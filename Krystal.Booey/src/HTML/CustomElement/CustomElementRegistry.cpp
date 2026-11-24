@@ -133,8 +133,7 @@ namespace krys::boo::html
     // 12. Let disableShadow be false.
     // 13. Let observedAttributes be an empty sequence<DOMString>.
     // 14. [...] (The options give what the constructor's properties would, and the lifecycle callbacks are
-    // the
-    //     behaviour's virtual methods.)
+    //     the behaviour's virtual methods.)
     // 15. Let definition be a new custom element definition with name name, local name localName, constructor
     //     constructor, observed attributes observedAttributes, lifecycle callbacks lifecycleCallbacks,
     //     form-associated formAssociated, disable internals disableInternals, and disable shadow
@@ -152,8 +151,7 @@ namespace krys::boo::html
     _nameMap.emplace(localName, elementInterface);
 
     // 18. Otherwise, upgrade particular elements within a document given this, this's relevant global
-    // object's
-    //     associated Document, definition, localName, and name.
+    //     object's associated Document, definition, localName, and name.
     if (auto *document = Document()) // Global custom element registry
     {
       EnqueueUpgradeInShadowIncludingTreeOrder(*document, *elementInterface, *this);
@@ -296,8 +294,7 @@ namespace krys::boo::html
     // 2. If root is a Document node whose custom element registry is null, then set root's custom element
     //    registry to this.
     // 3. Otherwise, if root is a ShadowRoot node whose custom element registry is null, then set root's
-    // custom
-    //    element registry to this.
+    //    custom element registry to this.
     if (auto *document = DynamicDowncast<boo::Document>(root); document != nullptr)
     {
       if (document->CustomElementRegistry() == nullptr)

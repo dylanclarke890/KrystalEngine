@@ -142,8 +142,7 @@ namespace krys::boo::dom
     }
 
     // 6. Append the result of creating an element given doc, "head", and the HTML namespace, to the html
-    // element
-    //    created earlier.
+    //    element created earlier.
     auto headElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"head"});
     if (auto appendResult = htmlElement->AppendChild(*headElement); appendResult.HasException())
     {
@@ -174,8 +173,7 @@ namespace krys::boo::dom
     }
 
     // 8. Append the result of creating an element given doc, "body", and the HTML namespace, to the html
-    // element
-    //    created earlier.
+    //    element created earlier.
     auto bodyElement = ElementFactory::Create(*document, {infra::namespaces::HTML, null, u8"body"});
     if (auto appendResult = htmlElement->AppendChild(*bodyElement); appendResult.HasException())
     {

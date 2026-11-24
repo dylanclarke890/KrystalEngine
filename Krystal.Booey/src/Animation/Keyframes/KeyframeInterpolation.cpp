@@ -36,14 +36,11 @@ namespace krys::boo
     // 1. If iteration progress is unresolved abort this procedure.
     // 2. Let target property be the longhand property for which the effect value is to be calculated.
     // 3. If animation type of the target property is not animatable abort this procedure since the effect
-    // cannot
-    //    be applied.
+    //    cannot be applied.
     // 4. Define the neutral value for composition as a value which, when combined with an underlying value
-    // using
-    //    the add composite operation, produces the underlying value.
+    //    using the add composite operation, produces the underlying value.
     // 5. Let property-specific keyframes be the result of getting the set of computed keyframes for this
-    // keyframe
-    //    effect.
+    //    keyframe effect.
     // 6. Remove any keyframes from property-specific keyframes that do not have a property value for target
     //    property.
     uint32 numberOfKeyframesWithZeroOffset = 0;
@@ -78,8 +75,7 @@ namespace krys::boo
     auto hasImplicitOneKeyframe = !numberOfKeyframesWithOneOffset;
 
     // 8. If there is no keyframe in property-specific keyframes with a computed keyframe offset of 0, create
-    // a new
-    //    keyframe with a computed keyframe offset of 0, a property value set to the neutral value for
+    //    a new keyframe with a computed keyframe offset of 0, a property value set to the neutral value for
     //    composition, and a composite operation of add, and prepend it to the beginning of property-specific
     //    keyframes.
     if (hasImplicitZeroKeyframe)
@@ -89,8 +85,7 @@ namespace krys::boo
     }
 
     // 9. Similarly, if there is no keyframe in property-specific keyframes with a computed keyframe offset of
-    // 1,
-    //    create a new keyframe with a computed keyframe offset of 1, a property value set to the neutral
+    //    1, create a new keyframe with a computed keyframe offset of 1, a property value set to the neutral
     //    value for composition, and a composite operation of add, and append it to the end of
     //    property-specific keyframes.
     if (hasImplicitOneKeyframe)
@@ -121,13 +116,11 @@ namespace krys::boo
     {
       // Otherwise,
       // 1. Append to interval endpoints the last keyframe in property-specific keyframes whose computed
-      // keyframe
-      //    offset is less than or equal to iteration progress and less than 1. If there is no such keyframe
-      //    (because, for example, the iteration progress is negative), add the last keyframe whose computed
-      //    keyframe offset is 0.
+      //    keyframe offset is less than or equal to iteration progress and less than 1. If there is no such
+      //    keyframe (because, for example, the iteration progress is negative), add the last keyframe whose
+      //    computed keyframe offset is 0.
       // 2. Append to interval endpoints the next keyframe in property-specific keyframes after the one added
-      // in
-      //    the previous step.
+      //    in the previous step.
       size_t indexOfLastKeyframeWithZeroOffset = 0;
       int64 indexOfFirstKeyframeToAddToIntervalEndpoints = -1;
       for (size_t i = 0; i < propertySpecificKeyframes.size(); ++i)
@@ -257,8 +250,7 @@ namespace krys::boo
     }
 
     // 13. If there is only one keyframe in interval endpoints return the property value of target property on
-    // that
-    //     keyframe.
+    //     that keyframe.
     if (intervalEndpoints.size() == 1)
     {
       interpolationCallback(0, 1, boo::IterationCompositeOperation::Replace);
@@ -272,8 +264,7 @@ namespace krys::boo
     auto endOffset = endKeyframe.Offset();
 
     // 16. Let interval distance be the result of evaluating (iteration progress - start offset) / (end offset
-    // -
-    //     start offset).
+    //     - start offset).
     auto intervalDistance = (iterationProgress - startOffset) / (endOffset - startOffset);
 
     // 17. Let transformed distance be the result of evaluating the timing function associated with the first
@@ -289,10 +280,9 @@ namespace krys::boo
     }
 
     // 18. Return the result of applying the interpolation procedure defined by the animation type of the
-    // target
-    //     property, to the values of the target property specified on the two keyframes in interval endpoints
-    //     taking the first such value as Vstart and the second as Vend and using transformed distance as the
-    //     interpolation parameter p.
+    //     target property, to the values of the target property specified on the two keyframes in interval
+    //     endpoints taking the first such value as Vstart and the second as Vend and using transformed
+    //     distance as the interpolation parameter p.
     auto iterationCompositeOperation = usedInterpolationForAccumulativeIteration
                                          ? boo::IterationCompositeOperation::Replace
                                          : IterationCompositeOperation();

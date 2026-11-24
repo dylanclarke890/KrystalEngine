@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2003-2017 Apple Inc. All rights reserved.
- * Copyright (C) 2011 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventSender.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
@@ -234,6 +211,7 @@ namespace krys::boo
       return _disabledState == DisabledState::Disabled;
     }
 
+    /// @brief Whether the sheet was enabled from script (by setting `disabled` to false).
     KRYS_NODISCARD bool IsEnabledViaScript() const noexcept
     {
       return _disabledState == DisabledState::EnabledViaScript;
@@ -257,6 +235,7 @@ namespace krys::boo
       return _relIsIcon;
     }
 
+    /// @brief Fires the `load` or `error` event that was waiting to be dispatched.
     void DispatchPendingEvent(html::LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
 
     /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every link.
@@ -281,34 +260,47 @@ namespace krys::boo
     void SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl, utf8_stringview charset,
                           const CachedCSSStyleSheet *cachedStyleSheet) noexcept override;
 
+    /// @brief Fetches and processes the linked resource (a style sheet), or drops the sheet the link no
+    /// longer has.
+    /// @see https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource
     void Process() noexcept;
 
+    /// @brief Detaches the link's sheet from it.
     void ClearSheet() noexcept;
 
+    /// @brief Disables or enables the sheet from script, loading or holding up rendering as that changes.
     void SetDisabledState(bool disabled) noexcept;
 
+    /// @brief Records the link types of the `rel` attribute that Booey uses: stylesheet, alternate and icon.
     void ParseRel(DOMStringView value) noexcept;
 
     /// @brief Tells the document its icons may have changed.
     void IconMayHaveChanged() noexcept;
 
+    /// @brief The `href` resolved against the document, or null if it's missing or only whitespace.
     KRYS_NODISCARD net::Url NonEmptyHrefUrl() const noexcept;
 
     /// @brief Whether the `media` attribute matches the environment (an empty list does).
     /// @see https://html.spec.whatwg.org/#matches-the-environment
     KRYS_NODISCARD bool MediaAttributeMatches() const noexcept;
 
+    /// @brief Makes the link's sheet from @p styleSheet, with its media and title.
     void InitializeStyleSheet(Ref<css::StyleSheetContents> &&styleSheet,
                               const css::ParserContext &context) noexcept;
 
+    /// @brief Has the style scope count the sheet as pending (holding up rendering if it's active), or stop.
     void AddPendingSheet(PendingSheetType type) noexcept;
 
     void RemovePendingSheet() noexcept;
 
+    /// @brief Blocks rendering on the link if it's potentially render-blocking, or stops.
+    /// @see https://html.spec.whatwg.org/#potentially-render-blocking
     void PotentiallyBlockRendering() noexcept;
 
     void UnblockRendering() noexcept;
 
+    /// @brief Whether it's a style sheet link the parser created, which blocks rendering without a `blocking`
+    /// attribute.
     KRYS_NODISCARD bool IsImplicitlyPotentiallyRenderBlocking() const noexcept;
   };
 }

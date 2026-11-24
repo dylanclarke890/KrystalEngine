@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2009 Rob Buis (rwlbuis@gmail.com)
- * Copyright (C) 2011 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLLinkElement.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
@@ -146,36 +122,32 @@ namespace krys::boo
       return;
     }
 
-    // If we change the disabled state while the sheet is still loading, then we have to
-    // perform three checks:
+    // While the sheet loads, only whether it holds up rendering changes.
     if (StyleSheetIsLoading())
     {
-      // Check #1: The sheet becomes disabled while loading.
+      // Disabled, it doesn't.
       if (_disabledState == DisabledState::Disabled)
       {
         RemovePendingSheet();
       }
 
-      // Check #2: An alternate sheet becomes enabled while it is still loading.
+      // An alternate sheet enabled from script does.
       if (_relIsAlternate && _disabledState == DisabledState::EnabledViaScript)
       {
         AddPendingSheet(PendingSheetType::Active);
       }
 
-      // Check #3: A main sheet becomes enabled while it was still loading and
-      // after it was disabled via script. It takes really terrible code to make this
-      // happen (a double toggle for no reason essentially).
+      // So does a sheet enabled again after being disabled.
       if (!_relIsAlternate && _disabledState == DisabledState::EnabledViaScript
           && oldDisabledState == DisabledState::Disabled)
       {
         AddPendingSheet(PendingSheetType::Active);
       }
 
-      // If the sheet is already loading just bail.
       return;
     }
 
-    // Load the sheet, since it's never been loaded before.
+    // A sheet enabled from script that never loaded (an alternate one) loads now.
     if (!_sheet && _disabledState == DisabledState::EnabledViaScript)
     {
       Process();
@@ -402,9 +374,8 @@ namespace krys::boo
 
       // 2. If el contributes a script-blocking style sheet, append el to its node document's script-blocking
       //    style sheet set.
-      // (Pending sheets hold up rendering, but there are no scripts to block.)
-      // Don't hold up render tree construction and script execution on stylesheets
-      // that are not needed for the rendering at the moment.
+      // (Pending sheets hold up rendering, but there are no scripts to block.) Only a sheet that applies now
+      // holds it up: one for other media, or an alternate one, doesn't.
       bool isActive = MediaAttributeMatches() && !IsAlternate();
       AddPendingSheet(isActive ? PendingSheetType::Active : PendingSheetType::Inactive);
 
@@ -452,7 +423,7 @@ namespace krys::boo
 
     if (_sheet)
     {
-      // we no longer contain a stylesheet, e.g. perhaps rel or type was changed
+      // The link no longer has a sheet (its rel or type changed).
       ClearSheet();
       if (auto *styleScope = _styleScope.get())
       {
@@ -488,7 +459,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet
+  // https://html.spec.whatwg.org/#link-type-stylesheet
   bool HTMLLinkElement::IsImplicitlyPotentiallyRenderBlocking() const noexcept
   {
     return _relIsStyleSheet && _createdByParser;
@@ -700,7 +671,7 @@ namespace krys::boo
 
   void HTMLLinkElement::StartLoadingDynamicSheet() noexcept
   {
-    // We don't support multiple active sheets.
+    // A link has at most one sheet pending.
     krys_debug_assert(_pendingSheetType < PendingSheetType::Active);
     AddPendingSheet(PendingSheetType::Active);
   }
@@ -740,7 +711,7 @@ namespace krys::boo
     }
     if (type == PendingSheetType::Inactive)
     {
-      // Document just needs to know about the sheet for exposure through document.styleSheets
+      // An inactive sheet doesn't hold up rendering; the scope only lists it in document.styleSheets.
       styleScope->DidChangeActiveStyleSheetCandidates();
       return;
     }

@@ -170,8 +170,7 @@ namespace krys::boo
       }
 
       // 2b. If element is in the HTML namespace and has a name attribute whose value is neither the empty
-      // string
-      //     nor is in result, append element's name attribute value to result.
+      //     string nor is in result, append element's name attribute value to result.
       if (element.NamespaceURI() == infra::namespaces::HTML)
       {
         auto name = dom::ElementAlgorithms::GetAttributeValue(element, u8"name");

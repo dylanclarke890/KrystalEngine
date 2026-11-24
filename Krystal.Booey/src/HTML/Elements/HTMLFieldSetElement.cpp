@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2010 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -55,7 +31,7 @@ namespace krys::boo
           }
         }
 
-        // Don't call SetDisabledByAncestorFieldset() on form controls inside disabled fieldsets.
+        // A disabled fieldset's subtree follows that fieldset instead.
         if (Is<HTMLFieldSetElement>(*element) && element->HasAttribute(u8"disabled"))
         {
           node = dom::TreeQueries::NextSkippingChildren(*node, &startNode);
@@ -91,7 +67,7 @@ namespace krys::boo
 
   void HTMLFieldSetElement::DisabledStateChanged() noexcept
   {
-    // This element must be updated before the style of nodes in its subtree gets recalculated.
+    // The fieldset's own state is updated before its descendants restyle.
     HTMLFormControlElement::DisabledStateChanged();
 
     if (DisabledByAncestorFieldset())
@@ -158,7 +134,7 @@ namespace krys::boo
 
   RenderPtr<RenderElement> HTMLFieldSetElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // Fieldsets should make a block flow if display: inline or table types are set.
+    // An inline or table display still gives a fieldset a block container.
     return RenderElement::CreateFor(*this, krys::move(style),
                                     {RenderElement::ConstructBlockLevelRendererFor::Inline,
                                      RenderElement::ConstructBlockLevelRendererFor::TableOrTablePart});

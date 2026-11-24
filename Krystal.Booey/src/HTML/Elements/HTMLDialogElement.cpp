@@ -100,9 +100,8 @@ namespace krys::boo
     }
 
     // 3. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
-    // attribute
-    //    initialized to true, the oldState attribute initialized to "closed", and the newState attribute
-    //    initialized to "open" at this is false, then return.
+    //    attribute initialized to true, the oldState attribute initialized to "closed", and the newState
+    //    attribute initialized to "open" at this is false, then return.
     if (!FireBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, nullptr))
     {
       return {};
@@ -209,10 +208,9 @@ namespace krys::boo
     }
 
     // 6. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
-    // attribute
-    //    initialized to true, the oldState attribute initialized to "closed", the newState attribute
-    //    initialized to "open", and the source attribute initialized to source at subject is false, then
-    //    return.
+    //    attribute initialized to true, the oldState attribute initialized to "closed", the newState
+    //    attribute initialized to "open", and the source attribute initialized to source at subject is false,
+    //    then return.
     if (!FireBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
     {
       return {};
@@ -269,9 +267,8 @@ namespace krys::boo
     }
 
     // 2. Fire an event named beforetoggle, using ToggleEvent, with the oldState attribute initialized to
-    // "open",
-    //    the newState attribute initialized to "closed", and the source attribute initialized to source at
-    //    subject.
+    //    "open", the newState attribute initialized to "closed", and the source attribute initialized to
+    //    source at subject.
     Ref<HTMLDialogElement> protectedThis = ShareRef(*this);
     (void)FireBeforeToggleEvent(dom::ToggleState::Open, dom::ToggleState::Closed, false, source);
 
@@ -329,8 +326,7 @@ namespace krys::boo
     }
 
     // 13. Queue an element task on the user interaction task source given the subject element to fire an
-    // event
-    //     named close at subject.
+    //     event named close at subject.
     html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
                                          [protectedThis]
                                          {
@@ -400,8 +396,7 @@ namespace krys::boo
     // 2. If command is in the Close state and element has an open attribute, then close the dialog element
     //    with source's optional value and source.
     // 3. If command is in the Request Close state and element has an open attribute, then request to close
-    // the
-    //    dialog element with source's optional value and source.
+    //    the dialog element with source's optional value and source.
     // 4. If command is the Show Modal state and element does not have an open attribute, then show a modal
     //    dialog given element and source.
     if (Open())
@@ -648,8 +643,7 @@ namespace krys::boo
     }
 
     // 3. Set dialog's close watcher to the result of establishing a close watcher given dialog's relevant
-    // global
-    //    object, with: cancelAction ...; closeAction ...; getEnabledState ...
+    //    global object, with: cancelAction ...; closeAction ...; getEnabledState ...
 
     // The watcher holds the dialog weakly: the dialog holds the watcher.
     auto weakThis = CreateWeakPtr(this);

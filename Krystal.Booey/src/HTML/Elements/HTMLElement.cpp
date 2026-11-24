@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2021-2024 Google Inc. All rights reserved.
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2011 Motorola Mobility. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
@@ -620,15 +595,13 @@ namespace krys::boo
       while (position < input.size())
       {
         // 4a. Collect a sequence of code points that are not U+000A LF or U+000D CR from input given
-        // position,
-        //     and set text to the result.
+        //     position, and set text to the result.
         auto end = std::min(input.find_first_of(u8"\r\n", position), input.size());
         auto text = input.substr(position, end - position);
         position = end;
 
         // 4b. If text is not the empty string, then append a new Text node whose data is text and node
-        // document
-        //     is document to fragment.
+        //     document is document to fragment.
         if (!text.empty())
         {
           (void)fragment->AppendChild(*document.CreateTextNode(DOMString(text)));
@@ -639,8 +612,7 @@ namespace krys::boo
         while (position < input.size() && (input[position] == u8'\n' || input[position] == u8'\r'))
         {
           // 4c.i. If the code point at position is U+000D CR and the next code point is U+000A LF, then
-          // advance
-          //       position to the next code point in input.
+          //       advance position to the next code point in input.
           if (input[position] == u8'\r' && position + 1 < input.size() && input[position + 1] == u8'\n')
           {
             ++position;
@@ -708,8 +680,8 @@ namespace krys::boo
     // 4. Remove any items from results that are the empty string.
     // 5. Remove any runs of consecutive required line break count items at the start or end of results.
     // 6. Replace each remaining run of consecutive required line break count items with a string consisting
-    // of
-    //    as many U+000A LF code points as the maximum of the values in the required line break count items.
+    //    of as many U+000A LF code points as the maximum of the values in the required line break count
+    //    items.
     // 7. Return the concatenation of the string items in results.
     // (The text iterator walks the rendered text, approximating the rendered text collection steps.)
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
@@ -1024,10 +996,9 @@ namespace krys::boo
     };
 
     // 9. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
-    // attribute
-    //    initialized to true, the oldState attribute initialized to "closed", the newState attribute
-    //    initialized to "open", and the source attribute initialized to source at element is false, then run
-    //    cleanupShowingSteps and return.
+    //    attribute initialized to true, the oldState attribute initialized to "closed", the newState
+    //    attribute initialized to "open", and the source attribute initialized to source at element is false,
+    //    then run cleanupShowingSteps and return.
     if (!FirePopoverBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
     {
       cleanupShowingSteps();
@@ -1114,9 +1085,8 @@ namespace krys::boo
       // 15j. Otherwise: set element's opened in popover mode to "hint".
       GetPopoverData()->SetOpenedInPopoverMode(effectiveType);
       // 15k. Set element's popover close watcher to the result of establishing a close watcher given
-      // element's
-      //      relevant global object, with: cancelAction being to return true; closeAction being to hide a
-      //      popover given element, true, true, false, and null; getEnabledState being to return true.
+      //      element's relevant global object, with: cancelAction being to return true; closeAction being to
+      //      hide a popover given element, true, true, false, and null; getEnabledState being to return true.
       if (document->Window())
       {
         auto weakThis = CreateWeakPtr(this);
@@ -1232,8 +1202,7 @@ namespace krys::boo
     //    otherwise false.
     bool autoPopoverListContainsElement = ListContains(document->ShowingAutoPopoverList(), *this);
     // 10. Let hintPopoverListContainsElement be true if document's showing hint popover list contains
-    // element;
-    //     otherwise false.
+    //     element; otherwise false.
     bool hintPopoverListContainsElement = ListContains(document->ShowingHintPopoverList(), *this);
 
     // 11. If element's opened in popover mode is "auto" or "hint":
@@ -1718,13 +1687,13 @@ namespace krys::boo
   {
     if (!value.empty())
     {
-      // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
+      // A string, so that the language isn't read as a keyword.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale,
                                            css::SerialiseString(CSSOMString(value)));
     }
     else
     {
-      // The empty string means the language is explicitly unknown.
+      // An empty lang says the language is unknown.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::InternalLocale, css::ValueId::Auto);
     }
   }
@@ -1862,7 +1831,7 @@ namespace krys::boo
     }
     else if (localName == u8"lang")
     {
-      // xml:lang has a higher priority than lang.
+      // xml:lang wins over lang.
       if (!HasAttributeNS(infra::namespaces::XML, u8"lang"))
       {
         MapLanguageAttributeToLocale(value, style);
@@ -1920,8 +1889,7 @@ namespace krys::boo
   void HTMLElement::ApplyAlignmentAttributeToStyle(DOMStringView alignment,
                                                    css::MutableStyleProperties &style) noexcept
   {
-    // Vertical alignment with respect to the current baseline of the text
-    // right or left means floating images.
+    // Most keywords align vertically; left and right float the element.
     auto floatValue = css::ValueId::Invalid;
     auto verticalAlignValue = css::ValueId::Invalid;
 
@@ -2087,7 +2055,7 @@ namespace krys::boo
     // The "#" is removed before truncating, so 128 digits follow it, as in other browsers.
     constexpr size_t maxColorLength = 128;
 
-    // We'll pad the buffer with two extra 0s later, so reserve two more than the max.
+    // Room for the two 0s step 10 may add.
     SmallList<char8, maxColorLength + 2> digitBuffer;
 
     size_t i = 0;
@@ -2125,8 +2093,8 @@ namespace krys::boo
     digitBuffer.push_back('0');
 
     // 11. Split input into three strings of equal code point length, to obtain three components. Let length
-    // be
-    //     the code point length that all of those components have (one third the code point length of input).
+    //     be the code point length that all of those components have (one third the code point length of
+    //     input).
     // 15. Let result be a CSS color.
     // 16. Interpret the first component as a hexadecimal number; let the red component of result be the
     //     resulting number.

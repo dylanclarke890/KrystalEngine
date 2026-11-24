@@ -3019,8 +3019,7 @@ namespace krys::boo
       // 7. Let decodedFragment be the result of running UTF-8 decode without BOM on fragmentBytes.
       auto decoded = net::UrlParser::PercentDecode(fragmentIdentifier);
       // 8. Set potentialIndicatedElement to the result of finding a potential indicated element given
-      // document
-      //    and decodedFragment.
+      //    document and decodedFragment.
       // 9. If potentialIndicatedElement is not null, then return potentialIndicatedElement.
       // 10. If decodedFragment is an ASCII case-insensitive match for the string top, then return the top of
       //     the document.

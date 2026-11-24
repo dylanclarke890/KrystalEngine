@@ -1,32 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- * Copyright (C) 2010-2021 Google Inc. All rights reserved.
- * Copyright (C) 2008 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- * Copyright (C) 2012 Samsung Electronics. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -719,7 +691,7 @@ namespace krys::boo
       }
     }
 
-    // The empty string is excluded from tooShort validation.
+    // An empty value is never too short.
     if (value.empty())
     {
       return false;
@@ -863,11 +835,6 @@ namespace krys::boo
   bool HTMLInputElement::IsColorControl() const noexcept
   {
     return _inputType->IsColorControl();
-  }
-
-  bool HTMLInputElement::IsText() const noexcept
-  {
-    return _inputType->IsTextType();
   }
 
   bool HTMLInputElement::IsTextType() const noexcept
@@ -1073,7 +1040,7 @@ namespace krys::boo
     {
       return;
     }
-    // Focus change may affect the result of shouldTruncateText().
+    // An ellipsis shows only while the field isn't focused, so its subtree restyles.
     if (auto *style = ExistingComputedStyle(); style && style->TextOverflow() == TextOverflow::Ellipsis)
     {
       InvalidateStyleForSubtreeInternal();
@@ -1186,19 +1153,15 @@ namespace krys::boo
 
   void HTMLInputElement::SetValueFromRenderer(DOMStringView value) noexcept
   {
-    // File upload controls will never use this.
     krys_debug_assert(!IsFileUpload());
 
-    // Workaround for bug where trailing \n is included in the result of textContent.
-    // The assert macro above may also be simplified by removing the expression
-    // that calls isEmpty.
-    // http://bugs.webkit.org/show_bug.cgi?id=9661
+    // A lone line break is the inner text's placeholder for an empty value.
     _valueIfDirty = value == u8"\n" ? DOMString {} : DOMString(value);
 
     SetFormControlValueMatchesRenderer(true);
     _wasModifiedByUser = true;
 
-    // Input event is fired by the Node::defaultEventHandler for editable controls.
+    // A text field's input event comes from editing; other controls fire it here.
     if (!IsTextField())
     {
       dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
@@ -1655,7 +1618,7 @@ namespace krys::boo
     krys_debug_assert(!IsConnected());
     krys_debug_assert(!Form());
 
-    // The input is not managed by a RadioButtonGroups, we'll need to traverse the tree.
+    // A button outside any group set (a detached one) searches its tree.
     RefPtr<HTMLInputElement> checkedRadio;
     auto &root = dom::TreeQueries::Root(const_cast<HTMLInputElement &>(*this));
     html::RadioInputType::ForEachButtonInDetachedGroup(Downcast<ContainerNode>(root), name,
@@ -1780,7 +1743,7 @@ namespace krys::boo
     }
     _inputType->CreateShadowSubtreeIfNeeded();
 
-    // https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
+    // https://html.spec.whatwg.org/#auto-directionality
     if (oldType == html::InputType::Type::Telephone
         || _inputType->GetType() == html::InputType::Type::Telephone
         || (HasAutoTextDirectionState() && didDirAutoUseValue != _inputType->DirAutoUsesValue()))
@@ -1825,11 +1788,11 @@ namespace krys::boo
     // 8. Let nowSelectable be true if setRangeText() now applies to the element, and false otherwise.
     bool nowSelectable = _inputType->SupportsSelectionAPI();
     // 9. If previouslySelectable is false and nowSelectable is true, set the element's text entry cursor
-    // position to the beginning of the text control, and set its selection direction to "none".
+    //    position to the beginning of the text control, and set its selection direction to "none".
     if (!previouslySelectable && nowSelectable)
     {
       auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
-      // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#set-the-selection-direction
+      // https://html.spec.whatwg.org/#set-the-selection-direction
       if (IsTextField() && NodeDocument().Frame()
           && NodeDocument().GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
       {
@@ -1923,7 +1886,7 @@ namespace krys::boo
       if (!_dirtyCheckednessFlag)
       {
         SetChecked(value.has_value());
-        // SetChecked() above sets the dirty checkedness flag so we need to reset it.
+        // The checked attribute doesn't make the checkedness dirty.
         _dirtyCheckednessFlag = false;
       }
     }
@@ -2149,12 +2112,10 @@ namespace krys::boo
   void HTMLInputElement::LegacyPreActivationBehavior(Event &event) noexcept
   {
     // 1. If this element's type attribute is in the Checkbox state, then set this element's checkedness to
-    // its
-    //    opposite value (i.e. true if it is false, false if it is true) and set this element's
+    //    its opposite value (i.e. true if it is false, false if it is true) and set this element's
     //    indeterminateness to false.
     // 2. If this element's type attribute is in the Radio Button state, then get a reference to the element
-    // in
-    //    this element's radio button group that has its checkedness set to true, if any, and then set this
+    //    in this element's radio button group that has its checkedness set to true, if any, and then set this
     //    element's checkedness to true.
     // (The checkbox and radio input types' WillDispatchClick, which remember the state to restore.)
     _clickHandlingState = {};
@@ -2216,11 +2177,11 @@ namespace krys::boo
     //    element's indeterminateness back to the values they had before the legacy-pre-activation behavior
     //    was run.
     // 2. If this element's type attribute is in the Radio Button state, then if the element to which a
-    // reference
-    //    was obtained in the legacy-pre-activation behavior, if any, is still in what is now this element's
-    //    radio button group, if it still has one, and if so, set that element's checkedness to true; or else,
-    //    if there was no such element, or that element is no longer in this element's radio button group, or
-    //    if this element no longer has a radio button group, set this element's checkedness to false.
+    //    reference was obtained in the legacy-pre-activation behavior, if any, is still in what is now this
+    //    element's radio button group, if it still has one, and if so, set that element's checkedness to
+    //    true; or else, if there was no such element, or that element is no longer in this element's radio
+    //    button group, or if this element no longer has a radio button group, set this element's checkedness
+    //    to false.
     // (The checkbox and radio input types' DidDispatchClick, for a canceled click.)
     Ref<html::InputType> protectedInputType = ShareRef(*_inputType);
     if (std::exchange(_clickHandlingState.Stateful, false))
@@ -2263,9 +2224,7 @@ namespace krys::boo
       }
     }
 
-    // Call the base event handler before any of our own event handling for almost all events in text fields.
-    // Makes editing keyboard handling take precedence over the keydown and keypress handling in this
-    // function.
+    // A text field's keydown and keypress go to editing first, before the handling below.
     bool callBaseClassEarly =
       IsTextField() && (event.Type() == event_names::KeyDown || event.Type() == event_names::KeyPress);
     if (callBaseClassEarly)
@@ -2308,7 +2267,7 @@ namespace krys::boo
         DispatchFormControlChangeEvent();
       }
 
-      // Form may never have been present, or may have been destroyed by code responding to the change event.
+      // There may be no form, or a change listener may have removed it.
       if (RefPtr<HTMLFormElement> formElement = ShareRefPtr(Form()))
       {
         formElement->SubmitImplicitly(event, CanTriggerImplicitSubmission());

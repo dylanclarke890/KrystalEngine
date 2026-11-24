@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2010 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
@@ -68,6 +44,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#concept-option-disabled
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
 
+    /// @brief Whether the option has a `disabled` attribute (an optgroup's can disable it too).
     KRYS_NODISCARD bool OwnElementDisabled() const noexcept
     {
       return _disabled;
@@ -140,9 +117,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#the-select-element-2
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild() const noexcept;
 
-    /// @brief The label shown for the option: its text, ignoring its `label` attribute, in quirks mode.
-    KRYS_NODISCARD DOMString DisplayLabel() const noexcept;
-
     /// @brief The label, indented when the option is in an optgroup.
     KRYS_NODISCARD DOMString TextIndentedToRespectGroupLabel() const noexcept;
 
@@ -150,6 +124,7 @@ namespace krys::boo
     void SetSelectedState(bool selected, html::AllowStyleInvalidation allowStyleInvalidation =
                                            html::AllowStyleInvalidation::Yes) noexcept;
 
+    /// @brief The option's selectedness as it is, without the select first updating its list.
     KRYS_NODISCARD bool SelectedWithoutUpdate() const noexcept
     {
       return _isSelected;
@@ -197,6 +172,9 @@ namespace krys::boo
     /// @return The select it forgot, if any.
     RefPtr<HTMLSelectElement> UpdateOwnerSelect() noexcept;
 
+    /// @brief The option's text: its descendant text, skipping scripts and images, as is or with its ASCII
+    /// whitespace stripped and collapsed.
+    /// @see https://html.spec.whatwg.org/#concept-option-text
     KRYS_NODISCARD DOMString CollectOptionInnerText() const noexcept;
 
     KRYS_NODISCARD DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;

@@ -82,8 +82,7 @@ namespace krys::boo::css
       if (sum > 100.0)
       {
         // 6. Otherwise, if both are provided but do not add up to 100%, they are scaled accordingly so that
-        // they
-        //    add up to 100%.
+        //    they add up to 100%.
         result.P1 *= 100.0 / sum;
         result.P2 *= 100.0 / sum;
       }
@@ -107,8 +106,8 @@ namespace krys::boo::css
       using ColorType = typename InterpolationMethod::ColourType;
 
       // 1. Both colors are converted to the specified <color-space>. If the specified color space has a
-      // smaller
-      //    gamut than the one in which the color to be adjusted is specified, gamut mapping will occur.
+      //    smaller gamut than the one in which the color to be adjusted is specified, gamut mapping will
+      //    occur.
       auto convertedColor1 = color1.template ToColorTypeLossyCarryingForwardMissing<ColorType>();
       auto convertedColor2 = color2.template ToColorTypeLossyCarryingForwardMissing<ColorType>();
 

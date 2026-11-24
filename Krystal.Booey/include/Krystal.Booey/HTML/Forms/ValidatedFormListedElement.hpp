@@ -31,11 +31,17 @@
 
 #include "Krystal.Booey/HTML/Forms/FormListedElement.hpp"
 #include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TriState.hpp"
 
 namespace krys::boo
 {
   class ContainerNode;
+}
+
+namespace krys::boo::style
+{
+  class PseudoClassChangeInvalidation;
 }
 
 namespace krys::boo::html
@@ -193,6 +199,14 @@ namespace krys::boo::html
     void ParseReadOnlyAttribute(Maybe<DOMStringView> value) noexcept;
 
     virtual void DisabledStateChanged() noexcept;
+
+    /// @brief Called before the disabled state changes, for elements whose descendants' disabled state
+    /// follows theirs: adds to @p invalidations the descendants' style invalidations, which end after the
+    /// change.
+    virtual void WillChangeDisabledState(bool,
+                                         List<UniquePtr<style::PseudoClassChangeInvalidation>> &) noexcept
+    {
+    }
 
     virtual void ReadOnlyStateChanged() noexcept;
 

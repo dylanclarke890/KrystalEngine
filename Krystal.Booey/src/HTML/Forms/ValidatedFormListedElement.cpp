@@ -292,12 +292,21 @@ namespace krys::boo::html
     bool changingDisabledState = newDisabledState != IsDisabled();
 
     Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+    // Disabled controls are barred from constraint validation, which :in-range and :out-of-range need.
+    Maybe<style::PseudoClassChangeInvalidation> inRangeInvalidation;
+    Maybe<style::PseudoClassChangeInvalidation> outOfRangeInvalidation;
+    List<UniquePtr<style::PseudoClassChangeInvalidation>> descendantStyleInvalidations;
     if (changingDisabledState)
     {
       styleInvalidation.emplace(AsHTMLElement(), std::initializer_list<Pair<PseudoClass, bool>> {
                                                    {PseudoClass::Disabled, newDisabledState},
                                                    {PseudoClass::Enabled, !newDisabledState},
                                                  });
+      inRangeInvalidation.emplace(AsHTMLElement(), PseudoClass::InRange,
+                                  style::PseudoClassChangeInvalidation::AnyValue);
+      outOfRangeInvalidation.emplace(AsHTMLElement(), PseudoClass::OutOfRange,
+                                     style::PseudoClassChangeInvalidation::AnyValue);
+      WillChangeDisabledState(newDisabledState, descendantStyleInvalidations);
     }
 
     _disabled = disabled;
@@ -411,6 +420,11 @@ namespace krys::boo::html
                            {PseudoClass::ReadWrite, newMatchesReadWrite},
                            {PseudoClass::ReadOnly, !newMatchesReadWrite},
                          });
+      // Read-only controls are barred from constraint validation, which :in-range and :out-of-range need.
+      style::PseudoClassChangeInvalidation inRangeInvalidation(
+        AsHTMLElement(), PseudoClass::InRange, style::PseudoClassChangeInvalidation::AnyValue);
+      style::PseudoClassChangeInvalidation outOfRangeInvalidation(
+        AsHTMLElement(), PseudoClass::OutOfRange, style::PseudoClassChangeInvalidation::AnyValue);
       _hasReadOnlyAttribute = newHasReadOnlyAttribute;
       ReadOnlyStateChanged();
     }

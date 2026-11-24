@@ -137,8 +137,7 @@ namespace krys::boo::html
     // 6. Add element to the end of definition's construction stack.
     // 7. Let C be definition's constructor.
     // 8. Let previousRegistry be the surrounding agent's active custom element constructor map[C] with
-    // default
-    //    null.
+    //    default null.
     // 9. Set the surrounding agent's active custom element constructor map[C] to element's custom element
     //    registry.
     // (Skipped: the factory is given the element, so there's no construction stack or constructor map.)
@@ -185,8 +184,7 @@ namespace krys::boo::html
     //      custom element callback reaction with element, callback name "formAssociatedCallback", and « the
     //      associated form ».
     // 13b. If element is disabled, then enqueue a custom element callback reaction with element, callback
-    // name
-    //      "formDisabledCallback", and « true ».
+    //      name "formDisabledCallback", and « true ».
     if (_isFormAssociated)
     {
       CustomElementReactionStack customElementReactionStack;

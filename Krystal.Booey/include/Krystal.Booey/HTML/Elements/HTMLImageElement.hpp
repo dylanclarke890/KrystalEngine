@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- * Copyright (C) 2010-2015 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -58,7 +35,7 @@ namespace krys::boo
     net::Url _currentUrl;
     float _imageDevicePixelRatio {1.0f};
     WeakPtr<HTMLPictureElement> _pictureElement;
-    // The source element that was selected to provide the source URL.
+    // The picture's source element the current image was selected from, if any.
     WeakPtr<HTMLSourceElement> _sourceElement;
 
   public:
@@ -254,6 +231,7 @@ namespace krys::boo
     /// @brief The `alt` attribute, or else the `title` attribute, or null if it has neither.
     KRYS_NODISCARD Maybe<DOMString> AltText() const noexcept;
 
+    /// @brief The image the element shows, as loaded, as decoded, and the loader that loads it.
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
     KRYS_NODISCARD Image *GetImage() const noexcept;
@@ -271,14 +249,17 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#will-lazy-load-element-steps
     KRYS_NODISCARD bool IsLazyLoadable() const noexcept;
 
+    /// @brief Whether a `loading` attribute value is `lazy`.
     KRYS_NODISCARD static bool HasLazyLoadableAttributeValue(Maybe<DOMStringView> attributeValue) noexcept;
 
     /// @brief The selected source: the best fitting candidate of a `<picture>`'s sources, or else of `srcset`
     /// and `src`.
     KRYS_NODISCARD Maybe<DOMString> ImageSourceUrl() const noexcept override;
 
+    /// @brief The picture element the img is the child of, if any.
     KRYS_NODISCARD HTMLPictureElement *PictureElement() const noexcept;
 
+    /// @brief Whether the image comes from a source set: the img's srcset, or its picture's sources.
     KRYS_NODISCARD bool UsesSrcsetOrPicture() const noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
@@ -321,22 +302,30 @@ namespace krys::boo
     void OnAdopt(Document &oldDocument) noexcept override;
 
   private:
+    /// @brief Sets the picture parent; and the source the current image came from.
     void SetPictureElement(HTMLPictureElement *pictureElement) noexcept;
 
     KRYS_NODISCARD HTMLSourceElement *SourceElement() const noexcept;
 
     void SetSourceElement(HTMLSourceElement *sourceElement) noexcept;
 
+    /// @brief Restyles the element, as the attributes its presentational hints come from changed.
     void InvalidateAttributeMapping() noexcept;
 
+    /// @see https://html.spec.whatwg.org/#select-an-image-source
     void SelectImageSource(RelevantMutation relevantMutation) noexcept;
 
+    /// @brief The best image candidate among the picture parent's sources, or none.
     KRYS_NODISCARD html::ImageCandidate BestFitSourceFromPictureElement() noexcept;
 
+    /// @brief Takes @p candidate's URL and the pixel density its descriptor gives.
     void SetBestFitUrlAndDPRFromImageCandidate(const html::ImageCandidate &candidate) noexcept;
 
+    /// @brief The image's pixel density, from its candidate's descriptor; 1 for SVG images and before
+    /// loading.
     KRYS_NODISCARD float EffectiveImageDevicePixelRatio() const noexcept;
 
+    /// @brief Follows a change of the img's parent into or out of a picture, selecting the image again.
     void UpdatePictureElement() noexcept;
 
   protected:

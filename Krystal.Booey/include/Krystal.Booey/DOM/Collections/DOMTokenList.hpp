@@ -97,8 +97,7 @@ namespace krys::boo::dom
     {
       // 1. If localName is set’s attribute name, namespace is null, and value is null, then empty token set.
       // 2. Otherwise, if localName is set’s attribute name and namespace is null, then set set’s token set to
-      // value,
-      //    parsed.
+      //    value, parsed.
       // The token set is parsed from the attribute when it's next read (Tokens()), unless the list is setting
       // the attribute to its own token set. A null value parses as the empty string, to the empty set.
       if (_inUpdateAssociatedAttributeFromTokens)

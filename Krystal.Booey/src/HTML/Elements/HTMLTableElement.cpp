@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1997 Martin Jones (mjones@kde.org)
- *           (C) 1997 Torben Weis (weis@kde.org)
- *           (C) 1998 Waldo Bastian (bastian@kde.org)
- *           (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2003, 2004, 2005, 2006, 2008, 2010, 2011 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
 #include "algorithm"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
@@ -189,8 +165,7 @@ namespace krys::boo
     auto head = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
 
     // 3. Insert thead immediately before the first element child of this that is neither a caption element
-    // nor
-    //    a colgroup element, if any; otherwise insert thead at the end of this.
+    //    nor a colgroup element, if any; otherwise insert thead at the end of this.
     (void)THead(RefPtr<HTMLTableSectionElement>(head));
 
     // 4. Return thead.
@@ -285,8 +260,7 @@ namespace krys::boo
     auto body = html::CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
 
     // 2. Insert tbody immediately after the last tbody element child of this, if any; otherwise insert tbody
-    // at
-    //    the end of this.
+    //    at the end of this.
     auto *lastBody = LastBody();
     (void)InsertBefore(*body, lastBody ? lastBody->NextSibling() : nullptr);
 
@@ -321,8 +295,7 @@ namespace krys::boo
   ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
   {
     // 1. If index is less than −1 or greater than the number of elements in the rows collection, then throw
-    // an
-    //    "IndexSizeError" DOMException.
+    //    an "IndexSizeError" DOMException.
     // (Greater is found while walking the rows.)
     if (index < -1)
     {
@@ -370,8 +343,7 @@ namespace krys::boo
     else
     {
       // 4. Otherwise, if the rows collection has zero elements in it, then append tr to the last tbody
-      // element
-      //    in this.
+      //    element in this.
       // (The last tbody child, as in browsers.)
       parent = ShareRefPtr<ContainerNode>(LastBody());
 
@@ -411,8 +383,7 @@ namespace krys::boo
     RefPtr<HTMLTableRowElement> row;
 
     // 2. If index is −1, then remove the last element in the rows collection from its parent, or do nothing
-    // if
-    //    the rows collection is empty.
+    //    if the rows collection is empty.
     if (index == -1)
     {
       row = ShareRefPtr(html::HTMLTableRowsCollection::LastRow(*this));
@@ -751,7 +722,7 @@ namespace krys::boo
     }
     if (localName == u8"rules")
     {
-      // The presence of a valid rules attribute causes border collapsing to be enabled.
+      // A valid rules attribute collapses the borders.
       if (_rulesAttr != TableRules::Unset)
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::BorderCollapse, css::ValueId::Collapse);
@@ -798,12 +769,10 @@ namespace krys::boo
 
     if (localName == u8"border")
     {
-      // FIXME: This attribute is a mess.
       _borderAttr = ParseBorderWidthAttribute(value);
     }
     else if (localName == u8"frame")
     {
-      // FIXME: This attribute is a mess.
       bool borderTop;
       bool borderRight;
       bool borderBottom;
@@ -874,8 +843,7 @@ namespace krys::boo
 
     if (!_borderAttr)
     {
-      // Setting the border to 'hidden' allows it to win over any border
-      // set on the table's cells during border-conflict resolution.
+      // A hidden border wins the conflicts with the cells' borders, so the rules alone show.
       if (_rulesAttr != TableRules::Unset)
       {
         static NeverDestroyed<Ref<css::MutableStyleProperties>> solidBorderStyle =
@@ -963,7 +931,7 @@ namespace krys::boo
       }
       case CellBorders::No:
       {
-        // If 'rules=none' then allow any borders set at cell level to take effect.
+        // rules=none leaves the cells' own borders.
         break;
       }
     }

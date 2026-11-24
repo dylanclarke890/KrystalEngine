@@ -381,14 +381,13 @@ namespace krys::boo
       // 3. Set removeEvent's type attribute to remove.
       // 4. Set removeEvent's currentTime attribute to the current time of animation.
       // 5. Set removeEvent's timelineTime attribute to the current time of the timeline with which animation
-      // is
-      //    associated.
+      //    is associated.
       // 6. If animation has a document for timing, then append removeEvent to its document for timing's
-      // pending
-      //    animation event queue along with its target, animation. For the scheduled event time, use the
-      //    result of applying the procedure to convert timeline time to origin-relative time to the current
-      //    time of the timeline with which animation is associated. Otherwise, queue a task to dispatch
-      //    removeEvent at animation. The task source for this task is the DOM manipulation task source.
+      //    pending animation event queue along with its target, animation. For the scheduled event time, use
+      //    the result of applying the procedure to convert timeline time to origin-relative time to the
+      //    current time of the timeline with which animation is associated. Otherwise, queue a task to
+      //    dispatch removeEvent at animation. The task source for this task is the DOM manipulation task
+      //    source.
       auto scheduledTime = [&]() -> Maybe<WebAnimationTime>
       {
         if (auto *documentTimeline = DynamicDowncast<DocumentTimeline>(animation->Timeline()))

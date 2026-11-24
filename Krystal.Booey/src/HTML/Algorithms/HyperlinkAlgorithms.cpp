@@ -132,9 +132,8 @@ namespace krys::boo::html
       long y = 0;
 
       // 3b. If event's isTrusted attribute is initialized to true, then set x to the distance in CSS pixels
-      // from
-      //     the left edge of the image to the location of the click, and set y to the distance in CSS pixels
-      //     from the top edge of the image to the location of the click.
+      //     from the left edge of the image to the location of the click, and set y to the distance in CSS
+      //     pixels from the top edge of the image to the location of the click.
       if (event.IsTrusted())
       {
         if (auto position = ServerMapClickPosition(*image, event))

@@ -710,8 +710,7 @@ namespace krys::boo
       }
 
       // 5. Let offsets be a sequence of nullable double values assigned based on the type of the “offset”
-      // member
-      //    of the property-indexed keyframe as follows:
+      //    member of the property-indexed keyframe as follows:
       //    - sequence<double?>, the value of “offset” as-is.
       //    - double?, a sequence of length one with the value of “offset” as its single item, i.e. « offset
       //    »,
@@ -830,14 +829,12 @@ namespace krys::boo
       if (!compositeModes.empty())
       {
         // 1. Let composite modes be a sequence of CompositeOperationOrAuto values assigned from the
-        // “composite”
-        //    member of property-indexed keyframe. If that member is a single CompositeOperationOrAuto value
-        //    operation, let composite modes be a sequence of length one, with the value of the “composite” as
-        //    its single item.
+        //    “composite” member of property-indexed keyframe. If that member is a single
+        //    CompositeOperationOrAuto value operation, let composite modes be a sequence of length one, with
+        //    the value of the “composite” as its single item.
         // 2. As with easings, if composite modes has fewer items than processed keyframes, repeat the
-        // elements
-        //    in composite modes successively starting from the beginning of the list until composite modes
-        //    has as many items as processed keyframes.
+        //    elements in composite modes successively starting from the beginning of the list until composite
+        //    modes has as many items as processed keyframes.
         if (compositeModes.size() < parsedKeyframes.size())
         {
           size_t initialNumberOfCompositeModes = compositeModes.size();
@@ -847,9 +844,8 @@ namespace krys::boo
           }
         }
         // 3. Assign each value in composite modes that is not auto to the keyframe-specific composite
-        // operation
-        //    on the keyframe with the corresponding position in processed keyframes until the end of
-        //    processed keyframes is reached.
+        //    operation on the keyframe with the corresponding position in processed keyframes until the end
+        //    of processed keyframes is reached.
         for (size_t index = 0; index < compositeModes.size() && index < parsedKeyframes.size(); ++index)
         {
           if (compositeModes[index] != CompositeOperationOrAuto::Auto)

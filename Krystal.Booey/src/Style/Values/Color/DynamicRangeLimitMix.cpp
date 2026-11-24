@@ -160,8 +160,7 @@ namespace krys::boo::style
     // 5. If p_standard, p_constrained, or p_no_limit equals 100%, then the computed value is standard,
     //    constrained, or no-limit, respectively.
     // 6. Otherwise, the computed value is dynamic-range-limit-mix(), with parameters standard, constrained,
-    // and
-    //    no-limit, in that order, and percentages p_standard, p_constrained, and p_no_limit, omitting
+    //    and no-limit, in that order, and percentages p_standard, p_constrained, and p_no_limit, omitting
     //    parameters with a percentage equal to 0%.
 
     return function;

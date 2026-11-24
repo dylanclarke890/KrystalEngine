@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2009, 2011 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
@@ -151,31 +130,6 @@ namespace krys::boo
     return GetRegion(IsDefault() ? elementSize : _lastSize);
   }
 
-  Path HTMLAreaElement::ComputePath(const RenderElement &renderer) const noexcept
-  {
-    // FIXME: This doesn't work correctly with transforms.
-    PointF absPos = renderer.LocalToAbsolute();
-
-    // Default should default to the size of the containing object.
-    LayoutSize size = _lastSize;
-    if (IsDefault())
-    {
-      size = renderer.OutlineBoundsForRepaint(nullptr).Size();
-    }
-
-    auto path = GetRegion(size);
-    float zoomFactor = renderer.Style().UsedZoom();
-    if (zoomFactor != 1.0f)
-    {
-      AffineTransform zoomTransform;
-      zoomTransform.Scale(zoomFactor);
-      path.Transform(zoomTransform);
-    }
-
-    path.Translate(ToSizeF(absPos));
-    return path;
-  }
-
   LayoutRect HTMLAreaElement::ComputeRect(const RenderObject *renderer) const noexcept
   {
     if (!renderer)
@@ -188,7 +142,26 @@ namespace krys::boo
       krys_debug_assert(false);
       return {};
     }
-    return EnclosingLayoutRect(ComputePath(Downcast<RenderElement>(*renderer)).FastBoundingRect());
+    auto &element = Downcast<RenderElement>(*renderer);
+
+    // The default area covers the whole image.
+    LayoutSize size = _lastSize;
+    if (IsDefault())
+    {
+      size = element.OutlineBoundsForRepaint(nullptr).Size();
+    }
+
+    // The shape's bounds in the image's coordinates (its coordinates are in CSS pixels, so they're zoomed),
+    // mapped through the image's transforms.
+    auto path = GetRegion(size);
+    float zoomFactor = element.Style().UsedZoom();
+    if (zoomFactor != 1.0f)
+    {
+      AffineTransform zoomTransform;
+      zoomTransform.Scale(zoomFactor);
+      path.Transform(zoomTransform);
+    }
+    return EnclosingLayoutRect(element.LocalToAbsoluteQuad(QuadF(path.FastBoundingRect())).BoundingBox());
   }
 
   // Obtaining the shape an area layers onto its image:
@@ -197,16 +170,13 @@ namespace krys::boo
   {
     // 1. Find the state that the element's shape attribute represents.
     // 2. Use the rules for parsing a list of floating-point numbers to parse the element's coords attribute,
-    // if
-    //    it is present, and let the coords list be the result. If the attribute is absent, let the coords
+    //    if it is present, and let the coords list be the result. If the attribute is absent, let the coords
     //    list be the empty list.
     // (Both are kept as the attributes change.)
     // 3. If the number of items in the coords list is less than the minimum number given for the area
-    // element's
-    //    current state, as per the following table, then the shape is empty; return.
+    //    element's current state, as per the following table, then the shape is empty; return.
     // 4. Check for excess items in the coords list as per the entry in the following list corresponding to
-    // the
-    //    shape attribute's state.
+    //    the shape attribute's state.
     // (Each shape checks its minimum, and reads only the coordinates it uses.)
     if (_coords.empty() && !IsDefault())
     {
@@ -236,8 +206,7 @@ namespace krys::boo
         if (_coords.size() >= 3)
         {
           // 7. If the shape attribute represents the circle state, and the third number in the list is less
-          // than
-          //    or equal to zero, then the shape is empty; return.
+          //    than or equal to zero, then the shape is empty; return.
           auto radius = static_cast<float>(_coords[2]);
           if (radius > 0)
           {

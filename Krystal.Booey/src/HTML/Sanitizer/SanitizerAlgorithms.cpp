@@ -188,8 +188,7 @@ namespace krys::boo::html
     CanonicalizeSanitizerList(configuration.ReplaceWithChildrenElements);
 
     // 9. If configuration["processingInstructions"] exists, then set configuration["processingInstructions"]
-    // to
-    //    the result of canonicalizing configuration["processingInstructions"].
+    //    to the result of canonicalizing configuration["processingInstructions"].
     // 10. If configuration["removeProcessingInstructions"] exists, then set
     //     configuration["removeProcessingInstructions"] to the result of canonicalizing
     //     configuration["removeProcessingInstructions"].

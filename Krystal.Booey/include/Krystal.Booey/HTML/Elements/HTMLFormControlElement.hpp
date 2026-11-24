@@ -1,27 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2023 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Forms/ValidatedFormListedElement.hpp"
@@ -79,6 +56,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-fs-formnovalidate
     KRYS_NODISCARD bool FormNoValidate() const noexcept;
 
+    /// @brief Whether the value shown (the inner text) matches the value, or was changed and needs updating.
     KRYS_NODISCARD bool FormControlValueMatchesRenderer() const noexcept
     {
       return _valueMatchesRenderer;
@@ -89,6 +67,7 @@ namespace krys::boo
       _valueMatchesRenderer = matches;
     }
 
+    /// @brief Whether the value changed (with an input event) since the last change event.
     KRYS_NODISCARD bool WasChangedSinceLastFormControlChangeEvent() const noexcept
     {
       return _wasChangedSinceLastFormControlChangeEvent;
@@ -96,14 +75,19 @@ namespace krys::boo
 
     void SetChangedSinceLastFormControlChangeEvent(bool changed) noexcept;
 
+    /// @brief Fires change, as the user commits a value; the value counts as unchanged since then.
     virtual void DispatchFormControlChangeEvent() noexcept;
 
+    /// @brief Fires change (queued while events are held back).
     void DispatchChangeEvent() noexcept;
 
+    /// @brief Fires cancel, as the user dismisses a picker.
     void DispatchCancelEvent() noexcept;
 
+    /// @brief Fires input, as the user changes the value; the value counts as changed until change fires.
     void DispatchFormControlInputEvent() noexcept;
 
+    /// @brief Whether the control has a `required` attribute.
     KRYS_NODISCARD bool IsRequired() const noexcept
     {
       return _isRequired;
@@ -116,11 +100,14 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief Whether it's a submit button, which the form's implicit submission activates.
     KRYS_NODISCARD virtual bool IsSuccessfulSubmitButton() const noexcept
     {
       return false;
     }
 
+    /// @brief Whether the button is the submitter of the entry list being constructed, so it appends its
+    /// entry; set around the construction.
     KRYS_NODISCARD virtual bool IsActivatedSubmit() const noexcept
     {
       return false;
@@ -209,8 +196,7 @@ namespace krys::boo
 
     void DisabledStateChanged() noexcept override;
 
-    void ReadOnlyStateChanged() noexcept override;
-
+    /// @brief Called when the `required` attribute comes or goes.
     virtual void RequiredStateChanged() noexcept;
 
     /// @brief Losing the focus hides the control's validation message.

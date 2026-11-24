@@ -593,8 +593,7 @@ namespace krys::boo
     }
 
     // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
-    // and
-    //    fallbackRegistry set to registry.
+    //    and fallbackRegistry set to registry.
     return dom::NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry);
   }
 
@@ -744,8 +743,7 @@ namespace krys::boo
     event->_composed = false;
 
     // 7. Initialize event's timeStamp attribute to the result of calling current high resolution time with
-    // this's
-    //    relevant global object. (The event's constructor records its creation time.)
+    //    this's relevant global object. (The event's constructor records its creation time.)
 
     // 8. Initialize event's isTrusted attribute to false.
     event->_isTrusted = false;
@@ -1456,8 +1454,7 @@ namespace krys::boo
     //    relevant global object's associated Document's character encoding.
     // Documents are always UTF-8, which the URL parser always uses.
     // 4. Let baseURL be environment's base URL, if environment is a Document object; otherwise environment's
-    // API
-    //    base URL.
+    //    API base URL.
     // 5. Return the result of applying the URL parser to url, with baseURL and encoding.
     return CompleteUrl(url, _baseUrl);
   }
@@ -1539,8 +1536,7 @@ namespace krys::boo
     // The document base URL, kept up to date:
     // https://html.spec.whatwg.org/#document-base-url
     // 1. If document has a descendant base element that has an href attribute, then return the frozen base
-    // URL
-    //    of the first such base element in tree order.
+    //    URL of the first such base element in tree order.
     // 2. If document's base URL override is non-null, then return document's base URL override. (Skipped:
     //    documents have no base URL override.)
     // 3. Return document's fallback base URL.
@@ -2744,8 +2740,7 @@ namespace krys::boo
     {
       // 1. Let target be event's target.
       // 2. If target is a dialog element, target has an open attribute, target's is modal is true, and
-      // event's
-      //    clientX and clientY are outside the bounds of target, then return null.
+      //    event's clientX and clientY are outside the bounds of target, then return null.
       if (auto *dialog = DynamicDowncast<HTMLDialogElement>(target);
           dialog && dialog->Open() && dialog->IsModal())
       {
@@ -2933,8 +2928,7 @@ namespace krys::boo
     }
 
     // 6. Let newPopoverList be document's showing auto popover list if stackType is Auto; otherwise
-    // document's
-    //    showing hint popover list.
+    //    document's showing hint popover list.
     // 7. Let toCheck be newPopoverList in reverse order.
     auto newPopoverList =
       stackType == dom::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();

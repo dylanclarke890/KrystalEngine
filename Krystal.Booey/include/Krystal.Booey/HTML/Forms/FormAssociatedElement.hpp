@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -47,17 +27,22 @@ namespace krys::boo::html
   public:
     virtual ~FormAssociatedElement() noexcept;
 
+    /// @brief The element itself.
     KRYS_NODISCARD virtual HTMLElement &AsHTMLElement() noexcept = 0;
 
     KRYS_NODISCARD virtual const HTMLElement &AsHTMLElement() const noexcept = 0;
 
+    /// @brief Whether it's a listed element (rather than an image).
     KRYS_NODISCARD virtual bool IsFormListedElement() const noexcept = 0;
 
+    /// @brief Drops the form owner, as the form is destroyed.
     virtual void FormWillBeDestroyed() noexcept
     {
       _form = nullptr;
     }
 
+    /// @brief The form owner, if any.
+    /// @see https://html.spec.whatwg.org/#form-owner
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
     /// @brief The form owner, as the `form` IDL attribute exposes it: retargeted against the element, so a
@@ -65,16 +50,19 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-fae-form
     KRYS_NODISCARD virtual RefPtr<Element> FormForBindings() const noexcept;
 
+    /// @brief Changes the form owner, if it's a different form.
     void SetForm(HTMLFormElement *newForm) noexcept;
 
     /// @brief The form the parser associates the element with, its form element pointer, which it joins when
     /// it's inserted.
     void SetFormSetByParser(HTMLFormElement *form) noexcept;
 
+    /// @brief Called as the element is inserted or removed, to reset its form owner.
     virtual void ElementInsertedIntoAncestor(Element &element, bool connectedToDocument) noexcept;
 
     virtual void ElementRemovedFromAncestor(Element &element, bool disconnectedFromDocument) noexcept;
 
+    /// @brief The element as a form-associated element.
     KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept = 0;
 
   protected:
@@ -83,6 +71,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#reset-the-form-owner
     virtual void ResetFormOwner() noexcept = 0;
 
+    /// @brief Sets the form owner; overrides also leave the old form and join the new one.
     virtual void SetFormInternal(HTMLFormElement *newForm) noexcept;
   };
 }

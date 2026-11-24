@@ -114,8 +114,7 @@ namespace krys::boo::infra
       position_variable start = position;
 
       // 2. While position doesn’t point past the end of input and the code point at position within input
-      // meets the
-      //    condition condition:
+      //    meets the condition condition:
       // 2a. Append that code point to the end of result.
       // 2b. Advance position by 1.
       AdvancePositionWhile(input, position, condition);
@@ -161,8 +160,7 @@ namespace krys::boo::infra
       List<DOMString> tokens;
 
       // 3. Let token be the result of collecting a sequence of code points that are not equal to delimiter
-      // from
-      //    input, given position.
+      //    from input, given position.
       // 4. Append token to tokens.
       tokens.emplace_back(CollectCodePointSequence(input, position, [delimiter](char32 current)
                                                    { return current != delimiter; }));
@@ -177,8 +175,7 @@ namespace krys::boo::infra
         ++position;
 
         // 5c. Let token be the result of collecting a sequence of code points that are not equal to delimiter
-        // from
-        //     input, given position.
+        //     from input, given position.
         // 5d. Append token to tokens.
         tokens.emplace_back(CollectCodePointSequence(input, position, [delimiter](char32 current)
                                                      { return current != delimiter; }));
@@ -204,8 +201,7 @@ namespace krys::boo::infra
       while (position != input.end())
       {
         // 4a. Let token be the result of collecting a sequence of code points that are not ASCII whitespace
-        // from
-        //     input, given position.
+        //     from input, given position.
         // 4b. Append token to tokens.
         tokens.emplace_back(CollectCodePointSequence(input, position, [](char32 current)
                                                      { return !IsASCIIWhitespace(current); }));
@@ -231,8 +227,7 @@ namespace krys::boo::infra
       while (position != input.end())
       {
         // 3a. Let token be the result of collecting a sequence of code points that are not U+002C (,) from
-        // input,
-        //     given position.
+        //     input, given position.
         auto token =
           CollectCodePointSequence(input, position, [](char32 current) { return current != u8','; });
 

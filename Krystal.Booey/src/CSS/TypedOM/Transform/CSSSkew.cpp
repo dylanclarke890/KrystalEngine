@@ -54,8 +54,7 @@ namespace krys::boo
       return Exception {ExceptionCode::TypeError};
     }
     // 2. Return a new CSSSkew object with its ax and ay internal slots set to ax and ay, and its is2D
-    // internal
-    //    slot set to true.
+    //    internal slot set to true.
     return AdoptRef(*new CSSSkew(krys::move(ax), krys::move(ay)));
   }
 

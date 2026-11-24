@@ -874,9 +874,8 @@ namespace krys::boo::style
       if (!hasMatchingTransitionProperty)
       {
         // 3. If the element has a running transition or completed transition for the property, and there is
-        // not a
-        //    matching transition-property value, then implementations must cancel the running transition or
-        //    remove the completed transition from the set of completed transitions.
+        //    not a matching transition-property value, then implementations must cancel the running
+        //    transition or remove the completed transition from the set of completed transitions.
         if (hasRunningTransition)
         {
           auto &runningTransitions = styleable.EnsureRunningTransitionsByProperty();
@@ -917,9 +916,8 @@ namespace krys::boo::style
         }();
 
         // 4. If the element has a running transition for the property, there is a matching
-        // transition-property
-        //    value, and the end value of the running transition is not equal to the value of the property in
-        //    the after-change style, then:
+        //    transition-property value, and the end value of the running transition is not equal to the value
+        //    of the property in the after-change style, then:
         if (interpolation::Equals(property, previouslyRunningTransitionCurrentStyle, afterChangeStyle,
                                   document)
             || !propertyCanBeInterpolated(property, currentStyle, afterChangeStyle))
@@ -935,18 +933,16 @@ namespace krys::boo::style
                                                afterChangeStyle))
         {
           // 2. Otherwise, if the combined duration is less than or equal to 0s, or if the current value of
-          // the
-          //    property in the running transition cannot be interpolated with the value of the property in
-          //    the after-change style, then implementations must cancel the running transition.
+          //    the property in the running transition cannot be interpolated with the value of the property
+          //    in the after-change style, then implementations must cancel the running transition.
           previouslyRunningTransition->CancelFromStyle();
         }
         else if (interpolation::Equals(property, previouslyRunningTransition->ReversingAdjustedStartStyle(),
                                        afterChangeStyle, document))
         {
           // 3. Otherwise, if the reversing-adjusted start value of the running transition is the same as the
-          // value
-          //    of the property in the after-change style (see the section on reversing of transitions for why
-          //    these case exists), implementations must cancel the running transition and start a new
+          //    value of the property in the after-change style (see the section on reversing of transitions
+          //    for why these case exists), implementations must cancel the running transition and start a new
           //    transition whose:
           //   - reversing-adjusted start value is the end value of the running transition,
           //   - reversing shortening factor is the absolute value, clamped to the range [0, 1], of the sum

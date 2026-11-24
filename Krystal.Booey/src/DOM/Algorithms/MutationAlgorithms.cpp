@@ -401,16 +401,14 @@ namespace krys::boo::dom
       }
 
       // 7d. If parent is a shadow host whose shadow root's slot assignment is "named" and node is a
-      // slottable,
-      //     then assign a slot for node.
+      //     slottable, then assign a slot for node.
       if (isParentShadowHost && SlotAlgorithms::IsSlottable(*target))
       {
         SlotAlgorithms::AssignSlot(*target);
       }
 
       // 7e. If parent's root is a shadow root, and parent is a slot whose assigned nodes is the empty list,
-      // then
-      //     run signal a slot change for parent.
+      //     then run signal a slot change for parent.
       if (isParentRootShadowRoot && slotParent != nullptr && slotParent->_assignedNodes.empty())
       {
         SlotAlgorithms::SignalSlotChange(*slotParent);
@@ -422,8 +420,7 @@ namespace krys::boo::dom
       ExtensibilityHooks::SubtreeInserted(*target, parent);
 
       // 7g. For each shadow-including inclusive descendant inclusiveDescendant of node, in shadow-including
-      // tree
-      //     order:
+      //     tree order:
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
         // 7g.i. Run the insertion steps with inclusiveDescendant.
@@ -465,9 +462,8 @@ namespace krys::boo::dom
           }
         }
         // 7g.iv. Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant's custom element
-        // registry
-        //        is non-null, and inclusiveDescendant's custom element registry's is scoped is true, then
-        //        append inclusiveDescendant's node document to inclusiveDescendant's custom element
+        //        registry is non-null, and inclusiveDescendant's custom element registry's is scoped is true,
+        //        then append inclusiveDescendant's node document to inclusiveDescendant's custom element
         //        registry's scoped document set.
         else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
         {
@@ -569,8 +565,7 @@ namespace krys::boo::dom
     }
 
     // 6. If newParent is a document, node is an Element node, and either newParent has an element child,
-    // child
-    //    is a doctype, or child is non-null and a doctype is following child then throw a
+    //    child is a doctype, or child is non-null and a doctype is following child then throw a
     //    "HierarchyRequestError" DOMException.
     if (Is<Document>(newParent) && Is<Element>(node)
         && (HasElementChild(newParent) || IsDocTypeOrDocTypeFollows(child)))
@@ -746,8 +741,7 @@ namespace krys::boo::dom
       ExtensibilityHooks::SubtreeMoved(node, oldParent, newParent);
 
       // 25. For each shadow-including inclusive descendant inclusiveDescendant of node, in shadow-including
-      // tree
-      //     order:
+      //     tree order:
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
         // 25a. Let isSubtreeRoot be true if inclusiveDescendant is node; otherwise false.
@@ -983,8 +977,7 @@ namespace krys::boo::dom
       }
 
       // 9. If parent's root is a shadow root, and parent is a slot whose assigned nodes is the empty list,
-      // then
-      //    run signal a slot change for parent.
+      //    then run signal a slot change for parent.
       auto &parentRoot = TreeQueries::Root(parent);
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
       {
@@ -1013,8 +1006,7 @@ namespace krys::boo::dom
       bool isParentConnected = parent.IsConnected();
 
       // 13. If node is custom and isParentConnected is true, then enqueue a custom element callback reaction
-      // with
-      //     node, callback name "disconnectedCallback", and « ».
+      //     with node, callback name "disconnectedCallback", and « ».
       if (auto *element = DynamicDowncast<Element>(node);
           element && element->IsDefinedCustomElement() && isParentConnected)
       {

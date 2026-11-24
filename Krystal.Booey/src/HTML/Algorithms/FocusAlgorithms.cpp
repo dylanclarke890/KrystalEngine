@@ -566,8 +566,7 @@ namespace krys::boo::html
     }
 
     // 6. Let old chain be the current focus chain of the top-level traversable in which new focus target
-    // finds
-    //    itself.
+    //    finds itself.
     auto *currentlyFocusedArea = CurrentlyFocusedArea(document);
     auto oldChain = currentlyFocusedArea ? GetFocusChain(*currentlyFocusedArea) : FocusChain {};
     // 7. Let new chain be the focus chain of new focus target.
@@ -915,8 +914,7 @@ namespace krys::boo::html
 
       // 9. Let target be element.
       // 10. If target is not a focusable area, then set target to the result of getting the focusable area
-      // for
-      //     target.
+      //     for target.
       element->NodeDocument().UpdateStyleIfNeeded();
       Node *target = IsFocusableArea(*element) ? element.get() : GetFocusableArea(*element);
 
@@ -1131,8 +1129,7 @@ namespace krys::boo::html
     auto order = SequentialFocusNavigationOrder(document);
 
     // 1. Let starting point be the currently focused area of a top-level traversable, if the user requested
-    // to
-    //    move focus sequentially from there, or else the top-level traversable itself, if the user instead
+    //    to move focus sequentially from there, or else the top-level traversable itself, if the user instead
     //    requested to move focus from outside the top-level traversable.
     // 2. If there is a sequential focus navigation starting point defined and it is inside starting point,
     //    then let starting point be the sequential focus navigation starting point instead.
@@ -1238,14 +1235,13 @@ namespace krys::boo::html
     {
       document._sequentialFocusNavigationStartingPoint = nullptr;
       // 8. If starting point is a top-level traversable, or a focusable area in the top-level traversable,
-      // the
-      //    user agent should transfer focus to its own controls appropriately (if any), honouring direction,
-      //    and then return. If the user agent has no sequentially focusable controls, then the user agent may
-      //    instead restart these steps with the starting point being the top-level traversable itself.
+      //    the user agent should transfer focus to its own controls appropriately (if any), honouring
+      //    direction, and then return. If the user agent has no sequentially focusable controls, then the
+      //    user agent may instead restart these steps with the starting point being the top-level traversable
+      //    itself.
       // (There are no user agent controls, so it restarts from the traversable: the first or last area.)
       // 9. Otherwise, starting point is a focusable area in a child navigable. Set starting point to that
-      // child
-      //    navigable's parent and return to the step labeled loop.
+      //    child navigable's parent and return to the step labeled loop.
       // FIXME: Child navigables, once there are any.
       if (order.empty())
       {

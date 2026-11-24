@@ -386,8 +386,7 @@ namespace krys::boo::html
       }
 
       // 2. Run this's set the content attribute with the given value converted to the shortest possible
-      // string
-      //    representing the number as a valid integer.
+      //    string representing the number as a valid integer.
       SetContentAttribute(target, krys::move(name), IntegerToString(value));
 
       if constexpr (OnlyNonNegative == OnlyNonNegativeNumbers::Yes)
@@ -556,8 +555,7 @@ namespace krys::boo::html
         {
           // 2b. If parsedValue is not an error and is greater than 0, then return parsedValue.
           // 2c. If parsedValue is not an error and the reflected IDL attribute is not limited to only
-          // positive
-          //     numbers, then return parsedValue.
+          //     positive numbers, then return parsedValue.
           if (OnlyPositive == OnlyPositiveNumbers::No || parsedValue > 0)
           {
             return parsedValue.Value;

@@ -70,7 +70,7 @@ namespace krys::boo::html
     krys_debug_assert(&AsHTMLElement() == &element);
     if (_formSetByParser)
     {
-      // The form could have been removed by a script during parsing.
+      // The parser's form may have been removed before the element was inserted.
       if (_formSetByParser->IsConnected())
       {
         SetForm(_formSetByParser.get());

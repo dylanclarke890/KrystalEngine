@@ -569,8 +569,7 @@ namespace krys::boo::dom
       }
 
       // 20c. Let subrange be a new live range whose start is (lastPartiallyContainedChild, 0) and whose end
-      // is
-      //      (originalEndNode, originalEndOffset).
+      //      is (originalEndNode, originalEndOffset).
       auto subrange = CreateRef<Range>(BoundaryPoint {ShareRef(*lastPartiallyContainedChild), 0uz},
                                        BoundaryPoint {ShareRef(*originalEndNode), originalEndOffset});
 
@@ -667,9 +666,8 @@ namespace krys::boo::dom
       }
     }
     // 13. Otherwise, if firstPartiallyContainedChild is non-null: append a clone of it to fragment, and
-    // append
-    //     to the clone the result of cloning the contents of (originalStartNode, originalStartOffset) to
-    //     (firstPartiallyContainedChild, firstPartiallyContainedChild's length).
+    //     append to the clone the result of cloning the contents of (originalStartNode, originalStartOffset)
+    //     to (firstPartiallyContainedChild, firstPartiallyContainedChild's length).
     else if (firstPartiallyContainedChild != nullptr)
     {
       auto clone = NodeAlgorithms::CloneNode(*firstPartiallyContainedChild);
@@ -767,8 +765,7 @@ namespace krys::boo::dom
     html::CEReactionsScope ceReactions;
     // Insert node into this:
     // 1. If range's start node is a ProcessingInstruction or Comment node, is a Text node whose parent is
-    // null,
-    //    or is node, then throw a "HierarchyRequestError" DOMException.
+    //    null, or is node, then throw a "HierarchyRequestError" DOMException.
     if (Is<ProcessingInstruction>(_start.Container.get()) || Is<Comment>(_start.Container.get())
         || (Is<Text>(_start.Container.get()) && _start.Container->ParentNode() == nullptr)
         || _start.Container == &node)
@@ -804,8 +801,7 @@ namespace krys::boo::dom
     }
 
     // 7. If range's start node is a Text node, then set referenceNode to the result of splitting it with
-    // offset
-    //    range's start offset.
+    //    offset range's start offset.
     if (Is<Text>(_start.Container.get()))
     {
       auto splitResult = Downcast<Text>(_start.Container.get())->SplitText(_start.Offset);
@@ -1053,8 +1049,7 @@ namespace krys::boo::dom
   {
     // 1. Let string be the empty string.
     // 2. If this's start node is this's end node and it is a Text node, then return the substring of that
-    // Text
-    //    node's data beginning at this's start offset and ending at this's end offset.
+    //    Text node's data beginning at this's start offset and ending at this's end offset.
     if (_start.Container == _end.Container)
     {
       if (auto *textNode = DynamicDowncast<Text>(_start.Container.get()))
@@ -1093,8 +1088,7 @@ namespace krys::boo::dom
     }
 
     // 5. If this's end node is a Text node, then append the substring of that node's data from its start
-    // until
-    //    this's end offset to string.
+    //    until this's end offset to string.
     if (auto *endTextNode = DynamicDowncast<Text>(_end.Container.get()))
     {
       auto substringResult = endTextNode->SubstringData(0, _end.Offset);

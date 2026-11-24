@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2010-2015 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
@@ -236,6 +211,8 @@ namespace krys::boo
     void OptionSelectedByUser(int32 optionIndex, bool dispatchChangeEvent,
                               bool allowMultipleSelection = false) noexcept;
 
+    /// @brief Updates the select as an option's text changed: the renderer, its validity and the button's
+    /// text.
     void OptionElementChildrenChanged() noexcept;
 
     /// @brief The slot of the shadow tree that takes @p child: a first child element that's a button takes
@@ -271,6 +248,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#clone-selected-option-into-select-button
     void CloneSelectedOptionIntoSelectButton() noexcept;
 
+    /// @brief Has the list items recomputed, as options, optgroups or hrs were added, removed or moved.
     void SetRecalcListItems() noexcept;
 
     /// @brief Runs the selectedness setting algorithm, then updates the selectedcontent elements if it or
@@ -278,8 +256,10 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#reset-a-select's-selectedness
     void ResetSelectedness(bool hasChanged) noexcept;
 
+    /// @brief Clears the cached `selectedOptions` collection.
     void InvalidateSelectedItems() noexcept;
 
+    /// @brief Recomputes the list items, and the options' selectedness, if they're out of date.
     void UpdateListItemSelectedStates(
       html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) noexcept;
 
@@ -289,23 +269,27 @@ namespace krys::boo
     /// @brief Selects the last selected option of an optgroup inserted into the select.
     void OptGroupInserted(HTMLOptGroupElement &optGroup) noexcept;
 
+    /// @brief Focuses the select and toggles the option at @p index, as an access key does.
     void AccessKeySetSelectedIndex(int32 index) noexcept;
 
+    /// @brief Scrolls a list box to its selection.
     void ScrollToSelection() noexcept;
 
-    void ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                           bool fireOnChangeNow = true) noexcept;
-
+    /// @brief Whether Select All applies (a list box), and selects all its options.
     KRYS_NODISCARD bool CanSelectAll() const noexcept;
 
     void SelectAll() noexcept;
 
+    /// @brief Converts between an index in the list items and one in the options; -1 if there's none.
     KRYS_NODISCARD int32 ListToOptionIndex(int32 listIndex) const noexcept;
 
+    /// @brief Fires change if the list box's selection differs from the one saved when the user began.
     void ListBoxOnChange() noexcept;
 
     KRYS_NODISCARD int32 OptionToListIndex(int32 optionIndex) const noexcept;
 
+    /// @brief The start and end of the range the user is selecting in a list box (from the anchor to the
+    /// end), and their setters.
     KRYS_NODISCARD int32 ActiveSelectionStartListIndex() const noexcept;
 
     KRYS_NODISCARD int32 ActiveSelectionEndListIndex() const noexcept;
@@ -314,11 +298,14 @@ namespace krys::boo
 
     void SetActiveSelectionEndIndex(int32 index) noexcept;
 
+    /// @brief Selects the options in the user's range, restoring the others to their saved state or (with
+    /// @p deselectOtherOptions) deselecting them.
     void UpdateListBoxSelection(bool deselectOtherOptions) noexcept;
 
     /// @brief Called by an option when its selectedness is set.
     void OptionSelectionStateChanged(HTMLOptionElement &option, bool optionIsSelected) noexcept;
 
+    /// @brief Whether a list box's selection may have gaps (Ctrl-click and space toggle options).
     KRYS_NODISCARD bool AllowsNonContiguousSelection() const noexcept
     {
       return _allowsNonContiguousSelection;
@@ -378,16 +365,24 @@ namespace krys::boo
 
     void DisabledStateChanged() noexcept final;
 
+    void WillChangeDisabledState(
+      bool newDisabled, List<UniquePtr<style::PseudoClassChangeInvalidation>> &invalidations) noexcept final;
+
     void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept final;
 
   private:
+    /// @brief The default event handling of a select with base appearance: opening its picker, and moving
+    /// the focus between the options.
     void BaseAppearanceDefaultEventHandler(Event &event) noexcept;
 
     /// @see https://html.spec.whatwg.org/#select-open-picker
     void OpenPicker(bool byKeyboard) noexcept;
 
+    /// @brief Hides the picker of a select with base appearance, refocusing the select if an option had the
+    /// focus.
     void ClosePicker() noexcept;
 
+    /// @brief Reassigns the children to slots as the select button or the drawing mode changes.
     void ReassignSlots() noexcept;
 
     /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
@@ -403,39 +398,58 @@ namespace krys::boo
     /// @brief The first option in the list of options whose selectedness is true, if any.
     KRYS_NODISCARD HTMLOptionElement *FirstSelectedOption() const noexcept;
 
+    /// @brief Fires input and change if the user changed a menu list's selection.
     void DispatchChangeEventForMenuList() noexcept;
 
+    /// @brief Recomputes the list items, running the selectedness setting algorithm with them if
+    /// @p updateSelectedStates.
     void RecalcListItems(
       bool updateSelectedStates = true,
       html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) const noexcept;
 
+    /// @brief Selects the option the user is typing the start of.
     void TypeAheadFind(KeyboardEvent &event) noexcept;
 
+    /// @brief Saves the selection, to know later whether the user changed it.
     void SaveLastSelection() noexcept;
 
+    /// @brief Selects the option at @p optionIndex (or none, for -1), as @p flags ask.
     void SelectOption(int32 optionIndex, SelectOptionFlags flags = {}) noexcept;
 
+    /// @brief Deselects every option but @p elementToExclude, without updating the validity.
     void DeselectItemsWithoutValidation(HTMLElement *elementToExclude = nullptr) noexcept;
 
+    /// @brief Follows the `multiple` attribute: the drawing mode and, if it changed, the selectedness.
     void ParseMultipleAttribute(bool present) noexcept;
 
+    /// @brief The list index of the last selected option, or -1.
     KRYS_NODISCARD int32 LastSelectedListIndex() const noexcept;
 
+    /// @brief Selects the clicked item at @p listIndex, toggling it (@p multi) or extending the range to it
+    /// (@p shift) in a list box that allows that.
     void UpdateSelectedState(int32 listIndex, bool multi, bool shift) noexcept;
 
+    /// @brief The default event handling of a menu list.
     void MenuListDefaultEventHandler(Event &event) noexcept;
 
+    /// @brief Opens a menu list's popup for an arrow key, where the theme does that.
+    /// @return Whether the key was taken.
     bool PlatformHandleKeydownEvent(KeyboardEvent &event) noexcept;
 
+    /// @brief The default event handling of a list box.
     void ListBoxDefaultEventHandler(Event &event) noexcept;
 
+    /// @brief Tells the renderer the options changed.
     void SetOptionsChangedOnRenderer() noexcept;
 
     /// @brief Shows the menu list's popup, if the select is drawn as a menu list.
     void ShowPopup() noexcept;
 
+    /// @brief The list index of the enabled option @p skip options from @p listIndex in @p direction, or the
+    /// last one found.
     KRYS_NODISCARD int32 NextValidIndex(int32 listIndex, SkipDirection direction, int32 skip) const noexcept;
 
+    /// @brief The enabled options next to, first, last, and a list box page away from a list index.
     KRYS_NODISCARD int32 NextSelectableListIndex(int32 startIndex) const noexcept;
 
     KRYS_NODISCARD int32 PreviousSelectableListIndex(int32 startIndex) const noexcept;

@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -59,9 +35,7 @@ namespace krys::boo
 
   void HTMLFormControlElement::DidAttachRenderers() noexcept
   {
-    // The call to UpdateFromElement() needs to go after the call through
-    // to the base class's attach() because that can sometimes do a close
-    // on the renderer.
+    // The renderer takes the element's state once it's made.
     if (auto *renderer = Renderer())
     {
       renderer->UpdateFromElement();
@@ -70,8 +44,8 @@ namespace krys::boo
 
   void HTMLFormControlElement::DidRecalcStyle(EnumSet<style::Change>) noexcept
   {
-    // UpdateFromElement() can cause the selection to change, and in turn
-    // trigger synchronous layout, so it must not be called during style recalc.
+    // The renderer takes the element's state after style resolution: doing so can change the selection,
+    // which lays out.
     if (Renderer())
     {
       style::DeprecatedQueuePostResolutionCallback(
@@ -181,15 +155,6 @@ namespace krys::boo
     {
       renderer->Repaint();
     }
-  }
-
-  void HTMLFormControlElement::ReadOnlyStateChanged() noexcept
-  {
-    html::ValidatedFormListedElement::ReadOnlyStateChanged();
-
-    // Some input pseudo-classes, like :in-range and :out-of-range, depend on the readonly state.
-    // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
-    InvalidateStyleForSubtree();
   }
 
   void HTMLFormControlElement::RequiredStateChanged() noexcept
@@ -344,8 +309,7 @@ namespace krys::boo
     }
     // 7. Otherwise:
     // 7a. Let validity be the result of running check popover validity given popover, false, and null. If
-    // this
-    //     throws an exception, catch it, and let validity be false.
+    //     this throws an exception, catch it, and let validity be false.
     // 7b. If validity is true, then run show popover given popover, false, and node.
     // (Show popover checks the validity first, and doesn't throw.)
     else

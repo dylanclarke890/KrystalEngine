@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2007-2018 Apple Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -53,18 +33,25 @@ namespace krys::boo::html
 
     ~RadioButtonGroups() noexcept;
 
+    /// @brief Forgets every group.
     void Clear() noexcept;
 
+    /// @brief Adds a radio button to its name's group, or removes it.
     void AddButton(HTMLInputElement &element) noexcept;
 
+    /// @brief Updates @p element's group as its checkedness changes: the group's checked button, and the
+    /// validity of its other buttons.
     void UpdateCheckedState(HTMLInputElement &element) noexcept;
 
+    /// @brief Updates @p element's group as its `required` attribute changes.
     void RequiredStateChanged(HTMLInputElement &element) noexcept;
 
     void RemoveButton(HTMLInputElement &element) noexcept;
 
+    /// @brief The checked button of the group named @p groupName, if any.
     KRYS_NODISCARD RefPtr<HTMLInputElement> CheckedButtonForGroup(DOMStringView groupName) const noexcept;
 
+    /// @brief Whether @p element's group has a checked button, and whether any of its buttons is required.
     KRYS_NODISCARD bool HasCheckedButton(const HTMLInputElement &element) const noexcept;
 
     KRYS_NODISCARD bool IsInRequiredGroup(HTMLInputElement &element) const noexcept;
@@ -73,6 +60,7 @@ namespace krys::boo::html
     KRYS_NODISCARD List<Ref<HTMLInputElement>> GroupMembers(const HTMLInputElement &element) const noexcept;
 
   private:
+    /// @brief The group named @p name, if any.
     KRYS_NODISCARD RadioButtonGroup *Find(DOMStringView name) const noexcept;
   };
 }

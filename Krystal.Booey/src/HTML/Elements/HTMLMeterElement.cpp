@@ -1,24 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
@@ -174,7 +154,7 @@ namespace krys::boo
 
     if (optimumValue < lowValue)
     {
-      // The optimum range stays under low
+      // The optimum region is below low.
       if (theValue <= lowValue)
       {
         return GaugeRegion::Optimum;
@@ -188,7 +168,7 @@ namespace krys::boo
 
     if (highValue < optimumValue)
     {
-      // The optimum range stays over high
+      // The optimum region is above high.
       if (highValue <= theValue)
       {
         return GaugeRegion::Optimum;
@@ -200,9 +180,9 @@ namespace krys::boo
       return GaugeRegion::EvenLessGood;
     }
 
-    // The optimum range stays between high and low.
-    // According to the standard, <meter> never show GaugeRegionEvenLessGood in this case
-    // because the value is never less or greater than min or max.
+    // The optimum region is between low and high; the value, clamped to min and max, is never in an even less
+    // good region.
+    // https://html.spec.whatwg.org/#the-meter-element
     if (lowValue <= theValue && theValue <= highValue)
     {
       return GaugeRegion::Optimum;
@@ -274,7 +254,7 @@ namespace krys::boo
     (void)style->TextContent(DOMString(css::MeterElementShadowUserAgentStyleSheet));
     (void)root.AppendChild(*style);
 
-    // Pseudos are set to allow author styling.
+    // The parts are named, so the page can style them.
     auto inner = CreateRef<HTMLDivElement>(document);
     inner->Id(u8"inner");
     inner->SetUserAgentPart(css::user_agent_parts::WebkitMeterInnerElement());

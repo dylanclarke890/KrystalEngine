@@ -1,31 +1,4 @@
-﻿/*
- * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2010-2022 Google Inc. All rights reserved.
- * Copyright (C) 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -63,6 +36,7 @@
 #include "Krystal.Booey/Rendering/FormControls/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include <climits>
 
@@ -235,8 +209,7 @@ namespace krys::boo
   void HTMLSelectElement::CloneSelectedOptionIntoSelectButton() noexcept
   {
     // 1. Let option be the first element of select's option list whose selectedness is set to true, if such
-    // an
-    //    element exists; otherwise null.
+    //    an element exists; otherwise null.
     auto *option = FirstSelectedOption();
     // 2. Let text be the empty string.
     // 3. If option is not null, then set text to option's label.
@@ -492,8 +465,7 @@ namespace krys::boo
   void HTMLSelectElement::OptionSelectedByUser(int32 optionIndex, bool dispatchChangeEvent,
                                                bool allowMultipleSelection) noexcept
   {
-    // User interaction such as mousedown events can cause list box select elements to send change events.
-    // This produces that same behavior for changes triggered by other code running on behalf of the user.
+    // A selection made for the user fires change as the user's own does.
     if (!UsesMenuList())
     {
       UpdateSelectedState(OptionToListIndex(optionIndex), allowMultipleSelection, false);
@@ -575,24 +547,6 @@ namespace krys::boo
     return firstSelectionIndex < 0 || (!firstSelectionIndex && HasPlaceholderLabelOption());
   }
 
-  void HTMLSelectElement::ListBoxSelectItem(int32 listIndex, bool allowMultiplySelections, bool shift,
-                                            bool fireOnChangeNow) noexcept
-  {
-    if (!Multiple())
-    {
-      OptionSelectedByUser(ListToOptionIndex(listIndex), fireOnChangeNow, false);
-    }
-    else
-    {
-      UpdateSelectedState(listIndex, allowMultiplySelections, shift);
-      UpdateValidity();
-      if (fireOnChangeNow)
-      {
-        ListBoxOnChange();
-      }
-    }
-  }
-
   bool HTMLSelectElement::UsesMenuList() const noexcept
   {
     if (RenderTheme::Singleton().DelegatesMenuListRendering())
@@ -664,8 +618,7 @@ namespace krys::boo
     }
 
     // 6. Let parent be reference's parent node if reference is not null; otherwise the select element on
-    // which
-    //    this is rooted.
+    //    which this is rooted.
     Ref<ContainerNode> parent =
       reference ? ShareRef(*reference->ParentNode()) : ShareRef<ContainerNode>(*this);
 
@@ -746,11 +699,27 @@ namespace krys::boo
   void HTMLSelectElement::DisabledStateChanged() noexcept
   {
     HTMLFormControlElement::DisabledStateChanged();
+  }
 
-    // The options and optgroups in a disabled select are actually disabled, which :disabled and :enabled
-    // match.
-    // FIXME: Use PseudoClassChangeInvalidation instead for :has() support and more efficiency.
-    InvalidateStyleForSubtree();
+  void HTMLSelectElement::WillChangeDisabledState(
+    bool newDisabled, List<UniquePtr<style::PseudoClassChangeInvalidation>> &invalidations) noexcept
+  {
+    // The options and optgroups are actually disabled while the select is, unless they're disabled anyway.
+    // https://html.spec.whatwg.org/#concept-element-disabled
+    for (auto &weakItem : ListItems())
+    {
+      auto *item = weakItem.get();
+      if (!item || !(Is<HTMLOptionElement>(*item) || Is<HTMLOptGroupElement>(*item))
+          || item->IsDisabledFormControl())
+      {
+        continue;
+      }
+      invalidations.push_back(CreateUnique<style::PseudoClassChangeInvalidation>(
+        *item, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> {
+                 {css::SelectorPseudoClass::Disabled, newDisabled},
+                 {css::SelectorPseudoClass::Enabled, !newDisabled},
+               }));
+    }
   }
 
   void HTMLSelectElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
@@ -772,7 +741,7 @@ namespace krys::boo
       uint32 oldSize = _size;
       uint32 size = LimitToOnlyHTMLNonNegative(value);
 
-      // Ensure that we've determined selectedness of the items at least once prior to changing the size.
+      // The items' selectedness is settled before the size changes how the select draws.
       if (oldSize != size)
       {
         UpdateListItemSelectedStates();
@@ -961,8 +930,7 @@ namespace krys::boo
     int64 delta = static_cast<int64>(index) - static_cast<int64>(length);
 
     // 4. If delta is greater than 0, then append new option elements to the select element on which
-    // collection
-    //    is rooted given delta.
+    //    collection is rooted given delta.
     if (delta > 0)
     {
       // An index past the limit the length setter has does nothing, as in other browsers.
@@ -1255,8 +1223,7 @@ namespace krys::boo
 
     auto &items = ListItems();
 
-    // If the cached selection list is empty, or the size has changed, then fire
-    // DispatchFormControlChangeEvent, and return early.
+    // Without a saved selection to compare (or with a different number of items), change fires anyway.
     if (_lastOnChangeSelection.empty() || _lastOnChangeSelection.size() != items.size())
     {
       DispatchFormControlChangeEvent();
@@ -1361,8 +1328,7 @@ namespace krys::boo
   void HTMLSelectElement::ResetSelectedness(bool hasChanged) noexcept
   {
     // 1. If the result of running the selectedness setting algorithm given select is true, then set
-    // hasChanged
-    //    to true.
+    //    hasChanged to true.
     // (Running it while finding the list of options again, and comparing the selected option.)
     RefPtr<HTMLOptionElement> previouslySelected = ShareRefPtr(FirstSelectedOption());
     SetRecalcListItems();
@@ -1392,7 +1358,7 @@ namespace krys::boo
   void HTMLSelectElement::SetRecalcListItems() noexcept
   {
     _shouldRecalcListItems = true;
-    // Manual selection anchor is reset when manipulating the select programmatically.
+    // A change to the options drops the anchor of the user's range selection.
     _activeSelectionAnchorIndex = -1;
     SetOptionsChangedOnRenderer();
     InvalidateStyleForSubtree();
@@ -1502,7 +1468,7 @@ namespace krys::boo
   {
     int32 index = 0;
 
-    // Return the number of the first option selected.
+    // The first selected option's index.
     for (auto &element : ListItems())
     {
       if (auto *option = DynamicDowncast<HTMLOptionElement>(element.get()))
@@ -1525,8 +1491,7 @@ namespace krys::boo
     // 2. For each option of select's list of options:
     // 2a. Set option's selectedness to false.
     // 2b. If firstMatchingOption is null and option's index is equal to value, then set firstMatchingOption
-    // to
-    //     option.
+    //     to option.
     // 3. If firstMatchingOption is not null, then set firstMatchingOption's selectedness to true and set
     //    firstMatchingOption's dirtiness to true.
     SelectOption(index, {SelectOptionFlag::DeselectOtherOptions, SelectOptionFlag::MakeOptionDirty});
@@ -1597,7 +1562,7 @@ namespace krys::boo
     InvalidateSelectedItems();
     UpdateValidity();
 
-    // For the menu list case, this is what makes the selected element appear.
+    // The renderer shows the new selection (a menu list's text).
     if (auto *renderer = Renderer())
     {
       renderer->UpdateFromElement();
@@ -1657,7 +1622,7 @@ namespace krys::boo
       return -1;
     }
 
-    // Actual index of option not counting optgroup entries that may be in list.
+    // Optgroups and hrs in the list don't count.
     int32 optionIndex = 0;
     for (int32 i = 0; i < listIndex; ++i)
     {
@@ -1724,8 +1689,7 @@ namespace krys::boo
     if (oldMultiple != _multiple)
     {
       // 1. If the multiple attribute was removed, then set the selectedness of all but the first option
-      // element
-      //    with its selectedness set to true in select's list of options to false.
+      //    element with its selectedness set to true in select's list of options to false.
       if (oldSelectedIndex >= 0)
       {
         SelectOption(oldSelectedIndex, {SelectOptionFlag::DeselectOtherOptions});
@@ -1781,8 +1745,7 @@ namespace krys::boo
       option->ResetDirtiness();
 
       // 2a. If optionElement has a selected attribute, then set optionElement's selectedness to true;
-      // otherwise
-      //     set it to false.
+      //     otherwise set it to false.
       // 3. Run the selectedness setting algorithm given selectElement.
       // (Both at once, keeping the last selected option and the first enabled one.)
       if (option->HasAttribute(u8"selected"))
@@ -1949,7 +1912,8 @@ namespace krys::boo
 
       if (keyCode == ' ' && NodeDocument().GetSettings().SpatialNavigationEnabled)
       {
-        // Use space to toggle arrow key handling for selection change or spatial navigation.
+        // With spatial navigation, space switches the arrow keys between changing the selection and
+        // navigating.
         _activeSelectionState = !_activeSelectionState;
         keyboardEvent->SetDefaultHandled();
         return;
@@ -1962,7 +1926,7 @@ namespace krys::boo
           Focus();
           NodeDocument().UpdateStyleIfNeeded();
 
-          // Calling Focus() may remove the renderer or change the renderer type.
+          // Focusing may have removed the renderer, or made it a list box.
           if (!UsesMenuList() || !Renderer())
           {
             return;
@@ -1983,7 +1947,7 @@ namespace krys::boo
           Focus();
           NodeDocument().UpdateStyleIfNeeded();
 
-          // Calling Focus() may remove the renderer or change the renderer type.
+          // Focusing may have removed the renderer, or made it a list box.
           if (!UsesMenuList() || !Renderer())
           {
             return;
@@ -2090,7 +2054,6 @@ namespace krys::boo
       SetActiveSelectionAnchorIndex(SelectedIndex());
     }
 
-    // Set the selection state of the clicked option.
     if (auto *option = DynamicDowncast<HTMLOptionElement>(*clickedElement);
         option && !option->IsDisabledFormControl())
     {
@@ -2132,7 +2095,7 @@ namespace krys::boo
         return;
       }
 
-      // Convert to coords relative to the list box if needed.
+      // In the list box's coordinates.
       auto absoluteLocation = mouseEvent->AbsoluteLocation();
       PointI localOffset = RoundedPointI(renderListBox->AbsoluteToLocal(
         PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
@@ -2176,7 +2139,7 @@ namespace krys::boo
         {
           if (_multiple)
           {
-            // Only extend selection if there is something selected.
+            // Shift extends a selection only if there is one.
             if (_activeSelectionAnchorIndex < 0)
             {
               return;
@@ -2199,7 +2162,7 @@ namespace krys::boo
              && NodeDocument().Frame()
              && NodeDocument().Frame()->GetEventHandler().AutoscrollRenderer() != Renderer())
     {
-      // This click or drag event was not over any of the options.
+      // The press or drag ended outside the options.
       if (_lastOnChangeSelection.empty())
       {
         return;
@@ -2233,7 +2196,7 @@ namespace krys::boo
       int32 endIndex = 0;
       if (_activeSelectionEndIndex < 0)
       {
-        // Initialize the end index
+        // The range's end starts at the last selected item.
         if (key == nextKey || key == u8"PageDown")
         {
           int32 startIndex = LastSelectedListIndex();
@@ -2263,7 +2226,7 @@ namespace krys::boo
       }
       else
       {
-        // Set the end index based on the current end index.
+        // Otherwise it moves from where it is.
         if (key == nextKey)
         {
           endIndex = NextSelectableListIndex(_activeSelectionEndIndex);
@@ -2298,7 +2261,7 @@ namespace krys::boo
 
       if (NodeDocument().GetSettings().SpatialNavigationEnabled)
       {
-        // Check if the selection moves to the boundary.
+        // At an edge, the arrow key navigates out of the list box.
         if (key == u8"ArrowLeft" || key == u8"ArrowRight"
             || ((key == u8"ArrowDown" || key == u8"ArrowUp") && endIndex == _activeSelectionEndIndex))
         {
@@ -2370,7 +2333,7 @@ namespace krys::boo
       }
       else if (_multiple && keyCode == ' ' && _allowsNonContiguousSelection)
       {
-        // Use space to toggle selection change.
+        // Space toggles whether moving changes the selection.
         _activeSelectionState = !_activeSelectionState;
         krys_debug_assert(_activeSelectionEndIndex >= 0);
         krys_debug_assert(_activeSelectionEndIndex < static_cast<int32>(listItems.size()));
@@ -2485,13 +2448,13 @@ namespace krys::boo
 
   void HTMLSelectElement::AccessKeySetSelectedIndex(int32 index) noexcept
   {
-    // First bring into focus the list box.
+    // The select is focused first.
     if (!Focused())
     {
       (void)AccessKeyAction(false);
     }
 
-    // If this index is already selected, unselect. otherwise update the selected index.
+    // The option's selectedness toggles.
     auto &items = ListItems();
     int32 listIndex = OptionToListIndex(index);
     if (listIndex >= 0)

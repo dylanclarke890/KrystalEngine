@@ -140,6 +140,17 @@ namespace krys::boo::tests
             .has_value());
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLTextFormControlElement: no ::before or ::after",
+                   "[HTML][HTMLTextFormControlElement]")
+  {
+    // Chrome: a tall ::before doesn't change the controls' scroll heights.
+    EditorFixture fixture(u8"<style>textarea, input { height: 20px; padding: 0; border: 0 }"
+                          u8".p::before { content: 'x'; display: block; height: 200px }</style>"
+                          u8"<textarea id=a class=p></textarea><input id=b class=p>");
+    CHECK(fixture.ById(u8"a").ScrollHeight() == 20);
+    CHECK(fixture.ById(u8"b").ScrollHeight() == 20);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLTextFormControlElement: typing",
                    "[HTML][HTMLTextFormControlElement]")
   {

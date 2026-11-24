@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2018 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2007 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -68,7 +43,8 @@ namespace krys::boo
 
   RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // https://html.spec.whatwg.org/multipage/rendering.html#button-layout
+    // A flex or grid button lays its contents out as such; otherwise it's a button box.
+    // https://html.spec.whatwg.org/#button-layout
     if (style.IsDisplayFlexibleOrGridFormattingContextBox())
     {
       return HTMLFormControlElement::CreateElementRenderer(krys::move(style));
@@ -188,7 +164,7 @@ namespace krys::boo
             keyboardEvent->SetDefaultHandled();
             return;
           case ' ':
-            // Prevent scrolling down the page.
+            // The space bar's keypress doesn't scroll the page: the keyup activates the button.
             keyboardEvent->SetDefaultHandled();
             return;
           default: break;
@@ -210,8 +186,7 @@ namespace krys::boo
 
   bool HTMLButtonElement::IsSuccessfulSubmitButton() const noexcept
   {
-    // HTML spec says that buttons must have names to be considered successful. However, other browsers do not
-    // impose this constraint.
+    // Any submit button, named or not, can submit its form (only a named one adds an entry).
     return _type == ButtonType::Submit;
   }
 
@@ -249,11 +224,6 @@ namespace krys::boo
   bool HTMLButtonElement::IsSubmitButton() const noexcept
   {
     return _type == ButtonType::Submit;
-  }
-
-  bool HTMLButtonElement::IsExplicitlySetSubmitButton() const noexcept
-  {
-    return IsSubmitButton() && HasAttribute(u8"type");
   }
 
   void HTMLButtonElement::OnInsert() noexcept
@@ -382,8 +352,7 @@ namespace krys::boo
     }
 
     // 5c. Let relatedTarget be target if the result of retargeting element against target is target;
-    // otherwise
-    //     element.
+    //     otherwise element.
     // 5d. Let continue be the result of firing an event named command at target, using CommandEvent, with its
     //     command attribute initialized to command, its source attribute initialized to element, its
     //     cancelable attribute initialized to true, its composed flag set, and relatedTarget set to

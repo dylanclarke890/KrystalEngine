@@ -91,8 +91,7 @@ namespace krys::boo
       }
 
       // 3b. If ancestor is an option element or a selectedcontent element, then set selectedcontent's
-      // disabled
-      //     to true and break.
+      //     disabled to true and break.
       if (Is<HTMLOptionElement>(*ancestor) || Is<HTMLSelectedContentElement>(*ancestor))
       {
         _disabled = true;

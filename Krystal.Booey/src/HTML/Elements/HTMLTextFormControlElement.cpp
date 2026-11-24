@@ -1,29 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- * Copyright (C) 2014 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
@@ -115,7 +90,7 @@ namespace krys::boo
 
     void StripTrailingNewline(DOMString &result) noexcept
     {
-      // Remove one trailing newline; there's always one that's collapsed out by rendering.
+      // The <br> after a trailing line break, there so the empty last line renders, isn't in the value.
       if (!result.empty() && result.back() == u8'\n')
       {
         result.pop_back();
@@ -170,8 +145,8 @@ namespace krys::boo
 
   bool HTMLTextFormControlElement::ChildShouldCreateRenderer(const Node &child) const noexcept
   {
-    // FIXME: We shouldn't force the pseudo elements down into the shadow, but
-    // this perserves the current behavior of WebKit.
+    // The light tree's children don't render, only the shadow tree's; pseudo-elements are left to the base
+    // check (which, as in Chrome, gives them no renderer either).
     if (Is<PseudoElement>(child))
     {
       return HTMLFormControlElement::ChildShouldCreateRenderer(child);
@@ -206,7 +181,7 @@ namespace krys::boo
     {
       UpdatePlaceholderVisibility();
     }
-    // Match the order in Document::setFocusedElement.
+    // The control's own blur handling runs before the blur event, as focus handling runs before focus.
     HandleBlurEvent();
     HTMLFormControlElement::DispatchBlurEvent(relatedTarget);
   }
@@ -219,7 +194,6 @@ namespace krys::boo
     }
 
     _lastChangeWasUserEdit = wasUserEdit;
-    _wasEverChangedByUserEdit |= wasUserEdit;
     SubtreeHasChanged();
   }
 
@@ -244,9 +218,8 @@ namespace krys::boo
 
   bool HTMLTextFormControlElement::PlaceholderShouldBeVisible() const noexcept
   {
-    // This function is used by the style resolver to match the :placeholder-shown pseudo class.
-    // Since it is used for styling, it must not use any value depending on the style.
-    return SupportsPlaceholder() && IsEmptyValue() && !IsPlaceholderEmpty() && _canShowPlaceholder;
+    // Selector matching (:placeholder-shown) uses this, so it can't depend on the style.
+    return SupportsPlaceholder() && IsEmptyValue() && !IsPlaceholderEmpty();
   }
 
   void HTMLTextFormControlElement::UpdatePlaceholderVisibility() noexcept
@@ -267,20 +240,13 @@ namespace krys::boo
     }
   }
 
-  void HTMLTextFormControlElement::SetCanShowPlaceholder(bool canShowPlaceholder) noexcept
-  {
-    _canShowPlaceholder = canShowPlaceholder;
-    UpdatePlaceholderVisibility();
-  }
-
   // https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
   void HTMLTextFormControlElement::SetSelectionStart(uint32 start) noexcept
   {
     // 2. Let end be the value of this element's selectionEnd attribute.
     // 3. If end is less than the given value, set end to the given value.
     // 4. Set the selection range with the given value, end, and the value of this element's
-    // selectionDirection
-    //    attribute.
+    //    selectionDirection attribute.
     SetSelectionRange(start, std::max(start, SelectionEnd()), SelectionDirection());
   }
 
@@ -288,8 +254,7 @@ namespace krys::boo
   void HTMLTextFormControlElement::SetSelectionEnd(uint32 end) noexcept
   {
     // 2. Set the selection range with the value of this element's selectionStart attribute, the given value,
-    // and
-    //    the value of this element's selectionDirection attribute.
+    //    and the value of this element's selectionDirection attribute.
     // (A start past the end is the end, as setting the selection range makes it.)
     SetSelectionRange(std::min(end, SelectionStart()), end, SelectionDirection());
   }
@@ -369,8 +334,7 @@ namespace krys::boo
     // 5. If start is greater than the length of the relevant value of the text control, then set it to the
     //    length of the relevant value of the text control.
     // 6. If end is greater than the length of the relevant value of the text control, then set it to the
-    // length
-    //    of the relevant value of the text control.
+    //    length of the relevant value of the text control.
     start = SnapToCharacterStart(text, std::min(start, textLength));
     end = SnapToCharacterStart(text, std::min(end, textLength));
 
@@ -411,7 +375,7 @@ namespace krys::boo
     }
     else
     {
-      // Default is "preserve".
+      // "preserve", the default.
       int64 delta = static_cast<int64>(replacementLength) - (end - start);
 
       if (newSelectionStart > end)
@@ -448,8 +412,7 @@ namespace krys::boo
                                                      html::ForBindings forBindings) noexcept
   {
     // 4. If direction is not identical to either "backward" or "forward", or if the direction argument was
-    // not
-    //    given, set direction to "none".
+    //    not given, set direction to "none".
     auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
     if (directionString == u8"forward")
     {
@@ -461,9 +424,8 @@ namespace krys::boo
     }
 
     // 3. Set the selection of the text control to the sequence of code units within the relevant value
-    // starting
-    //    with the code unit at the startth position (in logical order) and ending with the code unit at the
-    //    (end-1)th position.
+    //    starting with the code unit at the startth position (in logical order) and ending with the code unit
+    //    at the (end-1)th position.
     // 5. Set the selection direction of the text control to direction.
     // 6. If the previous steps caused the selection of the text control to be modified (in either extent or
     //    direction), then queue an element task on the user interaction task source given the element to fire
@@ -509,17 +471,16 @@ namespace krys::boo
         return CacheSelection(start, end, direction);
       }
 
-      // Cache selection if neither selection or focus is on the input.
+      // The selection is only kept while the frame's selection isn't in the control.
       if (frame && html::EnclosingTextFormControl(document->Selection().Selection().Start()) != this)
       {
         return CacheSelection(start, end, direction);
       }
 
-      // FIXME: Removing this synchronous layout requires fixing setSelectionWithoutUpdatingAppearance not
-      // needing up-to-date style.
+      // Layout is brought up to date, as the inner text's renderer is read below.
       document->UpdateLayoutIgnorePendingStylesheets();
 
-      // Cache selection if renderer is invisible.
+      // Or while the control isn't visible.
       if (auto *renderer = Renderer())
       {
         if (renderer->Style().Visibility() == Visibility::Hidden || !innerText->GetRenderBox()
@@ -766,8 +727,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Don't re-compute selection start and end if this function was called inside setSelectionRange.
-    // selectionStart() or selectionEnd() will return cached selection when this node doesn't have focus
+    // The selection is cached, for selectionStart and selectionEnd to return once the control loses focus.
     uint32 previousSelectionStart = _cachedSelectionStart;
     uint32 previousSelectionEnd = _cachedSelectionEnd;
     CacheSelection(ComputeSelectionStart(), ComputeSelectionEnd(), ComputeSelectionDirection());
@@ -858,15 +818,6 @@ namespace krys::boo
     return _lastChangeWasUserEdit;
   }
 
-  bool HTMLTextFormControlElement::WasEverChangedByUserEdit() const noexcept
-  {
-    if (!IsTextField())
-    {
-      return false;
-    }
-    return _wasEverChangedByUserEdit;
-  }
-
   void HTMLTextFormControlElement::SetInnerTextValue(DOMString value) noexcept
   {
     auto innerText = InnerTextElementCreatingShadowSubtreeIfNeeded();
@@ -946,15 +897,16 @@ namespace krys::boo
     }
 
     auto length = static_cast<uint32>(InnerTextValue().size());
-    // FIXME: We shouldn't have to call innerTextValue() just to ignore the last LF. See finishText.
+    // The value leaves out the inner text's trailing line break, so an index on it is clamped to the value's
+    // end.
     index = std::min(index, length);
     return index;
   }
 
   DOMString HTMLTextFormControlElement::ValueWithHardLineBreaks() const noexcept
   {
-    // FIXME: It's not acceptable to ignore the HardWrap setting when there is no renderer.
-    // While we have no evidence this has ever been a practical problem, it would be best to fix it some day.
+    // Lines are wrapped where they're laid out, so without a renderer there are no hard line breaks, as in
+    // Chrome.
     if (!IsTextField())
     {
       return Value();
@@ -1053,8 +1005,7 @@ namespace krys::boo
   void HTMLTextFormControlElement::AdjustInnerTextStyle(const RenderStyle &parentStyle,
                                                         RenderStyle &textBlockStyle) noexcept
   {
-    // The inner block, if present, always has its direction set to LTR,
-    // so we need to inherit the direction and unicode-bidi style from the element.
+    // The inner text's direction and bidi come from the control.
     textBlockStyle.SetDirection(parentStyle.GetWritingMode().ComputedTextDirection());
     textBlockStyle.SetUnicodeBidi(parentStyle.UnicodeBidi());
 

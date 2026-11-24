@@ -347,8 +347,7 @@ namespace krys::boo
         // 6c. For each live range whose start node is currentNode's parent and start offset is currentNode's
         //     index: set its start node to node and its start offset to length.
         // 6d. For each live range whose end node is currentNode's parent and end offset is currentNode's
-        // index:
-        //     set its end node to node and its end offset to length.
+        //     index: set its end node to node and its end offset to length.
         dom::LiveRangeUpdater::NodeNormalized(*node, currentTextNode, length);
 
         // 6e. Add currentNode's length to length.
@@ -475,8 +474,7 @@ namespace krys::boo
     }
 
     // 7. If node1 is an ancestor of node2 and attr1 is null, or node1 is node2 and attr2 is non-null, then
-    // return
-    //    the result of adding DOCUMENT_POSITION_CONTAINS to DOCUMENT_POSITION_PRECEDING.
+    //    return the result of adding DOCUMENT_POSITION_CONTAINS to DOCUMENT_POSITION_PRECEDING.
     if ((dom::TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr)
         || (node1 == node2 && attr2 != nullptr))
     {

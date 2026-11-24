@@ -190,8 +190,7 @@ namespace krys::boo
     }
 
     // 4. If animation has a pending play task, reschedule that task to run as soon as animation is ready to
-    // play
-    //    new effect.
+    //    play new effect.
     if (HasPendingPlayTask())
     {
       _timeToRunPendingPlayTask = TimeToRunPendingTask::WhenReady;
@@ -217,8 +216,7 @@ namespace krys::boo
     SetEffectInternal(krys::move(newEffect), IsStyleOriginatedAnimation());
 
     // 7. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //    false, and the synchronously notify flag set to false.
+    //    to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No);
 
     InvalidateEffect();
@@ -388,8 +386,7 @@ namespace krys::boo
     }
 
     // 11. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //     false, and the synchronously notify flag set to false.
+    //     to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No);
 
     InvalidateEffect();
@@ -479,8 +476,7 @@ namespace krys::boo
     // https://drafts.csswg.org/web-animations-2/#setting-the-start-time-of-an-animation
 
     // 1. Let valid start time be the result of running the validate a CSSNumberish time procedure with new
-    // start
-    //    time as the input.
+    //    start time as the input.
     // 2. If valid start time is false, abort this procedure.
     // (We do this in SetBindingsStartTime())
 
@@ -488,9 +484,8 @@ namespace krys::boo
     _autoAlignStartTime = false;
 
     // 4. Let timeline time be the current time value of the timeline that animation is associated with. If
-    // there
-    //    is no timeline associated with animation or the associated timeline is inactive, let the timeline
-    //    time be unresolved.
+    //    there is no timeline associated with animation or the associated timeline is inactive, let the
+    //    timeline time be unresolved.
     auto timelineTime = _timeline ? _timeline->CurrentTime() : null;
 
     // 5. If timeline time is unresolved and new start time is resolved, make animation's hold time
@@ -527,8 +522,7 @@ namespace krys::boo
     }
 
     // 10. If animation has a pending play task or a pending pause task, cancel that task and resolve
-    // animation's
-    //     current ready promise with animation.
+    //     animation's current ready promise with animation.
     if (Pending())
     {
       _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
@@ -537,8 +531,7 @@ namespace krys::boo
     }
 
     // 11. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //     true, and the synchronously notify flag set to false.
+    //     to true, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::Yes, SynchronouslyNotify::No);
 
     InvalidateEffect();
@@ -599,8 +592,7 @@ namespace krys::boo
     }
 
     // 2. Let valid seek time be the result of running the validate a CSSNumberish time procedure with seek
-    // time
-    //    as the input.
+    //    time as the input.
     // 3. If valid seek time is false, abort this procedure.
     // (We do this up front in SetBindingsCurrentTime()).
 
@@ -626,8 +618,7 @@ namespace krys::boo
     }
 
     // 6. If animation has no associated timeline or the associated timeline is inactive, make animation's
-    // start
-    //    time unresolved.
+    //    start time unresolved.
     if (!_timeline || !_timeline->CurrentTime())
     {
       _startTime = null;
@@ -668,8 +659,7 @@ namespace krys::boo
     }
 
     // 3. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //    true, and the synchronously notify flag set to false.
+    //    to true, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::Yes, SynchronouslyNotify::No);
 
     if (_effect)
@@ -791,8 +781,7 @@ namespace krys::boo
       // 3. Apply any pending playback rate on animation.
       ApplyPendingPlaybackRate();
       // 4. Run the procedure to update an animation's finished state for animation with the did seek flag set
-      // to
-      //    false, and the synchronously notify flag set to false.
+      //    to false, and the synchronously notify flag set to false.
       TimingDidChange(DidSeek::No, SynchronouslyNotify::No);
 
       InvalidateEffect();
@@ -1094,8 +1083,7 @@ namespace krys::boo
     // procedure to finish an animation for animation defined below:
     //
     // 1. If animation's effective playback rate is zero, or if animation's effective playback rate > 0 and
-    // target
-    //    effect end is infinity, throw an InvalidStateError and abort these steps.
+    //    target effect end is infinity, throw an InvalidStateError and abort these steps.
     if (!EffectivePlaybackRate() || (EffectivePlaybackRate() > 0 && EffectEndTime().IsInfinity()))
     {
       return Exception {ExceptionCode::InvalidStateError};
@@ -1113,9 +1101,8 @@ namespace krys::boo
     (void)SilentlySetCurrentTime(limit);
 
     // 5. If animation's start time is unresolved and animation has an associated active timeline, let the
-    // start
-    //    time be the result of evaluating timeline time - (limit / playback rate) where timeline time is the
-    //    current time value of the associated timeline.
+    //    start time be the result of evaluating timeline time - (limit / playback rate) where timeline time
+    //    is the current time value of the associated timeline.
     if (!_startTime && _timeline && _timeline->CurrentTime())
     {
       _startTime = *_timeline->CurrentTime() - (limit / _playbackRate);
@@ -1141,8 +1128,7 @@ namespace krys::boo
     }
 
     // 8. Run the procedure to update an animation's finished state animation with the did seek flag set to
-    // true,
-    //    and the synchronously notify flag set to true.
+    //    true, and the synchronously notify flag set to true.
     TimingDidChange(DidSeek::Yes, SynchronouslyNotify::Yes);
 
     InvalidateEffect();
@@ -1238,9 +1224,8 @@ namespace krys::boo
         // If animation playback rate ≠ 0, and animation is associated with an active timeline,
         // Perform the following steps:
         // 1. If did seek is true and the hold time is resolved, let animation's start time be equal to the
-        // result
-        //    of evaluating timeline time - (hold time / playback rate) where timeline time is the current
-        //    time value of timeline associated with animation.
+        //    result of evaluating timeline time - (hold time / playback rate) where timeline time is the
+        //    current time value of timeline associated with animation.
         if (didSeek == DidSeek::Yes && _holdTime)
         {
           _startTime = *_timeline->CurrentTime() - (*_holdTime / _playbackRate);
@@ -1445,8 +1430,7 @@ namespace krys::boo
     }
 
     // 11. If has pending ready promise is false, let animation's current ready promise be a new promise in
-    // the
-    //     relevant Realm of animation.
+    //     the relevant Realm of animation.
     if (!hasPendingReadyPromise)
     {
       _readyPromise = detail::AnimationPromise::Create(*this);
@@ -1456,8 +1440,7 @@ namespace krys::boo
     _timeToRunPendingPlayTask = TimeToRunPendingTask::WhenReady;
 
     // 13. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //     false, and the synchronously notify flag set to false.
+    //     to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No);
 
     InvalidateEffect();
@@ -1476,8 +1459,7 @@ namespace krys::boo
     krys_debug_assert(_startTime || _holdTime);
 
     // 2. Let ready time be the time value of the timeline associated with animation at the moment when
-    // animation
-    //    became ready.
+    //    animation became ready.
     auto readyTime = _pendingStartTime;
     if (!readyTime)
     {
@@ -1491,8 +1473,7 @@ namespace krys::boo
       // 1. Apply any pending playback rate on animation.
       ApplyPendingPlaybackRate();
       // 2. Let new start time be the result of evaluating ready time - hold time / animation playback rate
-      // for
-      //    animation. If the animation playback rate is zero, let new start time be simply ready time.
+      //    for animation. If the animation playback rate is zero, let new start time be simply ready time.
       // FIXME: Implementation cannot guarantee an active timeline at the point of this async dispatch.
       // Subsequently, the resulting readyTime value can be null. Avoid null dereferencing by defaulting to a
       // zero value.
@@ -1513,8 +1494,7 @@ namespace krys::boo
     {
       // If animation's start time is resolved and animation has a pending playback rate,
       // 1. Let current time to match be the result of evaluating (ready time - start time) × playback rate
-      // for
-      //    animation.
+      //    for animation.
       auto currentTimeToMatch = (readyTime.value_or(Seconds {0}) - *_startTime) * _playbackRate;
       // 2. Apply any pending playback rate on animation.
       ApplyPendingPlaybackRate();
@@ -1524,8 +1504,7 @@ namespace krys::boo
         _holdTime = currentTimeToMatch;
       }
       // 4. Let new start time be the result of evaluating ready time - current time to match / playback rate
-      // for
-      //    animation. If the playback rate is zero, let new start time be simply ready time.
+      //    for animation. If the playback rate is zero, let new start time be simply ready time.
       auto newStartTime = readyTime.value_or(Seconds {0});
       if (_playbackRate)
       {
@@ -1542,8 +1521,7 @@ namespace krys::boo
     }
 
     // 5. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //    false, and the synchronously notify flag set to false.
+    //    to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No, Silently::Yes);
 
     InvalidateEffect();
@@ -1612,16 +1590,14 @@ namespace krys::boo
     }
 
     // 8. If has pending ready promise is false, set animation's current ready promise to a new (pending)
-    // Promise
-    //    object.
+    //    Promise object.
     if (!hasPendingReadyPromise)
     {
       _readyPromise = detail::AnimationPromise::Create(*this);
     }
 
     // 9. Schedule a task to be executed at the first possible moment where all of the following conditions
-    // are
-    //    true:
+    //    are true:
     //     - the user agent has performed any processing necessary to suspend the playback of animation’s
     //       associated effect, if any.
     //     - the animation is associated with a timeline that is not inactive.
@@ -1629,8 +1605,7 @@ namespace krys::boo
     _timeToRunPendingPauseTask = TimeToRunPendingTask::ASAP;
 
     // 8. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //    false, and the synchronously notify flag set to false.
+    //    to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No);
 
     InvalidateEffect();
@@ -1691,8 +1666,7 @@ namespace krys::boo
     _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
 
     // 1. Let ready time be the time value of the timeline associated with animation at the moment when the
-    // user
-    //    agent completed processing necessary to suspend playback of animation's target effect.
+    //    user agent completed processing necessary to suspend playback of animation's target effect.
     auto readyTime = _pendingStartTime;
     if (!readyTime)
     {
@@ -1702,11 +1676,9 @@ namespace krys::boo
     auto animationStartTime = _startTime;
 
     // 2. If animation's start time is resolved and its hold time is not resolved, let animation's hold time
-    // be
-    //    the result of evaluating (ready time - start time) × playback rate.
-    //    Note: The hold time might be already set if the animation is finished, or if the animation is
-    //    pending, waiting to begin playback. In either case we want to preserve the hold time as we enter the
-    //    paused state.
+    //    be the result of evaluating (ready time - start time) × playback rate. Note: The hold time might be
+    //    already set if the animation is finished, or if the animation is pending, waiting to begin playback.
+    //    In either case we want to preserve the hold time as we enter the paused state.
     if (animationStartTime && !_holdTime)
     {
       // FIXME: Implementation cannot guarantee an active timeline at the point of this async dispatch.
@@ -1728,8 +1700,7 @@ namespace krys::boo
     }
 
     // 6. Run the procedure to update an animation's finished state for animation with the did seek flag set
-    // to
-    //    false, and the synchronously notify flag set to false.
+    //    to false, and the synchronously notify flag set to false.
     TimingDidChange(DidSeek::No, SynchronouslyNotify::No, Silently::Yes);
 
     InvalidateEffect();

@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 2005-2025 Apple Inc. All rights reserved.
- * Copyright (C) 2010 Google Inc. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
+﻿#include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
@@ -80,8 +59,7 @@ namespace krys::boo::html
     {
       if (Is<HTMLFormElement>(*node))
       {
-        // No need to consider the descendants of a form since they will have a form owner and we're only
-        // interested in input elements without a form owner.
+        // A form's descendants have it as their form owner, and only buttons without one are wanted.
         node = dom::TreeQueries::NextSkippingChildren(*node, &rootNode);
         continue;
       }
@@ -106,7 +84,7 @@ namespace krys::boo::html
     auto &element = *Element();
     if (element.RadioButtonGroups())
     {
-      // Buttons in RadioButtonGroups are handled in HTMLInputElement::SetChecked().
+      // A button in a group set is unchecked by the group (HTMLInputElement::SetChecked).
       return;
     }
     if (auto input = element.CheckedRadioButtonForGroup())
@@ -156,18 +134,16 @@ namespace krys::boo::html
     }
     bool forward = key == u8"ArrowDown" || key == u8"ArrowRight";
 
-    // We can only stay within the form's children if the form hasn't been demoted to a leaf because of
-    // malformed HTML.
+    // The walk goes through the document, stopping at a form: the buttons of a form may not all be its
+    // descendants.
     for (Node *node = forward ? dom::TreeQueries::Next(*element) : dom::TreeQueries::Previous(*element); node;
          node = forward ? dom::TreeQueries::Next(*node) : dom::TreeQueries::Previous(*node))
     {
-      // Once we encounter a form element, we know we're through.
       if (Is<HTMLFormElement>(*node))
       {
         break;
       }
 
-      // Look for more radio buttons.
       auto *inputElement = DynamicDowncast<HTMLInputElement>(*node);
       if (!inputElement)
       {
@@ -248,8 +224,7 @@ namespace krys::boo::html
     auto *element = Element();
     if (event.DefaultPrevented() || event.DefaultHandled())
     {
-      // Restore the original selected radio button if possible.
-      // Make sure it is still a radio button and only do the restoration if it still belongs to our group.
+      // A canceled click checks the group's previous button again, if it's still a radio button in the group.
       auto &button = state.CheckedRadioButton;
       krys_debug_assert(element);
       if (button && button->IsRadioButton() && button->Form() == element->Form()
@@ -267,7 +242,7 @@ namespace krys::boo::html
       FireInputAndChangeEvents();
     }
 
-    // The work we did in WillDispatchClick was default handling.
+    // Checking the button before the click was its default handling.
     event.SetDefaultHandled();
   }
 

@@ -106,8 +106,7 @@ namespace krys::boo::html
       _path.MoveTo(p1);
     }
     // 3. Otherwise, connect the last point in the subpath to the given point (x, y) using a straight line,
-    // and
-    //    then add the given point (x, y) to the subpath.
+    //    and then add the given point (x, y) to the subpath.
     // (A line to the last point is left out, as stroking prunes it.)
     else if (p1 != _path.CurrentPoint())
     {
@@ -220,8 +219,7 @@ namespace krys::boo::html
       LineTo(x1, y1);
     }
     // 6. Otherwise, if the points (x0, y0), (x1, y1), and (x2, y2) all lie on a single straight line, then
-    // add
-    //    the point (x1, y1) to the subpath, and connect that point to the previous point (x0, y0) by a
+    //    add the point (x1, y1) to the subpath, and connect that point to the previous point (x0, y0) by a
     //    straight line.
     // 7. Otherwise, let The Arc be the shortest arc [...]
     // (Both are Path::AddArcTo's.)

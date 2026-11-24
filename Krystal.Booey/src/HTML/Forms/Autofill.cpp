@@ -113,8 +113,7 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<AutofillCategory> DetermineFieldCategory(DOMStringView field) noexcept
     {
       // 1. If the field is not an ASCII case-insensitive match for one of the tokens given in the first
-      // column
-      //    of the following table, then return null.
+      //    column of the following table, then return null.
       // 2. Return the value of the cell in the second column of that row.
       for (const auto &[token, category] : AutofillFieldCategories)
       {
@@ -157,8 +156,7 @@ namespace krys::boo::html
     auto defaultLabel = [&]
     {
       // 31. Default: Set the element's IDL-exposed autofill value to the empty string, and its autofill hint
-      // set
-      //     and autofill scope to empty.
+      //     set and autofill scope to empty.
       AutofillData data;
 
       // 32. If the element's autocomplete attribute is wearing the autofill anchor mantle, then set the
@@ -223,8 +221,8 @@ namespace krys::boo::html
     }
 
     // 10. If category is Automatic, set the element's autofill field name to the string "on", set its
-    // autofill
-    //     hint set to empty, and set its IDL-exposed autofill value to the string "on". Then, return.
+    //     autofill hint set to empty, and set its IDL-exposed autofill value to the string "on". Then,
+    //     return.
     if (*category == AutofillCategory::Automatic)
     {
       return {.FieldName = u8"on", .IDLExposedValue = u8"on"};
@@ -298,8 +296,7 @@ namespace krys::boo::html
     --index;
 
     // 18. If category is Contact and the indexth token in tokens is an ASCII case-insensitive match for one
-    // of
-    //     the strings in the following list: "home"; "work"; "mobile"; "fax"; "pager" then:
+    //     of the strings in the following list: "home"; "work"; "mobile"; "fax"; "pager" then:
     constexpr Array<utf8_stringview, 5> contactTokens = {u8"home", u8"work", u8"mobile", u8"fax", u8"pager"};
     if (auto contactToken = MatchOneOf(tokens[index], contactTokens);
         category == AutofillCategory::Contact && contactToken)
@@ -314,8 +311,7 @@ namespace krys::boo::html
       hintTokens.push_back(contact);
 
       // 18d. Let IDL value be the concatenation of contact, a U+0020 SPACE character, and the previous value
-      // of
-      //      IDL value.
+      //      of IDL value.
       idlValue = contact + u8" " + idlValue;
 
       // 18e. If the indexth entry in tokens is the first entry, then skip to the step labeled done.
@@ -343,8 +339,7 @@ namespace krys::boo::html
       hintTokens.push_back(mode);
 
       // 19d. Let IDL value be the concatenation of mode, a U+0020 SPACE character, and the previous value of
-      // IDL
-      //      value.
+      //      IDL value.
       idlValue = mode + u8" " + idlValue;
 
       // 19e. If the indexth entry in tokens is the first entry, then skip to the step labeled done.
@@ -364,8 +359,7 @@ namespace krys::boo::html
     }
 
     // 21. If the first eight characters of the indexth token in tokens are not an ASCII case-insensitive
-    // match
-    //     for the string "section-", then jump to the step labeled default.
+    //     match for the string "section-", then jump to the step labeled default.
     auto &sectionToken = tokens[index];
     if (sectionToken.size() < 8
         || !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(DOMStringView(sectionToken).substr(0, 8),
@@ -381,8 +375,7 @@ namespace krys::boo::html
     scopeTokens.insert(scopeTokens.begin(), section);
 
     // 24. Let IDL value be the concatenation of section, a U+0020 SPACE character, and the previous value of
-    // IDL
-    //     value.
+    //     IDL value.
     idlValue = section + u8" " + idlValue;
     return done();
   }

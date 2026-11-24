@@ -1,28 +1,4 @@
-﻿/*
- * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
- *           (C) 1999 Antti Koivisto (koivisto@kde.org)
- *           (C) 2001 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004-2010, 2012-2016 Apple Inc. All rights reserved.
- *           (C) 2006 Alexey Proskuryakov (ap@nypop.com)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- *
- */
-
-#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
+﻿#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
@@ -329,13 +305,7 @@ namespace krys::boo
 
   void HTMLFormElement::Submit() noexcept
   {
-    Submit(nullptr, true, FormSubmissionTrigger::NotSubmittedByJavaScript);
-  }
-
-  void HTMLFormElement::SubmitFromJavaScript() noexcept
-  {
-    // FIXME: Whether a user gesture is being processed (UserGestureIndicator).
-    Submit(nullptr, false, FormSubmissionTrigger::SubmittedByJavaScript);
+    Submit(nullptr, FormSubmissionTrigger::NotSubmittedByJavaScript);
   }
 
   ExceptionOr<void> HTMLFormElement::RequestSubmit(HTMLElement *submitter) noexcept
@@ -460,8 +430,7 @@ namespace krys::boo
     }
 
     // 1. Statically validate the constraints of form, and let unhandled invalid controls be the list of
-    // elements
-    //    returned if the result was negative.
+    //    elements returned if the result was negative.
     // 2. If the result was positive, then return that result.
     List<Ref<HTMLElement>> unhandledInvalidControls;
     if (!CheckInvalidControlsAndCollectUnhandled(unhandledInvalidControls))
@@ -476,7 +445,7 @@ namespace krys::boo
     // focusable control.
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
 
-    // Focus on the first focusable control and show a validation message.
+    // The first focusable invalid control is focused, with its validation message.
     bool shouldFocus = true;
     for (auto &element : unhandledInvalidControls)
     {
@@ -525,8 +494,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Submitting forms with several fields that block implicit submission
-    // (Settings::allowMultiElementImplicitSubmission), for older apps.
+    // Without a submit button, only a form with a single field that blocks implicit submission submits.
     if (fromImplicitSubmissionTrigger && submissionTriggerCount == 1)
     {
       SubmitIfPossible(&event);
@@ -570,7 +538,7 @@ namespace krys::boo
       }
     }
 
-    // Interactive validation must be done before dispatching the submit event.
+    // Interactive validation comes before the submit event.
     if (shouldValidate && !ValidateInteractively())
     {
       _isSubmittingOrPreparingForSubmission = false;
@@ -602,25 +570,10 @@ namespace krys::boo
       plannedFormSubmission->Cancel();
     }
 
-    Submit(event, !submitter, trigger, submitter);
+    Submit(event, trigger, submitter);
   }
 
-  List<Pair<DOMString, DOMString>> HTMLFormElement::TextFieldValues() const noexcept
-  {
-    List<Pair<DOMString, DOMString>> values;
-    for (auto &element : CopyListedElementsVector())
-    {
-      auto *input = DynamicDowncast<HTMLInputElement>(*element);
-      if (!input || !input->IsTextField())
-      {
-        continue;
-      }
-      values.emplace_back(input->Name(), input->Value());
-    }
-    return values;
-  }
-
-  void HTMLFormElement::Submit(Event *event, bool processingUserGesture, FormSubmissionTrigger trigger,
+  void HTMLFormElement::Submit(Event *event, FormSubmissionTrigger trigger,
                                HTMLFormControlElement *submitter) noexcept
   {
     // SubmitIfPossible also checks this, but some paths bypass it.
@@ -647,7 +600,6 @@ namespace krys::boo
     }
 
     _isSubmittingOrPreparingForSubmission = true;
-    _wasUserSubmitted = processingUserGesture;
 
     if (event && !submitter)
     {
@@ -688,10 +640,11 @@ namespace krys::boo
     _isSubmittingOrPreparingForSubmission = false;
   }
 
-  // https://html.spec.whatwg.org/#submit-dialog
+  // A dialog method submission closes the form's nearest dialog ancestor, if it's open, with the
+  // submission's return value.
+  // https://html.spec.whatwg.org/#form-submission-algorithm
   void HTMLFormElement::SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept
   {
-    // Let subject be the nearest ancestor dialog element of form, if any.
     RefPtr<HTMLDialogElement> dialog;
     for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
     {
@@ -702,13 +655,11 @@ namespace krys::boo
       }
     }
 
-    // If there isn't one, or if it does not have an open attribute, do nothing.
     if (!dialog || !dialog->Open())
     {
       return;
     }
 
-    // Then, close the dialog subject. If there is a result, let that be the return value.
     dialog->CloseTheDialog(formSubmission->ReturnValue(), nullptr);
   }
 
@@ -1008,11 +959,6 @@ namespace krys::boo
     }
 
     return MakeTargetBlankIfHasDanglingMarkup(NodeDocument().BaseTarget());
-  }
-
-  bool HTMLFormElement::WasUserSubmitted() const noexcept
-  {
-    return _wasUserSubmitted;
   }
 
   HTMLFormControlElement *HTMLFormElement::FindSubmitter(const Event *event) noexcept
