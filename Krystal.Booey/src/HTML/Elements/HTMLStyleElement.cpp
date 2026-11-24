@@ -73,7 +73,7 @@ namespace krys::boo
     return sheet && sheet->Disabled();
   }
 
-  void HTMLStyleElement::Disabled(bool value) const noexcept
+  void HTMLStyleElement::Disabled(bool value) noexcept
   {
     // 1. If this does not have an associated CSS style sheet, return.
     // 2. If the given value is true, set this's associated CSS style sheet's disabled flag. Otherwise, unset
@@ -232,7 +232,7 @@ namespace krys::boo
     // 2. Let success be true.
     // 3. If the attempts to obtain any of the style sheet's critical subresources failed for any reason, set
     //    success to false.
-    _loadedSheet = !errorOccurred;
+    const bool success = !errorOccurred;
 
     // 4. Queue an element task on the networking task source given element and the following steps:
     // 4a. If success is true, fire an event named load at element.
@@ -243,7 +243,7 @@ namespace krys::boo
     // it's parsed, never holds back rendering; see DIFFERENCES.md.)
     UnblockRendering();
     html::EventLoop::Current().QueueTask(
-      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
+      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = success]
       { dom::EventDispatcher::FireEvent(loaded ? event_names::Load : event_names::Error, *element); });
   }
 

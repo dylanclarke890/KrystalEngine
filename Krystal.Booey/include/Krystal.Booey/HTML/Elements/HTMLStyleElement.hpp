@@ -38,7 +38,6 @@ namespace krys::boo
   private:
     UniquePtr<dom::DOMTokenList> _blocking;
     html::InlineStyleSheetOwner _styleSheetOwner;
-    bool _loadedSheet {false};
     bool _createdByParser {false};
     bool _isRenderBlocking {false};
 
@@ -53,7 +52,7 @@ namespace krys::boo
     KRYS_NODISCARD bool Disabled() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-disabled
-    void Disabled(bool value) const noexcept;
+    void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-media
     KRYS_NODISCARD DOMString Media() const noexcept;
