@@ -38,65 +38,65 @@ namespace krys::boo::html
 {
   /// @brief The parts of a URL, read and written through an element's URL: the members of
   /// `HTMLHyperlinkElementUtils` other than `href`.
-  /// @see https://html.spec.whatwg.org/#htmlhyperlinkelementutils
+  /// @see https://html.spec.whatwg.org/multipage/links.html#htmlhyperlinkelementutils
   class UrlDecomposition
   {
   public:
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-origin
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-origin
     KRYS_NODISCARD dom::USVString Origin() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-protocol
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-protocol
     KRYS_NODISCARD dom::USVString Protocol() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-protocol
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-protocol
     void Protocol(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-username
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-username
     KRYS_NODISCARD dom::USVString Username() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-username
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-username
     void Username(DOMStringView user) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-password
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-password
     KRYS_NODISCARD dom::USVString Password() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-password
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-password
     void Password(DOMStringView password) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-host
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-host
     KRYS_NODISCARD dom::USVString Host() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-host
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-host
     void Host(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-hostname
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-hostname
     KRYS_NODISCARD dom::USVString Hostname() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-hostname
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-hostname
     void Hostname(DOMStringView host) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-port
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-port
     KRYS_NODISCARD dom::USVString Port() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-port
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-port
     void Port(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-pathname
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-pathname
     KRYS_NODISCARD dom::USVString Pathname() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-pathname
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-pathname
     void Pathname(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-search
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-search
     KRYS_NODISCARD dom::USVString Search() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-search
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-search
     void Search(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-hash
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-hash
     KRYS_NODISCARD dom::USVString Hash() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-hash
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-hash
     void Hash(DOMStringView value) noexcept;
 
     /// @brief Parses @p string as the port of a URL with the scheme @p protocol (the URL standard's port
@@ -106,7 +106,7 @@ namespace krys::boo::html
                                                          DOMStringView protocol) noexcept;
 
     /// @brief The serialization of @p url's origin: `null` for an opaque origin.
-    /// @see https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin
+    /// @see https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin
     KRYS_NODISCARD static dom::USVString SerializedOrigin(const net::Url &url) noexcept;
 
   protected:

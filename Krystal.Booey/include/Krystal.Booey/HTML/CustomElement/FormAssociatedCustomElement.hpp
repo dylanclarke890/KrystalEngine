@@ -40,7 +40,7 @@ namespace krys::boo::html
 {
   /// @brief The form-associated half of a form-associated custom element: its form owner, submission value,
   /// validity and disabled state, set through its `ElementInternals`.
-  /// @see https://html.spec.whatwg.org/#form-associated-custom-element
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-element
   class FormAssociatedCustomElement final : public ValidatedFormListedElement
   {
     KRYS_NON_COPY_MOVABLE(FormAssociatedCustomElement);
@@ -90,10 +90,10 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setformvalue
     void SetFormValue(CustomElementFormValue &&submissionValue, Maybe<CustomElementFormValue> state) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setvalidity
     ExceptionOr<void> SetValidity(ValidityStateFlags flags, const DOMString &message,
                                   HTMLElement *validationAnchor) noexcept;
 

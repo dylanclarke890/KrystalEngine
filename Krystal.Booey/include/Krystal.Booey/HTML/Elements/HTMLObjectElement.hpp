@@ -6,7 +6,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlobjectelement
+  /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmlobjectelement
   class HTMLObjectElement : public HTMLPlugInElement, public html::FormListedElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLObjectElement);
@@ -24,55 +24,55 @@ namespace krys::boo
       return true;
     }
 
-#pragma region HTMLObjectElement - https://html.spec.whatwg.org/#htmlobjectelement
+#pragma region HTMLObjectElement - https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmlobjectelement
 
-    /// @see https://html.spec.whatwg.org/#dom-object-data
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-data
     KRYS_NODISCARD dom::USVString Data() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-data
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-data
     void Data(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-type
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-type
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-name
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-name
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-width
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-width
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-width
     void Width(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-height
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-height
     KRYS_NODISCARD DOMString Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-height
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-height
     void Height(DOMString value) noexcept;
 
     // (No `contentDocument`, `contentWindow` or `getSVGDocument()`: an object loads no nested document, as
     // subframes aren't planned; see OVERVIEW.md.)
 
     /// @brief Objects are never candidates for constraint validation.
-    /// @see https://html.spec.whatwg.org/#dom-cva-willvalidate
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-willvalidate
     KRYS_NODISCARD bool WillValidate() const noexcept final
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-checkvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-checkvalidity
     KRYS_NODISCARD static bool CheckValidity() noexcept
     {
       return true;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-reportvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-reportvalidity
     KRYS_NODISCARD static bool ReportValidity() noexcept
     {
       return true;
@@ -80,72 +80,72 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region HTMLObjectElement Obsolete members - https://html.spec.whatwg.org/#HTMLObjectElement-partial
+#pragma region HTMLObjectElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLObjectElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-object-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-archive
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-archive
     KRYS_NODISCARD DOMString Archive() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-archive
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-archive
     void Archive(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-code
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-code
     KRYS_NODISCARD DOMString Code() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-code
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-code
     void Code(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-declare
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-declare
     KRYS_NODISCARD bool Declare() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-declare
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-declare
     void Declare(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-hspace
     KRYS_NODISCARD uint32 HSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-hspace
     void HSpace(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-standby
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-standby
     KRYS_NODISCARD DOMString Standby() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-standby
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-standby
     void Standby(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-vspace
     KRYS_NODISCARD uint32 VSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-vspace
     void VSpace(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-codebase
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-codebase
     KRYS_NODISCARD DOMString CodeBase() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-codebase
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-codebase
     void CodeBase(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-codetype
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-codetype
     KRYS_NODISCARD DOMString CodeType() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-codetype
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-codetype
     void CodeType(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-usemap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-usemap
     KRYS_NODISCARD DOMString UseMap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-usemap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-usemap
     void UseMap(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-border
     KRYS_NODISCARD DOMString Border() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-object-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-object-border
     void Border(DOMString value) noexcept;
 
 #pragma endregion

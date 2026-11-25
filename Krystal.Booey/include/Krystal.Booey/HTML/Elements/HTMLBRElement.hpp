@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlbrelement
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlbrelement
   class HTMLBRElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBRElement);
@@ -17,7 +17,7 @@ namespace krys::boo
 
     HTMLBRElement(Document &document) noexcept;
 
-#pragma region HTMLBRElement Obsolete members - https://html.spec.whatwg.org/#HTMLBRElement-partial
+#pragma region HTMLBRElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLBRElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-br-compact
     KRYS_NODISCARD DOMString Clear() const noexcept;

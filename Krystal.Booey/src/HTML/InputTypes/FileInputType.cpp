@@ -39,7 +39,7 @@ namespace krys::boo::html
       return true;
     }
 
-    // https://html.spec.whatwg.org/#attr-input-accept
+    // https://html.spec.whatwg.org/multipage/input.html#attr-input-accept
     // The accept attribute's comma-separated tokens that @p predicate keeps, trimmed and lowercased.
     template <typename TPredicate>
     KRYS_NODISCARD List<utf8_string> ParseAcceptAttribute(utf8_stringview accept,
@@ -239,7 +239,7 @@ namespace krys::boo::html
 
   void FileInputType::FileChoosingCancelled() noexcept
   {
-    // https://html.spec.whatwg.org/#show-the-picker,-if-applicable
+    // https://html.spec.whatwg.org/multipage/input.html#show-the-picker,-if-applicable
     // If the user dismissed the prompt without changing their selection, then queue an element task on the
     // user interaction task source given element to fire an event named cancel at element, with the bubbles
     // attribute initialized to true.

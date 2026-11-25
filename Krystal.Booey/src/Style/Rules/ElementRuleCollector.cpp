@@ -1035,7 +1035,7 @@ namespace krys::boo::style
     {
       if (auto *presentationalHintStyle = styledElement->PresentationalHintStyle())
       {
-        // https://html.spec.whatwg.org/#presentational-hints
+        // https://html.spec.whatwg.org/multipage/rendering.html#presentational-hints
 
         // Presentation attributes in SVG elements tend to be unique and not restyled often. Avoid bloating
         // the cache.

@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#documentreadystate
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#documentreadystate
   enum class DocumentReadyState : uint8
   {
     Loading,

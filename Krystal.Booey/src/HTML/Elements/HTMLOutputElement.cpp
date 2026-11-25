@@ -45,7 +45,7 @@ namespace krys::boo
 
   HTMLOutputElement::~HTMLOutputElement() noexcept = default;
 
-  // https://html.spec.whatwg.org/#the-output-element:concept-form-reset-control
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-output-element:concept-form-reset-control
   void HTMLOutputElement::Reset() noexcept
   {
     SetInteractedWithSinceLastFormSubmitEvent(false);
@@ -90,14 +90,14 @@ namespace krys::boo
     html::Reflect(*this, u8"name", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-output-value
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-value
   DOMString HTMLOutputElement::Value() const noexcept
   {
     // Return this's descendant text content.
     return TextContent().value_or(DOMString());
   }
 
-  // https://html.spec.whatwg.org/#dom-output-value
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-value
   void HTMLOutputElement::Value(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -109,7 +109,7 @@ namespace krys::boo
     (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
-  // https://html.spec.whatwg.org/#concept-output-default-value
+  // https://html.spec.whatwg.org/multipage/form-elements.html#concept-output-default-value
   DOMString HTMLOutputElement::DefaultValue() const noexcept
   {
     // 1. If this element's default value override is non-null, then return it.
@@ -117,7 +117,7 @@ namespace krys::boo
     return _defaultValueOverride ? *_defaultValueOverride : TextContent().value_or(DOMString());
   }
 
-  // https://html.spec.whatwg.org/#dom-output-defaultvalue
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-defaultvalue
   void HTMLOutputElement::DefaultValue(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;

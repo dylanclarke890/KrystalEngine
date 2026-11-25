@@ -66,7 +66,7 @@ namespace krys::boo::html
     return _element;
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setvalidity
   ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
                                                              const DOMString &message,
                                                              HTMLElement *validationAnchor) noexcept
@@ -108,7 +108,7 @@ namespace krys::boo::html
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
   DOMString FormAssociatedCustomElement::ValidationMessage() const noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
@@ -117,7 +117,7 @@ namespace krys::boo::html
     return CustomValidationMessage();
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setformvalue
   void FormAssociatedCustomElement::SetFormValue(CustomElementFormValue &&submissionValue,
                                                  Maybe<CustomElementFormValue> state) noexcept
   {
@@ -146,7 +146,7 @@ namespace krys::boo::html
     return _validityStateFlags.IsValid();
   }
 
-  // https://html.spec.whatwg.org/#face-entry-construction
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#face-entry-construction
   bool FormAssociatedCustomElement::AppendFormData(DOMFormData &formData) noexcept
   {
     krys_debug_assert(_element.IsDefinedCustomElement());

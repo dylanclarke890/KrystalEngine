@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlframesetelement
+  /// @see https://html.spec.whatwg.org/multipage/obsolete.html#htmlframesetelement
   class HTMLFrameSetElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFrameSetElement);
@@ -12,23 +12,23 @@ namespace krys::boo
   public:
     HTMLFrameSetElement(Document &document) noexcept;
 
-#pragma region WindowEventHandlers - https://html.spec.whatwg.org/#windoweventhandlers
+#pragma region WindowEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#windoweventhandlers
 
     /// @note The body and frameset elements' window event handlers are their document's window's.
     KRYS_WINDOW_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
 
 #pragma endregion
 
-    /// @see https://html.spec.whatwg.org/#dom-frameset-cols
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-frameset-cols
     KRYS_NODISCARD DOMString Cols() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-frameset-cols
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-frameset-cols
     void Cols(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-frameset-rows
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-frameset-rows
     KRYS_NODISCARD DOMString Rows() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-frameset-rows
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-frameset-rows
     void Rows(DOMString value) noexcept;
 
   protected:

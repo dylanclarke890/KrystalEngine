@@ -65,7 +65,7 @@ namespace krys::boo::dom
   ScriptedAnimationController::CallbackId
     ScriptedAnimationController::RegisterCallback(FrameRequestCallback &&callback) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
     // (A window is always supported.)
     // 2. Let target be this's target object.
@@ -84,7 +84,7 @@ namespace krys::boo::dom
     return callbackId;
   }
 
-  // https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
+  // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
   void ScriptedAnimationController::CancelCallback(CallbackId callbackId) noexcept
   {
     // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
@@ -113,7 +113,7 @@ namespace krys::boo::dom
 
     auto highResNowMs = std::round(timestamp);
 
-    // https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     // 1. Let callbacks be target's map of animation frame callbacks.
     // 2. Let callbackHandles be the result of getting the keys of callbacks.
     // (Callbacks registered from this point on are considered only for the next frame.)

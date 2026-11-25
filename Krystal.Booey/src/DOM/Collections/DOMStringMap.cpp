@@ -98,7 +98,7 @@ namespace krys::boo
     }
   }
 
-#pragma region DOMStringMap - https://html.spec.whatwg.org/#domstringmap
+#pragma region DOMStringMap - https://html.spec.whatwg.org/multipage/dom.html#domstringmap
 
   bool DOMStringMap::IsSupportedPropertyName(DOMStringView name) const noexcept
   {

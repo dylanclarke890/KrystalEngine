@@ -806,7 +806,7 @@ namespace krys::boo
       document->SetAllowDeclarativeShadowRoots(true);
 
       // Parse HTML from a string given document, html, and sanitizerConfig.
-      // https://html.spec.whatwg.org/#parse-html-from-a-string
+      // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parse-html-from-a-string
       // 1. Set document's type to "html".
       // 2. Let parser be a new HTML parser whose allow declarative shadow roots is document's allow
       //    declarative shadow roots and parser sanitizer configuration is configuration, associated with
@@ -822,7 +822,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+  // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtmlunsafe
   ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
   {
     return ParseHTMLUnsafe(context, markup, {});
@@ -852,7 +852,7 @@ namespace krys::boo
     return ParseHTMLIntoNewDocument(context, markup, sanitizerConfig.ReleaseValue());
   }
 
-  // https://html.spec.whatwg.org/#dom-parsehtml
+  // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtml
   ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html) noexcept
   {
     return ParseHTML(context, html, {});
@@ -1501,7 +1501,7 @@ namespace krys::boo
     if (href.has_value())
     {
       // To set the frozen base URL for an element element:
-      // https://html.spec.whatwg.org/#set-the-frozen-base-url
+      // https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url
       // 1. Let document be element's node document.
       // 2. Let urlRecord be the result of parsing the value of element's href content attribute with
       //    document's fallback base URL, and document's character encoding. (Thus, the base element isn't
@@ -1534,7 +1534,7 @@ namespace krys::boo
   void Document::UpdateBaseUrl() noexcept
   {
     // The document base URL, kept up to date:
-    // https://html.spec.whatwg.org/#document-base-url
+    // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
     // 1. If document has a descendant base element that has an href attribute, then return the frozen base
     //    URL of the first such base element in tree order.
     // 2. If document's base URL override is non-null, then return document's base URL override. (Skipped:
@@ -1543,7 +1543,7 @@ namespace krys::boo
     _baseUrl = _baseElementUrl.IsNull() ? FallbackBaseUrl() : _baseElementUrl;
 
     // Then respond to base URL changes given document:
-    // https://html.spec.whatwg.org/#respond-to-base-url-changes
+    // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#respond-to-base-url-changes
     // 1. The user agent should update any user interface elements which are displaying affected URLs, or data
     //    derived from such URLs, to the user. (Skipped: Booey has no such user interface.)
     // 2. Ensure that the CSS :link/:visited/etc. pseudo-classes are updated appropriately. (Nothing to do:
@@ -1879,7 +1879,7 @@ namespace krys::boo
   {
     // If the focused area of the document is removed, the viewport becomes the focused area. This doesn't run
     // the focusing or focus update steps, so no events are fired.
-    // https://html.spec.whatwg.org/#html-element-removing-steps
+    // https://html.spec.whatwg.org/multipage/infrastructure.html#html-element-removing-steps
     if (_focusedElement && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_focusedElement))
     {
       // Clearing the focus while the element is still in the tree also clears its ancestors' focus within.
@@ -2688,13 +2688,13 @@ namespace krys::boo
     _openDialogs.erase(ShareRef(dialog));
   }
 
-  // https://html.spec.whatwg.org/#run-light-dismiss-activities
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#run-light-dismiss-activities
   void Document::HandleLightDismiss(const PointerEvent &event, Node &target) noexcept
   {
     krys_debug_assert(event.IsTrusted());
 
     // 1. Run light dismiss open popovers with event.
-    // https://html.spec.whatwg.org/#light-dismiss-open-popovers
+    // https://html.spec.whatwg.org/multipage/popover.html#light-dismiss-open-popovers
     // 1. Assert: event's isTrusted attribute is true.
     // 2. Let target be event's target.
     // 3. Let document be target's node document.
@@ -2726,7 +2726,7 @@ namespace krys::boo
     }
 
     // 2. Run light dismiss open dialogs with event.
-    // https://html.spec.whatwg.org/#light-dismiss-open-dialogs
+    // https://html.spec.whatwg.org/multipage/interactive-elements.html#light-dismiss-open-dialogs
     // 1. Assert: event's isTrusted attribute is true.
     // 2. Let document be event's target's node document.
     // 3. If document's open dialogs list is empty, then return.
@@ -2735,7 +2735,7 @@ namespace krys::boo
       return;
     }
 
-    // https://html.spec.whatwg.org/#nearest-clicked-dialog
+    // https://html.spec.whatwg.org/multipage/interactive-elements.html#nearest-clicked-dialog
     auto nearestClickedDialog = [&]() -> HTMLDialogElement *
     {
       // 1. Let target be event's target.
@@ -2851,7 +2851,7 @@ namespace krys::boo
     return popovers;
   }
 
-  // https://html.spec.whatwg.org/#topmost-auto-or-hint-popover
+  // https://html.spec.whatwg.org/multipage/popover.html#topmost-auto-or-hint-popover
   HTMLElement *Document::TopmostAutoOrHintPopover() const noexcept
   {
     // 1. If document's showing hint popover list is not empty, then return document's showing hint popover
@@ -2872,7 +2872,7 @@ namespace krys::boo
     return autoPopovers.empty() ? nullptr : autoPopovers.back().get();
   }
 
-  // https://html.spec.whatwg.org/#hide-popovers-until
+  // https://html.spec.whatwg.org/multipage/popover.html#hide-popovers-until
   void Document::HideAllPopoversUntil(HTMLElement *endpoint, dom::FocusPreviousElement focusPreviousElement,
                                       dom::FireEvents fireEvents) noexcept
   {
@@ -2899,7 +2899,7 @@ namespace krys::boo
     HidePopoverStackUntil(autoEndpoint.get(), dom::PopoverState::Auto, focusPreviousElement, fireEvents);
   }
 
-  // https://html.spec.whatwg.org/#hide-popover-stack-until
+  // https://html.spec.whatwg.org/multipage/popover.html#hide-popover-stack-until
   void Document::HidePopoverStackUntil(HTMLElement *endpoint, dom::PopoverState stackType,
                                        dom::FocusPreviousElement focusPreviousElement,
                                        dom::FireEvents fireEvents) noexcept
@@ -2957,7 +2957,7 @@ namespace krys::boo
 
   namespace
   {
-    /// @see https://html.spec.whatwg.org/#target-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#target-popover
     KRYS_NODISCARD RefPtr<HTMLElement> TargetPopover(HTMLElement &element) noexcept
     {
       auto *control = DynamicDowncast<HTMLFormControlElement>(element);
@@ -3013,7 +3013,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#topmost-clicked-popover
+  // https://html.spec.whatwg.org/multipage/popover.html#topmost-clicked-popover
   RefPtr<HTMLElement> Document::TopmostClickedPopover(Node &node) const noexcept
   {
     auto *startElement = DynamicDowncast<Element>(node);
@@ -3024,8 +3024,8 @@ namespace krys::boo
 
     // 1. Let clickedPopover be the result of running nearest inclusive open popover given node.
     // 2. Let targetPopover be the result of running nearest inclusive target popover given node.
-    // https://html.spec.whatwg.org/#nearest-inclusive-open-popover
-    // https://html.spec.whatwg.org/#nearest-inclusive-target-popover
+    // https://html.spec.whatwg.org/multipage/popover.html#nearest-inclusive-open-popover
+    // https://html.spec.whatwg.org/multipage/popover.html#nearest-inclusive-target-popover
     // (Both walk the flat tree up from node, so they're found together.)
     HTMLElement *clickedPopover = nullptr;
     RefPtr<HTMLElement> targetPopover;
@@ -3065,7 +3065,7 @@ namespace krys::boo
       }
     }
 
-    // https://html.spec.whatwg.org/#get-the-popover-stack-position
+    // https://html.spec.whatwg.org/multipage/popover.html#get-the-popover-stack-position
     auto autoPopovers = ShowingAutoPopoverList();
     auto hintPopovers = ShowingHintPopoverList();
     auto stackPosition = [&](HTMLElement *popover) -> size_t
@@ -3611,7 +3611,7 @@ namespace krys::boo
 
   void Document::FinishedParsing() noexcept
   {
-    // https://html.spec.whatwg.org/#the-end
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-end
     Ref<Document> protectedThis = ShareRef(*this);
     bool wasLoading = _parsing || _currentDocumentReadiness == html::DocumentReadyState::Loading;
     SetParsing(false);
@@ -3746,7 +3746,7 @@ namespace krys::boo
   {
     if (text::IsASCIICaselessEqual(equiv, u8"content-language"))
     {
-      // https://html.spec.whatwg.org/#pragma-set-default-language
+      // https://html.spec.whatwg.org/multipage/semantics.html#pragma-set-default-language
       // 1. If the meta element has no content attribute, then return.
       // 2. If the element's content attribute contains a U+002C COMMA character (,), then return.
       if (content.contains(u8','))
@@ -3782,7 +3782,7 @@ namespace krys::boo
 
     if (text::IsASCIICaselessEqual(equiv, u8"default-style"))
     {
-      // https://html.spec.whatwg.org/#attr-meta-http-equiv-default-style
+      // https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-default-style
       // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
       //    then return.
       // 2. Change the preferred CSS style sheet set name with the name being the value of the element's
@@ -5257,7 +5257,7 @@ namespace krys::boo
   void Document::MetaElementColorSchemeChanged() noexcept
   {
     // To obtain a page's supported color-schemes:
-    // https://html.spec.whatwg.org/#meta-color-scheme
+    // https://html.spec.whatwg.org/multipage/semantics.html#meta-color-scheme
     auto &context = CssParserContext();
 
     // 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree

@@ -34,6 +34,6 @@
 namespace krys::boo::html
 {
   /// @brief A form-associated custom element's submission value or state: none, a file, a string, or entries.
-  /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setformvalue
   using CustomElementFormValue = Variant<std::nullptr_t, RefPtr<File>, DOMString, RefPtr<DOMFormData>>;
 }

@@ -5,12 +5,12 @@
 
 @namespace "http://www.w3.org/1999/xhtml";
 
-/* https://html.spec.whatwg.org/#flow-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3 */
 form {
     margin-block-end: 1em;
 }
 
-/* https://html.spec.whatwg.org/#lists: an li outside a list puts its marker inside, and lists in it put
+/* https://html.spec.whatwg.org/multipage/rendering.html#lists: an li outside a list puts its marker inside, and lists in it put
    theirs back outside. */
 li {
     list-style-position: inside;
@@ -24,7 +24,7 @@ li :is(dir, menu, ol, ul) {
     list-style-position: unset;
 }
 
-/* https://html.spec.whatwg.org/#tables-2: tables don't inherit the text's font, spacing or alignment. */
+/* https://html.spec.whatwg.org/multipage/rendering.html#tables-2: tables don't inherit the text's font, spacing or alignment. */
 table {
     font-weight: initial;
     font-style: initial;
@@ -37,12 +37,12 @@ table {
     color: -internal-document-text-color;
 }
 
-/* https://html.spec.whatwg.org/#form-controls */
+/* https://html.spec.whatwg.org/multipage/rendering.html#form-controls */
 input:not([type=image i]), textarea {
     box-sizing: border-box;
 }
 
-/* https://html.spec.whatwg.org/#images-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#images-3 */
 img[align=left i] {
     margin-right: 3px;
 }

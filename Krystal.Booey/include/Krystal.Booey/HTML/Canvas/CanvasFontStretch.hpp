@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canvasfontstretch
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasfontstretch
   enum class CanvasFontStretch : uint8
   {
     UltraCondensed,

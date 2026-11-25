@@ -5,7 +5,7 @@
 namespace krys::boo::html
 {
   /// @brief What a 2D context is made with.
-  /// @see https://html.spec.whatwg.org/#canvasrenderingcontext2dsettings
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasrenderingcontext2dsettings
   struct CanvasRenderingContext2DSettings
   {
     // FIXME: An opaque backing store; the context is always transparent, as without the setting.
@@ -14,7 +14,7 @@ namespace krys::boo::html
     bool WillReadFrequently {false};
     PredefinedColorSpace ColorSpace {PredefinedColorSpace::SRGB};
 
-    /// @see https://html.spec.whatwg.org/#canvascolortype
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvascolortype
     enum class ColorType : bool
     {
       Unorm8,

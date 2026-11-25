@@ -1107,7 +1107,7 @@ namespace krys::boo::dom
 
 #pragma region Range (DOM Parsing)
 
-  // https://html.spec.whatwg.org/#dom-range-createcontextualfragment
+  // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
   ExceptionOr<Ref<DocumentFragment>> Range::CreateContextualFragment(DOMStringView markup) const noexcept
   {
     // 1. Let node be this's start node.

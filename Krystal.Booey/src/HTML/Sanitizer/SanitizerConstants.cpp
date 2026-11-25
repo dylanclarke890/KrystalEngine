@@ -17,7 +17,7 @@ namespace krys::boo::html
     };
 
     // The HTML elements whose definitions categorize them as Default, with the attributes the definitions
-    // list. https://html.spec.whatwg.org/#concept-element-sanitization
+    // list. https://html.spec.whatwg.org/multipage/dom.html#concept-element-sanitization
     constexpr SanitizerDefaultElement DefaultHTMLElements[] = {
       {u8"html", u8""},
       {u8"head", u8""},

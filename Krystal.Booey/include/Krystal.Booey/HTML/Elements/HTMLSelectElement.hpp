@@ -18,7 +18,7 @@ namespace krys::boo
   class HTMLOptGroupElement;
   class KeyboardEvent;
 
-  /// @see https://html.spec.whatwg.org/#htmlselectelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlselectelement
   class HTMLSelectElement : public HTMLFormControlElement, private html::TypeAheadDataSource
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectElement);
@@ -96,7 +96,7 @@ namespace krys::boo
       return false;
     }
 
-#pragma region HTMLSelectElement - https://html.spec.whatwg.org/#htmlselectelement
+#pragma region HTMLSelectElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmlselectelement
 
     /// @see https://html.spec.whatwg.org/#dom-select-autocomplete
     KRYS_NODISCARD DOMString Autocomplete() const noexcept;
@@ -104,95 +104,95 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-select-autocomplete
     void Autocomplete(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-disabled
     void Disabled(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-multiple
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-multiple
     KRYS_NODISCARD bool Multiple() const noexcept
     {
       return _multiple;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-select-multiple
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-multiple
     void Multiple(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-required
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-required
     KRYS_NODISCARD bool Required() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-required
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-required
     void Required(bool value) noexcept;
 
     /// @brief The parsed `size` attribute, or 0 if it's missing or invalid.
-    /// @see https://html.spec.whatwg.org/#dom-select-size
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-size
     KRYS_NODISCARD uint32 Size() const noexcept
     {
       return _size;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-select-size
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-size
     void Size(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-type
     KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-select-options
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-options
     KRYS_NODISCARD Ref<html::HTMLOptionsCollection> Options() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-length
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-length
     KRYS_NODISCARD uint32 Length() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-length
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-length
     ExceptionOr<void> Length(uint32 newLength) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-item
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-item
     KRYS_NODISCARD HTMLOptionElement *Item(uint32 index) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-nameditem
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-nameditem
     KRYS_NODISCARD HTMLOptionElement *NamedItem(DOMStringView name) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-add
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-add
     ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
                           const Maybe<HTMLElementOrInt> &before = {}) noexcept;
 
     using Element::Remove;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-remove
-    /// @see https://html.spec.whatwg.org/#htmloptionscollection-remove-an-option
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-remove
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#htmloptionscollection-remove-an-option
     void Remove(int32 optionIndex) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-setter
-    /// @see https://html.spec.whatwg.org/#append-new-option-elements
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-setter
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#append-new-option-elements
     ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-selectedoptions
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-selectedoptions
     KRYS_NODISCARD Ref<HTMLCollection> SelectedOptions() noexcept;
 
     /// @brief The index of the first selected option in the list of options, or -1 if none is.
-    /// @see https://html.spec.whatwg.org/#dom-select-selectedindex
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-selectedindex
     KRYS_NODISCARD int32 SelectedIndex() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-selectedindex
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-selectedindex
     void SelectedIndex(int32 index) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-value
     KRYS_NODISCARD DOMString Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-value
     void Value(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-select-showpicker
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-select-showpicker
     ExceptionOr<void> ShowPicker() noexcept;
 
 #pragma endregion
@@ -214,7 +214,7 @@ namespace krys::boo
     /// @brief The slot of the shadow tree that takes @p child: a first child element that's a button takes
     /// the select button slot and the other children the select popover's; all of a list box's take its own
     /// slot.
-    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const Node &child) const noexcept;
 
     /// @brief Whether the select renders as a drop-down box with base appearance (`appearance: base-select`):
@@ -237,11 +237,11 @@ namespace krys::boo
     }
 
     /// @brief The user picked @p option from the picker of a select with base appearance.
-    /// @see https://html.spec.whatwg.org/#concept-select-pick
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#concept-select-pick
     void PickOption(HTMLOptionElement &option) noexcept;
 
     /// @brief Sets the text the select shows without a button of its own to its selected option's label.
-    /// @see https://html.spec.whatwg.org/#clone-selected-option-into-select-button
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#clone-selected-option-into-select-button
     void CloneSelectedOptionIntoSelectButton() noexcept;
 
     /// @brief Has the list items recomputed, as options, optgroups or hrs were added, removed or moved.
@@ -338,7 +338,7 @@ namespace krys::boo
 
     bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#the-select-element:concept-form-reset-control
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#the-select-element:concept-form-reset-control
     void Reset() noexcept final;
 
   protected:
@@ -371,7 +371,7 @@ namespace krys::boo
     /// the focus between the options.
     void BaseAppearanceDefaultEventHandler(Event &event) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#select-open-picker
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#select-open-picker
     void OpenPicker(bool byKeyboard) noexcept;
 
     /// @brief Hides the picker of a select with base appearance, refocusing the select if an option had the
@@ -382,13 +382,13 @@ namespace krys::boo
     void ReassignSlots() noexcept;
 
     /// @brief Moves the focus between the selectable options for an arrow, Home, End or page key.
-    /// @see https://html.spec.whatwg.org/#focus-another-option
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#focus-another-option
     void FocusOptionForKey(DOMStringView key) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#append-new-option-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#append-new-option-elements
     ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#placeholder-label-option
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#placeholder-label-option
     KRYS_NODISCARD bool HasPlaceholderLabelOption() const noexcept;
 
     /// @brief The first option in the list of options whose selectedness is true, if any.

@@ -18,7 +18,7 @@ namespace krys::boo::html
   class ValidityState;
 
   /// @brief A form-associated element listed in its form's `elements` and in its fieldsets'.
-  /// @see https://html.spec.whatwg.org/#category-listed
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#category-listed
   class FormListedElement : public FormAssociatedElement
   {
   private:
@@ -28,14 +28,14 @@ namespace krys::boo::html
   public:
     ~FormListedElement() noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-validity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-validity
     KRYS_NODISCARD ValidityState Validity() noexcept;
 
     /// @brief Whether the element takes part in constraint validation (a ValidatedFormListedElement).
     KRYS_NODISCARD virtual bool IsValidatedFormListedElement() const noexcept = 0;
 
     /// @brief Whether the form's `elements` lists it (an image button isn't listed).
-    /// @see https://html.spec.whatwg.org/#dom-form-elements
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-elements
     KRYS_NODISCARD virtual bool IsEnumeratable() const noexcept = 0;
 
     /// @brief The `name` attribute's value, or the empty string if there isn't one (the `name` IDL attribute
@@ -84,13 +84,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual bool ValueMissing() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-validationmessage
     KRYS_NODISCARD virtual DOMString ValidationMessage() const noexcept;
 
     /// @brief Whether the element suffers from none of the validity states.
     KRYS_NODISCARD virtual bool ComputeValidity() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-setcustomvalidity
     virtual void SetCustomValidity(DOMStringView error) noexcept;
 
     /// @brief Resets the form owner, as the element the form attribute names changed.
@@ -102,7 +102,7 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept = 0;
 
     /// @brief Whether the element is a candidate for constraint validation.
-    /// @see https://html.spec.whatwg.org/#candidate-for-constraint-validation
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#candidate-for-constraint-validation
     KRYS_NODISCARD virtual bool WillValidate() const noexcept = 0;
 
   protected:
@@ -147,7 +147,7 @@ namespace krys::boo::html
   };
 
   /// @brief The validity states of a listed element, as `validity` exposes them.
-  /// @see https://html.spec.whatwg.org/#validitystate
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#validitystate
   class ValidityState
   {
   private:
@@ -166,7 +166,7 @@ namespace krys::boo::html
     }
 
     /// @brief The validity states, each as its ValidityState attribute; `Valid` when none applies.
-    /// @see https://html.spec.whatwg.org/#validitystate
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#validitystate
     KRYS_NODISCARD bool ValueMissing() const noexcept
     {
       return _element.ValueMissing();

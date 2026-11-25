@@ -30,12 +30,12 @@ namespace krys::boo::html
       EffectiveGlobalCustomElementRegistry(Document &document) noexcept;
 
     /// @note Customized built-in elements aren't supported: a definition is found by its local name alone.
-    /// @see https://html.spec.whatwg.org/#look-up-a-custom-element-definition
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-definition
     KRYS_NODISCARD static CustomElementInterface *
       LookupCustomElementDefinition(CustomElementRegistry *registry, const DOMStringAtom &namespaceURI,
                                     DOMStringAtom localName) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#look-up-a-custom-element-registry
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-registry
     KRYS_NODISCARD static CustomElementRegistry *LookUpCustomElementRegistry(Node &node) noexcept;
   };
 }

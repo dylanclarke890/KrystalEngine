@@ -456,7 +456,7 @@ namespace krys::boo::dom
     return ShareRefPtr(DynamicDowncast<Element>(*retargeted));
   }
 
-  // https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-documentorshadowroot-activeelement
   RefPtr<Element> DocumentOrShadowRoot::ActiveElement() const noexcept
   {
     // 1. Let candidate be this's node document's focused area's DOM anchor.

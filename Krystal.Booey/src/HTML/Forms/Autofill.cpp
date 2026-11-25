@@ -140,7 +140,7 @@ namespace krys::boo::html
       return std::nullopt;
     }
 
-    /// @see https://html.spec.whatwg.org/#autofill-anchor-mantle
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-anchor-mantle
     KRYS_NODISCARD AutofillMantle GetAutofillMantle(const HTMLFormControlElement &element) noexcept
     {
       auto *input = DynamicDowncast<HTMLInputElement>(element);
@@ -148,7 +148,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#autofill-processing-model
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-processing-model
   AutofillData AutofillData::Create(const HTMLFormControlElement &element) noexcept
   {
     auto mantle = GetAutofillMantle(element);

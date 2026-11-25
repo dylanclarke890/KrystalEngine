@@ -1,6 +1,6 @@
 ﻿/* A marquee's shadow tree, as Chrome builds it: the mover holds the contents on one line (or, moving up or
    down, at the marquee's width) and is moved by its transform.
-   https://html.spec.whatwg.org/#the-marquee-element-2 */
+   https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2 */
 
 :host {
     white-space: nowrap;

@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#documentvisibilitystate
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#documentvisibilitystate
   enum class DocumentVisibilityState : uint8
   {
     Visible,

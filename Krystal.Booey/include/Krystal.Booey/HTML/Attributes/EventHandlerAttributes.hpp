@@ -15,35 +15,35 @@ namespace krys::boo::html
   /// @brief An event handler's value: a C++ function called with each event of its type.
   /// @note Script's event handlers return a value that can cancel the event; a C++ handler calls
   /// `PreventDefault()` instead.
-  /// @see https://html.spec.whatwg.org/#eventhandler
+  /// @see https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler
   using EventHandlerCallback = Func<void(Event &)>;
 
   /// @brief The event handler IDL attributes' getting and setting steps.
-  /// @see https://html.spec.whatwg.org/#event-handler-attributes
+  /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
   class EventHandlerAlgorithms
   {
   public:
     /// @brief Where the event handler @p name of @p eventTarget is: the target itself, or, for the body and
     /// frameset elements' window-reflecting and `WindowEventHandlers` handlers, their document's window
     /// (null if the document isn't fully active).
-    /// @see https://html.spec.whatwg.org/#determining-the-target-of-an-event-handler
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#determining-the-target-of-an-event-handler
     KRYS_NODISCARD static EventTarget *DetermineTarget(EventTarget &eventTarget, DOMStringAtom name) noexcept;
 
     /// @brief The value of @p eventTarget's event handler @p name; null if it has none.
-    /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#getting-the-current-value-of-the-event-handler
     KRYS_NODISCARD static const EventHandlerCallback *Get(const EventTarget &eventTarget,
                                                           const DOMStringAtom &name) noexcept;
 
     /// @brief Sets @p eventTarget's event handler @p name to @p value, or deactivates it if @p value is
     /// empty.
-    /// @see https://html.spec.whatwg.org/#event-handler-idl-attributes
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes
     static void Set(EventTarget &eventTarget, const DOMStringAtom &name,
                     EventHandlerCallback &&value) noexcept;
   };
 }
 
 /// @brief The event handlers of every HTML, SVG and MathML element, document and window.
-/// @see https://html.spec.whatwg.org/#globaleventhandlers
+/// @see https://html.spec.whatwg.org/multipage/webappapis.html#globaleventhandlers
 /// @see https://w3c.github.io/pointerevents/#extensions-to-the-globaleventhandlers-mixin
 /// @see https://w3c.github.io/touch-events/#extensions-to-the-globaleventhandlers-mixin
 #define KRYS_GLOBAL_EVENT_HANDLERS(X)                                                                        \
@@ -143,7 +143,7 @@ namespace krys::boo::html
   X(Wheel, u8"wheel")
 
 /// @brief The event handlers of the window, which the body and frameset elements reflect.
-/// @see https://html.spec.whatwg.org/#windoweventhandlers
+/// @see https://html.spec.whatwg.org/multipage/webappapis.html#windoweventhandlers
 #define KRYS_WINDOW_EVENT_HANDLERS(X)                                                                        \
   X(PageHide, u8"pagehide")                                                                                  \
   X(PageShow, u8"pageshow")                                                                                  \
@@ -158,12 +158,12 @@ namespace krys::boo::html
 
 /// @brief Declares the event handler IDL attribute `on<name>`: `On<Name>()` and `SetOn<Name>()`.
 #define KRYS_DECLARE_EVENT_HANDLER(Name, name)                                                               \
-  /** @see https://html.spec.whatwg.org/#event-handler-idl-attributes */                                     \
+  /** @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes */                                     \
   KRYS_NODISCARD const ::krys::boo::html::EventHandlerCallback *On##Name() const noexcept                    \
   {                                                                                                          \
     return ::krys::boo::html::EventHandlerAlgorithms::Get(*this, ::krys::boo::DOMStringAtom(name));          \
   }                                                                                                          \
-  /** @see https://html.spec.whatwg.org/#event-handler-idl-attributes */                                     \
+  /** @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes */                                     \
   void SetOn##Name(::krys::boo::html::EventHandlerCallback &&callback) noexcept                              \
   {                                                                                                          \
     ::krys::boo::html::EventHandlerAlgorithms::Set(*this, ::krys::boo::DOMStringAtom(name),                  \

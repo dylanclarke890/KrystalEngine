@@ -208,37 +208,37 @@ namespace krys::boo
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
 
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     KRYS_NODISCARD int32 TabIndex() const noexcept
     {
       return html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     void TabIndex(int32 value) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this, value);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     KRYS_NODISCARD bool Autofocus() const noexcept
     {
       return html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     void Autofocus(bool value) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this, value);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-focus
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
     void Focus(const dom::FocusOptions &options = {}) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-blur
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
     void Blur() noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Blur(*this);
@@ -525,7 +525,7 @@ namespace krys::boo
     void UpdateRelativeLengthsInformationForChild(bool hasRelativeLengths, SVGElement &element) noexcept;
 
   public:
-#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
     KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)

@@ -72,7 +72,7 @@ namespace krys::boo
     /// @brief Whether a response of the MIME type @p mimeType (an essence) is loaded as a text document: a
     /// JavaScript MIME type, a JSON MIME type that isn't an XML MIME type, `text/css`, `text/plain` or
     /// `text/vtt`.
-    /// @see https://html.spec.whatwg.org/#navigate-text
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-text
     KRYS_NODISCARD bool IsTextDocumentMimeType(utf8_stringview mimeType) noexcept
     {
       // https://mimesniff.spec.whatwg.org/#javascript-mime-type

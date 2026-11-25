@@ -212,7 +212,7 @@ namespace krys::boo::dom
         document->_contentType = DOMString(contentType);
         return document;
       }
-      // https://html.spec.whatwg.org/#navigate-media
+      // https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-media
       if (img::ImageDecoder::SupportsMimeType(contentType))
       {
         Ref<Document> document = CreateRef<ImageDocument>();
@@ -221,7 +221,7 @@ namespace krys::boo::dom
       }
 
       // A text document is an HTML document of its type.
-      // https://html.spec.whatwg.org/#navigate-text
+      // https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-text
       auto document = CreateRef<HTMLDocument>();
       if (!contentType.empty())
       {

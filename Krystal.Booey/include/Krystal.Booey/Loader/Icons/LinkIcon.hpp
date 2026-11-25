@@ -35,7 +35,7 @@ namespace krys::boo
 {
   /// @brief An icon a document names with `<link rel=icon>`: where it is, and what its `type` and `sizes`
   /// say about it.
-  /// @see https://html.spec.whatwg.org/#rel-icon
+  /// @see https://html.spec.whatwg.org/multipage/links.html#rel-icon
   struct LinkIcon
   {
     net::Url Url;

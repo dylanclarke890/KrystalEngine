@@ -22,15 +22,15 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#update-a-select's-descendant-selectedcontent-elements
     static void UpdateDescendantSelectedContents(HTMLSelectElement &select) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#update-a-selectedcontent
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#update-a-selectedcontent
     static void UpdateSelectedContent(HTMLSelectElement &select,
                                       HTMLSelectedContentElement &selectedcontent) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#clone-an-option-into-a-selectedcontent
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#clone-an-option-into-a-selectedcontent
     static void CloneOptionIntoSelectedContent(HTMLOptionElement &option,
                                                HTMLSelectedContentElement &selectedcontent) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#clear-a-selectedcontent
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#clear-a-selectedcontent
     static void ClearSelectedContent(HTMLSelectedContentElement &selectedcontent) noexcept;
 
     /// @brief Queues a microtask to update the select's descendant selectedcontent elements.

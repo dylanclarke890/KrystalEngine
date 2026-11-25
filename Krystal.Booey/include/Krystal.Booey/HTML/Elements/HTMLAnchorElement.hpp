@@ -6,7 +6,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlanchorelement
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlanchorelement
   class HTMLAnchorElement : public HTMLElement, public html::UrlDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAnchorElement);
@@ -42,105 +42,105 @@ namespace krys::boo
     /// @brief A link is interactive content.
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept override;
 
-#pragma region HTMLAnchorElement - https://html.spec.whatwg.org/#htmlanchorelement
+#pragma region HTMLAnchorElement - https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlanchorelement
 
-    /// @see https://html.spec.whatwg.org/#dom-a-target
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-target
     KRYS_NODISCARD DOMString Target() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-target
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-target
     void Target(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-download
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-download
     KRYS_NODISCARD DOMString Download() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-download
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-download
     void Download(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-ping
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-ping
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-ping
     void Ping(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-rel
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-rel
     KRYS_NODISCARD DOMString Rel() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-rel
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-rel
     void Rel(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-rellist
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-rellist
     KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-hreflang
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-hreflang
     KRYS_NODISCARD DOMString HrefLang() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-hreflang
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-hreflang
     void HrefLang(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-type
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-type
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-a-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-text
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-text
     KRYS_NODISCARD DOMString Text() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-text
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-text
     ExceptionOr<void> Text(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-referrerpolicy
     void ReferrerPolicy(DOMString value) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLHyperlinkElementUtils - https://html.spec.whatwg.org/#htmlhyperlinkelementutils
+#pragma region HTMLHyperlinkElementUtils - https://html.spec.whatwg.org/multipage/links.html#htmlhyperlinkelementutils
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     void Href(dom::USVString value) noexcept;
 
     /// @brief The `href` stringifier.
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     KRYS_NODISCARD dom::USVString ToString() const noexcept;
 
 #pragma endregion
 
-#pragma region HTMLAnchorElement Obsolete members - https://html.spec.whatwg.org/#HTMLAnchorElement-partial
+#pragma region HTMLAnchorElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLAnchorElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-a-coords
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-coords
     KRYS_NODISCARD DOMString Coords() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-coords
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-coords
     void Coords(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-charset
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-charset
     KRYS_NODISCARD DOMString Charset() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-charset
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-charset
     void Charset(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-rev
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-rev
     KRYS_NODISCARD DOMString Rev() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-rev
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-rev
     void Rev(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-shape
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-shape
     KRYS_NODISCARD DOMString Shape() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-a-shape
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-a-shape
     void Shape(DOMString value) noexcept;
 
 #pragma endregion

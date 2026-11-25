@@ -788,7 +788,7 @@ namespace krys::boo::xml
     }
 
     // A doctype with one of the XHTML public identifiers gives the document HTML's named character references
-    // (https://html.spec.whatwg.org/#parsing-xhtml-documents).
+    // (https://html.spec.whatwg.org/multipage/xhtml.html#parsing-xhtml-documents).
     void ExternalSubsetHandler(void *closure, const xmlChar *, const xmlChar *externalId, const xmlChar *)
     {
       auto extId = ToStringView(externalId);

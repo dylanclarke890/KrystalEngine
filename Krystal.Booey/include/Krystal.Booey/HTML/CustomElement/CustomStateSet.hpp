@@ -38,7 +38,7 @@ namespace krys::boo
 namespace krys::boo::html
 {
   /// @brief The custom states of a custom element, which `:state()` matches; set through its internals.
-  /// @see https://html.spec.whatwg.org/#customstateset
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#customstateset
   class CustomStateSet : public RefCounted<CustomStateSet>
   {
   private:

@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmltimeelement
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmltimeelement
   class HTMLTimeElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTimeElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLTimeElement(Document &document) noexcept;
 
-#pragma region HTMLTimeElement - https://html.spec.whatwg.org/#htmltimeelement
+#pragma region HTMLTimeElement - https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmltimeelement
 
-    /// @see https://html.spec.whatwg.org/#dom-time-datetime
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-time-datetime
     KRYS_NODISCARD DOMString DateTime() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-time-datetime
+    /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-time-datetime
     void DateTime(DOMString value) noexcept;
 
 #pragma endregion

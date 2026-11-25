@@ -30,7 +30,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#imagedatapixelformat
+  /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#imagedatapixelformat
   enum class ImageDataPixelFormat : bool
   {
     RgbaUnorm8,

@@ -21,7 +21,7 @@ namespace krys::boo
   namespace
   {
     /// @brief Whether @p element defines a command, leaving labels and legends to the caller.
-    /// @see https://html.spec.whatwg.org/#commands
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#commands
     KRYS_NODISCARD bool DefinesCommand(const Element &element) noexcept
     {
       if (Is<HTMLAnchorElement>(element))

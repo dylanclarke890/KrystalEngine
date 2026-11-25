@@ -11,7 +11,7 @@ namespace krys::boo
 
   /// @brief A marquee: its contents, in a mover in its shadow tree, scroll across it, bounce in it or slide
   /// into it, as a Web Animation of the mover's transform, one loop at a time, as Chrome moves them.
-  /// @see https://html.spec.whatwg.org/#the-marquee-element
+  /// @see https://html.spec.whatwg.org/multipage/obsolete.html#the-marquee-element
   class HTMLMarqueeElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMarqueeElement);
@@ -32,84 +32,84 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<HTMLMarqueeElement> Create(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-behavior
     KRYS_NODISCARD DOMString Behavior() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-behavior
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-behavior
     void Behavior(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-bgcolor
     void BgColor(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-direction
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-direction
     KRYS_NODISCARD DOMString Direction() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-direction
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-direction
     void Direction(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-height
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-height
     KRYS_NODISCARD DOMString Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-height
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-height
     void Height(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-width
     void Width(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-hspace
     KRYS_NODISCARD uint32 HSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-hspace
     void HSpace(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-vspace
     KRYS_NODISCARD uint32 VSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-vspace
     void VSpace(uint32 value) noexcept;
 
     /// @brief The marquee loop count: -1 (the default) loops forever.
-    /// @see https://html.spec.whatwg.org/#dom-marquee-loop
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-loop
     KRYS_NODISCARD int32 Loop() const noexcept;
 
     /// @brief Sets the loop count, if @p value is positive or -1; other values are ignored.
-    /// @see https://html.spec.whatwg.org/#dom-marquee-loop
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-loop
     void Loop(int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-scrollamount
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrollamount
     KRYS_NODISCARD uint32 ScrollAmount() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-scrollamount
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrollamount
     void ScrollAmount(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-scrolldelay
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrolldelay
     KRYS_NODISCARD uint32 ScrollDelay() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-scrolldelay
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrolldelay
     void ScrollDelay(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-truespeed
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-truespeed
     KRYS_NODISCARD bool TrueSpeed() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-marquee-truespeed
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-truespeed
     void TrueSpeed(bool value) noexcept;
 
     /// @brief Turns the marquee on: it moves again, from where it stopped.
-    /// @see https://html.spec.whatwg.org/#dom-marquee-start
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-start
     void Start() noexcept;
 
     /// @brief Turns the marquee off: it stops where it is.
-    /// @see https://html.spec.whatwg.org/#dom-marquee-stop
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-stop
     void Stop() noexcept;
 
     /// @brief The marquee scroll interval, in milliseconds.
-    /// @see https://html.spec.whatwg.org/#marquee-scroll-interval
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#marquee-scroll-interval
     KRYS_NODISCARD uint32 ScrollInterval() const noexcept;
 
     /// @brief The shadow tree's element whose transform moves the contents.

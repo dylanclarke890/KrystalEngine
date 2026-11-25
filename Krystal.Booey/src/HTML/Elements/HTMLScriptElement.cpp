@@ -48,7 +48,7 @@ namespace krys::boo
     html::Reflect<bool>(*this, u8"nomodule", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-script-async
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-script-async
   bool HTMLScriptElement::Async() const noexcept
   {
     // 1. If this's force async is true, then return true.
@@ -57,7 +57,7 @@ namespace krys::boo
     return _forceAsync || html::Reflect<bool>(*this, u8"async");
   }
 
-  // https://html.spec.whatwg.org/#dom-script-async
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-script-async
   void HTMLScriptElement::Async(bool value) noexcept
   {
     // 1. Set this's force async to false.
@@ -160,14 +160,14 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-script-text
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
   DOMString HTMLScriptElement::Text() const noexcept
   {
     // The text getter steps are to return this's child text content.
     return dom::TextAlgorithms::ChildTextContent(*this);
   }
 
-  // https://html.spec.whatwg.org/#dom-script-text
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
   void HTMLScriptElement::Text(DOMString value) noexcept
   {
     // 1. (Skipped: there are no Trusted Types.)
@@ -176,7 +176,7 @@ namespace krys::boo
     (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
-  // https://html.spec.whatwg.org/#dom-script-supports
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports
   bool HTMLScriptElement::Supports(DOMStringView type) noexcept
   {
     // 1. If type is "classic", then return true.

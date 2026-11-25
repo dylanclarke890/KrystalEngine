@@ -29,13 +29,13 @@ namespace krys::boo
   class DataTransferItemList;
 
   /// @brief The data of a drag, a clipboard event or an input event, and what a page may do with it.
-  /// @see https://html.spec.whatwg.org/#the-datatransfer-interface
+  /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
   class DataTransfer final : public RefCounted<DataTransfer>, public CanMakeWeakPtr<DataTransfer>
   {
     KRYS_NON_COPY_MOVABLE(DataTransfer);
 
   public:
-    /// @see https://html.spec.whatwg.org/#drag-data-store-mode
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#drag-data-store-mode
     enum class StoreMode : uint8
     {
       /// @brief Cut off: its event is over (`MakeInvalidForSecurity`).
@@ -84,7 +84,7 @@ namespace krys::boo
   public:
     ~DataTransfer() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer
     KRYS_NODISCARD static Ref<DataTransfer> Create() noexcept;
 
     KRYS_NODISCARD static Ref<DataTransfer>
@@ -132,7 +132,7 @@ namespace krys::boo
 
     /// @brief Sets the drag image to @p element (an image that isn't in a document, or a snapshot of the
     /// element), with the cursor at @p x, @p y in it.
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-setdragimage
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdragimage
     void SetDragImage(Ref<Element> element, int32 x, int32 y) noexcept;
 
     /// @brief The drag has started, so drag images the page sets from now on go to the pasteboard at once.
@@ -158,41 +158,41 @@ namespace krys::boo
     /// @brief Whether the page set a drag image.
     KRYS_NODISCARD bool HasDragImage() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-dropeffect
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-dropeffect
     KRYS_NODISCARD DOMString DropEffect() const noexcept;
 
     void SetDropEffect(DOMStringView effect) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-effectallowed
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-effectallowed
     KRYS_NODISCARD DOMString EffectAllowed() const noexcept;
 
     void SetEffectAllowed(DOMStringView effect) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-items
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-items
     KRYS_NODISCARD DataTransferItemList &Items(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-types
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-types
     KRYS_NODISCARD List<DOMString> Types(Document &document) const noexcept;
 
     /// @brief The types without `Files`, which the item list lists as items of its own.
     KRYS_NODISCARD List<DOMString> TypesForItemList(Document &document) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-files
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-files
     KRYS_NODISCARD FileList &Files(Document *document) const noexcept;
 
     KRYS_NODISCARD FileList &Files(Document &document) const noexcept;
 
     /// @brief Clears the data of @p type, or all the data if none.
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-cleardata
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-cleardata
     void ClearData(Maybe<DOMStringView> type = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-getdata
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata
     KRYS_NODISCARD DOMString GetData(Document &document, DOMStringView type) const noexcept;
 
     /// @brief `getData` and `setData` for a type that's already normalized, as the item list's are.
     KRYS_NODISCARD DOMString GetDataForItem(Document &document, DOMStringView type) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransfer-setdata
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdata
     void SetData(Document &document, DOMStringView type, DOMStringView data) noexcept;
 
     void SetDataFromItemList(Document &document, DOMStringView type, DOMStringView data) noexcept;

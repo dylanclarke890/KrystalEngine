@@ -57,28 +57,28 @@ namespace krys::boo::css
   /// @see https://drafts.csswg.org/selectors/#focus-within-pseudo
   KRYS_NODISCARD bool MatchesFocusWithinPseudoClass(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-default
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-default
   KRYS_NODISCARD bool MatchesDefaultPseudoClass(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-disabled
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-disabled
   KRYS_NODISCARD bool MatchesDisabledPseudoClass(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-enabled
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-enabled
   KRYS_NODISCARD bool MatchesEnabledPseudoClass(const Element &element) noexcept;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-defined
   KRYS_NODISCARD bool IsDefinedElement(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-checked
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-checked
   KRYS_NODISCARD bool IsChecked(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-optional
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-optional
   KRYS_NODISCARD bool IsOptionalFormControl(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-required
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-required
   KRYS_NODISCARD bool IsRequiredFormControl(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-placeholder-shown
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-placeholder-shown
   KRYS_NODISCARD bool IsPlaceholderShown(const Element &element) noexcept;
 
   KRYS_NODISCARD bool ContainsLanguageSubtagMatchingRange(DOMStringView language, DOMStringView range,
@@ -91,21 +91,21 @@ namespace krys::boo::css
   /// @see https://drafts.csswg.org/selectors/#the-dir-pseudo
   KRYS_NODISCARD bool MatchesDirPseudoClass(const Element &element, const CSSOMStringAtom &argument) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-read-write
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-read-write
   KRYS_NODISCARD bool MatchesReadWritePseudoClass(const Element &element) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#selector-read-only
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-read-only
   KRYS_NODISCARD inline bool MatchesReadOnlyPseudoClass(const Element &element) noexcept
   {
     return !MatchesReadWritePseudoClass(element);
   }
 
-  /// @see https://html.spec.whatwg.org/#selector-indeterminate
+  /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-indeterminate
   KRYS_NODISCARD bool MatchesIndeterminatePseudoClass(const Element &element) noexcept;
 
   /// @brief The language of @p element: the nearest `xml:lang` attribute, or `lang` attribute on an HTML or
   /// SVG element, on it or an ancestor (crossing shadow boundaries), or else the pragma-set default language;
   /// empty if there is none.
-  /// @see https://html.spec.whatwg.org/#language
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#language
   KRYS_NODISCARD DOMString EffectiveLang(const Element &element) noexcept;
 }

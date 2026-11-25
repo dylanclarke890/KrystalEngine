@@ -75,7 +75,7 @@ namespace krys::boo
     return _kind == Kind::File;
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitem-kind
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-kind
   DOMString DataTransferItem::GetKind() const noexcept
   {
     // The kind attribute must return the empty string if the DataTransferItem object is in the disabled mode;
@@ -95,7 +95,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitem-type
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-type
   // The type attribute must return the empty string if the DataTransferItem object is in the disabled mode;
   // otherwise it must return the drag data item type string of the item represented by the DataTransferItem
   // object.
@@ -104,7 +104,7 @@ namespace krys::boo
     return IsInDisabledMode() ? DOMString() : _type;
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitem-getasstring
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasstring
   void DataTransferItem::GetAsString(Document &document,
                                      Func<void(const DOMString &)> &&callback) const noexcept
   {
@@ -131,7 +131,7 @@ namespace krys::boo
       { callback(string); });
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitem-getasfile
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasfile
   RefPtr<File> DataTransferItem::GetAsFile() const noexcept
   {
     // 1. If the DataTransferItem object is not in the read/write mode or the read-only mode, then return

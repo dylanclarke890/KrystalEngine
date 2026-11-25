@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmltablecaptionelement
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#htmltablecaptionelement
   class HTMLTableCaptionElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableCaptionElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLTableCaptionElement(Document &document) noexcept;
 
-#pragma region HTMLTableCaptionElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableCaptionElement-partial
+#pragma region HTMLTableCaptionElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLTableCaptionElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-caption-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-caption-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-caption-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-caption-align
     void Align(DOMString value) noexcept;
 
 #pragma endregion

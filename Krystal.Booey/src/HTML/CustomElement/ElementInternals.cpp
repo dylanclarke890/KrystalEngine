@@ -52,7 +52,7 @@ namespace krys::boo::html
     return _target.get();
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-shadowroot
   RefPtr<boo::ShadowRoot> ElementInternals::ShadowRoot() const noexcept
   {
     // 1. Let target be this's target element.
@@ -89,7 +89,7 @@ namespace krys::boo::html
     return element->FormForBindings();
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setformvalue
   // 1. Let element be this's target element.
   // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
   // (And so for the other form members.)
@@ -168,7 +168,7 @@ namespace krys::boo::html
     return Exception {ExceptionCode::NotSupportedError};
   }
 
-  // https://html.spec.whatwg.org/#dom-elementinternals-states
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-states
   // (The states getter steps are to return this's target element's states set.)
   CustomStateSet &ElementInternals::States() noexcept
   {

@@ -56,7 +56,7 @@ namespace krys::boo
 
 #pragma region HTMLCanvasElement
 
-  // https://html.spec.whatwg.org/#dom-canvas-width
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-width
   uint32 HTMLCanvasElement::Width() const noexcept
   {
     return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
@@ -77,7 +77,7 @@ namespace krys::boo
     html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
   }
 
-  // https://html.spec.whatwg.org/#dom-canvas-getcontext
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-getcontext
   RefPtr<html::CanvasRenderingContext> HTMLCanvasElement::GetContext(DOMStringView contextId) noexcept
   {
     // 1. If options is not an object, then set options to null. (Skipped: GetContext2d takes the options.)
@@ -120,7 +120,7 @@ namespace krys::boo
     return ShareRefPtr(DynamicDowncast<html::CanvasRenderingContext2D>(_context.get()));
   }
 
-  // https://html.spec.whatwg.org/#2d-context-creation-algorithm
+  // https://html.spec.whatwg.org/multipage/canvas.html#2d-context-creation-algorithm
   html::CanvasRenderingContext2D *
     HTMLCanvasElement::CreateContext2d(html::CanvasRenderingContext2DSettings &&settings) noexcept
   {
@@ -217,7 +217,7 @@ namespace krys::boo
     html::CanvasBase::DidDraw(rect);
   }
 
-  // https://html.spec.whatwg.org/#concept-canvas-set-bitmap-dimensions
+  // https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-set-bitmap-dimensions
   void HTMLCanvasElement::DidUpdateSizeProperties() noexcept
   {
     const bool hadImageBuffer = HasCreatedImageBuffer();
@@ -522,7 +522,7 @@ namespace krys::boo
     return quality;
   }
 
-  // https://html.spec.whatwg.org/#dom-canvas-todataurl
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-todataurl
   DOMString HTMLCanvasElement::ToDataUrl(DOMStringView mimeType, Maybe<double> quality) noexcept
   {
     // 1. (Skipped: a canvas is always origin-clean, as there are no origins; see DIFFERENCES.md.)

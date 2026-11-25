@@ -39,7 +39,7 @@
 namespace krys::boo::html
 {
   /// @brief The image input type: a submit button showing an image, that submits where it was clicked.
-  /// @see https://html.spec.whatwg.org/#image-button-state-(type=image)
+  /// @see https://html.spec.whatwg.org/multipage/input.html#image-button-state-(type=image)
   class ImageInputType final : public BaseButtonInputType
   {
   private:

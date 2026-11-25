@@ -44,7 +44,7 @@ namespace krys
 namespace krys::boo::html
 {
   /// @brief A rectangle of unpremultiplied pixels a 2D context reads and writes.
-  /// @see https://html.spec.whatwg.org/#imagedata
+  /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#imagedata
   class ImageData final : public RefCounted<ImageData>
   {
   private:
@@ -79,11 +79,11 @@ namespace krys::boo::html
                                                              Maybe<ImageDataSettings> = {},
                                                              Span<const uint8> bytes = {}) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-imagedata
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagedata
     KRYS_NODISCARD static ExceptionOr<Ref<ImageData>> Create(uint32 sw, uint32 sh,
                                                              Maybe<ImageDataSettings>) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-imagedata-with-data
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagedata-with-data
     KRYS_NODISCARD static ExceptionOr<Ref<ImageData>> Create(ImageDataArray &&, uint32 sw, Maybe<uint32> sh,
                                                              Maybe<ImageDataSettings>) noexcept;
 

@@ -89,17 +89,17 @@ namespace krys::boo::html
       }
     }
 
-    // https://html.spec.whatwg.org/#canonicalize-a-processing-instruction-list
+    // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-processing-instruction-list
     void CanonicalizeSanitizerList(Maybe<List<SanitizerProcessingInstruction>> &) noexcept
     {
-      // https://html.spec.whatwg.org/#canonicalize-a-processing-instruction
+      // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-processing-instruction
       // 1. If pi is a DOMString, then return «[ "target" → pi ]».
       // 2. Assert: pi is a dictionary and pi["target"] exists.
       // 3. Return «[ "target" → pi["target"] ]».
       // (A SanitizerProcessingInstruction is always a dictionary with a target, so it's canonical already.)
     }
 
-    // https://html.spec.whatwg.org/#canonicalize-a-sanitizer-name
+    // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-name
     // (Names are dictionaries with a namespace already, so only step 3 is left.)
     KRYS_NODISCARD DOMStringAtom CanonicalSanitizerNamespace(DOMStringAtom namespaceURI) noexcept
     {

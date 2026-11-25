@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 
 /// @brief The input types, as the `type` attribute names them.
-/// @see https://html.spec.whatwg.org/#attr-input-type
+/// @see https://html.spec.whatwg.org/multipage/input.html#attr-input-type
 namespace krys::boo::html::input_type_names
 {
   constexpr DOMStringView Button = u8"button";

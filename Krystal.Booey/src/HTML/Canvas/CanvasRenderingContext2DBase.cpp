@@ -284,7 +284,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#reset-the-rendering-context-to-its-default-state
+  // https://html.spec.whatwg.org/multipage/canvas.html#reset-the-rendering-context-to-its-default-state
   void CanvasRenderingContext2DBase::Reset() noexcept
   {
     // 3. Clear the context's drawing state stack.
@@ -379,7 +379,7 @@ namespace krys::boo::html
     } while (--_unrealizedSaveCount);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-restore
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-restore
   // (Pops the top entry in the drawing state stack, and resets the drawing state it describes; nothing if
   // there is none.)
   void CanvasRenderingContext2DBase::Restore() noexcept
@@ -446,7 +446,7 @@ namespace krys::boo::html
     state.UnparsedFillColor = krys::move(unparsedColor);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-linewidth
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-linewidth
   void CanvasRenderingContext2DBase::SetLineWidth(double width) noexcept
   {
     // On setting, zero, negative, infinite, and NaN values must be ignored, leaving the value unchanged.
@@ -502,7 +502,7 @@ namespace krys::boo::html
     c->SetLineJoin(lineJoin);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-miterlimit
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-miterlimit
   void CanvasRenderingContext2DBase::SetMiterLimit(double limit) noexcept
   {
     // On setting, zero, negative, infinite, and NaN values must be ignored, leaving the value unchanged.
@@ -524,7 +524,7 @@ namespace krys::boo::html
     c->SetMiterLimit(static_cast<float>(limit));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-shadowoffsetx
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-shadowoffsetx
   // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowOffsetX(float x) noexcept
   {
@@ -541,7 +541,7 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-shadowoffsety
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-shadowoffsety
   // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowOffsetY(float y) noexcept
   {
@@ -558,7 +558,7 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-shadowblur
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-shadowblur
   // (On setting, negative, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowBlur(float blur) noexcept
   {
@@ -575,7 +575,7 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-shadowcolor
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-shadowcolor
   void CanvasRenderingContext2DBase::SetShadowColor(DOMStringView colorString) noexcept
   {
     // 1. Let context be this's canvas attribute's value, if that is an element; otherwise null.
@@ -610,7 +610,7 @@ namespace krys::boo::html
     return true;
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-setlinedash
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-setlinedash
   void CanvasRenderingContext2DBase::SetLineDash(const List<double> &dash) noexcept
   {
     // 1. If any value in segments is not finite (e.g. an Infinity or a NaN value), or if any value is
@@ -636,7 +636,7 @@ namespace krys::boo::html
     ApplyLineDash();
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-linedashoffset
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-linedashoffset
   // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetLineDashOffset(double offset) noexcept
   {
@@ -665,7 +665,7 @@ namespace krys::boo::html
     c->SetLineDash(convertedLineDash, static_cast<float>(GetState().LineDashOffset));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-globalalpha
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-globalalpha
   void CanvasRenderingContext2DBase::SetGlobalAlpha(double alpha) noexcept
   {
     // 1. If the given value is either infinite, NaN, or not in the range 0.0 to 1.0, then return.
@@ -689,7 +689,7 @@ namespace krys::boo::html
     c->SetAlpha(static_cast<float>(alpha));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-globalcompositeoperation
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-globalcompositeoperation
   void CanvasRenderingContext2DBase::SetGlobalCompositeOperation(DOMStringView operation) noexcept
   {
     // 1. If the given value is not identical to any of the values that the <blend-mode> or the
@@ -717,7 +717,7 @@ namespace krys::boo::html
     c->SetCompositeOperation(op, blendMode);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-scale
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-scale
   // (Like the other transforms, nothing while the transform can't be inverted.)
   void CanvasRenderingContext2DBase::Scale(double sx, double sy) noexcept
   {
@@ -758,7 +758,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().ScaleNonUniform(1.0 / floatX, 1.0 / floatY));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-rotate
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-rotate
   void CanvasRenderingContext2DBase::Rotate(double angleInRadians) noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -791,7 +791,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().RotateRadians(-angleInRadians));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-translate
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-translate
   void CanvasRenderingContext2DBase::Translate(double tx, double ty) noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -829,7 +829,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().Translate(-tx, -ty));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-transform
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-transform
   void CanvasRenderingContext2DBase::Transform(double m11, double m12, double m21, double m22, double dx,
                                                double dy) noexcept
   {
@@ -875,7 +875,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-gettransform
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-gettransform
   // (A newly created DOMMatrix representing a copy of the current transformation matrix.)
   Ref<DOMMatrix> CanvasRenderingContext2DBase::GetTransform() const noexcept
   {
@@ -891,7 +891,7 @@ namespace krys::boo::html
       return;
     }
 
-    // https://html.spec.whatwg.org/#dom-context-2d-settransform
+    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-settransform
     // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(m11) || !std::isfinite(m21) || !std::isfinite(dx) || !std::isfinite(m12)
         || !std::isfinite(m22) || !std::isfinite(dy))
@@ -906,7 +906,7 @@ namespace krys::boo::html
 
   ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(DOMMatrix2DInit matrixInit) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-context-2d-settransform-matrix
+    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-settransform-matrix
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
@@ -923,7 +923,7 @@ namespace krys::boo::html
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-resettransform
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-resettransform
   // (Resets the current transformation matrix to the identity matrix.)
   void CanvasRenderingContext2DBase::ResetTransform() noexcept
   {
@@ -944,7 +944,7 @@ namespace krys::boo::html
     UpdateStateTransform({});
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-beginpath
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-beginpath
   // (Empties the list of subpaths in this's current default path.)
   void CanvasRenderingContext2DBase::BeginPath() noexcept
   {
@@ -1023,7 +1023,7 @@ namespace krys::boo::html
     ClipInternal(path.GetPath(), windingRule);
   }
 
-  // https://html.spec.whatwg.org/#fill-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#fill-steps
   // (Fill all the subpaths of the intended path, using this's fill style, and using the fill rule. Open
   // subpaths are implicitly closed.)
   void CanvasRenderingContext2DBase::FillInternal(const Path &path, CanvasFillRule windingRule) noexcept
@@ -1084,7 +1084,7 @@ namespace krys::boo::html
     c->SetFillRule(savedFillRule);
   }
 
-  // https://html.spec.whatwg.org/#stroke-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#stroke-steps
   // (Trace the intended path, using this's line styles, and fill the result with this's stroke style.)
   void CanvasRenderingContext2DBase::StrokeInternal(const Path &path) noexcept
   {
@@ -1144,7 +1144,7 @@ namespace krys::boo::html
             });
   }
 
-  // https://html.spec.whatwg.org/#clip-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#clip-steps
   // (Create a new clipping region by calculating the intersection of the current clipping region and the area
   // described by the intended path, using the fill rule.)
   void CanvasRenderingContext2DBase::ClipInternal(const Path &path, CanvasFillRule windingRule) noexcept
@@ -1196,7 +1196,7 @@ namespace krys::boo::html
     return IsPointInStrokeInternal(path.GetPath(), x, y);
   }
 
-  // https://html.spec.whatwg.org/#is-point-in-path-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#is-point-in-path-steps
   bool CanvasRenderingContext2DBase::IsPointInPathInternal(const Path &path, double x, double y,
                                                            CanvasFillRule windingRule) noexcept
   {
@@ -1230,7 +1230,7 @@ namespace krys::boo::html
     return path.Contains(transformedPoint, ToWindRule(windingRule));
   }
 
-  // https://html.spec.whatwg.org/#is-point-in-stroke-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#is-point-in-stroke-steps
   bool CanvasRenderingContext2DBase::IsPointInStrokeInternal(const Path &path, double x, double y) noexcept
   {
     // 1. If x or y are infinite or NaN, then return false.
@@ -1278,7 +1278,7 @@ namespace krys::boo::html
                                });
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-clearrect
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-clearrect
   void CanvasRenderingContext2DBase::ClearRect(double x, double y, double width, double height) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -1335,7 +1335,7 @@ namespace krys::boo::html
     DidDraw(rect, DefaultDidDrawOptionsWithoutPostProcessing());
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-fillrect
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-fillrect
   void CanvasRenderingContext2DBase::FillRect(double x, double y, double width, double height) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -1408,7 +1408,7 @@ namespace krys::boo::html
     DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : rect);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-strokerect
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-strokerect
   void CanvasRenderingContext2DBase::StrokeRect(double x, double y, double width, double height) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -1554,7 +1554,7 @@ namespace krys::boo::html
     return ToStyleVariant(GetState().StrokeStyle);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-strokestyle
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-strokestyle
   void CanvasRenderingContext2DBase::SetStrokeStyle(DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedStrokeColor)
@@ -1611,7 +1611,7 @@ namespace krys::boo::html
     return ToStyleVariant(GetState().FillStyle);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-fillstyle
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-fillstyle
   void CanvasRenderingContext2DBase::SetFillStyle(DOMString colorString) noexcept
   {
     if (colorString == GetState().UnparsedFillColor)
@@ -1663,7 +1663,7 @@ namespace krys::boo::html
     state.UnparsedFillColor = {};
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createlineargradient
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createlineargradient
   ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept
   {
@@ -1676,7 +1676,7 @@ namespace krys::boo::html
     return CanvasGradient::Create(PointF(x0, y0), PointF(x1, y1));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createradialgradient
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createradialgradient
   ExceptionOr<Ref<CanvasGradient>> CanvasRenderingContext2DBase::CreateRadialGradient(float x0, float y0,
                                                                                       float r0, float x1,
                                                                                       float y1,
@@ -1698,7 +1698,7 @@ namespace krys::boo::html
     return CanvasGradient::Create(PointF(x0, y0), r0, PointF(x1, y1), r1);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createconicgradient
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createconicgradient
   ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateConicGradient(float angleInRadians, float x, float y) noexcept
   {
@@ -1714,7 +1714,7 @@ namespace krys::boo::html
     return CanvasGradient::Create(PointF(x, y), angleInRadians);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createpattern
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createpattern
   ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource image, DOMStringView repetition) noexcept
   {
@@ -1896,7 +1896,7 @@ namespace krys::boo::html
            && std::isfinite(dstRect.Width()) && std::isfinite(dstRect.Height());
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-drawimage
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-drawimage
   ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource image, float dx,
                                                             float dy) noexcept
   {
@@ -1966,7 +1966,7 @@ namespace krys::boo::html
 
     // 2. Let usability be the result of checking the usability of image.
     // 3. If usability is bad, then return (without drawing anything).
-    // https://html.spec.whatwg.org/#check-the-usability-of-the-image-argument
+    // https://html.spec.whatwg.org/multipage/canvas.html#check-the-usability-of-the-image-argument
     // 1. If image's current request's state is broken, then throw an "InvalidStateError" DOMException.
     // 2. If image is not fully decodable, then return bad.
     // 3. If image has a natural width or natural height (or both) equal to zero, then return bad.
@@ -2367,7 +2367,7 @@ namespace krys::boo::html
   // buffer.
   constexpr static uint32 PutImageDataCacheAreaLimit = 60 * 60;
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createimagedata-imagedata
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createimagedata-imagedata
   ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(ImageData &existingImageData) const noexcept
   {
@@ -2390,7 +2390,7 @@ namespace krys::boo::html
                              static_cast<uint32>(existingImageData.Height()), _settings.ColorSpace, settings);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-createimagedata
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-createimagedata
   ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(int32 sw, int32 sh,
                                                   Maybe<ImageDataSettings> settings) const noexcept
@@ -2535,7 +2535,7 @@ namespace krys::boo::html
     CanvasRenderingContext2DBase::GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
                                                Maybe<ImageDataSettings> settings) const noexcept
   {
-    // https://html.spec.whatwg.org/#dom-context-2d-getimagedata
+    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-getimagedata
     // 1. If either the sw or sh arguments are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
@@ -2606,7 +2606,7 @@ namespace krys::boo::html
     return Exception {ExceptionCode::InvalidStateError};
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-putimagedata-short
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-putimagedata-short
   ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy) noexcept
   {
     return PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
@@ -2628,12 +2628,12 @@ namespace krys::boo::html
     return sourceRect;
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-putimagedata
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-putimagedata
   ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy,
                                                                int32 dirtyX, int32 dirtyY, int32 dirtyWidth,
                                                                int32 dirtyHeight) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-context2d-putimagedata-common
+    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context2d-putimagedata-common
     // 1. Let buffer be imageData's data attribute value's [[ViewedArrayBuffer]] internal slot.
     // 2. If IsDetachedBuffer(buffer) is true, then throw an "InvalidStateError" DOMException.
     if (data.Data().IsDetached())
@@ -2837,7 +2837,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-filter
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-filter
   void CanvasRenderingContext2DBase::SetFilterString(DOMStringView filterString) noexcept
   {
     if (GetState().FilterString == filterString)
@@ -3255,7 +3255,7 @@ namespace krys::boo::html
     return ParsedSpacing {.Serialised = krys::move(serialised).ToString(), .Pixels = pixels};
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-letterspacing
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-letterspacing
   void CanvasRenderingContext2DBase::SetLetterSpacing(DOMStringView letterSpacing) noexcept
   {
     if (GetState().LetterSpacing == letterSpacing)
@@ -3280,7 +3280,7 @@ namespace krys::boo::html
     ModifiableState().Font.SetLetterSpacing(static_cast<float>(spacing->Pixels));
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-wordspacing
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-wordspacing
   void CanvasRenderingContext2DBase::SetWordSpacing(DOMStringView wordSpacing) noexcept
   {
     if (GetState().WordSpacing == wordSpacing)
@@ -3439,7 +3439,7 @@ namespace krys::boo::html
     font.Initialize(fontSelector, fontCascade);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-lang
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-lang
   // (The lang setter steps are to set this's language to the given value.)
   void CanvasRenderingContext2DBase::SetLang(DOMStringView lang) noexcept
   {

@@ -360,7 +360,7 @@ namespace krys::boo
     }
 
   private:
-    /// @brief The largest `rowspan` (https://html.spec.whatwg.org/#attr-tdth-rowspan).
+    /// @brief The largest `rowspan` (https://html.spec.whatwg.org/multipage/tables.html#attr-tdth-rowspan).
     constexpr static uint32 MaxRowSpan = 65'534;
 
     /// @brief WebKit's heuristic for whether a table is for data (exposed) or for layout.

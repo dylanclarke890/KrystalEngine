@@ -5,7 +5,7 @@
 namespace krys::boo
 {
   /// @brief The obsolete `dir` element.
-  /// @see https://html.spec.whatwg.org/#htmldirectoryelement
+  /// @see https://html.spec.whatwg.org/multipage/obsolete.html#htmldirectoryelement
   class HTMLDirectoryElement final : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDirectoryElement);
@@ -13,10 +13,10 @@ namespace krys::boo
   public:
     explicit HTMLDirectoryElement(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dir-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-dir-compact
     KRYS_NODISCARD bool Compact() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dir-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-dir-compact
     void Compact(bool value) noexcept;
   };
 }

@@ -145,7 +145,7 @@ namespace krys::boo
     KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept;
 
     /// @brief Gives the frame its initial empty document (`about:blank`), at once.
-    /// @see https://html.spec.whatwg.org/#initialise-the-document-object
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#initialise-the-document-object
     void Init() noexcept;
 
     /// @brief Loads @p request into the frame, as the host asks: its URL, or the substitute data it carries.
@@ -161,7 +161,7 @@ namespace krys::boo
 
     /// @brief Whether the frame may navigate: not while its document's `pagehide` or `unload` is being
     /// dispatched.
-    /// @see https://html.spec.whatwg.org/#navigate (step 9)
+    /// @see https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigate (step 9)
     KRYS_NODISCARD bool IsNavigationAllowed() const noexcept
     {
       return !_pageDismissalEventBeingDispatched;
@@ -207,7 +207,7 @@ namespace krys::boo
 
     /// @brief Whether the document has loaded (parsed, its subresources and anything else delaying its load
     /// event done), and if so, fires its load event and tells the client.
-    /// @see https://html.spec.whatwg.org/#the-end
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-end
     void CheckCompleted() noexcept;
 
     KRYS_NODISCARD bool IsComplete() const noexcept
@@ -245,7 +245,7 @@ namespace krys::boo
     void CheckCallImplicitClose() noexcept;
 
     /// @brief Fires `pagehide` and `unload` at the document's window, as it's left.
-    /// @see https://html.spec.whatwg.org/#unload-a-document
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#unload-a-document
     void DispatchUnloadEvents() noexcept;
 
     /// @brief Whether a navigation to @p url navigates within the document: to a fragment of its URL.
@@ -256,7 +256,7 @@ namespace krys::boo
     void LoadInSameDocument(const net::Url &url) noexcept;
 
     /// @brief Scrolls to @p url's fragment, once the document's style sheets have loaded.
-    /// @see https://html.spec.whatwg.org/#try-to-scroll-to-the-fragment
+    /// @see https://html.spec.whatwg.org/multipage/browsing-the-web.html#try-to-scroll-to-the-fragment
     void ScrollToFragment(const net::Url &url) noexcept;
   };
 }

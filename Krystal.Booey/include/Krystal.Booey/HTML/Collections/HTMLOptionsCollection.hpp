@@ -15,7 +15,7 @@ namespace krys::boo
 namespace krys::boo::html
 {
   /// @brief A select's `options`: the options in its list of options.
-  /// @see https://html.spec.whatwg.org/#htmloptionscollection
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#htmloptionscollection
   class HTMLOptionsCollection final : public LiveHTMLCollection
   {
   public:
@@ -34,28 +34,28 @@ namespace krys::boo::html
       return *_selectElement;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-length
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-length
     ExceptionOr<void> Length(uint32 length) noexcept;
 
     using LiveHTMLCollection::Length;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-setter
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-setter
     ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-add
     ExceptionOr<void> Add(const OptionOrOptGroupElement &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-add
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-add
     ExceptionOr<void> Add(const OptionOrOptGroupElement &element,
                           const Maybe<HTMLElementOrInt> &before) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-remove
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-remove
     void Remove(int32 index) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-selectedindex
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-selectedindex
     KRYS_NODISCARD int32 SelectedIndex() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-htmloptionscollection-selectedindex
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmloptionscollection-selectedindex
     void SelectedIndex(int32 index) noexcept;
   };
 }

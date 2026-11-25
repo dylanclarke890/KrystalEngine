@@ -6,7 +6,7 @@ namespace krys::boo
 {
   /// @brief A `<bdi>`, text isolated from its surroundings for bidirectional formatting. Without a `dir`
   /// attribute its directionality is auto. Its interface is `HTMLElement`.
-  /// @see https://html.spec.whatwg.org/#the-bdi-element
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-bdi-element
   class HTMLBDIElement final : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBDIElement);

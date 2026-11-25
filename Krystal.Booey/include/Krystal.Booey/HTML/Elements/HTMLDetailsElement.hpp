@@ -14,7 +14,7 @@ namespace krys::boo
   /// @brief A disclosure widget: its first `summary` child is its caption, and the rest of its contents show
   /// only while it's open. Elements with the same `name` form an exclusive accordion: opening one closes the
   /// others.
-  /// @see https://html.spec.whatwg.org/#the-details-element
+  /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element
   class HTMLDetailsElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDetailsElement);
@@ -23,7 +23,7 @@ namespace krys::boo
     WeakPtr<HTMLSlotElement> _summarySlot;
     WeakPtr<HTMLSummaryElement> _defaultSummary;
     RefPtr<HTMLSlotElement> _defaultSlot;
-    /// @see https://html.spec.whatwg.org/#details-toggle-task-tracker
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#details-toggle-task-tracker
     RefPtr<dom::ToggleEventTask> _toggleEventTask;
 
   public:
@@ -33,18 +33,18 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<HTMLDetailsElement> Create(Document &document) noexcept;
 
-#pragma region HTMLDetailsElement - https://html.spec.whatwg.org/#htmldetailselement
+#pragma region HTMLDetailsElement - https://html.spec.whatwg.org/multipage/interactive-elements.html#htmldetailselement
 
-    /// @see https://html.spec.whatwg.org/#dom-details-name
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-details-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-details-name
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-details-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-details-open
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-details-open
     KRYS_NODISCARD bool Open() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-details-open
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-details-open
     void Open(bool value) noexcept;
 
 #pragma endregion
@@ -56,7 +56,7 @@ namespace krys::boo
     /// summary if it has none.
     KRYS_NODISCARD bool IsActiveSummary(const HTMLSummaryElement &summary) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#queue-a-details-toggle-event-task
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
     void QueueDetailsToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState) noexcept;
 
     /// @brief The slot of the element's shadow tree that takes @p child: the summary slot for the first
@@ -86,10 +86,10 @@ namespace krys::boo
 
   private:
     /// @brief The other elements in the element's details name group.
-    /// @see https://html.spec.whatwg.org/#details-name-group
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#details-name-group
     KRYS_NODISCARD List<Ref<HTMLDetailsElement>> OtherElementsInNameGroup() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-the-given-element-if-needed
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
     void EnsureDetailsExclusivityAfterMutation() noexcept;
   };
 }

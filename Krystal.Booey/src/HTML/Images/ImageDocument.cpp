@@ -48,7 +48,7 @@ namespace krys::boo
 {
   ImageDocument::ImageDocument() noexcept : HTMLDocument(dom::DocumentFlag::IsImageDocument)
   {
-    // https://html.spec.whatwg.org/#read-media
+    // https://html.spec.whatwg.org/multipage/document-lifecycle.html#read-media
     // 2. Set document's mode to "no-quirks".
     SetQuirksMode(dom::QuirksMode::NoQuirks);
   }
@@ -130,14 +130,14 @@ namespace krys::boo
       ImageUpdated();
     }
 
-    // https://html.spec.whatwg.org/#read-media
+    // https://html.spec.whatwg.org/multipage/document-lifecycle.html#read-media
     // 10. Act as if the user agent had stopped parsing document.
     FinishedParsing();
   }
 
   void ImageDocument::CreateDocumentStructure() noexcept
   {
-    // https://html.spec.whatwg.org/#read-media
+    // https://html.spec.whatwg.org/multipage/document-lifecycle.html#read-media
     // 3. Append an html element to document.
     Ref rootElement = dom::ElementFactory::CreateHTMLElement<HTMLHtmlElement>(*this, u8"html");
     (void)AppendChild(*rootElement);

@@ -912,7 +912,7 @@ namespace krys::ui
   void View::PerformMicrotaskCheckpoint() noexcept
   {
     // Input is dispatched as a task would be, so a microtask checkpoint follows it.
-    // https://html.spec.whatwg.org/#event-loop-processing-model
+    // https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model
     boo::html::EventLoop::Current().PerformMicrotaskCheckpoint();
   }
 

@@ -20,7 +20,7 @@ namespace krys::net
 namespace krys::boo::html
 {
   /// @brief What `<a>` and `<area>` share as hyperlinks: their URL, their target and following them.
-  /// @see https://html.spec.whatwg.org/#links-created-by-a-and-area-elements
+  /// @see https://html.spec.whatwg.org/multipage/links.html#links-created-by-a-and-area-elements
   class HyperlinkAlgorithms
   {
   public:
@@ -43,7 +43,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static bool HasRel(const HTMLElement &element, DOMStringView relation) noexcept;
 
     /// @brief The referrer policy @p subject's link is followed with: `no-referrer` for `rel=noreferrer`.
-    /// @see https://html.spec.whatwg.org/#hyperlink-referrer-policy
+    /// @see https://html.spec.whatwg.org/multipage/links.html#hyperlink-referrer-policy
     KRYS_NODISCARD static ReferrerPolicy HyperlinkReferrerPolicy(const HTMLElement &subject) noexcept;
 
     /// @brief The activation behaviour of `<a>` and `<area>`: follows the link, with the coordinates clicked
@@ -53,7 +53,7 @@ namespace krys::boo::html
 
     /// @brief Follows @p subject's link, as @p event (a click, or the Enter key's simulated click) asks: its
     /// frame's loader navigates to its URL, followed by @p hyperlinkSuffix, in its target.
-    /// @see https://html.spec.whatwg.org/#following-hyperlinks-2
+    /// @see https://html.spec.whatwg.org/multipage/links.html#following-hyperlinks-2
     static void FollowTheHyperlink(HTMLElement &subject, Event &event,
                                    const Maybe<utf8_string> &hyperlinkSuffix = null) noexcept;
   };

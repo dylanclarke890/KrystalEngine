@@ -13,7 +13,7 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#assignednodesoptions
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#assignednodesoptions
   struct AssignedNodesOptions
   {
     bool Flatten {false};
@@ -22,7 +22,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlslotelement
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#htmlslotelement
   /// @see https://dom.spec.whatwg.org/#concept-slot
   class HTMLSlotElement : public HTMLElement
   {
@@ -34,33 +34,33 @@ namespace krys::boo
   private:
     /// @see https://dom.spec.whatwg.org/#slot-assigned-nodes
     List<WeakRef<Node>> _assignedNodes;
-    /// @see https://html.spec.whatwg.org/#manually-assigned-nodes
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#manually-assigned-nodes
     List<WeakRef<Node>> _manuallyAssignedNodes;
 
   public:
     HTMLSlotElement(Document &document) noexcept;
 
-#pragma region HTMLSlotElement - https://html.spec.whatwg.org/#htmlslotelement
+#pragma region HTMLSlotElement - https://html.spec.whatwg.org/multipage/scripting.html#htmlslotelement
 
     /// @brief The slot's name: its `name` attribute in no namespace, or the empty string without one.
-    /// @see https://html.spec.whatwg.org/#dom-slot-name
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-name
     /// @see https://dom.spec.whatwg.org/#slot-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-slot-name
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-name
     void Name(DOMString name) noexcept;
 
     /// @brief The slot's assigned nodes, or with @p options' `Flatten`, its flattened slottables.
-    /// @see https://html.spec.whatwg.org/#dom-slot-assignednodes
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-assignednodes
     KRYS_NODISCARD List<Ref<Node>> AssignedNodes(const html::AssignedNodesOptions &options) noexcept;
 
     /// @brief `AssignedNodes(options)`, filtered to contain only elements.
-    /// @see https://html.spec.whatwg.org/#dom-slot-assignedelements
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-assignedelements
     KRYS_NODISCARD List<Ref<Element>>
       AssignedElements(const html::AssignedNodesOptions &options = {}) noexcept;
 
     /// @brief Sets the slot's manually assigned nodes to @p nodes.
-    /// @see https://html.spec.whatwg.org/#dom-slot-assign
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-assign
     void Assign(const List<dom::ElementOrText> &nodes) noexcept;
 
 #pragma endregion

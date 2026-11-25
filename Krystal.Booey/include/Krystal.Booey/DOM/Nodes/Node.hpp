@@ -480,7 +480,7 @@ namespace krys::boo
     }
 
     /// @brief The node's directionality: its own if it keeps one, otherwise the document element's.
-    /// @see https://html.spec.whatwg.org/#the-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-directionality
     KRYS_NODISCARD text::TextDirection EffectiveTextDirection() const noexcept;
 
     void SetEffectiveTextDirection(text::TextDirection direction) noexcept;

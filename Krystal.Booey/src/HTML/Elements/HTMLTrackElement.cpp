@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#attr-track-kind
+  /// @see https://html.spec.whatwg.org/multipage/media.html#attr-track-kind
   template <>
   struct html::EnumeratedAttributeTraits<"kind", HTMLTrackElement>
   {

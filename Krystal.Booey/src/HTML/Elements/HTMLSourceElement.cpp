@@ -125,7 +125,7 @@ namespace krys::boo
     return *_cachedParsedMediaAttribute;
   }
 
-  // https://html.spec.whatwg.org/#the-source-element:html-element-insertion-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-source-element:html-element-insertion-steps
   void HTMLSourceElement::OnInsert() noexcept
   {
     HTMLElement::OnInsert();
@@ -150,7 +150,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-source-element:html-element-removing-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-source-element:html-element-removing-steps
   void HTMLSourceElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
@@ -172,7 +172,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-source-element:html-element-moving-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-source-element:html-element-moving-steps
   void HTMLSourceElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);

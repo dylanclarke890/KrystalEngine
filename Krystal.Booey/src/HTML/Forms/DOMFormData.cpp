@@ -82,13 +82,13 @@ namespace krys::boo::html
 
   namespace
   {
-    // https://html.spec.whatwg.org/#create-an-entry
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#create-an-entry
     KRYS_NODISCARD DOMFormData::Item CreateStringEntry(DOMStringView name, DOMStringView value) noexcept
     {
       return {.Name = DOMString(name), .Data = DOMString(value)};
     }
 
-    // https://html.spec.whatwg.org/#create-an-entry
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#create-an-entry
     KRYS_NODISCARD DOMFormData::Item CreateFileEntry(DOMStringView name, Blob &blob,
                                                      Maybe<DOMStringView> filename) noexcept
     {

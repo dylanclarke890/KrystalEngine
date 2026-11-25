@@ -85,7 +85,7 @@ namespace krys::boo::html
     void PushMarker() noexcept;
 
     /// @brief Pushes an element onto the list of active formatting elements.
-    /// @see https://html.spec.whatwg.org/push-onto-the-list-of-active-formatting-elements
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#push-onto-the-list-of-active-formatting-elements
     void PushElement(StackItem &&item) noexcept;
 
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
@@ -103,7 +103,7 @@ namespace krys::boo::html
     void Remove(const Element &node) noexcept;
 
     /// @brief Pops elements up to and including the last marker.
-    /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
     void ClearUpToLastMarker() noexcept;
 
     /// @brief Returns true if the list is empty.

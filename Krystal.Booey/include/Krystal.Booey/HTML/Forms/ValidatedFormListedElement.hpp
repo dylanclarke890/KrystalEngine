@@ -82,12 +82,12 @@ namespace krys::boo::html
 
     void HideVisibleValidationMessage() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#check-validity-steps
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#check-validity-steps
     /// @param unhandledInvalidControls Gets the element if it's invalid and its `invalid` event wasn't
     /// canceled.
     bool CheckValidity(List<Ref<HTMLElement>> *unhandledInvalidControls = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#report-validity-steps
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#report-validity-steps
     bool ReportValidity() noexcept;
 
     KRYS_NODISCARD HTMLElement *FocusableValidationAnchorElement() noexcept;
@@ -107,7 +107,7 @@ namespace krys::boo::html
 
     void SetDisabledByAncestorFieldset(bool isDisabled) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#concept-form-reset-control
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset-control
     virtual void Reset() noexcept
     {
     }
@@ -127,7 +127,7 @@ namespace krys::boo::html
       return SupportsReadOnly() && _hasReadOnlyAttribute;
     }
 
-    /// @see https://html.spec.whatwg.org/#concept-fe-mutable
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-fe-mutable
     KRYS_NODISCARD bool IsMutable() const noexcept
     {
       return !IsDisabled() && !IsReadOnly();

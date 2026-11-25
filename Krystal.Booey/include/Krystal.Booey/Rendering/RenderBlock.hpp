@@ -345,7 +345,7 @@ namespace krys::boo
 
     /// @brief What a fieldset's legend adds to its border on the block start side, beyond the border's own
     /// width: how much taller the legend (and its margin after) is than the border.
-    /// @see https://html.spec.whatwg.org/#the-fieldset-and-legend-elements
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#the-fieldset-and-legend-elements
     KRYS_NODISCARD LayoutUnit IntrinsicBorderForFieldset() const noexcept
     {
       return _intrinsicBorderForFieldset;

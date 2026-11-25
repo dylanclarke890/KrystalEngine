@@ -62,7 +62,7 @@ namespace krys::boo::dom
     }
   }
 
-  // https://html.spec.whatwg.org/#ancestor-revealing-algorithm
+  // https://html.spec.whatwg.org/multipage/interaction.html#ancestor-revealing-algorithm
   bool RevealClosedDetailsAndHiddenUntilFoundAncestors(Node &node) noexcept
   {
     (void)node.NodeDocument().UpdateStyleIfNeeded();

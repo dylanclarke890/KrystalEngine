@@ -176,7 +176,7 @@ namespace krys::boo::dom
 
   /// @brief When a document reached each point of its loading, in milliseconds since its window's time
   /// origin; 0 for those it hasn't reached.
-  /// @see https://html.spec.whatwg.org/#load-timing-info
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#load-timing-info
   struct DocumentLoadTimingInfo
   {
     double DOMInteractiveTime {0};
@@ -313,17 +313,17 @@ namespace krys::boo
     html::DocumentReadyState _currentDocumentReadiness
       : EnumBitWidth<html::DocumentReadyState> {html::DocumentReadyState::Complete};
 
-    /// @see https://html.spec.whatwg.org/#parser-cannot-change-the-mode-flag
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-cannot-change-the-mode-flag
     bool _parserCannotChangeTheMode : 1 {false};
 
     List<WeakRef<Element>> _renderBlockingElements;
 
     /// @see https://dom.spec.whatwg.org/#concept-document-url
     net::Url _url;
-    /// @see https://html.spec.whatwg.org/#document-base-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
     net::Url _baseUrl;
     /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
-    /// @see https://html.spec.whatwg.org/#frozen-base-url
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#frozen-base-url
     net::Url _baseElementUrl;
     /// @brief The target of the first `base` element with a `target` in the document tree.
     DOMString _baseTarget;
@@ -414,7 +414,7 @@ namespace krys::boo
     bool _visibilityHiddenDueToDismissal {false};
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
-    /// @see https://html.spec.whatwg.org/#page-showing
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#page-showing
     bool _pageShowing {false};
     bool _loadEventFinished {false};
     /// @brief Set once an element with a `dir` attribute or a `<bdi>` is made, after which changes to
@@ -427,9 +427,9 @@ namespace krys::boo
     bool _hasPointerMoveListener {false};
     bool _hasPointerRawUpdateListener {false};
     bool _hasTouchRelatedListener {false};
-    /// @see https://html.spec.whatwg.org/#unload-counter
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#unload-counter
     uint32 _unloadCounter {0};
-    /// @see https://html.spec.whatwg.org/#pragma-set-default-language
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#pragma-set-default-language
     DOMString _contentLanguage;
     /// @brief When its source was last modified, as its response said; none if it's unknown.
     Maybe<std::chrono::sys_seconds> _lastModified;
@@ -638,7 +638,7 @@ namespace krys::boo
 
     /// @brief A new HTML document parsed from @p markup, with declarative shadow roots and the settings of
     /// @p context, the document of the caller; sanitized only if @p options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtmlunsafe
     KRYS_NODISCARD static ExceptionOr<Ref<Document>>
       ParseHTMLUnsafe(Document &context, DOMStringView markup, html::ParseHTMLUnsafeOptions options) noexcept;
 
@@ -649,7 +649,7 @@ namespace krys::boo
     /// @brief A new HTML document parsed from @p html, with declarative shadow roots and the settings of
     /// @p context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
-    /// @see https://html.spec.whatwg.org/#dom-parsehtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtml
     KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(Document &context, DOMStringView html,
                                                                const html::SetHTMLOptions &options) noexcept;
 
@@ -664,12 +664,12 @@ namespace krys::boo
       _allowDeclarativeShadowRoots = allow;
     }
 
-    // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
+    // resource metadata management - https://html.spec.whatwg.org/multipage/dom.html#resource-metadata-management
     // (No domain, referrer or cookie: origins and HTTP semantics aren't planned; see OVERVIEW.md.)
 
     /// @brief When the document's source was last modified, in the user's local time zone, as
     /// `MM/DD/YYYY hh:mm:ss`.
-    /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-lastmodified
     KRYS_NODISCARD DOMString LastModified() const noexcept;
 
     /// @brief When the document's source was last modified (its response's `Last-Modified`); unknown, the
@@ -679,24 +679,24 @@ namespace krys::boo
       _lastModified = lastModified;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-document-readystate
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-readystate
     KRYS_NODISCARD html::DocumentReadyState ReadyState() const noexcept
     {
       return _currentDocumentReadiness;
     }
 
-    // DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
+    // DOM tree accessors - https://html.spec.whatwg.org/multipage/dom.html#dom-tree-accessors
 
-    /// @see https://html.spec.whatwg.org/#document.title
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#document.title
     KRYS_NODISCARD DOMString Title() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#document.title
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#document.title
     ExceptionOr<void> Title(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-dir
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-dir
     KRYS_NODISCARD DOMString Dir() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-dir
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-dir
     void Dir(DOMString value) noexcept;
 
     /// @brief The first body element child of the html element. The body element, which can also be a
@@ -709,82 +709,82 @@ namespace krys::boo
 
     /// @brief Sets the body element to @p body; `HierarchyRequestError` if it isn't a body or frameset
     /// element, or if there's no body element and no document element to append it to.
-    /// @see https://html.spec.whatwg.org/#dom-document-body
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-body
     ExceptionOr<void> SetBodyOrFrameset(HTMLElement &body) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-head
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-head
     KRYS_NODISCARD RefPtr<HTMLHeadElement> Head() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-head
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-head
     KRYS_NODISCARD RefPtr<const HTMLHeadElement> Head() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-images
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-images
     KRYS_NODISCARD Ref<HTMLCollection> Images() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-embeds
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-embeds
     KRYS_NODISCARD Ref<HTMLCollection> Embeds() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-plugins
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-plugins
     KRYS_NODISCARD Ref<HTMLCollection> Plugins() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-links
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-links
     KRYS_NODISCARD Ref<HTMLCollection> Links() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-forms
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-forms
     KRYS_NODISCARD Ref<HTMLCollection> Forms() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-scripts
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-scripts
     KRYS_NODISCARD Ref<HTMLCollection> Scripts() noexcept;
 
-#pragma region Document Obsolete members - https://html.spec.whatwg.org/#Document-partial
+#pragma region Document Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#Document-partial
 
     /// @brief The body element's `text` attribute, or empty if the body element isn't a body.
-    /// @see https://html.spec.whatwg.org/#dom-document-fgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-fgcolor
     KRYS_NODISCARD DOMString FgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-fgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-fgcolor
     void FgColor(DOMString value) noexcept;
 
     /// @brief The body element's `link` attribute, or empty if the body element isn't a body.
-    /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-linkcolor
     KRYS_NODISCARD DOMString LinkColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-linkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-linkcolor
     void LinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `vlink` attribute, or empty if the body element isn't a body.
-    /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-vlinkcolor
     KRYS_NODISCARD DOMString VlinkColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-vlinkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-vlinkcolor
     void VlinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `alink` attribute, or empty if the body element isn't a body.
-    /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-alinkcolor
     KRYS_NODISCARD DOMString AlinkColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-alinkcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-alinkcolor
     void AlinkColor(DOMString value) noexcept;
 
     /// @brief The body element's `bgcolor` attribute, or empty if the body element isn't a body.
-    /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-bgcolor
     void BgColor(DOMString value) noexcept;
 
     /// @brief The `a` elements with `name` attributes.
-    /// @see https://html.spec.whatwg.org/#dom-document-anchors
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-anchors
     KRYS_NODISCARD Ref<HTMLCollection> Anchors() noexcept;
 
     /// @brief An empty collection, for historical reasons.
-    /// @see https://html.spec.whatwg.org/#dom-document-applets
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-applets
     KRYS_NODISCARD Ref<HTMLCollection> Applets() noexcept;
 
 #pragma endregion
 
     /// @brief The HTML elements whose `name` attribute is @p elementName, live, in tree order.
-    /// @see https://html.spec.whatwg.org/#dom-document-getelementsbyname
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-getelementsbyname
     KRYS_NODISCARD Ref<NodeList> GetElementsByName(DOMStringView elementName) noexcept;
 
     // dynamic markup insertion
@@ -802,14 +802,14 @@ namespace krys::boo
     /// last in tree order wins, as in Chrome.
     KRYS_NODISCARD RefPtr<Element> ElementForAccessKey(DOMStringView key) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#designMode
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#designMode
     KRYS_NODISCARD DOMString DesignMode() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#designMode
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#designMode
     void DesignMode(DOMStringView value) noexcept;
 
     /// @brief Whether the document's design mode is enabled, which makes its document tree editable.
-    /// @see https://html.spec.whatwg.org/#design-mode-enabled
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#design-mode-enabled
     KRYS_NODISCARD bool InDesignMode() const noexcept
     {
       return _designModeEnabled;
@@ -846,23 +846,23 @@ namespace krys::boo
     /// @see https://w3c.github.io/editing/docs/execCommand/#querycommandvalue()
     KRYS_NODISCARD ExceptionOr<DOMString> QueryCommandValue(DOMStringView commandId) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-hidden
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-document-hidden
     KRYS_NODISCARD bool Hidden() const noexcept
     {
       return VisibilityState() != html::DocumentVisibilityState::Visible;
     }
 
     /// @brief The page's visibility: hidden if the document isn't in a page's frame or has been unloaded.
-    /// @see https://html.spec.whatwg.org/#dom-document-visibilitystate
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-document-visibilitystate
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept;
 
     /// @brief Hides the document as it's unloaded, firing `visibilitychange` straight away if it was visible.
     /// It stays hidden.
-    /// @see https://html.spec.whatwg.org/#update-the-visibility-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#update-the-visibility-state
     void SetVisibilityHiddenDueToDismissal() noexcept;
 
     /// @brief Fires `visibilitychange` in a task, as the page is shown or hidden.
-    /// @see https://html.spec.whatwg.org/#update-the-visibility-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#update-the-visibility-state
     void VisibilityStateChanged() noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
@@ -892,7 +892,7 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region Urls - https://html.spec.whatwg.org/#document-base-url
+#pragma region Urls - https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
 
     /// @brief The document's URL; `about:blank` until the host sets one.
     /// @see https://dom.spec.whatwg.org/#concept-document-url
@@ -903,7 +903,7 @@ namespace krys::boo
 
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
     /// consumed.
-    /// @see https://html.spec.whatwg.org/#set-the-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#set-the-url
     void SetUrl(net::Url url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
@@ -913,11 +913,11 @@ namespace krys::boo
       return _baseTarget;
     }
 
-    /// @see https://html.spec.whatwg.org/#fallback-base-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fallback-base-url
     KRYS_NODISCARD const net::Url &FallbackBaseUrl() const noexcept;
 
     /// @brief The document base URL, which getting the base URL returns: there's no base URL override.
-    /// @see https://html.spec.whatwg.org/#document-base-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
     /// @see https://dom.spec.whatwg.org/#get-the-base-url
     KRYS_NODISCARD const net::Url &BaseUrl() const noexcept
     {
@@ -926,12 +926,12 @@ namespace krys::boo
 
     /// @brief Parses @p url relative to the document base URL. As documents are always UTF-8, this is
     /// both parsing and encoding-parsing a URL.
-    /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
-    /// @see https://html.spec.whatwg.org/#parse-a-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#encoding-parsing-a-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#parse-a-url
     KRYS_NODISCARD net::Url CompleteUrl(utf8_stringview url) const noexcept;
 
     /// @brief Parses @p url relative to @p baseURL.
-    /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#encoding-parsing-a-url
     KRYS_NODISCARD static net::Url CompleteUrl(utf8_stringview url, const net::Url &baseUrl) noexcept;
 
 #pragma endregion
@@ -1066,7 +1066,7 @@ namespace krys::boo
     /// then gathers and delivers the resize observations, deeper each round, laying out the page between
     /// them. Observations that were skipped (no deeper than the last round's) are reported as an error at the
     /// window, and left for the next update.
-    /// @see https://html.spec.whatwg.org/#update-the-rendering
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
     void UpdateResizeObservations(boo::Frame &page) noexcept;
 
     /// @brief Tracks a resize observer that observes something in the document, or stops tracking it; and
@@ -1116,7 +1116,7 @@ namespace krys::boo
 
     /// @brief The rendering update's intersection observations step: updates the observations of the
     /// intersection observers the document tracks, and notifies those with new entries.
-    /// @see https://html.spec.whatwg.org/#update-the-rendering
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
     void UpdateIntersectionObservations() noexcept;
 
     /// @brief The same, for @p intersectionObservers.
@@ -1202,33 +1202,33 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region Focus - https://html.spec.whatwg.org/#focus
+#pragma region Focus - https://html.spec.whatwg.org/multipage/interaction.html#focus
 
     /// @brief The focused area of the document if it's an element; null if it's the viewport.
-    /// @see https://html.spec.whatwg.org/#focused-area-of-the-document
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focused-area-of-the-document
     KRYS_NODISCARD Element *FocusedElement() const noexcept
     {
       return _focusedElement.get();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-document-hasfocus
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-document-hasfocus
     KRYS_NODISCARD bool HasFocus() const noexcept;
 
     /// @brief Sets the sequential focus navigation starting point to @p node (as when the user clicks it), or
     /// unsets it if @p node is null, the document or its document element (navigation then starts from the
     /// start of the document).
-    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-starting-point
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     void SetSequentialFocusNavigationStartingPoint(Node *node) noexcept;
 
     /// @brief The sequential focus navigation starting point, if it's set.
-    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-starting-point
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     KRYS_NODISCARD Node *SequentialFocusNavigationStartingPoint() const noexcept
     {
       return _sequentialFocusNavigationStartingPoint.get();
     }
 
     /// @brief The document's target element, which `:target` matches; null if there's none.
-    /// @see https://html.spec.whatwg.org/#target-element
+    /// @see https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-element
     KRYS_NODISCARD Element *CSSTarget() const noexcept;
 
     /// @brief Makes @p newTarget (or nothing, if it's null) the document's target element, invalidating the
@@ -1237,7 +1237,7 @@ namespace krys::boo
 
     /// @brief The element the fragment @p name indicates: the element with the ID @p name, or else the first
     /// `<a>` whose `name` is @p name (ASCII case-insensitively in quirks mode); null for an empty name.
-    /// @see https://html.spec.whatwg.org/#find-a-potential-indicated-element
+    /// @see https://html.spec.whatwg.org/multipage/browsing-the-web.html#find-a-potential-indicated-element
     KRYS_NODISCARD Element *FindAnchor(DOMStringView name) const noexcept;
 
     /// @brief Adds @p element, which mustn't be in it, to the top of the document's top layer. Use
@@ -1278,11 +1278,11 @@ namespace krys::boo
     void ProcessTopLayerRemovals() noexcept;
 
     /// @brief The topmost modal dialog in the top layer, which blocks the document: everything else is inert.
-    /// @see https://html.spec.whatwg.org/#blocked-by-a-modal-dialog
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#blocked-by-a-modal-dialog
     KRYS_NODISCARD HTMLDialogElement *ActiveModalDialog() const noexcept;
 
     /// @brief The open dialogs, in the order they opened.
-    /// @see https://html.spec.whatwg.org/#open-dialogs-list
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#open-dialogs-list
     KRYS_NODISCARD const ListHashSet<Ref<HTMLDialogElement>> &OpenDialogs() const noexcept
     {
       return _openDialogs;
@@ -1304,7 +1304,7 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<HTMLElement>> ShowingAutoPopoverList() const noexcept;
 
     /// @brief The showing popovers opened as hint popovers, in top layer order.
-    /// @see https://html.spec.whatwg.org/#showing-hint-popover-list
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#showing-hint-popover-list
     KRYS_NODISCARD List<Ref<HTMLElement>> ShowingHintPopoverList() const noexcept;
 
     /// @brief The last showing hint popover, else the last showing auto popover, if any.
@@ -1319,24 +1319,24 @@ namespace krys::boo
 
     /// @brief Hides the showing popovers of @p stackType (`Auto` or `Hint`) above @p endpoint, newest first,
     /// or all of them if it isn't one.
-    /// @see https://html.spec.whatwg.org/#hide-popover-stack-until
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#hide-popover-stack-until
     void HidePopoverStackUntil(HTMLElement *endpoint, dom::PopoverState stackType,
                                dom::FocusPreviousElement focusPreviousElement,
                                dom::FireEvents fireEvents) noexcept;
 
     /// @brief The popover a press on @p node is in, or on an invoker of, if it's a showing auto or hint
     /// popover; the higher in the stacks of the two.
-    /// @see https://html.spec.whatwg.org/#topmost-clicked-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#topmost-clicked-popover
     KRYS_NODISCARD RefPtr<HTMLElement> TopmostClickedPopover(Node &node) const noexcept;
 
     /// @brief The showing auto popover the first showing hint popover opened from, if any.
-    /// @see https://html.spec.whatwg.org/#hint-stack-parent
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#hint-stack-parent
     KRYS_NODISCARD HTMLElement *HintStackParent() const noexcept;
 
     /// @brief Sets it.
     void SetHintStackParent(HTMLElement *element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#hiding-popover-nesting-count
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#hiding-popover-nesting-count
     KRYS_NODISCARD uint32 HidingPopoverNestingCount() const noexcept
     {
       return _hidingPopoverNestingCount;
@@ -1354,7 +1354,7 @@ namespace krys::boo
       --_hidingPopoverNestingCount;
     }
 
-    /// @see https://html.spec.whatwg.org/#showing-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#showing-popover
     KRYS_NODISCARD bool IsShowingPopover() const noexcept
     {
       return _isShowingPopover;
@@ -1380,7 +1380,7 @@ namespace krys::boo
     void DidRemoveAllPendingStylesheet() noexcept;
 
     /// @brief Whether the document is its frame's (its navigable's active document).
-    /// @see https://html.spec.whatwg.org/#fully-active
+    /// @see https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active
     KRYS_NODISCARD bool IsFullyActive() const noexcept;
 
     /// @brief The document's custom highlights, which `::highlight()` styles.
@@ -1531,20 +1531,20 @@ namespace krys::boo
 
     /// @brief The document's window while it's in a frame (its browsing context's `WindowProxy`); null
     /// otherwise.
-    /// @see https://html.spec.whatwg.org/#dom-document-defaultview
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-document-defaultview
     KRYS_NODISCARD boo::Window *DefaultView() const noexcept;
 
     /// @brief Fires @p event at the document's window, if it has one.
     void DispatchWindowEvent(Event &event) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#load-timing-info
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#load-timing-info
     KRYS_NODISCARD const dom::DocumentLoadTimingInfo &LoadTiming() const noexcept
     {
       return _loadTiming;
     }
 
     /// @brief Whether the document's parser is running: it's being loaded into a frame.
-    /// @see https://html.spec.whatwg.org/#active-parser
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#active-parser
     KRYS_NODISCARD bool Parsing() const noexcept
     {
       return _parsing;
@@ -1582,7 +1582,7 @@ namespace krys::boo
     /// its frame's loader collects its icons again.
     void IconLinksMayHaveChanged() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#page-showing
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#page-showing
     KRYS_NODISCARD bool PageShowing() const noexcept
     {
       return _pageShowing;
@@ -1595,17 +1595,17 @@ namespace krys::boo
     void DispatchWindowLoadEvent() noexcept;
 
     /// @brief Fires `pageshow` at the window if the document isn't showing yet.
-    /// @see https://html.spec.whatwg.org/#fire-a-page-transition-event
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#fire-a-page-transition-event
     void DispatchPageshowEvent(bool persisted) noexcept;
 
     /// @brief Runs the pragma directive @p equiv (a `<meta http-equiv>`'s) with @p content: `refresh`,
     /// `content-language` and `default-style`; the others are ignored.
-    /// @see https://html.spec.whatwg.org/#pragma-directives
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives
     void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
 
     /// @brief The document's language, for elements without a language of their own: its `content-language`
     /// pragma's, or else its response's `Content-Language` header's first language; empty if it has none.
-    /// @see https://html.spec.whatwg.org/#pragma-set-default-language
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#pragma-set-default-language
     KRYS_NODISCARD const DOMString &ContentLanguage() const noexcept
     {
       return _contentLanguage;
@@ -1627,12 +1627,12 @@ namespace krys::boo
     }
 
     /// @brief Fires `pagehide` at the window if the document is showing.
-    /// @see https://html.spec.whatwg.org/#unload-a-document
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#unload-a-document
     void DispatchPagehideEvent(bool persisted) noexcept;
 
     /// @brief How many `beforeunload`, `pagehide` and `unload` events of the document are being dispatched:
     /// while there's one, it can't show dialogs.
-    /// @see https://html.spec.whatwg.org/#unload-counter
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#unload-counter
     KRYS_NODISCARD uint32 UnloadCounter() const noexcept
     {
       return _unloadCounter;
@@ -1662,7 +1662,7 @@ namespace krys::boo
     /// @brief Drops @p timer, which stopped.
     void RemoveTimer(dom::DocumentTimer &timer) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept;
 
     /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
@@ -1671,11 +1671,11 @@ namespace krys::boo
     /// @brief Resumes them.
     void ResumeScriptedAnimationControllerCallbacks() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 id) noexcept;
 
     /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
-    /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     void ServiceRequestAnimationFrameCallbacks() noexcept;
 
     /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:
@@ -1746,13 +1746,13 @@ namespace krys::boo
     /// @brief Asks the page for a rendering update that runs @p requestedSteps, if the document is in one.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#autofocus-candidates
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#autofocus-candidates
     KRYS_NODISCARD List<WeakPtr<Element>> &AutofocusCandidates() noexcept
     {
       return _autofocusCandidates;
     }
 
-    /// @see https://html.spec.whatwg.org/#autofocus-processed-flag
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#autofocus-processed-flag
     KRYS_NODISCARD bool AutofocusProcessed() const noexcept
     {
       return _autofocusProcessed;
@@ -1883,8 +1883,8 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<Element> ScrollingElementForAPI() noexcept;
 
     /// @brief The body element: the first body or frameset child of the html element.
-    /// @see https://html.spec.whatwg.org/#the-body-element-2
-    /// @see https://html.spec.whatwg.org/#dom-document-body
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-body-element-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-document-body
     KRYS_NODISCARD HTMLElement *BodyOrFrameset() const noexcept;
 
     /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.
@@ -2115,7 +2115,7 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
     KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
@@ -2308,14 +2308,14 @@ namespace krys::boo
     void ProcessBaseElement() noexcept;
 
     /// @brief Recomputes the document base URL and responds to base URL changes.
-    /// @see https://html.spec.whatwg.org/#document-base-url
-    /// @see https://html.spec.whatwg.org/#respond-to-base-url-changes
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#respond-to-base-url-changes
     void UpdateBaseUrl() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#concept-n-noscript
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#concept-n-noscript
     KRYS_NODISCARD static bool IsScriptingDisabled() noexcept
     {
       // SPEC-VIOLATION(HTML, DOM): We don't have global objects or JavaScript so we'll always return true

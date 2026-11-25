@@ -17,22 +17,22 @@ namespace krys::boo::html::mixins
   class HTMLOrSVGOrMathMLElement
   {
   public:
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     KRYS_NODISCARD static int32 TabIndex(const Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     static void TabIndex(Element &element, int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     KRYS_NODISCARD static bool Autofocus(const Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     static void Autofocus(Element &element, bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-focus
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
     static void Focus(Element &element, const dom::FocusOptions &options = {}) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-blur
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
     static void Blur(Element &element) noexcept;
   };
 }

@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlembedelement
+  /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmlembedelement
   class HTMLEmbedElement : public HTMLPlugInElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLEmbedElement);
@@ -23,30 +23,30 @@ namespace krys::boo
       return true;
     }
 
-#pragma region HTMLEmbedElement - https://html.spec.whatwg.org/#htmlembedelement
+#pragma region HTMLEmbedElement - https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmlembedelement
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-src
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-src
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-type
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-type
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-width
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-width
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-width
     void Width(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-height
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-height
     KRYS_NODISCARD DOMString Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-height
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-embed-height
     void Height(DOMString value) noexcept;
 
     // (No `getSVGDocument()`: an embed loads no nested document, as subframes aren't planned; see
@@ -54,18 +54,18 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region HTMLEmbedElement Obsolete members - https://html.spec.whatwg.org/#HTMLEmbedElement-partial
+#pragma region HTMLEmbedElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLEmbedElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-embed-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-embed-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-embed-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-embed-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-embed-name
     void Name(DOMString value) noexcept;
 
 #pragma endregion

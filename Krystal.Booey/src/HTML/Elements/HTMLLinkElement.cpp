@@ -27,7 +27,7 @@ namespace krys::boo
 {
   /// @brief A link's `as`: a keyword for each potential destination ("fetch", or a destination other than the
   /// empty string), with no missing or invalid value default.
-  /// @see https://html.spec.whatwg.org/#attr-link-as
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#attr-link-as
   template <>
   struct html::EnumeratedAttributeTraits<"as", HTMLLinkElement>
   {
@@ -357,7 +357,7 @@ namespace krys::boo
     }
 
     // The linked resource fetch setup steps for a stylesheet:
-    // https://html.spec.whatwg.org/#link-type-stylesheet:linked-resource-fetch-setup-steps
+    // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet:linked-resource-fetch-setup-steps
     // 1. If el's disabled attribute is set, then return false.
     if (_disabledState != DisabledState::Disabled && treatAsStyleSheet && document.Frame() && _url.IsValid())
     {
@@ -442,7 +442,7 @@ namespace krys::boo
   void HTMLLinkElement::PotentiallyBlockRendering() noexcept
   {
     // Whether the element is potentially render-blocking:
-    // https://html.spec.whatwg.org/#potentially-render-blocking
+    // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#potentially-render-blocking
     if (html::RenderBlocking::HasRenderBlockingToken(*this) || IsImplicitlyPotentiallyRenderBlocking())
     {
       html::RenderBlocking::BlockRendering(*this);
@@ -459,7 +459,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#link-type-stylesheet
+  // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet
   bool HTMLLinkElement::IsImplicitlyPotentiallyRenderBlocking() const noexcept
   {
     return _relIsStyleSheet && _createdByParser;
@@ -543,7 +543,7 @@ namespace krys::boo
   }
 
   // Processing the linked resource, for a stylesheet that loaded:
-  // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
+  // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet:process-the-linked-resource
   // (The load or error event is fired once the sheet's imports load, by
   // NotifyLoadedSheetAndAllCriticalSubresources.)
   void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const net::Url &baseUrl,

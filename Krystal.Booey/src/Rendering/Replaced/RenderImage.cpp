@@ -666,7 +666,7 @@ namespace krys::boo
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});
           // With dir=auto, the text has the directionality of its attribute: its first strong character's, or
-          // ltr. https://html.spec.whatwg.org/#directionality-of-the-attribute
+          // ltr. https://html.spec.whatwg.org/multipage/dom.html#directionality-of-the-attribute
           if (auto *element = GetElement();
               _altTextIsFromAttribute && element && element->HasAutoTextDirectionState())
           {

@@ -6,46 +6,46 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [11 Worklets](https://html.spec.whatwg.org/#worklets)
+## [11 Worklets](https://html.spec.whatwg.org/multipage/worklets.html#worklets)
 
 Status: n/a (no JavaScript)
 
-### [11.1 Introduction](https://html.spec.whatwg.org/#worklets-intro)
+### [11.1 Introduction](https://html.spec.whatwg.org/multipage/worklets.html#worklets-intro)
 
 Status: n/a (no JavaScript)
 
-#### [11.1.1 Motivations](https://html.spec.whatwg.org/#worklets-motivations)
+#### [11.1.1 Motivations](https://html.spec.whatwg.org/multipage/worklets.html#worklets-motivations)
 
 Status: n/a (no JavaScript)
 
-#### [11.1.2 Code idempotence](https://html.spec.whatwg.org/#worklets-idempotent)
+#### [11.1.2 Code idempotence](https://html.spec.whatwg.org/multipage/worklets.html#worklets-idempotent)
 
 Status: n/a (no JavaScript)
 
-#### [11.1.3 Speculative evaluation](https://html.spec.whatwg.org/#worklets-speculative)
+#### [11.1.3 Speculative evaluation](https://html.spec.whatwg.org/multipage/worklets.html#worklets-speculative)
 
 Status: n/a (no JavaScript)
 
-### [11.2 Examples](https://html.spec.whatwg.org/#worklets-examples)
+### [11.2 Examples](https://html.spec.whatwg.org/multipage/worklets.html#worklets-examples)
 
 Status: n/a (no JavaScript)
 <!-- definitions: fake-worklet-1 fake-worklet-2 registered-class-constructors-map -->
 
-- [x] [fakeWorklet1](https://html.spec.whatwg.org/#fakeworklet1) — The fakeWorklet1 getter steps are to return this's fake worklet 1.
+- [x] [fakeWorklet1](https://html.spec.whatwg.org/multipage/worklets.html#fakeworklet1) — The fakeWorklet1 getter steps are to return this's fake worklet 1.
 
-- [x] [fakeWorklet2](https://html.spec.whatwg.org/#fakeworklet2) — The fakeWorklet2 getter steps are to return this's fake worklet 2.
+- [x] [fakeWorklet2](https://html.spec.whatwg.org/multipage/worklets.html#fakeworklet2) — The fakeWorklet2 getter steps are to return this's fake worklet 2.
 
-- [x] [registerFake(type, classConstructor)](https://html.spec.whatwg.org/#dom-fakeworkletglobalscope-registerfake) — The registerFake(type, classConstructor) method steps are to set this's registered class constructors map[type] to classConstructor.
+- [x] [registerFake(type, classConstructor)](https://html.spec.whatwg.org/multipage/worklets.html#dom-fakeworkletglobalscope-registerfake) — The registerFake(type, classConstructor) method steps are to set this's registered class constructors map[type] to classConstructor.
 
-#### [11.2.1 Loading scripts](https://html.spec.whatwg.org/#worklets-examples-loading)
-
-Status: n/a (no JavaScript)
-
-#### [11.2.2 Registering a class and invoking its methods](https://html.spec.whatwg.org/#worklets-example-registering)
+#### [11.2.1 Loading scripts](https://html.spec.whatwg.org/multipage/worklets.html#worklets-examples-loading)
 
 Status: n/a (no JavaScript)
 
-- [x] [find the opposite of true](https://html.spec.whatwg.org/#fakeworkletglobalscope-process) — To make use of such registered classes, the specification for fake worklets could define a find the opposite of true algorithm, given a Worklet worklet:
+#### [11.2.2 Registering a class and invoking its methods](https://html.spec.whatwg.org/multipage/worklets.html#worklets-example-registering)
+
+Status: n/a (no JavaScript)
+
+- [x] [find the opposite of true](https://html.spec.whatwg.org/multipage/worklets.html#fakeworkletglobalscope-process) — To make use of such registered classes, the specification for fake worklets could define a find the opposite of true algorithm, given a Worklet worklet:
   - 1. Optionally, create a worklet global scope for worklet.
   - 2. Let workletGlobalScope be one of worklet's global scopes, chosen in an implementation-defined manner.
   - 3. Let classConstructor be workletGlobalScope's registered class constructors map["negation-processor"].
@@ -54,24 +54,24 @@ Status: n/a (no JavaScript)
   - 6. Let callback be the result of converting function to a Web IDL Function instance.
   - 7. Return the result of invoking callback with « true » and "rethrow", and with callback this value set to classInstance.
 
-### [11.3 Infrastructure](https://html.spec.whatwg.org/#worklets-infrastructure)
+### [11.3 Infrastructure](https://html.spec.whatwg.org/multipage/worklets.html#worklets-infrastructure)
 
 Status: n/a (no JavaScript)
 
-#### [11.3.1 The global scope](https://html.spec.whatwg.org/#worklets-global)
+#### [11.3.1 The global scope](https://html.spec.whatwg.org/multipage/worklets.html#worklets-global)
 
 Status: n/a (no JavaScript)
 <!-- definitions: concept-workletglobalscope-module-map -->
 
-##### [11.3.1.1 Agents and event loops](https://html.spec.whatwg.org/#worklet-agents-and-event-loops)
+##### [11.3.1.1 Agents and event loops](https://html.spec.whatwg.org/multipage/worklets.html#worklet-agents-and-event-loops)
 
 Status: n/a (no JavaScript)
 
-##### [11.3.1.2 Creation and termination](https://html.spec.whatwg.org/#worklets-creation-termination)
+##### [11.3.1.2 Creation and termination](https://html.spec.whatwg.org/multipage/worklets.html#worklets-creation-termination)
 
 Status: n/a (no JavaScript)
 
-- [x] [create a worklet global scope](https://html.spec.whatwg.org/#create-a-worklet-global-scope) — To create a worklet global scope for a Worklet worklet:
+- [x] [create a worklet global scope](https://html.spec.whatwg.org/multipage/worklets.html#create-a-worklet-global-scope) — To create a worklet global scope for a Worklet worklet:
   - 1. Let outsideSettings be worklet's relevant settings object.
   - 2. Let agent be the result of obtaining a worklet agent given outsideSettings. Run the rest of these steps in that agent.
   - 3. Let realmExecutionContext be the result of creating a new realm given agent and the following customizations: For the global object, create a new object of the type given by worklet's worklet global scope type.
@@ -91,7 +91,7 @@ Status: n/a (no JavaScript)
     - 7d. Run the responsible event loop specified by insideSettings.
   - 8. Run runNextAddedModule.
 
-- [x] [terminate a worklet global scope](https://html.spec.whatwg.org/#terminate-a-worklet-global-scope) — To terminate a worklet global scope given a WorkletGlobalScope workletGlobalScope:
+- [x] [terminate a worklet global scope](https://html.spec.whatwg.org/multipage/worklets.html#terminate-a-worklet-global-scope) — To terminate a worklet global scope given a WorkletGlobalScope workletGlobalScope:
   - 1. Let eventLoop be workletGlobalScope's relevant agent's event loop.
   - 2. If there are any tasks queued in eventLoop's task queues, discard them without processing them.
   - 3. Wait for eventLoop to complete the currently running task.
@@ -100,11 +100,11 @@ Status: n/a (no JavaScript)
   - 6. Remove workletGlobalScope from the global scopes of the Worklet whose global scopes contains workletGlobalScope.
   - 7. Remove workletGlobalScope from the worklet global scopes of the Document whose worklet global scopes contains workletGlobalScope.
 
-##### [11.3.1.3 Script settings for worklets](https://html.spec.whatwg.org/#script-settings-for-worklets)
+##### [11.3.1.3 Script settings for worklets](https://html.spec.whatwg.org/multipage/worklets.html#script-settings-for-worklets)
 
 Status: n/a (no JavaScript)
 
-- [x] [set up a worklet environment settings object](https://html.spec.whatwg.org/#set-up-a-worklet-environment-settings-object) — To set up a worklet environment settings object, given a JavaScript execution context executionContext and an environment settings object outsideSettings:
+- [x] [set up a worklet environment settings object](https://html.spec.whatwg.org/multipage/worklets.html#set-up-a-worklet-environment-settings-object) — To set up a worklet environment settings object, given a JavaScript execution context executionContext and an environment settings object outsideSettings:
   - 1. Let origin be a unique opaque origin.
   - 2. Let inheritedAPIBaseURL be outsideSettings's API base URL.
   - 3. Let inheritedPolicyContainer be a clone of outsideSettings's policy container.
@@ -115,12 +115,12 @@ Status: n/a (no JavaScript)
   - 8. Set realm's [[HostDefined]] field to settingsObject.
   - 9. Return settingsObject.
 
-#### [11.3.2 The Worklet class](https://html.spec.whatwg.org/#worklets-worklet)
+#### [11.3.2 The Worklet class](https://html.spec.whatwg.org/multipage/worklets.html#worklets-worklet)
 
 Status: n/a (no JavaScript)
 <!-- definitions: worklet-global-scope-type worklet-destination-type concept-worklet-global-scopes concept-worklet-added-modules-list concept-worklet-module-responses-map -->
 
-- [x] [Worklet.addModule(moduleURL, options)](https://html.spec.whatwg.org/#dom-worklet-addmodule) — The addModule(moduleURL, options) method steps are:
+- [x] [Worklet.addModule(moduleURL, options)](https://html.spec.whatwg.org/multipage/worklets.html#dom-worklet-addmodule) — The addModule(moduleURL, options) method steps are:
   - 1. Let outsideSettings be the relevant settings object of this.
   - 2. Let moduleURLRecord be the result of encoding-parsing a URL given moduleURL, relative to outsideSettings.
   - 3. If moduleURLRecord is failure, then return a promise rejected with a "SyntaxError" DOMException.
@@ -156,7 +156,7 @@ Status: n/a (no JavaScript)
           - 6d.v.A.2. If pendingTasks is 0, then resolve promise.
   - 7. Return promise.
 
-#### [11.3.3 The worklet's lifetime](https://html.spec.whatwg.org/#worklets-lifetime)
+#### [11.3.3 The worklet's lifetime](https://html.spec.whatwg.org/multipage/worklets.html#worklets-lifetime)
 
 Status: n/a (no JavaScript)
 <!-- definitions: concept-document-worklet-global-scopes -->

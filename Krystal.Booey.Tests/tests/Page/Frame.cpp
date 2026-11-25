@@ -625,7 +625,7 @@ namespace krys::boo::tests
       CHECK(events == List<bool> {true, true});
     }
 
-    // https://html.spec.whatwg.org/#update-the-rendering (hidden documents aren't rendered)
+    // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering (hidden documents aren't rendered)
     SECTION("A hidden page's rendering updates wait for it to be shown")
     {
       frame.SetIsVisible(false);

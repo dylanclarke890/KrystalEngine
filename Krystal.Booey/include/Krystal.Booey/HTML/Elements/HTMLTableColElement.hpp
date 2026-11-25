@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmltablecolelement
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#htmltablecolelement
   class HTMLTableColElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableColElement);
@@ -12,17 +12,17 @@ namespace krys::boo
   public:
     HTMLTableColElement(Document &document) noexcept;
 
-#pragma region HTMLTableColElement - https://html.spec.whatwg.org/#htmltablecolelement
+#pragma region HTMLTableColElement - https://html.spec.whatwg.org/multipage/tables.html#htmltablecolelement
 
-    /// @see https://html.spec.whatwg.org/#dom-colgroup-span
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-colgroup-span
     KRYS_NODISCARD uint32 Span() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-colgroup-span
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-colgroup-span
     void Span(uint32 value) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLTableColElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableColElement-partial
+#pragma region HTMLTableColElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLTableColElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-colgroup-align
     KRYS_NODISCARD DOMString Align() const noexcept;

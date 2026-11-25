@@ -197,7 +197,7 @@ namespace krys::boo
     return GetAttribute(u8"value");
   }
 
-  // https://html.spec.whatwg.org/#popover-target-element
+  // https://html.spec.whatwg.org/multipage/popover.html#popover-target-element
   RefPtr<HTMLElement> HTMLFormControlElement::PopoverTargetElement() const noexcept
   {
     // 1. If node is not a button, then return null.
@@ -251,7 +251,7 @@ namespace krys::boo
     SetElementAttribute(u8"popovertarget", element);
   }
 
-  // https://html.spec.whatwg.org/#dom-popovertargetaction
+  // https://html.spec.whatwg.org/multipage/popover.html#dom-popovertargetaction
   // The popoverTargetAction IDL attribute must reflect the popovertargetaction attribute, limited to only
   // known values.
   DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
@@ -265,7 +265,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"popovertargetaction", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
+  // https://html.spec.whatwg.org/multipage/popover.html#popover-target-attribute-activation-behavior
   void HTMLFormControlElement::HandlePopoverTargetAction(EventTarget *eventTarget) noexcept
   {
     // 1. Let popover be node's popover target element.

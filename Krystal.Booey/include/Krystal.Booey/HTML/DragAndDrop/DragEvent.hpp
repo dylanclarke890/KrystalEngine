@@ -7,7 +7,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#drageventinit
+  /// @see https://html.spec.whatwg.org/multipage/dnd.html#drageventinit
   struct DragEventInit : MouseEventInit
   {
     RefPtr<DataTransfer> DataTransfer;
@@ -15,7 +15,7 @@ namespace krys::boo
 
   /// @brief A drag and drop event: `dragstart`, `drag` and `dragend` at the source, and `dragenter`,
   /// `dragover`, `dragleave` and `drop` at the target, carrying the drag's data.
-  /// @see https://html.spec.whatwg.org/#the-dragevent-interface
+  /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-dragevent-interface
   class DragEvent final : public MouseEvent
   {
   private:
@@ -39,7 +39,7 @@ namespace krys::boo
              double force, SyntheticClickType syntheticClickType,
              DataTransfer *dataTransfer = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dragevent-datatransfer
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-datatransfer
     KRYS_NODISCARD DataTransfer *GetDataTransfer() const noexcept
     {
       return _dataTransfer.get();

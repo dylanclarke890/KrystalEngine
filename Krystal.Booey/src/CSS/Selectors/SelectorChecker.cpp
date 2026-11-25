@@ -924,7 +924,7 @@ namespace krys::boo::css
              || std::ranges::contains(*levels, static_cast<int32>(heading->ComputedHeadingLevel()));
     }
 
-    // https://html.spec.whatwg.org/#selector-open
+    // https://html.spec.whatwg.org/multipage/semantics-other.html#selector-open
     KRYS_NODISCARD bool MatchesOpen(const Element &element) noexcept
     {
       if (Is<HTMLDetailsElement>(element) || Is<HTMLDialogElement>(element))

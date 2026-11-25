@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlspanelement
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#htmlspanelement
   class HTMLSpanElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSpanElement);

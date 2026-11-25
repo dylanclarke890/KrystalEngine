@@ -7,7 +7,7 @@ namespace krys::boo
   class HTMLCollection;
   class HTMLLegendElement;
 
-  /// @see https://html.spec.whatwg.org/#htmlfieldsetelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlfieldsetelement
   class HTMLFieldSetElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFieldSetElement);
@@ -22,21 +22,21 @@ namespace krys::boo
 
     ~HTMLFieldSetElement() noexcept override;
 
-#pragma region HTMLFieldSetElement - https://html.spec.whatwg.org/#htmlfieldsetelement
+#pragma region HTMLFieldSetElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmlfieldsetelement
 
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-disabled
     void Disabled(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-type
     KRYS_NODISCARD static const DOMStringAtom &Type() noexcept
     {
       static const DOMStringAtom type {u8"fieldset"};
@@ -44,7 +44,7 @@ namespace krys::boo
     }
 
     /// @brief The fieldset's listed elements.
-    /// @see https://html.spec.whatwg.org/#dom-fieldset-elements
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-fieldset-elements
     KRYS_NODISCARD Ref<HTMLCollection> Elements() noexcept;
 
 #pragma endregion

@@ -54,7 +54,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsValidatedFormListedElement() const noexcept final;
 
     /// @brief Whether the element is a defined custom element whose definition is form-associated.
-    /// @see https://html.spec.whatwg.org/#form-associated-custom-element
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-element
     KRYS_NODISCARD bool IsFormAssociatedCustomElement() const noexcept;
 
     KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final;

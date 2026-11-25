@@ -26,7 +26,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#attr-img-decoding
+  /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-decoding
   template <>
   struct html::EnumeratedAttributeTraits<"decoding", HTMLImageElement>
   {
@@ -159,7 +159,7 @@ namespace krys::boo
   HTMLMapElement *HTMLImageElement::AssociatedMapElement() const noexcept
   {
     // The rules for parsing a hash-name reference to a map element, given the image:
-    // https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference
+    // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-hash-name-reference
     auto usemap = GetAttribute(u8"usemap");
     if (!usemap)
     {
@@ -645,7 +645,7 @@ namespace krys::boo
   }
 
   // Steps 3 and 5b to 5l of updating the source set, for the picture's source elements:
-  // https://html.spec.whatwg.org/#update-the-source-set
+  // https://html.spec.whatwg.org/multipage/images.html#update-the-source-set
   html::ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
   {
     // 3. If el is an img element whose parent node is a picture element, then replace the contents of
@@ -730,7 +730,7 @@ namespace krys::boo
     return candidate;
   }
 
-  // https://html.spec.whatwg.org/#select-an-image-source
+  // https://html.spec.whatwg.org/multipage/images.html#select-an-image-source
   void HTMLImageElement::SelectImageSource(RelevantMutation relevantMutation) noexcept
   {
     // 1. Update the source set for el.
@@ -819,7 +819,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element:html-element-insertion-steps
   void HTMLImageElement::OnInsert() noexcept
   {
     html::FormAssociatedElement::ElementInsertedIntoAncestor(*this, IsConnected());
@@ -847,7 +847,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-img-element:html-element-removing-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element:html-element-removing-steps
   void HTMLImageElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
@@ -866,7 +866,7 @@ namespace krys::boo
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
-  // https://html.spec.whatwg.org/#the-img-element:html-element-moving-steps
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element:html-element-moving-steps
   void HTMLImageElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);

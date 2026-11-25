@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlunknownelement
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#htmlunknownelement
   class HTMLUnknownElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUnknownElement);

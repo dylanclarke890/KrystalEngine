@@ -6,13 +6,13 @@ namespace krys::boo
 {
   class HTMLSelectElement;
 
-  /// @see https://html.spec.whatwg.org/#htmlselectedcontentelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlselectedcontentelement
   class HTMLSelectedContentElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectedContentElement);
 
   private:
-    /// @see https://html.spec.whatwg.org/#selectedcontent-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#selectedcontent-disabled
     bool _disabled {false};
 
   public:

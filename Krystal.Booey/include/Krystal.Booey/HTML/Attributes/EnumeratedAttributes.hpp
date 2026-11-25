@@ -14,7 +14,7 @@ namespace krys::boo::html
 {
 #pragma region States
 
-  /// @see https://html.spec.whatwg.org/#attr-contenteditable
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable
   enum class ContentEditableAttributeState : uint8
   {
     True,
@@ -23,7 +23,7 @@ namespace krys::boo::html
     Inherit,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-translate
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#attr-translate
   enum class TranslateAttributeState : uint8
   {
     Yes,
@@ -31,7 +31,7 @@ namespace krys::boo::html
     Inherit,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-hidden
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-hidden
   enum class HiddenAttributeState : uint8
   {
     Hidden,
@@ -39,7 +39,7 @@ namespace krys::boo::html
     NotHidden,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-draggable
+  /// @see https://html.spec.whatwg.org/multipage/dnd.html#attr-draggable
   enum class DraggableAttributeState : uint8
   {
     True,
@@ -47,7 +47,7 @@ namespace krys::boo::html
     Auto,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-spellcheck
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-spellcheck
   enum class SpellcheckAttributeState : uint8
   {
     True,
@@ -55,7 +55,7 @@ namespace krys::boo::html
     Default,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-writingsuggestions
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-writingsuggestions
   enum class WritingSuggestionsAttributeState : uint8
   {
     True,
@@ -63,7 +63,7 @@ namespace krys::boo::html
     Default,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-autocapitalize
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-autocapitalize
   enum class AutocapitalizeAttributeState : uint8
   {
     Default,
@@ -73,14 +73,14 @@ namespace krys::boo::html
     Characters,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-autocorrect
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-autocorrect
   enum class AutocorrectAttributeState : uint8
   {
     On,
     Off,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-inputmode
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-inputmode
   enum class InputModeAttributeState : uint8
   {
     None,
@@ -93,7 +93,7 @@ namespace krys::boo::html
     Search,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-enterkeyhint
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-enterkeyhint
   enum class EnterKeyHintAttributeState : uint8
   {
     Enter,
@@ -105,7 +105,7 @@ namespace krys::boo::html
     Send,
   };
 
-  /// @see https://html.spec.whatwg.org/#lazy-loading-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attribute
   enum class LoadingAttributeState : uint8
   {
     Lazy,
@@ -113,7 +113,7 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a form's `method` and a submit button's `formmethod`.
-  /// @see https://html.spec.whatwg.org/#attr-fs-method
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method
   enum class MethodAttributeState : uint8
   {
     Get,
@@ -122,7 +122,7 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a form's `enctype` and a submit button's `formenctype`.
-  /// @see https://html.spec.whatwg.org/#attr-fs-enctype
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-enctype
   enum class EnctypeAttributeState : uint8
   {
     UrlEncoded,
@@ -130,7 +130,7 @@ namespace krys::boo::html
     TextPlain,
   };
 
-  /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fetch-priority-attribute
   enum class FetchPriorityAttributeState : uint8
   {
     High,
@@ -138,7 +138,7 @@ namespace krys::boo::html
     Auto,
   };
 
-  /// @see https://html.spec.whatwg.org/#cors-settings-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-settings-attribute
   enum class CrossOriginAttributeState : uint8
   {
     NoCORS,
@@ -146,7 +146,7 @@ namespace krys::boo::html
     UseCredentials,
   };
 
-  /// @see https://html.spec.whatwg.org/#referrer-policy-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#referrer-policy-attribute
   enum class ReferrerPolicyAttributeState : uint8
   {
     /// @brief The empty string.
@@ -161,7 +161,7 @@ namespace krys::boo::html
     UnsafeUrl,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-dialog-closedby
+  /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-closedby
   enum class ClosedByAttributeState : uint8
   {
     Any,
@@ -170,7 +170,7 @@ namespace krys::boo::html
     Auto,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-popovertargetaction
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#attr-popovertargetaction
   enum class PopoverTargetActionAttributeState : uint8
   {
     Toggle,
@@ -179,14 +179,14 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a form's `autocomplete`.
-  /// @see https://html.spec.whatwg.org/#attr-form-autocomplete
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#attr-form-autocomplete
   enum class AutocompleteAttributeState : uint8
   {
     On,
     Off,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-img-decoding
+  /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#attr-img-decoding
   enum class DecodingAttributeState : uint8
   {
     Sync,
@@ -195,7 +195,7 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a table cell's `scope`.
-  /// @see https://html.spec.whatwg.org/#attr-th-scope
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#attr-th-scope
   enum class ScopeAttributeState : uint8
   {
     Row,
@@ -205,7 +205,7 @@ namespace krys::boo::html
     Auto,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-template-shadowrootmode
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#attr-template-shadowrootmode
   enum class ShadowRootModeAttributeState : uint8
   {
     Open,
@@ -213,7 +213,7 @@ namespace krys::boo::html
     None,
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-template-shadowrootslotassignment
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#attr-template-shadowrootslotassignment
   enum class ShadowRootSlotAssignmentAttributeState : uint8
   {
     Named,
@@ -221,7 +221,7 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a track's `kind`.
-  /// @see https://html.spec.whatwg.org/#attr-track-kind
+  /// @see https://html.spec.whatwg.org/multipage/media.html#attr-track-kind
   enum class KindAttributeState : uint8
   {
     Subtitles,
@@ -232,7 +232,7 @@ namespace krys::boo::html
   };
 
   /// @brief The states of a link's `as`: one for each potential destination.
-  /// @see https://html.spec.whatwg.org/#attr-link-as
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#attr-link-as
   enum class AsAttributeState : uint8
   {
     Fetch,
@@ -306,7 +306,7 @@ namespace krys::boo::html
   template <typename Traits>
   concept CanReturnNullResolvedState = !HasMissingValueDefault<Traits> || !HasInvalidValueDefault<Traits>;
 
-  /// @see https://html.spec.whatwg.org/#enumerated-attribute
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#enumerated-attribute
   template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement>
   class EnumeratedAttribute
   {
@@ -321,7 +321,7 @@ namespace krys::boo::html
     /// @brief The canonical keyword of the state of an attribute whose value is @p contentAttributeValue
     /// (`ReflectEnumerated`'s step 4). Without one, it's null for a `DOMString?` and the empty string for a
     /// `DOMString`.
-    /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-known-values
     template <OneOf<DOMString, Maybe<DOMString>> TResult>
     KRYS_NODISCARD static TResult ResolveCanonicalKeyword(Maybe<DOMStringView> contentAttributeValue) noexcept
     {
@@ -336,7 +336,7 @@ namespace krys::boo::html
 
     /// @brief The state of an attribute whose value is @p contentAttributeValue (null when it's not
     /// specified); no state is null.
-    /// @see https://html.spec.whatwg.org/#empty-value-default
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#empty-value-default
     KRYS_NODISCARD static conditional_t<CanReturnNullResolvedState<Traits>, Maybe<State>, State>
       ResolveState(Maybe<DOMStringView> contentAttributeValue) noexcept
     {
@@ -395,7 +395,7 @@ namespace krys::boo::html
     /// @note The canonical keyword is the only keyword for the state, the only conforming one, the
     /// conforming one that isn't empty (where an empty keyword is an empty value default here), or the one
     /// the specification gives explicitly, so `StateMappings` lists it first.
-    /// @see https://html.spec.whatwg.org/#canonical-keyword
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#canonical-keyword
     KRYS_NODISCARD static DOMStringAtom ResolveCanonicalKeywordForState(State state) noexcept
     {
       auto it =
@@ -418,7 +418,7 @@ namespace krys::boo::html
     // this).
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-contenteditable
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable
   template <>
   struct EnumeratedAttributeTraits<"contenteditable", HTMLElement>
   {
@@ -531,7 +531,7 @@ namespace krys::boo::html
     constexpr static State EmptyValueDefault = State::On;
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-inputmode
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-inputmode
   template <>
   struct EnumeratedAttributeTraits<"inputmode", HTMLElement>
   {
@@ -543,7 +543,7 @@ namespace krys::boo::html
     };
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-enterkeyhint
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#attr-enterkeyhint
   template <>
   struct EnumeratedAttributeTraits<"enterkeyhint", HTMLElement>
   {
@@ -555,7 +555,7 @@ namespace krys::boo::html
     };
   };
 
-  /// @see https://html.spec.whatwg.org/#lazy-loading-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attribute
   template <>
   struct EnumeratedAttributeTraits<"loading", HTMLElement>
   {
@@ -570,7 +570,7 @@ namespace krys::boo::html
   };
 
   /// @brief A submit button's `formmethod`, which has no missing value default.
-  /// @see https://html.spec.whatwg.org/#attr-fs-formmethod
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-formmethod
   template <>
   struct EnumeratedAttributeTraits<"formmethod", HTMLElement>
   {
@@ -585,7 +585,7 @@ namespace krys::boo::html
   };
 
   /// @brief A submit button's `formenctype`, which has no missing value default.
-  /// @see https://html.spec.whatwg.org/#attr-fs-formenctype
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-formenctype
   template <>
   struct EnumeratedAttributeTraits<"formenctype", HTMLElement>
   {
@@ -599,7 +599,7 @@ namespace krys::boo::html
     constexpr static State InvalidValueDefault = State::UrlEncoded;
   };
 
-  /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fetch-priority-attribute
   template <>
   struct EnumeratedAttributeTraits<"fetchpriority", HTMLElement>
   {
@@ -614,7 +614,7 @@ namespace krys::boo::html
     constexpr static State InvalidValueDefault = State::Auto;
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-popover
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#attr-popover
   template <>
   struct EnumeratedAttributeTraits<"popover", HTMLElement>
   {
@@ -631,8 +631,8 @@ namespace krys::boo::html
     constexpr static State EmptyValueDefault = State::Auto;
   };
 
-  /// @see https://html.spec.whatwg.org/#cors-settings-attribute
-  /// @see https://html.spec.whatwg.org/#attr-crossorigin-none
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-settings-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-crossorigin-none
   template <>
   struct EnumeratedAttributeTraits<"crossorigin", HTMLElement>
   {
@@ -649,7 +649,7 @@ namespace krys::boo::html
 
   /// @brief A referrer policy attribute: its keywords are the referrer policies, and the empty string is its
   /// missing and invalid value default.
-  /// @see https://html.spec.whatwg.org/#referrer-policy-attribute
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#referrer-policy-attribute
   template <>
   struct EnumeratedAttributeTraits<"referrerpolicy", HTMLElement>
   {

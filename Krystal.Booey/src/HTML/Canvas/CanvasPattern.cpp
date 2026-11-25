@@ -73,7 +73,7 @@ namespace krys::boo::html
     return false;
   }
 
-  // https://html.spec.whatwg.org/#dom-canvaspattern-settransform
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-canvaspattern-settransform
   ExceptionOr<void> CanvasPattern::SetTransform(DOMMatrix2DInit matrixInit) noexcept
   {
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.

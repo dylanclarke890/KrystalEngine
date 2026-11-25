@@ -17,7 +17,7 @@ namespace krys::boo
   class HTMLFormElement;
   class HTMLSelectElement;
 
-  /// @see https://html.spec.whatwg.org/#htmloptionelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmloptionelement
   class HTMLOptionElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOptionElement);
@@ -30,18 +30,18 @@ namespace krys::boo
     bool _isSelected {false};
     bool _isDefault {false};
 
-    /// @see https://html.spec.whatwg.org/#concept-option-dirtiness
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-dirtiness
     bool _dirtiness {false};
 
   public:
     explicit HTMLOptionElement(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option
     static ExceptionOr<Ref<HTMLOptionElement>>
       CreateForLegacyFactoryFunction(Document &document, DOMString text, Maybe<DOMString> value,
                                      bool defaultSelected, bool selected) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#concept-option-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-disabled
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
 
     /// @brief Whether the option has a `disabled` attribute (an optgroup's can disable it too).
@@ -59,53 +59,53 @@ namespace krys::boo
 
     void DefaultEventHandler(Event &event) noexcept final;
 
-#pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
+#pragma region HTMLOptionElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmloptionelement
 
-    /// @see https://html.spec.whatwg.org/#dom-option-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-disabled
     void Disabled(bool value) noexcept;
 
     /// @brief The form owner of the option's select, if it has one.
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
     /// @brief The form owner of the option's select, retargeted against the option.
-    /// @see https://html.spec.whatwg.org/#dom-option-form
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-form
     KRYS_NODISCARD RefPtr<Element> FormForBindings() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-label
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-label
     KRYS_NODISCARD DOMString Label() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-label
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-label
     void Label(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-defaultselected
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-defaultselected
     KRYS_NODISCARD bool DefaultSelected() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-defaultselected
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-defaultselected
     void DefaultSelected(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-selected
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-selected
     KRYS_NODISCARD bool Selected(
       html::AllowStyleInvalidation allowStyleInvalidation = html::AllowStyleInvalidation::Yes) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-selected
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-selected
     void Selected(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-value
     KRYS_NODISCARD DOMString Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-value
     void Value(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-text
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-text
     KRYS_NODISCARD DOMString Text() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-text
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-text
     void Text(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-option-index
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-index
     KRYS_NODISCARD int32 Index() const noexcept;
 
 #pragma endregion
@@ -114,7 +114,7 @@ namespace krys::boo
     KRYS_NODISCARD HTMLSelectElement *OwnerSelectElement() const noexcept;
 
     /// @brief The slot of the shadow tree that takes the option's children: none, when a label replaces them.
-    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild() const noexcept;
 
     /// @brief The label, indented when the option is in an optgroup.
@@ -180,7 +180,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMString CollectOptionInnerTextCollapsingWhitespace() const noexcept;
 
     /// @brief The option's label: its non-empty `label` attribute, or its text.
-    /// @see https://html.spec.whatwg.org/#concept-option-label
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-label
     KRYS_NODISCARD DOMString OptionLabel() const noexcept;
   };
 }

@@ -8,7 +8,7 @@ namespace krys::boo
   class HTMLDetailsElement;
 
   /// @brief The caption of a `details` element: activating its details' active summary opens or closes it.
-  /// @see https://html.spec.whatwg.org/#the-summary-element
+  /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#the-summary-element
   class HTMLSummaryElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSummaryElement);
@@ -18,10 +18,10 @@ namespace krys::boo
 
     /// @brief Whether the element is its details' summary: the first `summary` child of its `details`
     /// parent, or the default summary of a `details` element without one.
-    /// @see https://html.spec.whatwg.org/#summary-for-its-parent-details
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#summary-for-its-parent-details
     KRYS_NODISCARD bool IsActiveSummary() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#the-summary-element:activation-behaviour
     void ActivationBehavior(Event &event) noexcept final;
 
     void DefaultEventHandler(Event &event) noexcept final;

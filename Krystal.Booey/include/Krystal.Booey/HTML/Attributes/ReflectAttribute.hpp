@@ -61,7 +61,7 @@ namespace krys::boo::html
 
   /// @brief The value a reflected numeric attribute takes when it's missing or invalid: IDL's
   /// `[ReflectDefault]`.
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <Number T>
   struct ReflectDefault
   {
@@ -202,7 +202,7 @@ namespace krys::boo::html
     /// 5 and 6 of the `DOMString` getter, and 1, 2 and 5 of the `DOMString?` one, with null for the empty
     /// string (the caller's `value_or`). Enumerated attributes limited to only known values (steps 3 and 4)
     /// are `ReflectEnumerated`.
-    /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-known-values
     template <ReflectTarget Target>
     KRYS_NODISCARD Maybe<DOMString> ReflectDOMString(const Target &target, DOMStringAtom name) noexcept
     {
@@ -244,7 +244,7 @@ namespace krys::boo::html
     /// @brief Helper for getting reflected content attributes with 'dom::USVString' type: the content
     /// attribute's value, or the empty string if it's absent. A URL is completed against the node document's
     /// base URL, unless it doesn't parse.
-    /// @see https://html.spec.whatwg.org/#treated-as-a-url
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#treated-as-a-url
     template <TreatedAsUrl AsUrl, ReflectTarget Target>
     KRYS_NODISCARD dom::USVString ReflectUSVString(const Target &target, DOMStringAtom name) noexcept
     {
@@ -289,7 +289,7 @@ namespace krys::boo::html
 
     /// @brief Helper for getting reflected content attributes with 'bool' type: a boolean attribute is true
     /// when it's present, whatever its value.
-    /// @see https://html.spec.whatwg.org/#boolean-attribute
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attribute
     template <ReflectTarget Target>
     KRYS_NODISCARD bool ReflectBool(const Target &target, DOMStringAtom name) noexcept
     {
@@ -320,7 +320,7 @@ namespace krys::boo::html
 #pragma region ReflectLong
 
     /// @brief Helper for getting reflected content attributes with 'long' type.
-    /// @see https://html.spec.whatwg.org/#default-value
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#default-value
     template <OnlyNonNegativeNumbers OnlyNonNegative, MaybeReflectDefault<int32> DefaultValue,
               ReflectTarget Target>
     KRYS_NODISCARD int32 ReflectLong(const Target &target, DOMStringAtom name) noexcept
@@ -402,7 +402,7 @@ namespace krys::boo::html
     constexpr inline int32 MaxUnsignedLongValue {2'147'483'647};
 
     /// @brief Helper for getting reflected content attributes with 'unsigned long' type.
-    /// @see https://html.spec.whatwg.org/#clamped-to-the-range
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, MaybeReflectRange<uint32> Range, ReflectTarget Target>
     KRYS_NODISCARD uint32 ReflectUnsignedLong(const Target &target, DOMStringAtom name) noexcept
@@ -538,7 +538,7 @@ namespace krys::boo::html
 #pragma region ReflectDouble
 
     /// @brief Helper for getting reflected content attributes with 'double' type.
-    /// @see https://html.spec.whatwg.org/#clamped-to-the-range
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, MaybeReflectDefault<double> DefaultValue,
               ReflectTarget Target>
     KRYS_NODISCARD double ReflectDouble(const Target &target, DOMStringAtom name) noexcept
@@ -604,7 +604,7 @@ namespace krys::boo::html
 #pragma region Reflect
 
   /// @brief Represents the `[Reflect]` IDL attribute (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
                                                               DOMStringAtom name) noexcept
@@ -645,7 +645,7 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[Reflect]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
@@ -686,8 +686,8 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[Reflect][ReflectDefault]` combination of IDL attributes (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectDefaultGetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
                                                               DOMStringAtom name) noexcept
@@ -716,8 +716,8 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[Reflect][ReflectDefault]` combination of IDL attributes (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectDefaultSetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
@@ -739,8 +739,8 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[Reflect][ReflectRange]` combination of IDL attributes (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
-  /// @see https://html.spec.whatwg.org/#xattr-reflectrange
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectrange
   template <ReflectRangeType TValue, ReflectRange<TValue> Range, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
                                                               DOMStringAtom name) noexcept
@@ -759,9 +759,9 @@ namespace krys::boo::html
 
   /// @brief Represents the `[Reflect][ReflectDefault][ReflectRange]` combination of IDL attributes
   /// (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflect
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-  /// @see https://html.spec.whatwg.org/#xattr-reflectrange
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflect
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectrange
   template <ReflectRangeType TValue, ReflectDefault<TValue> DefaultValue, ReflectRange<TValue> Range,
             ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> Reflect(const Target &target,
@@ -787,7 +787,7 @@ namespace krys::boo::html
 
   /// @brief Represents the `[Reflect]` IDL attribute (getter) for an enumerated attribute limited to only
   /// known values, whose keywords and defaults are `EnumeratedAttributeTraits<AttributeName, TElement>`.
-  /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-known-values
   template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement = HTMLElement,
             ReflectTypeDOMString TValue = DOMString, ReflectTarget Target>
   KRYS_NODISCARD TValue ReflectEnumerated(const Target &target) noexcept
@@ -825,7 +825,7 @@ namespace krys::boo::html
 #pragma region ReflectSetter
 
   /// @brief Represents the `[ReflectSetter]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectsetter
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectsetter
   template <ReflectType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
@@ -841,7 +841,7 @@ namespace krys::boo::html
 #pragma region ReflectUrl
 
   /// @brief Represents the `[ReflectUrl]` IDL attribute (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflecturl
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflecturl
   template <ReflectUrlType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectUrl(const Target &target,
                                                                  DOMStringAtom name) noexcept
@@ -850,7 +850,7 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[ReflectUrl]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflecturl
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflecturl
   template <ReflectUrlType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
@@ -866,7 +866,7 @@ namespace krys::boo::html
 #pragma region ReflectNonNegative
 
   /// @brief Represents the `[ReflectNonNegative]` IDL attribute (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectnonnegative
   template <ReflectNonNegativeType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
                                                                          DOMStringAtom name) noexcept
@@ -883,7 +883,7 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[ReflectNonNegative]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectnonnegative
   template <ReflectNonNegativeType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::Yes, detail::OnlyPositiveNumbers::No>
@@ -902,8 +902,8 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[ReflectNonNegative][ReflectDefault]` combination of IDL attributes (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectnonnegative
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectNonNegativeType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
                                                                          DOMStringAtom name) noexcept
@@ -924,7 +924,7 @@ namespace krys::boo::html
 #pragma region ReflectPositive
 
   /// @brief Represents the `[ReflectPositive]` IDL attribute (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositive
   template <ReflectPositiveType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositive(const Target &target,
                                                                       DOMStringAtom name) noexcept
@@ -948,7 +948,7 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[ReflectPositive]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositive
   template <ReflectPositiveType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
@@ -974,8 +974,8 @@ namespace krys::boo::html
 
   /// @brief Represents the `[ReflectPositive][ReflectDefault]` combination of IDL
   /// attributes (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositive
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositive(const Target &target,
                                                                       DOMStringAtom name) noexcept
@@ -1000,8 +1000,8 @@ namespace krys::boo::html
 
   /// @brief Represents the `[ReflectPositive][ReflectDefault]` combination of IDL
   /// attributes (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositive
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::Yes>
@@ -1027,7 +1027,7 @@ namespace krys::boo::html
 #pragma region ReflectPositiveWithFallback
 
   /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositivewithfallback
   template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositiveWithFallback(const Target &target,
                                                                                   DOMStringAtom name) noexcept
@@ -1051,7 +1051,7 @@ namespace krys::boo::html
   }
 
   /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositivewithfallback
   template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
   KRYS_NODISCARD
   detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No, detail::OnlyPositiveNumbers::No>
@@ -1077,8 +1077,8 @@ namespace krys::boo::html
 
   /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault]` combination of IDL
   /// attributes (getter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositivewithfallback
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_get_return_t<TValue> ReflectPositiveWithFallback(const Target &target,
                                                                                   DOMStringAtom name) noexcept
@@ -1103,8 +1103,8 @@ namespace krys::boo::html
 
   /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault]` combination of IDL
   /// attributes (setter).
-  /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
-  /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectpositivewithfallback
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#xattr-reflectdefault
   template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
   KRYS_NODISCARD detail::reflect_set_return_t<TValue, detail::OnlyNonNegativeNumbers::No,
                                               detail::OnlyPositiveNumbers(SameType<TValue, double>)>

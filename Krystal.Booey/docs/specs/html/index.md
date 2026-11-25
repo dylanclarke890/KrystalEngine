@@ -6,10 +6,10 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [Table of contents](https://html.spec.whatwg.org/#table-of-contents)
+## [Table of contents](https://html.spec.whatwg.org/multipage/index.html#table-of-contents)
 
 Status: n/a (front matter)
 
-## [Full table of contents](https://html.spec.whatwg.org/#contents)
+## [Full table of contents](https://html.spec.whatwg.org/multipage/index.html#contents)
 
 Status: n/a (front matter)

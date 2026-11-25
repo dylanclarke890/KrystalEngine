@@ -43,7 +43,7 @@ namespace krys::boo::html
   {
   }
 
-  // https://html.spec.whatwg.org/#dom-closewatcher
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-closewatcher
   ExceptionOr<Ref<CloseWatcher>> CloseWatcher::Create(Document &document, const Options &options) noexcept
   {
     // 1. If this's relevant global object's associated Document is not fully active, then throw an
@@ -102,7 +102,7 @@ namespace krys::boo::html
     return watcher;
   }
 
-  // https://html.spec.whatwg.org/#establish-a-close-watcher
+  // https://html.spec.whatwg.org/multipage/interaction.html#establish-a-close-watcher
   Ref<CloseWatcher> CloseWatcher::Establish(Document &document, CancelAction &&cancelAction,
                                             CloseAction &&closeAction,
                                             GetEnabledState &&getEnabledState) noexcept
@@ -121,14 +121,14 @@ namespace krys::boo::html
     return watcher;
   }
 
-  // https://html.spec.whatwg.org/#dom-closewatcher-requestclose
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-closewatcher-requestclose
   // The requestClose() method steps are to request to close this's internal close watcher with false.
   void CloseWatcher::RequestClose() noexcept
   {
     (void)RequestToClose(false);
   }
 
-  // https://html.spec.whatwg.org/#close-watcher-request-close
+  // https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-request-close
   bool CloseWatcher::RequestToClose(bool requireHistoryActionActivation) noexcept
   {
     // 1. If closeWatcher is not active, then return true.
@@ -177,7 +177,7 @@ namespace krys::boo::html
     return true;
   }
 
-  // https://html.spec.whatwg.org/#close-watcher-close
+  // https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-close
   // (The close() method steps are to close this's internal close watcher.)
   void CloseWatcher::Close() noexcept
   {
@@ -196,7 +196,7 @@ namespace krys::boo::html
     _closeAction();
   }
 
-  // https://html.spec.whatwg.org/#close-watcher-destroy
+  // https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-destroy
   // (The destroy() method steps are to destroy this's internal close watcher.)
   void CloseWatcher::Destroy() noexcept
   {

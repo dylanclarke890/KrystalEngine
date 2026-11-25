@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlolistelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
   class HTMLOListElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOListElement);
@@ -17,34 +17,34 @@ namespace krys::boo
   public:
     HTMLOListElement(Document &document) noexcept;
 
-#pragma region HTMLOListElement https://html.spec.whatwg.org/#htmlolistelement
+#pragma region HTMLOListElement https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-reversed
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-reversed
     KRYS_NODISCARD bool Reversed() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-reversed
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-reversed
     void Reversed(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-start
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-start
     KRYS_NODISCARD int32 Start() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-start
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-start
     void Start(int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-type
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-type
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-type
     void Type(DOMString value) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLOListElement Obsolete members - https://html.spec.whatwg.org/#HTMLOListElement-partial
+#pragma region HTMLOListElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLOListElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ol-compact
     KRYS_NODISCARD bool Compact() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ol-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ol-compact
     void Compact(bool value) noexcept;
 
 #pragma endregion
@@ -52,7 +52,7 @@ namespace krys::boo
     /// @brief The value the list's numbering starts from: the start attribute, else the number of items for a
     /// reversed list, else 1.
     /// @note It doesn't trigger layout because it is called from rendering code.
-    /// @see https://html.spec.whatwg.org/#concept-ol-start
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#concept-ol-start
     KRYS_NODISCARD int32 StartValue() const noexcept
     {
       // 1. If the ol element has a start attribute:

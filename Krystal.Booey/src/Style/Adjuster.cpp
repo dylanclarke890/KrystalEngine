@@ -794,7 +794,7 @@ namespace krys::boo::style
     {
       style.SetEffectiveInert(true);
     }
-    // https://html.spec.whatwg.org/#the-button-element
+    // https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element
     // If a button element is the first child which is an element of a select element, then it is inert.
     if (auto *button = DynamicDowncast<HTMLButtonElement>(_element.get());
         button && Is<HTMLSelectElement>(button->ParentNode())

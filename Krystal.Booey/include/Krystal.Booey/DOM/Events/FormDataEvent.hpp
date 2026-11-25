@@ -11,7 +11,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#formdataeventinit
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#formdataeventinit
   struct FormDataEventInit : EventInit
   {
     RefPtr<html::DOMFormData> FormData;
@@ -19,7 +19,7 @@ namespace krys::boo
 
   /// @brief The `formdata` event, fired at a form with the entry list it's about to submit, which listeners
   /// can change.
-  /// @see https://html.spec.whatwg.org/#the-formdataevent-interface
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#the-formdataevent-interface
   class FormDataEvent final : public Event
   {
   private:
@@ -37,7 +37,7 @@ namespace krys::boo
                                                     bool isCancelable, bool isComposed,
                                                     Ref<html::DOMFormData> &&formData) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-formdataevent-formdata
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-formdataevent-formdata
     KRYS_NODISCARD html::DOMFormData &FormData() const noexcept
     {
       return *_formData;

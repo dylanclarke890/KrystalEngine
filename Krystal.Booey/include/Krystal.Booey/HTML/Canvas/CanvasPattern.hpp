@@ -41,7 +41,7 @@ namespace krys::boo
 namespace krys::boo::html
 {
   /// @brief An image a 2D context fills or strokes with, repeated.
-  /// @see https://html.spec.whatwg.org/#canvaspattern
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvaspattern
   class CanvasPattern : public RefCounted<CanvasPattern>
   {
   private:
@@ -67,7 +67,7 @@ namespace krys::boo::html
       return *_pattern;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-canvaspattern-settransform
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvaspattern-settransform
     ExceptionOr<void> SetTransform(DOMMatrix2DInit = {}) noexcept;
 
   private:

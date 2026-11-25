@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlmodelement
+  /// @see https://html.spec.whatwg.org/multipage/edits.html#htmlmodelement
   class HTMLModElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLModElement);
@@ -13,18 +13,18 @@ namespace krys::boo
   public:
     HTMLModElement(Document &document) noexcept;
 
-#pragma region HTMLModElement - https://html.spec.whatwg.org/#htmlmodelement
+#pragma region HTMLModElement - https://html.spec.whatwg.org/multipage/edits.html#htmlmodelement
 
-    /// @see https://html.spec.whatwg.org/#dom-mod-cite
+    /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-cite
     KRYS_NODISCARD dom::USVString Cite() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-mod-cite
+    /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-cite
     void Cite(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-mod-datetime
+    /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-datetime
     KRYS_NODISCARD DOMString DateTime() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-mod-datetime
+    /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-datetime
     void DateTime(DOMString value) noexcept;
 
 #pragma endregion

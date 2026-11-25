@@ -906,7 +906,7 @@ namespace krys::boo::html
   ExceptionOr<void> InputType::ApplyStep(int count, AnyStepHandling anyStepHandling,
                                          TextFieldEventBehavior eventBehavior) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-input-stepup
+    // https://html.spec.whatwg.org/multipage/input.html#dom-input-stepup
 
     StepRange stepRange(CreateStepRange(anyStepHandling));
 

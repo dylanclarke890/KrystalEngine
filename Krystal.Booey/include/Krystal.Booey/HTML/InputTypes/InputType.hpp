@@ -378,7 +378,7 @@ namespace krys::boo::html
     }
 
     /// @brief Only HTMLInputElement::SanitizeValue() calls this.
-    /// @see https://html.spec.whatwg.org/#value-sanitization-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/input.html#value-sanitization-algorithm
     KRYS_NODISCARD virtual DOMString SanitizeValue(DOMStringView proposedValue) const noexcept;
 
     // Event handlers.
@@ -565,7 +565,7 @@ namespace krys::boo::html
     }
 
     /// @brief Whether the `list` attribute applies to the type, so its datalist gives suggestions.
-    /// @see https://html.spec.whatwg.org/#attr-input-list
+    /// @see https://html.spec.whatwg.org/multipage/input.html#attr-input-list
     KRYS_NODISCARD virtual bool ShouldRespectListAttribute() const noexcept
     {
       return false;
@@ -642,7 +642,7 @@ namespace krys::boo::html
 
     /// @brief Whether the element's window has transient activation, which a click or key needs to open a
     /// picker, as in Chrome. It isn't consumed.
-    /// @see https://html.spec.whatwg.org/#transient-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#transient-activation
     KRYS_NODISCARD bool HasTransientActivation() const noexcept;
 
     KRYS_NODISCARD Decimal ParseToNumberOrNaN(DOMStringView string) const noexcept;

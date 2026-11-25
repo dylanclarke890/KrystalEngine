@@ -117,7 +117,7 @@ namespace krys::boo::xml
       return true;
     }
 
-    // https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm
+    // https://html.spec.whatwg.org/multipage/xhtml.html#xml-fragment-parsing-algorithm
     // (Rather than feeding the parser the context element's start and end tags, the parser starts with the
     // namespaces in scope on it declared, and parses the input straight into the fragment, checking it's
     // well formed as it goes.)

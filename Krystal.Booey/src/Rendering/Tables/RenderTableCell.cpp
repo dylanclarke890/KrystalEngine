@@ -51,7 +51,7 @@ namespace krys::boo
   namespace
   {
     // The largest rowspan, which rowspan=0 stands for.
-    // https://html.spec.whatwg.org/#attr-tdth-rowspan
+    // https://html.spec.whatwg.org/multipage/tables.html#attr-tdth-rowspan
     constexpr uint32 MaxRowspan = 65'534;
 
     KRYS_NODISCARD CollapsedBorderValue MakeCollapsedBorder(const RenderElement &renderer,

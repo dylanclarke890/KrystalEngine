@@ -36,7 +36,7 @@
 namespace krys::boo::html
 {
   /// @brief A path that can be built once and filled, stroked or clipped to by 2D contexts.
-  /// @see https://html.spec.whatwg.org/#path2d
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#path2d
   class Path2D final : public RefCounted<Path2D>, public CanvasPath
   {
   public:
@@ -60,7 +60,7 @@ namespace krys::boo::html
 
     ~Path2D() noexcept override = default;
 
-    /// @see https://html.spec.whatwg.org/#dom-path2d-addpath
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d-addpath
     ExceptionOr<void> AddPath(const Path2D &path, DOMMatrix2DInit transform = {}) noexcept;
 
     KRYS_NODISCARD const Path &GetPath() const noexcept

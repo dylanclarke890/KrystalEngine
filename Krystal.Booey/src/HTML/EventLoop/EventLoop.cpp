@@ -128,7 +128,7 @@ namespace krys::boo::html
     return false;
   }
 
-  // https://html.spec.whatwg.org/#run-steps-after-a-timeout
+  // https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#run-steps-after-a-timeout
   void EventLoop::ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept
   {
     // 1.-3. Let timerKey be a new unique internal value. [...] Set global's map of active timers[timerKey] to

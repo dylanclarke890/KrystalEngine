@@ -151,7 +151,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"dir", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-hidden
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
   BoolOr<DOMString> HTMLElement::Hidden() const noexcept
   {
     auto value = html::Reflect<DOMString>(*this, u8"hidden");
@@ -175,7 +175,7 @@ namespace krys::boo
            == html::HiddenAttributeState::UntilFound;
   }
 
-  // https://html.spec.whatwg.org/#dom-hidden
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
   // (The setter's steps are split between the overloads by the given value's type; a null value is the
   // empty string's overload.)
   void HTMLElement::Hidden(const DOMString &value) noexcept
@@ -199,7 +199,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-hidden
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
   void HTMLElement::Hidden(bool value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -215,7 +215,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-hidden
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
   void HTMLElement::Hidden(double value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -259,7 +259,7 @@ namespace krys::boo
            || IsHTMLOptGroupElement() || IsHTMLOptionElement() || IsHTMLFieldSetElement();
   }
 
-  // https://html.spec.whatwg.org/#concept-element-disabled
+  // https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled
   bool HTMLElement::IsActuallyDisabled() const noexcept
   {
     // An element is said to be actually disabled if it is one of the following: a button, input, select or
@@ -310,7 +310,7 @@ namespace krys::boo
     return labels;
   }
 
-  // https://html.spec.whatwg.org/#dom-click
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-click
   // 1. If this element is a form control that is disabled, then return.
   // 2. If this element's click in progress flag is set, then return.
   // 3. Set this element's click in progress flag.
@@ -379,7 +379,7 @@ namespace krys::boo
   namespace
   {
     /// @brief The form owner of @p element if it's an autocapitalize-and-autocorrect inheriting element.
-    /// @see https://html.spec.whatwg.org/#category-autocapitalize
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#category-autocapitalize
     KRYS_NODISCARD HTMLFormElement *AutocapitalizeAndAutocorrectFormOwner(const HTMLElement &element) noexcept
     {
       switch (element.TagQualifiedName().TagName())
@@ -396,7 +396,7 @@ namespace krys::boo
       return formAssociated ? formAssociated->Form() : nullptr;
     }
 
-    /// @see https://html.spec.whatwg.org/#own-autocapitalization-hint
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#own-autocapitalization-hint
     KRYS_NODISCARD html::AutocapitalizeAttributeState
       OwnAutocapitalizationHint(const HTMLElement &element) noexcept
     {
@@ -417,7 +417,7 @@ namespace krys::boo
       return html::AutocapitalizeAttributeState::Default;
     }
 
-    /// @see https://html.spec.whatwg.org/#used-autocorrection-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#used-autocorrection-state
     KRYS_NODISCARD html::AutocorrectAttributeState
       UsedAutocorrectionState(const HTMLElement &element) noexcept
     {
@@ -446,7 +446,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-spellcheck
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-spellcheck
   bool HTMLElement::SpellCheck() const noexcept
   {
     // The spellcheck IDL attribute, on getting, must return true if the element's spellcheck content
@@ -469,7 +469,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#dom-spellcheck
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-spellcheck
   void HTMLElement::SpellCheck(bool value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -478,11 +478,11 @@ namespace krys::boo
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"spellcheck", value ? u8"true" : u8"false");
   }
 
-  // https://html.spec.whatwg.org/#dom-writingsuggestions
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-writingsuggestions
   DOMString HTMLElement::WritingSuggestions() const noexcept
   {
     // Return this's computed writing suggestions value.
-    // https://html.spec.whatwg.org/#computed-writing-suggestions-value
+    // https://html.spec.whatwg.org/multipage/interaction.html#computed-writing-suggestions-value
     for (const Element *element = this; element; element = element->ParentElement())
     {
       switch (html::EnumeratedAttribute<"writingsuggestions", HTMLElement>::ResolveState(
@@ -507,7 +507,7 @@ namespace krys::boo
     html::ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-autocapitalize
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-autocapitalize
   DOMString HTMLElement::Autocapitalize() const noexcept
   {
     // 1. Let state be the own autocapitalization hint of this.
@@ -532,7 +532,7 @@ namespace krys::boo
     html::ReflectSetter(*this, u8"autocapitalize", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-autocorrect
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-autocorrect
   bool HTMLElement::Autocorrect() const noexcept
   {
     // The autocorrect getter steps are: return true if the element's used autocorrection state is On and
@@ -540,7 +540,7 @@ namespace krys::boo
     return UsedAutocorrectionState(*this) == html::AutocorrectAttributeState::On;
   }
 
-  // https://html.spec.whatwg.org/#dom-autocorrect
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-autocorrect
   void HTMLElement::Autocorrect(bool value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -549,21 +549,21 @@ namespace krys::boo
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"autocorrect", value ? u8"on" : u8"off");
   }
 
-  // https://html.spec.whatwg.org/#dom-inputmode
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-inputmode
   // The inputMode IDL attribute must reflect the inputmode content attribute, limited to only known values.
   DOMString HTMLElement::InputMode() const noexcept
   {
     return html::ReflectEnumerated<"inputmode">(*this);
   }
 
-  // https://html.spec.whatwg.org/#dom-inputmode
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-inputmode
   void HTMLElement::InputMode(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"inputmode", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-enterkeyhint
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-enterkeyhint
   // The enterKeyHint IDL attribute must reflect the enterkeyhint content attribute, limited to only known
   // values.
   DOMString HTMLElement::EnterKeyHint() const noexcept
@@ -571,7 +571,7 @@ namespace krys::boo
     return html::ReflectEnumerated<"enterkeyhint">(*this);
   }
 
-  // https://html.spec.whatwg.org/#dom-enterkeyhint
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-enterkeyhint
   void HTMLElement::EnterKeyHint(DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -580,7 +580,7 @@ namespace krys::boo
 
   namespace
   {
-    /// @see https://html.spec.whatwg.org/#rendered-text-fragment
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#rendered-text-fragment
     KRYS_NODISCARD Ref<DocumentFragment> RenderedTextFragment(DOMStringView input,
                                                               Document &document) noexcept
     {
@@ -632,7 +632,7 @@ namespace krys::boo
       return fragment;
     }
 
-    /// @see https://html.spec.whatwg.org/#merge-with-the-next-text-node
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#merge-with-the-next-text-node
     void MergeWithNextTextNode(Text &node) noexcept
     {
       // 1. Let next be node's next sibling.
@@ -763,7 +763,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-attachinternals
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals
   ExceptionOr<Ref<html::ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
     // 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
@@ -808,7 +808,7 @@ namespace krys::boo
     return internals;
   }
 
-  // https://html.spec.whatwg.org/#dom-showpopover
+  // https://html.spec.whatwg.org/multipage/popover.html#dom-showpopover
   ExceptionOr<void> HTMLElement::ShowPopover(const html::ShowPopoverOptions &options) noexcept
   {
     // 1. Let source be options["source"] if it exists; otherwise, null.
@@ -816,7 +816,7 @@ namespace krys::boo
     return ShowPopoverInternal(options.Source.get());
   }
 
-  // https://html.spec.whatwg.org/#dom-hidepopover
+  // https://html.spec.whatwg.org/multipage/popover.html#dom-hidepopover
   // The hidePopover() method steps are: Run the hide popover algorithm given this, true, true, true, and
   // null.
   ExceptionOr<void> HTMLElement::HidePopover() noexcept
@@ -824,7 +824,7 @@ namespace krys::boo
     return HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
   }
 
-  // https://html.spec.whatwg.org/#dom-togglepopover
+  // https://html.spec.whatwg.org/multipage/popover.html#dom-togglepopover
   ExceptionOr<bool> HTMLElement::TogglePopover(const html::TogglePopoverOptionsOrBool &options) noexcept
   {
     // 1. Let force be null.
@@ -951,7 +951,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#show-popover
+  // https://html.spec.whatwg.org/multipage/popover.html#show-popover
   ExceptionOr<void> HTMLElement::ShowPopoverInternal(HTMLElement *source, bool throwExceptions) noexcept
   {
     // 1. Let document be element's node document.
@@ -1157,7 +1157,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#hide-popover-algorithm
+  // https://html.spec.whatwg.org/multipage/popover.html#hide-popover-algorithm
   ExceptionOr<void> HTMLElement::HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
                                                      dom::FireEvents fireEvents, bool throwExceptions,
                                                      HTMLElement *source) noexcept
@@ -1338,7 +1338,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#check-popover-validity
+  // https://html.spec.whatwg.org/multipage/popover.html#check-popover-validity
   ExceptionOr<bool> HTMLElement::CheckPopoverValidity(bool expectedToBeShowing,
                                                       Document *expectedDocument) const noexcept
   {
@@ -1387,7 +1387,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#popover-focusing-steps
+  // https://html.spec.whatwg.org/multipage/popover.html#popover-focusing-steps
   void HTMLElement::RunPopoverFocusingSteps() noexcept
   {
     // 1. If the allow focus steps given subject's node document return false, then return.
@@ -1431,7 +1431,7 @@ namespace krys::boo
     controlDocument->SetAutofocusProcessed();
   }
 
-  // https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
+  // https://html.spec.whatwg.org/multipage/popover.html#queue-a-popover-toggle-event-task
   // (ToggleEventTask is the popover toggle task tracker.)
   void HTMLElement::QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                                 HTMLElement *source) noexcept
@@ -1509,7 +1509,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-popover-attribute
+  // https://html.spec.whatwg.org/multipage/popover.html#the-popover-attribute
   // The following attribute change steps, given element, localName, oldValue, value, and namespace, are used
   // for all HTML elements:
   // 1. If namespace is not null, then return.
@@ -1574,7 +1574,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  // https://html.spec.whatwg.org/#dom-contenteditable
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-contenteditable
   DOMString HTMLElement::ContentEditable() const noexcept
   {
     // The contentEditable IDL attribute, on getting, must return the string "true" if the content attribute
@@ -1591,7 +1591,7 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  // https://html.spec.whatwg.org/#dom-contenteditable
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-contenteditable
   ExceptionOr<void> HTMLElement::ContentEditable(DOMStringView value) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -1952,7 +1952,7 @@ namespace krys::boo
                                          AllowZeroValue allowZeroValue) noexcept
   {
     // Without a zero value, these are the rules for parsing nonzero dimension values.
-    // @see https://html.spec.whatwg.org/#rules-for-parsing-non-zero-dimension-values
+    // @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-non-zero-dimension-values
     auto dimensionValue = isMultiLength == IsMultiLength::No ? html::Dimensions::ParseHTMLDimension(value)
                                                              : html::Dimensions::ParseHTMLMultiLength(value);
     if (!dimensionValue || (!dimensionValue->Number && allowZeroValue == AllowZeroValue::No))

@@ -33,7 +33,7 @@ namespace krys::boo::html
 
     /// @brief Parses @p input as the children of @p target, an element or a shadow root (whose host is then
     /// the context).
-    /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#html-fragment-parsing-algorithm
     KRYS_NODISCARD static Ref<DocumentFragment>
       ParseFragment(ContainerNode &target, utf8_string input, bool allowDeclarativeShadowRoots = false,
                     ParserScriptingMode scriptingMode = ParserScriptingMode::Inert,
@@ -49,7 +49,7 @@ namespace krys::boo::html
     void PumpTokenizer() noexcept;
 
     /// @brief Makes the parser take all its input as text, in a `pre` element: a text document's parser.
-    /// @see https://html.spec.whatwg.org/#navigate-text
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-text
     void StartPlainText() noexcept;
 
     KRYS_NODISCARD InputStream &InputStream() noexcept

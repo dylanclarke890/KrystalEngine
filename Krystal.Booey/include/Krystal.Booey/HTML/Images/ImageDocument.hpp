@@ -42,7 +42,7 @@ namespace krys::boo
   /// @brief The document a load of an image shows: an `img` in an otherwise empty document, given the loaded
   /// bytes rather than fetching them. The image is shrunk to fit the view, and a click on it toggles between
   /// that and its natural size.
-  /// @see https://html.spec.whatwg.org/#read-media
+  /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#read-media
   class ImageDocument final : public HTMLDocument
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ImageDocument);

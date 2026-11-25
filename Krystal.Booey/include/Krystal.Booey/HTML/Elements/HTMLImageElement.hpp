@@ -21,7 +21,7 @@ namespace krys::boo
   class HTMLSourceElement;
   class Image;
 
-  /// @see https://html.spec.whatwg.org/#htmlimageelement
+  /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#htmlimageelement
   // FIXME: decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
   class HTMLImageElement : public HTMLElement, public html::FormAssociatedElement
@@ -58,164 +58,164 @@ namespace krys::boo
 
     /// @brief The image map `usemap` names: the first `map` in the image's tree whose `id` or `name` is the
     /// name after its `#`.
-    /// @see https://html.spec.whatwg.org/#image-map
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#image-map
     KRYS_NODISCARD HTMLMapElement *AssociatedMapElement() const noexcept;
 
-#pragma region HTMLImageElement - https://html.spec.whatwg.org/#htmlimageelement
+#pragma region HTMLImageElement - https://html.spec.whatwg.org/multipage/embedded-content.html#htmlimageelement
 
-    /// @see https://html.spec.whatwg.org/#dom-img-alt
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-alt
     KRYS_NODISCARD DOMString Alt() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-alt
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-alt
     void Alt(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-src
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-src
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-srcset
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-srcset
     KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-srcset
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-srcset
     void SrcSet(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-sizes
     KRYS_NODISCARD DOMString Sizes() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-sizes
     void Sizes(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-crossorigin
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-crossorigin
     KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-crossorigin
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-crossorigin
     void CrossOrigin(Maybe<DOMString> value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-usemap
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-usemap
     KRYS_NODISCARD DOMString UseMap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-usemap
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-usemap
     void UseMap(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-ismap
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-ismap
     KRYS_NODISCARD bool IsMap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-ismap
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-ismap
     void IsMap(bool value) noexcept;
 
     /// @brief Whether the image is a server-side image map: it has `ismap` and no client-side map
     /// (`usemap`), so a link around it is followed with the coordinates clicked.
     KRYS_NODISCARD bool IsServerMap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-controls
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-controls
     KRYS_NODISCARD bool Controls() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-controls
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-controls
     void Controls(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-width
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-width
     KRYS_NODISCARD uint32 Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-width
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-width
     void Width(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-height
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-height
     KRYS_NODISCARD uint32 Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-height
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-height
     void Height(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-naturalwidth
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-naturalwidth
     KRYS_NODISCARD uint32 NaturalWidth() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-naturalheight
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-naturalheight
     KRYS_NODISCARD uint32 NaturalHeight() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-complete
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete
     KRYS_NODISCARD bool Complete() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-currentsrc
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-currentsrc
     KRYS_NODISCARD dom::USVString CurrentSrc() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-referrerpolicy
     void ReferrerPolicy(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-decoding
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decoding
     KRYS_NODISCARD DOMString Decoding() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-decoding
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decoding
     void Decoding(DOMString value) noexcept;
 
     /// @brief The decoding hint `decoding` gives: synchronous, asynchronous, or the engine's choice.
-    /// @see https://html.spec.whatwg.org/#image-decoding-hint
+    /// @see https://html.spec.whatwg.org/multipage/images.html#image-decoding-hint
     KRYS_NODISCARD DecodingMode GetDecodingMode() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-loading
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-loading
     KRYS_NODISCARD DOMString Loading() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-loading
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-loading
     void Loading(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-fetchpriority
     KRYS_NODISCARD DOMString FetchPriority() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-fetchpriority
     void FetchPriority(DOMString value) noexcept;
 
     /// @brief Calls @p promise, as a microtask, once the image has loaded and decoded, so it can be drawn
     /// without decoding; it's rejected with an `EncodingError` if it can't be.
-    /// @see https://html.spec.whatwg.org/#dom-img-decode
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode
     void Decode(ImageLoader::DecodePromise promise) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLImageElement Obsolete members - https://html.spec.whatwg.org/#HTMLImageElement-partial
+#pragma region HTMLImageElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLImageElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-img-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-name
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-lowsrc
     KRYS_NODISCARD dom::USVString LowSrc() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-lowsrc
     void LowSrc(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-hspace
     KRYS_NODISCARD uint32 HSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-hspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-hspace
     void HSpace(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-vspace
     KRYS_NODISCARD uint32 VSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-vspace
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-vspace
     void VSpace(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-longdesc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-longdesc
     KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-longdesc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-longdesc
     void LongDesc(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-border
     KRYS_NODISCARD DOMString Border() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-border
     void Border(DOMString value) noexcept;
 
 #pragma endregion
@@ -246,7 +246,7 @@ namespace krys::boo
 
     /// @brief Whether the image will load lazily: its `loading` attribute is `lazy`, and scripting is
     /// enabled.
-    /// @see https://html.spec.whatwg.org/#will-lazy-load-element-steps
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#will-lazy-load-element-steps
     KRYS_NODISCARD bool IsLazyLoadable() const noexcept;
 
     /// @brief Whether a `loading` attribute value is `lazy`.
@@ -312,7 +312,7 @@ namespace krys::boo
     /// @brief Restyles the element, as the attributes its presentational hints come from changed.
     void InvalidateAttributeMapping() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#select-an-image-source
+    /// @see https://html.spec.whatwg.org/multipage/images.html#select-an-image-source
     void SelectImageSource(RelevantMutation relevantMutation) noexcept;
 
     /// @brief The best image candidate among the picture parent's sources, or none.

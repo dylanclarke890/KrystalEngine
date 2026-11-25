@@ -72,7 +72,7 @@ namespace krys::boo::html
     }
 
     /// @brief Whether @p element is an editing host: editable, and not inside an editable element.
-    /// @see https://html.spec.whatwg.org/#editing-host
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#editing-host
     KRYS_NODISCARD bool IsEditingHost(const Element &element) noexcept
     {
       if (!Is<HTMLElement>(element) || IsHTMLElement(element, TagName::input)
@@ -140,7 +140,7 @@ namespace krys::boo::html
 
     /// @brief Whether @p element is being rendered or delegating its rendering to its children
     /// (`display: contents`), and visible.
-    /// @see https://html.spec.whatwg.org/#being-rendered
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
     KRYS_NODISCARD bool IsBeingRendered(const Element &element) noexcept
     {
       auto *style = element.RenderOrDisplayContentsStyle();
@@ -155,7 +155,7 @@ namespace krys::boo::html
 
     /// @brief Whether @p element is a canvas's fallback content, which isn't rendered, while the canvas is
     /// not being rendered either.
-    /// @see https://html.spec.whatwg.org/#being-used-as-relevant-canvas-fallback-content
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#being-used-as-relevant-canvas-fallback-content
     KRYS_NODISCARD bool IsIrrelevantCanvasFallbackContent(const Element &element) noexcept
     {
       if (element.Renderer())
@@ -230,7 +230,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#tabindex-value
+  // https://html.spec.whatwg.org/multipage/interaction.html#tabindex-value
   // The tabindex value of an element is the value of its tabindex attribute, parsed using the rules for
   // parsing integers. If parsing fails or the attribute is not specified, then the tabindex value is null. (A
   // value outside the long range is null too, as the tabIndex getter needs.)
@@ -250,7 +250,7 @@ namespace krys::boo::html
     return static_cast<int32>(result.Value);
   }
 
-  // https://html.spec.whatwg.org/#inert
+  // https://html.spec.whatwg.org/multipage/interaction.html#inert
   bool FocusAlgorithms::IsInert(const Node &node) noexcept
   {
     auto *element = DynamicDowncast<Element>(node);
@@ -258,7 +258,7 @@ namespace krys::boo::html
     {
       element = node.ParentElementInComposedTree();
     }
-    // https://html.spec.whatwg.org/#blocked-by-a-modal-dialog
+    // https://html.spec.whatwg.org/multipage/interaction.html#blocked-by-a-modal-dialog
     // While document is so blocked, every node that is connected to document, with the exception of the
     // subject element and its flat tree descendants, must become inert. subject can additionally become inert
     // via the inert attribute, but only if specified on subject itself (i.e., subject escapes inertness of
@@ -270,7 +270,7 @@ namespace krys::boo::html
       {
         return true;
       }
-      // https://html.spec.whatwg.org/#the-button-element
+      // https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element
       // If a button element is the first child which is an element of a select element, then it is inert.
       if (Is<HTMLButtonElement>(*element) && Is<HTMLSelectElement>(element->ParentNode())
           && dom::TreeQueries::FirstElementChild(*element->ParentNode()) == element)
@@ -285,7 +285,7 @@ namespace krys::boo::html
     return modalDialog;
   }
 
-  // https://html.spec.whatwg.org/#focusable-area
+  // https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
   bool FocusAlgorithms::IsFocusableArea(const Element &element) noexcept
   {
     if (!element.IsConnected())
@@ -336,7 +336,7 @@ namespace krys::boo::html
     return IsBeingRendered(element);
   }
 
-  // https://html.spec.whatwg.org/#get-the-focusable-area
+  // https://html.spec.whatwg.org/multipage/interaction.html#get-the-focusable-area
   Node *FocusAlgorithms::GetFocusableArea(Element &focusTarget, dom::FocusTrigger focusTrigger) noexcept
   {
     // If focus target is an area element with one or more shapes that are focusable areas: return the shape
@@ -378,7 +378,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  // https://html.spec.whatwg.org/#focus-delegate
+  // https://html.spec.whatwg.org/multipage/interaction.html#focus-delegate
   Node *FocusAlgorithms::FocusDelegate(Element &focusTarget, dom::FocusTrigger focusTrigger) noexcept
   {
     // 1. If focusTarget is a shadow host and its shadow root's delegates focus is false, then return null.
@@ -440,7 +440,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  // https://html.spec.whatwg.org/#autofocus-delegate
+  // https://html.spec.whatwg.org/multipage/interaction.html#autofocus-delegate
   Node *FocusAlgorithms::AutofocusDelegate(ContainerNode &focusTarget,
                                            dom::FocusTrigger focusTrigger) noexcept
   {
@@ -475,7 +475,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  // https://html.spec.whatwg.org/#currently-focused-area-of-a-top-level-traversable
+  // https://html.spec.whatwg.org/multipage/interaction.html#currently-focused-area-of-a-top-level-traversable
   Node *FocusAlgorithms::CurrentlyFocusedArea(Document &document) noexcept
   {
     // 1. If traversable does not have system focus, then return null.
@@ -497,7 +497,7 @@ namespace krys::boo::html
     return &document;
   }
 
-  // https://html.spec.whatwg.org/#focus-chain
+  // https://html.spec.whatwg.org/multipage/interaction.html#focus-chain
   FocusAlgorithms::FocusChain FocusAlgorithms::GetFocusChain(Node &subject) noexcept
   {
     // 1. Let output be an empty list.
@@ -522,7 +522,7 @@ namespace krys::boo::html
     return output;
   }
 
-  // https://html.spec.whatwg.org/#focusing-steps
+  // https://html.spec.whatwg.org/multipage/interaction.html#focusing-steps
   void FocusAlgorithms::FocusingSteps(Node &newFocusTarget, Node *fallbackTarget,
                                       const dom::FocusOptions &options) noexcept
   {
@@ -575,7 +575,7 @@ namespace krys::boo::html
     FocusUpdateSteps(krys::move(oldChain), krys::move(newChain), target, options);
   }
 
-  // https://html.spec.whatwg.org/#unfocusing-steps
+  // https://html.spec.whatwg.org/multipage/interaction.html#unfocusing-steps
   void FocusAlgorithms::UnfocusingSteps(Element &oldFocusTarget) noexcept
   {
     auto &document = oldFocusTarget.NodeDocument();
@@ -637,7 +637,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#focus-update-steps
+  // https://html.spec.whatwg.org/multipage/interaction.html#focus-update-steps
   void FocusAlgorithms::FocusUpdateSteps(FocusChain oldChain, FocusChain newChain, Node *newFocusTarget,
                                          const dom::FocusOptions &options) noexcept
   {
@@ -761,7 +761,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#fire-a-focus-event
+  // https://html.spec.whatwg.org/multipage/interaction.html#fire-a-focus-event
   void FocusAlgorithms::FireFocusEvent(const DOMStringAtom &e, Element &target,
                                        EventTarget *relatedTarget) noexcept
   {
@@ -787,7 +787,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#has-focus-steps
+  // https://html.spec.whatwg.org/multipage/interaction.html#has-focus-steps
   bool FocusAlgorithms::HasFocusSteps(const Document &target) noexcept
   {
     // 1. If target's node navigable's top-level traversable does not have system focus, then return false.
@@ -802,7 +802,7 @@ namespace krys::boo::html
     return target.IsFocusedAndActive();
   }
 
-  // https://html.spec.whatwg.org/#the-autofocus-attribute
+  // https://html.spec.whatwg.org/multipage/interaction.html#the-autofocus-attribute
   void FocusAlgorithms::AutofocusInsertionSteps(Element &element) noexcept
   {
     if (!element.HasAttribute(u8"autofocus"))
@@ -852,7 +852,7 @@ namespace krys::boo::html
     topDocument.ScheduleRenderingUpdate({RenderingUpdateStep::FlushAutofocusCandidates});
   }
 
-  // https://html.spec.whatwg.org/#flush-autofocus-candidates
+  // https://html.spec.whatwg.org/multipage/interaction.html#flush-autofocus-candidates
   void FocusAlgorithms::FlushAutofocusCandidates(Document &topDocument) noexcept
   {
     // 1. If topDocument's autofocus processed flag is true, then return.
@@ -962,7 +962,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  // https://html.spec.whatwg.org/#focus-navigation-scope-owner
+  // https://html.spec.whatwg.org/multipage/interaction.html#focus-navigation-scope-owner
   // A node is a focus navigation scope owner if it is a Document, a shadow host, a slot, or an element which
   // is the popover trigger of an element in the popover showing state.
   bool FocusAlgorithms::IsFocusNavigationScopeOwner(const Node &node) noexcept
@@ -992,7 +992,7 @@ namespace krys::boo::html
     return Is<HTMLSlotElement>(*element);
   }
 
-  // https://html.spec.whatwg.org/#associated-focus-navigation-owner
+  // https://html.spec.whatwg.org/multipage/interaction.html#associated-focus-navigation-owner
   Node *FocusAlgorithms::AssociatedFocusNavigationOwner(const Element &element) noexcept
   {
     // 1. If element's parent is null, then return null.
@@ -1035,7 +1035,7 @@ namespace krys::boo::html
     return parentElement ? AssociatedFocusNavigationOwner(*parentElement) : nullptr;
   }
 
-  // https://html.spec.whatwg.org/#sequentially-focusable
+  // https://html.spec.whatwg.org/multipage/interaction.html#sequentially-focusable
   // (The user agent determines every area in its document's sequential focus navigation order sequentially
   // focusable.)
   bool FocusAlgorithms::IsSequentiallyFocusable(const Element &element) noexcept
@@ -1043,9 +1043,9 @@ namespace krys::boo::html
     return IsFocusableArea(element) && TabIndexValue(element).value_or(0) >= 0;
   }
 
-  // https://html.spec.whatwg.org/#sequential-focus-navigation-order
-  // https://html.spec.whatwg.org/#tabindex-ordered-focus-navigation-scope
-  // https://html.spec.whatwg.org/#flattened-tabindex-ordered-focus-navigation-scope
+  // https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-order
+  // https://html.spec.whatwg.org/multipage/interaction.html#tabindex-ordered-focus-navigation-scope
+  // https://html.spec.whatwg.org/multipage/interaction.html#flattened-tabindex-ordered-focus-navigation-scope
   List<Element *> FocusAlgorithms::SequentialFocusNavigationOrder(Document &document) noexcept
   {
     // Each focus navigation scope's elements, in shadow-including tree order.
@@ -1115,7 +1115,7 @@ namespace krys::boo::html
     return result;
   }
 
-  // https://html.spec.whatwg.org/#selection-mechanism-sequential
+  // https://html.spec.whatwg.org/multipage/interaction.html#selection-mechanism-sequential
   bool FocusAlgorithms::SequentialNavigation(Document &document, dom::FocusDirection direction) noexcept
   {
     krys_debug_assert(direction == dom::FocusDirection::Forward
@@ -1154,7 +1154,7 @@ namespace krys::boo::html
     //    Document's sequential focus navigation order; let selection mechanism be "DOM".
     // 5. Let candidate be the result of running the sequential navigation search algorithm with starting
     //    point, direction, and selection mechanism.
-    // https://html.spec.whatwg.org/#sequential-navigation-search-algorithm
+    // https://html.spec.whatwg.org/multipage/interaction.html#sequential-navigation-search-algorithm
     // (A suitable sequentially focusable area is one in the order, whose areas aren't inert.)
     Element *candidate = nullptr;
     auto inOrder = std::ranges::find(order, startingPoint);

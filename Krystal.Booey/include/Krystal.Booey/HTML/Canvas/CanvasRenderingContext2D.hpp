@@ -44,7 +44,7 @@ namespace krys::boo::html
   class Path2D;
 
   /// @brief A `<canvas>`'s 2D context, `GetContext(u8"2d")`.
-  /// @see https://html.spec.whatwg.org/#canvasrenderingcontext2d
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasrenderingcontext2d
   class CanvasRenderingContext2D final : public CanvasRenderingContext2DBase
   {
   public:
@@ -59,28 +59,28 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLCanvasElement &Canvas() const noexcept;
 
     /// @brief Sets the font, a CSS `font` value relative to the canvas's font; ignored if it isn't one.
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-font
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-font
     void SetFont(DOMStringView) noexcept;
 
     /// @brief Draws a focus ring along the current path if @p element, which must be the canvas's fallback
     /// content, has the focus.
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-drawfocusifneeded
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-drawfocusifneeded
     void DrawFocusIfNeeded(Element &element) noexcept;
 
     /// @brief Draws a focus ring along @p path if @p element, which must be the canvas's fallback content,
     /// has the focus.
     void DrawFocusIfNeeded(Path2D &path, Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-direction
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-direction
     KRYS_NODISCARD CanvasDirection GetDirection() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-filltext
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-filltext
     void FillText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-stroketext
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-stroketext
     void StrokeText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-measuretext
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-measuretext
     KRYS_NODISCARD Ref<TextMetrics> MeasureText(DOMStringView text) noexcept;
 
   private:

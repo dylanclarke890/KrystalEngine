@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlbuttonelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlbuttonelement
   class HTMLButtonElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLButtonElement);
@@ -31,24 +31,24 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
-#pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement
+#pragma region HTMLButtonElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmlbuttonelement
 
-    /// @see https://html.spec.whatwg.org/#dom-button-command
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-command
     KRYS_NODISCARD DOMString Command() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-command
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-command
     void Command(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-commandforelement
     KRYS_NODISCARD RefPtr<boo::Element> CommandForElementForBindings() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-commandforelement
     void CommandForElementForBindings(boo::Element *element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-disabled
     void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
@@ -71,31 +71,31 @@ namespace krys::boo
 
     using HTMLFormControlElement::FormNoValidate;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-formnovalidate
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-formnovalidate
     void FormNoValidate(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-formtarget
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-formtarget
     KRYS_NODISCARD DOMString FormTarget() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-formtarget
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-formtarget
     void FormTarget(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-value
     KRYS_NODISCARD DOMString Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-value
     void Value(DOMString value) noexcept;
 
 #pragma endregion
@@ -128,7 +128,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
 
     /// @brief The element the button sends its command: its `commandfor` element.
-    /// @see https://html.spec.whatwg.org/#attr-button-commandfor
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-commandfor
     KRYS_NODISCARD RefPtr<boo::Element> CommandForElement() const noexcept;
 
     /// @brief The state of the button's `command` attribute.
@@ -136,7 +136,7 @@ namespace krys::boo
 
     bool AppendFormData(html::DOMFormData &formData) noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#the-button-element:activation-behaviour
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element:activation-behaviour
     void ActivationBehavior(Event &event) noexcept final;
 
     void DefaultEventHandler(Event &event) noexcept final;
@@ -159,7 +159,7 @@ namespace krys::boo
 
     /// @brief Sets the button's type from its `type` attribute, with the missing and invalid value defaults
     /// (button for a command button or a select's button, else submit).
-    /// @see https://html.spec.whatwg.org/#attr-button-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type
     void ComputeType(DOMStringView typeAttributeValue) noexcept;
 
     /// @brief Fires `command` at the button's `commandfor` element, which then carries out a built-in command

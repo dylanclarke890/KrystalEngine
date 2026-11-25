@@ -25,7 +25,7 @@ namespace krys::boo
 
     /// @brief Whether attribute selectors match the values of @p attributeName case-sensitively on HTML
     /// elements in HTML documents.
-    /// @see https://html.spec.whatwg.org/#case-sensitivity-of-selectors
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
     KRYS_NODISCARD static bool IsCaseSensitiveAttribute(const QualifiedName &attributeName) noexcept;
   };
 }

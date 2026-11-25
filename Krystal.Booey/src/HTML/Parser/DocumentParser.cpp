@@ -224,7 +224,7 @@ namespace krys::boo::html
 
   void DocumentParser::StartPlainText() noexcept
   {
-    // https://html.spec.whatwg.org/#navigate-text
+    // https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-text
     // 3. ... Before any script execution occurs, the user agent must wait for scripts may run for the
     //    newly-created document to be true for the Document. When no bytes have yet been obtained, the user
     //    agent must act as if the tree builder had emitted a start tag token with tag name "pre" followed by

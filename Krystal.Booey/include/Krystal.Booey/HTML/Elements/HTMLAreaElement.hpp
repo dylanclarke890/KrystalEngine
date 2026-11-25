@@ -13,7 +13,7 @@ namespace krys::boo
   class HTMLImageElement;
   class HitTestResult;
 
-  /// @see https://html.spec.whatwg.org/#htmlareaelement
+  /// @see https://html.spec.whatwg.org/multipage/image-maps.html#htmlareaelement
   class HTMLAreaElement : public HTMLElement, public html::UrlDecomposition
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAreaElement);
@@ -72,24 +72,24 @@ namespace krys::boo
     /// @brief Follows a focused link on Enter (as a simulated click), and on a click of the middle button.
     void DefaultEventHandler(Event &event) noexcept override;
 
-#pragma region HTMLAreaElement - https://html.spec.whatwg.org/#htmlareaelement
+#pragma region HTMLAreaElement - https://html.spec.whatwg.org/multipage/image-maps.html#htmlareaelement
 
-    /// @see https://html.spec.whatwg.org/#dom-area-alt
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-alt
     KRYS_NODISCARD DOMString Alt() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-alt
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-alt
     void Alt(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-coords
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-coords
     KRYS_NODISCARD DOMString Coords() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-coords
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-coords
     void Coords(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-shape
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-shape
     KRYS_NODISCARD DOMString Shape() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-shape
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-shape
     void Shape(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-target
@@ -98,55 +98,55 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-area-target
     void Target(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-download
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-download
     KRYS_NODISCARD DOMString Download() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-download
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-download
     void Download(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-ping
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-ping
     KRYS_NODISCARD dom::USVString Ping() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-ping
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-ping
     void Ping(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-rel
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-rel
     KRYS_NODISCARD DOMString Rel() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-rel
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-rel
     void Rel(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-rellist
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-rellist
     KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-referrerpolicy
     void ReferrerPolicy(DOMString value) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLHyperlinkElementUtils - https://html.spec.whatwg.org/#htmlhyperlinkelementutils
+#pragma region HTMLHyperlinkElementUtils - https://html.spec.whatwg.org/multipage/links.html#htmlhyperlinkelementutils
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     void Href(dom::USVString value) noexcept;
 
     /// @brief The `href` stringifier.
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
+    /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
     KRYS_NODISCARD dom::USVString ToString() const noexcept;
 
 #pragma endregion
 
-#pragma region HTMLAreaElement Obsolete members - https://html.spec.whatwg.org/#HTMLAreaElement-partial
+#pragma region HTMLAreaElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLAreaElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-area-nohref
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-area-nohref
     KRYS_NODISCARD bool NoHref() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-area-nohref
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-area-nohref
     void NoHref(bool value) noexcept;
 
 #pragma endregion

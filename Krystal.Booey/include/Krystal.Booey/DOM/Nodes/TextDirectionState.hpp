@@ -38,7 +38,7 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   /// @brief The state of an element's `dir` attribute.
-  /// @see https://html.spec.whatwg.org/#attr-dir
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#attr-dir
   enum class TextDirectionState : uint8
   {
     LTR,

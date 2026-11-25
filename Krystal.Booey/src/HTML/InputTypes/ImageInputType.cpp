@@ -26,7 +26,7 @@ namespace krys::boo::html
     }
 
     /// @brief The width (or height, if @p height) of the dimensions of the image button @p element.
-    /// @see https://html.spec.whatwg.org/#determine-dimensions
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content-other.html#determine-dimensions
     KRYS_NODISCARD uint32 ImageButtonDimension(HTMLInputElement &element, bool height) noexcept
     {
       if (element.IsConnected())

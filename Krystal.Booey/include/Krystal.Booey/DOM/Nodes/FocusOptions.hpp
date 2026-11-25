@@ -84,7 +84,7 @@ namespace krys::boo::dom
   };
 
   /// @brief How to focus an element: the `FocusOptions` dictionary and the engine's own options.
-  /// @see https://html.spec.whatwg.org/#focusoptions
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#focusoptions
   struct FocusOptions
   {
     /// @brief What focusing an element with a selection of its own (a text control) does with it.

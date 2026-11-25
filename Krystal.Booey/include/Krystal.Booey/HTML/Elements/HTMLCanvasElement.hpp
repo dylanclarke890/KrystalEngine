@@ -46,7 +46,7 @@ namespace krys::boo
 
   /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
   /// fallback content, which isn't rendered.
-  /// @see https://html.spec.whatwg.org/#htmlcanvaselement
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#htmlcanvaselement
   class HTMLCanvasElement : public HTMLElement, public html::CanvasBase
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLCanvasElement);
@@ -107,29 +107,29 @@ namespace krys::boo
       return _context.get();
     }
 
-#pragma region HTMLCanvasElement - https://html.spec.whatwg.org/#htmlcanvaselement
+#pragma region HTMLCanvasElement - https://html.spec.whatwg.org/multipage/canvas.html#htmlcanvaselement
 
-    /// @see https://html.spec.whatwg.org/#dom-canvas-width
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-width
     KRYS_NODISCARD uint32 Width() const noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-canvas-width
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-width
     void Width(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-canvas-height
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-height
     KRYS_NODISCARD uint32 Height() const noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-canvas-height
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-height
     void Height(uint32 value) noexcept;
 
     /// @brief The canvas's context of type @p contextId, made on the first call; null if the canvas already
     /// has a context of another type, or there's no such type.
-    /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-getcontext
     /// @note The engine texture context is `"krystal-texture"`.
     KRYS_NODISCARD RefPtr<html::CanvasRenderingContext> GetContext(DOMStringView contextId) noexcept;
 
     /// @brief The canvas's 2D context, made with @p settings on the first call; null if the canvas has a
     /// context of another type.
-    /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-getcontext
     KRYS_NODISCARD RefPtr<html::CanvasRenderingContext2D>
       GetContext2d(html::CanvasRenderingContext2DSettings &&settings = {}) noexcept;
 
@@ -137,7 +137,7 @@ namespace krys::boo
 
     /// @brief The canvas's pixels as a `data:` URL of an image of @p mimeType (PNG, JPEG or WebP; PNG for any
     /// other), at @p quality (0 to 1) for JPEG and WebP; `data:,` if the canvas has no pixels.
-    /// @see https://html.spec.whatwg.org/#dom-canvas-todataurl
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-todataurl
     KRYS_NODISCARD DOMString ToDataUrl(DOMStringView mimeType = {}, Maybe<double> quality = {}) noexcept;
     // transferControlToOffscreen() isn't planned.
 

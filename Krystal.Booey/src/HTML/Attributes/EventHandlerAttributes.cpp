@@ -10,7 +10,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    /// @see https://html.spec.whatwg.org/#window-reflecting-body-element-event-handler-set
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#window-reflecting-body-element-event-handler-set
     constexpr std::array<utf8_stringview, 6> WindowReflectingBodyElementEventHandlers {
       u8"blur", u8"error", u8"focus", u8"load", u8"resize", u8"scroll"};
 

@@ -428,7 +428,7 @@ namespace krys::boo
       std::chrono::duration<double>(1.0 / _displayNominalFramesPerSecond));
   }
 
-  // https://html.spec.whatwg.org/#update-the-rendering
+  // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
   void Frame::UpdateRendering() noexcept
   {
     Ref protectedThis = ShareRef(*this);
@@ -512,7 +512,7 @@ namespace krys::boo
     // https://drafts.csswg.org/scroll-animations-1/#event-loop
     ForEachDocument([](boo::Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
 
-    // https://html.spec.whatwg.org/#focus-fixup-rule
+    // https://html.spec.whatwg.org/multipage/webappapis.html#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
                       [](boo::Document &document)
                       {
@@ -732,7 +732,7 @@ namespace krys::boo
 
   void Frame::ForEachRenderableDocument(const Func<void(boo::Document &)> &functor) const noexcept
   {
-    // https://html.spec.whatwg.org/#update-the-rendering
+    // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
     // Remove from docs any Document doc for which doc is render-blocked.
     List<Ref<boo::Document>> documents;
     ForEachDocument(

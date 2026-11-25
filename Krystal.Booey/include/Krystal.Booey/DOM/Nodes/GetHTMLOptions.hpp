@@ -10,7 +10,7 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
-  /// @see https://html.spec.whatwg.org/#gethtmloptions
+  /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#gethtmloptions
   struct GetHTMLOptions
   {
     bool SerializableShadowRoots = false;

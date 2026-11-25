@@ -182,7 +182,7 @@ namespace krys::boo
 
     // The optimum region is between low and high; the value, clamped to min and max, is never in an even less
     // good region.
-    // https://html.spec.whatwg.org/#the-meter-element
+    // https://html.spec.whatwg.org/multipage/form-elements.html#the-meter-element
     if (lowValue <= theValue && theValue <= highValue)
     {
       return GaugeRegion::Optimum;

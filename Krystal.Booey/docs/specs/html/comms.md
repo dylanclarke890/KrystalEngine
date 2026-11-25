@@ -6,32 +6,32 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [9 Communication](https://html.spec.whatwg.org/#comms)
+## [9 Communication](https://html.spec.whatwg.org/multipage/comms.html#comms)
 
 Status: reviewed (2026-11-01)
 > The sections below.
 
-### [9.1 The MessageEvent interface](https://html.spec.whatwg.org/#the-messageevent-interface)
+### [9.1 The MessageEvent interface](https://html.spec.whatwg.org/multipage/comms.html#the-messageevent-interface)
 
 Status: reviewed (2026-11-01)
 > `html::MessageEvent`: the origin is kept serialized (there are no origins), and there are no message ports, so there's no `ports` (see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-messageevent-origin -->
 
-- [x] [MessageEvent.data](https://html.spec.whatwg.org/#dom-messageevent-data) — The data attribute must return the value it was initialized to. It represents the message being sent.
+- [x] [MessageEvent.data](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-data) — The data attribute must return the value it was initialized to. It represents the message being sent.
 
-- [x] [MessageEvent.origin](https://html.spec.whatwg.org/#dom-messageevent-origin) — The origin attribute represents, in server-sent events and cross-document messaging, the origin of the document that sent the message (typically the scheme, hostname, and port of the document, but not its path or fragment).
+- [x] [MessageEvent.origin](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-origin) — The origin attribute represents, in server-sent events and cross-document messaging, the origin of the document that sent the message (typically the scheme, hostname, and port of the document, but not its path or fragment).
 
-- [x] [The origin getter steps](https://html.spec.whatwg.org/#dom-messageevent-origin) — The origin getter steps are:
+- [x] [The origin getter steps](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-origin) — The origin getter steps are:
   - 1. If this's origin is an origin, then return the serialization of this's origin.
   - 2. If this's origin is null, then return the empty string.
   - 3. Return this's origin.
 
-- [x] [Objects implementing the MessageEvent interface's extract an origin steps](https://html.spec.whatwg.org/#dom-messageevent-origin) — Objects implementing the MessageEvent interface's extract an origin steps are to return this's origin if it is an origin; otherwise null.
+- [x] [Objects implementing the MessageEvent interface's extract an origin steps](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-origin) — Objects implementing the MessageEvent interface's extract an origin steps are to return this's origin if it is an origin; otherwise null.
 
-- [x] [MessageEvent.lastEventId](https://html.spec.whatwg.org/#dom-messageevent-lasteventid) — The lastEventId attribute must return the value it was initialized to. It represents, in server-sent events, the last event ID string of the event source.
+- [x] [MessageEvent.lastEventId](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-lasteventid) — The lastEventId attribute must return the value it was initialized to. It represents, in server-sent events, the last event ID string of the event source.
 
-- [x] [MessageEvent.source](https://html.spec.whatwg.org/#dom-messageevent-source) — The source attribute must return the value it was initialized to. It represents, in cross-document messaging, the WindowProxy of the browsing context of the Window object from which the message came; and in the connect events used by shared workers, the newly connecting MessagePort.
+- [x] [MessageEvent.source](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-source) — The source attribute must return the value it was initialized to. It represents, in cross-document messaging, the WindowProxy of the browsing context of the Window object from which the message came; and in the connect events used by shared workers, the newly connecting MessagePort.
 
-- [x] [MessageEvent.ports](https://html.spec.whatwg.org/#dom-messageevent-ports) — The ports attribute must return the value it was initialized to. It represents, in cross-document messaging and channel messaging, the MessagePort array being sent.
+- [x] [MessageEvent.ports](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-ports) — The ports attribute must return the value it was initialized to. It represents, in cross-document messaging and channel messaging, the MessagePort array being sent.
 
-- [x] [MessageEvent.initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports)](https://html.spec.whatwg.org/#dom-messageevent-initmessageevent) — The initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports) method must initialize the event in a manner analogous to the similarly-named initEvent() method. [DOM]
+- [x] [MessageEvent.initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports)](https://html.spec.whatwg.org/multipage/comms.html#dom-messageevent-initmessageevent) — The initMessageEvent(type, bubbles, cancelable, data, origin, lastEventId, source, ports) method must initialize the event in a manner analogous to the similarly-named initEvent() method. [DOM]

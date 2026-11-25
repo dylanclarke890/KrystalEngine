@@ -44,7 +44,7 @@ namespace krys::boo
   RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
     // A flex or grid button lays its contents out as such; otherwise it's a button box.
-    // https://html.spec.whatwg.org/#button-layout
+    // https://html.spec.whatwg.org/multipage/rendering.html#button-layout
     if (style.IsDisplayFlexibleOrGridFormattingContextBox())
     {
       return HTMLFormControlElement::CreateElementRenderer(krys::move(style));
@@ -82,7 +82,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-button-element:activation-behaviour
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element:activation-behaviour
   void HTMLButtonElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If element is disabled, then return.
@@ -249,7 +249,7 @@ namespace krys::boo
     ComputeType(GetAttribute(u8"type").value_or(DOMString()));
   }
 
-  // https://html.spec.whatwg.org/#concept-submit-button
+  // https://html.spec.whatwg.org/multipage/forms.html#concept-submit-button
   void HTMLButtonElement::ComputeType(DOMStringView typeAttributeValue) noexcept
   {
     auto oldType = _type;
@@ -292,7 +292,7 @@ namespace krys::boo
     return ResolvedElementForAttribute(u8"commandfor");
   }
 
-  // https://html.spec.whatwg.org/#attr-button-command
+  // https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-command
   dom::CommandType HTMLButtonElement::GetCommandType() const noexcept
   {
     auto action = GetAttribute(u8"command");
@@ -332,7 +332,7 @@ namespace krys::boo
 
     // 5b. If the result of determining if a command is valid for a target given command and target is false,
     //     then return.
-    // https://html.spec.whatwg.org/#determine-if-command-is-valid
+    // https://html.spec.whatwg.org/multipage/form-elements.html#determine-if-command-is-valid
     // 1. If command is in the Unknown state, then return false.
     if (command == dom::CommandType::Invalid)
     {
@@ -387,7 +387,7 @@ namespace krys::boo
 
 #pragma region HTMLButtonElement
 
-  // https://html.spec.whatwg.org/#dom-button-command
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-command
   DOMString HTMLButtonElement::Command() const noexcept
   {
     // 1. Let command be this's command attribute.
@@ -441,7 +441,7 @@ namespace krys::boo
 
   dom::USVString HTMLButtonElement::FormAction() const noexcept
   {
-    // https://html.spec.whatwg.org/#dom-fs-formaction
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formaction
     // Let attributeValue be the result of running get an attribute value given this and formaction. If
     // attributeValue is null or the empty string, return this's node document's URL, serialized.
     auto attributeValue = GetAttribute(u8"formaction");
@@ -509,7 +509,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-button-type
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-type
   DOMString HTMLButtonElement::Type() const noexcept
   {
     // 1. If this is a submit button, then return "submit".

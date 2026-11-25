@@ -33,7 +33,7 @@ namespace krys::boo
 {
   class HTMLPictureElement;
 
-  /// @see https://html.spec.whatwg.org/#htmlsourceelement
+  /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#htmlsourceelement
   // FIXME: Media element sources (sourceWasAdded, error events), once there are media elements.
   class HTMLSourceElement : public HTMLElement
   {
@@ -51,55 +51,55 @@ namespace krys::boo
 
     ~HTMLSourceElement() noexcept override;
 
-#pragma region HTMLSourceElement - https://html.spec.whatwg.org/#htmlsourceelement
+#pragma region HTMLSourceElement - https://html.spec.whatwg.org/multipage/embedded-content.html#htmlsourceelement
 
-    /// @see https://html.spec.whatwg.org/#dom-source-src
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-src
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-type
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-type
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-srcset
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-srcset
     KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-srcset
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-srcset
     void SrcSet(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-sizes
     KRYS_NODISCARD DOMString Sizes() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-sizes
     void Sizes(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-media
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-media
     KRYS_NODISCARD DOMString Media() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-media
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-media
     void Media(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-width
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-width
     KRYS_NODISCARD uint32 Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-width
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-width
     void Width(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-height
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-height
     KRYS_NODISCARD uint32 Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-source-height
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-height
     void Height(uint32 value) noexcept;
 
 #pragma endregion
 
     /// @brief The `media` attribute, parsed: an empty or all-whitespace one is an empty list, which matches
     /// the environment.
-    /// @see https://html.spec.whatwg.org/#matches-the-environment
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#matches-the-environment
     KRYS_NODISCARD const css::mq::MediaQueryList &ParsedMediaAttribute(Document &document) const noexcept;
 
     void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,

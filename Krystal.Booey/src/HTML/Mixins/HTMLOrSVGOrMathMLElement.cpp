@@ -13,7 +13,7 @@
 
 namespace krys::boo::html::mixins
 {
-  // https://html.spec.whatwg.org/#dom-tabindex
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
   int32 HTMLOrSVGOrMathMLElement::TabIndex(const Element &element) noexcept
   {
     // 1. Let attribute be this's tabindex attribute.
@@ -83,11 +83,11 @@ namespace krys::boo::html::mixins
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-focus
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
   void HTMLOrSVGOrMathMLElement::Focus(Element &element, const dom::FocusOptions &options) noexcept
   {
     // 1. If the allow focus steps given this's node document return false, then return.
-    // https://html.spec.whatwg.org/#allow-focus-steps
+    // https://html.spec.whatwg.org/multipage/interaction.html#allow-focus-steps
     // (The "focus-without-user-activation" feature's default allowlist is *, and without frames or
     // permissions policies every document is allowed to use it, so focus is always allowed.)
 
@@ -130,7 +130,7 @@ namespace krys::boo::html::mixins
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-blur
+  // https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
   // The user agent should run the unfocusing steps given this.
   void HTMLOrSVGOrMathMLElement::Blur(Element &element) noexcept
   {

@@ -38,7 +38,7 @@ namespace krys::boo::html
   /// suspended (in the back/forward cache), and is usually dropped once the document's active objects are
   /// stopped.
   /// @note There's no rendering step and no scripting, so a microtask checkpoint only runs microtasks.
-  /// @see https://html.spec.whatwg.org/#event-loops
+  /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-loops
   class EventLoop
   {
     KRYS_NON_COPY_MOVABLE(EventLoop);
@@ -47,12 +47,12 @@ namespace krys::boo::html
     using Steps = Func<void()>;
 
   private:
-    /// @see https://html.spec.whatwg.org/#concept-task
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#concept-task
     struct Task
     {
       TaskSource Source;
       EventLoop::Steps Steps;
-      /// @see https://html.spec.whatwg.org/#concept-task-document
+      /// @see https://html.spec.whatwg.org/multipage/webappapis.html#concept-task-document
       WeakPtr<boo::Document> Document;
       bool HasDocument {false};
       StoppedDocumentTask WhenStopped {StoppedDocumentTask::Drop};
@@ -62,10 +62,10 @@ namespace krys::boo::html
     // keeps tasks from the same source in order.
     Deque<Task> _taskQueue;
 
-    /// @see https://html.spec.whatwg.org/#microtask-queue
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#microtask-queue
     Queue<Steps> _microtaskQueue;
 
-    /// @see https://html.spec.whatwg.org/#performing-a-microtask-checkpoint
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#performing-a-microtask-checkpoint
     bool _performingMicrotaskCheckpoint {false};
 
     /// @brief The timers of the tasks queued after a timeout; fired ones are removed when the loop next runs.
@@ -83,31 +83,31 @@ namespace krys::boo::html
     /// DIFFERENCES.md).
     KRYS_NODISCARD static EventLoop &Current() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#queue-a-task
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task
     void QueueTask(TaskSource source, Steps &&steps) noexcept;
 
     /// @brief Queues a task of @p document (a global task of its window, or an element task of one of its
     /// elements), which waits while the document is suspended; @p whenStopped is what becomes of it once the
     /// document is stopped or gone.
-    /// @see https://html.spec.whatwg.org/#queue-a-global-task
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-global-task
     void QueueTask(TaskSource source, boo::Document &document, Steps &&steps,
                    StoppedDocumentTask whenStopped = StoppedDocumentTask::Drop) noexcept;
 
     /// @brief Queues a task on @p source after @p timeout of the host's time.
-    /// @see https://html.spec.whatwg.org/#run-steps-after-a-timeout
+    /// @see https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#run-steps-after-a-timeout
     // (No ordering identifier, which orders script timers' timeouts, as scripting isn't planned.)
     void ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#queue-a-microtask
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-microtask
     void QueueMicrotask(Steps &&steps) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#perform-a-microtask-checkpoint
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint
     void PerformMicrotaskCheckpoint() noexcept;
 
     /// @brief Runs the oldest task, then performs a microtask checkpoint (one iteration of the processing
     /// model).
     /// @return Whether a task ran.
-    /// @see https://html.spec.whatwg.org/#event-loop-processing-model
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model
     bool RunNextTask() noexcept;
 
     /// @brief Runs tasks, including the ones they queue, and the timers due at the current time, until there

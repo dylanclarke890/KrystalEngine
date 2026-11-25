@@ -44,7 +44,7 @@ namespace krys::boo
 
   namespace
   {
-    // https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
+    // https://html.spec.whatwg.org/multipage/rendering.html#rules-for-parsing-a-legacy-font-size
     KRYS_NODISCARD Maybe<int32> ParseFontSize(DOMStringView input) noexcept
     {
       // 1. Let input be the attribute's value.

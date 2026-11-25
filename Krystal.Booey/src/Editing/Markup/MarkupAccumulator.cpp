@@ -86,7 +86,7 @@ namespace krys::boo
 
       switch (element->TagQualifiedName().TagName())
       {
-        // https://html.spec.whatwg.org/#void-elements
+        // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
         case html::TagName::area:
         case html::TagName::base:
         case html::TagName::br:
@@ -100,7 +100,7 @@ namespace krys::boo
         case html::TagName::source:
         case html::TagName::track:
         case html::TagName::wbr:
-        // https://html.spec.whatwg.org/#serializes-as-void
+        // https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void
         case html::TagName::basefont:
         case html::TagName::bgsound:
         case html::TagName::frame:
@@ -134,7 +134,7 @@ namespace krys::boo
       return true;
     }
 
-    // https://html.spec.whatwg.org/#html-fragment-serialisation-algorithm
+    // https://html.spec.whatwg.org/multipage/parsing.html#html-fragment-serialisation-algorithm
     KRYS_NODISCARD utf8_string TagQName(const Element &element, bool inXMLFragmentSerialization) noexcept
     {
       // If current node is an element in the HTML namespace, the MathML namespace, or the SVG namespace, then

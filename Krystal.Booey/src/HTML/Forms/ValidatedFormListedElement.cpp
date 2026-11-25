@@ -170,7 +170,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#check-validity-steps
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#check-validity-steps
   bool ValidatedFormListedElement::CheckValidity(List<Ref<HTMLElement>> *unhandledInvalidControls) noexcept
   {
     // 1. If element is a candidate for constraint validation and does not satisfy its constraints:
@@ -201,7 +201,7 @@ namespace krys::boo::html
     return false;
   }
 
-  // https://html.spec.whatwg.org/#report-validity-steps
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#report-validity-steps
   bool ValidatedFormListedElement::ReportValidity() noexcept
   {
     // 1. If element is a candidate for constraint validation and does not satisfy its constraints:

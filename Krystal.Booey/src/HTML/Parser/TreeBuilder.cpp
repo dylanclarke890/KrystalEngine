@@ -3672,7 +3672,7 @@ namespace krys::boo::html
 
   void TreeBuilder::StopParsing() noexcept
   {
-    // https://html.spec.whatwg.org/#the-end
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-end
     // 1. (Skipped: there's no speculative HTML parser.)
     // 2. (Skipped: there's no insertion point.)
     // 4. Pop all the nodes off the stack of open elements.
@@ -3825,7 +3825,7 @@ namespace krys::boo::html
 
   namespace
   {
-    // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node (steps 5 to 8, where targetParent
+    // https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node (steps 5 to 8, where targetParent
     // is a template element)
     KRYS_NODISCARD InsertionLocation
       InsertionLocationInTemplate(const HTMLTemplateElement &targetParent) noexcept
@@ -3852,7 +3852,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#appropriate-place-for-inserting-a-node
+  // https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
   InsertionLocation TreeBuilder::AppropriatePlaceToInsertNode(ContainerNode *targetOverride) noexcept
   {
     // 1. Let targetParent be overrideTarget if it is not null; otherwise the current node.
@@ -3960,7 +3960,7 @@ namespace krys::boo::html
     return adjustedInsertionLocation;
   }
 
-  // https://html.spec.whatwg.org/#adjusted-insertion-location
+  // https://html.spec.whatwg.org/multipage/parsing.html#adjusted-insertion-location
   InsertionLocation
     TreeBuilder::AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation) noexcept
   {
@@ -3992,7 +3992,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
+  // https://html.spec.whatwg.org/multipage/parsing.html#insert-an-element-at-the-adjusted-insertion-location
   void TreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element,
                                                              Maybe<InsertionLocation> location,
                                                              bool alreadySanitized) noexcept
@@ -4094,7 +4094,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#parsing-main-inhead (a start tag whose tag name is "template")
+  // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead (a start tag whose tag name is "template")
   void TreeBuilder::InsertTemplateElement(TokenAtom &token) noexcept
   {
     // 1. Let templateStartTag be the start tag.
@@ -4367,7 +4367,7 @@ namespace krys::boo::html
     (void)dom::MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
-  // https://html.spec.whatwg.org/#insert-a-processing-instruction
+  // https://html.spec.whatwg.org/multipage/parsing.html#insert-a-processing-instruction
   void TreeBuilder::InsertProcessingInstruction(const TokenAtom &token,
                                                 Maybe<InsertionLocation> position) noexcept
   {
@@ -4440,7 +4440,7 @@ namespace krys::boo::html
                                           const ParsedAttributeList &attributes,
                                           ContainerNode &intendedParent) noexcept
   {
-    // https://html.spec.whatwg.org/#create-an-element-for-the-token
+    // https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token
     // 1.-2. (There's no speculative parser.)
     // 3. Let document be intendedParent's node document.
     auto &document = intendedParent.NodeDocument();

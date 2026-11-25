@@ -173,7 +173,7 @@ namespace krys::boo
     KRYS_NODISCARD virtual DOMString Value() const noexcept = 0;
 
     /// @brief Whether the control's auto directionality comes from its value rather than its text.
-    /// @see https://html.spec.whatwg.org/#auto-directionality-form-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#auto-directionality-form-associated-elements
     KRYS_NODISCARD virtual bool DirAutoUsesValue() const noexcept = 0;
 
     virtual ExceptionOr<void>

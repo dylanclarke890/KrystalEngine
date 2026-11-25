@@ -106,7 +106,7 @@ namespace krys::boo::html
   };
 
   /// @brief An image candidate from `srcset` or `src`.
-  /// @see https://html.spec.whatwg.org/#image-candidate-string
+  /// @see https://html.spec.whatwg.org/multipage/images.html#image-candidate-string
   struct ImageCandidate
   {
     enum class OriginAttribute : bool
@@ -146,12 +146,12 @@ namespace krys::boo::html
   /// factor, with `w` descriptors resolved against @p sourceSize.
   /// @param srcAttribute The `src` attribute, or null if it's absent.
   /// @param srcsetAttribute The `srcset` attribute, or null if it's absent.
-  /// @see https://html.spec.whatwg.org/#select-an-image-source
+  /// @see https://html.spec.whatwg.org/multipage/images.html#select-an-image-source
   KRYS_NODISCARD ImageCandidate BestFitSourceForImageAttributes(
     float deviceScaleFactor, Maybe<DOMStringView> srcAttribute, Maybe<DOMStringView> srcsetAttribute,
     float sourceSize, const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback = {}) noexcept;
 
-  /// @see https://html.spec.whatwg.org/#parse-a-srcset-attribute
+  /// @see https://html.spec.whatwg.org/multipage/images.html#parse-a-srcset-attribute
   KRYS_NODISCARD List<ImageCandidate>
     ParseImageCandidatesFromSrcsetAttribute(DOMStringView attribute) noexcept;
 }

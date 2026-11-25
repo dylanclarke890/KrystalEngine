@@ -14,7 +14,7 @@ namespace krys::boo::html
   class RadioNodeList;
 
   /// @brief A form's `elements`: its listed elements, wherever they are in the tree.
-  /// @see https://html.spec.whatwg.org/#htmlformcontrolscollection
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#htmlformcontrolscollection
   class HTMLFormControlsCollection final : public LiveHTMLCollection
   {
   private:
@@ -40,7 +40,7 @@ namespace krys::boo::html
     KRYS_NODISCARD List<Ref<Element>> NamedItems(DOMStringView name) const noexcept;
 
     /// @brief The element whose ID or name is @p name, or a RadioNodeList of them if there are several.
-    /// @see https://html.spec.whatwg.org/#dom-htmlformcontrolscollection-nameditem
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-htmlformcontrolscollection-nameditem
     KRYS_NODISCARD Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<Element>>>
       NamedItemOrItems(DOMStringView name) const noexcept;
 

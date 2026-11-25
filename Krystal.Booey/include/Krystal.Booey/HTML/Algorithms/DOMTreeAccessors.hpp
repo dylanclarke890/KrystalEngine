@@ -14,12 +14,12 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#dom-tree-accessors
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-tree-accessors
   class DOMTreeAccessors
   {
   public:
     /// @brief The document element, if it's an html element.
-    /// @see https://html.spec.whatwg.org/#the-html-element-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-html-element-2
     KRYS_NODISCARD static HTMLHtmlElement *GetHtmlElement(const Document &document) noexcept
     {
       auto documentElement = document.DocumentElement();
@@ -32,7 +32,7 @@ namespace krys::boo::html
     }
 
     /// @brief The first head element that is a child of the html element.
-    /// @see https://html.spec.whatwg.org/#the-head-element-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-head-element-2
     KRYS_NODISCARD static HTMLHeadElement *GetHeadElement(const Document &document) noexcept
     {
       auto *html = GetHtmlElement(document);
@@ -47,7 +47,7 @@ namespace krys::boo::html
     }
 
     /// @brief The first title element in the document, in tree order.
-    /// @see https://html.spec.whatwg.org/#the-title-element-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-title-element-2
     KRYS_NODISCARD static HTMLTitleElement *GetTitleElement(const Document &document) noexcept
     {
       auto descendants = dom::DescendantRange(const_cast<Document &>(document));
@@ -56,7 +56,7 @@ namespace krys::boo::html
     }
 
     /// @brief The first of the html element's children that is a body or frameset element.
-    /// @see https://html.spec.whatwg.org/#the-body-element-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-body-element-2
     KRYS_NODISCARD static HTMLElement *GetBodyElement(const Document &document) noexcept
     {
       auto *html = GetHtmlElement(document);

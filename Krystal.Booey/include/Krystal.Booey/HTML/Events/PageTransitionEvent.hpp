@@ -6,14 +6,14 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#pagetransitioneventinit
+  /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#pagetransitioneventinit
   struct PageTransitionEventInit : EventInit
   {
     bool Persisted {false};
   };
 
   /// @brief `pageshow` and `pagehide`: a document is shown or hidden as its frame navigates.
-  /// @see https://html.spec.whatwg.org/#pagetransitionevent
+  /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#pagetransitionevent
   class PageTransitionEvent final : public Event
   {
   private:
@@ -30,7 +30,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<PageTransitionEvent> Create(const DOMStringAtom &type, bool persisted) noexcept;
 
     /// @brief Whether the document comes from, or goes into, the back/forward cache.
-    /// @see https://html.spec.whatwg.org/#dom-pagetransitionevent-persisted
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-pagetransitionevent-persisted
     KRYS_NODISCARD bool Persisted() const noexcept
     {
       return _persisted;

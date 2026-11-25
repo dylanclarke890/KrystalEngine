@@ -42,12 +42,12 @@ namespace krys::boo::dom
   class PopoverData;
 
   /// @brief The elements set through an element's element reflection attributes, by attribute name.
-  /// @see https://html.spec.whatwg.org/#explicitly-set-attr-element
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#explicitly-set-attr-element
   using ExplicitlySetAttrElementsMap = HashMap<DOMStringAtom, WeakPtr<Element>>;
 
   /// @brief The elements set through an element's `FrozenArray<Element>?` reflection attributes, by attribute
   /// name.
-  /// @see https://html.spec.whatwg.org/#explicitly-set-attr-elements
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#explicitly-set-attr-elements
   using ExplicitlySetAttrElementListsMap = HashMap<DOMStringAtom, List<WeakPtr<Element>>>;
 
   /// @brief The data an element needs only some of the time, made when it's first needed
@@ -99,7 +99,7 @@ namespace krys::boo::dom
     ~ElementRareData() noexcept override;
 
     /// @brief The element's custom element reaction queue, once a reaction has been enqueued for it.
-    /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reaction-queue
     KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
     {
       return _customElementReactionQueue.get();

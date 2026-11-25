@@ -6,7 +6,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#dom-track-none
+  /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-none
   enum class TrackReadyState : uint8
   {
     None,
@@ -23,7 +23,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmltrackelement
+  /// @see https://html.spec.whatwg.org/multipage/media.html#htmltrackelement
   class HTMLTrackElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTrackElement);
@@ -34,39 +34,39 @@ namespace krys::boo
   public:
     HTMLTrackElement(Document &document) noexcept;
 
-#pragma region HTMLTrackElement - https://html.spec.whatwg.org/#htmltrackelement
+#pragma region HTMLTrackElement - https://html.spec.whatwg.org/multipage/media.html#htmltrackelement
 
-    /// @see https://html.spec.whatwg.org/#dom-track-kind
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-kind
     KRYS_NODISCARD DOMString Kind() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-kind
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-kind
     void Kind(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-src
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-src
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-srclang
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-srclang
     KRYS_NODISCARD DOMString SrcLang() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-srclang
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-srclang
     void SrcLang(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-label
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-label
     KRYS_NODISCARD DOMString Label() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-label
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-label
     void Label(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-default
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-default
     KRYS_NODISCARD bool Default() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-default
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-default
     void Default(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-track-readystate
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-readystate
     KRYS_NODISCARD html::TrackReadyState ReadyState() const noexcept
     {
       return _readyState;

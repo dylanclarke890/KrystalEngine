@@ -39,31 +39,31 @@ namespace krys::boo::html
   }
 
   /// @brief The best representation of @p number as a floating-point number, for number-like input types.
-  /// @see https://html.spec.whatwg.org/#best-representation-of-the-number-as-a-floating-point-number
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#best-representation-of-the-number-as-a-floating-point-number
   KRYS_NODISCARD DOMString SerializeForNumberType(const Decimal &number) noexcept;
 
   /// @brief The best representation of @p number as a floating-point number: what script's `String(number)`
   /// gives.
-  /// @see https://html.spec.whatwg.org/#best-representation-of-the-number-as-a-floating-point-number
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#best-representation-of-the-number-as-a-floating-point-number
   KRYS_NODISCARD DOMString SerializeForNumberType(double number) noexcept;
 
   /// @brief Parses @p string as a valid floating-point number (no leading `+` or whitespace), or returns
   /// @p fallbackValue.
-  /// @see https://html.spec.whatwg.org/#valid-floating-point-number
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-floating-point-number
   KRYS_NODISCARD Decimal ParseToDecimalForNumberType(DOMStringView string,
                                                      const Decimal &fallbackValue) noexcept;
 
   KRYS_NODISCARD Decimal ParseToDecimalForNumberType(DOMStringView string) noexcept;
 
   /// @brief Parses @p string as a valid floating-point number, or returns @p fallbackValue.
-  /// @see https://html.spec.whatwg.org/#valid-floating-point-number
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-floating-point-number
   KRYS_NODISCARD double ParseToDoubleForNumberType(DOMStringView string, double fallbackValue) noexcept;
 
   KRYS_NODISCARD double ParseToDoubleForNumberType(DOMStringView string) noexcept;
 
   /// @brief Parses @p input with the rules for parsing floating-point number values, or returns
   /// @p fallbackValue.
-  /// @see https://html.spec.whatwg.org/#rules-for-parsing-floating-point-number-values
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-floating-point-number-values
   KRYS_NODISCARD double ParseHTMLFloatingPointNumberValue(DOMStringView input,
                                                           double fallbackValue = 0) noexcept;
 }

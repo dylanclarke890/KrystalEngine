@@ -54,12 +54,12 @@ namespace krys::boo
   bool HTMLFieldSetElement::IsDisabledFormControl() const noexcept
   {
     // The fieldset element itself should never be considered disabled, it is only supposed to affect its
-    // descendants: https://html.spec.whatwg.org/#concept-fe-disabled
+    // descendants: https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-fe-disabled
     return false;
   }
 
-  // https://html.spec.whatwg.org/#concept-element-disabled
-  // https://html.spec.whatwg.org/#concept-fieldset-disabled
+  // https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled
+  // https://html.spec.whatwg.org/multipage/form-elements.html#concept-fieldset-disabled
   bool HTMLFieldSetElement::IsActuallyDisabled() const noexcept
   {
     return HTMLFormControlElement::IsDisabledFormControl();

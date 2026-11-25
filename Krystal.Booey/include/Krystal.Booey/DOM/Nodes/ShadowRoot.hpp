@@ -244,7 +244,7 @@ namespace krys::boo
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
     /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-sethtml
     ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -252,7 +252,7 @@ namespace krys::boo
 
     /// @brief Appends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtml
     ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -260,7 +260,7 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtml
     ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -268,7 +268,7 @@ namespace krys::boo
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context;
     /// sanitized only if @p options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-sethtmlunsafe
     ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -276,7 +276,7 @@ namespace krys::boo
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -285,7 +285,7 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
                                         const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -293,7 +293,7 @@ namespace krys::boo
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-gethtml
     KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
 
     /// @brief The same, with no shadow roots.
@@ -302,10 +302,10 @@ namespace krys::boo
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
 #pragma endregion

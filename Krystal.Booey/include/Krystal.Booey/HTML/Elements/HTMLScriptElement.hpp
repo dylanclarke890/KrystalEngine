@@ -10,7 +10,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlscriptelement
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement
   class HTMLScriptElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);
@@ -28,94 +28,94 @@ namespace krys::boo
 
     ~HTMLScriptElement() noexcept override;
 
-#pragma region HTMLScriptElement - https://html.spec.whatwg.org/#htmlscriptelement
+#pragma region HTMLScriptElement - https://html.spec.whatwg.org/multipage/scripting.html#htmlscriptelement
 
-    /// @see https://html.spec.whatwg.org/#dom-script-type
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-type
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-type
     void Type(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-src
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-src
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-nomodule
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-nomodule
     KRYS_NODISCARD bool NoModule() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-nomodule
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-nomodule
     void NoModule(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-async
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-async
     KRYS_NODISCARD bool Async() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-async
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-async
     void Async(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-defer
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-defer
     KRYS_NODISCARD bool Defer() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-defer
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-defer
     void Defer(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-blocking
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-blocking
     KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-crossorigin
     KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-crossorigin
     void CrossOrigin(Maybe<DOMString> value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-referrerpolicy
     void ReferrerPolicy(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-integrity
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-integrity
     KRYS_NODISCARD DOMString Integrity() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-integrity
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-integrity
     void Integrity(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-fetchpriority
     KRYS_NODISCARD DOMString FetchPriority() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-fetchpriority
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-fetchpriority
     void FetchPriority(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-text
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
     KRYS_NODISCARD DOMString Text() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-text
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text
     void Text(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-supports
+    /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-supports
     KRYS_NODISCARD static bool Supports(DOMStringView type) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLScriptElement Obsolete members  - https://html.spec.whatwg.org/#HTMLScriptElement-partial
+#pragma region HTMLScriptElement Obsolete members  - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLScriptElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-script-charset
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-charset
     KRYS_NODISCARD DOMString Charset() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-charset
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-charset
     void Charset(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-event
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-event
     KRYS_NODISCARD DOMString Event() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-event
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-event
     void Event(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-htmlfor
     KRYS_NODISCARD DOMString HtmlFor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-script-htmlfor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-script-htmlfor
     void HtmlFor(DOMString value) noexcept;
 
 #pragma endregion

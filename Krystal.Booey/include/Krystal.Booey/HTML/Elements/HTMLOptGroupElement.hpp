@@ -7,7 +7,7 @@ namespace krys::boo
 {
   class HTMLSelectElement;
 
-  /// @see https://html.spec.whatwg.org/#htmloptgroupelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmloptgroupelement
   class HTMLOptGroupElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOptGroupElement);
@@ -29,7 +29,7 @@ namespace krys::boo
 
     /// @brief The slot of the shadow tree that takes @p child: a first child element that's a legend takes
     /// the legend slot, which otherwise shows the label, and the other children the contents slot.
-    /// @see https://html.spec.whatwg.org/#the-select-element-2
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
     KRYS_NODISCARD HTMLSlotElement *SlotForHostChild(const Node &child) const noexcept;
 
     KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final
@@ -37,18 +37,18 @@ namespace krys::boo
       return _isDisabled;
     }
 
-#pragma region HTMLOptGroupElement - https://html.spec.whatwg.org/#htmloptgroupelement
+#pragma region HTMLOptGroupElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmloptgroupelement
 
-    /// @see https://html.spec.whatwg.org/#dom-optgroup-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-optgroup-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-optgroup-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-optgroup-disabled
     void Disabled(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-optgroup-label
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-optgroup-label
     KRYS_NODISCARD DOMString Label() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-optgroup-label
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-optgroup-label
     void Label(DOMString value) noexcept;
 
 #pragma endregion

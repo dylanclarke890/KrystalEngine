@@ -47,7 +47,7 @@ namespace krys::boo::dom
   class ToggleEventTask;
 
   /// @brief The state of an element's `popover` attribute.
-  /// @see https://html.spec.whatwg.org/#attr-popover
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#attr-popover
   enum class PopoverState : uint8
   {
     None,
@@ -61,7 +61,7 @@ namespace krys::boo::dom
     return PopoverState::Hint;
   }
 
-  /// @see https://html.spec.whatwg.org/#popover-visibility-state
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-visibility-state
   enum class PopoverVisibilityState : bool
   {
     Hidden,
@@ -83,7 +83,7 @@ namespace krys::boo::dom
   };
 
   /// @brief The popover state of an element with a `popover` attribute.
-  /// @see https://html.spec.whatwg.org/#the-popover-attribute
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#the-popover-attribute
   class PopoverData
   {
     KRYS_NON_COPY_MOVABLE(PopoverData);
@@ -124,7 +124,7 @@ namespace krys::boo::dom
     }
 
     /// @brief The stack the popover opened in: `Auto` or `Hint` while it's showing in one, `None` otherwise.
-    /// @see https://html.spec.whatwg.org/#opened-in-popover-mode
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#opened-in-popover-mode
     KRYS_NODISCARD PopoverState OpenedInPopoverMode() const noexcept
     {
       return _openedInPopoverMode;
@@ -142,12 +142,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD Ref<ToggleEventTask> EnsureToggleEventTask(Element &element) noexcept;
 
     /// @brief The element that showed the popover (its popover trigger).
-    /// @see https://html.spec.whatwg.org/#popover-trigger
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-trigger
     KRYS_NODISCARD HTMLElement *Invoker() const noexcept;
 
     void SetInvoker(HTMLElement *element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#popover-close-watcher
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-close-watcher
     KRYS_NODISCARD html::CloseWatcher *CloseWatcher() const noexcept
     {
       return _closeWatcher.get();
@@ -155,7 +155,7 @@ namespace krys::boo::dom
 
     void SetCloseWatcher(RefPtr<html::CloseWatcher> &&closeWatcher) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#popover-hiding
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-hiding
     KRYS_NODISCARD bool IsHidingPopover() const noexcept
     {
       return _isHidingPopover;

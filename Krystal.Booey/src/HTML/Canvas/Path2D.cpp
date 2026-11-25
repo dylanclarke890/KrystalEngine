@@ -33,7 +33,7 @@
 
 namespace krys::boo::html
 {
-  // https://html.spec.whatwg.org/#dom-path2d
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d
   Ref<Path2D> Path2D::Create(DOMStringView pathData) noexcept
   {
     // 4. Let svgPath be the result of parsing and interpreting path according to SVG 2's rules for path data.
@@ -57,7 +57,7 @@ namespace krys::boo::html
     return output;
   }
 
-  // https://html.spec.whatwg.org/#dom-path2d-addpath
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-path2d-addpath
   ExceptionOr<void> Path2D::AddPath(const Path2D &path, DOMMatrix2DInit transform) noexcept
   {
     // 2. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.

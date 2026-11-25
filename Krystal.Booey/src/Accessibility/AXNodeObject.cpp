@@ -1083,7 +1083,7 @@ namespace krys::boo
       case TagName::label:    return AXRole::Label;
       case TagName::dfn:
         // The dfn element represents a term being defined, the "term" role rather than "definition".
-        // https://html.spec.whatwg.org/#the-dfn-element
+        // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-dfn-element
         return AXRole::Term;
       case TagName::div:     return AXRole::Generic;
       case TagName::form:    return AXRole::Form;
@@ -3297,7 +3297,7 @@ namespace krys::boo
       }
     };
 
-    // The forming a table algorithm (https://html.spec.whatwg.org/#forming-a-table), working out where each
+    // The forming a table algorithm (https://html.spec.whatwg.org/multipage/tables.html#forming-a-table), working out where each
     // cell is and how far it spans.
 
     // Step 1.
@@ -3322,7 +3322,7 @@ namespace krys::boo
 
     List<DownwardGrowingCell> downwardGrowingCells;
 
-    // https://html.spec.whatwg.org/#algorithm-for-growing-downward-growing-cells
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-growing-downward-growing-cells
     auto growDownwardsCells = [&]
     {
       // Extend each downward-growing cell so it also covers the slots (x, yCurrent), where
@@ -3344,7 +3344,7 @@ namespace krys::boo
     };
 
     HashSet<const AXObject *> processedRows;
-    // https://html.spec.whatwg.org/#algorithm-for-processing-rows
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-processing-rows
     auto processRow = [&](AXNodeObject *row)
     {
       if (!row || processedRows.contains(row))
@@ -3470,7 +3470,7 @@ namespace krys::boo
         processRow(DynamicDowncast<AXNodeObject>(object));
       }
     };
-    // https://html.spec.whatwg.org/#algorithm-for-ending-a-row-group
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-ending-a-row-group
     auto endRowGroup = [&]
     {
       // Step 1: While ycurrent is less than yheight, grow the downward-growing cells and increase ycurrent.
@@ -3482,7 +3482,7 @@ namespace krys::boo
       // Step 2: Empty the list of downward-growing cells.
       downwardGrowingCells.clear();
     };
-    // https://html.spec.whatwg.org/#algorithm-for-processing-row-groups
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-processing-row-groups
     auto processRowGroup = [&](Element &sectionElement)
     {
       // Step 1 (ystart) is only needed for step 3, which isn't implemented.
@@ -3833,7 +3833,7 @@ namespace krys::boo
       return 1;
     }
     // "If colspan is greater than 1000, let it be 1000 instead"
-    // (https://html.spec.whatwg.org/#attr-tdth-colspan).
+    // (https://html.spec.whatwg.org/multipage/tables.html#attr-tdth-colspan).
     for (auto name : {u8"colspan", u8"aria-colspan"})
     {
       auto span = html::Numbers::ParseInteger(GetAttribute(name));

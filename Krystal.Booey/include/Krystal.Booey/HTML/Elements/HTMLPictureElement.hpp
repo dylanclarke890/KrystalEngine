@@ -31,7 +31,7 @@ namespace krys::boo
 {
   class HTMLSourceElement;
 
-  /// @see https://html.spec.whatwg.org/#the-picture-element
+  /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#the-picture-element
   class HTMLPictureElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPictureElement);

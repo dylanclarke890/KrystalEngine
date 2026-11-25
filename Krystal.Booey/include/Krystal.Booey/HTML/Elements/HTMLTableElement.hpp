@@ -10,7 +10,7 @@ namespace krys::boo
   class HTMLTableRowElement;
   class HTMLTableSectionElement;
 
-  /// @see https://html.spec.whatwg.org/#htmltableelement
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#htmltableelement
   class HTMLTableElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableElement);
@@ -20,127 +20,127 @@ namespace krys::boo
 
     ~HTMLTableElement() noexcept override;
 
-#pragma region HTMLTableElement - https://html.spec.whatwg.org/#htmltableelement
+#pragma region HTMLTableElement - https://html.spec.whatwg.org/multipage/tables.html#htmltableelement
 
-    /// @see https://html.spec.whatwg.org/#dom-table-caption
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-caption
     KRYS_NODISCARD RefPtr<HTMLTableCaptionElement> Caption() const noexcept;
 
     /// @brief Removes the table's caption, and inserts @p caption as its first child if it isn't null.
-    /// @see https://html.spec.whatwg.org/#dom-table-caption
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-caption
     ExceptionOr<void> Caption(const RefPtr<HTMLTableCaptionElement> &caption) noexcept;
 
     /// @brief The table's caption, made its first child if it had none.
-    /// @see https://html.spec.whatwg.org/#dom-table-createcaption
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-createcaption
     Ref<HTMLTableCaptionElement> CreateCaption() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-deletecaption
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-deletecaption
     void DeleteCaption() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-thead
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-thead
     KRYS_NODISCARD RefPtr<HTMLTableSectionElement> THead() const noexcept;
 
     /// @brief Removes the table's `thead`, and inserts @p head after the caption and column groups if it
     /// isn't null: a `HierarchyRequestError` if it isn't a `thead`.
-    /// @see https://html.spec.whatwg.org/#dom-table-thead
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-thead
     ExceptionOr<void> THead(const RefPtr<HTMLTableSectionElement> &head) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-createthead
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-createthead
     Ref<HTMLTableSectionElement> CreateTHead() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-deletethead
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-deletethead
     void DeleteTHead() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-tfoot
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-tfoot
     KRYS_NODISCARD RefPtr<HTMLTableSectionElement> TFoot() const noexcept;
 
     /// @brief Removes the table's `tfoot`, and appends @p foot if it isn't null: a `HierarchyRequestError` if
     /// it isn't a `tfoot`.
-    /// @see https://html.spec.whatwg.org/#dom-table-tfoot
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-tfoot
     ExceptionOr<void> TFoot(const RefPtr<HTMLTableSectionElement> &foot) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-createtfoot
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-createtfoot
     Ref<HTMLTableSectionElement> CreateTFoot() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-deletetfoot
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-deletetfoot
     void DeleteTFoot() noexcept;
 
     /// @brief The table's `tbody` children.
-    /// @see https://html.spec.whatwg.org/#dom-table-tbodies
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-tbodies
     KRYS_NODISCARD Ref<HTMLCollection> TBodies() noexcept;
 
     /// @brief A new `tbody`, inserted after the table's last `tbody`, or at its end.
-    /// @see https://html.spec.whatwg.org/#dom-table-createtbody
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-createtbody
     Ref<HTMLTableSectionElement> CreateTBody() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-rows
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-rows
     KRYS_NODISCARD Ref<HTMLCollection> Rows() noexcept;
 
     /// @brief A new row at @p index in the table's rows (-1 for the end), in a new `tbody` if the table has
     /// no rows or bodies: an `IndexSizeError` if @p index is less than -1 or more than the number of rows.
-    /// @see https://html.spec.whatwg.org/#dom-table-insertrow
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-insertrow
     ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
 
     /// @brief Removes the row at @p index in the table's rows (-1 for the last, if any): an `IndexSizeError`
     /// if there's no such row.
-    /// @see https://html.spec.whatwg.org/#dom-table-deleterow
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-table-deleterow
     ExceptionOr<void> DeleteRow(int32 index) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLTableElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableElement-partial
+#pragma region HTMLTableElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLTableElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-table-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-border
     KRYS_NODISCARD DOMString Border() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-border
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-border
     void Border(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-frame
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-frame
     KRYS_NODISCARD DOMString Frame() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-frame
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-frame
     void Frame(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-rules
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-rules
     KRYS_NODISCARD DOMString Rules() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-rules
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-rules
     void Rules(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-summary
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-summary
     KRYS_NODISCARD DOMString Summary() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-summary
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-summary
     void Summary(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-width
     void Width(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-bgcolor
     void BgColor(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-cellpadding
     KRYS_NODISCARD DOMString CellPadding() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-cellpadding
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-cellpadding
     void CellPadding(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-cellspacing
     KRYS_NODISCARD DOMString CellSpacing() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-table-cellspacing
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-table-cellspacing
     void CellSpacing(DOMString value) noexcept;
 
 #pragma endregion

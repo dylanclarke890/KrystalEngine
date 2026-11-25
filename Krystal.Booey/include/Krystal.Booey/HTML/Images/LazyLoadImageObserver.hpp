@@ -40,7 +40,7 @@ namespace krys::boo::html
 {
   /// @brief Loads a document's lazily loaded images (`loading=lazy`) once they intersect the viewport, with
   /// an intersection observer the document makes on first use.
-  /// @see https://html.spec.whatwg.org/#lazy-load-intersection-observer
+  /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-load-intersection-observer
   class LazyLoadImageObserver
   {
     KRYS_NON_COPY_MOVABLE(LazyLoadImageObserver);
@@ -52,11 +52,11 @@ namespace krys::boo::html
     LazyLoadImageObserver() noexcept = default;
 
     /// @brief Starts observing @p element, the image of a deferred load, with its document's observer.
-    /// @see https://html.spec.whatwg.org/#start-intersection-observing-a-lazy-loading-element
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#start-intersection-observing-a-lazy-loading-element
     static void Observe(Element &element) noexcept;
 
     /// @brief Stops observing @p element with @p document's observer.
-    /// @see https://html.spec.whatwg.org/#stop-intersection-observing-a-lazy-loading-element
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#stop-intersection-observing-a-lazy-loading-element
     static void Unobserve(Element &element, Document &document) noexcept;
 
     KRYS_NODISCARD bool IsObserved(Element &element) const noexcept;

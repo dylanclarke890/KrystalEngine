@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlulistelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
   class HTMLUListElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUListElement);
@@ -12,18 +12,18 @@ namespace krys::boo
   public:
     HTMLUListElement(Document &document) noexcept;
 
-#pragma region HTMLUListElement Obsolete members - https://html.spec.whatwg.org/#HTMLUListElement-partial
+#pragma region HTMLUListElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLUListElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-ul-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ul-compact
     KRYS_NODISCARD bool Compact() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ul-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ul-compact
     void Compact(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ul-type
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ul-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-ul-type
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ul-type
     void Type(DOMString value) noexcept;
 
 #pragma endregion

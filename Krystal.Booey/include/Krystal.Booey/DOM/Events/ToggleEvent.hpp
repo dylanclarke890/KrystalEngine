@@ -9,7 +9,7 @@ namespace krys::boo
 {
   class Element;
 
-  /// @see https://html.spec.whatwg.org/#toggleeventinit
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#toggleeventinit
   struct ToggleEventInit : EventInit
   {
     DOMString OldState;
@@ -20,7 +20,7 @@ namespace krys::boo
 
   /// @brief Fired at a dialog, popover or details element as it opens or closes (`toggle`), or before
   /// (`beforetoggle`), with its old and new states, `"open"` or `"closed"`.
-  /// @see https://html.spec.whatwg.org/#the-toggleevent-interface
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#the-toggleevent-interface
   class ToggleEvent final : public Event
   {
   private:
@@ -39,20 +39,20 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<ToggleEvent> Create(const DOMStringAtom &type, const ToggleEventInit &init,
                                                   bool isCancelable) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-toggleevent-oldstate
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-toggleevent-oldstate
     KRYS_NODISCARD const DOMString &OldState() const noexcept
     {
       return _oldState;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-toggleevent-newstate
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-toggleevent-newstate
     KRYS_NODISCARD const DOMString &NewState() const noexcept
     {
       return _newState;
     }
 
     /// @brief The element that toggled the target (a button), retargeted against the current target.
-    /// @see https://html.spec.whatwg.org/#dom-toggleevent-source
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-toggleevent-source
     KRYS_NODISCARD Element *Source() const noexcept;
 
     KRYS_NODISCARD bool IsToggleEvent() const noexcept final

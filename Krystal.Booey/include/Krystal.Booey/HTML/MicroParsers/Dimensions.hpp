@@ -49,7 +49,7 @@ namespace krys::boo::html
 
   /// @brief Parses the lengths of presentational attributes (`width`, `height`, `hspace`, ...): leading
   /// whitespace, digits with an optional fraction, then an optional `%`; anything after is ignored.
-  /// @see https://html.spec.whatwg.org/#percentages-and-dimensions
+  /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#percentages-and-dimensions
   class Dimensions
   {
     enum class IsMultiLength : bool
@@ -59,7 +59,7 @@ namespace krys::boo::html
     };
 
   public:
-    /// @see https://html.spec.whatwg.org/#rules-for-parsing-dimension-values
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-dimension-values
     KRYS_NODISCARD static Maybe<HTMLDimension> ParseHTMLDimension(DOMStringView dimensionString) noexcept
     {
       return ParseHTMLDimensionInternal(dimensionString, IsMultiLength::No);
@@ -144,7 +144,7 @@ namespace krys::boo::html
       return HTMLDimensionParsingResult {.Number = number, .ParsedLength = position};
     }
 
-    /// @see https://html.spec.whatwg.org/#current-dimension-value
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#current-dimension-value
     KRYS_NODISCARD static Maybe<HTMLDimension>
       ParseHTMLDimensionInternal(DOMStringView dimensionString, IsMultiLength isMultiLength) noexcept
     {

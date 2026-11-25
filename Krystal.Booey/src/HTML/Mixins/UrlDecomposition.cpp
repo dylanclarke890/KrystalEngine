@@ -45,7 +45,7 @@ namespace krys::boo::html
       return dom::USVString(u8"null");
     }
 
-    // https://html.spec.whatwg.org/#ascii-serialisation-of-an-origin
+    // https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin
     if (url.ProtocolIs(u8"ftp") || url.ProtocolIs(u8"http") || url.ProtocolIs(u8"https")
         || url.ProtocolIs(u8"ws") || url.ProtocolIs(u8"wss"))
     {

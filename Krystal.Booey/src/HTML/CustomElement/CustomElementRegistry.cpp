@@ -39,7 +39,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    /// @see https://html.spec.whatwg.org/#upgrade-particular-elements-within-a-document
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#upgrade-particular-elements-within-a-document
     void EnqueueUpgradeInShadowIncludingTreeOrder(ContainerNode &node,
                                                   CustomElementInterface &elementInterface,
                                                   CustomElementRegistry &registry) noexcept
@@ -90,7 +90,7 @@ namespace krys::boo::html
     return _document.get();
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-define
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define
   ExceptionOr<void> CustomElementRegistry::Define(const DOMStringAtom &name, CustomElementFactory &&factory,
                                                   CustomElementOptions &&options) noexcept
   {
@@ -201,7 +201,7 @@ namespace krys::boo::html
     return it != _nameMap.end() ? it->second.get() : nullptr;
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-get
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-get
   CustomElementInterface *CustomElementRegistry::Get(DOMStringAtom name) const noexcept
   {
     // 1. If this's custom element definition set contains an item with name name, then return that item's
@@ -210,7 +210,7 @@ namespace krys::boo::html
     return FindInterface(krys::move(name));
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-getname
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-getname
   // (Given the definition rather than its constructor.)
   DOMStringAtom CustomElementRegistry::GetName(const CustomElementInterface &elementInterface) const noexcept
   {
@@ -221,7 +221,7 @@ namespace krys::boo::html
     return found == &elementInterface ? elementInterface.Name().LocalName() : null;
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-whendefined
   // (The promise is a callback, called in a microtask once the name is defined.)
   ExceptionOr<void> CustomElementRegistry::WhenDefined(const DOMStringAtom &name,
                                                        WhenDefinedCallback &&callback) noexcept
@@ -250,7 +250,7 @@ namespace krys::boo::html
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-upgrade
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-upgrade
   void CustomElementRegistry::Upgrade(Node &root) noexcept
   {
     CEReactionsScope ceReactions;
@@ -279,7 +279,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-customelementregistry-initialize
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-initialize
   ExceptionOr<void> CustomElementRegistry::Initialize(Node &root) noexcept
   {
     CEReactionsScope ceReactions;

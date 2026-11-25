@@ -6,100 +6,100 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [4 The elements of HTML](https://html.spec.whatwg.org/#semantics)
+## [4 The elements of HTML](https://html.spec.whatwg.org/multipage/semantics.html#semantics)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-### [4.1 The document element](https://html.spec.whatwg.org/#the-root-element)
+### [4.1 The document element](https://html.spec.whatwg.org/multipage/semantics.html#the-root-element)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-#### [4.1.1 The html element](https://html.spec.whatwg.org/#the-html-element)
+#### [4.1.1 The html element](https://html.spec.whatwg.org/multipage/semantics.html#the-html-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLHtmlElement`; the rest is author conformance.
 
-### [4.2 Document metadata](https://html.spec.whatwg.org/#document-metadata)
+### [4.2 Document metadata](https://html.spec.whatwg.org/multipage/semantics.html#document-metadata)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-#### [4.2.1 The head element](https://html.spec.whatwg.org/#the-head-element)
+#### [4.2.1 The head element](https://html.spec.whatwg.org/multipage/semantics.html#the-head-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLHeadElement`; the rest is author conformance.
 
-#### [4.2.2 The title element](https://html.spec.whatwg.org/#the-title-element)
+#### [4.2.2 The title element](https://html.spec.whatwg.org/multipage/semantics.html#the-title-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLTitleElement::Text`. The document's title is `Document::Title` (3.1.7).
 
-- [x] [HTMLTitleElement.text](https://html.spec.whatwg.org/#dom-title-text) — The text attribute's getter must return this title element's child text content.
+- [x] [HTMLTitleElement.text](https://html.spec.whatwg.org/multipage/semantics.html#dom-title-text) — The text attribute's getter must return this title element's child text content.
 
-#### [4.2.3 The base element](https://html.spec.whatwg.org/#the-base-element)
+#### [4.2.3 The base element](https://html.spec.whatwg.org/multipage/semantics.html#the-base-element)
 
 Status: reviewed (2026-11-01)
 > `Document::ProcessBaseElement` (the frozen base URL of the first base element with an href, and the first base target), `HTMLBaseElement::Href`; getting an element's target is `HyperlinkAlgorithms::EffectiveTarget` and `HTMLFormElement::EffectiveTarget`.
 > Fixed: an empty `target` fell back to the base target, and a form's base target wasn't checked for dangling markup (DIFFERENCES.md, from upstream).
 <!-- definitions: attr-base-href attr-base-target frozen-base-url -->
 
-- [x] [get an element's target](https://html.spec.whatwg.org/#get-an-element's-target) — To get an element's target, given an a, area, or form element element, and an optional string-or-null target (default null), run these steps:
+- [x] [get an element's target](https://html.spec.whatwg.org/multipage/semantics.html#get-an-element's-target) — To get an element's target, given an a, area, or form element element, and an optional string-or-null target (default null), run these steps:
   - 1. If target is null:
     - 1a. If element has a target attribute, then set target to that attribute's value.
     - 1b. Otherwise, if element's node document contains a base element with a target attribute, set target to the value of the target attribute of the first such base element.
   - 2. If target is not null, and contains an ASCII tab or newline and a U+003C (<), then set target to "_blank".
   - 3. Return target.
 
-- [x] [set the frozen base URL](https://html.spec.whatwg.org/#set-the-frozen-base-url) — To set the frozen base URL for an element element:
+- [x] [set the frozen base URL](https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url) — To set the frozen base URL for an element element:
   - 1. Let document be element's node document.
   - 2. Let urlRecord be the result of parsing the value of element's href content attribute with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by itself.)
   - 3. If any of the following are true: urlRecord is failure;; urlRecord's scheme is "data" or "javascript"; or; running Is base allowed for Document? on urlRecord and document returns "Blocked", then set element's frozen base URL to document's fallback base URL and return.
   - 4. Set element's frozen base URL to urlRecord.
   - 5. Respond to base URL changes given document.
 
-- [x] [HTMLBaseElement.href](https://html.spec.whatwg.org/#dom-base-href) — The href IDL attribute, on getting, must return the result of running the following algorithm:
+- [x] [HTMLBaseElement.href](https://html.spec.whatwg.org/multipage/semantics.html#dom-base-href) — The href IDL attribute, on getting, must return the result of running the following algorithm:
   - 1. Let document be element's node document.
   - 2. Let url be the value of the href attribute of this element, if it has one, and the empty string otherwise.
   - 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by other base elements or itself.)
   - 4. If urlRecord is failure, return url.
   - 5. Return the serialization of urlRecord.
 
-#### [4.2.4 The link element](https://html.spec.whatwg.org/#the-link-element)
+#### [4.2.4 The link element](https://html.spec.whatwg.org/multipage/semantics.html#the-link-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLLinkElement`: only `rel=stylesheet` (and `alternate`) links are processed (KNOWN-ISSUES.md); `crossOrigin`, `referrerPolicy` and `fetchPriority` were reviewed with 2.5; `disabled` and explicitly enabled are `SetDisabledState`. Being allowed in the body is author conformance.
 > Fixed: `as` wasn't limited to the potential destinations.
 <!-- definitions: attr-link-href attr-link-rel attr-link-crossorigin attr-link-media attr-link-integrity attr-link-hreflang attr-link-type attr-link-referrerpolicy attr-link-title attr-link-imagesrcset attr-link-imagesizes attr-link-sizes attr-link-as attr-link-blocking attr-link-color explicitly-enabled attr-link-disabled attr-link-fetchpriority -->
 
-- [x] [allowed in the body](https://html.spec.whatwg.org/#allowed-in-the-body) — If a link element has an itemprop attribute, or has a rel attribute that contains only keywords that are body-ok, then the element is said to be allowed in the body. This means that the element can be used where phrasing content is expected.
+- [x] [allowed in the body](https://html.spec.whatwg.org/multipage/semantics.html#allowed-in-the-body) — If a link element has an itemprop attribute, or has a rel attribute that contains only keywords that are body-ok, then the element is said to be allowed in the body. This means that the element can be used where phrasing content is expected.
   > n/a: author conformance.
 
-- [x] [HTMLLinkElement.as](https://html.spec.whatwg.org/#dom-link-as) — The as IDL attribute must reflect the as content attribute, limited to only known values.
+- [x] [HTMLLinkElement.as](https://html.spec.whatwg.org/multipage/semantics.html#dom-link-as) — The as IDL attribute must reflect the as content attribute, limited to only known values.
 
-- [x] [HTMLLinkElement.crossOrigin](https://html.spec.whatwg.org/#dom-link-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
+- [x] [HTMLLinkElement.crossOrigin](https://html.spec.whatwg.org/multipage/semantics.html#dom-link-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
 
-- [x] [HTMLLinkElement.referrerPolicy](https://html.spec.whatwg.org/#dom-link-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
+- [x] [HTMLLinkElement.referrerPolicy](https://html.spec.whatwg.org/multipage/semantics.html#dom-link-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
 
-- [x] [HTMLLinkElement.fetchPriority](https://html.spec.whatwg.org/#dom-link-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
+- [x] [HTMLLinkElement.fetchPriority](https://html.spec.whatwg.org/multipage/semantics.html#dom-link-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
 
-##### [4.2.4.1 Processing the media attribute](https://html.spec.whatwg.org/#processing-the-media-attribute)
+##### [4.2.4.1 Processing the media attribute](https://html.spec.whatwg.org/multipage/semantics.html#processing-the-media-attribute)
 
 Status: reviewed (2026-11-01)
 > The sheet's media queries (`SetMediaQueries`), evaluated by the style resolver; a sheet whose media doesn't match loads without holding back rendering.
 
-##### [4.2.4.2 Processing the type attribute](https://html.spec.whatwg.org/#processing-the-type-attribute)
+##### [4.2.4.2 Processing the type attribute](https://html.spec.whatwg.org/multipage/semantics.html#processing-the-type-attribute)
 
 Status: reviewed (2026-11-01)
 > A style sheet link with a `type` that isn't `text/css` isn't fetched (`HTMLLinkElement::Process`; a content type parser is a FIXME).
 
-##### [4.2.4.3 Fetching and processing a resource from a link element](https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element)
+##### [4.2.4.3 Fetching and processing a resource from a link element](https://html.spec.whatwg.org/multipage/semantics.html#fetching-and-processing-a-resource-from-a-link-element)
 
 Status: n/a (later: requests, with remote pages; style sheet links load through `CachedResourceLoader`, reviewed with the stylesheet link type)
 <!-- definitions: fetch-and-process-the-linked-resource linked-resource-fetch-setup-steps process-the-linked-resource -->
 
-- [x] [default fetch and process the linked resource](https://html.spec.whatwg.org/#default-fetch-and-process-the-linked-resource) — The default fetch and process the linked resource, given a link element el, is as follows:
+- [x] [default fetch and process the linked resource](https://html.spec.whatwg.org/multipage/semantics.html#default-fetch-and-process-the-linked-resource) — The default fetch and process the linked resource, given a link element el, is as follows:
   - 1. Let options be the result of creating link options from el.
   - 2. Let request be the result of creating a link request given options.
   - 3. If request is null, then return.
@@ -111,7 +111,7 @@ Status: n/a (later: requests, with remote pages; style sheet links load through 
     - 6c. Otherwise, wait for the link resource's critical subresources to finish loading.
     - 6d. Process the linked resource given el, success, response, and bodyBytes.
 
-- [x] [create a link request](https://html.spec.whatwg.org/#create-a-link-request) — To create a link request given a link processing options options:
+- [x] [create a link request](https://html.spec.whatwg.org/multipage/semantics.html#create-a-link-request) — To create a link request given a link processing options options:
   - 1. Assert: options's href is not the empty string.
   - 2. Let url be the result of encoding-parsing a URL given options's href, relative to options's base URL.
   - 3. If url is failure, then return null.
@@ -124,12 +124,12 @@ Status: n/a (later: requests, with remote pages; style sheet links load through 
   - 10. Set request's priority to options's fetch priority.
   - 11. Return request.
 
-##### [4.2.4.4 Processing `Link` headers](https://html.spec.whatwg.org/#processing-link-headers)
+##### [4.2.4.4 Processing `Link` headers](https://html.spec.whatwg.org/multipage/semantics.html#processing-link-headers)
 
 Status: n/a (responses have no headers)
 <!-- definitions: process-a-link-header link-processing-options link-options-href link-options-initiator link-options-integrity link-options-type link-options-nonce link-options-destination link-options-crossorigin link-options-referrer-policy link-options-source-set link-options-base-url link-options-origin link-options-environment link-options-policy-container link-options-document link-options-on-document-ready link-options-fetch-priority -->
 
-- [x] [create link options from element](https://html.spec.whatwg.org/#create-link-options-from-element) — To create link options from element given a link element el:
+- [x] [create link options from element](https://html.spec.whatwg.org/multipage/semantics.html#create-link-options-from-element) — To create link options from element given a link element el:
   - 1. Let document be el's node document.
   - 2. Let options be a new link processing options with crossoriginthe state of el's crossorigin content attributereferrer policythe state of el's referrerpolicy content attributesource setel's source setbase URLdocument's document base URLorigindocument's originenvironmentdocument's relevant settings objectpolicy containerdocument's policy containerdocumentdocumentcryptographic nonce metadatathe curre…
   - 3. If el has an href attribute, then set options's href to the value of el's href attribute.
@@ -138,7 +138,7 @@ Status: n/a (responses have no headers)
   - 6. Assert: options's href is not the empty string, or options's source set is not null. A link element with neither an href or an imagesrcset does not represent a link.
   - 7. Return options.
 
-- [x] [extract links from headers](https://html.spec.whatwg.org/#extract-links-from-headers) — To extract links from headers given a header list headers:
+- [x] [extract links from headers](https://html.spec.whatwg.org/multipage/semantics.html#extract-links-from-headers) — To extract links from headers given a header list headers:
   - 1. Let links be a new list.
   - 2. Let rawLinkHeaders be the result of getting, decoding, and splitting `Link` from headers.
   - 3. For each linkHeader of rawLinkHeaders:
@@ -147,7 +147,7 @@ Status: n/a (responses have no headers)
     - 3c. Append linkObject to links.
   - 4. Return links.
 
-- [x] [process link headers](https://html.spec.whatwg.org/#process-link-headers) — To process link headers given a Document doc, a response response, and a "pre-media" or "media" phase:
+- [x] [process link headers](https://html.spec.whatwg.org/multipage/semantics.html#process-link-headers) — To process link headers given a Document doc, a response response, and a "pre-media" or "media" phase:
   - 1. Let links be the result of extracting links from response's header list.
   - 2. For each linkObject in links:
     - 2a. Let rel be linkObject["relation_type"].
@@ -160,7 +160,7 @@ Status: n/a (responses have no headers)
     - 2h. If attribs["imagesrcset"] exists and attribs["imagesizes"] exists, then set options's source set to the result of creating a source set given linkObject["target_uri"], attribs["imagesrcset"], attribs["imagesizes"], and null.
     - 2i. Run the process a link header steps for rel given options.
 
-- [x] [apply link options from parsed header attributes](https://html.spec.whatwg.org/#apply-link-options-from-parsed-header-attributes) — To apply link options from parsed header attributes to a link processing options options given attribs and a string rel:
+- [x] [apply link options from parsed header attributes](https://html.spec.whatwg.org/multipage/semantics.html#apply-link-options-from-parsed-header-attributes) — To apply link options from parsed header attributes to a link processing options options given attribs and a string rel:
   - 1. If rel is "preload":
     - 1a. If attribs["as"] does not exist, then return false.
     - 1b. Let destination be the result of translating attribs["as"].
@@ -174,12 +174,12 @@ Status: n/a (responses have no headers)
   - 7. If attribs["fetchpriority"] exists and is an ASCII case-insensitive match for a fetch priority attribute keyword, then set options's fetch priority to that fetch priority attribute keyword.
   - 8. Return true.
 
-##### [4.2.4.5 Early hints](https://html.spec.whatwg.org/#early-hints)
+##### [4.2.4.5 Early hints](https://html.spec.whatwg.org/multipage/semantics.html#early-hints)
 
 Status: n/a (no network loader)
 <!-- definitions: early-hints-2 -->
 
-- [x] [process early hint headers](https://html.spec.whatwg.org/#process-early-hint-headers) — To process early hint headers given a response response and an environment reservedEnvironment:
+- [x] [process early hint headers](https://html.spec.whatwg.org/multipage/semantics.html#process-early-hint-headers) — To process early hint headers given a response response and an environment reservedEnvironment:
   - 1. Let earlyPolicyContainer be the result of creating a policy container from a fetch response given response and reservedEnvironment.
   - 2. Let links be the result of extracting links from response's header list.
   - 3. Let earlyHints be an empty list.
@@ -194,23 +194,23 @@ Status: n/a (no network loader)
     - 5a. If options's on document ready is null, then set options's document to doc.
     - 5b. Otherwise, call options's on document ready with doc.
 
-##### [4.2.4.6 Providing users with a means to follow hyperlinks created using the link element](https://html.spec.whatwg.org/#providing-users-with-a-means-to-follow-hyperlinks-created-using-the-link-element)
+##### [4.2.4.6 Providing users with a means to follow hyperlinks created using the link element](https://html.spec.whatwg.org/multipage/semantics.html#providing-users-with-a-means-to-follow-hyperlinks-created-using-the-link-element)
 
 Status: n/a (Booey has no browser user interface)
 
-#### [4.2.5 The meta element](https://html.spec.whatwg.org/#the-meta-element)
+#### [4.2.5 The meta element](https://html.spec.whatwg.org/multipage/semantics.html#the-meta-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLMetaElement`; `name`, `http-equiv`, `content` and `media` are reflected, and `Process` runs the pragmas and the color-scheme name.
 <!-- definitions: attr-meta-charset attr-meta-content attr-meta-name attr-meta-media -->
 
-##### [4.2.5.1 Standard metadata names](https://html.spec.whatwg.org/#standard-metadata-names)
+##### [4.2.5.1 Standard metadata names](https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names)
 
 Status: reviewed (2026-11-01)
 > Only `color-scheme` does anything: `Document::MetaElementColorSchemeChanged` (the page's supported color-schemes). Fixed: the legacy `supported-color-schemes` counted too (DIFFERENCES.md). The application name, keywords and theme colour are for browser user interface, which Booey has none of; `referrer` waits on referrers.
 <!-- definitions: meta-author meta-description meta-generator -->
 
-- [x] [To find the application name to use given an ordered list of languages (e.g. Br…](https://html.spec.whatwg.org/#meta-application-name) — To find the application name to use given an ordered list of languages (e.g. British English, American English, and English), user agents must run the following steps:
+- [x] [To find the application name to use given an ordered list of languages (e.g. Br…](https://html.spec.whatwg.org/multipage/semantics.html#meta-application-name) — To find the application name to use given an ordered list of languages (e.g. British English, American English, and English), user agents must run the following steps:
   - 1. Let languages be the list of languages.
   - 2. Let default language be the language of the Document's document element, if any, and if that language is not unknown.
   - 3. If there is a default language, and if it is not the same language as any of the languages in languages, append it to languages.
@@ -218,7 +218,7 @@ Status: reviewed (2026-11-01)
   - 5. Return the value of the content attribute of the first meta element in the Document in tree order where the name attribute value is an ASCII case-insensitive match for application-name and whose language is winning language.
   > n/a: no browser user interface to name the application in.
 
-- [x] [To obtain the list of keywords that the author has specified as applicable to t…](https://html.spec.whatwg.org/#meta-keywords) — To obtain the list of keywords that the author has specified as applicable to the page, the user agent must run the following steps:
+- [x] [To obtain the list of keywords that the author has specified as applicable to t…](https://html.spec.whatwg.org/multipage/semantics.html#meta-keywords) — To obtain the list of keywords that the author has specified as applicable to the page, the user agent must run the following steps:
   - 1. Let keywords be an empty list.
   - 2. For each meta element with a name attribute and a content attribute and where the name attribute value is an ASCII case-insensitive match for keywords:
     - 2a. Split the value of the element's content attribute on commas.
@@ -227,7 +227,7 @@ Status: reviewed (2026-11-01)
   - 4. Return keywords. This is the list of keywords that the author has specified as applicable to the page.
   > n/a: nothing uses the keywords.
 
-- [x] [If any meta element element is inserted into the document, or has its name or c…](https://html.spec.whatwg.org/#meta-referrer) — If any meta element element is inserted into the document, or has its name or content attributes changed, user agents must run the following algorithm:
+- [x] [If any meta element element is inserted into the document, or has its name or c…](https://html.spec.whatwg.org/multipage/semantics.html#meta-referrer) — If any meta element element is inserted into the document, or has its name or content attributes changed, user agents must run the following algorithm:
   - 1. If element is not in a document tree, then return.
   - 2. If element does not have a name attribute whose value is an ASCII case-insensitive match for "referrer", then return.
   - 3. If element does not have a content attribute, or that attribute's value is the empty string, then return.
@@ -236,7 +236,7 @@ Status: reviewed (2026-11-01)
   - 6. If value is a referrer policy, then set element's node document's policy container's referrer policy to policy.
   > n/a: no referrers until remote pages.
 
-- [x] [To obtain a page's theme color, user agents must run the following steps](https://html.spec.whatwg.org/#meta-theme-color) — To obtain a page's theme color, user agents must run the following steps:
+- [x] [To obtain a page's theme color, user agents must run the following steps](https://html.spec.whatwg.org/multipage/semantics.html#meta-theme-color) — To obtain a page's theme color, user agents must run the following steps:
   - 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree order: the element is in a document tree;; the element has a name attribute, whose value is an ASCII case-insensitive match for theme-color; and; the element has a content attribute.
   - 2. For each element in candidate elements:
     - 2a. If element has a media attribute and the value of element's media attribute does not match the environment, then continue.
@@ -246,27 +246,27 @@ Status: reviewed (2026-11-01)
   - 3. Return nothing (the page has no theme color).
   > n/a: no browser user interface to colour.
 
-- [x] [To obtain a page's supported color-schemes, user agents must run the following…](https://html.spec.whatwg.org/#meta-color-scheme) — To obtain a page's supported color-schemes, user agents must run the following steps:
+- [x] [To obtain a page's supported color-schemes, user agents must run the following…](https://html.spec.whatwg.org/multipage/semantics.html#meta-color-scheme) — To obtain a page's supported color-schemes, user agents must run the following steps:
   - 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree order: the element is in a document tree;; the element has a name attribute, whose value is an ASCII case-insensitive match for color-scheme; and; the element has a content attribute.
   - 2. For each element in candidate elements:
     - 2a. Let parsed be the result of parsing a list of component values given the value of element's content attribute.
     - 2b. If parsed is a valid CSS 'color-scheme' property value, then return parsed.
   - 3. Return null.
 
-##### [4.2.5.2 Other metadata names](https://html.spec.whatwg.org/#other-metadata-names)
+##### [4.2.5.2 Other metadata names](https://html.spec.whatwg.org/multipage/semantics.html#other-metadata-names)
 
 Status: n/a (author conformance and registries)
 <!-- definitions: concept-meta-extensions -->
 
-##### [4.2.5.3 Pragma directives](https://html.spec.whatwg.org/#pragma-directives)
+##### [4.2.5.3 Pragma directives](https://html.spec.whatwg.org/multipage/semantics.html#pragma-directives)
 
 Status: reviewed (2026-11-01)
 > `Document::ProcessMetaHttpEquiv`: `content-language` (the pragma-set default language), `default-style` and `refresh` (with `ParseRefresh`); pragmas run again on attribute changes (DIFFERENCES.md). Fixed: a refresh to a `javascript:` URL wasn't ignored. Content-Security-Policy waits on a security policy (not planned); Set-Cookie, X-UA-Compatible and Content-Type do nothing, as specified (the parser reads the charset).
 <!-- definitions: attr-meta-http-equiv attr-meta-http-equiv-content-language attr-meta-http-equiv-content-type attr-meta-http-equiv-default-style attr-meta-http-equiv-refresh attr-meta-http-equiv-set-cookie attr-meta-http-equiv-x-ua-compatible attr-meta-http-equiv-content-security-policy -->
 
-- [x] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
+- [x] [pragma-set default language](https://html.spec.whatwg.org/multipage/semantics.html#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
 
-- [x] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
+- [x] [pragma-set default language](https://html.spec.whatwg.org/multipage/semantics.html#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
   - 1. If the meta element has no content attribute, then return.
   - 2. If the element's content attribute contains a U+002C COMMA character (,), then return.
   - 3. Let input be the value of the element's content attribute.
@@ -277,12 +277,12 @@ Status: reviewed (2026-11-01)
   - 8. If candidate is the empty string, return.
   - 9. Set the pragma-set default language to candidate.
 
-- [x] [will declaratively refresh (Document)](https://html.spec.whatwg.org/#will-declaratively-refresh) — A Document object has an associated will declaratively refresh (a boolean). It is initially false.
+- [x] [will declaratively refresh (Document)](https://html.spec.whatwg.org/multipage/semantics.html#will-declaratively-refresh) — A Document object has an associated will declaratively refresh (a boolean). It is initially false.
   - 1. If the meta element has no content attribute, or if that attribute's value is the empty string, then return.
   - 2. Let input be the value of the element's content attribute.
   - 3. Run the shared declarative refresh steps with the meta element's node document, input, and the meta element.
 
-- [x] [shared declarative refresh steps](https://html.spec.whatwg.org/#shared-declarative-refresh-steps) — The shared declarative refresh steps, given a Document object document, string input, and optionally a meta element meta, are as follows:
+- [x] [shared declarative refresh steps](https://html.spec.whatwg.org/multipage/semantics.html#shared-declarative-refresh-steps) — The shared declarative refresh steps, given a Document object document, string input, and optionally a meta element meta, are as follows:
   - 1. If document's will declaratively refresh is true, then return.
   - 2. Let position point at the first code point of input.
   - 3. Skip ASCII whitespace within input given position.
@@ -315,27 +315,27 @@ Status: reviewed (2026-11-01)
   - 12. Set document's will declaratively refresh to true.
   - 13. Perform one or more of the following steps: After the refresh has come due (as defined below), if the user has not canceled the redirect and, if meta is given, document's active sandboxing flag set does not have the sandboxed automatic features browsing context flag set, then navigate document's node navigable to urlRecord using document, with historyHandling set to "replace". For the purposes of…
 
-##### [4.2.5.4 Specifying the document's character encoding](https://html.spec.whatwg.org/#charset)
+##### [4.2.5.4 Specifying the document's character encoding](https://html.spec.whatwg.org/multipage/semantics.html#charset)
 
 Status: n/a (documents are UTF-8 only; the parser's prescan reads the declaration)
 <!-- definitions: character-encoding-declaration -->
 
-#### [4.2.6 The style element](https://html.spec.whatwg.org/#the-style-element)
+#### [4.2.6 The style element](https://html.spec.whatwg.org/multipage/semantics.html#the-style-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLStyleElement` (`Disabled`, and the load and error events in `NotifyLoadedSheetAndAllCriticalSubresources`) and `InlineStyleSheetOwner::CreateSheet` (update a style block, run when the element is connected, its text changes or it finishes parsing). A style element blocks rendering in `HTMLStyleElement::PotentiallyBlockRendering` and is unblocked as its sheet is processed, not in the task that fires `load` (see `DIFFERENCES.md`).
 <!-- definitions: attr-style-media attr-style-blocking attr-style-title -->
 
-- [x] [HTMLStyleElement.disabled](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled getter steps are:
+- [x] [HTMLStyleElement.disabled](https://html.spec.whatwg.org/multipage/semantics.html#dom-style-disabled) — The disabled getter steps are:
   - 1. If this does not have an associated CSS style sheet, return false.
   - 2. If this's associated CSS style sheet's disabled flag is set, return true.
   - 3. Return false.
 
-- [x] [The disabled setter steps](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled setter steps are:
+- [x] [The disabled setter steps](https://html.spec.whatwg.org/multipage/semantics.html#dom-style-disabled) — The disabled setter steps are:
   - 1. If this does not have an associated CSS style sheet, return.
   - 2. If the given value is true, set this's associated CSS style sheet's disabled flag. Otherwise, unset this's associated CSS style sheet's disabled flag.
 
-- [x] [update a style block](https://html.spec.whatwg.org/#update-a-style-block) — The update a style block algorithm is as follows:
+- [x] [update a style block](https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block) — The update a style block algorithm is as follows:
   - 1. Let element be the style element.
   - 2. If element has an associated CSS style sheet, remove the CSS style sheet in question.
   - 3. If element is not connected, then return.
@@ -345,7 +345,7 @@ Status: reviewed (2026-11-01)
   - 7. If element contributes a script-blocking style sheet, append element to its node document's script-blocking style sheet set.
   - 8. If element's media attribute's value matches the environment and element is potentially render-blocking, then block rendering on element.
 
-- [x] [Once the attempts to obtain the style sheet's critical subresources, if any, ar…](https://html.spec.whatwg.org/#update-a-style-block) — Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the style sheet has no critical subresources, once the style sheet has been parsed and processed, the user agent must run these steps:
+- [x] [Once the attempts to obtain the style sheet's critical subresources, if any, ar…](https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block) — Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the style sheet has no critical subresources, once the style sheet has been parsed and processed, the user agent must run these steps:
   - 1. Let element be the style element associated with the style sheet in question.
   - 2. Let success be true.
   - 3. If the attempts to obtain any of the style sheet's critical subresources failed for any reason (e.g., DNS error, HTTP 404 response, a connection being prematurely closed, unsupported Content-Type), set success to false.
@@ -357,18 +357,18 @@ Status: reviewed (2026-11-01)
       - 4c.ii. Remove element from its node document's script-blocking style sheet set.
     - 4d. Unblock rendering on element.
 
-#### [4.2.7 Interactions of styling and scripting](https://html.spec.whatwg.org/#interactions-of-styling-and-scripting)
+#### [4.2.7 Interactions of styling and scripting](https://html.spec.whatwg.org/multipage/semantics.html#interactions-of-styling-and-scripting)
 
 Status: n/a (no scripting: nothing waits for script-blocking style sheets)
 <!-- definitions: script-blocking-style-sheet-set -->
 
-- [x] [contributes a script-blocking style sheet](https://html.spec.whatwg.org/#contributes-a-script-blocking-style-sheet) — An element el in the context of a Document of an HTML parser or XML parser contributes a script-blocking style sheet if all of the following are true:
+- [x] [contributes a script-blocking style sheet](https://html.spec.whatwg.org/multipage/semantics.html#contributes-a-script-blocking-style-sheet) — An element el in the context of a Document of an HTML parser or XML parser contributes a script-blocking style sheet if all of the following are true:
 
-- [x] [has a style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-a-style-sheet-that-is-blocking-scripts) — A Document document has a style sheet that is blocking scripts if the following steps return true:
+- [x] [has a style sheet that is blocking scripts](https://html.spec.whatwg.org/multipage/semantics.html#has-a-style-sheet-that-is-blocking-scripts) — A Document document has a style sheet that is blocking scripts if the following steps return true:
   - 1. If document's script-blocking style sheet set is not empty, then return true.
   - 2. If document's node navigable is null, then return false.
   - 3. Let containerDocument be document's node navigable's container document.
   - 4. If containerDocument is non-null and containerDocument's script-blocking style sheet set is not empty, then return true.
   - 5. Return false.
 
-- [x] [has no style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-no-style-sheet-that-is-blocking-scripts) — A Document has no style sheet that is blocking scripts if it does not have a style sheet that is blocking scripts.
+- [x] [has no style sheet that is blocking scripts](https://html.spec.whatwg.org/multipage/semantics.html#has-no-style-sheet-that-is-blocking-scripts) — A Document has no style sheet that is blocking scripts if it does not have a style sheet that is blocking scripts.

@@ -105,7 +105,7 @@ namespace krys::boo::html
     return element;
   }
 
-  // https://html.spec.whatwg.org/#concept-upgrade-an-element
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#concept-upgrade-an-element
   void CustomElementInterface::UpgradeElement(Element &element) noexcept
   {
     krys_debug_assert(element.TagQualifiedName().LocalName() == _name.LocalName()

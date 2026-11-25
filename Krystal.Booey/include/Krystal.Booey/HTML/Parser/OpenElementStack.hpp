@@ -97,7 +97,7 @@ namespace krys::boo::html
 
     void PopAll() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#generate-implied-end-tags
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#generate-implied-end-tags
     void GenerateImpliedEndTags(Maybe<TagName> exception = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generate-implied-end-tags-thoroughly

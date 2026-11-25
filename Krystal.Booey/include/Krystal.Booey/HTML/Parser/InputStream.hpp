@@ -82,7 +82,7 @@ namespace krys::boo::html
         return true;
       }
 
-      /// @see https://html.spec.whatwg.org/#preprocessing-the-input-stream
+      /// @see https://html.spec.whatwg.org/multipage/parsing.html#preprocessing-the-input-stream
       if (_nextInputCharacter == '\n' && _skipNextNewLine)
       {
         _skipNextNewLine = false;

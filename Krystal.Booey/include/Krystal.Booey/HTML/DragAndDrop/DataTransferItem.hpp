@@ -46,7 +46,7 @@ namespace krys::boo
   class DataTransferItemList;
 
   /// @brief One of a data transfer's items: a string of a type, or a file.
-  /// @see https://html.spec.whatwg.org/#the-datatransferitem-interface
+  /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransferitem-interface
   // FIXME: Entries (getAsEntry), with the file system API.
   class DataTransferItem final : public RefCounted<DataTransferItem>
   {
@@ -83,18 +83,18 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsFile() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransferitem-kind
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-kind
     KRYS_NODISCARD DOMString GetKind() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransferitem-type
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
     /// @brief Queues a task that calls @p callback with the item's string, if it's a string the data
     /// transfer can read.
-    /// @see https://html.spec.whatwg.org/#dom-datatransferitem-getasstring
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasstring
     void GetAsString(Document &document, Func<void(const DOMString &)> &&callback) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-datatransferitem-getasfile
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitem-getasfile
     KRYS_NODISCARD RefPtr<File> GetAsFile() const noexcept;
 
   private:

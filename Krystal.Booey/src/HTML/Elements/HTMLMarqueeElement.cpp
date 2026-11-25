@@ -41,7 +41,7 @@ namespace krys::boo
       Down,
     };
 
-    /// @see https://html.spec.whatwg.org/#attr-marquee-behavior
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#attr-marquee-behavior
     KRYS_NODISCARD MarqueeBehavior BehaviorOf(const HTMLMarqueeElement &marquee) noexcept
     {
       auto value = marquee.GetAttribute(u8"behavior").value_or(u8"");
@@ -56,7 +56,7 @@ namespace krys::boo
       return MarqueeBehavior::Scroll;
     }
 
-    /// @see https://html.spec.whatwg.org/#attr-marquee-direction
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#attr-marquee-direction
     KRYS_NODISCARD MarqueeDirection DirectionOf(const HTMLMarqueeElement &marquee) noexcept
     {
       auto value = marquee.GetAttribute(u8"direction").value_or(u8"");
@@ -161,7 +161,7 @@ namespace krys::boo
     html::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#marquee-loop-count
+  // https://html.spec.whatwg.org/multipage/obsolete.html#marquee-loop-count
   int32 HTMLMarqueeElement::Loop() const noexcept
   {
     // A marquee element has a marquee loop count, which, if the element has a loop attribute, and parsing its
@@ -177,7 +177,7 @@ namespace krys::boo
     return -1;
   }
 
-  // https://html.spec.whatwg.org/#dom-marquee-loop
+  // https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-loop
   void HTMLMarqueeElement::Loop(int32 value) noexcept
   {
     // On setting, if the new value is different than the element's marquee loop count and either greater than
@@ -190,7 +190,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#marquee-scroll-distance
+  // https://html.spec.whatwg.org/multipage/obsolete.html#marquee-scroll-distance
   uint32 HTMLMarqueeElement::ScrollAmount() const noexcept
   {
     return html::Reflect<uint32, html::ReflectDefault<uint32> {DefaultMarqueeScrollAmount}>(*this,
@@ -225,7 +225,7 @@ namespace krys::boo
     html::Reflect<bool>(*this, u8"truespeed", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#marquee-scroll-interval
+  // https://html.spec.whatwg.org/multipage/obsolete.html#marquee-scroll-interval
   uint32 HTMLMarqueeElement::ScrollInterval() const noexcept
   {
     // 1. If the element has a scrolldelay attribute, and parsing its value using the rules for parsing
@@ -242,7 +242,7 @@ namespace krys::boo
     return delay;
   }
 
-  // https://html.spec.whatwg.org/#dom-marquee-start
+  // https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-start
   void HTMLMarqueeElement::Start() noexcept
   {
     // The marquee element must be turned on: it moves on from the next animation frame.
@@ -261,7 +261,7 @@ namespace krys::boo
       });
   }
 
-  // https://html.spec.whatwg.org/#dom-marquee-stop
+  // https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-stop
   void HTMLMarqueeElement::Stop() noexcept
   {
     // The marquee element must be turned off: it holds where it is.
@@ -279,7 +279,7 @@ namespace krys::boo
 
   bool HTMLMarqueeElement::ShouldContinue() const noexcept
   {
-    // https://html.spec.whatwg.org/#increment-the-marquee-current-loop-index
+    // https://html.spec.whatwg.org/multipage/obsolete.html#increment-the-marquee-current-loop-index
     // 1. If the marquee loop count is -1, then return. (A slide loops once, as Chrome slides.)
     auto loopCount = Loop();
     if (loopCount <= 0 && BehaviorOf(*this) == MarqueeBehavior::Slide)
@@ -376,7 +376,7 @@ namespace krys::boo
     }
     _player = animation.ReleaseValue();
 
-    // https://html.spec.whatwg.org/#increment-the-marquee-current-loop-index
+    // https://html.spec.whatwg.org/multipage/obsolete.html#increment-the-marquee-current-loop-index
     // The loop's end increments the marquee current loop index, and the next loop starts.
     _player->WhenFinished(
       [weakThis = CreateWeakPtr(this), player = _player.get()](WebAnimation &)

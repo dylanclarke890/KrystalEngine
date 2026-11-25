@@ -40,7 +40,7 @@ namespace krys::boo::dom::mixins
   /// attributes; on its `ElementInternals`, the defaults a custom element gives itself.
   /// @tparam TTarget The reflected target: `Element` or `html::ElementInternals`.
   /// @see https://w3c.github.io/aria/#idl-interface
-  /// @see https://html.spec.whatwg.org/#accessibility-semantics
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#accessibility-semantics
   template <typename TTarget>
   class ARIAMixin
   {
@@ -119,14 +119,14 @@ namespace krys::boo::dom::mixins
     }
 
     /// @brief The `DOMString?` getter of a reflected attribute.
-    /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
     KRYS_NODISCARD Maybe<DOMString> ReflectedString(DOMStringAtom name) const noexcept;
 
     /// @brief The `DOMString?` setter of a reflected attribute.
     void SetReflectedString(DOMStringAtom name, Maybe<DOMString> value) noexcept;
 
     /// @brief The `FrozenArray<Element>?` getter of a reflected attribute.
-    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<Element>>> AttrAssociatedElements(DOMStringAtom name) const noexcept;
 
     /// @brief The `FrozenArray<Element>?` setter of a reflected attribute.

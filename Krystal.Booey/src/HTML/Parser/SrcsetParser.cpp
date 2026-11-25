@@ -216,7 +216,7 @@ namespace krys::boo::html
         return {};
       }
 
-      // Normalize the source densities: https://html.spec.whatwg.org/#normalise-the-source-densities
+      // Normalize the source densities: https://html.spec.whatwg.org/multipage/images.html#normalise-the-source-densities
       // 1. Let source size be source set's source size.
       // 2. For each image source in source set:
       for (auto &candidate : imageCandidates)
@@ -239,7 +239,7 @@ namespace krys::boo::html
       }
 
       // Select an image source from a source set:
-      // https://html.spec.whatwg.org/#select-an-image-source-from-a-source-set
+      // https://html.spec.whatwg.org/multipage/images.html#select-an-image-source-from-a-source-set
       // 2. In an implementation-defined manner, choose one image source from sourceSet. Let selectedSource be
       //    this choice.
       // (The lowest density at least the device scale factor, else the highest.)
@@ -360,7 +360,7 @@ namespace krys::boo::html
     float deviceScaleFactor, Maybe<DOMStringView> srcAttribute, Maybe<DOMStringView> srcsetAttribute,
     float sourceSize, const Func<bool(const ImageCandidate &)> &shouldIgnoreCandidateCallback) noexcept
   {
-    // Create a source set: https://html.spec.whatwg.org/#create-a-source-set
+    // Create a source set: https://html.spec.whatwg.org/multipage/images.html#create-a-source-set
     if (!srcsetAttribute)
     {
       if (!srcAttribute)

@@ -83,7 +83,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"closedby", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-dialog-show
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-show
   ExceptionOr<void> HTMLDialogElement::Show() noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -132,21 +132,21 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-dialog-showmodal
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal
   ExceptionOr<void> HTMLDialogElement::ShowModal() noexcept
   {
     html::CEReactionsScope ceReactions;
     return ShowModalDialog(nullptr);
   }
 
-  // https://html.spec.whatwg.org/#dom-dialog-close
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-close
   void HTMLDialogElement::Close(Maybe<DOMString> returnValue) noexcept
   {
     html::CEReactionsScope ceReactions;
     CloseTheDialog(krys::move(returnValue), nullptr);
   }
 
-  // https://html.spec.whatwg.org/#dom-dialog-requestclose
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-requestclose
   void HTMLDialogElement::RequestClose(Maybe<DOMString> returnValue) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -155,7 +155,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  // https://html.spec.whatwg.org/#computed-closed-by-state
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#computed-closed-by-state
   HTMLDialogElement::ClosedByState HTMLDialogElement::ComputedClosedByState() const noexcept
   {
     // 1. If the state of dialog's closedby attribute is Auto:
@@ -174,7 +174,7 @@ namespace krys::boo
     krys_unreachable();
   }
 
-  // https://html.spec.whatwg.org/#show-a-modal-dialog
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#show-a-modal-dialog
   ExceptionOr<void> HTMLDialogElement::ShowModalDialog(Element *source) noexcept
   {
     // 1. If subject has an open attribute and is modal of subject is true, then return.
@@ -257,7 +257,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#close-the-dialog
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog
   void HTMLDialogElement::CloseTheDialog(Maybe<DOMString> result, Element *source) noexcept
   {
     // 1. If subject does not have an open attribute, then return.
@@ -336,7 +336,7 @@ namespace krys::boo
                                          });
   }
 
-  // https://html.spec.whatwg.org/#dialog-request-close
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-request-close
   void HTMLDialogElement::RequestCloseTheDialog(Maybe<DOMString> returnValue, Element *source) noexcept
   {
     // 1. If subject does not have an open attribute, then return.
@@ -367,7 +367,7 @@ namespace krys::boo
     _enableCloseWatcherForRequestClose = false;
   }
 
-  // https://html.spec.whatwg.org/#is-valid-command-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#is-valid-command-steps
   bool HTMLDialogElement::IsValidCommandType(dom::CommandType command) const noexcept
   {
     // 1. If command is in the Close state, the Request Close state, or the Show Modal state, then return
@@ -386,7 +386,7 @@ namespace krys::boo
       return true;
     }
 
-    // https://html.spec.whatwg.org/#command-steps
+    // https://html.spec.whatwg.org/multipage/form-elements.html#command-steps
     // 1. If element is in the popover showing state, then return.
     if (IsPopoverShowing())
     {
@@ -424,7 +424,7 @@ namespace krys::boo
     return false;
   }
 
-  // https://html.spec.whatwg.org/#dialog-focusing-steps
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-focusing-steps
   void HTMLDialogElement::RunFocusingSteps() noexcept
   {
     // 1. FIXME: If the allow focus steps given subject's node document return false, then return, with
@@ -479,7 +479,7 @@ namespace krys::boo
   {
     HTMLElement::OnInsert();
 
-    // https://html.spec.whatwg.org/#the-dialog-element:html-element-insertion-steps
+    // https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element:html-element-insertion-steps
     // 1. If insertedNode's node document is not fully active, then return.
     // 2. If insertedNode has an open attribute and is connected, then run the dialog setup steps given
     //    insertedNode.
@@ -493,7 +493,7 @@ namespace krys::boo
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
 
-    // https://html.spec.whatwg.org/#the-dialog-element:html-element-removing-steps
+    // https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element:html-element-removing-steps
     // 1. If removedNode has an open attribute, then run the dialog cleanup steps given removedNode.
     if (Open())
     {
@@ -562,7 +562,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-dialog-toggle-event-task
   void HTMLDialogElement::QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                                      Element *source) noexcept
   {
@@ -594,7 +594,7 @@ namespace krys::boo
     return !event->DefaultPrevented();
   }
 
-  // https://html.spec.whatwg.org/#dialog-setup-steps
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-setup-steps
   void HTMLDialogElement::SetupSteps() noexcept
   {
     // 1. Assert: subject has an open attribute.
@@ -616,7 +616,7 @@ namespace krys::boo
     SetCloseWatcher();
   }
 
-  // https://html.spec.whatwg.org/#dialog-cleanup-steps
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-cleanup-steps
   void HTMLDialogElement::CleanupSteps() noexcept
   {
     // 1. Remove subject from subject's node document's open dialogs list.
@@ -631,7 +631,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#set-the-dialog-close-watcher
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#set-the-dialog-close-watcher
   void HTMLDialogElement::SetCloseWatcher() noexcept
   {
     // 1. Assert: dialog's close watcher is null.

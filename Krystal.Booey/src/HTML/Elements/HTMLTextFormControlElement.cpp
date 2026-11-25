@@ -407,7 +407,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#set-the-selection-range
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#set-the-selection-range
   void HTMLTextFormControlElement::SetSelectionRange(uint32 start, uint32 end, DOMStringView directionString,
                                                      html::ForBindings forBindings) noexcept
   {

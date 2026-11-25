@@ -42,7 +42,7 @@ namespace krys::boo::html
 {
   /// @brief A window's close watchers, in groups: each user activation allows one more group, so a page can't
   /// trap the user with watchers made without one; a close request closes the last group.
-  /// @see https://html.spec.whatwg.org/#close-watcher-manager
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-manager
   class CloseWatcherManager final : public RefCounted<CloseWatcherManager>
   {
     KRYS_NON_COPY_MOVABLE(CloseWatcherManager);
@@ -60,13 +60,13 @@ namespace krys::boo::html
       return CreateRef<CloseWatcherManager>();
     }
 
-    /// @see https://html.spec.whatwg.org/#establish-a-close-watcher
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#establish-a-close-watcher
     void Add(Ref<CloseWatcher> watcher) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#close-watcher-destroy
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-destroy
     void Remove(CloseWatcher &watcher) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#notify-the-close-watcher-manager-about-user-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#notify-the-close-watcher-manager-about-user-activation
     void NotifyAboutUserActivation() noexcept;
 
     /// @brief Whether a close request can be canceled: there's a group to spare.
@@ -80,7 +80,7 @@ namespace krys::boo::html
     /// @brief A close request (Escape, or another user action the host treats as one): asks the last group's
     /// watchers to close, newest first, until one cancels.
     /// @return Whether an enabled watcher was asked.
-    /// @see https://html.spec.whatwg.org/#process-close-watchers
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#process-close-watchers
     bool ProcessCloseWatchers() noexcept;
 
     /// @brief Destroys every watcher: the window's document stopped.

@@ -33,7 +33,7 @@ namespace krys::boo::html
 {
   /// @brief The dimensions of a piece of text measured by a 2D context's `MeasureText`, relative to where it
   /// would be drawn.
-  /// @see https://html.spec.whatwg.org/#textmetrics
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#textmetrics
   class TextMetrics final : public RefCounted<TextMetrics>
   {
   private:

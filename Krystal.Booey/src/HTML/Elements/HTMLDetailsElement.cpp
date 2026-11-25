@@ -87,7 +87,7 @@ namespace krys::boo
     (void)root.AppendChild(*style);
   }
 
-  // https://html.spec.whatwg.org/#summary-for-its-parent-details
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#summary-for-its-parent-details
   bool HTMLDetailsElement::IsActiveSummary(const HTMLSummaryElement &summary) const noexcept
   {
     // A summary element is a summary for its parent details if: this summary element has a parent; that
@@ -142,7 +142,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#queue-a-details-toggle-event-task
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
   void HTMLDetailsElement::QueueDetailsToggleEventTask(dom::ToggleState oldState,
                                                        dom::ToggleState newState) noexcept
   {
@@ -191,7 +191,7 @@ namespace krys::boo
 
           // 3b. If oldValue is null and value is not null, then ensure details exclusivity by closing other
           //     elements if needed given element.
-          // https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-other-elements-if-needed
+          // https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-other-elements-if-needed
           // 1. Assert: element has an open attribute.
           // 2. If element does not have a name attribute, or its name attribute is the empty string, then
           //    return.
@@ -233,7 +233,7 @@ namespace krys::boo
   {
     HTMLElement::OnPostConnection();
 
-    // https://html.spec.whatwg.org/#the-details-element:html-element-insertion-steps
+    // https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element:html-element-insertion-steps
     // 1. Ensure details exclusivity by closing the given element if needed given insertedNode.
     // (Only once it's connected; the insertion steps can't change attributes.)
     EnsureDetailsExclusivityAfterMutation();
@@ -254,7 +254,7 @@ namespace krys::boo
     return otherElementsInNameGroup;
   }
 
-  // https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-the-given-element-if-needed
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
   void HTMLDetailsElement::EnsureDetailsExclusivityAfterMutation() noexcept
   {
     // 1. If element does not have an open attribute, then return.

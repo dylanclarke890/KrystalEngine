@@ -9,7 +9,7 @@ namespace krys::boo
 {
   class Element;
 
-  /// @see https://html.spec.whatwg.org/#commandeventinit
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#commandeventinit
   struct CommandEventInit : EventInit
   {
     /// @note A plain pointer: the event takes its own reference.
@@ -19,7 +19,7 @@ namespace krys::boo
 
   /// @brief Fired at a button's `commandfor` element with the button's command, before the element carries
   /// out a built-in one; canceling it stops that.
-  /// @see https://html.spec.whatwg.org/#the-commandevent-interface
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#the-commandevent-interface
   class CommandEvent final : public Event
   {
   private:
@@ -38,10 +38,10 @@ namespace krys::boo
                                                    bool isTrusted = false) noexcept;
 
     /// @brief The button that invoked the command, retargeted against the current target.
-    /// @see https://html.spec.whatwg.org/#dom-commandevent-source
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-commandevent-source
     KRYS_NODISCARD Element *Source() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-commandevent-command
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-commandevent-command
     KRYS_NODISCARD const DOMString &Command() const noexcept
     {
       return _command;

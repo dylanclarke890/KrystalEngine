@@ -32,7 +32,7 @@ namespace krys::boo
   class RenderLineBreak;
 
   /// @brief A `<wbr>`, a line break opportunity. Its interface is `HTMLElement`.
-  /// @see https://html.spec.whatwg.org/#the-wbr-element
+  /// @see https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-wbr-element
   class HTMLWBRElement final : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLWBRElement);

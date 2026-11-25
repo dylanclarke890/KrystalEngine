@@ -2997,7 +2997,7 @@ namespace krys::boo
   {
     krys_assert(Frame().Document());
 
-    // https://html.spec.whatwg.org/#the-indicated-part-of-the-document
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#the-indicated-part-of-the-document
     // 1. If document's URL does not equal url with exclude fragments set to true, then return null.
     // (url is the document's.)
     // 2. Let fragment be url's fragment.
@@ -3047,7 +3047,7 @@ namespace krys::boo
 
     RefPtr<Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
 
-    // https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#scroll-to-the-fragment-identifier
     // 1. If document's indicated part is null, then set document's target element to null.
     // 2a. Set document's target element to null.
     // 3a. Assert: document's indicated part is an element.

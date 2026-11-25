@@ -85,7 +85,7 @@ namespace krys::boo::html
     void FilesChosen(const List<utf8_string> &paths) noexcept final;
 
     /// @brief Asks the host to show its file picker, with the input's settings.
-    /// @see https://html.spec.whatwg.org/#show-the-picker,-if-applicable
+    /// @see https://html.spec.whatwg.org/multipage/input.html#show-the-picker,-if-applicable
     void ShowPicker() noexcept final;
 
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept final;

@@ -29,7 +29,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canvastextalign
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvastextalign
   enum class CanvasTextAlign : uint8
   {
     Start,

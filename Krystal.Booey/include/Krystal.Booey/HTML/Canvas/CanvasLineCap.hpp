@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canvaslinecap
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvaslinecap
   enum class CanvasLineCap : uint8
   {
     Butt,

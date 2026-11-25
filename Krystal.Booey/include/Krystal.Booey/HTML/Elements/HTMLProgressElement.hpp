@@ -12,7 +12,7 @@ namespace krys::boo
 {
   class RenderProgress;
 
-  /// @see https://html.spec.whatwg.org/#htmlprogresselement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlprogresselement
   class HTMLProgressElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLProgressElement);
@@ -46,21 +46,21 @@ namespace krys::boo
       return _isDeterminate;
     }
 
-#pragma region HTMLProgressElement - https://html.spec.whatwg.org/#htmlprogresselement
+#pragma region HTMLProgressElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmlprogresselement
 
-    /// @see https://html.spec.whatwg.org/#dom-progress-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-value
     KRYS_NODISCARD double Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-progress-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-value
     void Value(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-progress-max
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-max
     KRYS_NODISCARD double Max() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-progress-max
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-max
     void Max(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-progress-position
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-position
     KRYS_NODISCARD double Position() const noexcept;
 
     // readonly attribute NodeList labels;

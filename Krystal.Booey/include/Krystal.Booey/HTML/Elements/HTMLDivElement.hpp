@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmldivelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmldivelement
   class HTMLDivElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDivElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLDivElement(Document &document) noexcept;
 
-#pragma region HTMLDivElement Obsolete members - https://html.spec.whatwg.org/#HTMLDivElement-partial
+#pragma region HTMLDivElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLDivElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-div-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-div-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-div-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-div-align
     void Align(DOMString value) noexcept;
 
 #pragma endregion

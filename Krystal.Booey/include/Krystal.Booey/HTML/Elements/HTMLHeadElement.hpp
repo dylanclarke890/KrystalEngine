@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlheadelement
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmlheadelement
   class HTMLHeadElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHeadElement);

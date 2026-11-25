@@ -58,7 +58,7 @@ namespace krys::boo
     return optgroup;
   }
 
-  // https://html.spec.whatwg.org/#the-select-element-2
+  // https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
   void HTMLOptGroupElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
@@ -215,7 +215,7 @@ namespace krys::boo
       _isDisabled = newDisabled;
     }
 
-    // https://html.spec.whatwg.org/#attr-optgroup-disabled
+    // https://html.spec.whatwg.org/multipage/form-elements.html#attr-optgroup-disabled
     // 1. Let select be the optgroup element's nearest ancestor select.
     // 2. If select is null, then return.
     // 3. Reset a select's selectedness given select and false.

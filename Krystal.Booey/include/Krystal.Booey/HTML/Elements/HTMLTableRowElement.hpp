@@ -8,7 +8,7 @@ namespace krys::boo
   class HTMLCollection;
   class HTMLTableCellElement;
 
-  /// @see https://html.spec.whatwg.org/#htmltablerowelement
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#htmltablerowelement
   class HTMLTableRowElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableRowElement);
@@ -19,38 +19,38 @@ namespace krys::boo
   public:
     HTMLTableRowElement(Document &document) noexcept;
 
-#pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
+#pragma region HTMLTableRowElement - https://html.spec.whatwg.org/multipage/tables.html#htmltablerowelement
 
     /// @brief The row's index in its table's rows, or -1 if it isn't in a table.
-    /// @see https://html.spec.whatwg.org/#dom-tr-rowindex
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tr-rowindex
     KRYS_NODISCARD int32 RowIndex() const noexcept;
 
     /// @brief The row's index in its section's rows (or its table's, if it's a child of the table), or -1.
-    /// @see https://html.spec.whatwg.org/#dom-tr-sectionrowindex
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tr-sectionrowindex
     KRYS_NODISCARD int32 SectionRowIndex() const noexcept;
 
     /// @brief The row's `td` and `th` children.
-    /// @see https://html.spec.whatwg.org/#dom-tr-cells
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tr-cells
     KRYS_NODISCARD Ref<HTMLCollection> Cells() noexcept;
 
     /// @brief A new `td` at @p index in the row's cells (-1 for the end): an `IndexSizeError` if @p index is
     /// less than -1 or more than the number of cells.
-    /// @see https://html.spec.whatwg.org/#dom-tr-insertcell
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tr-insertcell
     ExceptionOr<Ref<HTMLTableCellElement>> InsertCell(int32 index = -1) noexcept;
 
     /// @brief Removes the cell at @p index in the row's cells (-1 for the last, if any): an `IndexSizeError`
     /// if there's no such cell.
-    /// @see https://html.spec.whatwg.org/#dom-tr-deletecell
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tr-deletecell
     ExceptionOr<void> DeleteCell(int32 index) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLTableRowElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableRowElement-partial
+#pragma region HTMLTableRowElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLTableRowElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-align
     void Align(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tr-char
@@ -65,16 +65,16 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-tr-charoff
     void CharOff(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-valign
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-valign
     KRYS_NODISCARD DOMString VAlign() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-valign
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-valign
     void VAlign(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tr-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tr-bgcolor
     void BgColor(DOMString value) noexcept;
 
 #pragma endregion

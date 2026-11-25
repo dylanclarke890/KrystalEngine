@@ -7,7 +7,7 @@ namespace krys::boo
 {
   class RenderMeter;
 
-  /// @see https://html.spec.whatwg.org/#htmlmeterelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmlmeterelement
   class HTMLMeterElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMeterElement);
@@ -35,42 +35,42 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<HTMLMeterElement> Create(Document &document) noexcept;
 
-#pragma region HTMLMeterElement - https://html.spec.whatwg.org/#htmlmeterelement
+#pragma region HTMLMeterElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmlmeterelement
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-value
     KRYS_NODISCARD double Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-value
     void Value(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-min
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-min
     KRYS_NODISCARD double Min() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-min
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-min
     void Min(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-max
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-max
     KRYS_NODISCARD double Max() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-max
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-max
     void Max(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-low
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-low
     KRYS_NODISCARD double Low() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-low
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-low
     void Low(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-high
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-high
     KRYS_NODISCARD double High() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-high
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-high
     void High(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-optimum
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-optimum
     KRYS_NODISCARD double Optimum() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-meter-optimum
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-meter-optimum
     void Optimum(double value) noexcept;
 
     // readonly attribute NodeList labels;

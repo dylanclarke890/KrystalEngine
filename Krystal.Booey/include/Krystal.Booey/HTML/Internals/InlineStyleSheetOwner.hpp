@@ -20,7 +20,7 @@ namespace krys::boo::style
 namespace krys::boo::html
 {
   /// @brief The style sheet of an HTML or SVG `style` element, made from the element's child text. It
-  /// [updates](https://html.spec.whatwg.org/#update-a-style-block) the sheet as the element is connected,
+  /// [updates](https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block) the sheet as the element is connected,
   /// disconnected or has its text changed, and keeps the element among its style scope's sheet candidates.
   /// @note The element's members call these with themselves as @p element.
   class InlineStyleSheetOwner

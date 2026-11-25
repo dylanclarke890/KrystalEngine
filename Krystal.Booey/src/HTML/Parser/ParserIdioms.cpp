@@ -125,7 +125,7 @@ namespace krys::boo::html
 
   Decimal ParseToDecimalForNumberType(DOMStringView string, const Decimal &fallbackValue) noexcept
   {
-    // https://html.spec.whatwg.org/#floating-point-numbers and ParseToDoubleForNumberType
+    // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#floating-point-numbers and ParseToDoubleForNumberType
     if (string.empty())
     {
       return fallbackValue;
@@ -168,7 +168,7 @@ namespace krys::boo::html
 
   double ParseToDoubleForNumberType(DOMStringView string, double fallbackValue) noexcept
   {
-    // https://html.spec.whatwg.org/#floating-point-numbers
+    // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#floating-point-numbers
     if (string.empty())
     {
       return fallbackValue;

@@ -88,14 +88,14 @@ namespace krys::boo::html
   class TextMetrics;
 
   /// @brief What a 2D context draws images from.
-  /// @see https://html.spec.whatwg.org/#canvasimagesource
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasimagesource
   // FIXME: `<video>`, once there are media elements; `ImageBitmap`, `OffscreenCanvas` and video frames aren't
   // planned.
   using CanvasImageSource =
     Variant<RefPtr<HTMLImageElement>, RefPtr<SVGImageElement>, RefPtr<HTMLCanvasElement>>;
 
   /// @brief The 2D context's state and drawing, shared by the contexts that draw like it.
-  /// @see https://html.spec.whatwg.org/#canvasrenderingcontext2d
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasrenderingcontext2d
   class CanvasRenderingContext2DBase : public CanvasRenderingContext, public CanvasPath
   {
     friend class CanvasFilterContextSwitcher;
@@ -287,7 +287,7 @@ namespace krys::boo::html
     ~CanvasRenderingContext2DBase() noexcept override;
 
     /// @brief Whether the context has been lost; never, as there are no context loss events.
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-iscontextlost
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-iscontextlost
     KRYS_NODISCARD static constexpr bool IsContextLost() noexcept
     {
       return false;
@@ -414,7 +414,7 @@ namespace krys::boo::html
 
 #pragma region CanvasState
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-save
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-save
     /// @brief Pushes a copy of the current drawing state onto the drawing state stack (once something
     /// changes it).
     void Save() noexcept
@@ -422,10 +422,10 @@ namespace krys::boo::html
       ++_unrealizedSaveCount;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-restore
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-restore
     void Restore() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-reset
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-reset
     void Reset() noexcept;
 
 #pragma endregion
@@ -556,7 +556,7 @@ namespace krys::boo::html
     }
 
     /// @brief Sets the filter, a CSS `filter` value; ignored if it isn't one (or is empty).
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-filter
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-filter
     void SetFilterString(DOMStringView) noexcept;
 
 #pragma endregion
@@ -602,7 +602,7 @@ namespace krys::boo::html
       return GetState().FontString();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-lang
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-lang
     KRYS_NODISCARD const DOMString &Lang() const noexcept
     {
       return GetState().Lang;
@@ -610,7 +610,7 @@ namespace krys::boo::html
 
     void SetLang(DOMStringView) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-fontkerning
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-fontkerning
     KRYS_NODISCARD CanvasFontKerning FontKerning() const noexcept
     {
       return GetState().FontKerning;
@@ -618,7 +618,7 @@ namespace krys::boo::html
 
     void SetFontKerning(CanvasFontKerning) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-fontstretch
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-fontstretch
     KRYS_NODISCARD CanvasFontStretch FontStretch() const noexcept
     {
       return GetState().FontStretch;
@@ -626,7 +626,7 @@ namespace krys::boo::html
 
     void SetFontStretch(CanvasFontStretch) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-fontvariantcaps
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-fontvariantcaps
     KRYS_NODISCARD CanvasFontVariantCaps FontVariantCaps() const noexcept
     {
       return GetState().FontVariantCaps;
@@ -634,7 +634,7 @@ namespace krys::boo::html
 
     void SetFontVariantCaps(CanvasFontVariantCaps) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-context-2d-textrendering
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-textrendering
     KRYS_NODISCARD CanvasTextRendering TextRendering() const noexcept
     {
       return GetState().TextRendering;

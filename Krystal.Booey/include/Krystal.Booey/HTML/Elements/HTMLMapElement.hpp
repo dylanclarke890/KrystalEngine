@@ -8,7 +8,7 @@ namespace krys::boo
   class HTMLImageElement;
   class HitTestResult;
 
-  /// @see https://html.spec.whatwg.org/#htmlmapelement
+  /// @see https://html.spec.whatwg.org/multipage/image-maps.html#htmlmapelement
   class HTMLMapElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMapElement);
@@ -24,15 +24,15 @@ namespace krys::boo
     /// @brief The first image in the map's tree that uses it.
     KRYS_NODISCARD RefPtr<HTMLImageElement> ImageElement() const noexcept;
 
-#pragma region HTMLMapElement - https://html.spec.whatwg.org/#htmlmapelement
+#pragma region HTMLMapElement - https://html.spec.whatwg.org/multipage/image-maps.html#htmlmapelement
 
-    /// @see https://html.spec.whatwg.org/#dom-map-name
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-map-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-map-name
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-map-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-map-areas
+    /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-map-areas
     KRYS_NODISCARD Ref<HTMLCollection> Areas() noexcept;
 
 #pragma endregion

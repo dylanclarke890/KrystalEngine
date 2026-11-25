@@ -55,7 +55,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    // https://html.spec.whatwg.org/#update-a-color-well-control-color
+    // https://html.spec.whatwg.org/multipage/input.html#update-a-color-well-control-color
     // 3. Let color be the result of parsing value.
     // (As a CSS <color>, with currentcolor as black, as WebKit does.)
     KRYS_NODISCARD Maybe<Color> ParseColorValue(DOMStringView string, const HTMLInputElement &input) noexcept
@@ -79,7 +79,7 @@ namespace krys::boo::html
       return null;
     }
 
-    // https://html.spec.whatwg.org/#serialize-a-color-well-control-color
+    // https://html.spec.whatwg.org/multipage/input.html#serialize-a-color-well-control-color
     KRYS_NODISCARD DOMString SerializeColorValue(Color color, const HTMLInputElement &element) noexcept
     {
       // 1. Assert: element is an input element whose type attribute is in the Color state.
@@ -143,7 +143,7 @@ namespace krys::boo::html
 
   DOMString ColorInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
   {
-    // https://html.spec.whatwg.org/#update-a-color-well-control-color
+    // https://html.spec.whatwg.org/multipage/input.html#update-a-color-well-control-color
     krys_debug_assert(Element());
     auto color = ParseColorValue(proposedValue, *Element());
 

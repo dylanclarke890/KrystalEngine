@@ -92,7 +92,7 @@ namespace krys::boo
     return items[index];
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitemlist-add
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-add
   ExceptionOr<RefPtr<DataTransferItem>> DataTransferItemList::Add(Document &document, DOMStringView data,
                                                                   DOMStringView type) noexcept
   {
@@ -127,7 +127,7 @@ namespace krys::boo
     return RefPtr<DataTransferItem>(_items->back());
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitemlist-add
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-add
   RefPtr<DataTransferItem> DataTransferItemList::Add(Ref<File> &&file) noexcept
   {
     // 1. If the DataTransferItemList object is not in the read/write mode, return null.
@@ -148,7 +148,7 @@ namespace krys::boo
     return _items->back();
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitemlist-remove
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-remove
   ExceptionOr<void> DataTransferItemList::Remove(uint32 index) noexcept
   {
     // 1. If the DataTransferItemList object is not in the read/write mode, throw an "InvalidStateError"
@@ -183,7 +183,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransferitemlist-clear
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-clear
   void DataTransferItemList::Clear() noexcept
   {
     // The clear() method, if the DataTransferItemList object is in the read/write mode, must remove all the
@@ -265,7 +265,7 @@ namespace krys::boo
     std::erase_if(items, [](auto &item) { return !item->IsFile(); });
   }
 
-  // https://html.spec.whatwg.org/#dom-datatransfer-setdata
+  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdata
   void DataTransferItemList::DidSetStringData(DOMStringView type) noexcept
   {
     if (!_items)

@@ -130,7 +130,7 @@ namespace krys::boo::html
                                                 Maybe<ImageDataSettings> settings,
                                                 Span<const uint8> optionalBytes) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-imagedata
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagedata
     // 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
@@ -139,7 +139,7 @@ namespace krys::boo::html
 
     // 2. Initialize this given sw, sh, and settings.
     // 3. Initialize the image data of this to transparent black.
-    // https://html.spec.whatwg.org/#initialize-an-imagedata-object
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#initialize-an-imagedata-object
     // 2a.-2c. Initialize the data attribute of imageData to a new Uint8ClampedArray object [...] If the
     //         storage ArrayBuffer could not be allocated, then rethrow the RangeError thrown by JavaScript.
     // (Every format has 8 bits a channel; see the FIXME on ImageDataArray.)
@@ -178,7 +178,7 @@ namespace krys::boo::html
   ExceptionOr<Ref<ImageData>> ImageData::Create(ImageDataArray &&array, uint32 sw, Maybe<uint32> sh,
                                                 Maybe<ImageDataSettings> settings) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-imagedata-with-data
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagedata-with-data
     // 1. Let bytesPerPixel be 4 if settings["pixelFormat"] is "rgba-unorm8"; otherwise 8.
     // (Every format has 8 bits a channel; see the FIXME on ImageDataArray.)
     // 2. Let length be the buffer source byte length of data.
@@ -213,7 +213,7 @@ namespace krys::boo::html
     }
 
     // 8. Initialize this given sw, sh, settings, and source set to data.
-    // https://html.spec.whatwg.org/#initialize-an-imagedata-object
+    // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#initialize-an-imagedata-object
     // 1a.-1b. If settings["pixelFormat"] equals "rgba-unorm8" and source is not a Uint8ClampedArray [...],
     //         then throw an "InvalidStateError" DOMException.
     // (There's no Float16Array, so a Uint8ClampedArray is taken for every format; see the FIXME on

@@ -69,7 +69,7 @@ namespace krys::boo
   /// @brief A document's window: the global object of the document a frame shows, which the window events
   /// (`load`, `resize` and the others) fire at, and which the document's events bubble to.
   /// @note The document makes its window as it becomes a frame's document, and keeps it.
-  /// @see https://html.spec.whatwg.org/#the-window-object
+  /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-window-object
   class Window final : public EventTarget
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -87,7 +87,7 @@ namespace krys::boo
     Maybe<dom::DOMHighResTimeStamp> _frozenNowTimestamp;
     /// @brief When the window was last activated by the user, as a timestamp: positive infinity if it never
     /// was, negative infinity once an API consumed the activation.
-    /// @see https://html.spec.whatwg.org/#last-activation-timestamp
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#last-activation-timestamp
     dom::DOMHighResTimeStamp _lastActivationTimestamp;
     /// @brief Consumed by close watchers, so a page can't block closing without the user's activation.
     /// @see https://html.spec.whatwg.org/#last-history-action-activation-timestamp
@@ -102,7 +102,7 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<boo::Window> Create(boo::Document &document) noexcept;
 
     /// @brief The window's document (its associated `Document`), unless it has been destroyed.
-    /// @see https://html.spec.whatwg.org/#concept-document-window
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window
     KRYS_NODISCARD boo::Document *Document() const noexcept;
 
     /// @brief The frame showing the window's document (its navigable), if any.
@@ -114,43 +114,43 @@ namespace krys::boo
     /// @brief The window's custom element registry, made with the window and given to its document.
     KRYS_NODISCARD html::CustomElementRegistry &EnsureCustomElementRegistry() noexcept;
 
-#pragma region The current browsing context - https://html.spec.whatwg.org/#the-window-object
+#pragma region The current browsing context - https://html.spec.whatwg.org/multipage/nav-history-apis.html#the-window-object
 
     /// @brief The window's close watchers.
-    /// @see https://html.spec.whatwg.org/#close-watcher-manager
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-manager
     KRYS_NODISCARD html::CloseWatcherManager &GetCloseWatcherManager() const noexcept;
 
     /// @brief The window's close watcher manager, if it was made.
     KRYS_NODISCARD html::CloseWatcherManager *CloseWatcherManagerIfExists() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-window-customelements
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-window-customelements
     KRYS_NODISCARD html::CustomElementRegistry &CustomElements() noexcept
     {
       return EnsureCustomElementRegistry();
     }
 
     /// @brief Asks the host to bring the window to the front.
-    /// @see https://html.spec.whatwg.org/#dom-window-focus
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-window-focus
     void Focus() noexcept;
 
 #pragma endregion
 
-#pragma region Named access - https://html.spec.whatwg.org/#named-access-on-the-window-object
+#pragma region Named access - https://html.spec.whatwg.org/multipage/nav-history-apis.html#named-access-on-the-window-object
 
     /// @brief The document's named objects of name @p name (`embed`, `form`, `img` and `object` elements by
     /// their `name`, and HTML elements by their ID): the element if there's one, an `HTMLCollection` of them
     /// if there are several, nothing if there are none.
-    /// @see https://html.spec.whatwg.org/#dom-window-nameditem
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-window-nameditem
     KRYS_NODISCARD Maybe<Variant<RefPtr<Element>, RefPtr<HTMLCollection>>>
       NamedItem(DOMStringView name) const noexcept;
 
     /// @brief The names `NamedItem` finds something for, in tree order.
-    /// @see https://html.spec.whatwg.org/#named-access-on-the-window-object
+    /// @see https://html.spec.whatwg.org/multipage/nav-history-apis.html#named-access-on-the-window-object
     KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept;
 
 #pragma endregion
 
-#pragma region GlobalEventHandlers, WindowEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+#pragma region GlobalEventHandlers, WindowEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
     KRYS_WINDOW_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
@@ -232,7 +232,7 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region User activation - https://html.spec.whatwg.org/#tracking-user-activation
+#pragma region User activation - https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation
 
     /// @brief How long an activation is transient: 5s.
     KRYS_NODISCARD static double TransientActivationDuration() noexcept
@@ -241,23 +241,23 @@ namespace krys::boo
     }
 
     /// @brief The user activated the window just now (a press, a key): its activation notification.
-    /// @see https://html.spec.whatwg.org/#activation-notification
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#activation-notification
     void NotifyActivated() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#sticky-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sticky-activation
     KRYS_NODISCARD bool HasStickyActivation() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#transient-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#transient-activation
     KRYS_NODISCARD bool HasTransientActivation() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#history-action-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#history-action-activation
     KRYS_NODISCARD bool HasHistoryActionActivation() const noexcept;
 
     /// @return Whether there was a transient activation to consume.
-    /// @see https://html.spec.whatwg.org/#consume-user-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#consume-user-activation
     bool ConsumeTransientActivation() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#consume-history-action-user-activation
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#consume-history-action-user-activation
     bool ConsumeHistoryActionUserActivation() noexcept;
 
 #pragma endregion
@@ -265,17 +265,17 @@ namespace krys::boo
     /// @brief Calls @p function with each window that exists.
     static void ForEachWindow(const Func<void(boo::Window &)> &function) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-queuemicrotask
+    /// @see https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-queuemicrotask
     static void QueueMicrotask(Func<void()> &&callback) noexcept;
 
-#pragma region Animation frames - https://html.spec.whatwg.org/#animation-frames
+#pragma region Animation frames - https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames
 
     /// @brief Calls @p callback in the next rendering update, with its timestamp.
     /// @return The callback's handle, positive; 0 if the window has no document.
-    /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 handle) noexcept;
 
 #pragma endregion

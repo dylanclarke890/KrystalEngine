@@ -6,35 +6,35 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-### [4.7 Edits](https://html.spec.whatwg.org/#edits)
+### [4.7 Edits](https://html.spec.whatwg.org/multipage/edits.html#edits)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-#### [4.7.1 The ins element](https://html.spec.whatwg.org/#the-ins-element)
+#### [4.7.1 The ins element](https://html.spec.whatwg.org/multipage/edits.html#the-ins-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLModElement`, shared with `del`.
 
-#### [4.7.2 The del element](https://html.spec.whatwg.org/#the-del-element)
+#### [4.7.2 The del element](https://html.spec.whatwg.org/multipage/edits.html#the-del-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLModElement`, shared with `ins`.
 
-#### [4.7.3 Attributes common to ins and del elements](https://html.spec.whatwg.org/#attributes-common-to-ins-and-del-elements)
+#### [4.7.3 Attributes common to ins and del elements](https://html.spec.whatwg.org/multipage/edits.html#attributes-common-to-ins-and-del-elements)
 
 Status: reviewed (2026-11-01)
 > `HTMLModElement`: `cite` is reflected as a URL and `dateTime` as it's written; the date isn't parsed (see `DIFFERENCES.md`).
 <!-- definitions: attr-mod-cite attr-mod-datetime -->
 
-#### [4.7.4 Edits and paragraphs](https://html.spec.whatwg.org/#edits-and-paragraphs)
+#### [4.7.4 Edits and paragraphs](https://html.spec.whatwg.org/multipage/edits.html#edits-and-paragraphs)
 
 Status: n/a (author conformance)
 
-#### [4.7.5 Edits and lists](https://html.spec.whatwg.org/#edits-and-lists)
+#### [4.7.5 Edits and lists](https://html.spec.whatwg.org/multipage/edits.html#edits-and-lists)
 
 Status: n/a (author conformance)
 
-#### [4.7.6 Edits and tables](https://html.spec.whatwg.org/#edits-and-tables)
+#### [4.7.6 Edits and tables](https://html.spec.whatwg.org/multipage/edits.html#edits-and-tables)
 
 Status: n/a (author conformance)

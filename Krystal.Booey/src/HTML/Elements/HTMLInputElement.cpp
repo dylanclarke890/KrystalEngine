@@ -41,7 +41,7 @@ namespace krys::boo
 {
   namespace
   {
-    /// @see https://html.spec.whatwg.org/#limited-to-only-non-negative-numbers-greater-than-zero
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-non-negative-numbers-greater-than-zero
     KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<DOMStringView> value,
                                                                            uint32 defaultValue) noexcept
     {
@@ -148,7 +148,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"alt", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-fe-autocomplete
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-autocomplete
   DOMString HTMLInputElement::Autocomplete() const noexcept
   {
     // Return the element's IDL-exposed autofill value.
@@ -238,7 +238,7 @@ namespace krys::boo
 
   dom::USVString HTMLInputElement::FormAction() const noexcept
   {
-    // https://html.spec.whatwg.org/#dom-fs-formaction
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formaction
     // Let attributeValue be the result of running get an attribute value given this and formaction. If
     // attributeValue is null or the empty string, return this's node document's URL, serialized.
     auto attributeValue = GetAttribute(u8"formaction");
@@ -1696,7 +1696,7 @@ namespace krys::boo
     bool wasImageButton = _inputType->IsImageButton();
     bool wasSuccessfulSubmitButtonCandidate = _inputType->CanBeSuccessfulSubmitButton();
 
-    // https://html.spec.whatwg.org/#input-type-change
+    // https://html.spec.whatwg.org/multipage/input.html#input-type-change
     // 1. If the previous state of the element's type attribute put the value IDL attribute in the value mode,
     //    and the element's value is not the empty string, and the new state of the element's type attribute
     //    puts the value IDL attribute in either the default mode or the default/on mode, then set the
@@ -1743,7 +1743,7 @@ namespace krys::boo
     }
     _inputType->CreateShadowSubtreeIfNeeded();
 
-    // https://html.spec.whatwg.org/#auto-directionality
+    // https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
     if (oldType == html::InputType::Type::Telephone
         || _inputType->GetType() == html::InputType::Type::Telephone
         || (HasAutoTextDirectionState() && didDirAutoUseValue != _inputType->DirAutoUsesValue()))
@@ -1792,7 +1792,7 @@ namespace krys::boo
     if (!previouslySelectable && nowSelectable)
     {
       auto direction = html::TextFieldSelectionDirection::SelectionHasNoDirection;
-      // https://html.spec.whatwg.org/#set-the-selection-direction
+      // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#set-the-selection-direction
       if (IsTextField() && NodeDocument().Frame()
           && NodeDocument().GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
       {
@@ -2108,7 +2108,7 @@ namespace krys::boo
 
 #pragma region Events
 
-  // https://html.spec.whatwg.org/#the-input-element:legacy-pre-activation-behavior
+  // https://html.spec.whatwg.org/multipage/input.html#the-input-element:legacy-pre-activation-behavior
   void HTMLInputElement::LegacyPreActivationBehavior(Event &event) noexcept
   {
     // 1. If this element's type attribute is in the Checkbox state, then set this element's checkedness to
@@ -2128,7 +2128,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-input-element:activation-behaviour
+  // https://html.spec.whatwg.org/multipage/input.html#the-input-element:activation-behaviour
   void HTMLInputElement::ActivationBehavior(Event &event) noexcept
   {
     // A file input's button (its ::file-selector-button) activates the input, so clicking it opens the
@@ -2170,7 +2170,7 @@ namespace krys::boo
     HandlePopoverTargetAction(event.Target().get());
   }
 
-  // https://html.spec.whatwg.org/#the-input-element:legacy-canceled-activation-behavior
+  // https://html.spec.whatwg.org/multipage/input.html#the-input-element:legacy-canceled-activation-behavior
   void HTMLInputElement::LegacyCanceledActivationBehavior(Event &event) noexcept
   {
     // 1. If the element's type attribute is in the Checkbox state, then set the element's checkedness and the

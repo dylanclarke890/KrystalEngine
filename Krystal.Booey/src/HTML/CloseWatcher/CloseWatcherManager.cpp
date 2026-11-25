@@ -29,7 +29,7 @@
 
 namespace krys::boo::html
 {
-  // https://html.spec.whatwg.org/#establish-a-close-watcher
+  // https://html.spec.whatwg.org/multipage/interaction.html#establish-a-close-watcher
   void CloseWatcherManager::Add(Ref<CloseWatcher> watcher) noexcept
   {
     // 4. If manager's groups's size is less than manager's allowed number of groups, then append
@@ -54,7 +54,7 @@ namespace krys::boo::html
     _nextUserInteractionAllowsNewGroup = true;
   }
 
-  // https://html.spec.whatwg.org/#close-watcher-destroy
+  // https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-destroy
   void CloseWatcherManager::Remove(CloseWatcher &watcher) noexcept
   {
     // 2. For each group of manager's groups: remove closeWatcher from group.
@@ -74,7 +74,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#notify-the-close-watcher-manager-about-user-activation
+  // https://html.spec.whatwg.org/multipage/interaction.html#notify-the-close-watcher-manager-about-user-activation
   void CloseWatcherManager::NotifyAboutUserActivation() noexcept
   {
     // 1. Let manager be window's close watcher manager.
@@ -94,7 +94,7 @@ namespace krys::boo::html
     return _groups.size() < _allowedNumberOfGroups;
   }
 
-  // https://html.spec.whatwg.org/#close-request-steps
+  // https://html.spec.whatwg.org/multipage/interaction.html#close-request-steps
   // (Run from the Escape keydown's default action, so once it fired uncanceled.)
   bool CloseWatcherManager::EscapeKeyHandler(KeyboardEvent &event) noexcept
   {
@@ -123,7 +123,7 @@ namespace krys::boo::html
     return false;
   }
 
-  // https://html.spec.whatwg.org/#process-close-watchers
+  // https://html.spec.whatwg.org/multipage/interaction.html#process-close-watchers
   bool CloseWatcherManager::ProcessCloseWatchers() noexcept
   {
     // 1. Let processedACloseWatcher be false.

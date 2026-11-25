@@ -124,7 +124,7 @@ namespace krys::boo
     return select;
   }
 
-  // https://html.spec.whatwg.org/#the-select-element-2
+  // https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
   void HTMLSelectElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
   {
     auto &document = NodeDocument();
@@ -222,7 +222,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#select-open-picker
+  // https://html.spec.whatwg.org/multipage/form-elements.html#select-open-picker
   void HTMLSelectElement::OpenPicker(bool byKeyboard) noexcept
   {
     auto *selectPopover = _selectPopover.get();
@@ -277,7 +277,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#concept-select-pick
+  // https://html.spec.whatwg.org/multipage/form-elements.html#concept-select-pick
   void HTMLSelectElement::PickOption(HTMLOptionElement &option) noexcept
   {
     // 1. If select has the multiple attribute or select is disabled, then return.
@@ -298,7 +298,7 @@ namespace krys::boo
     ClosePicker();
   }
 
-  // https://html.spec.whatwg.org/#focus-another-option
+  // https://html.spec.whatwg.org/multipage/form-elements.html#focus-another-option
   void HTMLSelectElement::FocusOptionForKey(DOMStringView key) noexcept
   {
     List<HTMLOptionElement *> options;
@@ -497,7 +497,7 @@ namespace krys::boo
     SelectOption(optionIndex, flags);
   }
 
-  // https://html.spec.whatwg.org/#placeholder-label-option
+  // https://html.spec.whatwg.org/multipage/form-elements.html#placeholder-label-option
   bool HTMLSelectElement::HasPlaceholderLabelOption() const noexcept
   {
     // The select element has no placeholder label option if it has an attribute "multiple" specified or a
@@ -634,7 +634,7 @@ namespace krys::boo
   void HTMLSelectElement::Remove(int32 optionIndex) noexcept
   {
     // To remove an option from the options collection given index:
-    // https://html.spec.whatwg.org/#htmloptionscollection-remove-an-option
+    // https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#htmloptionscollection-remove-an-option
     html::CEReactionsScope ceReactions;
 
     // 1. If the number of nodes represented by collection is 0, then return.
@@ -667,7 +667,7 @@ namespace krys::boo
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-select-value
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-select-value
   void HTMLSelectElement::Value(DOMStringView value) noexcept
   {
     // 1. Let firstMatchingOption be null.
@@ -705,7 +705,7 @@ namespace krys::boo
     bool newDisabled, List<UniquePtr<style::PseudoClassChangeInvalidation>> &invalidations) noexcept
   {
     // The options and optgroups are actually disabled while the select is, unless they're disabled anyway.
-    // https://html.spec.whatwg.org/#concept-element-disabled
+    // https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled
     for (auto &weakItem : ListItems())
     {
       auto *item = weakItem.get();
@@ -1381,7 +1381,7 @@ namespace krys::boo
 
     _shouldRecalcListItems = false;
 
-    // https://html.spec.whatwg.org/#selectedness-setting-algorithm
+    // https://html.spec.whatwg.org/multipage/form-elements.html#selectedness-setting-algorithm
     // (Steps 4 to 6, while finding the list of options; an option selected for being the first enabled one
     // is deselected by a later selected one.)
     RefPtr<HTMLOptionElement> foundSelected;
@@ -1484,7 +1484,7 @@ namespace krys::boo
     return -1;
   }
 
-  // https://html.spec.whatwg.org/#set-the-selected-index
+  // https://html.spec.whatwg.org/multipage/form-elements.html#set-the-selected-index
   void HTMLSelectElement::SelectedIndex(int32 index) noexcept
   {
     // 1. Let firstMatchingOption be null.
@@ -1724,7 +1724,7 @@ namespace krys::boo
     return successful;
   }
 
-  // https://html.spec.whatwg.org/#the-select-element:concept-form-reset-control
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-select-element:concept-form-reset-control
   void HTMLSelectElement::Reset() noexcept
   {
     // 1. Set selectElement's user validity to false.
@@ -2529,7 +2529,7 @@ namespace krys::boo
 
 #pragma region HTMLSelectElement
 
-  // https://html.spec.whatwg.org/#dom-fe-autocomplete
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-autocomplete
   DOMString HTMLSelectElement::Autocomplete() const noexcept
   {
     // Return the element's IDL-exposed autofill value.

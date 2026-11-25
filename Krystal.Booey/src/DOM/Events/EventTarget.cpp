@@ -130,7 +130,7 @@ namespace krys::boo
         {
           return;
         }
-        // https://html.spec.whatwg.org/#the-event-handler-processing-algorithm
+        // https://html.spec.whatwg.org/multipage/webappapis.html#the-event-handler-processing-algorithm
         // 1. If the result of WebDriver BiDi scripting is enabled with eventTarget's relevant settings object
         //    is false, then return.
         // 2. Let callback be the result of getting the current value of the event handler given eventTarget

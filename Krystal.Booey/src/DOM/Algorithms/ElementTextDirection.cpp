@@ -97,7 +97,7 @@ namespace krys::boo::dom
       }
     }
 
-    /// @see https://html.spec.whatwg.org/#text-node-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#text-node-directionality
     KRYS_NODISCARD Maybe<text::TextDirection> ComputeTextDirectionFromText(DOMStringView text) noexcept
     {
       // 1. If text's data does not contain a code point whose bidirectional character type is L, AL, or R,
@@ -111,8 +111,8 @@ namespace krys::boo::dom
 
     /// @brief The directionality of @p element, whose `dir` attribute is in @p textDirectionState; null for
     /// an element without a parent whose directionality would be 'ltr'.
-    /// @see https://html.spec.whatwg.org/#the-directionality
-    /// @see https://html.spec.whatwg.org/#parent-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#parent-directionality
     KRYS_NODISCARD Maybe<text::TextDirection>
       ComputeTextDirection(const Element &element, TextDirectionState textDirectionState) noexcept
     {
@@ -180,7 +180,7 @@ namespace krys::boo::dom
       return element && ElementHasValidTextDirectionState(*element);
     }
 
-    /// @see https://html.spec.whatwg.org/#contained-text-auto-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#contained-text-auto-directionality
     KRYS_NODISCARD Maybe<text::TextDirection> ComputeContainedTextAutoDirection(const Element &element,
                                                                                 bool canExcludeRoot) noexcept
     {

@@ -47,7 +47,7 @@ namespace krys::boo::html
   class ElementInternals;
 
   /// @brief A custom element reaction: an upgrade, or a callback with its arguments.
-  /// @see https://html.spec.whatwg.org/#custom-element-reactions
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reactions
   class CustomElementReactionQueueItem
   {
     KRYS_NON_COPYABLE(CustomElementReactionQueueItem);
@@ -117,7 +117,7 @@ namespace krys::boo::html
     void Invoke(Element &element, CustomElementInterface &elementInterface) noexcept;
   };
 
-  /// @see https://html.spec.whatwg.org/#element-queue
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#element-queue
   class CustomElementQueue
   {
     KRYS_NON_COPY_MOVABLE(CustomElementQueue);
@@ -139,7 +139,7 @@ namespace krys::boo::html
     void Add(Element &element) noexcept;
 
     /// @brief Invokes the reactions of the queue's elements, in order, and empties it.
-    /// @see https://html.spec.whatwg.org/#invoke-custom-element-reactions
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#invoke-custom-element-reactions
     void ProcessQueue() noexcept;
 
     KRYS_NODISCARD List<Ref<Element>> TakeElements() noexcept;
@@ -150,7 +150,7 @@ namespace krys::boo::html
 
   /// @brief An element's custom element reaction queue, with the definition it was enqueued to upgrade to or
   /// was defined by.
-  /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reaction-queue
   class CustomElementReactionQueue
   {
     KRYS_NON_COPY_MOVABLE(CustomElementReactionQueue);
@@ -167,13 +167,13 @@ namespace krys::boo::html
 
     ~CustomElementReactionQueue() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-a-custom-element-upgrade-reaction
     static void EnqueueElementUpgrade(Element &element, bool alreadyScheduledToUpgrade) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#concept-try-upgrade
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-try-upgrade
     static void TryToUpgradeElement(Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-callback-reaction
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-a-custom-element-callback-reaction
     static void EnqueueConnectedCallbackIfNeeded(Element &element) noexcept;
 
     static void EnqueueDisconnectedCallbackIfNeeded(Element &element) noexcept;
@@ -195,7 +195,7 @@ namespace krys::boo::html
 
     /// @brief Enqueues the callbacks an upgrade implies: an attribute change for each observed attribute the
     /// element has, then the connection if it's connected.
-    /// @see https://html.spec.whatwg.org/#concept-upgrade-an-element (steps 4 and 5)
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-upgrade-an-element (steps 4 and 5)
     static void EnqueuePostUpgradeReactions(Element &element) noexcept;
 
     KRYS_NODISCARD bool ObservesStyleAttribute() const noexcept;
@@ -203,7 +203,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsElementInternalsDisabled() const noexcept;
 
     /// @brief The element's attached internals, null until `attachInternals()` is called.
-    /// @see https://html.spec.whatwg.org/#attached-internals
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#attached-internals
     KRYS_NODISCARD ElementInternals *AttachedInternals() const noexcept;
 
     void SetAttachedInternals(Ref<ElementInternals> internals) noexcept;
@@ -227,13 +227,13 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool HasJustUpgradeReaction() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#backup-element-queue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#backup-element-queue
     static void ProcessBackupQueue(CustomElementQueue &backupElementQueue) noexcept;
 
     static void EnqueueElementsOnAppropriateElementQueue(const List<Ref<Element>> &elements) noexcept;
 
   private:
-    /// @see https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-an-element-on-the-appropriate-element-queue
     static void EnqueueElementOnAppropriateElementQueue(Element &element) noexcept;
   };
 
@@ -286,7 +286,7 @@ namespace krys::boo::html
 
   /// @brief An element queue pushed onto the custom element reactions stack for the scope's lifetime; its
   /// reactions are invoked when it's popped.
-  /// @see https://html.spec.whatwg.org/#custom-element-reactions-stack
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reactions-stack
   class CustomElementReactionStack : public CustomElementReactionDisallowedScope::AllowedScope
   {
     KRYS_NON_COPY_MOVABLE(CustomElementReactionStack);
@@ -329,7 +329,7 @@ namespace krys::boo::html
   /// unless one is on the stack, so that the reactions a call causes are invoked before it returns. Methods
   /// the host calls while Booey is running (in a reaction or an event listener) are given their own queue by
   /// `CustomElementReactionStackSuspension`.
-  /// @see https://html.spec.whatwg.org/#cereactions
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#cereactions
   class CEReactionsScope
   {
     KRYS_NON_COPY_MOVABLE(CEReactionsScope);

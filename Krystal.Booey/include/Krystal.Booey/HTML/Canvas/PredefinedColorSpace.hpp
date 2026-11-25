@@ -36,7 +36,7 @@ namespace krys::boo
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#predefinedcolorspace
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#predefinedcolorspace
   enum class PredefinedColorSpace : uint8
   {
     SRGB,

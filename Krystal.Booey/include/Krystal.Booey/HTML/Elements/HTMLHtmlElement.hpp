@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlhtmlelement
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmlhtmlelement
   class HTMLHtmlElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHtmlElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLHtmlElement(Document &document) noexcept;
 
-#pragma region HTMLHtmlElement Obsolete members - https://html.spec.whatwg.org/#HTMLHtmlElement-partial
+#pragma region HTMLHtmlElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLHtmlElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-html-version
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-html-version
     KRYS_NODISCARD DOMString Version() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-html-version
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-html-version
     void Version(DOMString value) noexcept;
 
 #pragma endregion

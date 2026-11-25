@@ -64,7 +64,7 @@ namespace krys::boo
     return details->IsActiveSummary(*this);
   }
 
-  // https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
+  // https://html.spec.whatwg.org/multipage/interactive-elements.html#the-summary-element:activation-behaviour
   void HTMLSummaryElement::ActivationBehavior(Event &event) noexcept
   {
     // 1. If this summary element is not the summary for its parent details, then return.

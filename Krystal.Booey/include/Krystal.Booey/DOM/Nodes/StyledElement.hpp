@@ -113,7 +113,7 @@ namespace krys::boo
 #pragma region Presentational hints
 
     /// @brief The declarations the element's presentational attributes map to, rebuilt after one changes.
-    /// @see https://html.spec.whatwg.org/#presentational-hints
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#presentational-hints
     KRYS_NODISCARD const css::ImmutableStyleProperties *PresentationalHintStyle() const noexcept;
 
     /// @brief Presentational hints that depend on several attributes or on other elements (tables and their

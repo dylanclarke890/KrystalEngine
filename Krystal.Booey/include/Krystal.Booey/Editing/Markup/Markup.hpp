@@ -107,7 +107,7 @@ namespace krys::boo
   /// @brief The markup, parsed as the children of @p contextElement, for `innerHTML`, `outerHTML`,
   /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
   /// and as XML otherwise, which throws a `SyntaxError` if it isn't well formed.
-  /// @see https://html.spec.whatwg.org/#fragment-parsing-algorithm-steps
+  /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-parsing-algorithm-steps
   KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
     CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
                                     EnumSet<dom::ParserContentPolicy> parserContentPolicy = {}) noexcept;
@@ -194,7 +194,7 @@ namespace krys::boo
     Yes,
   };
 
-  /// @see https://html.spec.whatwg.org/#serialising-html-fragments
+  /// @see https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
   KRYS_NODISCARD utf8_string SerializeFragment(const Node &node, SerializedNodes root, List<Ref<Node>> *nodes,
                                                ResolveUrls resolveUrls,
                                                Maybe<SerializationSyntax> serializationSyntax,
@@ -210,7 +210,7 @@ namespace krys::boo
   /// @brief Serializes @p node as the markup getters (`innerHTML`, `outerHTML`) do: as HTML in an HTML
   /// document, and otherwise as XML that must be well-formed.
   /// @return An `InvalidStateError` if the XML serialization meets one of its error cases.
-  /// @see https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps
+  /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-serializing-algorithm-steps
   KRYS_NODISCARD ExceptionOr<utf8_string> SerializeFragmentRequiringWellFormed(const Node &node,
                                                                                SerializedNodes root) noexcept;
 

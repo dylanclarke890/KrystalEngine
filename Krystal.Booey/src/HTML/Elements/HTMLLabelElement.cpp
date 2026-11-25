@@ -210,7 +210,7 @@ namespace krys::boo
 
       // The activation behavior of a label element for events targeted at interactive content descendants of
       // a label element, and any descendants of those interactive content descendants, must be to do nothing.
-      // https://html.spec.whatwg.org/#the-label-element
+      // https://html.spec.whatwg.org/multipage/forms.html#the-label-element
       if (IsEventTargetedAtInteractiveDescendants(event))
       {
         HTMLElement::DefaultEventHandler(event);

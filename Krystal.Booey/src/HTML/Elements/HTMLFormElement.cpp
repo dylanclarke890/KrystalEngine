@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#attr-form-autocomplete
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#attr-form-autocomplete
   template <>
   struct html::EnumeratedAttributeTraits<"autocomplete", HTMLFormElement>
   {
@@ -41,7 +41,7 @@ namespace krys::boo
     constexpr static State InvalidValueDefault = State::On;
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-fs-method
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method
   template <>
   struct html::EnumeratedAttributeTraits<"method", HTMLFormElement>
   {
@@ -56,7 +56,7 @@ namespace krys::boo
     constexpr static State InvalidValueDefault = State::Get;
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-fs-enctype
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-enctype
   template <>
   struct html::EnumeratedAttributeTraits<"enctype", HTMLFormElement>
   {
@@ -130,7 +130,7 @@ namespace krys::boo
 
   dom::USVString HTMLFormElement::Action() const noexcept
   {
-    // https://html.spec.whatwg.org/#dom-fs-action
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-action
     // Let attributeValue be the result of running get an attribute value given this and action. If
     // attributeValue is null or the empty string, return this's node document's URL, serialized.
     auto attributeValue = GetAttribute(u8"action");
@@ -173,7 +173,7 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"enctype", krys::move(value));
   }
 
-  // https://html.spec.whatwg.org/#dom-fs-encoding
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-encoding
   DOMString HTMLFormElement::Encoding() const noexcept
   {
     // The encoding IDL attribute must reflect the enctype content attribute, limited to only known values.
@@ -353,7 +353,7 @@ namespace krys::boo
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
     bool wasInResetFunction = std::exchange(_isInResetFunction, true);
 
-    // https://html.spec.whatwg.org/#concept-form-reset
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset
     // 1. Let reset be the result of firing an event named reset at form, with the bubbles and cancelable
     //    attributes initialized to true.
     auto event = Event::Create(event_names::Reset, true, true);
@@ -385,7 +385,7 @@ namespace krys::boo
     return !CheckInvalidControlsAndCollectUnhandled(controls);
   }
 
-  // https://html.spec.whatwg.org/#statically-validate-the-constraints
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#statically-validate-the-constraints
   bool HTMLFormElement::CheckInvalidControlsAndCollectUnhandled(
     List<Ref<HTMLElement>> &unhandledInvalidControls) noexcept
   {
@@ -421,7 +421,7 @@ namespace krys::boo
     return ValidateInteractively();
   }
 
-  // https://html.spec.whatwg.org/#interactively-validate-the-constraints
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#interactively-validate-the-constraints
   bool HTMLFormElement::ValidateInteractively() noexcept
   {
     for (auto &element : CopyValidatedListedElementsVector())
@@ -504,7 +504,7 @@ namespace krys::boo
   void HTMLFormElement::SubmitIfPossible(Event *event, HTMLFormControlElement *submitter,
                                          FormSubmissionTrigger trigger) noexcept
   {
-    // https://html.spec.whatwg.org/#form-submission-algorithm
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
     if (!IsConnected())
     {
       return;
@@ -642,7 +642,7 @@ namespace krys::boo
 
   // A dialog method submission closes the form's nearest dialog ancestor, if it's open, with the
   // submission's return value.
-  // https://html.spec.whatwg.org/#form-submission-algorithm
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
   void HTMLFormElement::SubmitDialog(const Ref<FormSubmission> &formSubmission) noexcept
   {
     RefPtr<HTMLDialogElement> dialog;
@@ -1086,7 +1086,7 @@ namespace krys::boo
       return {};
     }
 
-    // https://html.spec.whatwg.org/#dom-form-nameditem
+    // https://html.spec.whatwg.org/multipage/forms.html#dom-form-nameditem
     auto namedItems = Elements()->NamedItems(name);
     if (namedItems.empty())
     {
@@ -1230,7 +1230,7 @@ namespace krys::boo
                                         const Ref<html::DOMFormData> &domFormData,
                                         List<Pair<DOMString, DOMString>> *formValues) noexcept
   {
-    // https://html.spec.whatwg.org/#constructing-the-form-data-set
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constructing-the-form-data-set
     // 1. If form's constructing entry list is true, then return null.
     if (_isConstructingEntryList)
     {

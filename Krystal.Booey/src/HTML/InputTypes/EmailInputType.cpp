@@ -35,7 +35,7 @@ namespace krys::boo::html
     }
 
     /// @brief Whether @p address is a [valid email
-    /// address](https://html.spec.whatwg.org/#valid-e-mail-address).
+    /// address](https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address).
     KRYS_NODISCARD constexpr bool IsValidEmailAddress(DOMStringView address) noexcept
     {
       auto at = address.find(u8'@');

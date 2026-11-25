@@ -56,21 +56,21 @@ namespace krys::boo::html
   /// changes reach `AttributeChangedCallback`, and the features it disables or enables.
   struct CustomElementOptions
   {
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-observed-attributes
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-observed-attributes
     List<DOMStringAtom> ObservedAttributes;
     /// @brief `attachInternals()` throws for the elements it defines.
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-disable-internals
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-disable-internals
     bool DisableInternals {false};
     /// @brief `attachShadow()` throws for the elements it defines.
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-disable-shadow
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-disable-shadow
     bool DisableShadow {false};
     /// @brief The elements it defines are form-associated custom elements.
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-form-associated
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated
     bool FormAssociated {false};
   };
 
   /// @brief A custom element definition: its name, the factory of its behaviour, and its options.
-  /// @see https://html.spec.whatwg.org/#custom-element-definition
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-definition
   class CustomElementInterface : public RefCounted<CustomElementInterface>
   {
   private:
@@ -105,7 +105,7 @@ namespace krys::boo::html
     /// behaviour.
     KRYS_NODISCARD Ref<HTMLElement> CreateElement(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#concept-upgrade-an-element
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-upgrade-an-element
     void UpgradeElement(Element &element) noexcept;
 
     void InvokeConnectedCallback(Element &element) noexcept;
@@ -146,7 +146,7 @@ namespace krys::boo::html
       return _isFormAssociated;
     }
 
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-name
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-name
     KRYS_NODISCARD const QualifiedName &Name() const noexcept
     {
       return _name;

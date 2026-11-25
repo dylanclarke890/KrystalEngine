@@ -6,19 +6,19 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-### [8.4 Dynamic markup insertion](https://html.spec.whatwg.org/#dynamic-markup-insertion)
+### [8.4 Dynamic markup insertion](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dynamic-markup-insertion)
 
 Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 > The sections below.
 <!-- definitions: throw-on-dynamic-markup-insertion-counter -->
 
-#### [8.4.1 Opening the input stream](https://html.spec.whatwg.org/#opening-the-input-stream)
+#### [8.4.1 Opening the input stream](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#opening-the-input-stream)
 
 Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 > There's no script-created parser or insertion point.
 <!-- definitions: active-parser-was-aborted script-created-parser -->
 
-- [x] [document open steps](https://html.spec.whatwg.org/#document-open-steps) — The document open steps, given a document, are as follows:
+- [x] [document open steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#document-open-steps) — The document open steps, given a document, are as follows:
   - 1. If document is an XML document, then throw an "InvalidStateError" DOMException.
   - 2. If document's throw-on-dynamic-markup-insertion counter is greater than 0, then throw an "InvalidStateError" DOMException.
   - 3. Let entryDocument be the entry global object's associated Document.
@@ -42,17 +42,17 @@ Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, s
   - 18. Update the current document readiness of document to "loading".
   - 19. Return document.
 
-- [x] [Document.open(unused1, unused2)](https://html.spec.whatwg.org/#dom-document-open) — The open(unused1, unused2) method must return the result of running the document open steps with this.
+- [x] [Document.open(unused1, unused2)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-document-open) — The open(unused1, unused2) method must return the result of running the document open steps with this.
 
-- [x] [Document.open(url, name, features)](https://html.spec.whatwg.org/#dom-document-open-window) — The open(url, name, features) method must run these steps:
+- [x] [Document.open(url, name, features)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-document-open-window) — The open(url, name, features) method must run these steps:
   - 1. If this is not fully active, then throw an "InvalidAccessError" DOMException.
   - 2. Return the result of running the window open steps with url, name, and features.
 
-#### [8.4.2 Closing the input stream](https://html.spec.whatwg.org/#closing-the-input-stream)
+#### [8.4.2 Closing the input stream](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#closing-the-input-stream)
 
 Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 
-- [x] [Document.close()](https://html.spec.whatwg.org/#dom-document-close) — The close() method must run the following steps:
+- [x] [Document.close()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-document-close) — The close() method must run the following steps:
   - 1. If this is an XML document, then throw an "InvalidStateError" DOMException.
   - 2. If this's throw-on-dynamic-markup-insertion counter is greater than zero, then throw an "InvalidStateError" DOMException.
   - 3. If there is no script-created parser associated with this, then return.
@@ -60,12 +60,12 @@ Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, s
   - 5. If this's pending parsing-blocking script is not null, then return.
   - 6. Run the tokenizer, processing resulting tokens as they are emitted, and stopping when the tokenizer reaches the explicit "EOF" character or spins the event loop.
 
-#### [8.4.3 document.write()](https://html.spec.whatwg.org/#document.write%28%29)
+#### [8.4.3 document.write()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#document.write%28%29)
 
 Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 <!-- definitions: ignore-destructive-writes-counter -->
 
-- [x] [document write steps](https://html.spec.whatwg.org/#document-write-steps) — The document write steps, given a Document object document, a list text, a boolean lineFeed, and a string sink, are as follows:
+- [x] [document write steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#document-write-steps) — The document write steps, given a Document object document, a list text, a boolean lineFeed, and a string sink, are as follows:
   - 1. Let string be the empty string.
   - 2. Let isTrusted be false if text contains a string; otherwise true.
   - 3. For each value of text:
@@ -82,28 +82,28 @@ Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, s
   - 10. Insert string into the input stream just before the insertion point.
   - 11. If document's pending parsing-blocking script is null, then have the HTML parser process string, one code point at a time, processing resulting tokens as they are emitted, and stopping when the tokenizer reaches the insertion point or when the processing of the tokenizer is aborted by the tree construction stage (this can happen if a script end tag token is emitted by the tokenizer).
 
-- [x] [Document.document.write(...text)](https://html.spec.whatwg.org/#dom-document-write) — The document.write(...text) method steps are to run the document write steps with this, text, false, and "Document write".
+- [x] [Document.document.write(...text)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-document-write) — The document.write(...text) method steps are to run the document write steps with this, text, false, and "Document write".
 
-#### [8.4.4 document.writeln()](https://html.spec.whatwg.org/#document.writeln%28%29)
+#### [8.4.4 document.writeln()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#document.writeln%28%29)
 
 Status: n/a (there is no `document.open()`/`write()`: scripting isn't planned, see `OVERVIEW.md`)
 
-- [x] [Document.document.writeln(...text)](https://html.spec.whatwg.org/#dom-document-writeln) — The document.writeln(...text) method steps are to run the document write steps with this, text, true, and "Document writeln".
+- [x] [Document.document.writeln(...text)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-document-writeln) — The document.writeln(...text) method steps are to run the document write steps with this, text, true, and "Document writeln".
 
-### [8.5 DOM parsing and serialization APIs](https://html.spec.whatwg.org/#dom-parsing-and-serialization)
+### [8.5 DOM parsing and serialization APIs](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization)
 
 Status: reviewed (2026-11-01)
 > The sections below.
 
-#### [8.5.1 The DOMParser interface](https://html.spec.whatwg.org/#the-domparser-interface)
+#### [8.5.1 The DOMParser interface](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-domparser-interface)
 
 Status: n/a (there is no `DOMParser`: `Document::ParseHTMLUnsafe` and `Document::ParseHTML` parse HTML into a new document)
 > `Document::ParseHTMLIntoNewDocument` implements parse HTML from a string, for `parseHTMLUnsafe()` and `parseHTML()`.
 <!-- definitions: dom-domparsersupportedtype-texthtml dom-domparsersupportedtype-otherwise -->
 
-- [x] [new DOMParser()](https://html.spec.whatwg.org/#dom-domparser-constructor) — The new DOMParser() constructor steps are to do nothing.
+- [x] [new DOMParser()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-domparser-constructor) — The new DOMParser() constructor steps are to do nothing.
 
-- [x] [DOMParser.parseFromString(string, type)](https://html.spec.whatwg.org/#dom-domparser-parsefromstring) — The parseFromString(string, type) method steps are:
+- [x] [DOMParser.parseFromString(string, type)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-domparser-parsefromstring) — The parseFromString(string, type) method steps are:
   - 1. Let compliantString be the result of invoking the get trusted type compliant string algorithm with TrustedHTML, this's relevant global object, string, "DOMParser parseFromString", and "script".
   - 2. Let relevantDocument be this's relevant global object's associated Document.
   - 3. Let document be a new Document, whose content type is type, origin is relevantDocument's origin, and URL is relevantDocument's URL.
@@ -118,97 +118,97 @@ Status: n/a (there is no `DOMParser`: `Document::ParseHTMLUnsafe` and `Document:
       - 4c.iv. Append root to document.
   - 5. Return document.
 
-- [x] [parse HTML from a string](https://html.spec.whatwg.org/#parse-html-from-a-string) — To parse HTML from a string, given a Document document, a string html, and an optional SanitizerConfig or null configuration (default null):
+- [x] [parse HTML from a string](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parse-html-from-a-string) — To parse HTML from a string, given a Document document, a string html, and an optional SanitizerConfig or null configuration (default null):
   - 1. Set document's type to "html".
   - 2. Let parser be a new HTML parser whose allow declarative shadow roots is document's allow declarative shadow roots and parser sanitizer configuration is configuration, associated with document.
   - 3. Place html into the input stream for parser. The encoding confidence is irrelevant.
   - 4. Start parser and let it run until it has consumed all the characters just inserted into the input stream.
 
-#### [8.5.2 HTML parsing and insertion methods](https://html.spec.whatwg.org/#html-parsing-methods)
+#### [8.5.2 HTML parsing and insertion methods](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#html-parsing-methods)
 
 Status: reviewed (2026-11-01)
 > `Element`, `ShadowRoot` and `Document`'s `SetHTML`/`SetHTMLUnsafe` and the insertion methods (`HTMLInsertionAlgorithms.cpp`); `Document::ParseHTMLUnsafe` and `ParseHTML`. There are no Trusted Types and no scripts to run.
 <!-- definitions: html-insertion-methods -->
 
-- [x] [Element.setHTML(html, options)](https://html.spec.whatwg.org/#dom-element-sethtml) — Element's setHTML(html, options) method steps are:
+- [x] [Element.setHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-sethtml) — Element's setHTML(html, options) method steps are:
   - 1. Let target be the target for HTML insertion given this.
   - 2. Filter and set HTML given target, html, options, and Safe.
 
-- [x] [Element.appendHTML(html, options)](https://html.spec.whatwg.org/#dom-element-appendhtml) — Element's appendHTML(html, options) method steps are:
+- [x] [Element.appendHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-appendhtml) — Element's appendHTML(html, options) method steps are:
   - 1. Let target be the target for HTML insertion given this.
   - 2. Filter and pre-insert HTML given target, null, html, options, and Safe.
 
-- [x] [Element.prependHTML(html, options)](https://html.spec.whatwg.org/#dom-element-prependhtml) — Element's prependHTML(html, options) method steps are:
+- [x] [Element.prependHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtml) — Element's prependHTML(html, options) method steps are:
   - 1. Let target be the target for HTML insertion given this.
   - 2. Filter and pre-insert HTML given target, target's first child, html, options, and Safe.
 
-- [x] [ShadowRoot.setHTML(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-sethtml) — ShadowRoot's setHTML(html, options) method steps are to filter and set HTML given this, html, options, and Safe.
+- [x] [ShadowRoot.setHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-sethtml) — ShadowRoot's setHTML(html, options) method steps are to filter and set HTML given this, html, options, and Safe.
 
-- [x] [ShadowRoot.appendHTML(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-appendhtml) — ShadowRoot's appendHTML(html, options) method steps are to filter and pre-insert HTML given this, null, html, options, and Safe.
+- [x] [ShadowRoot.appendHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtml) — ShadowRoot's appendHTML(html, options) method steps are to filter and pre-insert HTML given this, null, html, options, and Safe.
 
-- [x] [ShadowRoot.prependHTML(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-prependhtml) — ShadowRoot's prependHTML(html, options) method steps are to filter and pre-insert HTML given this, this's first child, html, options, and Safe.
+- [x] [ShadowRoot.prependHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtml) — ShadowRoot's prependHTML(html, options) method steps are to filter and pre-insert HTML given this, this's first child, html, options, and Safe.
 
-- [x] [NonDocumentTypeChildNode.beforeHTML(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml) — NonDocumentTypeChildNode's beforeHTML(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.beforeHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml) — NonDocumentTypeChildNode's beforeHTML(html, options) method steps are:
   - 1. Let parent be the parent for HTML insertion given this.
   - 2. If parent is null, then return.
   - 3. Filter and pre-insert HTML given parent, this, html, options, and Safe.
 
-- [x] [NonDocumentTypeChildNode.afterHTML(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml) — NonDocumentTypeChildNode's afterHTML(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.afterHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml) — NonDocumentTypeChildNode's afterHTML(html, options) method steps are:
   - 1. Let parent be the parent for HTML insertion given this.
   - 2. If parent is null, then return.
   - 3. Filter and pre-insert HTML given parent, this's next sibling, html, options, and Safe.
 
-- [x] [NonDocumentTypeChildNode.replaceWithHTML(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml) — NonDocumentTypeChildNode's replaceWithHTML(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.replaceWithHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml) — NonDocumentTypeChildNode's replaceWithHTML(html, options) method steps are:
   - 1. Let parent be the parent for HTML insertion given this.
   - 2. If parent is null, then return.
   - 3. Filter and replace with HTML given parent, this, html, options, and Safe.
 
-- [x] [Element.setHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-element-sethtmlunsafe) — Element's setHTMLUnsafe(html, options) method steps are:
+- [x] [Element.setHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-sethtmlunsafe) — Element's setHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Element setHTMLUnsafe".
   - 2. Let target be the target for HTML insertion given this.
   - 3. Filter and set HTML given target, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [Element.appendHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe) — Element's appendHTMLUnsafe(html, options) method steps are:
+- [x] [Element.appendHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-appendhtmlunsafe) — Element's appendHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Element appendHTMLUnsafe".
   - 2. Let target be the target for HTML insertion given this.
   - 3. Filter and pre-insert HTML given target, null, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [Element.prependHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe) — Element's prependHTMLUnsafe(html, options) method steps are:
+- [x] [Element.prependHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtmlunsafe) — Element's prependHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Element prependHTMLUnsafe".
   - 2. Let target be the target for HTML insertion given this.
   - 3. Filter and pre-insert HTML given target, target's first child, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [ShadowRoot.setHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe) — ShadowRoot's setHTMLUnsafe(html, options) method steps are:
+- [x] [ShadowRoot.setHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-sethtmlunsafe) — ShadowRoot's setHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "ShadowRoot setHTMLUnsafe".
   - 2. Filter and set HTML given this, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [ShadowRoot.appendHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe) — ShadowRoot's appendHTMLUnsafe(html, options) method steps are:
+- [x] [ShadowRoot.appendHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe) — ShadowRoot's appendHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "ShadowRoot appendHTMLUnsafe".
   - 2. Filter and pre-insert HTML given this, null, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [ShadowRoot.prependHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe) — ShadowRoot's prependHTMLUnsafe(html, options) method steps are:
+- [x] [ShadowRoot.prependHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe) — ShadowRoot's prependHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "ShadowRoot prependHTMLUnsafe".
   - 2. Filter and pre-insert HTML given this, this's first child, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [NonDocumentTypeChildNode.beforeHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe) — NonDocumentTypeChildNode's beforeHTMLUnsafe(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.beforeHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe) — NonDocumentTypeChildNode's beforeHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Node beforeHTMLUnsafe".
   - 2. Let parent be the parent for HTML insertion given this.
   - 3. If parent is null, then return.
   - 4. Filter and pre-insert HTML given parent, this, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [NonDocumentTypeChildNode.afterHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe) — NonDocumentTypeChildNode's afterHTMLUnsafe(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.afterHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe) — NonDocumentTypeChildNode's afterHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Node afterHTMLUnsafe".
   - 2. Let parent be the parent for HTML insertion given this.
   - 3. If parent is null, then return.
   - 4. Filter and pre-insert HTML given parent, this's next sibling, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [NonDocumentTypeChildNode.replaceWithHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe) — NonDocumentTypeChildNode's replaceWithHTMLUnsafe(html, options) method steps are:
+- [x] [NonDocumentTypeChildNode.replaceWithHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe) — NonDocumentTypeChildNode's replaceWithHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, html, options, and "Node replaceWithHTMLUnsafe".
   - 2. Let parent be the parent for HTML insertion given this.
   - 3. If parent is null, then return.
   - 4. Filter and replace with HTML given parent, this, compliantHTML, compliantOptions, and Unsafe.
 
-- [x] [Document.parseHTML(html, options)](https://html.spec.whatwg.org/#dom-parsehtml) — The static parseHTML(html, options) method steps are:
+- [x] [Document.parseHTML(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtml) — The static parseHTML(html, options) method steps are:
   - 1. Let document be a new Document, whose content type is "text/html" and origin is this's relevant global object's associated Document's origin.
   - 2. Set document's allow declarative shadow roots to true.
   - 3. Let sanitizerConfig be the result of getting a sanitizer config from options given options and true.
@@ -216,7 +216,7 @@ Status: reviewed (2026-11-01)
   - 5. Parse HTML from a string given document, html, and sanitizerConfig.
   - 6. Return document.
 
-- [x] [Document.parseHTMLUnsafe(html, options)](https://html.spec.whatwg.org/#dom-parsehtmlunsafe) — The static parseHTMLUnsafe(html, options) method steps are:
+- [x] [Document.parseHTMLUnsafe(html, options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsehtmlunsafe) — The static parseHTMLUnsafe(html, options) method steps are:
   - 1. Let (compliantHTML, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with the current global object, html, options, and "Document parseHTMLUnsafe".
   - 2. Let document be a new Document, whose content type is "text/html" and origin is this's relevant global object's associated Document's origin.
   - 3. Set document's allow declarative shadow roots to true.
@@ -224,59 +224,59 @@ Status: reviewed (2026-11-01)
   - 5. Parse HTML from a string given document, compliantHTML, and sanitizerConfig.
   - 6. Return document.
 
-#### [8.5.3 HTML serialization methods](https://html.spec.whatwg.org/#html-serialization-methods)
+#### [8.5.3 HTML serialization methods](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#html-serialization-methods)
 
 Status: reviewed (2026-11-01)
 > `Element::GetHTML` and `ShadowRoot::GetHTML`.
 
-- [x] [Element.getHTML(options)](https://html.spec.whatwg.org/#dom-element-gethtml) — Element's getHTML(options) method steps are to return the result of HTML fragment serialization algorithm with this, options["serializableShadowRoots"], and options["shadowRoots"].
+- [x] [Element.getHTML(options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) — Element's getHTML(options) method steps are to return the result of HTML fragment serialization algorithm with this, options["serializableShadowRoots"], and options["shadowRoots"].
 
-- [x] [ShadowRoot.getHTML(options)](https://html.spec.whatwg.org/#dom-shadowroot-gethtml) — ShadowRoot's getHTML(options) method steps are to return the result of HTML fragment serialization algorithm with this, options["serializableShadowRoots"], and options["shadowRoots"].
+- [x] [ShadowRoot.getHTML(options)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-gethtml) — ShadowRoot's getHTML(options) method steps are to return the result of HTML fragment serialization algorithm with this, options["serializableShadowRoots"], and options["shadowRoots"].
 
-#### [8.5.4 The innerHTML property](https://html.spec.whatwg.org/#the-innerhtml-property)
+#### [8.5.4 The innerHTML property](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-innerhtml-property)
 
 Status: reviewed (2026-11-01)
 > The fragment parsing and serializing algorithm steps (`HTMLInsertionAlgorithms.cpp`, `Editing/Markup/Markup.cpp`); `innerHTML` follows the existing markup code (see `DIFFERENCES.md`).
 <!-- definitions: fragment-parser-mode fragment-parser-mode-safe fragment-parser-mode-unsafe fragment-parser-mode-legacy -->
 
-- [x] [fragment serializing algorithm steps](https://html.spec.whatwg.org/#fragment-serializing-algorithm-steps) — The fragment serializing algorithm steps, given an Element, Document, or DocumentFragment node and a boolean require well-formed, are:
+- [x] [fragment serializing algorithm steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-serializing-algorithm-steps) — The fragment serializing algorithm steps, given an Element, Document, or DocumentFragment node and a boolean require well-formed, are:
   - 1. Let context document be node's node document.
   - 2. If context document is an HTML document, then return the result of HTML fragment serialization algorithm with node, false, and « ».
   - 3. Return the XML serialization of node given require well-formed.
 
-- [x] [target for HTML insertion](https://html.spec.whatwg.org/#target-for-html-insertion) — To get the target for HTML insertion, given an Element element:
+- [x] [target for HTML insertion](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#target-for-html-insertion) — To get the target for HTML insertion, given an Element element:
   - 1. If element is a template element, then return element's template contents.
   - 2. Return element.
 
-- [x] [parent for HTML insertion](https://html.spec.whatwg.org/#parent-for-html-insertion) — To get the parent for HTML insertion, given a Node node:
+- [x] [parent for HTML insertion](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parent-for-html-insertion) — To get the parent for HTML insertion, given a Node node:
   - 1. Let parent be node's parent.
   - 2. If parent is null, then return null.
   - 3. If parent is a template element, then throw a "HierarchyRequestError" DOMException.
   - 4. If parent is an Element, or a DocumentFragment with a non-null host, then return parent.
   - 5. Throw a "HierarchyRequestError" DOMException.
 
-- [x] [filter and set HTML](https://html.spec.whatwg.org/#set-and-filter-html) — To filter and set HTML, given an Element or DocumentFragment target, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
+- [x] [filter and set HTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#set-and-filter-html) — To filter and set HTML, given an Element or DocumentFragment target, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
   - 1. Let fragment be the result of parsing HTML for insertion given target, html, options, and mode.
   - 2. If fragment is non-null, then replace all with fragment within target.
 
-- [x] [filter and pre-insert HTML](https://html.spec.whatwg.org/#filter-and-pre-insert-html) — To filter and pre-insert HTML, given an Element or DocumentFragment parent, a Node-or-null child, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
+- [x] [filter and pre-insert HTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#filter-and-pre-insert-html) — To filter and pre-insert HTML, given an Element or DocumentFragment parent, a Node-or-null child, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
   - 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
   - 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
   - 3. If fragment is non-null, then pre-insert fragment into parent before child.
 
-- [x] [filter and replace with HTML](https://html.spec.whatwg.org/#filter-and-replace-with-html) — To filter and replace with HTML, given an Element or DocumentFragment parent, a Node node, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
+- [x] [filter and replace with HTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#filter-and-replace-with-html) — To filter and replace with HTML, given an Element or DocumentFragment parent, a Node node, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
   - 1. If parent is an html element, then throw a "HierarchyRequestError" DOMException.
   - 2. Let fragment be the result of parsing HTML for insertion given parent, html, options, and mode.
   - 3. If fragment is non-null, then replace node with fragment within parent.
 
-- [x] [parse HTML for insertion](https://html.spec.whatwg.org/#parse-html-for-insertion) — To parse HTML for insertion, given an Element or DocumentFragment target, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
+- [x] [parse HTML for insertion](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parse-html-for-insertion) — To parse HTML for insertion, given an Element or DocumentFragment target, a string html, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode:
   - 1. If mode is Safe:
     - 1a. Let context be target if target is an Element; otherwise target's host.
     - 1b. Assert: context is non-null.
     - 1c. If all of the following are true: context's local name is "script"; and; context's namespace is the HTML namespace or the SVG namespace, then return null.
   - 2. Return the result of invoking the fragment parsing algorithm steps given target, html, options, and mode.
 
-- [x] [fragment parsing algorithm steps](https://html.spec.whatwg.org/#fragment-parsing-algorithm-steps) — The fragment parsing algorithm steps, given an Element or DocumentFragment target, a string markup, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode, are:
+- [x] [fragment parsing algorithm steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-parsing-algorithm-steps) — The fragment parsing algorithm steps, given an Element or DocumentFragment target, a string markup, a SetHTMLOptions or SetHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a fragment parser mode mode, are:
   - 1. If mode is Legacy and target's node document is an XML document, then return the result of invoking the XML fragment parsing algorithm given target and markup.
   - 2. Let safe be true if mode is Safe; otherwise false.
   - 3. Let sanitizerConfig be the result of getting a sanitizer config from options given options and safe.
@@ -288,29 +288,29 @@ Status: reviewed (2026-11-01)
   - 7. Let allowDeclarativeShadowRoots be false if mode is Legacy; otherwise true.
   - 8. Return the result of the HTML fragment parsing algorithm given target, markup, allowDeclarativeShadowRoots, scriptingMode, and sanitizerConfig.
 
-- [x] [Element.innerHTML](https://html.spec.whatwg.org/#dom-element-innerhtml) — Element's innerHTML getter steps are to return the result of running fragment serializing algorithm steps with this and true.
+- [x] [Element.innerHTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-innerhtml) — Element's innerHTML getter steps are to return the result of running fragment serializing algorithm steps with this and true.
 
-- [x] [ShadowRoot.innerHTML](https://html.spec.whatwg.org/#dom-shadowroot-innerhtml) — ShadowRoot's innerHTML getter steps are to return the result of running fragment serializing algorithm steps with this and true.
+- [x] [ShadowRoot.innerHTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml) — ShadowRoot's innerHTML getter steps are to return the result of running fragment serializing algorithm steps with this and true.
 
-- [x] [Element's innerHTML setter steps](https://html.spec.whatwg.org/#dom-shadowroot-innerhtml) — Element's innerHTML setter steps are:
+- [x] [Element's innerHTML setter steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml) — Element's innerHTML setter steps are:
   - 1. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, the given value, a new SetHTMLUnsafeOptions dictionary, "Element innerHTML", this's node document's type, and false.
   - 2. Let target be the target for HTML insertion given this.
   - 3. Filter and set HTML given target, compliantString, compliantOptions, and Legacy.
 
-- [x] [ShadowRoot's innerHTML setter steps](https://html.spec.whatwg.org/#dom-shadowroot-innerhtml) — ShadowRoot's innerHTML setter steps are:
+- [x] [ShadowRoot's innerHTML setter steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-innerhtml) — ShadowRoot's innerHTML setter steps are:
   - 1. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, the given value, a new SetHTMLUnsafeOptions dictionary, "ShadowRoot innerHTML", this's node document's type, and false.
   - 2. Filter and set HTML given this, compliantString, compliantOptions, and Legacy.
 
-#### [8.5.5 The outerHTML property](https://html.spec.whatwg.org/#the-outerhtml-property)
+#### [8.5.5 The outerHTML property](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-outerhtml-property)
 
 Status: reviewed (2026-11-01)
 > `Element::SetOuterHTML` and `OuterHTML`.
 
-- [x] [Element.outerHTML](https://html.spec.whatwg.org/#dom-element-outerhtml) — Element's outerHTML getter steps are:
+- [x] [Element.outerHTML](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml) — Element's outerHTML getter steps are:
   - 1. Let element be a fictional node whose only child is this.
   - 2. Return the result of running fragment serializing algorithm steps with element and true.
 
-- [x] [Element's outerHTML setter steps](https://html.spec.whatwg.org/#dom-element-outerhtml) — Element's outerHTML setter steps are:
+- [x] [Element's outerHTML setter steps](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml) — Element's outerHTML setter steps are:
   - 1. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, the given value, a new SetHTMLUnsafeOptions dictionary, "Element outerHTML", this's node document's type, and false.
   - 2. Let parent be this's parent.
   - 3. If parent is null, return. There would be no way to obtain a reference to the nodes created even if the remaining steps were run.
@@ -319,12 +319,12 @@ Status: reviewed (2026-11-01)
   - 6. Let fragment be the result of invoking the fragment parsing algorithm steps given parent, compliantString, compliantOptions, and Legacy.
   - 7. Replace this with fragment within this's parent.
 
-#### [8.5.6 The insertAdjacentHTML() method](https://html.spec.whatwg.org/#the-insertadjacenthtml%28%29-method)
+#### [8.5.6 The insertAdjacentHTML() method](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-insertadjacenthtml%28%29-method)
 
 Status: reviewed (2026-11-01)
 > `Element::InsertAdjacentHTML`.
 
-- [x] [Element.insertAdjacentHTML(position, string)](https://html.spec.whatwg.org/#dom-element-insertadjacenthtml) — Element's insertAdjacentHTML(position, string) method steps are:
+- [x] [Element.insertAdjacentHTML(position, string)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-insertadjacenthtml) — Element's insertAdjacentHTML(position, string) method steps are:
   - 1. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, string, a new SetHTMLUnsafeOptions dictionary, "Element insertAdjacentHTML", this's node document's type, and false.
   - 2. Let context be null.
   - 3. Use the first matching item from this list: If position is an ASCII case-insensitive match for the string "beforebegin"If position is an ASCII case-insensitive match for the string "afterend" If position is an ASCII case-insensitive match for the string "afterbegin"If position is an ASCII case-insensitive match for the string "beforeend"Set context to this.OtherwiseThrow a "SyntaxError" DOMExcept…
@@ -334,12 +334,12 @@ Status: reviewed (2026-11-01)
   - 5. Let fragment be the result of invoking the fragment parsing algorithm steps given context, compliantString, compliantOptions, and Legacy.
   - 6. Use the first matching item from this list: If position is an ASCII case-insensitive match for the string "beforebegin" Insert fragment into this's parent before this. If position is an ASCII case-insensitive match for the string "afterbegin" Insert fragment into this before its first child. If position is an ASCII case-insensitive match for the string "beforeend" Append fragment to this. If posi…
 
-#### [8.5.7 The createContextualFragment() method](https://html.spec.whatwg.org/#the-createcontextualfragment%28%29-method)
+#### [8.5.7 The createContextualFragment() method](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-createcontextualfragment%28%29-method)
 
 Status: reviewed (2026-11-01)
 > Fixed: added `Range::CreateContextualFragment`.
 
-- [x] [Range.createContextualFragment(string)](https://html.spec.whatwg.org/#dom-range-createcontextualfragment) — Range's createContextualFragment(string) method steps are:
+- [x] [Range.createContextualFragment(string)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment) — Range's createContextualFragment(string) method steps are:
   - 1. Let node be this's start node.
   - 2. Let (compliantString, compliantOptions) be the result of invoking the get trusted type compliant input algorithm with this's relevant global object, string, a new SetHTMLUnsafeOptions dictionary whose runScripts member is set to true and whose other members are set to their default values, "Range createContextualFragment", node's node document's type, and false.
   - 3. Let element be null.
@@ -348,49 +348,49 @@ Status: reviewed (2026-11-01)
   - 6. If element is null or all of the following are true: element's node document is an HTML document;; element's local name is "html"; and; element's namespace is the HTML namespace, then set element to the result of creating an element given node's node document, "body", and the HTML namespace.
   - 7. Return the result of invoking the fragment parsing algorithm steps given element, compliantString, compliantOptions, and Legacy.
 
-#### [8.5.8 The XMLSerializer interface](https://html.spec.whatwg.org/#the-xmlserializer-interface)
+#### [8.5.8 The XMLSerializer interface](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-xmlserializer-interface)
 
 Status: n/a (there is no `XMLSerializer`: `SerializeFragment` with `SerializationSyntax::XML` serializes a node as XML)
 
-- [x] [new XMLSerializer()](https://html.spec.whatwg.org/#dom-xmlserializer-constructor) — The new XMLSerializer() constructor steps are to do nothing.
+- [x] [new XMLSerializer()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-xmlserializer-constructor) — The new XMLSerializer() constructor steps are to do nothing.
 
-- [x] [XMLSerializer.serializeToString(root)](https://html.spec.whatwg.org/#dom-xmlserializer-serializetostring) — The serializeToString(root) method steps are:
+- [x] [XMLSerializer.serializeToString(root)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-xmlserializer-serializetostring) — The serializeToString(root) method steps are:
   - 1. Return the XML serialization of root given false.
 
-### [8.6 HTML sanitization](https://html.spec.whatwg.org/#html-sanitization)
+### [8.6 HTML sanitization](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#html-sanitization)
 
 Status: reviewed (2026-11-01)
 > The sections below.
 
-#### [8.6.1 Introduction](https://html.spec.whatwg.org/#introduction-12)
+#### [8.6.1 Introduction](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#introduction-12)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-##### [8.6.1.1 Safe and unsafe](https://html.spec.whatwg.org/#safe-and-unsafe)
+##### [8.6.1.1 Safe and unsafe](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#safe-and-unsafe)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-#### [8.6.2 The Sanitizer interface](https://html.spec.whatwg.org/#the-sanitizer-interface)
+#### [8.6.2 The Sanitizer interface](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#the-sanitizer-interface)
 
 Status: reviewed (2026-11-01)
 > `Sanitizer` (`Sanitizer.cpp`): the constructor, `get()` and the modifier methods, with the configure and canonicalize algorithms in `SanitizerAlgorithms.cpp`.
 <!-- definitions: configuration -->
 
-- [x] [Sanitizer.new Sanitizer(configuration)](https://html.spec.whatwg.org/#dom-sanitizer-constructor) — The new Sanitizer(configuration) constructor steps are:
+- [x] [Sanitizer.new Sanitizer(configuration)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-constructor) — The new Sanitizer(configuration) constructor steps are:
   - 1. If configuration is a SanitizerPresets string:
     - 1a. Assert: configuration is "default".
     - 1b. Set configuration to the built-in safe default configuration.
   - 2. Configure this given configuration and true.
 
-- [x] [configure (Sanitizer)](https://html.spec.whatwg.org/#configure-a-sanitizer) — To configure a Sanitizer sanitizer, given a dictionary configuration and a boolean permissiveDefaults:
+- [x] [configure (Sanitizer)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#configure-a-sanitizer) — To configure a Sanitizer sanitizer, given a dictionary configuration and a boolean permissiveDefaults:
   - 1. Let freshConfiguration be a clone of configuration.
   - 2. Canonicalize the configuration freshConfiguration with permissiveDefaults.
   - 3. If freshConfiguration is not valid, then throw a TypeError.
   - 4. Set sanitizer's configuration to freshConfiguration.
 
-- [x] [canonicalize the configuration](https://html.spec.whatwg.org/#canonicalize-the-configuration) — To canonicalize the configuration SanitizerConfig configuration with a boolean permissiveDefaults:
+- [x] [canonicalize the configuration](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-the-configuration) — To canonicalize the configuration SanitizerConfig configuration with a boolean permissiveDefaults:
   - 1. If neither configuration["elements"] nor configuration["removeElements"] exists, then set configuration["removeElements"] to an empty list.
   - 2. If neither configuration["attributes"] nor configuration["removeAttributes"] exists, then set configuration["removeAttributes"] to an empty list.
   - 3. If neither configuration["processingInstructions"] nor configuration["removeProcessingInstructions"] exists:
@@ -410,43 +410,43 @@ Status: reviewed (2026-11-01)
   - 12. If configuration["attributes"] exists and configuration["dataAttributes"] does not exist, then set it to permissiveDefaults.
   - 13. If configuration["javascriptURLs"] does not exist, then set it to permissiveDefaults.
 
-- [x] [canonicalize a sanitizer list](https://html.spec.whatwg.org/#canonicalize-a-sanitizer-list) — To canonicalize a sanitizer list list:
+- [x] [canonicalize a sanitizer list](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-list) — To canonicalize a sanitizer list list:
   - 1. Let newList be « ».
   - 2. For each item in list, append the result of canonicalizing item to newList.
   - 3. Return newList.
 
-- [x] [canonicalize a processing instruction list](https://html.spec.whatwg.org/#canonicalize-a-processing-instruction-list) — To canonicalize a processing instruction list list:
+- [x] [canonicalize a processing instruction list](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-processing-instruction-list) — To canonicalize a processing instruction list list:
   - 1. Let newList be « ».
   - 2. For each item in list, append the result of canonicalizing item to newList.
   - 3. Return newList.
 
-- [x] [canonicalize a processing instruction](https://html.spec.whatwg.org/#canonicalize-a-processing-instruction) — To canonicalize a processing instruction given a SanitizerPI pi:
+- [x] [canonicalize a processing instruction](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-processing-instruction) — To canonicalize a processing instruction given a SanitizerPI pi:
   - 1. If pi is a DOMString, then return «[ "target" → pi ]».
   - 2. Assert: pi is a dictionary and pi["target"] exists.
   - 3. Return «[ "target" → pi["target"] ]».
 
-- [x] [canonicalize a sanitizer name](https://html.spec.whatwg.org/#canonicalize-a-sanitizer-name) — To canonicalize a sanitizer name given a DOMString or dictionary name, and a default namespace defaultNamespace (default null):
+- [x] [canonicalize a sanitizer name](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-name) — To canonicalize a sanitizer name given a DOMString or dictionary name, and a default namespace defaultNamespace (default null):
   - 1. If name is a DOMString, then return «[ "name" → name, "namespace" → defaultNamespace ]».
   - 2. Assert: name is a dictionary and both name["name"] and name["namespace"] exist.
   - 3. If name["namespace"] is the empty string, then set it to null.
   - 4. Return «[ "name" → name["name"], "namespace" → name["namespace"] ]».
 
-- [x] [canonicalize a sanitizer element](https://html.spec.whatwg.org/#canonicalize-a-sanitizer-element) — To canonicalize a sanitizer element given a SanitizerElement element:
+- [x] [canonicalize a sanitizer element](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-element) — To canonicalize a sanitizer element given a SanitizerElement element:
   - 1. Return the result of canonicalizing element with the HTML namespace as the default namespace.
 
-- [x] [canonicalize a sanitizer element list](https://html.spec.whatwg.org/#canonicalize-a-sanitizer-element-list) — To canonicalize a sanitizer element list list:
+- [x] [canonicalize a sanitizer element list](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-element-list) — To canonicalize a sanitizer element list list:
   - 1. Let newList be « ».
   - 2. For each item in list, append the result of canonicalizing item to newList.
   - 3. Return newList.
 
-- [x] [canonicalized intersection](https://html.spec.whatwg.org/#sanitizer-canonicalized-intersection) — To find the canonicalized intersection of lists A and B:
+- [x] [canonicalized intersection](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-canonicalized-intersection) — To find the canonicalized intersection of lists A and B:
   - 1. Let setA be « ».
   - 2. Let setB be « ».
   - 3. For each entry of A, append the result of canonicalizing entry to setA.
   - 4. For each entry of B, append the result of canonicalizing entry to setB.
   - 5. Return the intersection of setA and setB.
 
-- [x] [Sanitizer.get()](https://html.spec.whatwg.org/#dom-sanitizer-get) — The get() method steps are:
+- [x] [Sanitizer.get()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-get) — The get() method steps are:
   - 1. Let config be this's configuration.
   - 2. Assert: config is valid.
   - 3. If config["elements"] exists:
@@ -465,7 +465,7 @@ Status: reviewed (2026-11-01)
     - 9a. Set config["removeAttributes"] to the result of sorting config["removeAttributes"] given compare sanitizer items.
   - 10. Return config.
 
-- [x] [Sanitizer.allowElement(element)](https://html.spec.whatwg.org/#dom-sanitizer-allowelement) — The allowElement(element) method steps are:
+- [x] [Sanitizer.allowElement(element)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-allowelement) — The allowElement(element) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. Set element to the result of canonicalizing element.
@@ -503,9 +503,9 @@ Status: reviewed (2026-11-01)
     - 5d. Remove element from configuration["removeElements"].
     - 5e. Return true.
 
-- [x] [Sanitizer.removeElement(element)](https://html.spec.whatwg.org/#dom-sanitizer-removeelement) — The removeElement(element) method steps are to return the result of removing element from this's configuration.
+- [x] [Sanitizer.removeElement(element)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-removeelement) — The removeElement(element) method steps are to return the result of removing element from this's configuration.
 
-- [x] [Sanitizer.replaceElementWithChildren(element)](https://html.spec.whatwg.org/#dom-sanitizer-replaceelementwithchildren) — The replaceElementWithChildren(element) method steps are:
+- [x] [Sanitizer.replaceElementWithChildren(element)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-replaceelementwithchildren) — The replaceElementWithChildren(element) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. Set element to the result of canonicalizing element.
@@ -517,7 +517,7 @@ Status: reviewed (2026-11-01)
     - 7b. Return true.
   - 8. Return modified.
 
-- [x] [Sanitizer.allowAttribute(attribute)](https://html.spec.whatwg.org/#dom-sanitizer-allowattribute) — The allowAttribute(attribute) method steps are:
+- [x] [Sanitizer.allowAttribute(attribute)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-allowattribute) — The allowAttribute(attribute) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. Set attribute to the result of canonicalizing attribute.
@@ -534,16 +534,16 @@ Status: reviewed (2026-11-01)
     - 5b. Remove attribute from configuration["removeAttributes"].
     - 5c. Return true.
 
-- [x] [Sanitizer.removeAttribute(attribute)](https://html.spec.whatwg.org/#dom-sanitizer-removeattribute) — The removeAttribute(attribute) method steps are to return the result of removing attribute from this's configuration.
+- [x] [Sanitizer.removeAttribute(attribute)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-removeattribute) — The removeAttribute(attribute) method steps are to return the result of removing attribute from this's configuration.
 
-- [x] [Sanitizer.setComments(allow)](https://html.spec.whatwg.org/#dom-sanitizer-setcomments) — The setComments(allow) method steps are:
+- [x] [Sanitizer.setComments(allow)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-setcomments) — The setComments(allow) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. If configuration["comments"] is allow, then return false.
   - 4. Set configuration["comments"] to allow.
   - 5. Return true.
 
-- [x] [Sanitizer.setDataAttributes(allow)](https://html.spec.whatwg.org/#dom-sanitizer-setdataattributes) — The setDataAttributes(allow) method steps are:
+- [x] [Sanitizer.setDataAttributes(allow)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-setdataattributes) — The setDataAttributes(allow) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. If configuration["attributes"] does not exist, then return false.
@@ -556,14 +556,14 @@ Status: reviewed (2026-11-01)
   - 6. Set configuration["dataAttributes"] to allow.
   - 7. Return true.
 
-- [x] [Sanitizer.setJavascriptURLs(allow)](https://html.spec.whatwg.org/#dom-sanitizer-setjavascripturls) — The setJavascriptURLs(allow) method steps are:
+- [x] [Sanitizer.setJavascriptURLs(allow)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-setjavascripturls) — The setJavascriptURLs(allow) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. If configuration["javascriptURLs"] is allow, then return false.
   - 4. Set configuration["javascriptURLs"] to allow.
   - 5. Return true.
 
-- [x] [Sanitizer.allowProcessingInstruction(pi)](https://html.spec.whatwg.org/#dom-sanitizer-allowprocessinginstruction) — The allowProcessingInstruction(pi) method steps are:
+- [x] [Sanitizer.allowProcessingInstruction(pi)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-allowprocessinginstruction) — The allowProcessingInstruction(pi) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. Set pi to the result of canonicalizing pi.
@@ -577,7 +577,7 @@ Status: reviewed (2026-11-01)
       - 5a.ii. Return true.
     - 5b. Return false.
 
-- [x] [Sanitizer.removeProcessingInstruction(pi)](https://html.spec.whatwg.org/#dom-sanitizer-removeprocessinginstruction) — The removeProcessingInstruction(pi) method steps are:
+- [x] [Sanitizer.removeProcessingInstruction(pi)](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-removeprocessinginstruction) — The removeProcessingInstruction(pi) method steps are:
   - 1. Let configuration be this's configuration.
   - 2. Assert: configuration is valid.
   - 3. Set pi to the result of canonicalizing pi.
@@ -591,26 +591,26 @@ Status: reviewed (2026-11-01)
     - 5b. Append pi to configuration["removeProcessingInstructions"].
     - 5c. Return true.
 
-- [x] [Sanitizer.removeUnsafe()](https://html.spec.whatwg.org/#dom-sanitizer-removeunsafe) — The removeUnsafe() method steps are to return the result of removing unsafe from this's configuration.
+- [x] [Sanitizer.removeUnsafe()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizer-removeunsafe) — The removeUnsafe() method steps are to return the result of removing unsafe from this's configuration.
 
-#### [8.6.3 Sanitizer configuration](https://html.spec.whatwg.org/#sanitizer-configuration)
+#### [8.6.3 Sanitizer configuration](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-configuration)
 
 Status: reviewed (2026-11-01)
 > `SanitizerConfig.hpp`.
 
-##### [8.6.3.1 Configuration invariants](https://html.spec.whatwg.org/#configuration-invariants)
+##### [8.6.3.1 Configuration invariants](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#configuration-invariants)
 
 Status: reviewed (2026-11-01)
 > `IsValid` in `SanitizerAlgorithms.cpp`.
 <!-- definitions: dom-sanitizerpresets-default -->
 
-#### [8.6.4 Sanitization algorithms](https://html.spec.whatwg.org/#sanitization-algorithms)
+#### [8.6.4 Sanitization algorithms](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitization-algorithms)
 
 Status: reviewed (2026-11-01)
 > `SanitizerAlgorithms.cpp`: set and filter HTML, sanitize, the core sanitize steps and the allow checks.
 <!-- definitions: sanitizer-action sanitizer-action-keep sanitizer-action-remove sanitizer-action-replace-with-children -->
 
-- [x] [get a sanitizer config from options](https://html.spec.whatwg.org/#get-a-sanitizer-config-from-options) — To get a sanitizer config from options given a SetHTMLOptions, SetHTMLUnsafeOptions, or ParseHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a boolean safe:
+- [x] [get a sanitizer config from options](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#get-a-sanitizer-config-from-options) — To get a sanitizer config from options given a SetHTMLOptions, SetHTMLUnsafeOptions, or ParseHTMLUnsafeOptions dictionary, or a TrustedHTMLParserOptions object options, and a boolean safe:
   - 1. Let sanitizerInput be null.
   - 2. If options is a TrustedHTMLParserOptions:
     - 2a. If options's sanitizer configuration is null:
@@ -634,20 +634,20 @@ Status: reviewed (2026-11-01)
   - 15. Assert: configuration is valid.
   - 16. Return configuration.
 
-- [x] [contains a javascript: URL](https://html.spec.whatwg.org/#contains-a-javascript:-url) — To determine whether a string value contains a javascript: URL:
+- [x] [contains a javascript: URL](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#contains-a-javascript:-url) — To determine whether a string value contains a javascript: URL:
   - 1. Let url be the result of running the basic URL parser on value.
   - 2. If url is failure, then return false.
   - 3. Return true if url's scheme is "javascript", and false otherwise.
 
-- [x] [sanitizer config allows comments](https://html.spec.whatwg.org/#sanitizer-config-allows-comments) — To check if a sanitizer config allows comments given a SanitizerConfig configuration, return true if configuration["comments"] is true; otherwise false.
+- [x] [sanitizer config allows comments](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-config-allows-comments) — To check if a sanitizer config allows comments given a SanitizerConfig configuration, return true if configuration["comments"] is true; otherwise false.
 
-- [x] [sanitizer config allows processing instruction target](https://html.spec.whatwg.org/#sanitizer-config-allows-processing-instruction-target) — To check if a sanitizer config allows processing instruction target given a string piTarget and a SanitizerConfig configuration:
+- [x] [sanitizer config allows processing instruction target](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-config-allows-processing-instruction-target) — To check if a sanitizer config allows processing instruction target given a string piTarget and a SanitizerConfig configuration:
   - 1. Let pi be «[ "target" → piTarget ]».
   - 2. If configuration["processingInstructions"] exists, then return whether configuration["processingInstructions"] contains pi.
   - 3. If configuration["removeProcessingInstructions"] exists and configuration["removeProcessingInstructions"] contains pi, then return false.
   - 4. Return true.
 
-- [x] [get the sanitizer action for an element name](https://html.spec.whatwg.org/#get-the-sanitizer-action-for-an-element-name) — To get the sanitizer action for an element name given a string localName, a string or null namespace, and a SanitizerConfig configuration:
+- [x] [get the sanitizer action for an element name](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#get-the-sanitizer-action-for-an-element-name) — To get the sanitizer action for an element name given a string localName, a string or null namespace, and a SanitizerConfig configuration:
   - 1. Let elementName be «[ "name" → localName, "namespace" → namespace ]».
   - 2. If configuration["replaceWithChildrenElements"] exists and configuration["replaceWithChildrenElements"] contains elementName, then return "Replace with children".
   - 3. If configuration["elements"] exists:
@@ -655,7 +655,7 @@ Status: reviewed (2026-11-01)
   - 4. Otherwise, if configuration["removeElements"] contains elementName, then return "Remove".
   - 5. Return "Keep".
 
-- [x] [sanitizer config allows an attribute](https://html.spec.whatwg.org/#sanitizer-config-allows-an-attribute) — To check if a sanitizer config allows an attribute given a string localName, a string or null namespace, a string value, a string elementLocalName, a string or null elementNamespace, and a SanitizerConfig configuration:
+- [x] [sanitizer config allows an attribute](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-config-allows-an-attribute) — To check if a sanitizer config allows an attribute given a string localName, a string or null namespace, a string value, a string elementLocalName, a string or null elementNamespace, and a SanitizerConfig configuration:
   - 1. Let attrName be «[ "name" → localName, "namespace" → namespace ]».
   - 2. Let elementName be «[ "name" → elementLocalName, "namespace" → elementNamespace ]».
   - 3. Let elementWithLocalAttributes be «[ ]».
@@ -672,7 +672,7 @@ Status: reviewed (2026-11-01)
   - 11. If the built-in animating URL attributes list contains the pair (elementName, attrName), and value is "href" or "xlink:href", then return false.
   - 12. Return true.
 
-- [x] [remove an element](https://html.spec.whatwg.org/#remove-an-element-from-sanitizer-config) — To remove an element element from a SanitizerConfig configuration:
+- [x] [remove an element](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#remove-an-element-from-sanitizer-config) — To remove an element element from a SanitizerConfig configuration:
   - 1. Assert: configuration is valid.
   - 2. Set element to the result of canonicalizing element.
   - 3. Let modified be the result of removing element from configuration["replaceWithChildrenElements"].
@@ -686,7 +686,7 @@ Status: reviewed (2026-11-01)
     - 5b. Append element to configuration["removeElements"].
     - 5c. Return true.
 
-- [x] [remove an attribute](https://html.spec.whatwg.org/#remove-an-attribute-from-sanitizer-config) — To remove an attribute attribute from a SanitizerConfig configuration:
+- [x] [remove an attribute](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#remove-an-attribute-from-sanitizer-config) — To remove an attribute attribute from a SanitizerConfig configuration:
   - 1. Assert: configuration is valid.
   - 2. Set attribute to the result of canonicalizing attribute.
   - 3. If configuration["attributes"] exists:
@@ -709,7 +709,7 @@ Status: reviewed (2026-11-01)
     - 4c. Append attribute to configuration["removeAttributes"].
     - 4d. Return true.
 
-- [x] [remove unsafe](https://html.spec.whatwg.org/#remove-unsafe) — To remove unsafe from a SanitizerConfig configuration:
+- [x] [remove unsafe](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#remove-unsafe) — To remove unsafe from a SanitizerConfig configuration:
   - 1. Assert: configuration is valid.
   - 2. Let result be false.
   - 3. For each element in built-in safe baseline configuration["removeElements"]:
@@ -723,7 +723,7 @@ Status: reviewed (2026-11-01)
     - 6b. Set configuration["javascriptURLs"] to false.
   - 7. Return result.
 
-- [x] [compare sanitizer items](https://html.spec.whatwg.org/#compare-sanitizer-items) — To compare sanitizer items itemA and itemB:
+- [x] [compare sanitizer items](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#compare-sanitizer-items) — To compare sanitizer items itemA and itemB:
   - 1. Let namespaceA be itemA["namespace"].
   - 2. Let namespaceB be itemB["namespace"].
   - 3. If namespaceA is null:
@@ -735,7 +735,7 @@ Status: reviewed (2026-11-01)
   - 5. If itemA["name"] is code unit less than itemB["name"], then return true.
   - 6. Return false.
 
-- [x] [canonicalize](https://html.spec.whatwg.org/#canonicalize-a-sanitizer-element-with-attributes) — To canonicalize a SanitizerElementWithAttributes element:
+- [x] [canonicalize](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#canonicalize-a-sanitizer-element-with-attributes) — To canonicalize a SanitizerElementWithAttributes element:
   - 1. Let result be the result of canonicalizing element.
   - 2. If element is a dictionary:
     - 2a. If element["attributes"] exists, then set result["attributes"] to the result of canonicalizing element["attributes"].
@@ -743,7 +743,7 @@ Status: reviewed (2026-11-01)
   - 3. If neither result["attributes"] nor result["removeAttributes"] exists, then set result["removeAttributes"] to an empty list.
   - 4. Return result.
 
-- [x] [valid](https://html.spec.whatwg.org/#dom-sanitizerconfig-valid) — To determine whether a canonical SanitizerConfig config is valid:
+- [x] [valid](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-sanitizerconfig-valid) — To determine whether a canonical SanitizerConfig config is valid:
   - 1. Assert: config["elements"] exists or config["removeElements"] exists.
   - 2. If config["elements"] exists and config["removeElements"] exists, then return false.
   - 3. Assert: Either config["processingInstructions"] exists or config["removeProcessingInstructions"] exists.
@@ -792,33 +792,33 @@ Status: reviewed (2026-11-01)
     - 17b. If config["dataAttributes"] exists, then return false.
   - 18. Return true.
 
-#### [8.6.5 Sanitization constants](https://html.spec.whatwg.org/#sanitization-constants)
+#### [8.6.5 Sanitization constants](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitization-constants)
 
 Status: reviewed (2026-11-01)
 > `SanitizerConstants.cpp`: the built-in safe default and baseline configurations, and the URL attribute lists, checked against the specification's lists.
 <!-- definitions: sanitization-category sanitizer-category-default sanitizer-category-unsafe sanitizer-uncategorized built-in-safe-baseline-configuration built-in-safe-default-configuration built-in-navigating-url-attributes-list navigating-url-attributes built-in-animating-url-attributes-list built-in-non-replaceable-elements-list -->
 
-#### [8.6.6 Security considerations](https://html.spec.whatwg.org/#sanitizer-security-considerations)
+#### [8.6.6 Security considerations](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-security-considerations)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-##### [8.6.6.1 Server-side reflected and stored XSS](https://html.spec.whatwg.org/#sanitizer-security-server-reflected)
+##### [8.6.6.1 Server-side reflected and stored XSS](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-security-server-reflected)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-##### [8.6.6.2 DOM clobbering](https://html.spec.whatwg.org/#sanitizer-security-dom-clobbering)
+##### [8.6.6.2 DOM clobbering](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-security-dom-clobbering)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-##### [8.6.6.3 XSS with script gadgets](https://html.spec.whatwg.org/#sanitizer-security-script-gadgets)
+##### [8.6.6.3 XSS with script gadgets](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-security-script-gadgets)
 
 Status: reviewed (2026-11-01)
 > No requirements.
 
-##### [8.6.6.4 Mutation XSS](https://html.spec.whatwg.org/#sanitizer-security-mxss)
+##### [8.6.6.4 Mutation XSS](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#sanitizer-security-mxss)
 
 Status: reviewed (2026-11-01)
 > No requirements.

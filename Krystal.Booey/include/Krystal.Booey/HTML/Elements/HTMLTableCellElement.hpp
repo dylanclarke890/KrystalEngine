@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmltablecellelement
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#htmltablecellelement
   class HTMLTableCellElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableCellElement);
@@ -12,28 +12,28 @@ namespace krys::boo
   public:
     HTMLTableCellElement(Document &document) noexcept;
 
-#pragma region HTMLTableCellElement - https://html.spec.whatwg.org/#htmltablecellelement
+#pragma region HTMLTableCellElement - https://html.spec.whatwg.org/multipage/tables.html#htmltablecellelement
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-colspan
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-colspan
     KRYS_NODISCARD uint32 ColSpan() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-colspan
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-colspan
     void ColSpan(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-rowspan
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-rowspan
     KRYS_NODISCARD uint32 RowSpan() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-rowspan
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-rowspan
     void RowSpan(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-headers
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-headers
     KRYS_NODISCARD DOMString Headers() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-headers
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-headers
     void Headers(DOMString value) noexcept;
 
     /// @brief The cell's index in its row's cells, or -1 if its parent isn't a row.
-    /// @see https://html.spec.whatwg.org/#dom-tdth-cellindex
+    /// @see https://html.spec.whatwg.org/multipage/tables.html#dom-tdth-cellindex
     KRYS_NODISCARD int32 CellIndex() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-scope
@@ -50,30 +50,30 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region HTMLTableCellElement Obsolete members - https://html.spec.whatwg.org/#HTMLTableCellElement-partial
+#pragma region HTMLTableCellElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLTableCellElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-axis
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-axis
     KRYS_NODISCARD DOMString Axis() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-axis
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-axis
     void Axis(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-height
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-height
     KRYS_NODISCARD DOMString Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-height
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-height
     void Height(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-width
     void Width(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-char
@@ -88,22 +88,22 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-tdth-charoff
     void CharOff(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-nowrap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-nowrap
     KRYS_NODISCARD bool NoWrap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-nowrap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-nowrap
     void NoWrap(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-valign
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-valign
     KRYS_NODISCARD DOMString VAlign() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-valign
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-valign
     void VAlign(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-bgcolor
     KRYS_NODISCARD DOMString BgColor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-tdth-bgcolor
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-tdth-bgcolor
     void BgColor(DOMString value) noexcept;
 
 #pragma endregion

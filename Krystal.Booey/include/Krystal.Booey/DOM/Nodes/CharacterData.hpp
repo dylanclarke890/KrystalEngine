@@ -136,7 +136,7 @@ namespace krys::boo
 
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
     ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -144,7 +144,7 @@ namespace krys::boo
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
     ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -152,7 +152,7 @@ namespace krys::boo
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context, sanitized by @p options
     /// (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
     ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -160,7 +160,7 @@ namespace krys::boo
 
     /// @brief Inserts before the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -169,7 +169,7 @@ namespace krys::boo
 
     /// @brief Inserts after the node @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
     ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -177,7 +177,7 @@ namespace krys::boo
 
     /// @brief Replaces the node with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
                                             const html::SetHTMLUnsafeOptions &options) noexcept;
 

@@ -74,7 +74,7 @@ namespace krys::boo::dom
 
   /// @brief The state and members shared by documents and shadow roots, the roots of node trees.
   /// @see https://dom.spec.whatwg.org/#mixin-documentorshadowroot
-  /// @see https://html.spec.whatwg.org/#documentorshadowroot
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#documentorshadowroot
   class DocumentOrShadowRoot
   {
     friend class DocumentAlgorithms;
@@ -131,10 +131,10 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin (HTML) - https://html.spec.whatwg.org/#documentorshadowroot
+#pragma region DocumentOrShadowRoot Mixin (HTML) - https://html.spec.whatwg.org/multipage/dom.html#documentorshadowroot
 
     /// @brief Returns node's active element, if any; otherwise null.
-    /// @see https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-documentorshadowroot-activeelement
     KRYS_NODISCARD RefPtr<Element> ActiveElement() const noexcept;
 
 #pragma endregion

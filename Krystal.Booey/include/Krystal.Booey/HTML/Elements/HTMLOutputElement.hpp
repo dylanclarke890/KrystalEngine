@@ -35,7 +35,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmloutputelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmloutputelement
   class HTMLOutputElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOutputElement);
@@ -54,33 +54,33 @@ namespace krys::boo
 
     ~HTMLOutputElement() noexcept override;
 
-#pragma region HTMLOutputElement - https://html.spec.whatwg.org/#htmloutputelement
+#pragma region HTMLOutputElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmloutputelement
 
-    /// @see https://html.spec.whatwg.org/#dom-output-htmlfor
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-htmlfor
     KRYS_NODISCARD DOMTokenList &HtmlFor() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-type
     KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-output-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-defaultvalue
     KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-defaultvalue
     void DefaultValue(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-value
     KRYS_NODISCARD DOMString Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-output-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-output-value
     void Value(DOMString value) noexcept;
 
 #pragma endregion

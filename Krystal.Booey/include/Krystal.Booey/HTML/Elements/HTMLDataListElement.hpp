@@ -9,7 +9,7 @@ namespace krys::boo
   class HTMLCollection;
   class HTMLOptionElement;
 
-  /// @see https://html.spec.whatwg.org/#htmldatalistelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmldatalistelement
   class HTMLDataListElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDataListElement);
@@ -22,11 +22,11 @@ namespace krys::boo
     HTMLDataListElement(Document &document) noexcept;
 
     /// @brief The option elements that are descendants of the datalist.
-    /// @see https://html.spec.whatwg.org/#dom-datalist-options
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-datalist-options
     KRYS_NODISCARD Ref<HTMLCollection> Options() noexcept;
 
     /// @brief The options that are suggestions: those that aren't disabled and have a value, in tree order.
-    /// @see https://html.spec.whatwg.org/#concept-input-list
+    /// @see https://html.spec.whatwg.org/multipage/input.html#concept-input-list
     KRYS_NODISCARD List<Ref<HTMLOptionElement>> Suggestions() const noexcept;
 
     /// @brief Tells the inputs whose `list` names the datalist that its options changed.

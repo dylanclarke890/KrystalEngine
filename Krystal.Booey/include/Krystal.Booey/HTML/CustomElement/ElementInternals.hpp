@@ -61,7 +61,7 @@ namespace krys::boo::html
   /// @brief What a custom element's behaviour reaches its element through: its closed shadow root, its
   /// custom states, its default ARIA semantics, and, for a form-associated custom element, its form value,
   /// validity and labels.
-  /// @see https://html.spec.whatwg.org/#elementinternals
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#elementinternals
   class KRYS_EMPTY_BASE_CLASS ElementInternals : public RefCounted<ElementInternals>,
                                                  public dom::mixins::ARIAMixin<ElementInternals>
   {
@@ -90,70 +90,70 @@ namespace krys::boo::html
 
     /// @brief The element's shadow root, open or closed, if it was attached while the element was a custom
     /// element.
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-shadowroot
     KRYS_NODISCARD RefPtr<boo::ShadowRoot> ShadowRoot() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-form
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-form
     KRYS_NODISCARD ExceptionOr<RefPtr<boo::Element>> Form() const noexcept;
 
     /// @brief Sets the value the element submits with its form, and the state it restores (by default its
     /// value).
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setformvalue
     ExceptionOr<void> SetFormValue(CustomElementFormValue &&value,
                                    Maybe<CustomElementFormValue> &&state = null) noexcept;
 
     /// @brief Sets the element's validity: invalid with @p message if any of @p flags is set.
     /// @param validationAnchor Where the validation message points (a shadow-including descendant of the
     /// element); the element if null.
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-setvalidity
     ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
                                   HTMLElement *validationAnchor = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-willvalidate
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-willvalidate
     KRYS_NODISCARD ExceptionOr<bool> WillValidate() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-validity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-validity
     KRYS_NODISCARD ExceptionOr<ValidityState> Validity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
     KRYS_NODISCARD ExceptionOr<DOMString> ValidationMessage() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-reportvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-reportvalidity
     ExceptionOr<bool> ReportValidity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-checkvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-checkvalidity
     ExceptionOr<bool> CheckValidity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-labels
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-elementinternals-labels
     KRYS_NODISCARD ExceptionOr<RefPtr<NodeList>> Labels() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-elementinternals-states
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-states
     KRYS_NODISCARD CustomStateSet &States() noexcept;
 
     /// @brief The value the target element's ARIA defaults give @p name (an ARIA attribute's content
     /// attribute name), if the internals set one.
-    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#internal-content-attribute-map
     KRYS_NODISCARD Maybe<DOMString> InternalContentAttribute(const DOMStringAtom &name) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#internal-content-attribute-map
     void SetInternalContentAttribute(const DOMStringAtom &name, DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#internal-content-attribute-map
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#internal-content-attribute-map
     void RemoveInternalContentAttribute(const DOMStringAtom &name) noexcept;
 
     /// @brief The element an `Element?` ARIA attribute of the internals refers to.
-    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-element
     KRYS_NODISCARD RefPtr<boo::Element> ElementForAttributeInternal(const DOMStringAtom &name) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-element
     void SetElementAttribute(const DOMStringAtom &name, boo::Element *element) noexcept;
 
     /// @brief The elements a `FrozenArray<Element>?` ARIA attribute of the internals refers to.
-    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<boo::Element>>>
       ElementsForAttributeInternal(const DOMStringAtom &name) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-elements
     void SetElementsArrayAttribute(const DOMStringAtom &name,
                                    const Maybe<List<Ref<boo::Element>>> &elements) noexcept;
 

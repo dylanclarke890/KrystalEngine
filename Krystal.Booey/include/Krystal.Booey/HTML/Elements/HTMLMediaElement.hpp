@@ -31,7 +31,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canplaytyperesult
+  /// @see https://html.spec.whatwg.org/multipage/media.html#canplaytyperesult
   enum class CanPlayTypeResult : uint8
   {
     None,
@@ -47,7 +47,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlmediaelement
+  /// @see https://html.spec.whatwg.org/multipage/media.html#htmlmediaelement
   class HTMLMediaElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMediaElement);

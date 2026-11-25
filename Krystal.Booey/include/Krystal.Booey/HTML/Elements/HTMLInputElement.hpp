@@ -29,7 +29,7 @@ namespace krys::boo
   class HTMLDataListElement;
   class HTMLOptionElement;
 
-  /// @see https://html.spec.whatwg.org/#htmlinputelement
+  /// @see https://html.spec.whatwg.org/multipage/input.html#htmlinputelement
   class HTMLInputElement : public HTMLTextFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLInputElement);
@@ -74,24 +74,24 @@ namespace krys::boo
 
     ~HTMLInputElement() noexcept override;
 
-#pragma region HTMLInputElement - https://html.spec.whatwg.org/#htmlinputelement
+#pragma region HTMLInputElement - https://html.spec.whatwg.org/multipage/input.html#htmlinputelement
 
-    /// @see https://html.spec.whatwg.org/#dom-input-accept
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-accept
     KRYS_NODISCARD DOMString Accept() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-accept
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-accept
     void Accept(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-alpha
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-alpha
     KRYS_NODISCARD bool Alpha() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-alpha
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-alpha
     void Alpha(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-alt
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-alt
     KRYS_NODISCARD DOMString Alt() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-alt
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-alt
     void Alt(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
@@ -100,20 +100,20 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-input-autocomplete
     void Autocomplete(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-defaultchecked
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultchecked
     KRYS_NODISCARD bool DefaultChecked() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-defaultchecked
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultchecked
     void DefaultChecked(bool value) noexcept;
 
     /// @brief The checkedness.
-    /// @see https://html.spec.whatwg.org/#dom-input-checked
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-checked
     KRYS_NODISCARD bool Checked() const noexcept
     {
       return _isChecked;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-input-checked
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-checked
     void Checked(bool value) noexcept
     {
       SetChecked(value);
@@ -123,16 +123,16 @@ namespace krys::boo
     void SetChecked(bool isChecked,
                     html::WasSetByJavaScript wasCheckedByJavaScript = html::WasSetByJavaScript::Yes) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-colorspace
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-colorspace
     KRYS_NODISCARD DOMString ColourSpace() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-colorspace
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-colorspace
     void ColourSpace(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-dirname
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-dirname
     KRYS_NODISCARD DOMString DirName() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-dirname
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-dirname
     void DirName(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-disabled
@@ -142,12 +142,12 @@ namespace krys::boo
     void Disabled(bool value) noexcept;
 
     /// @brief A file input's files, or null for other types.
-    /// @see https://html.spec.whatwg.org/#dom-input-files
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-files
     KRYS_NODISCARD FileList *Files() noexcept;
 
     /// @brief Replaces a file input's files (other types ignore it); unless set by script, fires `input` and
     /// `change` if their paths changed, or else `cancel`.
-    /// @see https://html.spec.whatwg.org/#dom-input-files
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-files
     void SetFiles(RefPtr<FileList> &&files,
                   html::WasSetByJavaScript wasSetByJavaScript = html::WasSetByJavaScript::No) noexcept;
 
@@ -196,19 +196,19 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-input-formtarget
     void FormTarget(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-height
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-height
     KRYS_NODISCARD uint32 Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-height
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-height
     void Height(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-indeterminate
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-indeterminate
     KRYS_NODISCARD bool Indeterminate() const noexcept
     {
       return _isIndeterminate;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-input-indeterminate
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-indeterminate
     void Indeterminate(bool value) noexcept
     {
       SetIndeterminate(value);
@@ -219,12 +219,12 @@ namespace krys::boo
 
     /// @brief The datalist giving the input's suggestions (its suggestions source element): the `list`
     /// attribute's resolved target, if that's a datalist and the attribute applies to the input's type.
-    /// @see https://html.spec.whatwg.org/#concept-input-list
+    /// @see https://html.spec.whatwg.org/multipage/input.html#concept-input-list
     KRYS_NODISCARD RefPtr<HTMLDataListElement> List() const noexcept;
 
     /// @brief The suggestions source element retargeted against the input: a datalist in a shadow tree shows
     /// as its host.
-    /// @see https://html.spec.whatwg.org/#dom-input-list
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-list
     KRYS_NODISCARD RefPtr<boo::Element> ListForBindings() const noexcept;
 
     /// @brief The input's datalist (its `list`) or its suggestions may have changed.
@@ -236,32 +236,32 @@ namespace krys::boo
     /// @brief The value of the datalist suggestion closest to @p value, for a slider's thumb to snap to.
     KRYS_NODISCARD Maybe<Decimal> FindClosestTickMarkValue(const Decimal &value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-max
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-max
     KRYS_NODISCARD DOMString Max() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-max
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-max
     void Max(DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MaxLength;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-maxlength
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-maxlength
     void MaxLength(int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-min
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-min
     KRYS_NODISCARD DOMString Min() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-min
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-min
     void Min(DOMString value) noexcept;
 
     using HTMLTextFormControlElement::MinLength;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-minlength
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-minlength
     void MinLength(int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-multiple
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-multiple
     KRYS_NODISCARD bool Multiple() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-multiple
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-multiple
     void Multiple(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-name
@@ -270,71 +270,71 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-input-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-pattern
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-pattern
     KRYS_NODISCARD DOMString Pattern() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-pattern
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-pattern
     void Pattern(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-placeholder
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-placeholder
     KRYS_NODISCARD DOMString Placeholder() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-placeholder
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-placeholder
     void Placeholder(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-readonly
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-readonly
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-readonly
     void ReadOnly(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-required
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-required
     KRYS_NODISCARD bool Required() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-required
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-required
     void Required(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-size
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-size
     KRYS_NODISCARD uint32 Size() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-size
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-size
     ExceptionOr<void> Size(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-src
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-src
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-step
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-step
     KRYS_NODISCARD DOMString Step() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-step
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-step
     void Step(DOMString value) noexcept;
 
     /// @brief The type's name: "text" for a missing or unknown type.
-    /// @see https://html.spec.whatwg.org/#dom-input-type
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-type
     KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-input-type
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-type
     void Type(DOMString value) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultvalue
     KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultvalue
     void DefaultValue(DOMString value) noexcept;
 
     /// @brief The value, by the type's value mode.
-    /// @see https://html.spec.whatwg.org/#dom-input-value
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-value
     KRYS_NODISCARD DOMString Value() const noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-value
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-value
     ExceptionOr<void> Value(const DOMString &value) noexcept
     {
       return SetValue(value);
@@ -351,33 +351,33 @@ namespace krys::boo
 
     /// @brief The value as milliseconds since the epoch (NaN if it isn't a date), as `valueAsDate` exposes
     /// it.
-    /// @see https://html.spec.whatwg.org/#dom-input-valueasdate
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-valueasdate
     KRYS_NODISCARD double ValueAsDate() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-valueasdate
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-valueasdate
     ExceptionOr<void> SetValueAsDate(double value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-valueasnumber
     KRYS_NODISCARD double ValueAsNumber() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-valueasnumber
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-valueasnumber
     ExceptionOr<void> SetValueAsNumber(
       double value,
       html::TextFieldEventBehavior eventBehavior = html::TextFieldEventBehavior::DispatchNoEvent) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-width
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-width
     KRYS_NODISCARD uint32 Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-width
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-width
     void Width(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-stepup
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-stepup
     ExceptionOr<void> StepUp(int n = 1) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-stepdown
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-stepdown
     ExceptionOr<void> StepDown(int n = 1) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-validationmessage
     KRYS_NODISCARD DOMString ValidationMessage() const noexcept final;
 
     /// @brief The selection's start, or null if the type has no selection.
@@ -412,7 +412,7 @@ namespace krys::boo
     ExceptionOr<void> SetRangeText(DOMStringView replacement, uint32 start, uint32 end,
                                    DOMStringView selectionMode) noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-showpicker
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-showpicker
     ExceptionOr<void> ShowPicker() noexcept;
 
     /// @brief Whether the type's picker is showing.
@@ -559,14 +559,14 @@ namespace krys::boo
     KRYS_NODISCARD bool IsValidValue(DOMStringView value) const noexcept;
 
     /// @brief Whether the value was set (by the user or the API) rather than taken from the attribute.
-    /// @see https://html.spec.whatwg.org/#concept-fe-dirty
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-fe-dirty
     KRYS_NODISCARD bool HasDirtyValue() const noexcept
     {
       return _valueIfDirty.has_value();
     }
 
     /// @brief @p value as the type's value sanitization algorithm leaves it.
-    /// @see https://html.spec.whatwg.org/#value-sanitization-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/input.html#value-sanitization-algorithm
     KRYS_NODISCARD Maybe<DOMString> SanitizeValue(Maybe<DOMStringView> value) const noexcept;
 
     /// @brief The value as the input shows it.
@@ -717,18 +717,18 @@ namespace krys::boo
 
     void DefaultEventHandler(Event &event) noexcept final;
 
-#pragma region HTMLInputElement Obsolete members - https://html.spec.whatwg.org/#HTMLInputElement-partial
+#pragma region HTMLInputElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLInputElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-input-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-input-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-input-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-usemap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-input-usemap
     KRYS_NODISCARD DOMString UseMap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-input-usemap
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-input-usemap
     void UseMap(DOMString value) noexcept;
 
 #pragma endregion

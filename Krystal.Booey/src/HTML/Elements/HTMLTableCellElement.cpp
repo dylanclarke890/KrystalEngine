@@ -34,7 +34,7 @@ namespace krys::boo
     }
   }
 
-  /// @see https://html.spec.whatwg.org/#attr-th-scope
+  /// @see https://html.spec.whatwg.org/multipage/tables.html#attr-th-scope
   template <>
   struct html::EnumeratedAttributeTraits<"scope", HTMLTableCellElement>
   {
@@ -247,7 +247,7 @@ namespace krys::boo
       return;
     }
     // Both map to their dimension properties, ignoring zero.
-    // https://html.spec.whatwg.org/#tables-2
+    // https://html.spec.whatwg.org/multipage/rendering.html#tables-2
     if (localName == u8"width")
     {
       AddHTMLLengthToStyle(style, css::PropertyId::Width, value, AllowZeroValue::No);

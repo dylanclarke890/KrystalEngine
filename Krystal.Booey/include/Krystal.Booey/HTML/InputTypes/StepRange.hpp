@@ -105,7 +105,7 @@ namespace krys::boo::html
 
     /// @brief The allowed value step from the step attribute, scaled to the type's units; NaN for `any`
     /// (unless @p anyStepHandling defaults it) and the default for an invalid one.
-    /// @see https://html.spec.whatwg.org/#concept-input-step
+    /// @see https://html.spec.whatwg.org/multipage/input.html#concept-input-step
     KRYS_NODISCARD static Decimal ParseStep(AnyStepHandling anyStepHandling,
                                             const StepDescription &stepDescription,
                                             Maybe<DOMStringView> stepString) noexcept;

@@ -165,7 +165,7 @@ namespace krys::boo
   }
 
   // Obtaining the shape an area layers onto its image:
-  // https://html.spec.whatwg.org/#image-map-processing-model
+  // https://html.spec.whatwg.org/multipage/image-maps.html#image-map-processing-model
   Path HTMLAreaElement::GetRegion(const LayoutSize &size) const noexcept
   {
     // 1. Find the state that the element's shape attribute represents.

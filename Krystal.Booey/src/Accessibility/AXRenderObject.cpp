@@ -95,7 +95,7 @@ namespace krys::boo
       {
         return AXObjectInclusion::IncludeObject;
       }
-      // An image with an empty alt is decorative (https://html.spec.whatwg.org/#alt).
+      // An image with an empty alt is decorative (https://html.spec.whatwg.org/multipage/images.html#alt).
       return AXObjectInclusion::IgnoreObject;
     }
   }

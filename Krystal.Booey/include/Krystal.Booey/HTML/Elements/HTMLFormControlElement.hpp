@@ -53,7 +53,7 @@ namespace krys::boo
       return IsDisabled();
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-fs-formnovalidate
+    /// @see https://html.spec.whatwg.org/multipage/input.html#dom-fs-formnovalidate
     KRYS_NODISCARD bool FormNoValidate() const noexcept;
 
     /// @brief Whether the value shown (the inner text) matches the value, or was changed and needs updating.
@@ -94,7 +94,7 @@ namespace krys::boo
     }
 
     /// @brief Whether pressing Enter in the control submits its form implicitly.
-    /// @see https://html.spec.whatwg.org/#implicit-submission
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
     KRYS_NODISCARD virtual bool CanTriggerImplicitSubmission() const noexcept
     {
       return false;
@@ -118,7 +118,7 @@ namespace krys::boo
       (void)activated;
     }
 
-    /// @see https://html.spec.whatwg.org/#concept-submit-button
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#concept-submit-button
     KRYS_NODISCARD virtual bool IsSubmitButton() const noexcept
     {
       return false;
@@ -128,24 +128,24 @@ namespace krys::boo
     KRYS_NODISCARD virtual Maybe<DOMString> ResultForDialogSubmit() const noexcept;
 
     /// @brief The popover the control (a button) shows or hides, if it can.
-    /// @see https://html.spec.whatwg.org/#popover-target-element
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-target-element
     KRYS_NODISCARD RefPtr<HTMLElement> PopoverTargetElement() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popovertargetelement
     KRYS_NODISCARD RefPtr<boo::Element> PopoverTargetElementForBindings() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popovertargetelement
     void PopoverTargetElementForBindings(boo::Element *element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popovertargetaction
     KRYS_NODISCARD DOMString PopoverTargetAction() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popovertargetaction
     void PopoverTargetAction(DOMString value) noexcept;
 
     /// @brief Shows or hides the control's popover target element as its activation, unless the activation
     /// came from inside the popover (@p eventTarget is the event's target).
-    /// @see https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-target-attribute-activation-behavior
     void HandlePopoverTargetAction(EventTarget *eventTarget) noexcept;
 
     KRYS_NODISCARD html::FormAssociatedElement *AsFormAssociatedElement() noexcept final

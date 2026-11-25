@@ -5,28 +5,28 @@
 
 @namespace "http://www.w3.org/1999/xhtml";
 
-/* https://html.spec.whatwg.org/#the-page: the text takes the colour scheme's colour. */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-page: the text takes the colour scheme's colour. */
 html {
     display: block;
     color: CanvasText;
 }
 
-/* https://html.spec.whatwg.org/#hidden-elements */
+/* https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements */
 area, base, basefont, datalist, head, link, meta, noembed,
 noframes, param, rp, script, style, template, title {
     display: none;
 }
 
-/* https://html.spec.whatwg.org/#the-page: the margins are 8px unless the body's attributes say otherwise. */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-page: the margins are 8px unless the body's attributes say otherwise. */
 body {
     display: block;
     margin: 8px;
 }
 
-/* https://html.spec.whatwg.org/#flow-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3 */
 
 /* A paragraph's block margins are quirky: in quirks mode they collapse away at the top and bottom of a cell
-   or body (https://html.spec.whatwg.org/#margin-collapsing-quirks). */
+   or body (https://html.spec.whatwg.org/multipage/rendering.html#margin-collapsing-quirks). */
 p {
     display: block;
     margin-block: 1__qem;
@@ -37,7 +37,7 @@ address, article, aside, div, footer, header, hgroup, main, nav, search, section
     display: block;
 }
 
-/* https://html.spec.whatwg.org/#the-marquee-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2 */
 marquee {
     display: inline-block;
     text-align: initial;
@@ -60,7 +60,7 @@ figure {
     margin-inline: 40px;
 }
 
-/* https://html.spec.whatwg.org/#phrasing-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3 */
 q {
     display: inline;
 }
@@ -73,13 +73,13 @@ q::after {
     content: close-quote;
 }
 
-/* Centres its text and its blocks (https://html.spec.whatwg.org/#align-descendants). */
+/* Centres its text and its blocks (https://html.spec.whatwg.org/multipage/rendering.html#align-descendants). */
 center {
     display: block;
     text-align: -internal-center;
 }
 
-/* https://html.spec.whatwg.org/#the-hr-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-hr-element-2 */
 hr {
     display: block;
     overflow: hidden;
@@ -90,7 +90,7 @@ hr {
     border-width: 1px;
 }
 
-/* https://html.spec.whatwg.org/#phrasing-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3 */
 abbr[title], acronym[title] {
     text-decoration: dotted underline;
 }
@@ -102,12 +102,12 @@ abbr[title], acronym[title] {
     inset: 0;
 }
 
-/* https://html.spec.whatwg.org/#flow-content-3: a popover's backdrop doesn't take clicks. */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3: a popover's backdrop doesn't take clicks. */
 :popover-open::backdrop {
     pointer-events: none !important;
 }
 
-/* https://html.spec.whatwg.org/#flow-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3 */
 dialog {
     position: absolute;
     inset-inline: 0;
@@ -139,7 +139,7 @@ dialog::backdrop {
     background: rgba(0, 0, 0, 0.1);
 }
 
-/* https://html.spec.whatwg.org/#embedded-content-rendering-rules. Not in the specification: 'content' can't
+/* https://html.spec.whatwg.org/multipage/rendering.html#embedded-content-rendering-rules. Not in the specification: 'content' can't
    replace a video. */
 video {
     object-fit: contain;
@@ -157,7 +157,7 @@ audio:not([controls]) {
     display: none !important;
 }
 
-/* https://html.spec.whatwg.org/#sections-and-headings. Headings are styled by element, not by their computed
+/* https://html.spec.whatwg.org/multipage/rendering.html#sections-and-headings. Headings are styled by element, not by their computed
    heading level with :heading() as in the specification (see DIFFERENCES.md). */
 
 h1 {
@@ -207,7 +207,7 @@ h6 {
     font-weight: bold;
 }
 
-/* https://html.spec.whatwg.org/#tables-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#tables-2 */
 
 table {
     display: table;
@@ -275,7 +275,7 @@ caption {
     display: none !important;
 }
 
-/* https://html.spec.whatwg.org/#lists */
+/* https://html.spec.whatwg.org/multipage/rendering.html#lists */
 
 ul, menu, dir {
     display: block;
@@ -333,7 +333,7 @@ dt {
     text-indent: 0px !important;
 }
 
-/* https://html.spec.whatwg.org/#form-controls. The controls follow Chrome's rules more closely than these
+/* https://html.spec.whatwg.org/multipage/rendering.html#form-controls. The controls follow Chrome's rules more closely than these
    (see DIFFERENCES.md). */
 
 form {
@@ -345,7 +345,7 @@ label {
     cursor: default;
 }
 
-/* https://html.spec.whatwg.org/#the-fieldset-and-legend-elements */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-fieldset-and-legend-elements */
 legend {
     padding-inline: 2px;
     border: none;
@@ -422,7 +422,7 @@ input[type="search"]::-webkit-search-results-button {
 }
 
 /* Date and time fields, edited a field at a time
-   (https://html.spec.whatwg.org/#the-input-element-as-domain-specific-widgets). */
+   (https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-domain-specific-widgets). */
 input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
     align-items: center;
     display: inline-flex;
@@ -512,7 +512,7 @@ input::-webkit-inner-spin-button {
     user-select: none;
 }
 
-/* https://html.spec.whatwg.org/#the-textarea-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-textarea-element-2 */
 textarea {
     appearance: auto;
     color: CanvasText;
@@ -558,7 +558,7 @@ input[type="image"] {
     cursor: pointer;
 }
 
-/* https://html.spec.whatwg.org/#the-input-element-as-a-file-upload-control */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-a-file-upload-control */
 input[type="file"] {
     align-items: baseline;
     color: inherit;
@@ -569,7 +569,7 @@ input[type="file"] {
     field-sizing: fixed !important;
 }
 
-/* https://html.spec.whatwg.org/#the-input-element-as-a-checkbox-and-radio-button-widgets */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-a-checkbox-and-radio-button-widgets */
 input:is([type="radio"], [type="checkbox"]) {
     margin: 3px 2px;
     box-sizing: border-box;
@@ -578,8 +578,8 @@ input:is([type="radio"], [type="checkbox"]) {
     background-color: initial;
 }
 
-/* https://html.spec.whatwg.org/#the-input-element-as-a-button and
-   https://html.spec.whatwg.org/#the-button-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-a-button and
+   https://html.spec.whatwg.org/multipage/rendering.html#the-button-element-2 */
 input:is([type="button"], [type="submit"], [type="reset"]) {
     white-space: pre;
 }
@@ -605,7 +605,7 @@ input:is([type="button"], [type="submit"], [type="reset"]):active, input[type="f
     color: ActiveButtonText;
 }
 
-/* https://html.spec.whatwg.org/#the-input-element-as-a-range-control */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-a-range-control */
 input[type="range"] {
     padding: initial;
     border: initial;
@@ -650,7 +650,7 @@ input[type="file"]:active:disabled::file-selector-button, button:active:disabled
     border-style: outset;
 }
 
-/* https://html.spec.whatwg.org/#the-input-element-as-a-colour-well */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-input-element-as-a-colour-well */
 input[type="color"] {
     appearance: auto;
     box-sizing: border-box;
@@ -680,7 +680,7 @@ input[type="color"]::-webkit-color-swatch {
     flex: 1;
 }
 
-/* https://html.spec.whatwg.org/#the-select-element-2. -internal-auto-base() takes its second value when
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2. -internal-auto-base() takes its second value when
    the select has a base appearance, and its first otherwise. */
 select {
     box-sizing: border-box;
@@ -827,7 +827,7 @@ output {
     display: inline;
 }
 
-/* https://html.spec.whatwg.org/#the-meter-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-meter-element-2 */
 
 meter {
     appearance: auto;
@@ -838,7 +838,7 @@ meter {
     vertical-align: -0.2em;
 }
 
-/* https://html.spec.whatwg.org/#the-progress-element-2 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-progress-element-2 */
 
 progress {
     appearance: auto;
@@ -869,7 +869,7 @@ progress::-webkit-progress-value {
     box-sizing: border-box;
 }
 
-/* https://html.spec.whatwg.org/#phrasing-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3 */
 
 u, ins {
     text-decoration: underline;
@@ -887,7 +887,7 @@ tt, code, kbd, samp {
     font-family: monospace;
 }
 
-/* https://html.spec.whatwg.org/#flow-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3 */
 pre, xmp, plaintext, listing {
     display: block;
     font-family: monospace;
@@ -929,7 +929,7 @@ nobr {
     white-space: nowrap;
 }
 
-/* Focus rings and links (https://html.spec.whatwg.org/#phrasing-content-3). */
+/* Focus rings and links (https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3). */
 
 :focus-visible {
     outline: auto 5px -webkit-focus-ring-color;
@@ -964,7 +964,7 @@ area:any-link {
     cursor: pointer;
 }
 
-/* https://html.spec.whatwg.org/#phrasing-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#phrasing-content-3 */
 ruby {
     display: ruby;
 }
@@ -990,7 +990,7 @@ ruby > :not(rb, rbc, ruby) {
     white-space: nowrap;
 }
 
-/* https://html.spec.whatwg.org/#the-details-and-summary-elements */
+/* https://html.spec.whatwg.org/multipage/rendering.html#the-details-and-summary-elements */
 
 details, summary {
     display: block;
@@ -1015,12 +1015,12 @@ frameset {
     border-color: inherit;
 }
 
-/* https://html.spec.whatwg.org/#embedded-content-rendering-rules */
+/* https://html.spec.whatwg.org/multipage/rendering.html#embedded-content-rendering-rules */
 iframe {
     border: 2px inset;
 }
 
-/* https://html.spec.whatwg.org/#bidi-rendering */
+/* https://html.spec.whatwg.org/multipage/rendering.html#bidi-rendering */
 hr, bdi, output {
     unicode-bidi: isolate;
 }
@@ -1031,7 +1031,7 @@ bdo, bdo[dir] {
     unicode-bidi: isolate-override;
 }
 
-/* https://html.spec.whatwg.org/#flow-content-3 */
+/* https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3 */
 slot {
     display: contents;
 }

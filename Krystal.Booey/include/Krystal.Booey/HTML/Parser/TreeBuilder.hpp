@@ -273,10 +273,10 @@ namespace krys::boo::html
 
     Tokenizer &_tokenizer;
 
-    /// @see https://html.spec.whatwg.org/multipage/syntax.html#insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insertion-mode
     InsertionMode _insertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
-    /// @see https://html.spec.whatwg.org/multipage/syntax.html#original-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#original-insertion-mode
     InsertionMode _originalInsertionMode : EnumBitWidth<InsertionMode> {InsertionMode::Initial};
 
     /// @see https://html.spec.whatwg.org/#scripting-mode
@@ -391,22 +391,22 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-template-insertion-mode
     KRYS_NODISCARD InsertionMode CurrentTemplateInsertionMode() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode
     void InitialMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-before-html-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-before-html-insertion-mode
     void BeforeHTMLMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
     void BeforeHeadMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#parsing-main-inhead
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
     void InHeadMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
     void InHeadNoscriptMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-after-head-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-after-head-insertion-mode
     void AfterHeadMode(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
@@ -448,10 +448,10 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#the-after-frameset-insertion-mode
     void AfterFramesetMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-after-after-body-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-body-insertion-mode
     void AfterAfterBodyMode(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-frameset-insertion-mode
     void AfterAfterFramesetMode(TokenAtom token) noexcept;
 
     void InBodyGenericEndTag(const TokenAtom &token, TagName tagName);
@@ -462,7 +462,7 @@ namespace krys::boo::html
 
 #pragma region Character Insertion
 
-    /// @see https://html.spec.whatwg.org/#insert-a-character
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-a-character
     void InsertCharacters(DOMString data) noexcept;
 
     /// @brief Removes null characters in a character token and returns whether any characters remain.
@@ -491,21 +491,21 @@ namespace krys::boo::html
     KRYS_NODISCARD InsertionLocation
       AppropriatePlaceToInsertNode(ContainerNode *targetOverride = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#adjusted-insertion-location
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-insertion-location
     KRYS_NODISCARD InsertionLocation
       AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-an-element-at-the-adjusted-insertion-location
     void InsertElementAtAdjustedInsertionLocation(Element &element, Maybe<InsertionLocation> location = null,
                                                   bool alreadySanitized = false) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-a-foreign-element
     Ref<Element> InsertForeignElement(TokenAtom &token, const DOMStringAtom &namespaceURI,
                                       bool onlyAddToElementStack) noexcept;
 
     /// @brief The sanitizer action for an element named @p localName in @p namespaceURI: "Keep" when the
     /// parser isn't sanitizing.
-    /// @see https://html.spec.whatwg.org/#get-the-sanitizer-action-for-an-element-name
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#get-the-sanitizer-action-for-an-element-name
     KRYS_NODISCARD SanitizerAction SanitizerActionFor(DOMStringView localName,
                                                       DOMStringAtom namespaceURI) const noexcept;
 
@@ -518,26 +518,26 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
     void InsertTemplateElement(TokenAtom &token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-an-html-element
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-an-html-element
     Ref<Element> InsertHTMLElement(TokenAtom &token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-a-comment
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-a-comment
     void InsertComment(DOMStringView data, Maybe<InsertionLocation> position = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-a-processing-instruction
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-a-processing-instruction
     void InsertProcessingInstruction(const TokenAtom &token,
                                      Maybe<InsertionLocation> position = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#insert-a-character
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insert-a-character
     void AppendCommentToDocument(DOMStringView data) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#generic-raw-text-element-parsing-algorithm
     void ParseGenericRawTextElement(TokenAtom token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generic-rcdata-text-element-parsing-algorithm
     void ParseGenericRCDATATextElement(TokenAtom token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token
     KRYS_NODISCARD Ref<Element> CreateElement(const DOMStringAtom &name, const DOMStringAtom &namespaceURI,
                                               const ParsedAttributeList &attributes,
                                               ContainerNode &intendedParent) noexcept;
@@ -547,17 +547,17 @@ namespace krys::boo::html
 
     void ReconstructActiveFormattingElements() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#close-a-p-element
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#close-a-p-element
     void ClosePElement(const TokenAtom &token) noexcept;
 
 #pragma endregion
 
 #pragma region Adjust Attribute Algorithms
 
-    /// @see https://html.spec.whatwg.org/#adjust-foreign-attributes
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjust-foreign-attributes
     static void AdjustForeignAttributes(TokenAtom &token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjust-svg-attributes
     static void AdjustSVGAttributes(TokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes

@@ -114,7 +114,7 @@ namespace krys::boo
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video, once there is one.
-    // https://html.spec.whatwg.org/#focus-processing-model
+    // https://html.spec.whatwg.org/multipage/interaction.html#focus-processing-model
     // (The target node of a routed key event.)
     KRYS_NODISCARD Element *EventTargetElementForDocument(Document *document) noexcept
     {
@@ -478,7 +478,7 @@ namespace krys::boo
     // FIXME: Page overlays and synthetic touch events.
 
     // A press is an activation-triggering input event: the window is notified before the event is dispatched.
-    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (auto *window = frame->Window())
     {
       window->NotifyActivated();
@@ -1271,7 +1271,7 @@ namespace krys::boo
     }
 
     // A key press other than Escape is an activation-triggering input event: the window is notified before
-    // the event is dispatched. https://html.spec.whatwg.org/#activation-triggering-input-event
+    // the event is dispatched. https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (initialKeyEvent.GetType() != Type::KeyUp && initialKeyEvent.GetType() != Type::Char
         && initialKeyEvent.Key() != u8"Escape")
     {
@@ -2882,7 +2882,7 @@ namespace krys::boo
 
     // The end of a touch is an activation-triggering input event: the window is notified before the event
     // is dispatched.
-    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (event.GetType() == PlatformEvent::Type::TouchEnd)
     {
       if (auto *window = frame->Window())

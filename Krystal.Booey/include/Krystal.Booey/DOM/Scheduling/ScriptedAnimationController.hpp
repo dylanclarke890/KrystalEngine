@@ -43,11 +43,11 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   /// @brief Called with the frame's timestamp: milliseconds since the window's time origin.
-  /// @see https://html.spec.whatwg.org/#framerequestcallback
+  /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#framerequestcallback
   using FrameRequestCallback = Func<void(DOMHighResTimeStamp)>;
 
   /// @brief A document's animation frame callbacks (`requestAnimationFrame()`), run by the rendering update.
-  /// @see https://html.spec.whatwg.org/#animation-frames
+  /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames
   class ScriptedAnimationController
   {
     KRYS_NON_COPY_MOVABLE(ScriptedAnimationController);
@@ -81,7 +81,7 @@ namespace krys::boo::dom
 
     /// @brief Runs the callbacks registered before this frame, with @p timestamp (milliseconds since the
     /// window's time origin).
-    /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     void ServiceRequestAnimationFrameCallbacks(DOMHighResTimeStamp timestamp) noexcept;
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.

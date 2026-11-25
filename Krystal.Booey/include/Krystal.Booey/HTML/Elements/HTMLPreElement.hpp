@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlpreelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
   class HTMLPreElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPreElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLPreElement(Document &document) noexcept;
 
-#pragma region HTMLPreElement Obsolete members - https://html.spec.whatwg.org/#HTMLPreElement-partial
+#pragma region HTMLPreElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLPreElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-pre-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-pre-width
     KRYS_NODISCARD int32 Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-pre-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-pre-width
     void Width(int32 value) noexcept;
 
 #pragma endregion

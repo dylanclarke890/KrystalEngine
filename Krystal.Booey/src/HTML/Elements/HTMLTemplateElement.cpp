@@ -10,7 +10,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#attr-template-shadowrootmode
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#attr-template-shadowrootmode
   template <>
   struct html::EnumeratedAttributeTraits<"shadowrootmode", HTMLTemplateElement>
   {
@@ -24,7 +24,7 @@ namespace krys::boo
     constexpr static State InvalidValueDefault = State::None;
   };
 
-  /// @see https://html.spec.whatwg.org/#attr-template-shadowrootslotassignment
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#attr-template-shadowrootslotassignment
   template <>
   struct html::EnumeratedAttributeTraits<"shadowrootslotassignment", HTMLTemplateElement>
   {
@@ -40,7 +40,7 @@ namespace krys::boo
 
   // FIXME: Implement the HTMLTemplateElement constructor in a spec compliant way.
 
-  // https://html.spec.whatwg.org/#template-contents
+  // https://html.spec.whatwg.org/multipage/scripting.html#template-contents
   HTMLTemplateElement::HTMLTemplateElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Template),
         // 1. Let document be the template element's node document's appropriate template contents owner
@@ -56,7 +56,7 @@ namespace krys::boo
 
 #pragma region HTMLTemplateElement
 
-  // https://html.spec.whatwg.org/#dom-template-content
+  // https://html.spec.whatwg.org/multipage/scripting.html#dom-template-content
   RefPtr<DocumentFragment> HTMLTemplateElement::Content() const noexcept
   {
     // 1. Assert: this's template contents is not a ShadowRoot node.
@@ -83,7 +83,7 @@ namespace krys::boo
 
   namespace
   {
-    // https://html.spec.whatwg.org/#find-markers
+    // https://html.spec.whatwg.org/multipage/scripting.html#find-markers
     KRYS_NODISCARD Pair<ProcessingInstruction *, ProcessingInstruction *>
       FindMarkers(ContainerNode &scope, DOMStringView name) noexcept
     {
@@ -166,7 +166,7 @@ namespace krys::boo
     _insertionEndMarker = nullptr;
   }
 
-  // https://html.spec.whatwg.org/#prepare-content-patching
+  // https://html.spec.whatwg.org/multipage/scripting.html#prepare-content-patching
   bool HTMLTemplateElement::PrepareContentPatching(ContainerNode &scope) noexcept
   {
     // 1. Assert: template's for attribute is specified.
@@ -226,7 +226,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#the-template-element:concept-node-adopt-ext
+  // https://html.spec.whatwg.org/multipage/scripting.html#the-template-element:concept-node-adopt-ext
   void HTMLTemplateElement::OnAdopt(Document &oldDocument) noexcept
   {
     HTMLElement::OnAdopt(oldDocument);
@@ -241,7 +241,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-template-element:concept-node-clone-ext
+  // https://html.spec.whatwg.org/multipage/scripting.html#the-template-element:concept-node-clone-ext
   void HTMLTemplateElement::OnClone(Node &copy, bool subtree) noexcept
   {
     HTMLElement::OnClone(copy, subtree);

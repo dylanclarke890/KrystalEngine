@@ -105,7 +105,7 @@ namespace krys::boo::dom
   }
 
   /// @brief The state of a button's `command` attribute: the command it sends its `commandfor` element.
-  /// @see https://html.spec.whatwg.org/#attr-button-command
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-command
   enum class CommandType : uint8
   {
     Invalid,
@@ -281,7 +281,7 @@ namespace krys::boo
     KRYS_NODISCARD DOMTokenList &Part() noexcept;
 
     /// @brief The element's `data-*` attributes, by property name.
-    /// @see https://html.spec.whatwg.org/#dom-dataset
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-dataset
     KRYS_NODISCARD DOMStringMap &Dataset() noexcept;
 
     /// @brief The element's computed style, as a read-only property map.
@@ -414,7 +414,7 @@ namespace krys::boo
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
     /// removed.
-    /// @see https://html.spec.whatwg.org/#dom-element-sethtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-sethtml
     ExceptionOr<void> SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -422,7 +422,7 @@ namespace krys::boo
 
     /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-appendhtml
     ExceptionOr<void> AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -430,7 +430,7 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
     /// configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtml
     ExceptionOr<void> PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -438,7 +438,7 @@ namespace krys::boo
 
     /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
     /// context; sanitized only if @p options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-sethtmlunsafe
     ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -446,7 +446,7 @@ namespace krys::boo
 
     /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -455,7 +455,7 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
                                         const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -464,7 +464,7 @@ namespace krys::boo
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
     ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -472,7 +472,7 @@ namespace krys::boo
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
     ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -480,7 +480,7 @@ namespace krys::boo
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
     ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -488,7 +488,7 @@ namespace krys::boo
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -497,7 +497,7 @@ namespace krys::boo
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
     ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -505,7 +505,7 @@ namespace krys::boo
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
                                             const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -513,7 +513,7 @@ namespace krys::boo
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
-    /// @see https://html.spec.whatwg.org/#dom-element-gethtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml
     KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
 
     /// @brief The same, with no shadow roots.
@@ -522,21 +522,21 @@ namespace krys::boo
 
     /// @brief The children serialized; in an XML document, an `InvalidStateError` if they can't be serialized
     /// as well-formed XML.
-    /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-innerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> InnerHTML() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-innerhtml
     ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
 
     /// @brief The element serialized; in an XML document, an `InvalidStateError` if it can't be serialized as
     /// well-formed XML.
-    /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml
     KRYS_NODISCARD ExceptionOr<DOMString> OuterHTML() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml
     ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-element-insertadjacenthtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-insertadjacenthtml
     ExceptionOr<void> InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept;
 
 #pragma endregion
@@ -868,7 +868,7 @@ namespace krys::boo
 
     /// @brief The element's custom element reaction queue, which holds the definition it's defined by or is
     /// to be upgraded to; null if it has neither.
-    /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reaction-queue
     /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-definition
     KRYS_NODISCARD html::CustomElementReactionQueue *ReactionQueue() const noexcept;
 
@@ -890,7 +890,7 @@ namespace krys::boo
     void SetIsCustomElementUpgradeCandidate() noexcept;
 
     /// @brief Enqueues an upgrade of the element to @p elementInterface's definition.
-    /// @see https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-a-custom-element-upgrade-reaction
     void EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept;
 
     /// @brief Sets the behaviour the element's definition created for it, and the registry it uses.
@@ -923,7 +923,7 @@ namespace krys::boo
 
     /// @brief Whether the element is a replaced element (its content is outside the scope of CSS), given its
     /// style if there is one.
-    /// @see https://html.spec.whatwg.org/#replaced-elements
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#replaced-elements
     KRYS_NODISCARD virtual bool IsReplaced(const RenderStyle * = nullptr) const noexcept
     {
       return false;
@@ -933,7 +933,7 @@ namespace krys::boo
 
     /// @brief Whether the element is a listed form-associated element, and whether it's one that can be
     /// validated.
-    /// @see https://html.spec.whatwg.org/#category-listed
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#category-listed
     KRYS_NODISCARD virtual bool IsFormListedElement() const noexcept
     {
       return false;
@@ -944,73 +944,73 @@ namespace krys::boo
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#concept-fe-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-fe-disabled
     KRYS_NODISCARD virtual bool IsDisabledFormControl() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-valid
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-valid
     KRYS_NODISCARD virtual bool MatchesValidPseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-invalid
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-invalid
     KRYS_NODISCARD virtual bool MatchesInvalidPseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-user-valid
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-user-valid
     KRYS_NODISCARD virtual bool MatchesUserValidPseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-user-invalid
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-user-invalid
     KRYS_NODISCARD virtual bool MatchesUserInvalidPseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-read-write
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-read-write
     KRYS_NODISCARD virtual bool MatchesReadWritePseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-indeterminate
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-indeterminate
     KRYS_NODISCARD virtual bool MatchesIndeterminatePseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-default
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-default
     KRYS_NODISCARD virtual bool MatchesDefaultPseudoClass() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-optional
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-optional
     KRYS_NODISCARD virtual bool IsOptionalFormControl() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-required
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-required
     KRYS_NODISCARD virtual bool IsRequiredFormControl() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-in-range
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-in-range
     KRYS_NODISCARD virtual bool IsInRange() const noexcept
     {
       return false;
     }
 
-    /// @see https://html.spec.whatwg.org/#selector-out-of-range
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#selector-out-of-range
     KRYS_NODISCARD virtual bool IsOutOfRange() const noexcept
     {
       return false;
@@ -1162,12 +1162,12 @@ namespace krys::boo
     KRYS_NODISCARD bool HasValidTextDirectionState() const noexcept;
 
     /// @brief Whether the element's directionality is its auto directionality.
-    /// @see https://html.spec.whatwg.org/#auto-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
     KRYS_NODISCARD bool HasAutoTextDirectionState() const noexcept;
 
     /// @brief Updates the directionality of the element, of what it decides, and of its ancestors whose auto
     /// directionality it decides.
-    /// @see https://html.spec.whatwg.org/#the-directionality
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#the-directionality
     void UpdateEffectiveTextDirection() noexcept;
 
     /// @brief Takes the parent's directionality, or updates the element's own if it may differ; called as
@@ -1226,7 +1226,7 @@ namespace krys::boo
 
     /// @brief The element that shows that this one is focused (the image of an image map's area), or null if
     /// none does.
-    /// @see https://html.spec.whatwg.org/#focus-processing-model
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-processing-model
     KRYS_NODISCARD virtual RefPtr<Element> FocusAppearanceUpdateTarget() noexcept;
 
     /// @brief The element's renderer, or null if it isn't rendered.
@@ -1592,13 +1592,13 @@ namespace krys::boo
 
     /// @brief The element's assigned access key: the first token of its `accesskey` attribute that's a single
     /// code point, or empty if it has none.
-    /// @see https://html.spec.whatwg.org/#assigned-access-key
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#assigned-access-key
     KRYS_NODISCARD DOMString AssignedAccessKey() const noexcept;
 
     /// @brief Runs the command the element's access key stands for. This focuses it if it's focusable.
     /// @param sendMouseEvents Whether a click it fires comes with a press and a release.
     /// @return Whether a click was dispatched.
-    /// @see https://html.spec.whatwg.org/#command-facet-action
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#command-facet-action
     virtual bool AccessKeyAction(bool sendMouseEvents) noexcept;
 
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
@@ -1649,7 +1649,7 @@ namespace krys::boo
     void ClearPopoverData() noexcept;
 
     /// @brief Whether the element is in the popover showing state.
-    /// @see https://html.spec.whatwg.org/#popover-showing-state
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-showing-state
     KRYS_NODISCARD bool IsPopoverShowing() const noexcept;
 
     /// @brief The state of the element's `popover` attribute.
@@ -1665,7 +1665,7 @@ namespace krys::boo
     /// @p isPopover) of @p source, the element's invoker, inclusive.
     /// @param isPopover Whether the element is a popover about to show, rather than another element about to
     /// enter the top layer (a dialog), whose source isn't considered.
-    /// @see https://html.spec.whatwg.org/#topmost-popover-ancestor
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#topmost-popover-ancestor
     KRYS_NODISCARD RefPtr<HTMLElement> TopmostPopoverAncestor(HTMLElement *source, bool isPopover) noexcept;
 
 #pragma endregion
@@ -1743,13 +1743,13 @@ namespace krys::boo
     /// @brief The element an element reflection attribute refers to: the one set through its IDL attribute,
     /// if it's still in the element's shadow-including ancestors' trees, else the one with the attribute's
     /// value as its ID in the element's tree.
-    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-element
     KRYS_NODISCARD RefPtr<Element>
       ElementForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
     /// @brief Sets an element reflection attribute's element: the content attribute becomes empty, or is
     /// removed if @p element is null.
-    /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:element
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element
     void SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
@@ -1758,7 +1758,7 @@ namespace krys::boo
     /// @brief The elements a `FrozenArray<Element>?` reflection attribute refers to: the ones set through its
     /// IDL attribute that are still in the element's shadow-including ancestors' trees, else the ones with
     /// the attribute's IDs in the element's tree; null if neither is set.
-    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-elements
     KRYS_NODISCARD Maybe<List<Ref<Element>>>
       ElementsForAttributeInternal(const DOMStringAtom &attributeName) const noexcept;
 
@@ -1771,7 +1771,7 @@ namespace krys::boo
 
     /// @brief Sets a `FrozenArray<Element>?` reflection attribute's elements: the content attribute becomes
     /// empty, or is removed if @p elements is null.
-    /// @see https://html.spec.whatwg.org/#attr-associated-elements
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#attr-associated-elements
     void SetElementsArrayAttribute(const DOMStringAtom &attributeName,
                                    const Maybe<List<Ref<Element>>> &elements) noexcept;
 
@@ -1919,7 +1919,7 @@ namespace krys::boo
 
     /// @brief Called by the parser when it pops this element off the stack of open elements. Overrides must
     /// call the base implementation.
-    /// @see https://html.spec.whatwg.org/#stack-of-open-elements
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#stack-of-open-elements
     virtual void FinishParsingChildren() noexcept;
 
 #pragma endregion

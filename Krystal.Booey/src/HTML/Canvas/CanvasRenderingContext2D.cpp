@@ -164,7 +164,7 @@ namespace krys::boo::html
     DrawFocusIfNeededInternal(path.GetPath(), element);
   }
 
-  // https://html.spec.whatwg.org/#draw-focus-if-needed
+  // https://html.spec.whatwg.org/multipage/canvas.html#draw-focus-if-needed
   void CanvasRenderingContext2D::DrawFocusIfNeededInternal(const Path &path, Element &element) noexcept
   {
     // 1. If element is not focused or is not a descendant of context's canvas element, then return.
@@ -186,7 +186,7 @@ namespace krys::boo::html
     DidDrawEntireCanvas();
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-font
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-font
   void CanvasRenderingContext2D::SetFont(DOMStringView newFont) noexcept
   {
     Canvas().NodeDocument().UpdateStyleIfNeeded();
@@ -291,7 +291,7 @@ namespace krys::boo::html
                                                                              : CanvasDirection::Ltr;
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-filltext
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-filltext
   void CanvasRenderingContext2D::FillText(DOMStringView text, double x, double y,
                                           Maybe<double> maxWidth) noexcept
   {
@@ -304,7 +304,7 @@ namespace krys::boo::html
     DrawTextInternal(text, x, y, false, maxWidth);
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-measuretext
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-measuretext
   // (Runs the text preparation algorithm and returns a TextMetrics object with the glyphs' measurements.)
   Ref<TextMetrics> CanvasRenderingContext2D::MeasureText(DOMStringView text) noexcept
   {

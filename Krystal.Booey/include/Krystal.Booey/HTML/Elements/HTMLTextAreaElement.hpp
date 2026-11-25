@@ -6,7 +6,7 @@ namespace krys::boo
 {
   class BeforeTextInsertedEvent;
 
-  /// @see https://html.spec.whatwg.org/#htmltextareaelement
+  /// @see https://html.spec.whatwg.org/multipage/form-elements.html#htmltextareaelement
   class HTMLTextAreaElement : public HTMLTextFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
@@ -34,7 +34,7 @@ namespace krys::boo
     /// @brief A text area with its user agent shadow tree.
     KRYS_NODISCARD static Ref<HTMLTextAreaElement> Create(Document &document) noexcept;
 
-#pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/#htmltextareaelement
+#pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/multipage/form-elements.html#htmltextareaelement
 
     /// @see https://html.spec.whatwg.org/#dom-textarea-autocomplete
     KRYS_NODISCARD DOMString Autocomplete() const noexcept;
@@ -42,85 +42,85 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-textarea-autocomplete
     void Autocomplete(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-cols
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-cols
     KRYS_NODISCARD uint32 Cols() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-cols
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-cols
     void Cols(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-dirname
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-dirname
     KRYS_NODISCARD DOMString DirName() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-dirname
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-dirname
     void DirName(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-disabled
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-disabled
     void Disabled(bool value) noexcept;
 
     using HTMLTextFormControlElement::MaxLength;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-maxlength
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-maxlength
     void MaxLength(int32 value) noexcept;
 
     using HTMLTextFormControlElement::MinLength;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-minlength
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-minlength
     void MinLength(int32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-name
     KRYS_NODISCARD DOMString Name() const noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-name
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-placeholder
     KRYS_NODISCARD DOMString Placeholder() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-placeholder
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-placeholder
     void Placeholder(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-readonly
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-readonly
     KRYS_NODISCARD bool ReadOnly() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-readonly
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-readonly
     void ReadOnly(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-required
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-required
     KRYS_NODISCARD bool Required() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-required
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-required
     void Required(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-rows
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-rows
     KRYS_NODISCARD uint32 Rows() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-rows
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-rows
     void Rows(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-wrap
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-wrap
     KRYS_NODISCARD DOMString Wrap() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-wrap
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-wrap
     void Wrap(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-type
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-type
     KRYS_NODISCARD DOMString Type() const noexcept
     {
       return FormControlType();
     }
 
     /// @brief The text content of the element.
-    /// @see https://html.spec.whatwg.org/#dom-textarea-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-defaultvalue
     KRYS_NODISCARD DOMString DefaultValue() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-defaultvalue
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-defaultvalue
     void DefaultValue(DOMString value) noexcept;
 
     /// @brief The raw value.
-    /// @see https://html.spec.whatwg.org/#dom-textarea-value
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-value
     KRYS_NODISCARD DOMString Value() const noexcept final;
 
     ExceptionOr<void>
@@ -129,7 +129,7 @@ namespace krys::boo
                html::TextControlSetValueSelection selection =
                  html::TextControlSetValueSelection::SetSelectionToEnd) noexcept final;
 
-    /// @see https://html.spec.whatwg.org/#dom-textarea-textlength
+    /// @see https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-textlength
     KRYS_NODISCARD uint32 TextLength() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange

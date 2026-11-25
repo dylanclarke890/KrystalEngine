@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canvasfontvariantcaps
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasfontvariantcaps
   enum class CanvasFontVariantCaps : uint8
   {
     Normal,

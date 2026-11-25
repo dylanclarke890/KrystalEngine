@@ -36,8 +36,8 @@ namespace krys::boo::html
 
     /// @brief Whether @p element's blocking tokens set contains "render", the only possible blocking token:
     /// an element whose blocking tokens set contains it is potentially render-blocking.
-    /// @see https://html.spec.whatwg.org/#blocking-tokens-set
-    /// @see https://html.spec.whatwg.org/#potentially-render-blocking
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#blocking-tokens-set
+    /// @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#potentially-render-blocking
     KRYS_NODISCARD static bool HasRenderBlockingToken(const Element &element) noexcept;
   };
 }

@@ -51,7 +51,7 @@ namespace krys::boo::html
   class CloseWatcher final : public EventTarget
   {
   public:
-    /// @see https://html.spec.whatwg.org/#closewatcheroptions
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#closewatcheroptions
     struct Options
     {
       /// @note A plain pointer, as the options are only read while the watcher is made.
@@ -59,12 +59,12 @@ namespace krys::boo::html
     };
 
     /// @brief Given whether it can refuse, returns whether to close.
-    /// @see https://html.spec.whatwg.org/#close-watcher-cancel-action
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-cancel-action
     using CancelAction = Func<bool(bool canPreventClose)>;
-    /// @see https://html.spec.whatwg.org/#close-watcher-close-action
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-close-action
     using CloseAction = Func<void()>;
     /// @brief Whether the watcher takes close requests now.
-    /// @see https://html.spec.whatwg.org/#close-watcher-get-enabled-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-get-enabled-state
     using GetEnabledState = Func<bool()>;
 
   private:
@@ -83,11 +83,11 @@ namespace krys::boo::html
     /// @brief A close watcher of @p document's window that fires `cancel` and `close` at itself, destroyed
     /// once @p options' signal aborts.
     /// @return An `InvalidStateError` if @p document isn't fully active.
-    /// @see https://html.spec.whatwg.org/#dom-closewatcher
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-closewatcher
     static ExceptionOr<Ref<CloseWatcher>> Create(Document &document, const Options &options = {}) noexcept;
 
     /// @brief A close watcher of @p document's window, which must be fully active, with the given actions.
-    /// @see https://html.spec.whatwg.org/#establish-a-close-watcher
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#establish-a-close-watcher
     static Ref<CloseWatcher> Establish(Document &document, CancelAction &&cancelAction,
                                        CloseAction &&closeAction, GetEnabledState &&getEnabledState) noexcept;
 
@@ -98,26 +98,26 @@ namespace krys::boo::html
       return _active;
     }
 
-    /// @see https://html.spec.whatwg.org/#close-watcher-get-enabled-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-get-enabled-state
     KRYS_NODISCARD bool IsEnabled() const noexcept
     {
       return _getEnabledState();
     }
 
     /// @brief Requests to close the watcher; its cancel action can always refuse.
-    /// @see https://html.spec.whatwg.org/#dom-closewatcher-requestclose
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-closewatcher-requestclose
     void RequestClose() noexcept;
 
     /// @brief Requests to close the watcher; its cancel action can refuse unless
     /// @p requireHistoryActionActivation and the window has no history-action activation or group to spare.
     /// @return Whether the watcher closed (or couldn't be asked): false if the cancel action refused.
-    /// @see https://html.spec.whatwg.org/#close-watcher-request-close
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-request-close
     bool RequestToClose(bool requireHistoryActionActivation) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#close-watcher-close
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-close
     void Close() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#close-watcher-destroy
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#close-watcher-destroy
     void Destroy() noexcept;
 
     KRYS_DECLARE_EVENT_HANDLER(Cancel, u8"cancel")

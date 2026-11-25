@@ -44,7 +44,7 @@ namespace krys::boo
   namespace
   {
     // The largest value a non-negative integer reflects as.
-    // https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:idl-unsigned-long
+    // https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-unsigned-long
     constexpr uint32 MaxHTMLNonNegativeInteger = 2'147'483'647;
     // The largest rowspan a table cell takes, as HTML's.
     constexpr uint32 MaxMathMLRowspan = 65'534;

@@ -6,39 +6,39 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [Index](https://html.spec.whatwg.org/#index)
+## [Index](https://html.spec.whatwg.org/multipage/indices.html#index)
 
 Status: n/a (back matter)
 
-### [Elements](https://html.spec.whatwg.org/#elements-3)
+### [Elements](https://html.spec.whatwg.org/multipage/indices.html#elements-3)
 
 Status: n/a (back matter)
 
-### [Element content categories](https://html.spec.whatwg.org/#element-content-categories)
+### [Element content categories](https://html.spec.whatwg.org/multipage/indices.html#element-content-categories)
 
 Status: n/a (back matter)
 
-### [Attributes](https://html.spec.whatwg.org/#attributes-3)
+### [Attributes](https://html.spec.whatwg.org/multipage/indices.html#attributes-3)
 
 Status: n/a (back matter)
 
-### [Element interfaces](https://html.spec.whatwg.org/#element-interfaces)
+### [Element interfaces](https://html.spec.whatwg.org/multipage/indices.html#element-interfaces)
 
 Status: n/a (back matter)
 
-### [All interfaces](https://html.spec.whatwg.org/#all-interfaces)
+### [All interfaces](https://html.spec.whatwg.org/multipage/indices.html#all-interfaces)
 
 Status: n/a (back matter)
 
-### [Events](https://html.spec.whatwg.org/#events-2)
+### [Events](https://html.spec.whatwg.org/multipage/indices.html#events-2)
 
 Status: n/a (back matter)
 
-### [HTTP headers](https://html.spec.whatwg.org/#http-headers)
+### [HTTP headers](https://html.spec.whatwg.org/multipage/indices.html#http-headers)
 
 Status: n/a (back matter)
 
-### [MIME types](https://html.spec.whatwg.org/#mime-types-2)
+### [MIME types](https://html.spec.whatwg.org/multipage/indices.html#mime-types-2)
 
 Status: n/a (back matter)
 <!-- definitions: application/atom+xml application/json application/octet-stream application/rss+xml application/wasm application/xml image/gif image/jpeg image/png image/svg+xml multipart/form-data multipart/mixed text/css text/javascript text/json text/plain text/uri-list text/vcard text/vtt text/xml video/mp4 video/mpeg -->

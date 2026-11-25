@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   // FIXME: The poster frame (its loading, events and renderer) and decoded video, with a host media player.
-  /// @see https://html.spec.whatwg.org/#htmlvideoelement
+  /// @see https://html.spec.whatwg.org/multipage/media.html#htmlvideoelement
   class HTMLVideoElement : public HTMLMediaElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLVideoElement);
@@ -39,36 +39,36 @@ namespace krys::boo
   public:
     HTMLVideoElement(Document &document) noexcept;
 
-#pragma region HTMLVideoElement - https://html.spec.whatwg.org/#htmlvideoelement
+#pragma region HTMLVideoElement - https://html.spec.whatwg.org/multipage/media.html#htmlvideoelement
 
-    /// @see https://html.spec.whatwg.org/#dom-video-width
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-width
     KRYS_NODISCARD uint32 Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-width
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-width
     void Width(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-height
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-height
     KRYS_NODISCARD uint32 Height() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-height
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-height
     void Height(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-videowidth
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-videowidth
     KRYS_NODISCARD static uint32 VideoWidth() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-videoheight
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-videoheight
     KRYS_NODISCARD static uint32 VideoHeight() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-poster
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-poster
     KRYS_NODISCARD dom::USVString Poster() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-poster
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-poster
     void Poster(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-playsinline
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-playsinline
     KRYS_NODISCARD bool PlaysInline() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-video-playsinline
+    /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-playsinline
     void PlaysInline(bool value) noexcept;
 
 #pragma endregion

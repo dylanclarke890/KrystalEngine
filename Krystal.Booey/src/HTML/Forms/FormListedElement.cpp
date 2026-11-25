@@ -278,7 +278,7 @@ namespace krys::boo::html
     return WillValidate() ? _customValidationMessage : DOMString();
   }
 
-  // https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-setcustomvalidity
   void FormListedElement::SetCustomValidity(DOMStringView error) noexcept
   {
     // 1. Set error to the result of normalizing newlines given error.

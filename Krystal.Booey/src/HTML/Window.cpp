@@ -457,7 +457,7 @@ namespace krys::boo
   {
   }
 
-  // https://html.spec.whatwg.org/#activation-notification
+  // https://html.spec.whatwg.org/multipage/interaction.html#activation-notification
   void boo::Window::NotifyActivated() noexcept
   {
     // 1. Assert: document is fully active.
@@ -496,7 +496,7 @@ namespace krys::boo
     return _lastHistoryActionActivationTimestamp != _lastActivationTimestamp;
   }
 
-  // https://html.spec.whatwg.org/#consume-user-activation
+  // https://html.spec.whatwg.org/multipage/interaction.html#consume-user-activation
   bool boo::Window::ConsumeTransientActivation() noexcept
   {
     // (Without transient activation, consuming changes nothing observable, so it returns early to report it.)
@@ -519,7 +519,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#consume-history-action-user-activation
+  // https://html.spec.whatwg.org/multipage/interaction.html#consume-history-action-user-activation
   bool boo::Window::ConsumeHistoryActionUserActivation() noexcept
   {
     if (!HasHistoryActionActivation())
@@ -538,7 +538,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#dom-queuemicrotask
+  // https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-queuemicrotask
   void boo::Window::QueueMicrotask(Func<void()> &&callback) noexcept
   {
     // Queue a microtask to invoke callback with « » and "report".

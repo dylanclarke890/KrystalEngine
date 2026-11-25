@@ -47,7 +47,7 @@
 
 namespace krys::boo::html
 {
-  // https://html.spec.whatwg.org/#dom-context-2d-closepath
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-closepath
   void CanvasPath::ClosePath() noexcept
   {
     // The closePath() method, when invoked, must do nothing if the object's path has no subpaths.
@@ -63,7 +63,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-moveto
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-moveto
   void CanvasPath::MoveTo(float x, float y) noexcept
   {
     // 1. If either of the arguments are infinite or NaN, then return.
@@ -86,7 +86,7 @@ namespace krys::boo::html
     LineTo(point.X(), point.Y());
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-lineto
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-lineto
   void CanvasPath::LineTo(float x, float y) noexcept
   {
     // 1. If either of the arguments are infinite or NaN, then return.
@@ -114,7 +114,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-quadraticcurveto
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-quadraticcurveto
   void CanvasPath::QuadraticCurveTo(float cpx, float cpy, float x, float y) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -145,7 +145,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-beziercurveto
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-beziercurveto
   void CanvasPath::BezierCurveTo(float cp1x, float cp1y, float cp2x, float cp2y, float x, float y) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -178,7 +178,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-arcto
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-arcto
   ExceptionOr<void> CanvasPath::ArcTo(float x1, float y1, float x2, float y2, float r) noexcept
   {
     // 1. If any of the arguments are infinite or NaN, then return.
@@ -257,7 +257,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-arc
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-arc
   // (The ellipse method steps with radius as both radii and no rotation.)
   ExceptionOr<void> CanvasPath::Arc(float x, float y, float radius, float startAngle, float endAngle,
                                     bool anticlockwise) noexcept
@@ -292,7 +292,7 @@ namespace krys::boo::html
     return {};
   }
 
-  // https://html.spec.whatwg.org/#ellipse-method-steps
+  // https://html.spec.whatwg.org/multipage/canvas.html#ellipse-method-steps
   ExceptionOr<void> CanvasPath::Ellipse(float x, float y, float radiusX, float radiusY, float rotation,
                                         float startAngle, float endAngle, bool anticlockwise) noexcept
   {
@@ -356,7 +356,7 @@ namespace krys::boo::html
     return {};
   }
 
-  // https://html.spec.whatwg.org/#dom-context-2d-rect
+  // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-rect
   void CanvasPath::Rect(float x, float y, float width, float height) noexcept
   {
     if (!HasInvertibleTransform()) KRYS_UNLIKELY
@@ -393,7 +393,7 @@ namespace krys::boo::html
   ExceptionOr<void> CanvasPath::RoundRect(float x, float y, float width, float height,
                                           Span<const RadiusVariant> radii) noexcept
   {
-    // https://html.spec.whatwg.org/#dom-context-2d-roundrect
+    // https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-roundrect
     // 1. If any of x, y, w, or h are infinite or NaN, then return.
 
     if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(width) || !std::isfinite(height))

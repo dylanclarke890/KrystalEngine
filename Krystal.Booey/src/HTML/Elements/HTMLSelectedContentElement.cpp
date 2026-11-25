@@ -13,7 +13,7 @@ namespace krys::boo
 
 #pragma region Extension Hooks
 
-  // https://html.spec.whatwg.org/#the-selectedcontent-element:html-element-insertion-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-insertion-steps
   void HTMLSelectedContentElement::OnInsert() noexcept
   {
     HTMLElement::OnInsert();
@@ -22,7 +22,7 @@ namespace krys::boo
     (void)RecalculateDisabledness();
   }
 
-  // https://html.spec.whatwg.org/#the-selectedcontent-element:html-element-post-connection-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-post-connection-steps
   void HTMLSelectedContentElement::OnPostConnection() noexcept
   {
     HTMLElement::OnPostConnection();
@@ -42,7 +42,7 @@ namespace krys::boo
     html::FormControlAlgorithms::UpdateSelectedContent(*select, *this);
   }
 
-  // https://html.spec.whatwg.org/#the-selectedcontent-element:html-element-moving-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-moving-steps
   void HTMLSelectedContentElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);

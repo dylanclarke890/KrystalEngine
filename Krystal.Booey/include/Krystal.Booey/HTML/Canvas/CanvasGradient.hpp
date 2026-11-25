@@ -41,7 +41,7 @@ namespace krys::boo
 namespace krys::boo::html
 {
   /// @brief A gradient a 2D context fills or strokes with.
-  /// @see https://html.spec.whatwg.org/#canvasgradient
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasgradient
   class CanvasGradient : public RefCounted<CanvasGradient>
   {
   private:
@@ -68,7 +68,7 @@ namespace krys::boo::html
       return *_gradient;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-canvasgradient-addcolorstop
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-canvasgradient-addcolorstop
     ExceptionOr<void> AddColorStop(double value, DOMStringView color) noexcept;
 
   private:

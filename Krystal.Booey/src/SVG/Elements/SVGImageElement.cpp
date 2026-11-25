@@ -181,7 +181,7 @@ namespace krys::boo
 
   Maybe<DOMString> SVGImageElement::CrossOrigin() const noexcept
   {
-    // https://html.spec.whatwg.org/#cors-settings-attribute
+    // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#cors-settings-attribute
     auto value = GetAttribute(u8"crossorigin");
     if (!value)
     {

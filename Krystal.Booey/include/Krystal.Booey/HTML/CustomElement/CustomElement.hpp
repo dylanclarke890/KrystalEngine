@@ -20,7 +20,7 @@ namespace krys::boo::html
   /// are its virtual methods.
   /// @note The element stays the element it was created as, so that an element defined after it was created
   /// keeps its identity: state belongs here, and the element is reached through `Element()`.
-  /// @see https://html.spec.whatwg.org/#custom-elements
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements
   class CustomElement : public CanMakeWeakPtr<CustomElement>
   {
     KRYS_NON_COPY_MOVABLE(CustomElement);
@@ -42,7 +42,7 @@ namespace krys::boo::html
     }
 
     /// @brief The element became connected.
-    /// @see https://html.spec.whatwg.org/#concept-custom-element-definition-lifecycle-callbacks
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-lifecycle-callbacks
     virtual void ConnectedCallback() noexcept
     {
     }

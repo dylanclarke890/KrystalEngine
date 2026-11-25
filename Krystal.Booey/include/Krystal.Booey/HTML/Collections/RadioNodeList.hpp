@@ -46,7 +46,7 @@ namespace krys::boo::html
 
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are
   /// several.
-  /// @see https://html.spec.whatwg.org/#radionodelist
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#radionodelist
   class RadioNodeList final : public LiveNodeList
   {
   private:
@@ -60,10 +60,10 @@ namespace krys::boo::html
 
     ~RadioNodeList() noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-radionodelist-value
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-radionodelist-value
     KRYS_NODISCARD DOMString Value() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-radionodelist-value
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#dom-radionodelist-value
     void SetValue(DOMStringView value) noexcept;
 
     KRYS_NODISCARD bool ElementMatches(const Element &element) const noexcept;

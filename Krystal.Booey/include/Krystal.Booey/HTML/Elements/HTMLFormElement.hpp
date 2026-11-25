@@ -24,7 +24,7 @@ namespace krys::boo
   class HTMLFormControlElement;
   class HTMLImageElement;
 
-  /// @see https://html.spec.whatwg.org/#htmlformelement
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#htmlformelement
   class HTMLFormElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFormElement);
@@ -57,12 +57,12 @@ namespace krys::boo
 
     ~HTMLFormElement() noexcept override;
 
-#pragma region HTMLFormElement - https://html.spec.whatwg.org/#htmlformelement
+#pragma region HTMLFormElement - https://html.spec.whatwg.org/multipage/forms.html#htmlformelement
 
-    /// @see https://html.spec.whatwg.org/#dom-form-acceptcharset
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-acceptcharset
     KRYS_NODISCARD DOMString AcceptCharset() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-acceptcharset
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-acceptcharset
     void AcceptCharset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
@@ -71,10 +71,10 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-form-action
     void Action(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-autocomplete
     KRYS_NODISCARD DOMString Autocomplete() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-autocomplete
     void Autocomplete(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-enctype
@@ -95,10 +95,10 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-form-method
     void Method(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-name
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-name
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-name
     void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-novalidate
@@ -113,41 +113,41 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-form-target
     void Target(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-rel
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-rel
     KRYS_NODISCARD DOMString Rel() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-rel
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-rel
     void Rel(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-rellist
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-rellist
     KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-elements
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-elements
     KRYS_NODISCARD Ref<html::HTMLFormControlsCollection> Elements() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-length
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-length
     KRYS_NODISCARD size_t Length() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-item
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-item
     KRYS_NODISCARD RefPtr<HTMLElement> Item(size_t index) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-nameditem
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-nameditem
     KRYS_NODISCARD Maybe<Variant<RefPtr<html::RadioNodeList>, RefPtr<Element>>>
       NamedItem(DOMStringView name) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-submit
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-submit
     void Submit() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-requestsubmit
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-requestsubmit
     ExceptionOr<void> RequestSubmit(HTMLElement *submitter = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-reset
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-reset
     void Reset() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-checkvalidity
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-checkvalidity
     bool CheckValidity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-form-reportvalidity
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-reportvalidity
     bool ReportValidity() noexcept;
 
 #pragma endregion
@@ -156,7 +156,7 @@ namespace krys::boo
     KRYS_NODISCARD List<Ref<Element>> NamedElements(DOMStringView name) noexcept;
 
     /// @brief Whether @p name names one of the form's elements or images, now or in its past names map.
-    /// @see https://html.spec.whatwg.org/#the-form-element:supported-property-names
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#the-form-element:supported-property-names
     KRYS_NODISCARD bool IsSupportedPropertyName(DOMStringView name) noexcept;
 
     /// @brief Whether the form's `autocomplete` isn't `off`.
@@ -182,12 +182,12 @@ namespace krys::boo
 
     void RemoveInvalidFormControlIfNeeded(const HTMLElement &formControlElement) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#form-submission-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
     void SubmitIfPossible(
       Event *event, HTMLFormControlElement *submitter = nullptr,
       FormSubmissionTrigger trigger = FormSubmissionTrigger::NotSubmittedByJavaScript) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#implicit-submission
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
     void SubmitImplicitly(Event &event, bool fromImplicitSubmissionTrigger) noexcept;
 
     /// @brief The browsing context name the form submits to: the submitter's `formtarget`, the form's
@@ -199,7 +199,7 @@ namespace krys::boo
     /// @brief The form control the event that submits the form was targeted at, if any.
     KRYS_NODISCARD static HTMLFormControlElement *FindSubmitter(const Event *event) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#default-button
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#default-button
     KRYS_NODISCARD HTMLFormControlElement *DefaultButton() const noexcept;
 
     /// @brief Finds the default button again, as a submit button was added, removed or changed; restyles the
@@ -221,7 +221,7 @@ namespace krys::boo
     /// @brief The nearest form ancestor of @p element, if any.
     KRYS_NODISCARD static HTMLFormElement *FindClosestFormAncestor(const Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#constructing-the-form-data-set
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constructing-the-form-data-set
     /// @return The entry list, or null if the form is already constructing one.
     KRYS_NODISCARD RefPtr<html::DOMFormData>
       ConstructEntryList(const RefPtr<HTMLFormControlElement> &submitter,
@@ -265,7 +265,7 @@ namespace krys::boo
   private:
     /// @brief Submits the form, validating it interactively and firing submit first, unless script submits
     /// it.
-    /// @see https://html.spec.whatwg.org/#form-submission-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
     void Submit(Event *event, FormSubmissionTrigger trigger,
                 HTMLFormControlElement *submitter = nullptr) noexcept;
 
@@ -282,7 +282,7 @@ namespace krys::boo
 
     /// @brief Validates the form, reporting the first invalid control to the user (focusing it).
     /// @return Whether the form is valid.
-    /// @see https://html.spec.whatwg.org/#interactively-validate-the-constraints
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#interactively-validate-the-constraints
     bool ValidateInteractively() noexcept;
 
     /// @brief Checks each control's validity, storing those whose `invalid` event wasn't canceled.
@@ -290,7 +290,7 @@ namespace krys::boo
     bool CheckInvalidControlsAndCollectUnhandled(List<Ref<HTMLElement>> &unhandledInvalidControls) noexcept;
 
     /// @brief The past names map: the element last found by a name, kept while it's still the form's.
-    /// @see https://html.spec.whatwg.org/#past-names-map
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#past-names-map
     KRYS_NODISCARD HTMLElement *ElementFromPastNamesMap(DOMStringView pastName) const noexcept;
 
     void AddToPastNamesMap(html::FormAssociatedElement &element, DOMStringView pastName) noexcept;

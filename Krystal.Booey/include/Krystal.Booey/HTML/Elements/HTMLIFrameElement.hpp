@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmliframeelement
+  /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement
   class HTMLIFrameElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLIFrameElement);
@@ -28,42 +28,42 @@ namespace krys::boo
       return true;
     }
 
-#pragma region HTMLIFrameElement - https://html.spec.whatwg.org/#htmliframeelement
+#pragma region HTMLIFrameElement - https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-src
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-src
     KRYS_NODISCARD dom::USVString Src() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-src
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-src
     void Src(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-srcdoc
     KRYS_NODISCARD DOMString SrcDoc() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-srcdoc
     void SrcDoc(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-sizes
     KRYS_NODISCARD DOMString Sizes() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-img-sizes
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-sizes
     void Sizes(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-name
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-name
     KRYS_NODISCARD DOMString Name() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-name
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-name
     void Name(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-allow
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-allow
     KRYS_NODISCARD DOMString Allow() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-allow
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-allow
     void Allow(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-allowfullscreen
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-allowfullscreen
     KRYS_NODISCARD bool AllowFullscreen() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-allowfullscreen
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-allowfullscreen
     void AllowFullscreen(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-width
@@ -78,56 +78,56 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-iframe-height
     void Height(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-referrerpolicy
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-referrerpolicy
     void ReferrerPolicy(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-loading
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-loading
     KRYS_NODISCARD DOMString Loading() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-loading
+    /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-loading
     void Loading(DOMString value) noexcept;
 
 #pragma endregion
 
-#pragma region HTMLIFrameElement Obsolete members - https://html.spec.whatwg.org/#HTMLIFrameElement-partial
+#pragma region HTMLIFrameElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLIFrameElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-scrolling
     KRYS_NODISCARD DOMString Scrolling() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-scrolling
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-scrolling
     void Scrolling(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-frameborder
     KRYS_NODISCARD DOMString FrameBorder() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-frameborder
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-frameborder
     void FrameBorder(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-longdesc
     KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-longdesc
     void LongDesc(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-marginwidth
     KRYS_NODISCARD DOMString MarginWidth() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-marginwidth
     void MarginWidth(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-marginheight
     KRYS_NODISCARD DOMString MarginHeight() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-iframe-marginheight
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-marginheight
     void MarginHeight(DOMString value) noexcept;
 
 #pragma endregion

@@ -268,7 +268,7 @@ namespace krys::boo::html
     /// @brief The largest character reference code kept: one past the Unicode range.
     constexpr static int64 MaxCharacterReferenceCode = 0x110000;
 
-    /// @see https://html.spec.whatwg.org/#temporary-buffer
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#temporary-buffer
     SmallList<char32, 32u> _temporaryBuffer;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
@@ -548,7 +548,7 @@ namespace krys::boo::html
       return true;
     }
 
-    /// @see https://html.spec.whatwg.org/#convert-the-temporary-buffer-to-a-comment
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#convert-the-temporary-buffer-to-a-comment
     void ConvertTemporaryBufferToComment() noexcept
     {
       _token.BeginComment();
@@ -709,7 +709,7 @@ namespace krys::boo::html
 #pragma warning(push)
 #pragma warning(disable : 4'702) // Disable unreachable code warning
 
-    /// @see https://html.spec.whatwg.org/#tokenization
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#tokenization
     KRYS_NODISCARD bool StepTokenizationStateMachine() noexcept
     {
       constexpr char32 Null = U'\000';

@@ -58,7 +58,7 @@ namespace krys::boo::xml
 
   /// @brief Parses an XML document, or a fragment of one, with libxml2, building the tree from its SAX
   /// callbacks. A document that isn't well formed gets the errors shown in it (XMLErrors).
-  /// @see https://html.spec.whatwg.org/#parsing-xhtml-documents
+  /// @see https://html.spec.whatwg.org/multipage/xhtml.html#parsing-xhtml-documents
   class XMLDocumentParser final : public dom::DocumentParser
   {
   private:
@@ -108,7 +108,7 @@ namespace krys::boo::xml
 
     /// @brief Parses @p source into @p fragment, with the namespaces in scope on @p contextElement.
     /// @return Whether @p source was well formed.
-    /// @see https://html.spec.whatwg.org/#xml-fragment-parsing-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/xhtml.html#xml-fragment-parsing-algorithm
     static bool ParseDocumentFragment(DOMStringView source, DocumentFragment &fragment,
                                       Element *contextElement = nullptr) noexcept;
 

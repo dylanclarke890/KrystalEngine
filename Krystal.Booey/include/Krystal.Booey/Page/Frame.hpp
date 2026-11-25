@@ -54,7 +54,7 @@ namespace krys::boo
   /// at its next rendering opportunity.
   /// @note FIXME: Only what layout, style and navigation within a document need: no frame tree, scripting or
   /// printing, focus controller or page overlays.
-  /// @see https://html.spec.whatwg.org/#update-the-rendering
+  /// @see https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
   class Frame final : public RefCounted<Frame>, public CanMakeWeakPtr<Frame>
   {
     KRYS_NON_COPY_MOVABLE(Frame);
@@ -261,7 +261,7 @@ namespace krys::boo
     }
 
     /// @brief The visibility state of the frame's document.
-    /// @see https://html.spec.whatwg.org/#visibility-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#visibility-state
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept
     {
       return _isVisible ? html::DocumentVisibilityState::Visible : html::DocumentVisibilityState::Hidden;

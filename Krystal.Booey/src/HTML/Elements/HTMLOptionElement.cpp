@@ -44,7 +44,7 @@ namespace krys::boo
     return select && select->ContentsUseBaseAppearance() && HTMLElement::RendererIsNeeded(style);
   }
 
-  // https://html.spec.whatwg.org/#the-select-element-2
+  // https://html.spec.whatwg.org/multipage/rendering.html#the-select-element-2
   // An option without a label renders as if its contents slot took its children, so only one with a label
   // makes the tree, which stays if the label goes.
   void HTMLOptionElement::DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept
@@ -68,7 +68,7 @@ namespace krys::boo
     auto *select = OwnerSelectElement();
     if (select && select->ContentsUseBaseAppearance() && event.Type() == event_names::MouseUp)
     {
-      // https://html.spec.whatwg.org/#concept-select-pick
+      // https://html.spec.whatwg.org/multipage/form-elements.html#concept-select-pick
       // 3. If event is a MouseEvent and event's button attribute is not 0, then return.
       if (auto *mouseEvent = DynamicDowncast<MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
       {
@@ -163,7 +163,7 @@ namespace krys::boo
     return RetargetForBindings(Form());
   }
 
-  // https://html.spec.whatwg.org/#dom-option-label
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-label
   DOMString HTMLOptionElement::Label() const noexcept
   {
     // 1. Let attribute be this's label attribute.
@@ -201,7 +201,7 @@ namespace krys::boo
     return _isSelected;
   }
 
-  // https://html.spec.whatwg.org/#dom-option-selected
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-option-selected
   void HTMLOptionElement::Selected(bool value) noexcept
   {
     // 2. Set this's dirtiness to true.
@@ -371,7 +371,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-option-element:html-element-post-connection-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-option-element:html-element-post-connection-steps
   void HTMLOptionElement::OnPostConnection() noexcept
   {
     HTMLElement::OnPostConnection();
@@ -380,7 +380,7 @@ namespace krys::boo
     html::FormControlAlgorithms::UpdateDescendantSelectedContentsForOption(*this);
   }
 
-  // https://html.spec.whatwg.org/#the-option-element:html-element-removing-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-option-element:html-element-removing-steps
   void HTMLOptionElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
@@ -394,7 +394,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#the-option-element:html-element-moving-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-option-element:html-element-moving-steps
   void HTMLOptionElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
@@ -479,7 +479,7 @@ namespace krys::boo
           renderer->Repaint();
         }
 
-        // https://html.spec.whatwg.org/#concept-option-disabled
+        // https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-disabled
         // 1. Let select be the option element's cached nearest ancestor select element.
         // 2. If select is null, then return.
         // 3. Reset a select's selectedness given select and false.
@@ -495,7 +495,7 @@ namespace krys::boo
                                                                value.has_value());
       _isDefault = value.has_value();
 
-      // https://html.spec.whatwg.org/#concept-option-selectedness
+      // https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-selectedness
       // 1. Let hasChanged be false.
       // 2. If option's dirtiness is false:
       // 2a. If the selected attribute was added and option's selectedness is false, then set option's
@@ -556,7 +556,7 @@ namespace krys::boo
 
 #pragma endregion
 
-  // https://html.spec.whatwg.org/#get-html-aware-text-content
+  // https://html.spec.whatwg.org/multipage/form-elements.html#get-html-aware-text-content
   DOMString HTMLOptionElement::CollectOptionInnerText() const noexcept
   {
     // 1. Let text be the empty string.
@@ -587,7 +587,7 @@ namespace krys::boo
     return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(CollectOptionInnerText());
   }
 
-  // https://html.spec.whatwg.org/#concept-option-label
+  // https://html.spec.whatwg.org/multipage/form-elements.html#concept-option-label
   DOMString HTMLOptionElement::OptionLabel() const noexcept
   {
     // 1. If option has a label attribute whose value is not the empty string, then return that value.

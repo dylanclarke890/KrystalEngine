@@ -10,7 +10,7 @@ namespace krys::boo
 
   /// @brief The `style` element: a style sheet written in the document, which its InlineStyleSheetOwner
   /// keeps in step with the element's text, `type` and `media`.
-  /// @see https://html.spec.whatwg.org/#the-style-element
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#the-style-element
   class HTMLStyleElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLStyleElement);
@@ -28,31 +28,31 @@ namespace krys::boo
 
     ~HTMLStyleElement() noexcept override;
 
-#pragma region HTMLStyleElement - https://html.spec.whatwg.org/#htmlstyleelement
+#pragma region HTMLStyleElement - https://html.spec.whatwg.org/multipage/semantics.html#htmlstyleelement
 
-    /// @see https://html.spec.whatwg.org/#dom-style-disabled
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-style-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-style-disabled
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-style-disabled
     void Disabled(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-style-media
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-style-media
     KRYS_NODISCARD DOMString Media() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-style-media
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-style-media
     void Media(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-style-blocking
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-style-blocking
     KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
 #pragma endregion
 
-#pragma region HTMLStyleElement Obsolete members - https://html.spec.whatwg.org/#HTMLStyleElement-partial
+#pragma region HTMLStyleElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLStyleElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-style-type
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-style-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-style-type
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-style-type
     void Type(DOMString value) noexcept;
 
 #pragma endregion
@@ -82,11 +82,11 @@ namespace krys::boo
   public:
     /// @brief Blocks rendering on the element if it's potentially render-blocking (its `blocking` attribute
     /// has `render`, or the parser made it) and @p mediaQueries, its `media`, match the environment.
-    /// @see https://html.spec.whatwg.org/#update-a-style-block
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block
     void PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept;
 
     /// @brief Stops blocking rendering on the element, if it was.
-    /// @see https://html.spec.whatwg.org/#unblock-rendering
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#unblock-rendering
     void UnblockRendering() noexcept;
 
     /// @brief Takes the element off its scope's pending sheets, unless the sheet is still loading.

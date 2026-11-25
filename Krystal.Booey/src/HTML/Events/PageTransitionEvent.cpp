@@ -8,7 +8,7 @@ namespace krys::boo
   {
   }
 
-  // https://html.spec.whatwg.org/#fire-a-page-transition-event
+  // https://html.spec.whatwg.org/multipage/nav-history-apis.html#fire-a-page-transition-event
   Ref<PageTransitionEvent> PageTransitionEvent::Create(const DOMStringAtom &type, bool persisted) noexcept
   {
     // ... with the persisted attribute initialized to persisted, the cancelable attribute initialized to

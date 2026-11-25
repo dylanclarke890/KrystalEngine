@@ -55,7 +55,7 @@ namespace krys::boo
       *html::TextControlInnerTextElement::Create(NodeDocument(), IsInnerTextElementEditable()));
   }
 
-  // https://html.spec.whatwg.org/#the-textarea-element:children-changed-steps
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element:children-changed-steps
   void HTMLTextAreaElement::OnChildrenChanged() noexcept
   {
     // If the element's dirty value flag is false, set the element's raw value to its child text content.
@@ -257,7 +257,7 @@ namespace krys::boo
     SetSelectionRange(start, end, direction, html::ForBindings::Yes);
   }
 
-  // https://html.spec.whatwg.org/#the-textarea-element:concept-node-clone-ext
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element:concept-node-clone-ext
   void HTMLTextAreaElement::OnClone(Node &copy, bool subtree) noexcept
   {
     // Propagate the raw value and dirty value flag from node to copy.
@@ -281,7 +281,7 @@ namespace krys::boo
 
     if (localName == u8"wrap")
     {
-      // https://html.spec.whatwg.org/#attr-textarea-wrap
+      // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-wrap
       // Soft or Hard; off (no wrapping when rendered) is the rendering section's.
       auto newValue = value.value_or(DOMStringView());
       WrapMethod wrap;
@@ -336,7 +336,7 @@ namespace krys::boo
     return true;
   }
 
-  // https://html.spec.whatwg.org/#the-textarea-element:concept-form-reset-control
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element:concept-form-reset-control
   void HTMLTextAreaElement::Reset() noexcept
   {
     // Set the user validity to false, the dirty value flag back to false, and the raw value to its child text
@@ -351,7 +351,7 @@ namespace krys::boo
     return _value;
   }
 
-  // https://html.spec.whatwg.org/#dom-textarea-value
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-value
   ExceptionOr<void> HTMLTextAreaElement::SetValue(DOMStringView value,
                                                   html::TextFieldEventBehavior eventBehavior,
                                                   html::TextControlSetValueSelection selection) noexcept
@@ -433,7 +433,7 @@ namespace krys::boo
     }
   }
 
-  // https://html.spec.whatwg.org/#dom-textarea-defaultvalue
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-defaultvalue
   DOMString HTMLTextAreaElement::DefaultValue() const noexcept
   {
     return dom::TextAlgorithms::ChildTextContent(*this);
@@ -444,7 +444,7 @@ namespace krys::boo
     (void)TextContent(krys::move(defaultValue));
   }
 
-  // https://html.spec.whatwg.org/#dom-textarea-textlength
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-textarea-textlength
   uint32 HTMLTextAreaElement::TextLength() const noexcept
   {
     return static_cast<uint32>(LengthForAPIValue(Value()));
@@ -523,7 +523,7 @@ namespace krys::boo
 
 #pragma region HTMLTextAreaElement
 
-  // https://html.spec.whatwg.org/#dom-fe-autocomplete
+  // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-autocomplete
   DOMString HTMLTextAreaElement::Autocomplete() const noexcept
   {
     // Return the element's IDL-exposed autofill value.

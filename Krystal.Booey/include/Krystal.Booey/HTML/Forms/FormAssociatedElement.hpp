@@ -15,7 +15,7 @@ namespace krys::boo
 namespace krys::boo::html
 {
   /// @brief An element that can have a form owner.
-  /// @see https://html.spec.whatwg.org/#form-associated-element
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#form-associated-element
   class FormAssociatedElement
   {
     KRYS_NON_COPY_MOVABLE(FormAssociatedElement);
@@ -42,12 +42,12 @@ namespace krys::boo::html
     }
 
     /// @brief The form owner, if any.
-    /// @see https://html.spec.whatwg.org/#form-owner
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-owner
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
     /// @brief The form owner, as the `form` IDL attribute exposes it: retargeted against the element, so a
     /// form in a shadow tree it reaches through a reference target shows as that tree's host.
-    /// @see https://html.spec.whatwg.org/#dom-fae-form
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form
     KRYS_NODISCARD virtual RefPtr<Element> FormForBindings() const noexcept;
 
     /// @brief Changes the form owner, if it's a different form.
@@ -68,7 +68,7 @@ namespace krys::boo::html
   protected:
     FormAssociatedElement() noexcept = default;
 
-    /// @see https://html.spec.whatwg.org/#reset-the-form-owner
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#reset-the-form-owner
     virtual void ResetFormOwner() noexcept = 0;
 
     /// @brief Sets the form owner; overrides also leave the old form and join the new one.

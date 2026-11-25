@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlaudioelement
+  /// @see https://html.spec.whatwg.org/multipage/media.html#htmlaudioelement
   class HTMLAudioElement : public HTMLMediaElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAudioElement);

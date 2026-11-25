@@ -46,98 +46,98 @@ namespace krys::boo::html
 {
   /// @brief The focus processing model. A focusable area is an element, or a document standing for its
   /// viewport; a focus chain is a list of such nodes ending with the document.
-  /// @see https://html.spec.whatwg.org/#focus
+  /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus
   class FocusAlgorithms
   {
   public:
     using FocusChain = List<Ref<Node>>;
 
-    /// @see https://html.spec.whatwg.org/#tabindex-value
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#tabindex-value
     KRYS_NODISCARD static Maybe<int32> TabIndexValue(const Element &element) noexcept;
 
     /// @brief Whether @p node is inert: an element with an `inert` attribute or a flat tree descendant of
     /// one, or, while its document is blocked by a modal dialog, outside that dialog's flat tree.
-    /// @see https://html.spec.whatwg.org/#inert
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#inert
     // FIXME: Fullscreen elements, once there are any.
     KRYS_NODISCARD static bool IsInert(const Node &node) noexcept;
 
     /// @brief Whether @p element is a focusable area (it is focusable).
-    /// @see https://html.spec.whatwg.org/#focusable-area
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
     KRYS_NODISCARD static bool IsFocusableArea(const Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#get-the-focusable-area
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#get-the-focusable-area
     KRYS_NODISCARD static Node *
       GetFocusableArea(Element &focusTarget,
                        dom::FocusTrigger focusTrigger = dom::FocusTrigger::Other) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#focus-delegate
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-delegate
     KRYS_NODISCARD static Node *
       FocusDelegate(Element &focusTarget, dom::FocusTrigger focusTrigger = dom::FocusTrigger::Other) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#autofocus-delegate
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#autofocus-delegate
     KRYS_NODISCARD static Node *AutofocusDelegate(ContainerNode &focusTarget,
                                                   dom::FocusTrigger focusTrigger) noexcept;
 
     /// @brief The focused area of the document if its window has system focus, or null.
-    /// @see https://html.spec.whatwg.org/#currently-focused-area-of-a-top-level-traversable
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#currently-focused-area-of-a-top-level-traversable
     KRYS_NODISCARD static Node *CurrentlyFocusedArea(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#focus-chain
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-chain
     KRYS_NODISCARD static FocusChain GetFocusChain(Node &subject) noexcept;
 
     /// @brief Run when an element with the `autofocus` attribute is inserted into a document: it becomes one
     /// of the top-level document's autofocus candidates, unless autofocus was processed.
-    /// @see https://html.spec.whatwg.org/#the-autofocus-attribute
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#the-autofocus-attribute
     static void AutofocusInsertionSteps(Element &element) noexcept;
 
     /// @brief Focuses the first of @p topDocument's autofocus candidates that's focusable, in the rendering
     /// update.
-    /// @see https://html.spec.whatwg.org/#flush-autofocus-candidates
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#flush-autofocus-candidates
     static void FlushAutofocusCandidates(Document &topDocument) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#focusing-steps
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focusing-steps
     static void FocusingSteps(Node &newFocusTarget, Node *fallbackTarget = nullptr,
                               const dom::FocusOptions &options = {}) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#unfocusing-steps
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#unfocusing-steps
     static void UnfocusingSteps(Element &oldFocusTarget) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#focus-update-steps
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-update-steps
     static void FocusUpdateSteps(FocusChain oldChain, FocusChain newChain, Node *newFocusTarget,
                                  const dom::FocusOptions &options = {}) noexcept;
 
     /// @brief Fires a focus event named @p e at @p target, and the `focusin`/`focusout` that goes with it.
-    /// @see https://html.spec.whatwg.org/#fire-a-focus-event
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#fire-a-focus-event
     static void FireFocusEvent(const DOMStringAtom &e, Element &target, EventTarget *relatedTarget) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#has-focus-steps
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#has-focus-steps
     KRYS_NODISCARD static bool HasFocusSteps(const Document &target) noexcept;
 
     /// @brief Focuses what the user activated with a pointer: the nearest click focusable area that is
     /// @p element or one of its flat tree ancestors, or the viewport if there's none.
-    /// @see https://html.spec.whatwg.org/#click-focusable
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#click-focusable
     static void FocusForClick(Element &element) noexcept;
 
     /// @brief The nearest click focusable area that is @p element or one of its flat tree ancestors, if any.
     KRYS_NODISCARD static Element *ClickFocusableInclusiveAncestor(Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#focus-navigation-scope-owner
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-navigation-scope-owner
     KRYS_NODISCARD static bool IsFocusNavigationScopeOwner(const Node &node) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#associated-focus-navigation-owner
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#associated-focus-navigation-owner
     KRYS_NODISCARD static Node *AssociatedFocusNavigationOwner(const Element &element) noexcept;
 
     /// @brief Whether @p element is a focusable area with a non-negative tabindex value (an omitted one
     /// counts as 0 for the elements that are focusable by default).
     /// @note Areas in a focus navigation scope whose owner has a negative tabindex value are sequentially
     /// focusable by this test but missing from the sequential focus navigation order.
-    /// @see https://html.spec.whatwg.org/#sequentially-focusable
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequentially-focusable
     KRYS_NODISCARD static bool IsSequentiallyFocusable(const Element &element) noexcept;
 
     /// @brief The document's flattened tabindex-ordered focus navigation scope: its sequentially focusable
     /// areas, those with positive tabindex values first (ascending), then the rest in shadow-including tree
     /// order, each scope (shadow trees, slots) navigated as a whole.
-    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-order
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-order
     KRYS_NODISCARD static List<Element *> SequentialFocusNavigationOrder(Document &document) noexcept;
 
     /// @brief Moves the focus to the next (@p direction `Forward`) or previous (`Backward`) suitable

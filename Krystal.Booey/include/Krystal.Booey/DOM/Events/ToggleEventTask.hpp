@@ -54,8 +54,8 @@ namespace krys::boo::dom
 
   /// @brief An element's `toggle` event task: toggling it again before the task runs updates the queued
   /// event's new state (and source), keeping its old state, so one event reports both changes.
-  /// @see https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
-  /// @see https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
+  /// @see https://html.spec.whatwg.org/multipage/popover.html#queue-a-popover-toggle-event-task
+  /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-dialog-toggle-event-task
   class ToggleEventTask final : public RefCounted<ToggleEventTask>
   {
     KRYS_NON_COPY_MOVABLE(ToggleEventTask);

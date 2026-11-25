@@ -253,7 +253,7 @@ namespace krys::boo
     };
   }
 
-  // https://html.spec.whatwg.org/#unload-a-document
+  // https://html.spec.whatwg.org/multipage/document-lifecycle.html#unload-a-document
   void FrameLoader::DispatchUnloadEvents() noexcept
   {
     RefPtr<boo::Document> document = ShareRefPtr(_frame.Document());
@@ -431,7 +431,7 @@ namespace krys::boo
     krys_assert(frameRequest.GetResourceRequest().HttpMethod() == u8"GET");
 
     auto *document = _frame.Document();
-    // https://html.spec.whatwg.org/#navigate
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigate
     // 9. If navigable's active document's unload counter is greater than 0, then return.
     if (!document || !IsNavigationAllowed())
     {
@@ -487,13 +487,13 @@ namespace krys::boo
       return;
     }
 
-    // https://html.spec.whatwg.org/#form-submission-algorithm
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
     // 26a. Let referrerPolicy be the empty string.
     // 26b. If the form element's link types include the noreferrer keyword, then set referrerPolicy to
     //      "no-referrer".
     // (Skipped: there are no referrers, so the policy would change nothing; see DIFFERENCES.md.)
 
-    // https://html.spec.whatwg.org/#plan-to-navigate
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#plan-to-navigate
     // The navigation is planned for a later task, which a later submission of the form cancels.
     html::EventLoop::Current().QueueTask(
       html::TaskSource::DOMManipulation, *document,
@@ -523,7 +523,7 @@ namespace krys::boo
       return;
     }
 
-    // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
+    // https://html.spec.whatwg.org/multipage/document-sequences.html#the-rules-for-choosing-a-navigable
     // 8. If chosen is null, then a new top-level traversable is being requested: ... If the user agent has
     //    been configured such that in this instance it will create a new top-level traversable:
     // 8a. Consume user activation of currentNavigable's active window.
@@ -537,7 +537,7 @@ namespace krys::boo
 
   boo::Frame *FrameLoader::FindFrameForNavigation(DOMStringView name) const noexcept
   {
-    // https://html.spec.whatwg.org/#the-rules-for-choosing-a-navigable
+    // https://html.spec.whatwg.org/multipage/document-sequences.html#the-rules-for-choosing-a-navigable
     // 1. Let chosen be null.
     // 2. Let windowType be "existing or none".
     // 3. Let sandboxingFlagSet be currentNavigable's active document's active sandboxing flag set.

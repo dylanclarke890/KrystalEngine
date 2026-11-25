@@ -2500,7 +2500,7 @@ namespace krys::boo
 
     // An empty string only parses to new elements in an <html> element (which gets a head and a body); in
     // anything else it just removes the children.
-    // https://html.spec.whatwg.org/#parsing-main-inhtml
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml
     if (markup.empty() && !Is<HTMLHtmlElement>(*container))
     {
       return dom::MutationAlgorithms::ReplaceAll(nullptr, *container);
@@ -2732,7 +2732,7 @@ namespace krys::boo
 
     // An element without a parent element: nothing happens without a parent, a Document parent throws, and
     // so does a DocumentFragment one, as in Chrome (see DIFFERENCES.md).
-    // https://html.spec.whatwg.org/#dom-element-outerhtml
+    // https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml
     RefPtr<Element> parent = ShareRefPtr(ParentElement());
     if (!parent) KRYS_UNLIKELY
     {
@@ -3326,7 +3326,7 @@ namespace krys::boo
     InvalidateStyleInternal();
   }
 
-  // https://html.spec.whatwg.org/#topmost-popover-ancestor
+  // https://html.spec.whatwg.org/multipage/popover.html#topmost-popover-ancestor
   RefPtr<HTMLElement> Element::TopmostPopoverAncestor(HTMLElement *source, bool isPopover) noexcept
   {
     // 1. If isPopover is true: assert: newPopoverOrTopLayerElement is an HTML element; its popover attribute

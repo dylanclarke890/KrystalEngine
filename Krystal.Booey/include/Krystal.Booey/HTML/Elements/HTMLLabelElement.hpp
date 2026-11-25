@@ -6,7 +6,7 @@ namespace krys::boo
 {
   class HTMLFormElement;
 
-  /// @see https://html.spec.whatwg.org/#htmllabelelement
+  /// @see https://html.spec.whatwg.org/multipage/forms.html#htmllabelelement
   class HTMLLabelElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLabelElement);
@@ -17,19 +17,19 @@ namespace krys::boo
   public:
     HTMLLabelElement(Document &document) noexcept;
 
-#pragma region HTMLLabelElement - https://html.spec.whatwg.org/#htmllabelelement
+#pragma region HTMLLabelElement - https://html.spec.whatwg.org/multipage/forms.html#htmllabelelement
 
     /// @brief The form owner of the labeled control, if it has one.
-    /// @see https://html.spec.whatwg.org/#dom-label-form
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-label-form
     KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
 
     /// @brief The labeled control's form owner, retargeted against the label.
-    /// @see https://html.spec.whatwg.org/#dom-label-form
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-label-form
     KRYS_NODISCARD RefPtr<Element> FormForBindings() const noexcept;
 
     /// @brief The labeled control: the element the `for` attribute names, or the first labelable
     /// descendant.
-    /// @see https://html.spec.whatwg.org/#labeled-control
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#labeled-control
     KRYS_NODISCARD RefPtr<HTMLElement> Control() const noexcept;
 
     /// @brief Runs the labeled control's access key action, if it has one.
@@ -37,13 +37,13 @@ namespace krys::boo
 
     /// @brief The labeled control, retargeted against the label: a control in a shadow tree shows as its
     /// host.
-    /// @see https://html.spec.whatwg.org/#dom-label-control
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-label-control
     KRYS_NODISCARD RefPtr<HTMLElement> ControlForBindings() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-label-htmlfor
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-label-htmlfor
     KRYS_NODISCARD DOMString HtmlFor() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-label-htmlfor
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-label-htmlfor
     void HtmlFor(DOMString value) noexcept;
 
 #pragma endregion

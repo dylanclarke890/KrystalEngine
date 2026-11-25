@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlmenuelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlmenuelement
   class HTMLMenuElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMenuElement);
@@ -12,12 +12,12 @@ namespace krys::boo
   public:
     HTMLMenuElement(Document &document) noexcept;
 
-#pragma region HTMLMenuElement Obsolete members - https://html.spec.whatwg.org/#HTMLMenuElement-partial
+#pragma region HTMLMenuElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLMenuElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-menu-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-menu-compact
     KRYS_NODISCARD bool Compact() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-menu-compact
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-menu-compact
     void Compact(bool value) noexcept;
 
 #pragma endregion

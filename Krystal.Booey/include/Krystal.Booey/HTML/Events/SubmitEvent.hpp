@@ -8,14 +8,14 @@ namespace krys::boo
 {
   class HTMLElement;
 
-  /// @see https://html.spec.whatwg.org/#submiteventinit
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#submiteventinit
   struct SubmitEventInit : EventInit
   {
     HTMLElement *Submitter {nullptr};
   };
 
   /// @brief The `submit` event, with the button that submitted the form.
-  /// @see https://html.spec.whatwg.org/#submitevent
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#submitevent
   class SubmitEvent final : public Event
   {
   private:
@@ -31,7 +31,7 @@ namespace krys::boo
     /// @brief A trusted `submit` event, which bubbles and can be cancelled.
     KRYS_NODISCARD static Ref<SubmitEvent> Create(RefPtr<HTMLElement> &&submitter) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-submitevent-submitter
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-submitevent-submitter
     KRYS_NODISCARD HTMLElement *Submitter() const noexcept
     {
       return _submitter.get();

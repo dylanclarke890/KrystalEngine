@@ -45,7 +45,7 @@ namespace krys::boo::html
 {
   /// @brief The custom element definitions of a document (its global registry) or of the trees that use a
   /// scoped registry, defined from C++.
-  /// @see https://html.spec.whatwg.org/#customelementregistry
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#customelementregistry
   class CustomElementRegistry : public RefCounted<CustomElementRegistry>
   {
   public:
@@ -55,10 +55,10 @@ namespace krys::boo::html
     /// @brief The document whose global registry this is; null for a scoped registry.
     WeakPtr<boo::Document> _document;
     bool _isScoped {false};
-    /// @see https://html.spec.whatwg.org/#element-definition-is-running
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#element-definition-is-running
     bool _elementDefinitionIsRunning {false};
     HashMap<DOMStringAtom, Ref<CustomElementInterface>> _nameMap;
-    /// @see https://html.spec.whatwg.org/#when-defined-promise-map
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#when-defined-promise-map
     HashMap<DOMStringAtom, List<WhenDefinedCallback>> _whenDefinedMap;
     /// @see https://html.spec.whatwg.org/#customelementregistry-scoped-document-set
     List<WeakPtr<boo::Document>> _scopedDocumentSet;
@@ -77,13 +77,13 @@ namespace krys::boo::html
       return CreateRef<CustomElementRegistry>(document);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry
     KRYS_NODISCARD static Ref<CustomElementRegistry> CreateScoped() noexcept
     {
       return CreateRef<CustomElementRegistry>();
     }
 
-    /// @see https://html.spec.whatwg.org/#is-scoped
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#is-scoped
     KRYS_NODISCARD bool IsScoped() const noexcept
     {
       return _isScoped;
@@ -94,28 +94,28 @@ namespace krys::boo::html
 
     /// @brief Defines @p name as a custom element whose behaviour @p factory creates, and upgrades the
     /// elements already waiting for it.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-define
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define
     ExceptionOr<void> Define(const DOMStringAtom &name, CustomElementFactory &&factory,
                              CustomElementOptions &&options = {}) noexcept;
 
     /// @brief The definition of @p name; null if there's none.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-get
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-get
     KRYS_NODISCARD CustomElementInterface *Get(DOMStringAtom name) const noexcept;
 
     /// @brief The name @p elementInterface is defined as here; null if it isn't one of this registry's.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-getname
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-getname
     KRYS_NODISCARD DOMStringAtom GetName(const CustomElementInterface &elementInterface) const noexcept;
 
     /// @brief Calls @p callback (in a microtask) once @p name is defined, or now if it already is.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-whendefined
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-whendefined
     ExceptionOr<void> WhenDefined(const DOMStringAtom &name, WhenDefinedCallback &&callback) noexcept;
 
     /// @brief Tries to upgrade @p root and its shadow-including descendants.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-upgrade
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-upgrade
     void Upgrade(Node &root) noexcept;
 
     /// @brief Gives @p root and its descendants that have a null registry this one, and upgrades them.
-    /// @see https://html.spec.whatwg.org/#dom-customelementregistry-initialize
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-initialize
     ExceptionOr<void> Initialize(Node &root) noexcept;
 
     /// @brief Remembers that @p document has trees using this (scoped) registry, so that they upgrade when

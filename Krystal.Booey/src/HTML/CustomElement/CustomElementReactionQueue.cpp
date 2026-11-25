@@ -62,7 +62,7 @@ namespace krys::boo::html
       return state;
     }
 
-    /// @see https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue (step 2)
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-an-element-on-the-appropriate-element-queue (step 2)
     CustomElementQueue &BackupElementQueueForEnqueue() noexcept
     {
       auto &state = GetBackupElementQueueState();
@@ -228,7 +228,7 @@ namespace krys::boo::html
     EnqueueElementOnAppropriateElementQueue(element);
   }
 
-  // https://html.spec.whatwg.org/#concept-try-upgrade
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#concept-try-upgrade
   void CustomElementReactionQueue::TryToUpgradeElement(Element &element) noexcept
   {
     krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
@@ -420,7 +420,7 @@ namespace krys::boo::html
     }
   }
 
-  // https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-an-element-on-the-appropriate-element-queue
   void CustomElementReactionQueue::EnqueueElementOnAppropriateElementQueue(Element &element) noexcept
   {
     krys_debug_assert(element.ReactionQueue() != nullptr);

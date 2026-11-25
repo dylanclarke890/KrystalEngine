@@ -18,7 +18,7 @@ namespace krys::boo::html
   class RadioButtonGroup;
 
   /// @brief The radio button groups of a form, or of a tree's radio buttons without a form, by name.
-  /// @see https://html.spec.whatwg.org/#radio-button-group
+  /// @see https://html.spec.whatwg.org/multipage/input.html#radio-button-group
   class RadioButtonGroups
   {
     KRYS_NON_COPY_MOVABLE(RadioButtonGroups);

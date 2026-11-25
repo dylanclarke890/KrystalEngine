@@ -113,7 +113,7 @@ namespace krys::boo
     KRYS_NODISCARD utf8_string SerializeNodes(Node &targetNode, SerializedNodes root) noexcept;
 
     /// @brief False if the serialization required well-formed XML and met one of the error cases.
-    /// @see https://html.spec.whatwg.org/#xml-fragment-serialisation-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/xhtml.html#xml-fragment-serialisation-algorithm
     KRYS_NODISCARD bool IsWellFormed() const noexcept
     {
       return _wellFormed;

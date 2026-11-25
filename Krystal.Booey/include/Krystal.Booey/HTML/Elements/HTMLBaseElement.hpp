@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlbaseelement
+  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmlbaseelement
   class HTMLBaseElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLBaseElement);
@@ -13,18 +13,18 @@ namespace krys::boo
   public:
     HTMLBaseElement(Document &document) noexcept;
 
-#pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
+#pragma region HTMLBaseElement - https://html.spec.whatwg.org/multipage/semantics.html#htmlbaseelement
 
-    /// @see https://html.spec.whatwg.org/#dom-base-href
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-href
     KRYS_NODISCARD dom::USVString Href() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-base-href
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-href
     void Href(dom::USVString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-base-target
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-target
     KRYS_NODISCARD DOMString Target() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-base-target
+    /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-target
     void Target(DOMString value) noexcept;
 
 #pragma endregion

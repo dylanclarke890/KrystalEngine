@@ -140,7 +140,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlelement
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#htmlelement
   class HTMLElement : public StyledElement
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -164,214 +164,214 @@ namespace krys::boo
   public:
     HTMLElement(Document &document) noexcept;
 
-#pragma region HTMLElement - https://html.spec.whatwg.org/#htmlelement
+#pragma region HTMLElement - https://html.spec.whatwg.org/multipage/dom.html#htmlelement
 
-    /// @see https://html.spec.whatwg.org/#dom-title
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-title
     KRYS_NODISCARD DOMString Title() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-title
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-title
     void Title(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-lang
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-lang
     KRYS_NODISCARD DOMString Lang() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-lang
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-lang
     void Lang(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-translate
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-translate
     KRYS_NODISCARD bool Translate() const noexcept;
 
     /// @brief Whether @p element's translation mode is translate-enabled, rather than no-translate: the
     /// state of the nearest inclusive ancestor HTML element whose `translate` attribute is `yes` or `no`, or
     /// translate-enabled if there's none.
-    /// @see https://html.spec.whatwg.org/#translation-mode
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#translation-mode
     KRYS_NODISCARD static bool IsTranslateEnabled(const Element &element) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-translate
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-translate
     void Translate(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dir
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-dir
     KRYS_NODISCARD DOMString Dir() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dir
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-dir
     void Dir(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hidden
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
     KRYS_NODISCARD BoolOr<DOMString> Hidden() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hidden
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
     void Hidden(const DOMString &value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hidden
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
     void Hidden(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hidden
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-hidden
     void Hidden(double value) noexcept;
 
     /// @brief Whether the `hidden` attribute is in the hidden until found state.
     KRYS_NODISCARD bool IsHiddenUntilFound() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-inert
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-inert
     KRYS_NODISCARD bool Inert() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-inert
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-inert
     void Inert(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-click
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-click
     void Click() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-accesskey
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-accesskey
     KRYS_NODISCARD DOMString AccessKey() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-accesskey
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-accesskey
     void AccessKey(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-accesskeylabel
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-accesskeylabel
     KRYS_NODISCARD DOMString AccessKeyLabel() const noexcept;
 
     /// @brief The state of the `contenteditable` attribute: `true`, `plaintext-only`, `false` or `inherit`.
     /// @note `isContentEditable` is `Node::IsContentEditable`.
-    /// @see https://html.spec.whatwg.org/#dom-contenteditable
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-contenteditable
     KRYS_NODISCARD DOMString ContentEditable() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-contenteditable
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-contenteditable
     ExceptionOr<void> ContentEditable(DOMStringView value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-draggable
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-draggable
     KRYS_NODISCARD bool Draggable() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-draggable
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-draggable
     void Draggable(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-spellcheck
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-spellcheck
     KRYS_NODISCARD bool SpellCheck() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-spellcheck
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-spellcheck
     void SpellCheck(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-writingsuggestions
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-writingsuggestions
     KRYS_NODISCARD DOMString WritingSuggestions() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-writingsuggestions
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-writingsuggestions
     void WritingSuggestions(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-autocapitalize
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-autocapitalize
     KRYS_NODISCARD DOMString Autocapitalize() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-autocapitalize
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-autocapitalize
     void Autocapitalize(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-autocorrect
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-autocorrect
     KRYS_NODISCARD bool Autocorrect() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-autocorrect
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-autocorrect
     void Autocorrect(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-inputmode
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-inputmode
     KRYS_NODISCARD DOMString InputMode() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-inputmode
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-inputmode
     void InputMode(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-enterkeyhint
     KRYS_NODISCARD DOMString EnterKeyHint() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-enterkeyhint
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-enterkeyhint
     void EnterKeyHint(DOMString value) noexcept;
 
     /// @brief The element's rendered text: its text as laid out, with line breaks and tabs for its boxes, or
     /// its descendant text content if it isn't being rendered.
-    /// @see https://html.spec.whatwg.org/#dom-innertext
-    /// @see https://html.spec.whatwg.org/#get-the-text-steps
-    /// @see https://html.spec.whatwg.org/#rendered-text-collection-steps
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-innertext
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#get-the-text-steps
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#rendered-text-collection-steps
     KRYS_NODISCARD DOMString InnerText() const noexcept;
 
     /// @brief Replaces the element's children with @p value's text, with a `<br>` for each line break.
-    /// @see https://html.spec.whatwg.org/#dom-innertext
-    /// @see https://html.spec.whatwg.org/#set-the-inner-text-steps
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-innertext
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#set-the-inner-text-steps
     void InnerText(const DOMString &value) noexcept;
 
     /// @brief The same as `InnerText()`.
-    /// @see https://html.spec.whatwg.org/#dom-outertext
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-outertext
     KRYS_NODISCARD DOMString OuterText() const noexcept;
 
     /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
     /// with the text around it; `NoModificationAllowedError` if the element has no parent.
-    /// @see https://html.spec.whatwg.org/#dom-outertext
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-outertext
     ExceptionOr<void> OuterText(const DOMString &value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-attachinternals
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals
     KRYS_NODISCARD ExceptionOr<Ref<html::ElementInternals>> AttachInternals() noexcept;
 
     /// @brief Shows the popover, invoked by @p options' source.
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it isn't
     /// connected, its document isn't fully active, it's a modal dialog, another popover is being shown or
     /// hidden, or its `popover` attribute changes as other popovers hide.
-    /// @see https://html.spec.whatwg.org/#dom-showpopover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-showpopover
     ExceptionOr<void> ShowPopover(const html::ShowPopoverOptions &options = {}) noexcept;
 
     /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it's a modal
     /// dialog.
-    /// @see https://html.spec.whatwg.org/#dom-hidepopover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-hidepopover
     ExceptionOr<void> HidePopover() noexcept;
 
     /// @brief Hides the popover if it's showing, else shows it, unless @p options forces one or the other.
     /// @return Whether the popover is showing, or the exceptions of `ShowPopover` and `HidePopover`.
-    /// @see https://html.spec.whatwg.org/#dom-togglepopover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-togglepopover
     ExceptionOr<bool>
       TogglePopover(const html::TogglePopoverOptionsOrBool &options = html::TogglePopoverOptions {}) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popover
     KRYS_NODISCARD Maybe<DOMString> Popover() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#dom-popover
     void Popover(Maybe<DOMString> value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-headingoffset
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-headingoffset
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-headingoffset
     void HeadingOffset(uint32 value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-headingreset
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-headingreset
     KRYS_NODISCARD bool HeadingReset() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-headingreset
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-headingreset
     void HeadingReset(bool value) noexcept;
 
 #pragma endregion
 
     /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
-    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(DOMStringView string) noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
 
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     KRYS_NODISCARD int32 TabIndex() const noexcept
     {
       return html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
     void TabIndex(int32 value) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this, value);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     KRYS_NODISCARD bool Autofocus() const noexcept
     {
       return html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
     void Autofocus(bool value) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this, value);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-focus
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
     void Focus(const dom::FocusOptions &options = {}) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
@@ -381,7 +381,7 @@ namespace krys::boo
     /// @return Whether the click was dispatched.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#dom-blur
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
     void Blur() noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Blur(*this);
@@ -389,7 +389,7 @@ namespace krys::boo
 
 #pragma endregion
 
-#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
 
     KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
     KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
@@ -404,7 +404,7 @@ namespace krys::boo
     KRYS_NODISCARD static Node::Editability EditabilityFromContentEditableAttr(const Node &node) noexcept;
 
   protected:
-#pragma region Presentational hints - https://html.spec.whatwg.org/#presentational-hints
+#pragma region Presentational hints - https://html.spec.whatwg.org/multipage/rendering.html#presentational-hints
 
     enum class AllowZeroValue : bool
     {
@@ -428,24 +428,24 @@ namespace krys::boo
 
     /// @brief Maps an image-like element's `align` attribute to `vertical-align`, or to `float` for left and
     /// right.
-    /// @see https://html.spec.whatwg.org/#attributes-for-embedded-content-and-images
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#attributes-for-embedded-content-and-images
     void ApplyAlignmentAttributeToStyle(DOMStringView alignment, css::MutableStyleProperties &style) noexcept;
 
     /// @brief Maps `width` and `height` attributes to `aspect-ratio: auto w / h`, if both are numbers of
     /// pixels.
-    /// @see https://html.spec.whatwg.org/#map-to-the-aspect-ratio-property-(using-dimension-rules)
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property-(using-dimension-rules)
     void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(DOMStringView widthAttribute,
                                                              DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
 
     /// @brief As above, for a canvas's attributes, which are non-negative integers.
-    /// @see https://html.spec.whatwg.org/#map-to-the-aspect-ratio-property
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property
     void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
       DOMStringView widthAttribute, DOMStringView heightAttribute,
       css::MutableStyleProperties &style) noexcept;
 
     /// @brief Maps a dimension attribute (a number of pixels or a percentage) to @p property.
-    /// @see https://html.spec.whatwg.org/#maps-to-the-dimension-property
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#maps-to-the-dimension-property
     void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               DOMStringView value,
                               AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
@@ -455,12 +455,12 @@ namespace krys::boo
                                    DOMStringView value) noexcept;
 
     /// @brief Maps a dimension attribute that's a number of pixels (not a percentage) to @p property.
-    /// @see https://html.spec.whatwg.org/#maps-to-the-pixel-length-property
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#maps-to-the-pixel-length-property
     void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                               DOMStringView value) noexcept;
 
     /// @brief Maps a legacy color attribute to @p property, if it parses.
-    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                     DOMStringView attributeValue) noexcept;
 
@@ -478,13 +478,13 @@ namespace krys::boo
   public:
     /// @brief Shows the popover, invoked by @p source; the exceptions of `ShowPopover` are returned only if
     /// @p throwExceptions.
-    /// @see https://html.spec.whatwg.org/#show-popover
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#show-popover
     ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
 
     /// @brief Hides the popover, and the popovers above it in its stack; the exceptions of `HidePopover` are
     /// returned only if @p throwExceptions.
     /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
-    /// @see https://html.spec.whatwg.org/#hide-popover-algorithm
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#hide-popover-algorithm
     ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
                                           dom::FireEvents fireEvents, bool throwExceptions,
                                           HTMLElement *source) noexcept;
@@ -503,7 +503,7 @@ namespace krys::boo
     void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
 
-    /// @see https://html.spec.whatwg.org/#html-element-insertion-steps
+    /// @see https://html.spec.whatwg.org/multipage/infrastructure.html#html-element-insertion-steps
     void OnInsert() noexcept override
     {
       // 1. If insertedNode is an element whose namespace is the HTML namespace, and this standard defines
@@ -522,7 +522,7 @@ namespace krys::boo
       // (Skipped: internal resource links aren't processed; see KNOWN-ISSUES.md.)
     }
 
-    /// @see https://html.spec.whatwg.org/#html-element-removing-steps
+    /// @see https://html.spec.whatwg.org/multipage/infrastructure.html#html-element-removing-steps
     void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
@@ -551,7 +551,7 @@ namespace krys::boo
       }
     }
 
-    /// @see https://html.spec.whatwg.org/#html-element-moving-steps
+    /// @see https://html.spec.whatwg.org/multipage/infrastructure.html#html-element-moving-steps
     void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
     {
       (void)isSubtreeRoot;
@@ -621,20 +621,20 @@ namespace krys::boo
       return nullptr;
     }
 
-    /// @see https://html.spec.whatwg.org/#category-label
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#category-label
     KRYS_NODISCARD virtual bool IsLabelable() const noexcept
     {
       return false;
     }
 
     /// @brief Whether the element can be actually disabled: a form control, an optgroup or an option.
-    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled
     KRYS_NODISCARD bool CanBeActuallyDisabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    /// @see https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled
     KRYS_NODISCARD virtual bool IsActuallyDisabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#interactive-content-2
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#interactive-content-2
     KRYS_NODISCARD virtual bool IsInteractiveContent() const noexcept
     {
       return false;
@@ -643,7 +643,7 @@ namespace krys::boo
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept override;
 
     /// @brief The labels of a labelable element, in tree order; null for other elements.
-    /// @see https://html.spec.whatwg.org/#dom-lfe-labels
+    /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels
     KRYS_NODISCARD RefPtr<NodeList> Labels() noexcept;
 
 #pragma endregion
@@ -1078,14 +1078,14 @@ namespace krys::boo
 
     /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
     /// is.
-    /// @see https://html.spec.whatwg.org/#check-popover-validity
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#check-popover-validity
     KRYS_NODISCARD ExceptionOr<bool> CheckPopoverValidity(bool expectedToBeShowing,
                                                           Document *expectedDocument) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#popover-focusing-steps
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-focusing-steps
     void RunPopoverFocusingSteps() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#queue-a-popover-toggle-event-task
     void QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                      HTMLElement *source) noexcept;
 
@@ -1097,7 +1097,7 @@ namespace krys::boo
     void SetInvoker(HTMLElement *invoker) noexcept;
 
     /// @brief Follows a change to the `popover` attribute, hiding the popover if it's showing.
-    /// @see https://html.spec.whatwg.org/#the-popover-attribute
+    /// @see https://html.spec.whatwg.org/multipage/popover.html#the-popover-attribute
     void PopoverAttributeChanged(Maybe<DOMStringView> value) noexcept;
   };
 }

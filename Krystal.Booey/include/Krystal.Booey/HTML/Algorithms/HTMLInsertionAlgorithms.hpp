@@ -19,7 +19,7 @@ namespace krys::boo::html
   /// @brief How the HTML insertion methods parse.
   /// @note The specification's Legacy mode is `innerHTML`'s, `outerHTML`'s and `insertAdjacentHTML()`'s,
   /// which parse through `CreateFragmentForInnerOuterHTML`.
-  /// @see https://html.spec.whatwg.org/#fragment-parser-mode
+  /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#fragment-parser-mode
   enum class FragmentParserMode : uint8
   {
     /// @brief Unsafe elements and attributes are removed, and declarative shadow roots are allowed.
@@ -31,56 +31,56 @@ namespace krys::boo::html
 
   /// @brief The algorithms of the HTML insertion methods (`setHTML()`, `appendHTML()`, `prependHTML()`,
   /// `beforeHTML()`, `afterHTML()`, `replaceWithHTML()` and their Unsafe counterparts).
-  /// @see https://html.spec.whatwg.org/#html-parsing-methods
+  /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#html-parsing-methods
   class HTMLInsertionAlgorithms
   {
   public:
     /// @brief @p element, or a template's template contents.
-    /// @see https://html.spec.whatwg.org/#target-for-html-insertion
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#target-for-html-insertion
     KRYS_NODISCARD static ContainerNode &TargetForHTMLInsertion(Element &element) noexcept;
 
     /// @brief @p node's parent, null if it has none, or a `HierarchyRequestError` if it can't give the parser
     /// a context (it's a template, a document, or a fragment without a host).
-    /// @see https://html.spec.whatwg.org/#parent-for-html-insertion
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parent-for-html-insertion
     KRYS_NODISCARD static ExceptionOr<ContainerNode *> ParentForHTMLInsertion(Node &node) noexcept;
 
     /// @brief Replaces @p target's children with @p html parsed in its context.
     /// @param sanitizer The options' sanitizer member, or null if it's missing.
-    /// @see https://html.spec.whatwg.org/#set-and-filter-html
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#set-and-filter-html
     static ExceptionOr<void> FilterAndSetHTML(ContainerNode &target, DOMStringView html,
                                               const SanitizerInput *sanitizer,
                                               FragmentParserMode mode) noexcept;
 
     /// @brief Inserts @p html, parsed in @p parent's context, into @p parent before @p child.
-    /// @see https://html.spec.whatwg.org/#filter-and-pre-insert-html
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#filter-and-pre-insert-html
     static ExceptionOr<void> FilterAndPreInsertHTML(ContainerNode &parent, Node *child, DOMStringView html,
                                                     const SanitizerInput *sanitizer,
                                                     FragmentParserMode mode) noexcept;
 
     /// @brief Replaces @p node with @p html, parsed in @p parent's context.
-    /// @see https://html.spec.whatwg.org/#filter-and-replace-with-html
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#filter-and-replace-with-html
     static ExceptionOr<void> FilterAndReplaceWithHTML(ContainerNode &parent, Node &node, DOMStringView html,
                                                       const SanitizerInput *sanitizer,
                                                       FragmentParserMode mode) noexcept;
 
     /// @brief @p html parsed as @p target's children; null when Safe parsing into a script element.
-    /// @see https://html.spec.whatwg.org/#parse-html-for-insertion
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#parse-html-for-insertion
     KRYS_NODISCARD static ExceptionOr<RefPtr<DocumentFragment>>
       ParseHTMLForInsertion(ContainerNode &target, DOMStringView html, const SanitizerInput *sanitizer,
                             FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `beforeHTML()` and `beforeHTMLUnsafe()`, shared by elements and character data.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
     static ExceptionOr<void> BeforeHTML(Node &node, DOMStringView html, const SanitizerInput *sanitizer,
                                         FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `afterHTML()` and `afterHTMLUnsafe()`.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
     static ExceptionOr<void> AfterHTML(Node &node, DOMStringView html, const SanitizerInput *sanitizer,
                                        FragmentParserMode mode) noexcept;
 
     /// @brief The steps of `replaceWithHTML()` and `replaceWithHTMLUnsafe()`.
-    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
     static ExceptionOr<void> ReplaceWithHTML(Node &node, DOMStringView html, const SanitizerInput *sanitizer,
                                              FragmentParserMode mode) noexcept;
   };

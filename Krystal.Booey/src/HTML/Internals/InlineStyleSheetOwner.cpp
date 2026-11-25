@@ -154,7 +154,7 @@ namespace krys::boo::html
     UpdateSheet(element, dom::TextAlgorithms::ChildTextContent(element));
   }
 
-  // https://html.spec.whatwg.org/#update-a-style-block
+  // https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block
   void InlineStyleSheetOwner::UpdateSheet(Element &element, const DOMString &text) noexcept
   {
     // 1. Let element be the style element.

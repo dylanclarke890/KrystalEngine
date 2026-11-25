@@ -354,7 +354,7 @@ namespace krys::boo
     }
     _writer.End();
 
-    // https://html.spec.whatwg.org/#creating-a-new-browsing-context
+    // https://html.spec.whatwg.org/multipage/document-sequences.html#creating-a-new-browsing-context
     // 26. Completely finish loading document.
     // (The document is never parsed, so its readiness is "complete", and it gets no load event.)
     if (RefPtr<boo::Document> document = ShareRefPtr(_frame ? _frame->Document() : nullptr))

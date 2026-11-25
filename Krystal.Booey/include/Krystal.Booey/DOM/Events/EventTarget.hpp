@@ -57,7 +57,7 @@ namespace krys::boo
     SmallList<Ref<EventListener>> _eventListenerList;
 
     /// @brief An event handler: its value and the listener that calls it, added when it was first set.
-    /// @see https://html.spec.whatwg.org/#event-handlers
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handlers
     struct EventHandler
     {
       DOMStringAtom Name;
@@ -66,7 +66,7 @@ namespace krys::boo
     };
 
     /// @brief The target's event handlers (its event handler map), made when one is first set.
-    /// @see https://html.spec.whatwg.org/#event-handler-map
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-map
     UniquePtr<List<EventHandler>> _eventHandlers;
 
   protected:
@@ -132,13 +132,13 @@ namespace krys::boo
     ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
 
     /// @brief The value of the target's own event handler @p name; null if it's not set.
-    /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#getting-the-current-value-of-the-event-handler
     KRYS_NODISCARD const Func<void(Event &)> *EventHandlerValue(DOMStringAtom name) const noexcept;
 
     /// @brief Sets the target's own event handler @p name to @p value, activating it (adding its listener)
     /// the first time; an empty @p value deactivates it (removing its listener).
-    /// @see https://html.spec.whatwg.org/#activate-an-event-handler
-    /// @see https://html.spec.whatwg.org/#deactivate-an-event-handler
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#activate-an-event-handler
+    /// @see https://html.spec.whatwg.org/multipage/webappapis.html#deactivate-an-event-handler
     void SetEventHandlerValue(DOMStringAtom name, Func<void(Event &)> &&value) noexcept;
 
     /// @brief The target's event listener list, in the order they were added.

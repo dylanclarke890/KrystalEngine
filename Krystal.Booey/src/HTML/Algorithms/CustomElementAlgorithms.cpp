@@ -31,7 +31,7 @@ namespace krys::boo::html
     return EffectiveGlobalCustomElementRegistry(document._customElementRegistry.get());
   }
 
-  // https://html.spec.whatwg.org/#look-up-a-custom-element-definition
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-definition
   CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
     CustomElementRegistry *registry, const DOMStringAtom &namespaceURI, DOMStringAtom localName) noexcept
   {
@@ -55,7 +55,7 @@ namespace krys::boo::html
     return registry->FindInterface(krys::move(localName));
   }
 
-  // https://html.spec.whatwg.org/#look-up-a-custom-element-registry
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-registry
   CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(Node &node) noexcept
   {
     // 1. If node is an Element object, then return node's custom element registry.

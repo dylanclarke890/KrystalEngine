@@ -209,7 +209,7 @@ namespace krys::boo
   {
     // Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the
     // style sheet has no critical subresources, once the style sheet has been parsed and processed:
-    // https://html.spec.whatwg.org/#update-a-style-block
+    // https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block
     // 1. Let element be the style element associated with the style sheet in question.
     // 2. Let success be true.
     // 3. If the attempts to obtain any of the style sheet's critical subresources failed for any reason, set
@@ -229,7 +229,7 @@ namespace krys::boo
       { dom::EventDispatcher::FireEvent(success ? event_names::Load : event_names::Error, *element); });
   }
 
-  // https://html.spec.whatwg.org/#potentially-render-blocking
+  // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#potentially-render-blocking
   void HTMLStyleElement::PotentiallyBlockRendering(const css::mq::MediaQueryList &mediaQueries) noexcept
   {
     // An element is potentially render-blocking if its blocking tokens set contains "render", or if it is

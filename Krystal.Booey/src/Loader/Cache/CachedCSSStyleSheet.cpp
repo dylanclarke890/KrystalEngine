@@ -79,7 +79,7 @@ namespace krys::boo
            || text::IsASCIICaselessEqual(Response().MimeType(), u8"text/css");
   }
 
-  // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
+  // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet:process-the-linked-resource
   bool CachedCSSStyleSheet::CanUseSheet() const noexcept
   {
     if (ErrorOccurred())
@@ -89,7 +89,7 @@ namespace krys::boo
 
     // An unsuccessful HTTP response is no style sheet. (A host that gives no status, 0, isn't saying it
     // failed.)
-    // https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
+    // https://html.spec.whatwg.org/multipage/semantics.html#fetching-and-processing-a-resource-from-a-link-element:processresponseconsumebody
     if (Response().Url().ProtocolIsInHttpFamily() && Response().HttpStatusCode()
         && !Response().IsSuccessful())
     {

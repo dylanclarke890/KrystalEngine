@@ -38,13 +38,13 @@ namespace krys::boo
   /// @brief A dialog box: shown with `Show()`, or `ShowModal()` in the top layer, where it blocks the rest of
   /// the document; closed with `Close()`, by a `method=dialog` form, or by the user through its close watcher
   /// (Escape, and a press outside it for `closedby=any`).
-  /// @see https://html.spec.whatwg.org/#the-dialog-element
+  /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element
   class HTMLDialogElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDialogElement);
 
   public:
-    /// @see https://html.spec.whatwg.org/#attr-dialog-closedby
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#attr-dialog-closedby
     enum class ClosedByState : uint8
     {
       Any,
@@ -54,19 +54,19 @@ namespace krys::boo
 
   private:
     DOMString _returnValue;
-    /// @see https://html.spec.whatwg.org/#is-modal
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#is-modal
     bool _isModal {false};
-    /// @see https://html.spec.whatwg.org/#enable-close-watcher-for-requestclose()
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#enable-close-watcher-for-requestclose()
     bool _enableCloseWatcherForRequestClose {false};
-    /// @see https://html.spec.whatwg.org/#request-close-return-value
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#request-close-return-value
     Maybe<DOMString> _requestCloseReturnValue;
-    /// @see https://html.spec.whatwg.org/#request-close-source-element
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#request-close-source-element
     WeakPtr<Element> _requestCloseSourceElement;
-    /// @see https://html.spec.whatwg.org/#previously-focused-element
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#previously-focused-element
     WeakPtr<Element> _previouslyFocusedElement;
-    /// @see https://html.spec.whatwg.org/#dialog-close-watcher
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-close-watcher
     RefPtr<html::CloseWatcher> _closeWatcher;
-    /// @see https://html.spec.whatwg.org/#dialog-toggle-task-tracker
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-toggle-task-tracker
     RefPtr<dom::ToggleEventTask> _toggleEventTask;
 
   public:
@@ -74,47 +74,47 @@ namespace krys::boo
 
     ~HTMLDialogElement() noexcept override;
 
-#pragma region HTMLDialogElement - https://html.spec.whatwg.org/#htmldialogelement
+#pragma region HTMLDialogElement - https://html.spec.whatwg.org/multipage/interactive-elements.html#htmldialogelement
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-open
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-open
     KRYS_NODISCARD bool Open() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-open
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-open
     void Open(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-returnvalue
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-returnvalue
     KRYS_NODISCARD const DOMString &ReturnValue() const noexcept
     {
       return _returnValue;
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-returnvalue
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-returnvalue
     void ReturnValue(DOMString value) noexcept
     {
       _returnValue = krys::move(value);
     }
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-closedby
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-closedby
     KRYS_NODISCARD DOMString ClosedBy() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-closedby
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-closedby
     void ClosedBy(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-show
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-show
     ExceptionOr<void> Show() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-showmodal
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-showmodal
     ExceptionOr<void> ShowModal() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-close
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-close
     void Close(Maybe<DOMString> returnValue = null) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-dialog-requestclose
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dom-dialog-requestclose
     void RequestClose(Maybe<DOMString> returnValue = null) noexcept;
 
 #pragma endregion
 
-    /// @see https://html.spec.whatwg.org/#is-modal
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#is-modal
     KRYS_NODISCARD bool IsModal() const noexcept
     {
       return _isModal;
@@ -126,22 +126,22 @@ namespace krys::boo
       return _closeWatcher.get();
     }
 
-    /// @see https://html.spec.whatwg.org/#computed-closed-by-state
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#computed-closed-by-state
     KRYS_NODISCARD ClosedByState ComputedClosedByState() const noexcept;
 
     /// @brief Shows the dialog modally, invoked by @p source.
-    /// @see https://html.spec.whatwg.org/#show-a-modal-dialog
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#show-a-modal-dialog
     ExceptionOr<void> ShowModalDialog(Element *source) noexcept;
 
     /// @brief Closes the dialog, setting its return value to @p result if there's one, invoked by @p source.
-    /// @see https://html.spec.whatwg.org/#close-the-dialog
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#close-the-dialog
     void CloseTheDialog(Maybe<DOMString> result, Element *source) noexcept;
 
     /// @brief Asks the dialog to close (`cancel` can refuse), invoked by @p source.
-    /// @see https://html.spec.whatwg.org/#dialog-request-close
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-request-close
     void RequestCloseTheDialog(Maybe<DOMString> returnValue, Element *source) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dialog-focusing-steps
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-focusing-steps
     void RunFocusingSteps() noexcept;
 
     /// @brief The popover commands, and the dialog commands.
@@ -162,7 +162,7 @@ namespace krys::boo
   private:
     void SetIsModal(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-dialog-toggle-event-task
     void QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
                                     Element *source) noexcept;
 
@@ -171,13 +171,13 @@ namespace krys::boo
     bool FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
                                Element *source) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dialog-setup-steps
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-setup-steps
     void SetupSteps() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dialog-cleanup-steps
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-cleanup-steps
     void CleanupSteps() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#set-the-dialog-close-watcher
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#set-the-dialog-close-watcher
     void SetCloseWatcher() noexcept;
 
     /// @brief Hides the popovers the dialog isn't in, as it shows.

@@ -30,7 +30,7 @@
 namespace krys::boo::html
 {
   /// @brief The validity states a form-associated custom element sets through its internals.
-  /// @see https://html.spec.whatwg.org/#validitystateflags
+  /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#validitystateflags
   struct ValidityStateFlags
   {
     bool ValueMissing : 1 {false};

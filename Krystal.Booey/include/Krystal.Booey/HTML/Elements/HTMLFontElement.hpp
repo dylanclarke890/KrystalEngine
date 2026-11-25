@@ -5,7 +5,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlfontelement
+  /// @see https://html.spec.whatwg.org/multipage/obsolete.html#htmlfontelement
   class HTMLFontElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFontElement);
@@ -13,26 +13,26 @@ namespace krys::boo
   public:
     HTMLFontElement(Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-color
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-color
     KRYS_NODISCARD DOMString Color() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-color
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-color
     void Color(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-face
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-face
     KRYS_NODISCARD DOMString Face() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-face
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-face
     void Face(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-size
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-size
     KRYS_NODISCARD DOMString Size() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-font-size
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-font-size
     void Size(DOMString value) noexcept;
 
     /// @brief The `font-size` keyword for a legacy font size (`1` to `7`, or relative with `+` or `-`).
-    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#rules-for-parsing-a-legacy-font-size
     KRYS_NODISCARD static Maybe<css::ValueId> CSSValueFromFontSizeNumber(DOMStringView string) noexcept;
 
   protected:

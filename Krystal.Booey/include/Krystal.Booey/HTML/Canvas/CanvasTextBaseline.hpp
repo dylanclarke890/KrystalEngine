@@ -29,7 +29,7 @@
 
 namespace krys::boo::html
 {
-  /// @see https://html.spec.whatwg.org/#canvastextbaseline
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvastextbaseline
   enum class CanvasTextBaseline : uint8
   {
     Top,

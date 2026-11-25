@@ -4,7 +4,7 @@
 
 namespace krys::boo
 {
-  /// @see https://html.spec.whatwg.org/#htmlhrelement
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlhrelement
   class HTMLHRElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLHRElement);
@@ -17,36 +17,36 @@ namespace krys::boo
 
     HTMLHRElement(Document &document) noexcept;
 
-#pragma region HTMLHRElement Obsolete members - https://html.spec.whatwg.org/#HTMLHRElement-partial
+#pragma region HTMLHRElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLHRElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-align
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-align
     void Align(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-color
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-color
     KRYS_NODISCARD DOMString Color() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-color
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-color
     void Color(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-noshade
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-noshade
     KRYS_NODISCARD bool NoShade() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-noshade
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-noshade
     void NoShade(bool value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-size
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-size
     KRYS_NODISCARD DOMString Size() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-size
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-size
     void Size(DOMString value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-width
     KRYS_NODISCARD DOMString Width() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-width
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-hr-width
     void Width(DOMString value) noexcept;
 
 #pragma endregion
