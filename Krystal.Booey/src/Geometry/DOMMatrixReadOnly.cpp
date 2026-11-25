@@ -23,17 +23,17 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
+#include "Krystal.Booey/Geometry/DOMPoint.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <cmath>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   ExceptionOr<Ref<DOMMatrixReadOnly>>
     DOMMatrixReadOnly::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
@@ -230,7 +230,8 @@ namespace krys::boo::css
       return AbstractMatrix {};
     }
 
-    auto transform = parse_property::ParseTransformRaw(string, ParserContext(ParserMode::HTMLStandard));
+    auto transform =
+      css::parse_property::ParseTransformRaw(string, css::ParserContext(css::ParserMode::HTMLStandard));
     if (!transform)
     {
       return Exception {ExceptionCode::SyntaxError};
@@ -357,10 +358,10 @@ namespace krys::boo::css
     return matrix->InvertSelf();
   }
 
-  Ref<dom::DOMPoint> DOMMatrixReadOnly::TransformPoint(dom::DOMPointInit pointInit) const noexcept
+  Ref<DOMPoint> DOMMatrixReadOnly::TransformPoint(DOMPointInit pointInit) const noexcept
   {
     _matrix.Map4ComponentPoint(pointInit.X, pointInit.Y, pointInit.Z, pointInit.W);
-    return dom::DOMPoint::Create(pointInit.X, pointInit.Y, pointInit.Z, pointInit.W);
+    return DOMPoint::Create(pointInit.X, pointInit.Y, pointInit.Z, pointInit.W);
   }
 
   Array<float, 16> DOMMatrixReadOnly::ToFloat32Array() const noexcept

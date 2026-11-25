@@ -2,7 +2,6 @@
 
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserver.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverSize.hpp"
+#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"

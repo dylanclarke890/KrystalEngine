@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Types/Exception.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Core/Attributes.hpp"

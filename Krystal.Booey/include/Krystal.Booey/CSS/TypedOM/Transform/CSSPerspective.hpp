@@ -70,7 +70,7 @@ namespace krys::boo
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {

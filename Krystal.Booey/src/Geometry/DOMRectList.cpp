@@ -23,9 +23,9 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   DOMRectList::DOMRectList(const List<QuadF> &quads) noexcept
   {

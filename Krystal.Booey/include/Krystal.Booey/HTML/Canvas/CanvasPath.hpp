@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/Span.hpp"
@@ -43,7 +43,7 @@ namespace krys::boo::html
   class CanvasPath
   {
   public:
-    using RadiusVariant = Variant<double, dom::DOMPointInit>;
+    using RadiusVariant = Variant<double, DOMPointInit>;
 
   protected:
     Path _path;

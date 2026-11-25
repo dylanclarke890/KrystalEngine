@@ -28,15 +28,15 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSMatrixComponent.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo
 {
-  Ref<CSSMatrixComponent> CSSMatrixComponent::Create(const css::DOMMatrixReadOnly &matrix,
+  Ref<CSSMatrixComponent> CSSMatrixComponent::Create(const DOMMatrixReadOnly &matrix,
                                                      CSSMatrixComponentOptions options) noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-cssmatrixcomponent
@@ -70,29 +70,29 @@ namespace krys::boo
     const auto &e = entries;
     if (function.Name() == css::ValueId::Matrix && e.size() == 6)
     {
-      auto matrix = css::DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5]),
-                                                   css::DOMMatrixReadOnly::Is2D::Yes);
+      auto matrix = DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5]),
+                                              DOMMatrixReadOnly::Is2D::Yes);
       return Create(*matrix);
     }
     if (function.Name() == css::ValueId::Matrix3d && e.size() == 16)
     {
-      auto matrix = css::DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5],
-                                                                        e[6], e[7], e[8], e[9], e[10], e[11],
-                                                                        e[12], e[13], e[14], e[15]),
-                                                   css::DOMMatrixReadOnly::Is2D::No);
+      auto matrix =
+        DOMMatrixReadOnly::Create(TransformationMatrix(e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8],
+                                                       e[9], e[10], e[11], e[12], e[13], e[14], e[15]),
+                                  DOMMatrixReadOnly::Is2D::No);
       return Create(*matrix);
     }
     return Exception {ExceptionCode::TypeError};
   }
 
-  CSSMatrixComponent::CSSMatrixComponent(const css::DOMMatrixReadOnly &matrix, bool is2D) noexcept
+  CSSMatrixComponent::CSSMatrixComponent(const DOMMatrixReadOnly &matrix, bool is2D) noexcept
       : CSSTransformComponent(is2D), _matrix(matrix.CloneAsDOMMatrix())
   {
   }
 
   CSSMatrixComponent::~CSSMatrixComponent() noexcept = default;
 
-  void CSSMatrixComponent::SetMatrix(Ref<css::DOMMatrix> matrix) noexcept
+  void CSSMatrixComponent::SetMatrix(Ref<DOMMatrix> matrix) noexcept
   {
     _matrix = krys::move(matrix);
   }
@@ -114,7 +114,7 @@ namespace krys::boo
                    m.M42(), u8", ", m.M43(), u8", ", m.M44(), u8')');
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSMatrixComponent::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     if (!Is2D())
@@ -123,8 +123,8 @@ namespace krys::boo
     }
     // Flattened to 2D.
     const auto &m = *_matrix;
-    return css::DOMMatrix::Create(TransformationMatrix(m.A(), m.B(), m.C(), m.D(), m.E(), m.F()),
-                                  css::DOMMatrixReadOnly::Is2D::Yes);
+    return DOMMatrix::Create(TransformationMatrix(m.A(), m.B(), m.C(), m.D(), m.E(), m.F()),
+                             DOMMatrixReadOnly::Is2D::Yes);
   }
 
   RefPtr<css::Value> CSSMatrixComponent::ToCSSValue() const noexcept

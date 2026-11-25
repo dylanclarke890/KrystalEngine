@@ -422,7 +422,7 @@ namespace krys::boo::html
       auto exception = SwitchOn(
         radius,
         // 5a. If radius is a DOMPointInit:
-        [&normalizedRadii, &shouldReturnSilently](const dom::DOMPointInit &point) -> ExceptionOr<void>
+        [&normalizedRadii, &shouldReturnSilently](const DOMPointInit &point) -> ExceptionOr<void>
         {
           // 5a.i. If radius["x"] or radius["y"] is infinite or NaN, then return.
           if (!std::isfinite(point.X) || !std::isfinite(point.Y))

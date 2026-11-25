@@ -28,7 +28,6 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformValue.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSMatrixComponent.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSPerspective.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSRotate.hpp"
@@ -40,6 +39,7 @@
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/TransformListValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Perspective.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Rotate.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
@@ -201,13 +201,13 @@ namespace krys::boo
     return std::ranges::all_of(_components, [](const auto &component) { return component->Is2D(); });
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSTransformValue::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
     // 1. Let matrix be a new DOMMatrix, initialized to the identity matrix, with its is2D internal slot set
     //    to true.
     TransformationMatrix matrix;
-    auto is2D = css::DOMMatrixReadOnly::Is2D::Yes;
+    auto is2D = DOMMatrixReadOnly::Is2D::Yes;
     // 2. For each transform in this's values to iterate over:
     for (const auto &component : _components)
     {
@@ -221,12 +221,12 @@ namespace krys::boo
       // 2.2. Set matrix to the result of multiplying matrix and the matrix represented by transformMatrix.
       if (!transformMatrix->GetIs2D())
       {
-        is2D = css::DOMMatrixReadOnly::Is2D::No;
+        is2D = DOMMatrixReadOnly::Is2D::No;
       }
       matrix.Multiply(transformMatrix->GetTransformationMatrix());
     }
     // 3. Return matrix.
-    return css::DOMMatrix::Create(matrix, is2D);
+    return DOMMatrix::Create(matrix, is2D);
   }
 
   void CSSTransformValue::Serialise(StringBuilder &builder, EnumSet<SerialisationArguments>) const noexcept

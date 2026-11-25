@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValueProperty.hpp"
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
 #include "Krystal.Booey/SVG/SVGTransformValue.hpp"
@@ -95,7 +95,7 @@ namespace krys::boo
       return _value.Matrix();
     }
 
-    ExceptionOr<void> SetMatrix(css::DOMMatrix2DInit matrixInit) noexcept
+    ExceptionOr<void> SetMatrix(DOMMatrix2DInit matrixInit) noexcept
     {
       if (IsReadOnly())
       {

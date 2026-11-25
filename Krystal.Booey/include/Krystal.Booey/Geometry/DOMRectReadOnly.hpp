@@ -31,7 +31,7 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include <cmath>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @see https://drafts.fxtf.org/geometry/#dictdef-domrectinit
   struct DOMRectInit

@@ -22,12 +22,12 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"
@@ -426,7 +426,7 @@ namespace krys::boo
     return SVGTransform::Create(SVGTransformValue::SVG_TRANSFORM_MATRIX);
   }
 
-  Ref<SVGTransform> SVGSvgElement::CreateSVGTransformFromMatrix(css::DOMMatrix2DInit matrixInit) noexcept
+  Ref<SVGTransform> SVGSvgElement::CreateSVGTransformFromMatrix(DOMMatrix2DInit matrixInit) noexcept
   {
     AffineTransform transform;
     if (matrixInit.A)

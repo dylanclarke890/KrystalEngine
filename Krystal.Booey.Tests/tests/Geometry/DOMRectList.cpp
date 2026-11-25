@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+﻿#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <cmath>
 
 namespace krys::boo::dom::tests
 {
-  TEST_CASE("DOMRect: edges", "[DOM][DOMRect]")
+  TEST_CASE("DOMRect: edges", "[Geometry][DOMRect]")
   {
     auto rect = DOMRect::Create(10, 20, 30, 40);
     CHECK(rect->Left() == 10);
@@ -30,7 +30,7 @@ namespace krys::boo::dom::tests
     CHECK(fromInit->ToRectF() == RectF(1, 2, 3, 4));
   }
 
-  TEST_CASE("DOMRectList: items", "[DOM][DOMRectList]")
+  TEST_CASE("DOMRectList: items", "[Geometry][DOMRectList]")
   {
     CHECK(DOMRectList::Create()->Length() == 0u);
 

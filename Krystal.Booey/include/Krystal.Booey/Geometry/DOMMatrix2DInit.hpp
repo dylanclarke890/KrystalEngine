@@ -25,23 +25,24 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
-  /// @see https://drafts.fxtf.org/geometry/#dictdef-dommatrixinit
-  struct DOMMatrixInit : DOMMatrix2DInit
+  /// @see https://drafts.fxtf.org/geometry/#dictdef-dommatrix2dinit
+  struct DOMMatrix2DInit
   {
-    double M13 {0};
-    double M14 {0};
-    double M23 {0};
-    double M24 {0};
-    double M31 {0};
-    double M32 {0};
-    double M33 {1};
-    double M34 {0};
-    double M43 {0};
-    double M44 {1};
-    Maybe<bool> Is2D;
+    Maybe<double> A;
+    Maybe<double> B;
+    Maybe<double> C;
+    Maybe<double> D;
+    Maybe<double> E;
+    Maybe<double> F;
+    Maybe<double> M11;
+    Maybe<double> M12;
+    Maybe<double> M21;
+    Maybe<double> M22;
+    Maybe<double> M41;
+    Maybe<double> M42;
   };
 }

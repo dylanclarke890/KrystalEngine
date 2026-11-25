@@ -28,10 +28,10 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTranslate.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo
 {
@@ -180,7 +180,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSTranslate::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     // The matrix's entries are relative to px, so a length that isn't compatible with px (a relative length
@@ -209,8 +209,7 @@ namespace krys::boo
     {
       matrix.Translate3d(x->Value(), y->Value(), z->Value());
     }
-    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
-                                                 : css::DOMMatrixReadOnly::Is2D::No);
+    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
   }
 
   RefPtr<css::Value> CSSTranslate::ToCSSValue() const noexcept

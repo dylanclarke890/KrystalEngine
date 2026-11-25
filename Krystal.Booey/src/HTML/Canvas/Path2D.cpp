@@ -26,7 +26,7 @@
  */
 
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include <cmath>
@@ -58,10 +58,10 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-path2d-addpath
-  ExceptionOr<void> Path2D::AddPath(const Path2D &path, css::DOMMatrix2DInit transform) noexcept
+  ExceptionOr<void> Path2D::AddPath(const Path2D &path, DOMMatrix2DInit transform) noexcept
   {
     // 2. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
-    auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(transform);
+    auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(transform);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();

@@ -21,12 +21,12 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextQuery.hpp"
@@ -127,7 +127,7 @@ namespace krys::boo
     return SVGTextQuery(Renderer()).RotationOfCharacter(charnum);
   }
 
-  int32 SVGTextContentElement::GetCharNumAtPosition(dom::DOMPointInit pointInit) noexcept
+  int32 SVGTextContentElement::GetCharNumAtPosition(DOMPointInit pointInit) noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
       {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,

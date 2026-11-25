@@ -28,10 +28,10 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSRotate.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo
 {
@@ -208,7 +208,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSRotate::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSRotate::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *angleUnitValue = DynamicDowncast<CSSUnitValue>(*_angle);
@@ -234,8 +234,7 @@ namespace krys::boo
     {
       matrix.Rotate3d(xUnitValue->Value(), yUnitValue->Value(), zUnitValue->Value(), angle->Value());
     }
-    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
-                                                 : css::DOMMatrixReadOnly::Is2D::No);
+    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
   }
 
   RefPtr<css::Value> CSSRotate::ToCSSValue() const noexcept

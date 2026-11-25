@@ -83,7 +83,7 @@ namespace krys::boo::svg::tests
     REQUIRE_FALSE(single.HasException());
     CHECK(single.Value().get() == list->Items()[0].get());
 
-    auto fromMatrix = list->CreateSVGTransformFromMatrix(css::DOMMatrix2DInit {.A = 2, .D = 3, .F = 4});
+    auto fromMatrix = list->CreateSVGTransformFromMatrix(DOMMatrix2DInit {.A = 2, .D = 3, .F = 4});
     REQUIRE_FALSE(fromMatrix.HasException());
     CHECK(fromMatrix.Value()->Value().ValueAsString() == u8"matrix(2 0 0 3 0 4)");
     CHECK_FALSE(fromMatrix.Value()->IsAttached());
@@ -114,7 +114,7 @@ namespace krys::boo::svg::tests
     CHECK(transform->Value().Scale() == SizeF(3, 4));
     REQUIRE_FALSE(transform->SetSkewY(10).HasException());
     CHECK(transform->Value().ValueAsString() == u8"skewY(10)");
-    REQUIRE_FALSE(transform->SetMatrix(css::DOMMatrix2DInit {.B = 1, .E = 2}).HasException());
+    REQUIRE_FALSE(transform->SetMatrix(DOMMatrix2DInit {.B = 1, .E = 2}).HasException());
     CHECK(transform->Value().ValueAsString() == u8"matrix(1 1 0 1 2 0)");
 
     // A change to a transform's matrix is committed through the transform and its list.

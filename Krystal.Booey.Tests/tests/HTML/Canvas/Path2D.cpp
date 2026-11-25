@@ -120,7 +120,7 @@ namespace krys::boo::tests
           == ExceptionCode::RangeError);
     CHECK(path->RoundRect(0, 0, 10, 10, CanvasPath::RadiusVariant(-1.0)).GetException().Code()
           == ExceptionCode::RangeError);
-    CHECK(path->RoundRect(0, 0, 10, 10, CanvasPath::RadiusVariant(dom::DOMPointInit {.X = 1, .Y = -1}))
+    CHECK(path->RoundRect(0, 0, 10, 10, CanvasPath::RadiusVariant(DOMPointInit {.X = 1, .Y = -1}))
             .GetException()
             .Code()
           == ExceptionCode::RangeError);

@@ -6,7 +6,7 @@
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"

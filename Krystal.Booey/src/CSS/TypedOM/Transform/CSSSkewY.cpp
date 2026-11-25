@@ -28,10 +28,10 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSSkewY.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo
 {
@@ -85,7 +85,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSSkewY::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSSkewY::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *unitValue = DynamicDowncast<CSSUnitValue>(*_ay);
@@ -101,7 +101,7 @@ namespace krys::boo
 
     TransformationMatrix matrix;
     matrix.SkewY(angle->Value());
-    return css::DOMMatrix::Create(matrix, css::DOMMatrixReadOnly::Is2D::Yes);
+    return DOMMatrix::Create(matrix, DOMMatrixReadOnly::Is2D::Yes);
   }
 
   RefPtr<css::Value> CSSSkewY::ToCSSValue() const noexcept

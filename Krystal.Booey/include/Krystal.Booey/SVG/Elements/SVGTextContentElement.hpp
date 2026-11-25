@@ -26,13 +26,9 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGLengthValue.hpp"
 
-namespace krys::boo::dom
-{
-  struct DOMPointInit;
-}
-
 namespace krys::boo
 {
+  struct DOMPointInit;
   class RenderObject;
   class SVGPoint;
   class SVGRect;
@@ -131,7 +127,7 @@ namespace krys::boo
     KRYS_NODISCARD ExceptionOr<float> GetRotationOfChar(uint32 charnum) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__getCharNumAtPosition
-    KRYS_NODISCARD int32 GetCharNumAtPosition(dom::DOMPointInit) noexcept;
+    KRYS_NODISCARD int32 GetCharNumAtPosition(DOMPointInit) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/text.html#__svg__SVGTextContentElement__selectSubString
     ExceptionOr<void> SelectSubString(uint32 charnum, uint32 nchars) noexcept;

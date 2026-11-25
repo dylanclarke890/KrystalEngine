@@ -31,12 +31,12 @@
 
 namespace krys::boo::css
 {
-  class DOMMatrix;
   class FunctionValue;
 }
 
 namespace krys::boo
 {
+  class DOMMatrix;
   class Document;
 
   /// @brief The kinds of transform components.
@@ -82,7 +82,7 @@ namespace krys::boo
 
     /// @return A `TypeError` if a length or angle in the component isn't one with an absolute unit.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
-    KRYS_NODISCARD virtual ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept = 0;
+    KRYS_NODISCARD virtual ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept = 0;
 
     KRYS_NODISCARD virtual CSSTransformType TransformType() const noexcept = 0;
 

@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixInit.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixInit.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/List.hpp"
@@ -38,14 +38,11 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class DOMPoint;
   struct DOMPointInit;
-}
 
-namespace krys::boo::css
-{
   class DOMMatrix;
 
   /// @brief A 4 by 4 matrix (or a 2D one) that can't be changed through it.
@@ -240,7 +237,7 @@ namespace krys::boo::css
     KRYS_NODISCARD Ref<DOMMatrix> Inverse() const noexcept;
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-transformpoint
-    KRYS_NODISCARD Ref<dom::DOMPoint> TransformPoint(dom::DOMPointInit) const noexcept;
+    KRYS_NODISCARD Ref<DOMPoint> TransformPoint(DOMPointInit) const noexcept;
 
     KRYS_NODISCARD Array<float, 16> ToFloat32Array() const noexcept;
 

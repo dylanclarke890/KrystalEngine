@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/TypedOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSMatrixComponent.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTranslate.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo::css::tests
 {

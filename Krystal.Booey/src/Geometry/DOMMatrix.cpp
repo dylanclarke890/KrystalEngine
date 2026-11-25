@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include <limits>
 
-namespace krys::boo::css
+namespace krys::boo
 {
   ExceptionOr<Ref<DOMMatrix>> DOMMatrix::Create(Maybe<Variant<CSSOMString, List<double>>> init) noexcept
   {

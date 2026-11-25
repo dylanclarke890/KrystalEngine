@@ -391,10 +391,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/CSSFunctionDescriptors.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSPositionTryDescriptors.hpp
   include/Krystal.Booey/CSS/CSSOM/PropertySetCSSDescriptors.hpp
-  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp
-  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp
-  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrixInit.hpp
-  include/Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp
   include/Krystal.Booey/CSS/Font/FontFace.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSet.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSource.hpp
@@ -801,8 +797,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/CSSFunctionDescriptors.cpp
   src/CSS/CSSOM/CSSPositionTryDescriptors.cpp
   src/CSS/CSSOM/PropertySetCSSDescriptors.cpp
-  src/CSS/DOMMatrix/DOMMatrix.cpp
-  src/CSS/DOMMatrix/DOMMatrixReadOnly.cpp
   src/CSS/Font/FontFace.cpp
   src/CSS/Font/FontFaceSet.cpp
   src/CSS/Font/FontFaceSource.cpp
@@ -1109,11 +1103,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/UIEvent.hpp
   include/Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp
   include/Krystal.Booey/DOM/Events/WheelEvent.hpp
-  include/Krystal.Booey/DOM/Geometry/DOMPoint.hpp
-  include/Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp
-  include/Krystal.Booey/DOM/Geometry/DOMRect.hpp
-  include/Krystal.Booey/DOM/Geometry/DOMRectList.hpp
-  include/Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp
   include/Krystal.Booey/DOM/Highlights/Highlight.hpp
   include/Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp
   include/Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp
@@ -1264,8 +1253,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/TouchEvent.cpp
   src/DOM/Events/TouchList.cpp
   src/DOM/Events/WheelEvent.cpp
-  src/DOM/Geometry/DOMPointReadOnly.cpp
-  src/DOM/Geometry/DOMRectList.cpp
   src/DOM/Highlights/Highlight.cpp
   src/DOM/Highlights/HighlightRegistry.cpp
   src/DOM/Internals/DocumentFontLoader.cpp
@@ -1440,6 +1427,25 @@ set(KRYSTAL_BOOEY_FILEAPI_SOURCES
   src/FileAPI/Blob.cpp
   src/FileAPI/File.cpp
   src/FileAPI/FileList.cpp
+)
+
+set(KRYSTAL_BOOEY_GEOMETRY_HEADERS
+  include/Krystal.Booey/Geometry/DOMMatrix.hpp
+  include/Krystal.Booey/Geometry/DOMMatrix2DInit.hpp
+  include/Krystal.Booey/Geometry/DOMMatrixInit.hpp
+  include/Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp
+  include/Krystal.Booey/Geometry/DOMPoint.hpp
+  include/Krystal.Booey/Geometry/DOMPointReadOnly.hpp
+  include/Krystal.Booey/Geometry/DOMRect.hpp
+  include/Krystal.Booey/Geometry/DOMRectList.hpp
+  include/Krystal.Booey/Geometry/DOMRectReadOnly.hpp
+)
+
+set(KRYSTAL_BOOEY_GEOMETRY_SOURCES
+  src/Geometry/DOMMatrix.cpp
+  src/Geometry/DOMMatrixReadOnly.cpp
+  src/Geometry/DOMPointReadOnly.cpp
+  src/Geometry/DOMRectList.cpp
 )
 
 set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
@@ -4217,6 +4223,7 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_DOM_HEADERS}
       ${KRYSTAL_BOOEY_EDITING_HEADERS}
       ${KRYSTAL_BOOEY_FILEAPI_HEADERS}
+      ${KRYSTAL_BOOEY_GEOMETRY_HEADERS}
       ${KRYSTAL_BOOEY_GRAPHICS_HEADERS}
       ${KRYSTAL_BOOEY_HISTORY_HEADERS}
       ${KRYSTAL_BOOEY_HTML_HEADERS}
@@ -4241,6 +4248,7 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_DOM_SOURCES}
     ${KRYSTAL_BOOEY_EDITING_SOURCES}
     ${KRYSTAL_BOOEY_FILEAPI_SOURCES}
+    ${KRYSTAL_BOOEY_GEOMETRY_SOURCES}
     ${KRYSTAL_BOOEY_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}
     ${KRYSTAL_BOOEY_HTML_SOURCES}

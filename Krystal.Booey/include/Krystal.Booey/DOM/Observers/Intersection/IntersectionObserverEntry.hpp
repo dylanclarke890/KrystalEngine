@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -42,9 +42,9 @@ namespace krys::boo
     struct Init
     {
       double Time {0};
-      Maybe<dom::DOMRectInit> RootBounds;
-      dom::DOMRectInit BoundingClientRect;
-      dom::DOMRectInit IntersectionRect;
+      Maybe<DOMRectInit> RootBounds;
+      DOMRectInit BoundingClientRect;
+      DOMRectInit IntersectionRect;
       double IntersectionRatio {0};
       RefPtr<Element> Target;
       bool IsIntersecting {false};
@@ -52,9 +52,9 @@ namespace krys::boo
 
   private:
     double _time {0};
-    RefPtr<dom::DOMRectReadOnly> _rootBounds;
-    RefPtr<dom::DOMRectReadOnly> _boundingClientRect;
-    RefPtr<dom::DOMRectReadOnly> _intersectionRect;
+    RefPtr<DOMRectReadOnly> _rootBounds;
+    RefPtr<DOMRectReadOnly> _boundingClientRect;
+    RefPtr<DOMRectReadOnly> _intersectionRect;
     double _intersectionRatio {0};
     RefPtr<Element> _target;
     bool _isIntersecting {false};
@@ -74,19 +74,19 @@ namespace krys::boo
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserverentry-rootbounds
-    KRYS_NODISCARD dom::DOMRectReadOnly *RootBounds() const noexcept
+    KRYS_NODISCARD DOMRectReadOnly *RootBounds() const noexcept
     {
       return _rootBounds.get();
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserverentry-boundingclientrect
-    KRYS_NODISCARD dom::DOMRectReadOnly *BoundingClientRect() const noexcept
+    KRYS_NODISCARD DOMRectReadOnly *BoundingClientRect() const noexcept
     {
       return _boundingClientRect.get();
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserverentry-intersectionrect
-    KRYS_NODISCARD dom::DOMRectReadOnly *IntersectionRect() const noexcept
+    KRYS_NODISCARD DOMRectReadOnly *IntersectionRect() const noexcept
     {
       return _intersectionRect.get();
     }

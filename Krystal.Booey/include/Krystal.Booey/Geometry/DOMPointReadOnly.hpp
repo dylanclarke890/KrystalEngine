@@ -36,13 +36,10 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   struct DOMMatrixInit;
-}
 
-namespace krys::boo::dom
-{
   class DOMPoint;
 
   /// @see https://drafts.fxtf.org/geometry/#dictdef-dompointinit
@@ -107,7 +104,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://drafts.fxtf.org/geometry/#dom-dompointreadonly-matrixtransform
-    KRYS_NODISCARD ExceptionOr<Ref<DOMPoint>> MatrixTransform(css::DOMMatrixInit &&) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<DOMPoint>> MatrixTransform(DOMMatrixInit &&) const noexcept;
 
   protected:
     DOMPointReadOnly(double x, double y, double z, double w) noexcept : _x(x), _y(y), _z(z), _w(w)

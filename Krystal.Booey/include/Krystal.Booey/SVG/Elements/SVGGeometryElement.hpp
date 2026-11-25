@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
 
 namespace krys::boo
@@ -46,10 +46,10 @@ namespace krys::boo
     KRYS_NODISCARD virtual ExceptionOr<Ref<SVGPoint>> GetPointAtLength(float distance) const noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInFill
-    KRYS_NODISCARD bool IsPointInFill(dom::DOMPointInit) noexcept;
+    KRYS_NODISCARD bool IsPointInFill(DOMPointInit) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGGeometryElement__isPointInStroke
-    KRYS_NODISCARD bool IsPointInStroke(dom::DOMPointInit) noexcept;
+    KRYS_NODISCARD bool IsPointInStroke(DOMPointInit) noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGeometryElement, SVGGraphicsElement>;
 

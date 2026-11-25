@@ -28,7 +28,6 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
@@ -53,6 +52,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -4053,7 +4053,7 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::DOMRectList> Element::GetClientRects() noexcept
+  Ref<DOMRectList> Element::GetClientRects() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
       {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
@@ -4085,11 +4085,11 @@ namespace krys::boo
 
     if (quads.empty())
     {
-      return dom::DOMRectList::Create();
+      return DOMRectList::Create();
     }
 
     NodeDocument().ConvertAbsoluteToClientQuads(quads, renderer->Style());
-    return dom::DOMRectList::Create(quads);
+    return DOMRectList::Create(quads);
   }
 
   Maybe<Pair<RenderElement *, RectF>> Element::BoundingAbsoluteRectWithoutLayout() const noexcept
@@ -4170,9 +4170,9 @@ namespace krys::boo
     return view->ContentsToScreen(renderer->AbsoluteBoundingBoxRect());
   }
 
-  Ref<dom::DOMRect> Element::GetBoundingClientRect() noexcept
+  Ref<DOMRect> Element::GetBoundingClientRect() noexcept
   {
-    return dom::DOMRect::Create(BoundingClientRect());
+    return DOMRect::Create(BoundingClientRect());
   }
 
   void Element::ScrollIntoView(const ScrollIntoViewOptions &options) noexcept

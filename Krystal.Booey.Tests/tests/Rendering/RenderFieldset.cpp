@@ -1,8 +1,8 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
 
 namespace krys::boo::tests

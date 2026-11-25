@@ -32,12 +32,12 @@
 
 namespace krys::boo::css
 {
-  class DOMMatrix;
   class TransformListValue;
 }
 
 namespace krys::boo
 {
+  class DOMMatrix;
   class Document;
 
   /// @brief A `<transform-list>`, as a list of transform components.
@@ -90,7 +90,7 @@ namespace krys::boo
     /// @brief The components' matrices, multiplied in order.
     /// @return A `TypeError` if a component has no matrix.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-csstransformvalue-tomatrix
-    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept;
 
     KRYS_NODISCARD CSSStyleValueType StyleValueType() const noexcept final
     {

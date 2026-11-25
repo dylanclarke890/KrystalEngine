@@ -1,10 +1,10 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 
 namespace krys::boo::layout::tests
 {
@@ -221,7 +221,7 @@ layer at (0,0) size 95x20
                    u8"#t { columns: 2; width: 200px } #t div { height: 40px }",
                    u8"<div id=m><div>aa</div><div id=b>bb</div></div>"
                    u8"<div id=t><div id=s></div></div>")};
-    auto rectIs = [](const dom::DOMRectReadOnly &rect, double x, double y, double width, double height)
+    auto rectIs = [](const DOMRectReadOnly &rect, double x, double y, double width, double height)
     {
       return rect.X() == x && rect.Y() == y && rect.Width() == width && rect.Height() == height;
     };

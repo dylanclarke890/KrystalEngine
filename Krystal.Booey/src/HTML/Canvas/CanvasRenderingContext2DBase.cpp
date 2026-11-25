@@ -32,7 +32,6 @@
 
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 #include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -42,6 +41,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
@@ -877,10 +877,9 @@ namespace krys::boo::html
 
   // https://html.spec.whatwg.org/#dom-context-2d-gettransform
   // (A newly created DOMMatrix representing a copy of the current transformation matrix.)
-  Ref<css::DOMMatrix> CanvasRenderingContext2DBase::GetTransform() const noexcept
+  Ref<DOMMatrix> CanvasRenderingContext2DBase::GetTransform() const noexcept
   {
-    return css::DOMMatrix::Create(GetState().Transform.ToTransformationMatrix(),
-                                  css::DOMMatrixReadOnly::Is2D::Yes);
+    return DOMMatrix::Create(GetState().Transform.ToTransformationMatrix(), DOMMatrixReadOnly::Is2D::Yes);
   }
 
   void CanvasRenderingContext2DBase::SetTransform(double m11, double m12, double m21, double m22, double dx,
@@ -905,11 +904,11 @@ namespace krys::boo::html
     Transform(m11, m12, m21, m22, dx, dy);
   }
 
-  ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
+  ExceptionOr<void> CanvasRenderingContext2DBase::SetTransform(DOMMatrix2DInit matrixInit) noexcept
   {
     // https://html.spec.whatwg.org/#dom-context-2d-settransform-matrix
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
-    auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
+    auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();

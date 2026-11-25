@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
@@ -74,10 +74,10 @@ namespace krys::boo::html
   }
 
   // https://html.spec.whatwg.org/#dom-canvaspattern-settransform
-  ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit matrixInit) noexcept
+  ExceptionOr<void> CanvasPattern::SetTransform(DOMMatrix2DInit matrixInit) noexcept
   {
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
-    auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
+    auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();

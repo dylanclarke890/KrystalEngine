@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverSize.hpp"
+#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"
@@ -41,7 +41,7 @@ namespace krys::boo
   {
   private:
     const Ref<Element> _target;
-    const Ref<dom::DOMRectReadOnly> _contentRect;
+    const Ref<DOMRectReadOnly> _contentRect;
     // The specification allows several boxes for fragmented elements (multicol), but these lists only ever
     // hold one.
     List<Ref<ResizeObserverSize>> _borderBoxSizes;
@@ -51,8 +51,8 @@ namespace krys::boo
     ResizeObserverEntry(Ref<Element> &&target, const RectF &contentRect, SizeF borderBoxSize,
                         SizeF contentBoxSize, SizeF devicePixelContentBoxSize) noexcept
         : _target(krys::move(target)),
-          _contentRect(dom::DOMRectReadOnly::Create(contentRect.X(), contentRect.Y(), contentRect.Width(),
-                                                    contentRect.Height())),
+          _contentRect(DOMRectReadOnly::Create(contentRect.X(), contentRect.Y(), contentRect.Width(),
+                                               contentRect.Height())),
           _borderBoxSizes({ResizeObserverSize::Create(borderBoxSize.Width(), borderBoxSize.Height())}),
           _contentBoxSizes({ResizeObserverSize::Create(contentBoxSize.Width(), contentBoxSize.Height())}),
           _devicePixelContentBoxSizes({ResizeObserverSize::Create(devicePixelContentBoxSize.Width(),
@@ -76,7 +76,7 @@ namespace krys::boo
     }
 
     /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserverentry-contentrect
-    KRYS_NODISCARD dom::DOMRectReadOnly &ContentRect() const noexcept
+    KRYS_NODISCARD DOMRectReadOnly &ContentRect() const noexcept
     {
       return *_contentRect;
     }

@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
@@ -13,6 +12,7 @@
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -72,7 +72,6 @@ namespace krys::boo::xml
 
 namespace krys::boo::dom
 {
-  class DOMRectList;
   class DocumentAlgorithms;
   class ElementAlgorithms;
   class ElementFactory;
@@ -145,6 +144,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class DOMRectList;
   class DOMStringMap;
   class DOMTokenList;
   class HTMLButtonElement;
@@ -569,10 +569,10 @@ namespace krys::boo
 #pragma region Element (CSSOM View) - https://drafts.csswg.org/cssom-view/#extension-to-the-element-interface
 
     /// @brief The bounding boxes of the element's boxes, in client coordinates.
-    KRYS_NODISCARD Ref<dom::DOMRectList> GetClientRects() noexcept;
+    KRYS_NODISCARD Ref<DOMRectList> GetClientRects() noexcept;
 
     /// @brief The union of the element's boxes, in client coordinates.
-    KRYS_NODISCARD Ref<dom::DOMRect> GetBoundingClientRect() noexcept;
+    KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() noexcept;
 
     /// @brief `GetBoundingClientRect()` as a rect, without making a `DOMRect`.
     KRYS_NODISCARD RectF BoundingClientRect() noexcept;

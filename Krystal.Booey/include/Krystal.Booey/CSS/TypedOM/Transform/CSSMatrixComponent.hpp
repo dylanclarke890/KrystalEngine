@@ -28,7 +28,7 @@
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSTransformComponent.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   class DOMMatrixReadOnly;
 }
@@ -46,13 +46,13 @@ namespace krys::boo
   class CSSMatrixComponent final : public CSSTransformComponent
   {
   private:
-    Ref<css::DOMMatrix> _matrix;
+    Ref<DOMMatrix> _matrix;
 
   public:
     /// @brief A matrix component of a copy of @p matrix, 2D if @p options say so, or if they don't and the
     /// matrix is.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-cssmatrixcomponent
-    KRYS_NODISCARD static Ref<CSSMatrixComponent> Create(const css::DOMMatrixReadOnly &matrix,
+    KRYS_NODISCARD static Ref<CSSMatrixComponent> Create(const DOMMatrixReadOnly &matrix,
                                                          CSSMatrixComponentOptions options = {}) noexcept;
 
     /// @brief Reifies a `matrix()` or `matrix3d()` function.
@@ -62,16 +62,16 @@ namespace krys::boo
     ~CSSMatrixComponent() noexcept override;
 
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssmatrixcomponent-matrix
-    KRYS_NODISCARD css::DOMMatrix &Matrix() const noexcept
+    KRYS_NODISCARD DOMMatrix &Matrix() const noexcept
     {
       return *_matrix;
     }
 
-    void SetMatrix(Ref<css::DOMMatrix> matrix) noexcept;
+    void SetMatrix(Ref<DOMMatrix> matrix) noexcept;
 
     void Serialise(StringBuilder &builder) const noexcept final;
 
-    KRYS_NODISCARD ExceptionOr<Ref<css::DOMMatrix>> ToMatrix() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<Ref<DOMMatrix>> ToMatrix() const noexcept final;
 
     KRYS_NODISCARD CSSTransformType TransformType() const noexcept final
     {
@@ -81,7 +81,7 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<css::Value> ToCSSValue() const noexcept final;
 
   private:
-    CSSMatrixComponent(const css::DOMMatrixReadOnly &matrix, bool is2D) noexcept;
+    CSSMatrixComponent(const DOMMatrixReadOnly &matrix, bool is2D) noexcept;
   };
 }
 

@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrixReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp"
 
-namespace krys::boo::css
+namespace krys::boo
 {
   /// @brief A 4 by 4 matrix (or a 2D one) that can be changed.
   /// @see https://drafts.fxtf.org/geometry/#dommatrix

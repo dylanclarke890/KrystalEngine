@@ -114,7 +114,7 @@ namespace krys::boo
     return Exception {ExceptionCode::InvalidStateError};
   }
 
-  bool SVGGeometryElement::IsPointInFill(dom::DOMPointInit pointInit) noexcept
+  bool SVGGeometryElement::IsPointInFill(DOMPointInit pointInit) noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(GeometryQueryLayoutOptions, this);
 
@@ -134,7 +134,7 @@ namespace krys::boo
     return false;
   }
 
-  bool SVGGeometryElement::IsPointInStroke(dom::DOMPointInit pointInit) noexcept
+  bool SVGGeometryElement::IsPointInStroke(DOMPointInit pointInit) noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(GeometryQueryLayoutOptions, this);
 

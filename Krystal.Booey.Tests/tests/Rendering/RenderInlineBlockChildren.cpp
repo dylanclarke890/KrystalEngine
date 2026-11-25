@@ -2,9 +2,9 @@
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/Geometry/DOMRectList.hpp"
 
 #include <format>
 
@@ -15,7 +15,7 @@ namespace krys::boo::tests
     constexpr utf8_stringview InlineBlockStyle =
       u8"body{margin:0;font:20px/20px Ahem}#b{width:100px;height:30px;background:#0f0}";
 
-    KRYS_NODISCARD std::string Format(const dom::DOMRectReadOnly &rect)
+    KRYS_NODISCARD std::string Format(const DOMRectReadOnly &rect)
     {
       return std::format("{},{},{},{}", rect.X(), rect.Y(), rect.Width(), rect.Height());
     }

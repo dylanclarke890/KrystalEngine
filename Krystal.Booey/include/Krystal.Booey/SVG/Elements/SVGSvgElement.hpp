@@ -26,11 +26,6 @@
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 
-namespace krys::boo::css
-{
-  struct DOMMatrix2DInit;
-}
-
 namespace krys::boo::svg
 {
   class SMILTimeContainer;
@@ -38,6 +33,7 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  struct DOMMatrix2DInit;
   class Frame;
   class SVGAngle;
   class SVGLength;
@@ -120,8 +116,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static Ref<SVGTransform> CreateSVGTransform() noexcept;
 
-    KRYS_NODISCARD static Ref<SVGTransform>
-      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit matrixInit) noexcept;
+    KRYS_NODISCARD static Ref<SVGTransform> CreateSVGTransformFromMatrix(DOMMatrix2DInit matrixInit) noexcept;
 
     /// @brief The first element in the subtree of the `<svg>` element whose id is @p id.
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getElementById

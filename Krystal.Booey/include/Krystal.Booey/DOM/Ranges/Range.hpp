@@ -1,16 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Booey/Geometry/DOMRect.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include <compare>
 
 namespace krys::boo::dom
 {
-  class DOMRectList;
-
   /// @see https://dom.spec.whatwg.org/#dom-range-compareboundarypoints
   enum class BoundaryPointComparator
   {
@@ -28,6 +26,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class DOMRectList;
   class DocumentFragment;
 }
 

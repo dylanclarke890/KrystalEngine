@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2014 Adobe Systems Incorporated. All rights reserved.
- * Copyright (C) 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,57 +27,26 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMPoint.hpp"
 
-#include "Krystal.Booey/DOM/Geometry/DOMPointReadOnly.hpp"
-
-namespace krys::boo::dom
+namespace krys::boo
 {
-  /// @brief A point whose coordinates can be changed.
-  /// @see https://drafts.fxtf.org/geometry/#dompoint
-  class DOMPoint final : public DOMPointReadOnly
+  ExceptionOr<Ref<DOMPoint>> DOMPointReadOnly::MatrixTransform(DOMMatrixInit &&matrixInit) const noexcept
   {
-  public:
-    KRYS_NODISCARD static Ref<DOMPoint> Create(double x, double y, double z = 0, double w = 1) noexcept
+    auto matrixOrException = DOMMatrixReadOnly::FromMatrix(krys::move(matrixInit));
+    if (matrixOrException.HasException())
     {
-      return AdoptRef(*new DOMPoint(x, y, z, w));
+      return matrixOrException.ReleaseException();
     }
 
-    KRYS_NODISCARD static Ref<DOMPoint> Create(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
-
-    KRYS_NODISCARD static Ref<DOMPoint> FromPoint(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
-
-    void SetX(double x) noexcept
-    {
-      _x = x;
-    }
-
-    void SetY(double y) noexcept
-    {
-      _y = y;
-    }
-
-    void SetZ(double z) noexcept
-    {
-      _z = z;
-    }
-
-    void SetW(double w) noexcept
-    {
-      _w = w;
-    }
-
-  private:
-    DOMPoint(double x, double y, double z, double w) noexcept : DOMPointReadOnly(x, y, z, w)
-    {
-    }
-  };
-
-  static_assert(sizeof(DOMPoint) == sizeof(DOMPointReadOnly));
+    auto matrix = matrixOrException.ReleaseValue();
+    double x = X();
+    double y = Y();
+    double z = Z();
+    double w = W();
+    matrix->GetTransformationMatrix().Map4ComponentPoint(x, y, z, w);
+    return DOMPoint::Create(x, y, z, w);
+  }
 }

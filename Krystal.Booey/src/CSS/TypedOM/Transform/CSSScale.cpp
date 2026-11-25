@@ -28,10 +28,10 @@
  */
 
 #include "Krystal.Booey/CSS/TypedOM/Transform/CSSScale.hpp"
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo
 {
@@ -176,7 +176,7 @@ namespace krys::boo
     builder.Append(u8')');
   }
 
-  ExceptionOr<Ref<css::DOMMatrix>> CSSScale::ToMatrix() const noexcept
+  ExceptionOr<Ref<DOMMatrix>> CSSScale::ToMatrix() const noexcept
   {
     // https://drafts.css-houdini.org/css-typed-om/#dom-csstransformcomponent-tomatrix
     const auto *xUnitValue = DynamicDowncast<CSSUnitValue>(*_x);
@@ -196,8 +196,7 @@ namespace krys::boo
     {
       matrix.Scale3d(xUnitValue->Value(), yUnitValue->Value(), zUnitValue->Value());
     }
-    return css::DOMMatrix::Create(matrix, Is2D() ? css::DOMMatrixReadOnly::Is2D::Yes
-                                                 : css::DOMMatrixReadOnly::Is2D::No);
+    return DOMMatrix::Create(matrix, Is2D() ? DOMMatrixReadOnly::Is2D::Yes : DOMMatrixReadOnly::Is2D::No);
   }
 
   RefPtr<css::Value> CSSScale::ToCSSValue() const noexcept

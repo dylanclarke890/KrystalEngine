@@ -1,16 +1,14 @@
-﻿#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix.hpp"
+﻿#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Geometry/DOMPoint.hpp"
+#include "Krystal.Booey/Geometry/DOMPoint.hpp"
 #include <cmath>
 
 namespace krys::boo::tests
 {
   using Catch::Approx;
-  using css::DOMMatrix;
-  using css::DOMMatrixReadOnly;
 
-  TEST_CASE("DOMMatrix: made from nothing, lists and strings", "[CSS][DOMMatrix]")
+  TEST_CASE("DOMMatrix: made from nothing, lists and strings", "[Geometry][DOMMatrix]")
   {
     // With nothing, the matrix is the 2D identity.
     auto identity = DOMMatrix::Create().ReleaseValue();
@@ -72,10 +70,10 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("DOMMatrix: validating and fixing up dictionaries", "[CSS][DOMMatrix]")
+  TEST_CASE("DOMMatrix: validating and fixing up dictionaries", "[Geometry][DOMMatrix]")
   {
     // The letters fill in the matrix entries they alias.
-    css::DOMMatrixInit init;
+    DOMMatrixInit init;
     init.A = 2;
     init.F = 5;
     REQUIRE_FALSE(DOMMatrixReadOnly::ValidateAndFixup(init).HasException());
@@ -85,33 +83,33 @@ namespace krys::boo::tests
     CHECK(init.Is2D == true);
 
     // Aliases that disagree throw; NaN agrees with NaN.
-    css::DOMMatrix2DInit mismatched;
+    DOMMatrix2DInit mismatched;
     mismatched.A = 1;
     mismatched.M11 = 2;
     CHECK(DOMMatrixReadOnly::ValidateAndFixup(mismatched).GetException().Code() == ExceptionCode::TypeError);
-    css::DOMMatrix2DInit nan;
+    DOMMatrix2DInit nan;
     nan.B = std::nan("");
     nan.M12 = std::nan("");
     CHECK_FALSE(DOMMatrixReadOnly::ValidateAndFixup(nan).HasException());
 
     // A 2D dictionary can't have 3D entries.
-    css::DOMMatrixInit flat;
+    DOMMatrixInit flat;
     flat.Is2D = true;
     flat.M33 = 2;
     CHECK(DOMMatrixReadOnly::ValidateAndFixup(flat).GetException().Code() == ExceptionCode::TypeError);
 
     // Without `is2D`, 3D entries make it 3D.
-    css::DOMMatrixInit deep;
+    DOMMatrixInit deep;
     deep.M34 = 1;
     REQUIRE_FALSE(DOMMatrixReadOnly::ValidateAndFixup(deep).HasException());
     CHECK(deep.Is2D == false);
 
-    auto fromInit = DOMMatrix::FromMatrix(css::DOMMatrixInit {{.E = 7}}).ReleaseValue();
+    auto fromInit = DOMMatrix::FromMatrix(DOMMatrixInit {{.E = 7}}).ReleaseValue();
     CHECK(fromInit->GetIs2D());
     CHECK(fromInit->E() == 7);
   }
 
-  TEST_CASE("DOMMatrix: operations", "[CSS][DOMMatrix]")
+  TEST_CASE("DOMMatrix: operations", "[Geometry][DOMMatrix]")
   {
     auto matrix = DOMMatrix::Create().ReleaseValue();
 
@@ -146,10 +144,10 @@ namespace krys::boo::tests
     SECTION("multiplying and inverting")
     {
       matrix->TranslateSelf(5, 0);
-      auto product = matrix->Multiply(css::DOMMatrixInit {{.A = 2, .D = 2}}).ReleaseValue();
+      auto product = matrix->Multiply(DOMMatrixInit {{.A = 2, .D = 2}}).ReleaseValue();
       CHECK(product->A() == 2);
       CHECK(product->E() == 5);
-      REQUIRE_FALSE(matrix->PreMultiplySelf(css::DOMMatrixInit {{.A = 2, .D = 2}}).HasException());
+      REQUIRE_FALSE(matrix->PreMultiplySelf(DOMMatrixInit {{.A = 2, .D = 2}}).HasException());
       CHECK(matrix->E() == 10);
 
       auto inverse = matrix->Inverse();
@@ -174,7 +172,7 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("DOMMatrix: points, arrays and strings", "[CSS][DOMMatrix]")
+  TEST_CASE("DOMMatrix: points, arrays and strings", "[Geometry][DOMMatrix]")
   {
     auto matrix = DOMMatrix::Create().ReleaseValue()->Translate(10, 20)->ScaleSelf(2);
 
@@ -183,8 +181,7 @@ namespace krys::boo::tests
     CHECK(point->Y() == 22);
     CHECK(point->W() == 1);
 
-    auto transformed =
-      dom::DOMPoint::Create(1, 1)->MatrixTransform(css::DOMMatrixInit {{.E = 3}}).ReleaseValue();
+    auto transformed = DOMPoint::Create(1, 1)->MatrixTransform(DOMMatrixInit {{.E = 3}}).ReleaseValue();
     CHECK(transformed->X() == 4);
     CHECK(transformed->Y() == 1);
 

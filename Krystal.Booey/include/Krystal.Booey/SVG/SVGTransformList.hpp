@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGValuePropertyList.hpp"
 #include "Krystal.Booey/SVG/SVGTransform.hpp"
 
@@ -59,7 +59,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD static ExceptionOr<Ref<SVGTransform>>
-      CreateSVGTransformFromMatrix(css::DOMMatrix2DInit &&matrixInit) noexcept
+      CreateSVGTransformFromMatrix(DOMMatrix2DInit &&matrixInit) noexcept
     {
       Ref svgTransform = SVGTransform::Create();
       (void)svgTransform->SetMatrix(krys::move(matrixInit));

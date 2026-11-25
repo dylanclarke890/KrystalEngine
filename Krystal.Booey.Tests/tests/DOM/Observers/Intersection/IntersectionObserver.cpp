@@ -33,7 +33,7 @@ namespace krys::boo::tests
       bool operator==(const ObservedIntersection &) const = default;
     };
 
-    KRYS_NODISCARD Rect ToRect(const dom::DOMRectReadOnly *rect)
+    KRYS_NODISCARD Rect ToRect(const DOMRectReadOnly *rect)
     {
       REQUIRE(rect);
       return {rect->X(), rect->Y(), rect->Width(), rect->Height()};

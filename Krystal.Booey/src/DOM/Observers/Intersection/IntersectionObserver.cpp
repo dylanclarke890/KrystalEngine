@@ -732,8 +732,8 @@ namespace krys::boo
 
         AppendQueuedEntry(IntersectionObserverEntry::Create({
           .Time = *timestamp,
-          .RootBounds = dom::DOMRectInit {clientRootBounds.X(), clientRootBounds.Y(),
-                                          clientRootBounds.Width(), clientRootBounds.Height()},
+          .RootBounds = DOMRectInit {clientRootBounds.X(), clientRootBounds.Y(), clientRootBounds.Width(),
+                                     clientRootBounds.Height()},
           .BoundingClientRect = {targetBoundingClientRect.X(), targetBoundingClientRect.Y(),
                                  targetBoundingClientRect.Width(), targetBoundingClientRect.Height()},
           .IntersectionRect = {clientIntersectionRect.X(), clientIntersectionRect.Y(),

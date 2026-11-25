@@ -27,8 +27,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/DOMMatrix/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Geometry/DOMMatrix2DInit.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPath.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
@@ -61,7 +61,7 @@ namespace krys::boo::html
     ~Path2D() noexcept override = default;
 
     /// @see https://html.spec.whatwg.org/#dom-path2d-addpath
-    ExceptionOr<void> AddPath(const Path2D &path, css::DOMMatrix2DInit transform = {}) noexcept;
+    ExceptionOr<void> AddPath(const Path2D &path, DOMMatrix2DInit transform = {}) noexcept;
 
     KRYS_NODISCARD const Path &GetPath() const noexcept
     {

@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   /// @brief A rectangle whose coordinates can be changed.
   /// @see https://drafts.fxtf.org/geometry/#domrect
