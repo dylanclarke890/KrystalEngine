@@ -451,7 +451,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Ranges/Range.cpp
   tests/DOM/Ranges/SimpleRange.cpp
   tests/DOM/Ranges/StaticRange.cpp
-  tests/DOM/Scheduling/DocumentTimer.cpp
   tests/DOM/Traversal/NodeFilter.cpp
   tests/DOM/Traversal/NodeIterator.cpp
   tests/DOM/Traversal/TreeWalker.cpp
@@ -623,6 +622,7 @@ set(KRYSTAL_BOOEY_TESTS_HTML_SOURCES
   tests/HTML/Shadow/SliderThumbElement.cpp
   tests/HTML/Shadow/SpinButtonElement.cpp
   tests/HTML/Popover.cpp
+  tests/HTML/Timers/DocumentTimer.cpp
   tests/HTML/Window.cpp
 )
 

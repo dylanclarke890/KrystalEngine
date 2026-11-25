@@ -150,7 +150,7 @@ Status: n/a (there is no `ImageBitmap` or `createImageBitmap`, see `KNOWN-ISSUES
 ### [8.12 Animation frames](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames)
 
 Status: reviewed (2026-11-01)
-> `Window::RequestAnimationFrame`/`CancelAnimationFrame` and `dom::ScriptedAnimationController`; callbacks get the frame's timestamp in whole milliseconds (see `DIFFERENCES.md`).
+> `Window::RequestAnimationFrame`/`CancelAnimationFrame` and `html::AnimationFrameCallbacks`; callbacks get the frame's timestamp in whole milliseconds (see `DIFFERENCES.md`).
 <!-- definitions: list-of-animation-frame-callbacks animation-frame-callback-identifier -->
 
 - [x] [target object](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#concept-animationframeprovider-target-object) — Each AnimationFrameProvider object also has a target object that stores the provider's internal state. It is defined as follows:

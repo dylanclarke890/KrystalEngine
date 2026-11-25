@@ -29,9 +29,9 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventTarget.hpp"
-#include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/AnimationFrames/AnimationFrameCallbacks.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -272,10 +272,12 @@ namespace krys::boo
 
     /// @brief Calls @p callback in the next rendering update, with its timestamp.
     /// @return The callback's handle, positive; 0 if the window has no document.
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
-    int32 RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept;
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
+    int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 handle) noexcept;
 
 #pragma endregion

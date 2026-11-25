@@ -484,7 +484,7 @@ namespace krys::boo
                       [](boo::Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks,
-                      [](boo::Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
+                      [](boo::Document &document) { document.RunAnimationFrameCallbacks(); });
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
                       [](boo::Document &document) { document.ServiceCaretAnimation(); });
@@ -712,13 +712,13 @@ namespace krys::boo
   void Frame::SuspendScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = true;
-    ForEachDocument([](boo::Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.SuspendAnimationFrameCallbacks(); });
   }
 
   void Frame::ResumeScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = false;
-    ForEachDocument([](boo::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.ResumeAnimationFrameCallbacks(); });
   }
 
   void Frame::ResumeAnimatingImages() noexcept

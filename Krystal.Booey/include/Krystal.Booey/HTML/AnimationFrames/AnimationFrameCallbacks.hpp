@@ -38,19 +38,19 @@ namespace krys::boo
 {
   class Document;
   class Frame;
-}
 
-namespace krys::boo::dom
-{
   /// @brief Called with the frame's timestamp: milliseconds since the window's time origin.
   /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#framerequestcallback
-  using FrameRequestCallback = Func<void(DOMHighResTimeStamp)>;
+  using FrameRequestCallback = Func<void(dom::DOMHighResTimeStamp)>;
+}
 
+namespace krys::boo::html
+{
   /// @brief A document's animation frame callbacks (`requestAnimationFrame()`), run by the rendering update.
   /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames
-  class ScriptedAnimationController
+  class AnimationFrameCallbacks
   {
-    KRYS_NON_COPY_MOVABLE(ScriptedAnimationController);
+    KRYS_NON_COPY_MOVABLE(AnimationFrameCallbacks);
 
   public:
     using CallbackId = int32;
@@ -67,12 +67,12 @@ namespace krys::boo::dom
     List<CallbackData> _callbackDataList;
     CallbackId _nextCallbackId {0};
     uint32 _suspendCount {0};
-    DOMHighResTimeStamp _lastAnimationFrameTimestamp {0};
+    dom::DOMHighResTimeStamp _lastAnimationFrameTimestamp {0};
 
   public:
-    explicit ScriptedAnimationController(Document &document) noexcept;
+    explicit AnimationFrameCallbacks(Document &document) noexcept;
 
-    ~ScriptedAnimationController() noexcept;
+    ~AnimationFrameCallbacks() noexcept;
 
     /// @return The callback's handle, positive.
     CallbackId RegisterCallback(FrameRequestCallback &&callback) noexcept;
@@ -81,8 +81,9 @@ namespace krys::boo::dom
 
     /// @brief Runs the callbacks registered before this frame, with @p timestamp (milliseconds since the
     /// window's time origin).
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
-    void ServiceRequestAnimationFrameCallbacks(DOMHighResTimeStamp timestamp) noexcept;
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
+    void Run(dom::DOMHighResTimeStamp timestamp) noexcept;
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.
     void Suspend() noexcept;

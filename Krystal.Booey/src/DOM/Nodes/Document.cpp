@@ -16,6 +16,8 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
@@ -61,9 +63,6 @@
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
-#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
-#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/DOM/Traversal/TreeWalker.hpp"
@@ -113,6 +112,7 @@
 #include "Krystal.Booey/Input/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
+#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
@@ -3180,70 +3180,70 @@ namespace krys::boo
     return _frame && _frame->Document() == this;
   }
 
-  dom::DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
+  html::DocumentTimerHandle Document::StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept
   {
     auto &timer =
-      _timers.emplace_back(AdoptRef(*new dom::DocumentTimer(*this, krys::move(action), delay, false)));
-    return dom::DocumentTimerHandle(*timer);
+      _timers.emplace_back(AdoptRef(*new html::DocumentTimer(*this, krys::move(action), delay, false)));
+    return html::DocumentTimerHandle(*timer);
   }
 
-  dom::DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
-                                                         Func<void()> action) noexcept
+  html::DocumentTimerHandle Document::StartRepeatingTimer(MonotonicTime::duration interval,
+                                                          Func<void()> action) noexcept
   {
     auto &timer =
-      _timers.emplace_back(AdoptRef(*new dom::DocumentTimer(*this, krys::move(action), interval, true)));
-    return dom::DocumentTimerHandle(*timer);
+      _timers.emplace_back(AdoptRef(*new html::DocumentTimer(*this, krys::move(action), interval, true)));
+    return html::DocumentTimerHandle(*timer);
   }
 
-  void Document::RemoveTimer(dom::DocumentTimer &timer) noexcept
+  void Document::RemoveTimer(html::DocumentTimer &timer) noexcept
   {
-    std::erase_if(_timers, [&](const Ref<dom::DocumentTimer> &each) { return each.get() == &timer; });
+    std::erase_if(_timers, [&](const Ref<html::DocumentTimer> &each) { return each.get() == &timer; });
   }
 
-  int32 Document::RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept
+  int32 Document::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
   {
-    if (!_scriptedAnimationController)
+    if (!_animationFrameCallbacks)
     {
-      _scriptedAnimationController = CreateUnique<dom::ScriptedAnimationController>(*this);
+      _animationFrameCallbacks = CreateUnique<html::AnimationFrameCallbacks>(*this);
 
       // The page may have suspended its animation frame callbacks before the controller was made.
       if (!Frame() || Frame()->ScriptedAnimationsSuspended())
       {
-        _scriptedAnimationController->Suspend();
+        _animationFrameCallbacks->Suspend();
       }
     }
-    return _scriptedAnimationController->RegisterCallback(krys::move(callback));
+    return _animationFrameCallbacks->RegisterCallback(krys::move(callback));
   }
 
-  void Document::SuspendScriptedAnimationControllerCallbacks() noexcept
+  void Document::SuspendAnimationFrameCallbacks() noexcept
   {
-    if (_scriptedAnimationController)
+    if (_animationFrameCallbacks)
     {
-      _scriptedAnimationController->Suspend();
+      _animationFrameCallbacks->Suspend();
     }
   }
 
-  void Document::ResumeScriptedAnimationControllerCallbacks() noexcept
+  void Document::ResumeAnimationFrameCallbacks() noexcept
   {
-    if (_scriptedAnimationController)
+    if (_animationFrameCallbacks)
     {
-      _scriptedAnimationController->Resume();
+      _animationFrameCallbacks->Resume();
     }
   }
 
   void Document::CancelAnimationFrame(int32 id) noexcept
   {
-    if (_scriptedAnimationController)
+    if (_animationFrameCallbacks)
     {
-      _scriptedAnimationController->CancelCallback(id);
+      _animationFrameCallbacks->CancelCallback(id);
     }
   }
 
-  void Document::ServiceRequestAnimationFrameCallbacks() noexcept
+  void Document::RunAnimationFrameCallbacks() noexcept
   {
-    if (_scriptedAnimationController && _domWindow)
+    if (_animationFrameCallbacks && _domWindow)
     {
-      _scriptedAnimationController->ServiceRequestAnimationFrameCallbacks(_domWindow->FrozenNowTimestamp());
+      _animationFrameCallbacks->Run(_domWindow->FrozenNowTimestamp());
     }
   }
 
@@ -3343,9 +3343,9 @@ namespace krys::boo
       return;
     }
 
-    if (_scriptedAnimationController)
+    if (_animationFrameCallbacks)
     {
-      _scriptedAnimationController->Suspend();
+      _animationFrameCallbacks->Suspend();
     }
     SuspendActiveDOMObjects(reason);
 
@@ -3360,9 +3360,9 @@ namespace krys::boo
     }
 
     ResumeActiveDOMObjects(reason);
-    if (_scriptedAnimationController)
+    if (_animationFrameCallbacks)
     {
-      _scriptedAnimationController->Resume();
+      _animationFrameCallbacks->Resume();
     }
 
     _scheduledTasksAreSuspended = false;
@@ -3418,7 +3418,7 @@ namespace krys::boo
     {
       timer->Stop();
     }
-    _scriptedAnimationController = nullptr;
+    _animationFrameCallbacks = nullptr;
 
     WebAnimation::StopAnimationsOfDocument(*this);
 

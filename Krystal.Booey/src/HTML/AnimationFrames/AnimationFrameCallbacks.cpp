@@ -24,26 +24,26 @@
  *
  */
 
-#include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
+#include "Krystal.Booey/HTML/AnimationFrames/AnimationFrameCallbacks.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include <cmath>
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
-  ScriptedAnimationController::ScriptedAnimationController(Document &document) noexcept
+  AnimationFrameCallbacks::AnimationFrameCallbacks(Document &document) noexcept
       : _document(CreateWeakPtr(&document))
   {
   }
 
-  ScriptedAnimationController::~ScriptedAnimationController() noexcept = default;
+  AnimationFrameCallbacks::~AnimationFrameCallbacks() noexcept = default;
 
-  void ScriptedAnimationController::Suspend() noexcept
+  void AnimationFrameCallbacks::Suspend() noexcept
   {
     ++_suspendCount;
   }
 
-  void ScriptedAnimationController::Resume() noexcept
+  void AnimationFrameCallbacks::Resume() noexcept
   {
     if (_suspendCount > 0)
     {
@@ -56,14 +56,14 @@ namespace krys::boo::dom
     }
   }
 
-  boo::Frame *ScriptedAnimationController::Frame() const noexcept
+  boo::Frame *AnimationFrameCallbacks::Frame() const noexcept
   {
     auto *document = _document.get();
     return document ? document->Frame() : nullptr;
   }
 
-  ScriptedAnimationController::CallbackId
-    ScriptedAnimationController::RegisterCallback(FrameRequestCallback &&callback) noexcept
+  AnimationFrameCallbacks::CallbackId
+    AnimationFrameCallbacks::RegisterCallback(FrameRequestCallback &&callback) noexcept
   {
     // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
@@ -85,7 +85,7 @@ namespace krys::boo::dom
   }
 
   // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
-  void ScriptedAnimationController::CancelCallback(CallbackId callbackId) noexcept
+  void AnimationFrameCallbacks::CancelCallback(CallbackId callbackId) noexcept
   {
     // 1. If this is not supported, then throw a "NotSupportedError" DOMException.
     // 2. Let callbacks be this's target object's map of animation frame callbacks.
@@ -100,8 +100,7 @@ namespace krys::boo::dom
     }
   }
 
-  void
-    ScriptedAnimationController::ServiceRequestAnimationFrameCallbacks(DOMHighResTimeStamp timestamp) noexcept
+  void AnimationFrameCallbacks::Run(dom::DOMHighResTimeStamp timestamp) noexcept
   {
     if (_callbackDataList.empty() || _suspendCount)
     {
@@ -141,7 +140,7 @@ namespace krys::boo::dom
       // 3b. Remove callbacks[handle].
       // (It's removed below, as the list is being walked.)
       it->FiredOrCancelled = true;
-      auto callback = it->Callback;
+      auto &callback = it->Callback;
       // 3c. Invoke callback with « now » and "report".
       callback(highResNowMs);
     }
@@ -157,7 +156,7 @@ namespace krys::boo::dom
     }
   }
 
-  void ScriptedAnimationController::ScheduleAnimation() noexcept
+  void AnimationFrameCallbacks::ScheduleAnimation() noexcept
   {
     if (auto *frame = Frame())
     {

@@ -546,7 +546,7 @@ namespace krys::boo
     html::EventLoop::Current().QueueMicrotask(krys::move(callback));
   }
 
-  int32 boo::Window::RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept
+  int32 boo::Window::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
   {
     auto *document = Document();
     return document ? document->RequestAnimationFrame(krys::move(callback)) : 0;

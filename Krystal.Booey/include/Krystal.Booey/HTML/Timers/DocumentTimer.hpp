@@ -15,7 +15,7 @@ namespace krys::boo
   class Document;
 }
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
   /// @brief A timer started from C++ in a document: it runs its action as a task on the timer task source,
   /// once or every interval, until it's stopped. It waits while its document is suspended, keeping the time

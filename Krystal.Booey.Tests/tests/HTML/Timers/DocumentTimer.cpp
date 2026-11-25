@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp"
+﻿#include "Krystal.Booey/HTML/Timers/DocumentTimer.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -88,7 +88,7 @@ namespace krys::boo::tests
 
     SECTION("repeating timers repeat until stopped, even from their own action")
     {
-      dom::DocumentTimerHandle timer;
+      html::DocumentTimerHandle timer;
       int32 count = 0;
       timer = document.StartRepeatingTimer(10ms,
                                            [&]
@@ -108,7 +108,7 @@ namespace krys::boo::tests
     SECTION("timers started from a timer's action aren't clamped")
     {
       int32 runs = 0;
-      List<dom::DocumentTimerHandle> timers;
+      List<html::DocumentTimerHandle> timers;
       Func<void()> nest;
       nest = [&]
       {

@@ -1,8 +1,8 @@
-﻿#include "Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp"
+﻿#include "Krystal.Booey/HTML/Timers/DocumentTimer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
   DocumentTimer::DocumentTimer(Document &document, Func<void()> action, Duration delay,
                                bool repeating) noexcept

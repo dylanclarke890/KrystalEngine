@@ -1192,8 +1192,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Ranges/Range.hpp
   include/Krystal.Booey/DOM/Ranges/SimpleRange.hpp
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
-  include/Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp
-  include/Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp
   include/Krystal.Booey/DOM/Traversal/NodeFilter.hpp
   include/Krystal.Booey/DOM/Traversal/NodeIterator.hpp
   include/Krystal.Booey/DOM/Traversal/TraversalBase.hpp
@@ -1314,8 +1312,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Ranges/Range.cpp
   src/DOM/Ranges/SimpleRange.cpp
   src/DOM/Ranges/StaticRange.cpp
-  src/DOM/Scheduling/DocumentTimer.cpp
-  src/DOM/Scheduling/ScriptedAnimationController.cpp
   src/DOM/Traversal/NodeIterator.cpp
   src/DOM/Traversal/TreeWalker.cpp
   src/DOM/Types/QualifiedName.cpp
@@ -1827,6 +1823,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp
   include/Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp
   include/Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp
+  include/Krystal.Booey/HTML/AnimationFrames/AnimationFrameCallbacks.hpp
   include/Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp
   include/Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp
   include/Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp
@@ -2043,6 +2040,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
   include/Krystal.Booey/HTML/EventLoop/TaskSource.hpp
+  include/Krystal.Booey/HTML/Timers/DocumentTimer.hpp
   include/Krystal.Booey/HTML/Types/DocumentReadyState.hpp
   include/Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp
   include/Krystal.Booey/HTML/Types/Namespace.hpp
@@ -2057,6 +2055,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Algorithms/HTMLInsertionAlgorithms.cpp
   src/HTML/Algorithms/HyperlinkAlgorithms.cpp
   src/HTML/Algorithms/RenderBlocking.cpp
+  src/HTML/AnimationFrames/AnimationFrameCallbacks.cpp
   src/HTML/Attributes/EventHandlerAttributes.cpp
   src/HTML/Canvas/CanvasBase.cpp
   src/HTML/Canvas/CanvasFilterContextSwitcher.cpp
@@ -2232,6 +2231,7 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Shadow/SliderThumbElement.cpp
   src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
+  src/HTML/Timers/DocumentTimer.cpp
   src/HTML/Window.cpp
 )
 

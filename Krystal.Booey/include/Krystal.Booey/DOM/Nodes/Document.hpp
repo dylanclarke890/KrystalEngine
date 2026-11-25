@@ -9,8 +9,6 @@
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
-#include "Krystal.Booey/DOM/Scheduling/DocumentTimer.hpp"
-#include "Krystal.Booey/DOM/Scheduling/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
@@ -19,7 +17,9 @@
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Booey/HTML/AnimationFrames/AnimationFrameCallbacks.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Timers/DocumentTimer.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
@@ -434,8 +434,8 @@ namespace krys::boo
     /// @brief When its source was last modified, as its response said; none if it's unknown.
     Maybe<std::chrono::sys_seconds> _lastModified;
     /// @brief The document's active timers.
-    List<Ref<dom::DocumentTimer>> _timers;
-    UniquePtr<dom::ScriptedAnimationController> _scriptedAnimationController;
+    List<Ref<html::DocumentTimer>> _timers;
+    UniquePtr<html::AnimationFrameCallbacks> _animationFrameCallbacks;
     dom::DocumentLoadTimingInfo _loadTiming;
     // The [SameObject] collections of the DOM tree accessors, while something holds them.
     WeakPtr<HTMLCollection> _images;
@@ -1655,25 +1655,25 @@ namespace krys::boo
 
     /// @brief Starts a timer that runs @p action once, after @p delay, as a task on the timer task source.
     /// @return The timer's handle, which stops it when it's destroyed.
-    dom::DocumentTimerHandle StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept;
+    html::DocumentTimerHandle StartTimer(MonotonicTime::duration delay, Func<void()> action) noexcept;
 
     /// @brief Starts a timer that runs @p action every @p interval, as a task on the timer task source.
     /// @return The timer's handle, which stops it when it's destroyed.
-    dom::DocumentTimerHandle StartRepeatingTimer(MonotonicTime::duration interval,
-                                                 Func<void()> action) noexcept;
+    html::DocumentTimerHandle StartRepeatingTimer(MonotonicTime::duration interval,
+                                                  Func<void()> action) noexcept;
 
     /// @brief Drops @p timer, which stopped.
-    void RemoveTimer(dom::DocumentTimer &timer) noexcept;
+    void RemoveTimer(html::DocumentTimer &timer) noexcept;
 
     /// @see
     /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
-    int32 RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept;
+    int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
 
     /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
-    void SuspendScriptedAnimationControllerCallbacks() noexcept;
+    void SuspendAnimationFrameCallbacks() noexcept;
 
     /// @brief Resumes them.
-    void ResumeScriptedAnimationControllerCallbacks() noexcept;
+    void ResumeAnimationFrameCallbacks() noexcept;
 
     /// @see
     /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
@@ -1682,7 +1682,7 @@ namespace krys::boo
     /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
     /// @see
     /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
-    void ServiceRequestAnimationFrameCallbacks() noexcept;
+    void RunAnimationFrameCallbacks() noexcept;
 
     /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:
     /// it's leaving its frame.
