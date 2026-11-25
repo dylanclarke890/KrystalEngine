@@ -103,7 +103,7 @@ namespace krys::boo::dom
     }
   }
 
-  void NodeRareData::InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept
+  void NodeRareData::InvalidateLiveCollectionCachesForAttribute(DOMStringView localName) noexcept
   {
     // Last first: each that forgets its items removes itself, which moves the last into its place.
     for (auto i = _liveCollectionCaches.size(); i-- > 0;)

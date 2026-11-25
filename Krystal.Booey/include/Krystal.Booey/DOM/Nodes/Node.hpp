@@ -788,7 +788,7 @@ namespace krys::boo
     void InvalidateLiveCollectionCachesForChildChange(const Node &child) noexcept;
 
     /// @brief Clears the caches that a change to the attribute called @p localName of the node affects.
-    void InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept;
+    void InvalidateLiveCollectionCachesForAttribute(DOMStringView localName) noexcept;
 
     /// @brief Whether an image has been painted for the node (as its content or a background): a later decode
     /// of a visible one is synchronous, so the image doesn't flicker.

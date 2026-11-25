@@ -105,7 +105,7 @@ namespace krys::boo
     }
   }
 
-  void Node::InvalidateLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept
+  void Node::InvalidateLiveCollectionCachesForAttribute(DOMStringView localName) noexcept
   {
     if (auto &document = NodeDocument(); document.HasLiveCollectionCachesForAttribute(localName))
     {

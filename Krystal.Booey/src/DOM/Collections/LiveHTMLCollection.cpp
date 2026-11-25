@@ -147,7 +147,7 @@ namespace krys::boo
     UnregisterCache();
   }
 
-  void LiveHTMLCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
+  void LiveHTMLCollection::InvalidateCacheForAttribute(DOMStringView localName) noexcept
   {
     if (localName == u8"id" || localName == u8"name")
     {

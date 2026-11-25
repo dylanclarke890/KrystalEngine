@@ -488,7 +488,8 @@ namespace krys::boo
     /// do, even with no references left.
     uint32 _referencingNodeCount {0};
     /// @brief How many live collections in the document have cached their items, by what invalidates them.
-    Array<uint32, static_cast<size_t>(dom::LiveCollectionInvalidation::Count)> _liveCollectionCacheCounts {};
+    Array<uint32, ToUnderlying(MaxEnumValue(dom::LiveCollectionInvalidation {})) + 1uz>
+      _liveCollectionCacheCounts {};
     /// @brief Those with a cache that a change anywhere in the document could affect.
     List<dom::LiveCollection *> _ownerTreeLiveCollectionCaches;
 
@@ -1966,7 +1967,7 @@ namespace krys::boo
     void InvalidateOwnerTreeLiveCollectionCaches() noexcept;
 
     /// @brief Clears what those collections cached that depends on the attribute called @p localName.
-    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept;
+    void InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringView localName) noexcept;
 
     /// @brief Whether a live collection in the document has cached its items, which a change to the tree
     /// could affect.
@@ -1974,7 +1975,7 @@ namespace krys::boo
 
     /// @brief Whether a live collection in the document has cached something that depends on the attribute
     /// called @p localName.
-    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(const DOMStringAtom &localName) const noexcept;
+    KRYS_NODISCARD bool HasLiveCollectionCachesForAttribute(DOMStringView localName) const noexcept;
 
     /// @brief Whether a touch or pointer listener was ever added to the document's nodes or window. Without
     /// one, touches aren't dispatched in the document.

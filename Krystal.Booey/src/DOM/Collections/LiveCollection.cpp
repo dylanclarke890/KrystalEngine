@@ -6,7 +6,7 @@
 namespace krys::boo::dom
 {
   bool LiveCollectionDependsOnAttribute(LiveCollectionInvalidation invalidation,
-                                        const DOMStringAtom &localName) noexcept
+                                        DOMStringView localName) noexcept
   {
     switch (invalidation)
     {
@@ -19,8 +19,8 @@ namespace krys::boo::dom
         return localName == u8"for" || localName == u8"id" || localName == u8"type";
       case LiveCollectionInvalidation::FormControls:
         return localName == u8"id" || localName == u8"name" || localName == u8"form" || localName == u8"type";
-      case LiveCollectionInvalidation::Count: break;
     }
+
     return false;
   }
 
@@ -35,9 +35,9 @@ namespace krys::boo::dom
     UnregisterCache();
   }
 
-  void LiveCollection::InvalidateCacheForAttribute(DOMStringAtom localName) noexcept
+  void LiveCollection::InvalidateCacheForAttribute(DOMStringView localName) noexcept
   {
-    if (LiveCollectionDependsOnAttribute(_invalidation, krys::move(localName)))
+    if (LiveCollectionDependsOnAttribute(_invalidation, localName))
     {
       InvalidateCache();
     }
@@ -70,8 +70,10 @@ namespace krys::boo::dom
     {
       _isRegistered = true;
       _root->EnsureNodeRareData().AddLiveCollectionCache(const_cast<LiveCollection &>(*this));
+      
       auto &document = _root->NodeDocument();
       document.LiveCollectionCacheAdded(_invalidation);
+      
       if (_traversal == LiveCollectionTraversal::OwnerTree)
       {
         document.AddOwnerTreeLiveCollectionCache(const_cast<LiveCollection &>(*this));
@@ -85,8 +87,10 @@ namespace krys::boo::dom
     {
       _isRegistered = false;
       _root->RareData()->RemoveLiveCollectionCache(const_cast<LiveCollection &>(*this));
+      
       auto &document = _root->NodeDocument();
       document.LiveCollectionCacheRemoved(_invalidation);
+      
       if (_traversal == LiveCollectionTraversal::OwnerTree)
       {
         document.RemoveOwnerTreeLiveCollectionCache(const_cast<LiveCollection &>(*this));

@@ -73,7 +73,7 @@ namespace krys::boo
 
     void InvalidateCache() noexcept override;
 
-    void InvalidateCacheForAttribute(DOMStringAtom localName) noexcept override;
+    void InvalidateCacheForAttribute(DOMStringView localName) noexcept override;
 
   protected:
     /// @brief Called before the collection caches its items, for a subclass to bring up to date what its

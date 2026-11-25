@@ -1285,7 +1285,7 @@ namespace krys::boo
     }
   }
 
-  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(const DOMStringAtom &localName) noexcept
+  void Document::InvalidateOwnerTreeLiveCollectionCachesForAttribute(DOMStringView localName) noexcept
   {
     // Last first: each that forgets its items removes itself, which moves the last into its place.
     for (auto i = _ownerTreeLiveCollectionCaches.size(); i-- > 0;)
@@ -1299,7 +1299,7 @@ namespace krys::boo
     return std::ranges::any_of(_liveCollectionCacheCounts, [](uint32 count) { return count != 0; });
   }
 
-  bool Document::HasLiveCollectionCachesForAttribute(const DOMStringAtom &localName) const noexcept
+  bool Document::HasLiveCollectionCachesForAttribute(DOMStringView localName) const noexcept
   {
     for (size_t i = 0; i < _liveCollectionCacheCounts.size(); ++i)
     {
