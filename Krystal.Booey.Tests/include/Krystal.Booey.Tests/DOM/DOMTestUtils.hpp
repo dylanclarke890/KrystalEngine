@@ -67,13 +67,13 @@ namespace krys::boo::tests
   };
 
   /// @brief A node filter that accepts text nodes only.
-  class TextNodeFilter : public dom::NodeFilter
+  class TextNodeFilter : public NodeFilter
   {
   public:
-    KRYS_NODISCARD ExceptionOr<dom::FilterResult> AcceptNode(const Node &node) const noexcept override
+    KRYS_NODISCARD ExceptionOr<FilterResult> AcceptNode(const Node &node) const noexcept override
     {
-      return node.NodeType() == dom::NodeType::TEXT_NODE ? dom::FilterResult::FILTER_ACCEPT
-                                                         : dom::FilterResult::FILTER_REJECT;
+      return node.NodeType() == dom::NodeType::TEXT_NODE ? FilterResult::FILTER_ACCEPT
+                                                         : FilterResult::FILTER_REJECT;
     }
   };
 }

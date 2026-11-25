@@ -1,28 +1,24 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
-#include "Krystal.Booey/DOM/Traversal/TraversalBase.hpp"
+#include "Krystal.Booey/DOM/Traversal/Traverser.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 
 namespace krys::boo
 {
   class Document;
-}
 
-namespace krys::boo::dom
-{
   /// @brief Walks the subtree of its root, moving its current node to the nodes its filter accepts.
   /// @see https://dom.spec.whatwg.org/#interface-treewalker
-  class TreeWalker : public TraversalBase, public RefCounted<TreeWalker>
+  class TreeWalker : public dom::Traverser, public RefCounted<TreeWalker>
   {
-    friend class boo::Document;
+    friend class Document;
 
   private:
     /// @see https://dom.spec.whatwg.org/#treewalker-current
     Ref<Node> _currentNode;
 
-  protected:
-    TreeWalker(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept;
+    TreeWalker(Node &root, boo::WhatToShow whatToShow, RefPtr<NodeFilter> filter) noexcept;
 
   public:
 #pragma region TreeWalker - https://dom.spec.whatwg.org/#treewalker

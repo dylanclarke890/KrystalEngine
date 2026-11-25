@@ -2395,7 +2395,7 @@ Status: reviewed (2026-10-31)
 ## [6. Traversal](https://dom.spec.whatwg.org/#traversal)
 
 Status: reviewed (2026-10-31)
-> NodeIterator and TreeWalker share `TraversalBase` (`DOM/Traversal/TraversalBase.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
+> NodeIterator and TreeWalker share `Traverser` (`DOM/Traversal/Traverser.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
 <!-- definitions: concept-traversal-active concept-traversal-root concept-traversal-whattoshow concept-traversal-filter -->
 
 - [x] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
@@ -2411,7 +2411,7 @@ Status: reviewed (2026-10-31)
 ### [6.1. Interface NodeIterator](https://dom.spec.whatwg.org/#interface-nodeiterator)
 
 Status: reviewed (2026-10-31)
-> NodeIterator is `DOM/Traversal/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
+> NodeIterator is `DOM/Traversal/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
 <!-- definitions: iterator-collection node-pointer node-pointer-node node-pointer-pointer-before nodeiterator-reference nodeiterator-candidate-reference -->
 
 - [x] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
@@ -2468,7 +2468,7 @@ Status: reviewed (2026-10-31)
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 
 Status: reviewed (2026-10-31)
-> TreeWalker is `DOM/Traversal/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s.
+> TreeWalker is `DOM/Traversal/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s.
 <!-- definitions: treewalker-current -->
 
 - [x] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.

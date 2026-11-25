@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeIterator.hpp"
@@ -9,8 +9,7 @@
 
 namespace krys::boo::dom
 {
-  ExceptionOr<FilterResult> IteratorAlgorithms::FilterNode(TraversalBase &traverser,
-                                                           const Node &node) noexcept
+  ExceptionOr<FilterResult> IteratorAlgorithms::FilterNode(Traverser &traverser, const Node &node) noexcept
   {
     // 1. If traverser’s is active is true, then throw an "InvalidStateError" DOMException.
     if (traverser.IsActive())
@@ -36,7 +35,7 @@ namespace krys::boo::dom
     }
 
     // 5. Set traverser’s is active to true.
-    traverser.IsActive(true);
+    traverser.SetActive(true);
 
     // 6. Let result be the return value of call a user object’s operation with traverser’s filter,
     //    "acceptNode", and « node ». If this throws an exception, then set traverser’s is active to false and
@@ -44,7 +43,7 @@ namespace krys::boo::dom
     auto result = traverser.Filter()->AcceptNode(node);
 
     // 7. Set traverser’s is active to false.
-    traverser.IsActive(false);
+    traverser.SetActive(false);
 
     // 8. Return result.
     return result;

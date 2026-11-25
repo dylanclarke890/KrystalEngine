@@ -104,9 +104,7 @@ namespace krys::boo::dom
   class LiveRangeUpdater;
   class MutationAlgorithms;
   class NodeAlgorithms;
-  class NodeIterator;
   class SelectorQuery;
-  class TreeWalker;
   class UserActionElementSet;
 
   enum class FireEvents : bool;
@@ -243,6 +241,7 @@ namespace krys::boo
   class MediaQueryList;
   class MouseEvent;
   class MouseEventWithHitTestResults;
+  class NodeIterator;
   class PlatformMouseEvent;
   class PointerEvent;
   class ProcessingInstruction;
@@ -257,6 +256,7 @@ namespace krys::boo
   class StyleOriginatedTimelinesController;
   class StyleSheetList;
   class Text;
+  class TreeWalker;
   class WebAnimation;
   class Window;
 
@@ -276,7 +276,7 @@ namespace krys::boo
     friend class dom::LiveRangeUpdater;
     friend class dom::MutationAlgorithms;
     friend class dom::NodeAlgorithms;
-    friend class dom::NodeIterator;
+    friend class NodeIterator;
 
     friend class html::CustomElementAlgorithms;
     friend class html::FocusAlgorithms;
@@ -305,7 +305,7 @@ namespace krys::boo
     DOMString _xmlVersion {u8"1.0"};
     StandaloneStatus _xmlStandalone {StandaloneStatus::Unspecified};
     List<dom::Range *> _liveRanges;
-    List<dom::NodeIterator *> _nodeIterators;
+    List<NodeIterator *> _nodeIterators;
     bool _allowDeclarativeShadowRoots : 1 {false};
     bool _hasXMLDeclaration : 1 {false};
     dom::QuirksMode _quirksMode : EnumBitWidth<dom::QuirksMode> {dom::QuirksMode::NoQuirks};
@@ -623,14 +623,13 @@ namespace krys::boo
     KRYS_NODISCARD Ref<dom::Range> CreateRange() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createnodeiterator
-    KRYS_NODISCARD static Ref<dom::NodeIterator>
-      CreateNodeIterator(Node &root, dom::WhatToShow whatToShow = dom::ShowAll,
-                         RefPtr<dom::NodeFilter> &&filter = nullptr) noexcept;
+    KRYS_NODISCARD static Ref<NodeIterator>
+      CreateNodeIterator(Node &root, WhatToShow whatToShow = ShowAll,
+                         RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createtreewalker
-    KRYS_NODISCARD static Ref<dom::TreeWalker>
-      CreateTreeWalker(Node &root, dom::WhatToShow whatToShow = dom::ShowAll,
-                       RefPtr<dom::NodeFilter> &&filter = nullptr) noexcept;
+    KRYS_NODISCARD static Ref<TreeWalker> CreateTreeWalker(Node &root, WhatToShow whatToShow = ShowAll,
+                                                           RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
 #pragma endregion
 
@@ -2371,7 +2370,7 @@ namespace krys::boo
     }
 
     /// @brief The node iterators over the document, which removals update.
-    KRYS_NODISCARD List<dom::NodeIterator *> &NodeIterators() noexcept
+    KRYS_NODISCARD List<NodeIterator *> &NodeIterators() noexcept
     {
       return _nodeIterators;
     }

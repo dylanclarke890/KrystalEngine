@@ -7,8 +7,10 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class Node;
+
   /// @brief What a filter returns for a node.
   /// @see https://dom.spec.whatwg.org/#interface-nodefilter
   enum class FilterResult : uint8
@@ -68,15 +70,7 @@ namespace krys::boo::dom
 
   /// @see https://dom.spec.whatwg.org/#dom-nodefilter-show_all
   constexpr WhatToShow ShowAll = WhatToShow::FromRaw(0xFF'FF'FF'FFu);
-}
 
-namespace krys::boo
-{
-  class Node;
-}
-
-namespace krys::boo::dom
-{
   /// @brief Decides which nodes a NodeIterator or TreeWalker returns.
   /// @see https://dom.spec.whatwg.org/#interface-nodefilter
   class NodeFilter : public RefCounted<NodeFilter>

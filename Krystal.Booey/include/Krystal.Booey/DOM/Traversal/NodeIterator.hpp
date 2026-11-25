@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Traversal/TraversalBase.hpp"
+#include "Krystal.Booey/DOM/Traversal/Traverser.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -22,22 +22,25 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#node-pointer-pointer-before
     bool PointerBefore {false};
   };
+}
 
+namespace krys::boo
+{
   /// @brief Iterates over the inclusive descendants of its root (its iterator collection) in tree order.
   /// @see https://dom.spec.whatwg.org/#interface-nodeiterator
   /// @see https://dom.spec.whatwg.org/#iterator-collection
-  class NodeIterator : public TraversalBase, public RefCounted<NodeIterator>
+  class NodeIterator : public dom::Traverser, public RefCounted<NodeIterator>
   {
-    friend class boo::Document;
-    friend class IteratorAlgorithms;
+    friend class Document;
+    friend class dom::IteratorAlgorithms;
 
   private:
     /// @see https://dom.spec.whatwg.org/#nodeiterator-reference
-    NodePointer _reference;
+    dom::NodePointer _reference;
     /// @see https://dom.spec.whatwg.org/#nodeiterator-candidate-reference
-    Maybe<NodePointer> _candidateReference;
+    Maybe<dom::NodePointer> _candidateReference;
 
-    NodeIterator(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept;
+    NodeIterator(Node &root, boo::WhatToShow whatToShow, RefPtr<NodeFilter> filter) noexcept;
 
   public:
     ~NodeIterator() noexcept;

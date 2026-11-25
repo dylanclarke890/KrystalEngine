@@ -7,14 +7,14 @@
 namespace krys::boo
 {
   class Node;
+  class NodeIterator;
+  class TreeWalker;
 }
 
 namespace krys::boo::dom
 {
-  class NodeIterator;
   struct NodePointer;
-  class TraversalBase;
-  class TreeWalker;
+  class Traverser;
 
   enum class TraversalNextOrPrev
   {
@@ -32,7 +32,7 @@ namespace krys::boo::dom
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-node-filter
-    KRYS_NODISCARD static ExceptionOr<FilterResult> FilterNode(TraversalBase &traverser,
+    KRYS_NODISCARD static ExceptionOr<FilterResult> FilterNode(Traverser &traverser,
                                                                const Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps

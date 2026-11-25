@@ -1193,7 +1193,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
   include/Krystal.Booey/DOM/Traversal/NodeFilter.hpp
   include/Krystal.Booey/DOM/Traversal/NodeIterator.hpp
-  include/Krystal.Booey/DOM/Traversal/TraversalBase.hpp
+  include/Krystal.Booey/DOM/Traversal/Traverser.hpp
   include/Krystal.Booey/DOM/Traversal/TreeWalker.hpp
   include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
   include/Krystal.Booey/DOM/Types/DOMString.hpp

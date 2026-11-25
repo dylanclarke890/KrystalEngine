@@ -2,10 +2,10 @@
 #include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  NodeIterator::NodeIterator(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
-      : TraversalBase(root, whatToShow, krys::move(filter)), _reference {ShareRef(root), true}
+  NodeIterator::NodeIterator(Node &root, boo::WhatToShow whatToShow, RefPtr<NodeFilter> filter) noexcept
+      : dom::Traverser(root, whatToShow, krys::move(filter)), _reference {ShareRef(root), true}
   {
     // The document runs the NodeIterator pre-remove steps for the iterators whose root it is the node
     // document of.
@@ -19,11 +19,11 @@ namespace krys::boo::dom
 
   ExceptionOr<RefPtr<Node>> NodeIterator::NextNode() noexcept
   {
-    return IteratorAlgorithms::Traverse(*this, TraversalNextOrPrev::Next);
+    return dom::IteratorAlgorithms::Traverse(*this, dom::TraversalNextOrPrev::Next);
   }
 
   ExceptionOr<RefPtr<Node>> NodeIterator::PreviousNode() noexcept
   {
-    return IteratorAlgorithms::Traverse(*this, TraversalNextOrPrev::Previous);
+    return dom::IteratorAlgorithms::Traverse(*this, dom::TraversalNextOrPrev::Previous);
   }
 }

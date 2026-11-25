@@ -8,25 +8,30 @@
 namespace krys::boo
 {
   class Node;
+  class NodeIterator;
+  class TreeWalker;
 }
 
 namespace krys::boo::dom
 {
-  /// @brief A NodeIterator or TreeWalker: a root, the node types it shows and a filter.
+  /// @brief What a NodeIterator and a TreeWalker share: a root, the node types it shows, a filter, and
+  /// whether it's filtering a node. The specification's filter algorithm takes either as its traverser.
   /// @see https://dom.spec.whatwg.org/#traversal
-  class TraversalBase
+  /// @see https://dom.spec.whatwg.org/#concept-node-filter
+  class Traverser
   {
+    friend class boo::NodeIterator;
+    friend class boo::TreeWalker;
     friend class IteratorAlgorithms;
 
-  protected:
+  private:
     Ref<Node> _root;
     RefPtr<NodeFilter> _filter;
     WhatToShow _whatToShow {ShowAll};
     /// @see https://dom.spec.whatwg.org/#concept-traversal-active
     bool _isActive {false};
 
-  protected:
-    TraversalBase(Node &root, WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
+    Traverser(Node &root, WhatToShow whatToShow, RefPtr<NodeFilter> filter) noexcept
         : _root(ShareRef(root)), _filter(krys::move(filter)), _whatToShow(whatToShow)
     {
     }
@@ -64,14 +69,14 @@ namespace krys::boo::dom
       return _filter.get();
     }
 
-  protected:
+  private:
     /// @see https://dom.spec.whatwg.org/#concept-traversal-active
     KRYS_NODISCARD bool IsActive() const noexcept
     {
       return _isActive;
     }
 
-    void IsActive(bool active) noexcept
+    void SetActive(bool active) noexcept
     {
       _isActive = active;
     }

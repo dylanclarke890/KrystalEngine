@@ -761,8 +761,8 @@ namespace krys::boo
                                  dom::BoundaryPoint {ShareRef(*this), 0uz});
   }
 
-  Ref<dom::NodeIterator> Document::CreateNodeIterator(Node &root, dom::WhatToShow whatToShow,
-                                                      RefPtr<dom::NodeFilter> &&filter) noexcept
+  Ref<NodeIterator> Document::CreateNodeIterator(Node &root, WhatToShow whatToShow,
+                                                 RefPtr<NodeFilter> &&filter) noexcept
   {
     // 1. Let iterator be a new NodeIterator object.
     // 2. Set iterator's root to root.
@@ -770,18 +770,18 @@ namespace krys::boo
     // 4. Set iterator's whatToShow to whatToShow.
     // 5. Set iterator's filter to filter.
     // 6. Return iterator.
-    return AdoptRef(*new dom::NodeIterator(root, whatToShow, krys::move(filter)));
+    return AdoptRef(*new NodeIterator(root, whatToShow, krys::move(filter)));
   }
 
-  Ref<dom::TreeWalker> Document::CreateTreeWalker(Node &root, dom::WhatToShow whatToShow,
-                                                  RefPtr<dom::NodeFilter> &&filter) noexcept
+  Ref<TreeWalker> Document::CreateTreeWalker(Node &root, WhatToShow whatToShow,
+                                             RefPtr<NodeFilter> &&filter) noexcept
   {
     // 1. Let walker be a new TreeWalker object.
     // 2. Set walker's root and walker's current to root.
     // 3. Set walker's whatToShow to whatToShow.
     // 4. Set walker's filter to filter.
     // 5. Return walker.
-    return AdoptRef(*new dom::TreeWalker(root, whatToShow, krys::move(filter)));
+    return AdoptRef(*new TreeWalker(root, whatToShow, krys::move(filter)));
   }
 
 #pragma endregion

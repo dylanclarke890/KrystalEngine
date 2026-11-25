@@ -2,10 +2,10 @@
 #include "Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
-  TreeWalker::TreeWalker(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
-      : TraversalBase(root, whatToShow, krys::move(filter)), _currentNode(ShareRef(root))
+  TreeWalker::TreeWalker(Node &root, boo::WhatToShow whatToShow, RefPtr<NodeFilter> filter) noexcept
+      : dom::Traverser(root, whatToShow, krys::move(filter)), _currentNode(ShareRef(root))
   {
   }
 
@@ -24,7 +24,7 @@ namespace krys::boo::dom
       //     to node and return node.
       if (node)
       {
-        auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
+        auto filterResult = dom::IteratorAlgorithms::FilterNode(*this, *node);
         if (filterResult.HasException())
         {
           return filterResult.ReleaseException();
@@ -44,22 +44,22 @@ namespace krys::boo::dom
 
   ExceptionOr<Node *> TreeWalker::FirstChild() noexcept
   {
-    return IteratorAlgorithms::TraverseChildren(*this, TraverseFirstOrLast::First);
+    return dom::IteratorAlgorithms::TraverseChildren(*this, dom::TraverseFirstOrLast::First);
   }
 
   ExceptionOr<Node *> TreeWalker::LastChild() noexcept
   {
-    return IteratorAlgorithms::TraverseChildren(*this, TraverseFirstOrLast::Last);
+    return dom::IteratorAlgorithms::TraverseChildren(*this, dom::TraverseFirstOrLast::Last);
   }
 
   ExceptionOr<Node *> TreeWalker::PreviousSibling() noexcept
   {
-    return IteratorAlgorithms::TraverseSiblings(*this, TraversalNextOrPrev::Previous);
+    return dom::IteratorAlgorithms::TraverseSiblings(*this, dom::TraversalNextOrPrev::Previous);
   }
 
   ExceptionOr<Node *> TreeWalker::NextSibling() noexcept
   {
-    return IteratorAlgorithms::TraverseSiblings(*this, TraversalNextOrPrev::Next);
+    return dom::IteratorAlgorithms::TraverseSiblings(*this, dom::TraversalNextOrPrev::Next);
   }
 
   ExceptionOr<Node *> TreeWalker::PreviousNode() noexcept
@@ -80,7 +80,7 @@ namespace krys::boo::dom
         node = sibling;
 
         // 2b.ii. Let result be the result of filtering node within this.
-        auto result = IteratorAlgorithms::FilterNode(*this, *node);
+        auto result = dom::IteratorAlgorithms::FilterNode(*this, *node);
         if (result.HasException())
         {
           return result.ReleaseException();
@@ -93,7 +93,7 @@ namespace krys::boo::dom
           node = ShareRefPtr(node->LastChild());
 
           // 2b.iii.B. Set result to the result of filtering node within this.
-          result = IteratorAlgorithms::FilterNode(*this, *node);
+          result = dom::IteratorAlgorithms::FilterNode(*this, *node);
           if (result.HasException())
           {
             return result.ReleaseException();
@@ -122,7 +122,7 @@ namespace krys::boo::dom
 
       // 2e. If the return value of filtering node within this is FILTER_ACCEPT, then set this’s current to
       //     node and return node.
-      auto result = IteratorAlgorithms::FilterNode(*this, *node);
+      auto result = dom::IteratorAlgorithms::FilterNode(*this, *node);
       if (result.HasException())
       {
         return result.ReleaseException();
@@ -157,7 +157,7 @@ namespace krys::boo::dom
         node = ShareRefPtr(node->FirstChild());
 
         // 3a.ii. Set result to the result of filtering node within this.
-        auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
+        auto filterResult = dom::IteratorAlgorithms::FilterNode(*this, *node);
         if (filterResult.HasException())
         {
           return filterResult.ReleaseException();
@@ -210,7 +210,7 @@ namespace krys::boo::dom
       node = ShareRefPtr(sibling);
 
       // 3g. Set result to the result of filtering node within this.
-      auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
+      auto filterResult = dom::IteratorAlgorithms::FilterNode(*this, *node);
       if (filterResult.HasException())
       {
         return filterResult.ReleaseException();
