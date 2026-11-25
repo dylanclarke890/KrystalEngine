@@ -34,10 +34,10 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
@@ -966,7 +966,7 @@ namespace krys::boo
       }
     }
 
-    auto range = *dom::MakeSimpleRange(dom::MakeBoundaryPointBeforeNodeContents(*scope), position);
+    auto range = *dom::CreateSimpleRange(dom::CreateBoundaryPointBeforeNodeContents(*scope), position);
     return static_cast<int32>(
       CharacterCount(range, TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions));
   }
@@ -980,7 +980,7 @@ namespace krys::boo
       return 0;
     }
 
-    auto range = dom::MakeSimpleRange(dom::MakeBoundaryPointBeforeNodeContents(node), visiblePosition);
+    auto range = dom::CreateSimpleRange(dom::CreateBoundaryPointBeforeNodeContents(node), visiblePosition);
     return range ? static_cast<int32>(CharacterCount(*range, behaviors)) : 0;
   }
 
@@ -1002,8 +1002,8 @@ namespace krys::boo
     {
       return {};
     }
-    return {dom::MakeDeprecatedLegacyPosition(ResolveCharacterLocation(
-      dom::MakeRangeSelectingNodeContents(*scope), static_cast<uint64>(index), behaviors))};
+    return {dom::CreateDeprecatedLegacyPosition(ResolveCharacterLocation(
+      dom::CreateRangeSelectingNodeContents(*scope), static_cast<uint64>(index), behaviors))};
   }
 
   VisiblePosition VisiblePositionForIndexUsingCharacterIterator(Node &node, int32 index) noexcept
@@ -1013,7 +1013,7 @@ namespace krys::boo
       return {FirstPositionInOrBeforeNode(&node)};
     }
 
-    auto range = dom::MakeRangeSelectingNodeContents(node);
+    auto range = dom::CreateRangeSelectingNodeContents(node);
     CharacterIterator it(range);
     if (!it.AtEnd())
     {
@@ -1027,11 +1027,11 @@ namespace krys::boo
       it.Advance(1);
       if (!it.AtEnd())
       {
-        return {dom::MakeDeprecatedLegacyPosition(it.Range().Start)};
+        return {dom::CreateDeprecatedLegacyPosition(it.Range().Start)};
       }
     }
 
-    return {dom::MakeDeprecatedLegacyPosition((it.AtEnd() ? range : it.Range()).End), Affinity::Upstream};
+    return {dom::CreateDeprecatedLegacyPosition((it.AtEnd() ? range : it.Range()).End), Affinity::Upstream};
   }
 
   // Determines whether a node is inside a range or visibly starts and ends at the boundaries of the range.
@@ -1043,8 +1043,8 @@ namespace krys::boo
       return true;
     }
 
-    auto startPosition = dom::MakeDeprecatedLegacyPosition(range.Start);
-    auto endPosition = dom::MakeDeprecatedLegacyPosition(range.End);
+    auto startPosition = dom::CreateDeprecatedLegacyPosition(range.Start);
+    auto endPosition = dom::CreateDeprecatedLegacyPosition(range.End);
 
     bool startIsVisuallySame = VisiblePositionBeforeNode(node) == VisiblePosition(startPosition);
     if (startIsVisuallySame && dom::PositionInParentAfterNode(&node) < endPosition)
@@ -1205,8 +1205,8 @@ namespace krys::boo
 
   dom::PositionRange PositionsForRange(const dom::SimpleRange &range) noexcept
   {
-    return {dom::MakeContainerOffsetPosition(range.Start).Downstream(),
-            dom::MakeContainerOffsetPosition(range.End).Upstream()};
+    return {dom::CreateContainerOffsetPosition(range.Start).Downstream(),
+            dom::CreateContainerOffsetPosition(range.End).Upstream()};
   }
 
 #pragma region Elements editing makes

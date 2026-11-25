@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include <compare>
 
@@ -129,6 +129,20 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-range-stringifier
     KRYS_NODISCARD ExceptionOr<DOMString> ToString() const noexcept;
 
+#pragma endregion
+
+#pragma region Range (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
+
+    /// @brief @p markup parsed as the children of the start node (or its parent element, or a `body`).
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
+      CreateContextualFragment(DOMStringView markup) const noexcept;
+
+#pragma endregion
+
+#pragma region Range Extensions (CSSOM View) - https://drafts.csswg.org/cssom-view/#extensions-to-the-range-interface
+
     /// @brief The border boxes of the elements the range selects, and the boxes of its text.
     /// @see https://drafts.csswg.org/cssom-view/#dom-range-getclientrects
     KRYS_NODISCARD Ref<DOMRectList> GetClientRects() const noexcept;
@@ -137,19 +151,10 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/cssom-view/#dom-range-getboundingclientrect
     KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() const noexcept;
 
+#pragma endregion
+
     /// @brief The union of @p range's client rects, ignoring empty ones.
     KRYS_NODISCARD static Ref<DOMRect> BoundingClientRect(const SimpleRange &range) noexcept;
-
-#pragma endregion
-
-#pragma region Range (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
-
-    /// @brief @p markup parsed as the children of the start node (or its parent element, or a `body`).
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
-    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
-      CreateContextualFragment(DOMStringView markup) const noexcept;
-
-#pragma endregion
 
     /// @brief Whether this is the range associated with its document's selection, so changing its boundary
     /// points changes the selection too.

@@ -448,7 +448,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/MutationObserver/MutationRecord.cpp
   tests/DOM/Ranges/AbstractRange.cpp
   tests/DOM/Ranges/BoundaryPoint.cpp
-  tests/DOM/Ranges/Position.cpp
   tests/DOM/Ranges/Range.cpp
   tests/DOM/Ranges/SimpleRange.cpp
   tests/DOM/Ranges/StaticRange.cpp
@@ -478,6 +477,7 @@ set(KRYSTAL_BOOEY_TESTS_EDITING_SOURCES
   tests/Editing/Selection/VisibleUnits.cpp
   tests/Editing/Composition.cpp
   tests/Editing/Editor.cpp
+  tests/Editing/Position.cpp
   tests/Editing/TextIterator.cpp
 )
 

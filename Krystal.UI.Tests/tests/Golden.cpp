@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
-#include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
+#include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
@@ -410,8 +410,8 @@ namespace krys::ui::tests
                 auto &document = view.Document();
                 auto *start = document.GetElementById(u8"start")->FirstChild();
                 auto *end = document.GetElementById(u8"end")->FirstChild();
-                document.Selection().MoveTo(boo::dom::MakeContainerOffsetPosition(ShareRefPtr(start), 14),
-                                            boo::dom::MakeContainerOffsetPosition(ShareRefPtr(end), 8),
+                document.Selection().MoveTo(boo::dom::CreateContainerOffsetPosition(ShareRefPtr(start), 14),
+                                            boo::dom::CreateContainerOffsetPosition(ShareRefPtr(end), 8),
                                             boo::Affinity::Downstream);
                 view.UpdateRendering();
               });
@@ -425,7 +425,7 @@ namespace krys::ui::tests
     field.Focus();
     auto &text = Downcast<boo::Text>(*field.FirstChild());
     document.Selection().MoveTo(
-      boo::dom::MakeContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
+      boo::dom::CreateContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
       boo::Affinity::Downstream);
     document.GetEditor().SetComposition(u8"kanji henkan", underlines, 12, 12);
     view.UpdateRendering();

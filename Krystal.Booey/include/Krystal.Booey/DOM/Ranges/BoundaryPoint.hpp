@@ -71,17 +71,17 @@ namespace krys::boo::dom
   KRYS_NODISCARD std::partial_ordering TreeOrder(const BoundaryPoint &a, const BoundaryPoint &b) noexcept;
 
   /// @brief The boundary point before @p node in its parent, or null if it has no parent.
-  KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPointBeforeNode(Node &node) noexcept;
+  KRYS_NODISCARD Maybe<BoundaryPoint> CreateBoundaryPointBeforeNode(Node &node) noexcept;
 
   /// @brief The boundary point after @p node in its parent, or null if it has no parent.
-  KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPointAfterNode(Node &node) noexcept;
+  KRYS_NODISCARD Maybe<BoundaryPoint> CreateBoundaryPointAfterNode(Node &node) noexcept;
 
-  KRYS_NODISCARD inline BoundaryPoint MakeBoundaryPointBeforeNodeContents(Node &node) noexcept
+  KRYS_NODISCARD inline BoundaryPoint CreateBoundaryPointBeforeNodeContents(Node &node) noexcept
   {
     return {ShareRef(node), 0};
   }
 
-  KRYS_NODISCARD inline BoundaryPoint MakeBoundaryPointAfterNodeContents(Node &node) noexcept
+  KRYS_NODISCARD inline BoundaryPoint CreateBoundaryPointAfterNodeContents(Node &node) noexcept
   {
     return {ShareRef(node), node.Length()};
   }

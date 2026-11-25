@@ -77,7 +77,7 @@ namespace krys::boo::dom
     return std::strong_ordering::less;
   }
 
-  Maybe<BoundaryPoint> MakeBoundaryPointBeforeNode(Node &node) noexcept
+  Maybe<BoundaryPoint> CreateBoundaryPointBeforeNode(Node &node) noexcept
   {
     auto *parent = node.ParentNode();
     if (!parent)
@@ -87,7 +87,7 @@ namespace krys::boo::dom
     return BoundaryPoint {ShareRef<Node>(*parent), node.ComputeNodeIndex()};
   }
 
-  Maybe<BoundaryPoint> MakeBoundaryPointAfterNode(Node &node) noexcept
+  Maybe<BoundaryPoint> CreateBoundaryPointAfterNode(Node &node) noexcept
   {
     auto *parent = node.ParentNode();
     if (!parent)

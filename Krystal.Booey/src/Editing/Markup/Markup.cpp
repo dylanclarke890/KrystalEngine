@@ -41,12 +41,12 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Markup/MarkupAccumulator.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
@@ -577,7 +577,7 @@ namespace krys::boo
         behaviors.Add(TextIteratorBehavior::IgnoresUserSelectNone);
       }
 
-      auto range = dom::MakeSimpleRange(dom::PositionRange {start, end});
+      auto range = dom::CreateSimpleRange(dom::PositionRange {start, end});
       return range ? PlainText(*range, behaviors) : utf8_string();
     }
 
@@ -1352,8 +1352,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContextPreservesNewline(const dom::SimpleRange &context) noexcept
     {
-      auto *container =
-        VisiblePosition(dom::MakeDeprecatedLegacyPosition(context.Start)).DeepEquivalent().GetContainerNode();
+      auto *container = VisiblePosition(dom::CreateDeprecatedLegacyPosition(context.Start))
+                          .DeepEquivalent()
+                          .GetContainerNode();
       return container && container->Renderer() && container->Renderer()->Style().PreserveNewline();
     }
 
@@ -1518,7 +1519,7 @@ namespace krys::boo
                                                   ResolveUrls resolveUrls) noexcept
   {
     return SerializePreservingVisualAppearanceInternal(
-      dom::MakeDeprecatedLegacyPosition(range.Start), dom::MakeDeprecatedLegacyPosition(range.End), nodes,
+      dom::CreateDeprecatedLegacyPosition(range.Start), dom::CreateDeprecatedLegacyPosition(range.End), nodes,
       resolveUrls, SerializeComposedTree::No, IgnoreUserSelectNone::No, annotate, convertBlocksToInlines,
       StandardFontFamilySerializationMode::Keep, MSOListMode::DoNotPreserve, PreserveBaseElement::No,
       PreserveDirectionForInlineText::No);
@@ -1755,7 +1756,7 @@ namespace krys::boo
     }
 
     // Break string into paragraphs. Extra line breaks turn into empty paragraphs.
-    auto start = dom::MakeDeprecatedLegacyPosition(context.Start);
+    auto start = dom::CreateDeprecatedLegacyPosition(context.Start);
     auto block = EnclosingBlock(start.FirstNode());
     bool useClonesOfEnclosingBlock = block && !HasTagName(*block, html::TagName::body)
                                      && !HasTagName(*block, html::TagName::html)

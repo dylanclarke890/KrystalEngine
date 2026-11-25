@@ -43,6 +43,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
@@ -1222,7 +1223,7 @@ namespace krys::boo
     {
       // FIXME: We sometimes allow deletions at the start of editable roots, like when the caret is in an
       // empty list item.
-      auto previous = VisiblePosition {dom::MakeDeprecatedLegacyPosition(range.Start)}.Previous();
+      auto previous = VisiblePosition {dom::CreateDeprecatedLegacyPosition(range.Start)}.Previous();
       if (previous.IsNull()
           || previous.DeepEquivalent().DeprecatedNode()->RootEditableElement()
                != range.Start.Container->RootEditableElement())
@@ -1646,8 +1647,8 @@ namespace krys::boo
 
     // The composition can start inside a composed character sequence, so we have to override checks.
     VisibleSelection selection;
-    selection.SetWithoutValidation(dom::MakeDeprecatedLegacyPosition(range->Start),
-                                   dom::MakeDeprecatedLegacyPosition(range->End));
+    selection.SetWithoutValidation(dom::CreateDeprecatedLegacyPosition(range->Start),
+                                   dom::CreateDeprecatedLegacyPosition(range->End));
     _document.Selection().SetSelection(selection, {});
   }
 
@@ -1979,7 +1980,7 @@ namespace krys::boo
     {
       return {};
     }
-    return dom::MakeSimpleRange(*_compositionRange);
+    return dom::CreateSimpleRange(*_compositionRange);
   }
 
   bool Editor::GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept
@@ -2048,7 +2049,7 @@ namespace krys::boo
   {
     (void)range.Start.GetDocument().UpdateLayout();
 
-    VisiblePosition start(dom::MakeDeprecatedLegacyPosition(range.Start));
+    VisiblePosition start(dom::CreateDeprecatedLegacyPosition(range.Start));
 
     if (range.Collapsed())
     {
@@ -2059,7 +2060,7 @@ namespace krys::boo
       return startCaretRect;
     }
 
-    VisiblePosition end(dom::MakeDeprecatedLegacyPosition(range.End), Affinity::Upstream);
+    VisiblePosition end(dom::CreateDeprecatedLegacyPosition(range.End), Affinity::Upstream);
 
     if (InSameLine(start, end))
     {

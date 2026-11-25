@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSet.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/Painting/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"

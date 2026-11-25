@@ -30,8 +30,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -2092,8 +2092,8 @@ namespace krys::boo
           }
           else
           {
-            if (auto end = dom::MakeBoundaryPoint(
-                  VisiblePosition(dom::MakeDeprecatedLegacyPosition(textRunRange.Start))
+            if (auto end = dom::CreateBoundaryPoint(
+                  VisiblePosition(dom::CreateDeprecatedLegacyPosition(textRunRange.Start))
                     .Next()
                     .DeepEquivalent()))
             {

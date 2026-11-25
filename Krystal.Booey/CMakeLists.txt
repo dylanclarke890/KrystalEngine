@@ -1188,8 +1188,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp
   include/Krystal.Booey/DOM/Ranges/AbstractRange.hpp
   include/Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp
-  include/Krystal.Booey/DOM/Ranges/Position.hpp
-  include/Krystal.Booey/DOM/Ranges/PositionIterator.hpp
   include/Krystal.Booey/DOM/Ranges/Range.hpp
   include/Krystal.Booey/DOM/Ranges/SimpleRange.hpp
   include/Krystal.Booey/DOM/Ranges/StaticRange.hpp
@@ -1308,8 +1306,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/MutationObserver/MutationObserver.cpp
   src/DOM/MutationObserver/MutationRecord.cpp
   src/DOM/Ranges/BoundaryPoint.cpp
-  src/DOM/Ranges/Position.cpp
-  src/DOM/Ranges/PositionIterator.cpp
   src/DOM/Ranges/Range.cpp
   src/DOM/Ranges/SimpleRange.cpp
   src/DOM/Ranges/StaticRange.cpp
@@ -1367,6 +1363,8 @@ set(KRYSTAL_BOOEY_EDITING_HEADERS
   include/Krystal.Booey/Editing/Selection/VisiblePosition.hpp
   include/Krystal.Booey/Editing/Selection/VisibleSelection.hpp
   include/Krystal.Booey/Editing/Selection/VisibleUnits.hpp
+  include/Krystal.Booey/Editing/Position.hpp
+  include/Krystal.Booey/Editing/PositionIterator.hpp
   include/Krystal.Booey/Editing/SmartReplace.hpp
   include/Krystal.Booey/Editing/TextIterator.hpp
   include/Krystal.Booey/Editing/TextIteratorBehavior.hpp
@@ -1415,6 +1413,8 @@ set(KRYSTAL_BOOEY_EDITING_SOURCES
   src/Editing/Selection/VisiblePosition.cpp
   src/Editing/Selection/VisibleSelection.cpp
   src/Editing/Selection/VisibleUnits.cpp
+  src/Editing/Position.cpp
+  src/Editing/PositionIterator.cpp
   src/Editing/SmartReplace.cpp
   src/Editing/TextIterator.cpp
 )

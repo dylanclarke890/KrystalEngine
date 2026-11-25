@@ -684,7 +684,7 @@ namespace krys::boo
     //    items.
     // 7. Return the concatenation of the string items in results.
     // (The text iterator walks the rendered text, approximating the rendered text collection steps.)
-    return PlainText(dom::MakeRangeSelectingNodeContents(self));
+    return PlainText(dom::CreateRangeSelectingNodeContents(self));
   }
 
   void HTMLElement::InnerText(const DOMString &value) noexcept
@@ -1952,7 +1952,8 @@ namespace krys::boo
                                          AllowZeroValue allowZeroValue) noexcept
   {
     // Without a zero value, these are the rules for parsing nonzero dimension values.
-    // @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-non-zero-dimension-values
+    // @see
+    // https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-non-zero-dimension-values
     auto dimensionValue = isMultiLength == IsMultiLength::No ? html::Dimensions::ParseHTMLDimension(value)
                                                              : html::Dimensions::ParseHTMLMultiLength(value);
     if (!dimensionValue || (!dimensionValue->Number && allowZeroValue == AllowZeroValue::No))

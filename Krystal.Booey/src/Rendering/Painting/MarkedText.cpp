@@ -204,7 +204,7 @@ namespace krys::boo
           // FIXME: Potentially move this check elsewhere, to where we collect this range information.
           auto hasRenderer = [&]
           {
-            for (auto &node : dom::IntersectingNodes(dom::MakeSimpleRange(highlightRange->Range())))
+            for (auto &node : dom::IntersectingNodes(dom::CreateSimpleRange(highlightRange->Range())))
             {
               if (node.Renderer())
               {

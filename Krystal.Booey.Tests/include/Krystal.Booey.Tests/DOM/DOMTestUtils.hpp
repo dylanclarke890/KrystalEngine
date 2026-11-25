@@ -5,8 +5,8 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Traversal/NodeFilter.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -48,7 +48,7 @@ namespace krys::boo::tests
   /// @brief The position @p offset into @p node.
   KRYS_NODISCARD inline dom::Position At(Node &node, uint32 offset) noexcept
   {
-    return dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset);
+    return dom::CreateContainerOffsetPosition(ShareRefPtr(&node), offset);
   }
 
   /// @brief An event listener that calls a function.

@@ -30,9 +30,9 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
@@ -626,7 +626,7 @@ namespace krys::boo
       if (!node->HasEditableStyle())
       {
         // If it can be found, we prefer a visually equivalent position that is editable.
-        auto position = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset));
+        auto position = dom::CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset));
         auto candidate = position.Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary);
         if (candidate.DeprecatedNode()->HasEditableStyle())
         {
@@ -640,7 +640,7 @@ namespace krys::boo
       }
       // FIXME: Eliminate legacy editing positions
       return dom::PositionWithAffinity(
-        dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset)), affinity);
+        dom::CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset)), affinity);
     }
 
     // We don't want to cross the boundary between editable and non-editable

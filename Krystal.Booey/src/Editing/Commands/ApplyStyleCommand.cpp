@@ -372,8 +372,8 @@ namespace krys::boo
       return;
     }
 
-    auto scope = dom::MakeRangeSelectingNodeContents(*scopeRoot);
-    auto range = *MakeSimpleRange(VisiblePositionRange {visibleStart, visibleEnd});
+    auto scope = dom::CreateRangeSelectingNodeContents(*scopeRoot);
+    auto range = *CreateSimpleRange(VisiblePositionRange {visibleStart, visibleEnd});
     constexpr TextIteratorBehaviors behaviors {
       TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions};
     auto startIndex = CharacterCount({scope.Start, range.Start}, behaviors);
@@ -423,9 +423,9 @@ namespace krys::boo
     }
 
     auto startPosition =
-      dom::MakeDeprecatedLegacyPosition(ResolveCharacterLocation(scope, startIndex, behaviors));
+      dom::CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, startIndex, behaviors));
     auto endPosition =
-      dom::MakeDeprecatedLegacyPosition(ResolveCharacterLocation(scope, endIndex, behaviors));
+      dom::CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, endIndex, behaviors));
     UpdateStartEnd(startPosition, endPosition);
   }
 
@@ -795,7 +795,7 @@ namespace krys::boo
     // e.g. When applying font-size: large on <font color="blue">hello</font>, we need to include the font
     // element in our run to generate <font color="blue" size="4">hello</font> instead of <font
     // color="blue"><font size="4">hello</font></font>
-    auto range = *dom::MakeSimpleRange(dom::PositionRange {start, end});
+    auto range = *dom::CreateSimpleRange(dom::PositionRange {start, end});
     RefPtr<Element> editableRoot = ShareRefPtr(startNode->RootEditableElement());
     if (startNode != editableRoot)
     {

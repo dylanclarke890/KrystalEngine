@@ -21,12 +21,12 @@
  */
 
 #include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextQuery.hpp"

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"

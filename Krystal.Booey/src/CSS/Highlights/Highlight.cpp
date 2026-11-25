@@ -118,7 +118,7 @@ namespace krys::boo
 
   void Highlight::RepaintRange(const dom::AbstractRange &range) noexcept
   {
-    auto sortedRange = dom::MakeSimpleRange(range);
+    auto sortedRange = dom::CreateSimpleRange(range);
     if (std::is_gt(dom::TreeOrder<dom::TreeType::ComposedTree>(sortedRange.Start, sortedRange.End)))
     {
       std::swap(sortedRange.Start, sortedRange.End);

@@ -71,79 +71,80 @@ namespace krys::boo::dom
     KRYS_NODISCARD friend bool operator==(const SimpleRange &, const SimpleRange &) noexcept = default;
   };
 
-  KRYS_NODISCARD inline SimpleRange MakeSimpleRangeHelper(BoundaryPoint &&start, BoundaryPoint &&end) noexcept
+  KRYS_NODISCARD inline SimpleRange CreateSimpleRangeHelper(BoundaryPoint &&start,
+                                                            BoundaryPoint &&end) noexcept
   {
     return {krys::move(start), krys::move(end)};
   }
 
-  KRYS_NODISCARD inline Maybe<SimpleRange> MakeSimpleRangeHelper(Maybe<BoundaryPoint> &&start,
-                                                                 Maybe<BoundaryPoint> &&end) noexcept
+  KRYS_NODISCARD inline Maybe<SimpleRange> CreateSimpleRangeHelper(Maybe<BoundaryPoint> &&start,
+                                                                   Maybe<BoundaryPoint> &&end) noexcept
   {
     if (!start || !end)
     {
       return null;
     }
-    return MakeSimpleRangeHelper(krys::move(*start), krys::move(*end));
+    return CreateSimpleRangeHelper(krys::move(*start), krys::move(*end));
   }
 
-  KRYS_NODISCARD inline SimpleRange MakeSimpleRangeHelper(BoundaryPoint &&point) noexcept
+  KRYS_NODISCARD inline SimpleRange CreateSimpleRangeHelper(BoundaryPoint &&point) noexcept
   {
     auto end = point;
-    return MakeSimpleRangeHelper(krys::move(point), krys::move(end));
+    return CreateSimpleRangeHelper(krys::move(point), krys::move(end));
   }
 
-  KRYS_NODISCARD inline Maybe<SimpleRange> MakeSimpleRangeHelper(Maybe<BoundaryPoint> &&point) noexcept
+  KRYS_NODISCARD inline Maybe<SimpleRange> CreateSimpleRangeHelper(Maybe<BoundaryPoint> &&point) noexcept
   {
     if (!point)
     {
       return null;
     }
-    return MakeSimpleRangeHelper(krys::move(*point));
+    return CreateSimpleRangeHelper(krys::move(*point));
   }
 
-  KRYS_NODISCARD inline BoundaryPoint MakeBoundaryPointHelper(const BoundaryPoint &point) noexcept
+  KRYS_NODISCARD inline BoundaryPoint CreateBoundaryPointHelper(const BoundaryPoint &point) noexcept
   {
     return point;
   }
 
-  KRYS_NODISCARD inline BoundaryPoint MakeBoundaryPointHelper(BoundaryPoint &&point) noexcept
+  KRYS_NODISCARD inline BoundaryPoint CreateBoundaryPointHelper(BoundaryPoint &&point) noexcept
   {
     return krys::move(point);
   }
 
   KRYS_NODISCARD inline Maybe<BoundaryPoint>
-    MakeBoundaryPointHelper(const Maybe<BoundaryPoint> &point) noexcept
+    CreateBoundaryPointHelper(const Maybe<BoundaryPoint> &point) noexcept
   {
     return point;
   }
 
-  KRYS_NODISCARD inline Maybe<BoundaryPoint> MakeBoundaryPointHelper(Maybe<BoundaryPoint> &&point) noexcept
+  KRYS_NODISCARD inline Maybe<BoundaryPoint> CreateBoundaryPointHelper(Maybe<BoundaryPoint> &&point) noexcept
   {
     return krys::move(point);
   }
 
-  /// @brief Anything with a `MakeBoundaryPoint` (positions and visible positions).
+  /// @brief Anything with a `CreateBoundaryPoint` (positions and visible positions).
   template <typename T>
-  KRYS_NODISCARD auto MakeBoundaryPointHelper(T &&argument) noexcept
-    -> decltype(MakeBoundaryPoint(std::forward<T>(argument)))
+  KRYS_NODISCARD auto CreateBoundaryPointHelper(T &&argument) noexcept
+    -> decltype(CreateBoundaryPoint(std::forward<T>(argument)))
   {
-    return MakeBoundaryPoint(std::forward<T>(argument));
+    return CreateBoundaryPoint(std::forward<T>(argument));
   }
 
   /// @brief A range from one point, or between two, each a boundary point or anything that makes one; null
   /// when a point is null.
   template <typename... T>
-  KRYS_NODISCARD auto MakeSimpleRange(T &&...arguments) noexcept
-    -> decltype(MakeSimpleRangeHelper(MakeBoundaryPointHelper(std::forward<T>(arguments))...))
+  KRYS_NODISCARD auto CreateSimpleRange(T &&...arguments) noexcept
+    -> decltype(CreateSimpleRangeHelper(CreateBoundaryPointHelper(std::forward<T>(arguments))...))
   {
-    return MakeSimpleRangeHelper(MakeBoundaryPointHelper(std::forward<T>(arguments))...);
+    return CreateSimpleRangeHelper(CreateBoundaryPointHelper(std::forward<T>(arguments))...);
   }
 
   // FIXME: Would like these two functions to have shorter names; another option is to change prefix to
   // makeSimpleRange.
-  KRYS_NODISCARD Maybe<SimpleRange> MakeRangeSelectingNode(Node &node) noexcept;
+  KRYS_NODISCARD Maybe<SimpleRange> CreateRangeSelectingNode(Node &node) noexcept;
 
-  KRYS_NODISCARD SimpleRange MakeRangeSelectingNodeContents(Node &node) noexcept;
+  KRYS_NODISCARD SimpleRange CreateRangeSelectingNodeContents(Node &node) noexcept;
 
   template <TreeType = TreeType::Tree>
   KRYS_NODISCARD Node *CommonInclusiveAncestor(const SimpleRange &range) noexcept;

@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
@@ -168,7 +168,7 @@ namespace krys::boo
   KRYS_NODISCARD std::partial_ordering operator<=>(const VisiblePosition &a,
                                                    const VisiblePosition &b) noexcept;
 
-  KRYS_NODISCARD Maybe<dom::BoundaryPoint> MakeBoundaryPoint(const VisiblePosition &position) noexcept;
+  KRYS_NODISCARD Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const VisiblePosition &position) noexcept;
 
   KRYS_NODISCARD Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept;
 
@@ -214,7 +214,7 @@ namespace krys::boo
     }
   };
 
-  KRYS_NODISCARD Maybe<dom::SimpleRange> MakeSimpleRange(const VisiblePositionRange &range) noexcept;
+  KRYS_NODISCARD Maybe<dom::SimpleRange> CreateSimpleRange(const VisiblePositionRange &range) noexcept;
 
   KRYS_NODISCARD VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept;
 

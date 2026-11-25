@@ -875,7 +875,7 @@ namespace krys::ui
       return bounds;
     }
     auto simpleRange =
-      boo::MakeSimpleRange(object->VisiblePositionRangeForRange({range.Start, range.Length}));
+      boo::CreateSimpleRange(object->VisiblePositionRangeForRange({range.Start, range.Length}));
     if (!simpleRange)
     {
       return bounds;

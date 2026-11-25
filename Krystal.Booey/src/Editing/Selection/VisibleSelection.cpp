@@ -97,8 +97,8 @@ namespace krys::boo
 
   VisibleSelection::VisibleSelection(const dom::SimpleRange &range, Affinity affinity,
                                      boo::Directionality directionality) noexcept
-      : VisibleSelection(dom::MakeDeprecatedLegacyPosition(range.Start),
-                         dom::MakeDeprecatedLegacyPosition(range.End), affinity, directionality)
+      : VisibleSelection(dom::CreateDeprecatedLegacyPosition(range.Start),
+                         dom::CreateDeprecatedLegacyPosition(range.End), affinity, directionality)
   {
   }
 
@@ -131,9 +131,9 @@ namespace krys::boo
     const auto &end = UncanonicalizedEnd();
     if (start.GetDocument())
     {
-      return dom::MakeSimpleRange({start, end});
+      return dom::CreateSimpleRange({start, end});
     }
-    return dom::MakeSimpleRange({start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
+    return dom::CreateSimpleRange({start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
   }
 
   void VisibleSelection::SetAnchor(const dom::Position &position) noexcept
@@ -208,7 +208,7 @@ namespace krys::boo
       return {};
     }
     // FIXME: Seems likely we don't need to call ParentAnchoredEquivalent here.
-    return dom::MakeSimpleRange({_start.ParentAnchoredEquivalent(), _end.ParentAnchoredEquivalent()});
+    return dom::CreateSimpleRange({_start.ParentAnchoredEquivalent(), _end.ParentAnchoredEquivalent()});
   }
 
   Maybe<dom::SimpleRange> VisibleSelection::ToNormalizedRange() const noexcept
@@ -264,7 +264,7 @@ namespace krys::boo
       }
     }
 
-    return dom::MakeSimpleRange({s, e});
+    return dom::CreateSimpleRange({s, e});
   }
 
   bool VisibleSelection::ExpandUsingGranularity(TextGranularity granularity) noexcept
@@ -292,12 +292,12 @@ namespace krys::boo
       return;
     }
 
-    auto start = dom::MakeBoundaryPoint(_end);
+    auto start = dom::CreateBoundaryPoint(_end);
     if (!start)
     {
       return;
     }
-    CharacterIterator charIt(dom::SimpleRange {*start, dom::MakeBoundaryPointAfterNodeContents(*scope)},
+    CharacterIterator charIt(dom::SimpleRange {*start, dom::CreateBoundaryPointAfterNodeContents(*scope)},
                              TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
     for (; !charIt.AtEnd() && !charIt.Text().empty(); charIt.Advance(1))
     {
@@ -306,7 +306,7 @@ namespace krys::boo
       {
         break;
       }
-      _end = dom::MakeDeprecatedLegacyPosition(charIt.Range().End);
+      _end = dom::CreateDeprecatedLegacyPosition(charIt.Range().End);
       if (_anchorIsBeforeFocus)
       {
         _focus = _end;

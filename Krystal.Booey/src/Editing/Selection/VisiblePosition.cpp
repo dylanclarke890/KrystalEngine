@@ -309,7 +309,7 @@ namespace krys::boo
         break;
       }
 
-      p = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+      p = dom::CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
 
       if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
       {
@@ -550,7 +550,7 @@ namespace krys::boo
         break;
       }
 
-      p = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+      p = dom::CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
 
       if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
       {
@@ -962,9 +962,9 @@ namespace krys::boo
     return _affinity == other._affinity && _deepPosition.Equals(other._deepPosition);
   }
 
-  Maybe<dom::BoundaryPoint> MakeBoundaryPoint(const VisiblePosition &position) noexcept
+  Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const VisiblePosition &position) noexcept
   {
-    return dom::MakeBoundaryPoint(position.DeepEquivalent());
+    return dom::CreateBoundaryPoint(position.DeepEquivalent());
   }
 
   Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept
@@ -972,9 +972,9 @@ namespace krys::boo
     return dom::CommonInclusiveAncestor(a.DeepEquivalent(), b.DeepEquivalent());
   }
 
-  Maybe<dom::SimpleRange> MakeSimpleRange(const VisiblePositionRange &range) noexcept
+  Maybe<dom::SimpleRange> CreateSimpleRange(const VisiblePositionRange &range) noexcept
   {
-    return dom::MakeSimpleRange(range.Start, range.End);
+    return dom::CreateSimpleRange(range.Start, range.End);
   }
 
   VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept
@@ -983,7 +983,7 @@ namespace krys::boo
     {
       return {};
     }
-    return {dom::MakeContainerOffsetPosition(range->Start), dom::MakeContainerOffsetPosition(range->End)};
+    return {dom::CreateContainerOffsetPosition(range->Start), dom::CreateContainerOffsetPosition(range->End)};
   }
 
   std::partial_ordering operator<=>(const VisiblePosition &a, const VisiblePosition &b) noexcept
@@ -1028,9 +1028,9 @@ namespace krys::boo
     {
       return {};
     }
-    auto scope = dom::MakeRangeSelectingNodeContents(*rootContainerNode);
-    auto characterRange = GetCharacterRange(scope, *dom::MakeSimpleRange(range.Start, range.End));
-    return dom::MakeContainerOffsetPosition(
+    auto scope = dom::CreateRangeSelectingNodeContents(*rootContainerNode);
+    auto characterRange = GetCharacterRange(scope, *dom::CreateSimpleRange(range.Start, range.End));
+    return dom::CreateContainerOffsetPosition(
       ResolveCharacterLocation(scope, characterRange.Location + characterRange.Length / 2));
   }
 }

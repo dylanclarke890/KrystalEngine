@@ -118,8 +118,8 @@ namespace krys::boo
         dom::Position pos =
           IsHTMLBRElement(*previousNode)
             ? dom::PositionBeforeNode(previousNode.get())
-            : dom::MakeDeprecatedLegacyPosition(RefPtr<Node>(previousNode),
-                                                static_cast<uint32>(CaretMaxOffset(*previousNode)));
+            : dom::CreateDeprecatedLegacyPosition(RefPtr<Node>(previousNode),
+                                                  static_cast<uint32>(CaretMaxOffset(*previousNode)));
 
         if (pos.IsCandidate())
         {
@@ -152,8 +152,8 @@ namespace krys::boo
         }
 
         dom::Position pos;
-        pos = dom::MakeDeprecatedLegacyPosition(RefPtr<Node>(nextNode),
-                                                static_cast<uint32>(CaretMinOffset(*nextNode)));
+        pos = dom::CreateDeprecatedLegacyPosition(RefPtr<Node>(nextNode),
+                                                  static_cast<uint32>(CaretMinOffset(*nextNode)));
 
         if (pos.IsCandidate())
         {
@@ -737,7 +737,8 @@ namespace krys::boo
       utf8_string string;
       uint32 suffixLength = 0;
 
-      auto searchRange = dom::MakeSimpleRange(dom::MakeBoundaryPointBeforeNodeContents(*boundary), position);
+      auto searchRange =
+        dom::CreateSimpleRange(dom::CreateBoundaryPointBeforeNodeContents(*boundary), position);
       if (!searchRange)
       {
         return {};
@@ -745,7 +746,7 @@ namespace krys::boo
 
       if (needsContextAtParagraphStart == NeedsContextAtParagraphStart::Yes && IsStartOfParagraph(position))
       {
-        auto forwardsScanRange = dom::MakeSimpleRange(searchRange->Start, EndOfParagraph(position));
+        auto forwardsScanRange = dom::CreateSimpleRange(searchRange->Start, EndOfParagraph(position));
         if (!forwardsScanRange)
         {
           return {};
@@ -760,7 +761,7 @@ namespace krys::boo
       else if (text::RequiresContextForWordBoundary(position.CharacterBefore()))
       {
         auto forwardsScanRange =
-          dom::MakeSimpleRange(searchRange->End, dom::MakeBoundaryPointAfterNodeContents(*boundary));
+          dom::CreateSimpleRange(searchRange->End, dom::CreateBoundaryPointAfterNodeContents(*boundary));
         suffixLength = SuffixLengthForRange(forwardsScanRange, string);
       }
 
@@ -769,7 +770,8 @@ namespace krys::boo
 
       if (!next)
       {
-        return it.AtEnd() ? VisiblePosition(dom::MakeDeprecatedLegacyPosition(searchRange->Start)) : position;
+        return it.AtEnd() ? VisiblePosition(dom::CreateDeprecatedLegacyPosition(searchRange->Start))
+                          : position;
       }
 
       auto &node = *(it.AtEnd() ? *searchRange : it.Range()).Start.Container;
@@ -777,7 +779,7 @@ namespace krys::boo
       if (textNode && !suffixLength && next <= textNode->Length())
       {
         // The next variable contains a usable index into a text node.
-        return VisiblePosition(dom::MakeDeprecatedLegacyPosition(ShareRefPtr(&node), next));
+        return VisiblePosition(dom::CreateDeprecatedLegacyPosition(ShareRefPtr(&node), next));
       }
 
       // Use the character iterator to translate the next value into a DOM position.
@@ -787,7 +789,7 @@ namespace krys::boo
         charIt.Advance(static_cast<int32>(string.size() - suffixLength - next));
       }
       // FIXME: charIt can get out of shadow host.
-      return VisiblePosition(dom::MakeDeprecatedLegacyPosition(charIt.Range().End));
+      return VisiblePosition(dom::CreateDeprecatedLegacyPosition(charIt.Range().End));
     }
 
     KRYS_NODISCARD VisiblePosition NextBoundary(const VisiblePosition &c,
@@ -808,7 +810,7 @@ namespace krys::boo
       if (text::RequiresContextForWordBoundary(c.CharacterAfter()))
       {
         auto backwardsScanRange =
-          dom::MakeSimpleRange(dom::MakeBoundaryPointBeforeNodeContents(boundaryDocument), c);
+          dom::CreateSimpleRange(dom::CreateBoundaryPointBeforeNodeContents(boundaryDocument), c);
         if (!backwardsScanRange)
         {
           return {};
@@ -816,7 +818,7 @@ namespace krys::boo
         prefixLength = PrefixLengthForRange(*backwardsScanRange, string);
       }
 
-      auto searchRange = dom::MakeSimpleRange(c, dom::MakeBoundaryPointAfterNodeContents(*boundary));
+      auto searchRange = dom::CreateSimpleRange(c, dom::CreateBoundaryPointAfterNodeContents(*boundary));
       if (!searchRange)
       {
         return {};
@@ -827,7 +829,7 @@ namespace krys::boo
 
       if (it.AtEnd() && next == string.size())
       {
-        pos = dom::MakeDeprecatedLegacyPosition(searchRange->End);
+        pos = dom::CreateDeprecatedLegacyPosition(searchRange->End);
       }
       else if (next > prefixLength)
       {
@@ -841,17 +843,17 @@ namespace krys::boo
         }
 
         auto characterRange = charIt.Range();
-        pos = dom::MakeDeprecatedLegacyPosition(characterRange.End);
+        pos = dom::CreateDeprecatedLegacyPosition(characterRange.End);
 
         if (charIt.Text()[0] == '\n')
         {
           // FIXME: workaround for collapsed range (where only start position is correct) emitted for some
           // emitted newlines (see rdar://5192593)
           if (VisiblePosition(pos)
-              == VisiblePosition(dom::MakeDeprecatedLegacyPosition(characterRange.Start)))
+              == VisiblePosition(dom::CreateDeprecatedLegacyPosition(characterRange.Start)))
           {
             charIt.Advance(1);
-            pos = dom::MakeDeprecatedLegacyPosition(charIt.Range().Start);
+            pos = dom::CreateDeprecatedLegacyPosition(charIt.Range().Start);
           }
         }
       }
@@ -1880,7 +1882,7 @@ namespace krys::boo
     // position to null, even when there's a valid candidate to be had, because the root HTML element
     // is not content editable.  So we construct directly from the valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    dom::Position firstCandidate = NextCandidate(dom::MakeDeprecatedLegacyPosition(documentElement, 0));
+    dom::Position firstCandidate = NextCandidate(dom::CreateDeprecatedLegacyPosition(documentElement, 0));
     if (firstCandidate.IsNull())
     {
       return VisiblePosition();
@@ -1905,7 +1907,7 @@ namespace krys::boo
     // valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
     dom::Position lastPosition =
-      dom::MakeDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
+      dom::CreateDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
     dom::Position lastCandidate = PreviousCandidate(lastPosition);
     if (lastCandidate.IsNull())
     {

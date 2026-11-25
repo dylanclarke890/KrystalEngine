@@ -24,6 +24,8 @@
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -50,8 +52,6 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -3536,7 +3536,7 @@ namespace krys::boo
             continue;
           }
 
-          auto simpleRange = dom::MakeSimpleRange(highlightRange->Range());
+          auto simpleRange = dom::CreateSimpleRange(highlightRange->Range());
           if (&simpleRange.StartContainer().TreeScope() != &simpleRange.EndContainer().TreeScope())
           {
             continue;
@@ -3567,7 +3567,7 @@ namespace krys::boo
         continue;
       }
 
-      VisibleSelection visibleSelection(dom::MakeSimpleRange(highlightRange->Range()));
+      VisibleSelection visibleSelection(dom::CreateSimpleRange(highlightRange->Range()));
       auto startPosition = visibleSelection.VisibleStart().DeepEquivalent();
       auto endPosition = visibleSelection.VisibleEnd().DeepEquivalent();
       if (!weakRangeData.get())
@@ -3576,7 +3576,7 @@ namespace krys::boo
       }
 
       if (auto simpleRange =
-            dom::MakeSimpleRange(highlightRange->StartPosition(), highlightRange->EndPosition()))
+            dom::CreateSimpleRange(highlightRange->StartPosition(), highlightRange->EndPosition()))
       {
         if (auto init = dom::StaticRangeInit::Create(simpleRange->Start, simpleRange->End);
             !init.HasException())

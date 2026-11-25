@@ -23,7 +23,7 @@ namespace krys::boo::tests
       KRYS_NODISCARD std::string Text(TextIteratorBehaviors behaviors = {}) noexcept
       {
         auto &body = *Document->Body();
-        auto text = PlainText(dom::MakeRangeSelectingNodeContents(body), behaviors);
+        auto text = PlainText(dom::CreateRangeSelectingNodeContents(body), behaviors);
         return std::string(text.begin(), text.end());
       }
     };
@@ -59,7 +59,7 @@ namespace krys::boo::tests
   {
     TextFixture fixture(u8"<p id=p>hello  world</p>");
     auto &text = Downcast<boo::Text>(*fixture.ById(u8"p").FirstChild());
-    auto scope = dom::MakeRangeSelectingNodeContents(*fixture.Document->Body());
+    auto scope = dom::CreateRangeSelectingNodeContents(*fixture.Document->Body());
 
     TextIterator iterator(scope);
     REQUIRE(!iterator.AtEnd());
@@ -94,7 +94,7 @@ namespace krys::boo::tests
   {
     TextFixture fixture(u8"<div id=d>ab<b>cd</b></div><div>ef</div>");
     std::string text;
-    for (SimplifiedBackwardsTextIterator it(dom::MakeRangeSelectingNodeContents(*fixture.Document->Body()));
+    for (SimplifiedBackwardsTextIterator it(dom::CreateRangeSelectingNodeContents(*fixture.Document->Body()));
          !it.AtEnd(); it.Advance())
     {
       text.insert(0, std::string(it.Text().begin(), it.Text().end()));
@@ -102,7 +102,7 @@ namespace krys::boo::tests
     // The newline for the first block's start is emitted too.
     CHECK(text == "\nabcd\nef");
 
-    BackwardsCharacterIterator characters(dom::MakeRangeSelectingNodeContents(fixture.ById(u8"d")));
+    BackwardsCharacterIterator characters(dom::CreateRangeSelectingNodeContents(fixture.ById(u8"d")));
     characters.Advance(1);
     CHECK(characters.Range().Start.Container.get() == fixture.ById(u8"d").LastChild()->FirstChild());
     CHECK(characters.Range().EndOffset() == 1);
@@ -111,7 +111,7 @@ namespace krys::boo::tests
   TEST_CASE("TextIterator: word aware chunks", "[Editing][TextIterator]")
   {
     TextFixture fixture(u8"<p>ab<b>cd</b> ef</p>");
-    WordAwareIterator iterator(dom::MakeRangeSelectingNodeContents(*fixture.Document->Body()));
+    WordAwareIterator iterator(dom::CreateRangeSelectingNodeContents(*fixture.Document->Body()));
     REQUIRE(!iterator.AtEnd());
     CHECK(std::string(iterator.Text().begin(), iterator.Text().end()) == "abcd");
   }

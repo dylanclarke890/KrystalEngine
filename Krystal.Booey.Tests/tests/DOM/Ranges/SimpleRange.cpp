@@ -31,18 +31,18 @@ namespace krys::boo::dom::tests
       CHECK(std::is_gt(TreeOrder(BoundaryAt(d, 1), BoundaryAt(bText, 1))));
       CHECK(std::is_lt(TreeOrder(BoundaryAt(bText, 2), BoundaryAt(iText, 0))));
       CHECK(std::is_eq(TreeOrder(BoundaryAt(d, 1), BoundaryAt(d, 1))));
-      CHECK(MakeBoundaryPointBeforeNode(i).value().Offset == 1);
-      CHECK(MakeBoundaryPointAfterNode(i).value().Offset == 2);
-      CHECK(MakeBoundaryPointAfterNodeContents(bText).Offset == 2);
+      CHECK(CreateBoundaryPointBeforeNode(i).value().Offset == 1);
+      CHECK(CreateBoundaryPointAfterNode(i).value().Offset == 2);
+      CHECK(CreateBoundaryPointAfterNodeContents(bText).Offset == 2);
     }
 
     SECTION("Ranges selecting nodes")
     {
-      auto selectingB = *MakeRangeSelectingNode(b);
+      auto selectingB = *CreateRangeSelectingNode(b);
       CHECK(selectingB.Start == BoundaryAt(d, 0));
       CHECK(selectingB.End == BoundaryAt(d, 1));
       CHECK(!selectingB.Collapsed());
-      auto contents = MakeRangeSelectingNodeContents(d);
+      auto contents = CreateRangeSelectingNodeContents(d);
       CHECK(contents.EndOffset() == 2);
       CHECK(Contains(contents, selectingB));
       CHECK(!Contains(selectingB, contents));

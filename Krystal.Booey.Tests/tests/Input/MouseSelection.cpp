@@ -126,7 +126,7 @@ namespace krys::boo::tests
     // Onto the next line.
     fixture.Drag(1, 30);
     CHECK(fixture.Selection().Selection().VisibleEnd()
-          == VisiblePosition(dom::MakeContainerOffsetPosition(ShareRefPtr(&second), 0)));
+          == VisiblePosition(dom::CreateContainerOffsetPosition(ShareRefPtr(&second), 0)));
 
     fixture.Release(1, 30);
     CHECK(fixture.Selection().IsRange());
@@ -175,7 +175,7 @@ namespace krys::boo::tests
       CHECK(fixture.Selection().Selection().Start().DeprecatedNode() == &first);
       CHECK(fixture.StartOffset() == 0);
       CHECK(fixture.Selection().Selection().VisibleEnd()
-            == VisiblePosition(dom::MakeContainerOffsetPosition(ShareRefPtr(&second), 0)));
+            == VisiblePosition(dom::CreateContainerOffsetPosition(ShareRefPtr(&second), 0)));
     }
 
     SECTION("Shift extends the selection")

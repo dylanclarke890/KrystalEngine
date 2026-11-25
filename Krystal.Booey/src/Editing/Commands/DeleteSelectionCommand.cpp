@@ -993,7 +993,8 @@ namespace krys::boo
             RefPtr<boo::Node> downstreamEndNode = ShareRefPtr(_downstreamEnd.DeprecatedNode());
             RemoveChildrenInRange(*downstreamEndNode, offset,
                                   static_cast<uint32>(_downstreamEnd.DeprecatedEditingOffset()));
-            _downstreamEnd = dom::MakeDeprecatedLegacyPosition(RefPtr<boo::Node>(downstreamEndNode), offset);
+            _downstreamEnd =
+              dom::CreateDeprecatedLegacyPosition(RefPtr<boo::Node>(downstreamEndNode), offset);
           }
         }
       }
@@ -1015,7 +1016,7 @@ namespace krys::boo
         if (position->IsNotNull() && position->DeprecatedNode() == &textNode
             && position->DeprecatedEditingOffset() > static_cast<int32>(offset))
         {
-          *position = dom::MakeDeprecatedLegacyPosition(
+          *position = dom::CreateDeprecatedLegacyPosition(
             ShareRefPtr<boo::Node>(&textNode),
             static_cast<uint32>(position->DeprecatedEditingOffset() + delta));
         }
@@ -1148,7 +1149,7 @@ namespace krys::boo
       return;
     }
 
-    auto range = MakeSimpleRange(VisiblePositionRange {startOfParagraphToMove, endOfParagraphToMove});
+    auto range = CreateSimpleRange(VisiblePositionRange {startOfParagraphToMove, endOfParagraphToMove});
     if (!range)
     {
       return;

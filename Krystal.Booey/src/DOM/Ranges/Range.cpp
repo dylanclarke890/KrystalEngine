@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
@@ -17,7 +18,6 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
@@ -1027,24 +1027,6 @@ namespace krys::boo::dom
     return true;
   }
 
-  Ref<DOMRectList> Range::GetClientRects() const noexcept
-  {
-    (void)_start.Container->NodeDocument().UpdateLayout();
-    return DOMRectList::Create(RenderObject::ClientBorderAndTextRects(MakeSimpleRange(*this)));
-  }
-
-  Ref<DOMRect> Range::GetBoundingClientRect() const noexcept
-  {
-    return BoundingClientRect(MakeSimpleRange(*this));
-  }
-
-  Ref<DOMRect> Range::BoundingClientRect(const SimpleRange &range) noexcept
-  {
-    (void)range.Start.GetDocument().UpdateLayout();
-    auto rects = RenderObject::ClientBorderAndTextRects(range);
-    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const RectF>(rects)));
-  }
-
   ExceptionOr<DOMString> Range::ToString() const noexcept
   {
     // 1. Let string be the empty string.
@@ -1146,6 +1128,28 @@ namespace krys::boo::dom
   }
 
 #pragma endregion
+
+#pragma region Range Extensions (CSSOM View)
+
+  Ref<DOMRectList> Range::GetClientRects() const noexcept
+  {
+    (void)_start.Container->NodeDocument().UpdateLayout();
+    return DOMRectList::Create(RenderObject::ClientBorderAndTextRects(CreateSimpleRange(*this)));
+  }
+
+  Ref<DOMRect> Range::GetBoundingClientRect() const noexcept
+  {
+    return BoundingClientRect(CreateSimpleRange(*this));
+  }
+
+#pragma endregion
+
+  Ref<DOMRect> Range::BoundingClientRect(const SimpleRange &range) noexcept
+  {
+    (void)range.Start.GetDocument().UpdateLayout();
+    auto rects = RenderObject::ClientBorderAndTextRects(range);
+    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const RectF>(rects)));
+  }
 
   ExceptionOr<void> Range::SetStartBoundaryPoint(Node &node, uint64 offset) noexcept
   {

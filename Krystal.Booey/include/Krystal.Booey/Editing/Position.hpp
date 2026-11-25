@@ -69,7 +69,7 @@ namespace krys::boo::dom
     };
 
   private:
-    friend Position MakeDeprecatedLegacyPosition(RefPtr<Node> &&, uint32 offset) noexcept;
+    friend Position CreateDeprecatedLegacyPosition(RefPtr<Node> &&, uint32 offset) noexcept;
 
     // For creating legacy editing positions: (Anchor type will be determined from
     // editingIgnoresContent(node))
@@ -304,18 +304,18 @@ namespace krys::boo::dom
 
   KRYS_NODISCARD std::partial_ordering operator<=>(const Position &a, const Position &b) noexcept;
 
-  KRYS_NODISCARD inline Position MakeContainerOffsetPosition(RefPtr<Node> &&node, uint32 offset) noexcept
+  KRYS_NODISCARD inline Position CreateContainerOffsetPosition(RefPtr<Node> &&node, uint32 offset) noexcept
   {
     return {krys::move(node), offset, Position::AnchorType::PositionIsOffsetInAnchor};
   }
 
-  KRYS_NODISCARD Position MakeContainerOffsetPosition(const BoundaryPoint &point) noexcept;
+  KRYS_NODISCARD Position CreateContainerOffsetPosition(const BoundaryPoint &point) noexcept;
 
-  KRYS_NODISCARD Position MakeDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept;
+  KRYS_NODISCARD Position CreateDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept;
 
-  KRYS_NODISCARD Position MakeDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept;
+  KRYS_NODISCARD Position CreateDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept;
 
-  KRYS_NODISCARD Maybe<BoundaryPoint> MakeBoundaryPoint(const Position &position) noexcept;
+  KRYS_NODISCARD Maybe<BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept;
 
   KRYS_NODISCARD Position PositionInParentBeforeNode(Node *node) noexcept;
 
@@ -351,7 +351,7 @@ namespace krys::boo::dom
     Position End;
   };
 
-  KRYS_NODISCARD Maybe<SimpleRange> MakeSimpleRange(const PositionRange &range) noexcept;
+  KRYS_NODISCARD Maybe<SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept;
 
   /// @brief A position and which side of a line break it belongs to.
   class PositionWithAffinity

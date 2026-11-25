@@ -97,8 +97,8 @@ namespace krys::boo::tests
       CHECK(!SnapshotSelection(frame, {}));
 
       auto &text = *fixture.ById(u8"p").FirstChild();
-      fixture.Document->Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 0),
-                                           dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4),
+      fixture.Document->Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 0),
+                                           dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 4),
                                            Affinity::Downstream);
       auto snapshot = SnapshotSelection(frame, {});
       REQUIRE(snapshot);
@@ -184,8 +184,8 @@ namespace krys::boo::tests
     {
       CHECK(!CreateDragImageForSelection(frame).DragImage);
       auto &text = *fixture.ById(u8"p").FirstChild();
-      fixture.Document->Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 0),
-                                           dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4),
+      fixture.Document->Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 0),
+                                           dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 4),
                                            Affinity::Downstream);
       CHECK(CreateDragImageForSelection(frame).DragImage);
     }

@@ -252,11 +252,11 @@ namespace krys::boo
 
     if (AtLeftmostOffsetInBox())
     {
-      return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
+      return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
     }
 
-    return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(NextLeafOnLine()->Renderer().GetNode()),
-                                             NextLeafOnLine()->LeftmostCaretOffset());
+    return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(NextLeafOnLine()->Renderer().GetNode()),
+                                               NextLeafOnLine()->LeftmostCaretOffset());
   }
 
   dom::Position RenderedPosition::PositionAtRightBoundaryOfBiDiRun() const noexcept
@@ -265,11 +265,11 @@ namespace krys::boo
 
     if (AtRightmostOffsetInBox())
     {
-      return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
+      return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
     }
 
-    return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(PreviousLeafOnLine()->Renderer().GetNode()),
-                                             PreviousLeafOnLine()->RightmostCaretOffset());
+    return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(PreviousLeafOnLine()->Renderer().GetNode()),
+                                               PreviousLeafOnLine()->RightmostCaretOffset());
   }
 
   RectI RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept

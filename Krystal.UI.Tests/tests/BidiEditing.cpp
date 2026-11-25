@@ -1,10 +1,10 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
@@ -125,7 +125,7 @@ namespace krys::ui::tests
           return {};
         }
         auto offset = FromUTF16Offset(*node, static_cast<uint32>(std::stoul(text.substr(colon + 1))));
-        return boo::VisiblePosition(boo::dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), offset));
+        return boo::VisiblePosition(boo::dom::CreateDeprecatedLegacyPosition(ShareRefPtr(node), offset));
       };
       auto a = endpoint(chrome);
       return !a.IsNull() && a == endpoint(booey);

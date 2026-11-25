@@ -58,7 +58,7 @@ namespace krys::boo::tests
 
     SECTION("Moves need editable text; extending needs a range outside it")
     {
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 4),
                                  Affinity::Downstream);
       CHECK_FALSE(editor.GetCommand(u8"MoveRight").IsEnabled());
       CHECK_FALSE(editor.GetCommand(u8"MoveRightAndModifySelection").IsEnabled());
@@ -78,7 +78,7 @@ namespace krys::boo::tests
     SECTION("Caret browsing enables moving a caret anywhere")
     {
       fixture.Document->GetSettings().CaretBrowsingEnabled = true;
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 4),
                                  Affinity::Downstream);
       CHECK(editor.GetCommand(u8"MoveRight").Execute());
       CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 5);
@@ -139,7 +139,7 @@ namespace krys::boo::tests
 
     SECTION("A caret outside editable text copies nothing, but still copies")
     {
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 4),
                                  Affinity::Downstream);
       CHECK(editor.CanCopy());
       editor.Copy();
@@ -708,13 +708,13 @@ namespace krys::boo::tests
       document.DesignMode(u8"on");
       (void)document.UpdateLayout();
       auto &text = fixture.TextIn(u8"one");
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 2),
                                  Affinity::Downstream);
       CHECK(fixture.GetEditor().InsertText(u8"ZZ", nullptr));
       CHECK(Narrow(fixture.InnerHTML(one)) == "heZZllo");
 
       auto &lockedText = fixture.TextIn(u8"locked");
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&lockedText), 1),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&lockedText), 1),
                                  Affinity::Downstream);
       CHECK_FALSE(fixture.GetEditor().InsertText(u8"Q", nullptr));
       CHECK(Narrow(fixture.InnerHTML(locked)) == "no<b id=\"in\">pe</b>");

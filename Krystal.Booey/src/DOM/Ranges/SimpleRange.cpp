@@ -32,7 +32,7 @@
 
 namespace krys::boo::dom
 {
-  Maybe<SimpleRange> MakeRangeSelectingNode(Node &node) noexcept
+  Maybe<SimpleRange> CreateRangeSelectingNode(Node &node) noexcept
   {
     auto *parent = node.ParentNode();
     if (!parent)
@@ -43,9 +43,9 @@ namespace krys::boo::dom
     return SimpleRange {{ShareRef<Node>(*parent), offset}, {ShareRef<Node>(*parent), offset + 1}};
   }
 
-  SimpleRange MakeRangeSelectingNodeContents(Node &node) noexcept
+  SimpleRange CreateRangeSelectingNodeContents(Node &node) noexcept
   {
-    return {MakeBoundaryPointBeforeNodeContents(node), MakeBoundaryPointAfterNodeContents(node)};
+    return {CreateBoundaryPointBeforeNodeContents(node), CreateBoundaryPointAfterNodeContents(node)};
   }
 
   OffsetRange CharacterDataOffsetRange(const SimpleRange &range, const Node &node) noexcept
@@ -257,7 +257,7 @@ namespace krys::boo::dom
   {
     // FIXME: Consider a more efficient algorithm that avoids always computing the node index.
     // FIXME: Does this const_cast point to a design problem?
-    auto nodeRange = MakeRangeSelectingNode(const_cast<Node &>(node));
+    auto nodeRange = CreateRangeSelectingNode(const_cast<Node &>(node));
     return nodeRange && Contains<treeType>(range, *nodeRange);
   }
 
@@ -289,7 +289,7 @@ namespace krys::boo::dom
   {
     // FIXME: Consider a more efficient algorithm that avoids always computing the node index.
     // FIXME: Does this const_cast point to a design problem?
-    auto nodeRange = MakeRangeSelectingNode(const_cast<Node &>(node));
+    auto nodeRange = CreateRangeSelectingNode(const_cast<Node &>(node));
     if (!nodeRange)
     {
       return ContainsNode<treeType>(node, *range.Start.Container);

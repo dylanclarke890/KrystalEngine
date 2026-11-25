@@ -23,7 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
+#include "Krystal.Booey/Editing/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
@@ -64,7 +64,7 @@ namespace krys::boo::dom
     {
       return LastPositionInOrAfterNode(anchorNode);
     }
-    return MakeDeprecatedLegacyPosition(ShareRefPtr(anchorNode), static_cast<uint32>(_offsetInAnchor));
+    return CreateDeprecatedLegacyPosition(ShareRefPtr(anchorNode), static_cast<uint32>(_offsetInAnchor));
   }
 
   void PositionIterator::Increment() noexcept

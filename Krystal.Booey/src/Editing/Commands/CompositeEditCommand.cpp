@@ -1901,7 +1901,7 @@ namespace krys::boo
         if (visibleStart >= startOfParagraphToMove)
         {
           if (auto rangeToSelectionStart =
-                MakeSimpleRange(VisiblePositionRange {startOfParagraphToMove, visibleStart}))
+                CreateSimpleRange(VisiblePositionRange {startOfParagraphToMove, visibleStart}))
           {
             startIndex = CharacterCount(*rangeToSelectionStart, behaviors);
           }
@@ -1910,7 +1910,7 @@ namespace krys::boo
         if (visibleEnd <= endOfParagraphToMove)
         {
           if (auto rangeToSelectionEnd =
-                MakeSimpleRange(VisiblePositionRange {startOfParagraphToMove, visibleEnd}))
+                CreateSimpleRange(VisiblePositionRange {startOfParagraphToMove, visibleEnd}))
           {
             endIndex = CharacterCount(*rangeToSelectionEnd, behaviors);
           }
@@ -1940,7 +1940,7 @@ namespace krys::boo
     {
       fragment = CreateFragmentFromMarkup(
         *document,
-        SerializePreservingVisualAppearance(*MakeSimpleRange(VisiblePositionRange {start, end}), nullptr,
+        SerializePreservingVisualAppearance(*CreateSimpleRange(VisiblePositionRange {start, end}), nullptr,
                                             AnnotateForInterchange::No, ConvertBlocksToInlines::Yes),
         {});
     }
@@ -2008,7 +2008,7 @@ namespace krys::boo
     }
 
     auto destinationIndex = CharacterCount(
-      {dom::BoundaryPoint(ShareRef(*editableRoot), 0), *MakeBoundaryPoint(destination)}, behaviors);
+      {dom::BoundaryPoint(ShareRef(*editableRoot), 0), *CreateBoundaryPoint(destination)}, behaviors);
 
     SetEndingSelection(VisibleSelection(destination, originalDirectionality));
     krys_debug_assert(EndingSelection().IsCaretOrRange());
@@ -2038,10 +2038,10 @@ namespace krys::boo
       // causes spaces to be collapsed during the move operation.  This results
       // in a call to rangeFromLocationAndLength with a location past the end
       // of the document (which will return null).
-      auto scope = dom::MakeRangeSelectingNodeContents(*editableRoot);
-      auto startPosition = dom::MakeDeprecatedLegacyPosition(
+      auto scope = dom::CreateRangeSelectingNodeContents(*editableRoot);
+      auto startPosition = dom::CreateDeprecatedLegacyPosition(
         ResolveCharacterLocation(scope, destinationIndex + *startIndex, behaviors));
-      auto endPosition = dom::MakeDeprecatedLegacyPosition(
+      auto endPosition = dom::CreateDeprecatedLegacyPosition(
         ResolveCharacterLocation(scope, destinationIndex + *endIndex, behaviors));
       SetEndingSelection(
         VisibleSelection(startPosition, endPosition, Affinity::Downstream, originalDirectionality));

@@ -1977,7 +1977,7 @@ namespace krys::boo
       return false;
     }
 
-    return dom::Contains(*range, MakeBoundaryPoint(innerNode->Renderer()->VisiblePositionForPoint(
+    return dom::Contains(*range, CreateBoundaryPoint(innerNode->Renderer()->VisiblePositionForPoint(
                                    result.LocalPoint(), HitTestSource::User)));
   }
 
@@ -2767,11 +2767,12 @@ namespace krys::boo
     else
     {
       // Don't use VisibleSelection's constructor that takes a SimpleRange, because it uses
-      // MakeDeprecatedLegacyPosition instead of MakeContainerOffsetPosition.
-      auto start = dom::MakeContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->StartContainer()),
-                                                    static_cast<uint32>(_associatedLiveRange->StartOffset()));
-      auto end = dom::MakeContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->EndContainer()),
-                                                  static_cast<uint32>(_associatedLiveRange->EndOffset()));
+      // CreateDeprecatedLegacyPosition instead of CreateContainerOffsetPosition.
+      auto start =
+        dom::CreateContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->StartContainer()),
+                                           static_cast<uint32>(_associatedLiveRange->StartOffset()));
+      auto end = dom::CreateContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->EndContainer()),
+                                                    static_cast<uint32>(_associatedLiveRange->EndOffset()));
       auto options = DefaultSetSelectionOptions();
       options.Add(SetSelectionOption::MaintainLiveRange);
       SetSelection(VisibleSelection(start, end), options);

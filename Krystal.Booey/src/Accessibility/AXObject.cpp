@@ -1786,7 +1786,7 @@ namespace krys::boo
 
   DOMString AXObject::StringForVisiblePositionRange(const VisiblePositionRange &range) noexcept
   {
-    auto simpleRange = MakeSimpleRange(range);
+    auto simpleRange = CreateSimpleRange(range);
     return simpleRange ? PlainText(*simpleRange) : DOMString {};
   }
 
@@ -1828,7 +1828,7 @@ namespace krys::boo
       {
         return false;
       }
-      auto lineBreakRange = MakeSimpleRange(VisiblePositionRange {position, position.Next()});
+      auto lineBreakRange = CreateSimpleRange(VisiblePositionRange {position, position.Next()});
       if (!lineBreakRange)
       {
         return false;

@@ -258,7 +258,7 @@ namespace krys::boo
     {
       if (element.NodeDocument().Frame())
       {
-        if (auto range = dom::MakeRangeSelectingNode(element))
+        if (auto range = dom::CreateRangeSelectingNode(element))
         {
           element.NodeDocument().Selection().SetSelection(VisibleSelection(*range));
         }

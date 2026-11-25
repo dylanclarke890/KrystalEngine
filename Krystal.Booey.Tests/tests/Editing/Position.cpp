@@ -1,11 +1,11 @@
-﻿#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+﻿#include "Krystal.Booey/Editing/Position.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 
@@ -77,11 +77,11 @@ namespace krys::boo::dom::tests
     {
       CHECK(EditingIgnoresContent(img));
       CHECK(!EditingIgnoresContent(d));
-      CHECK(MakeDeprecatedLegacyPosition(ShareRefPtr<Node>(&img), 0).GetAnchorType()
+      CHECK(CreateDeprecatedLegacyPosition(ShareRefPtr<Node>(&img), 0).GetAnchorType()
             == Position::AnchorType::PositionIsBeforeAnchor);
-      CHECK(MakeDeprecatedLegacyPosition(ShareRefPtr<Node>(&img), 1).GetAnchorType()
+      CHECK(CreateDeprecatedLegacyPosition(ShareRefPtr<Node>(&img), 1).GetAnchorType()
             == Position::AnchorType::PositionIsAfterAnchor);
-      CHECK(MakeDeprecatedLegacyPosition(ShareRefPtr<Node>(&d), 1).GetAnchorType()
+      CHECK(CreateDeprecatedLegacyPosition(ShareRefPtr<Node>(&d), 1).GetAnchorType()
             == Position::AnchorType::PositionIsOffsetInAnchor);
       CHECK(LastOffsetForEditing(img) == 1);
       CHECK(LastOffsetForEditing(d) == 3);
@@ -101,11 +101,11 @@ namespace krys::boo::dom::tests
 
     SECTION("Boundary points")
     {
-      auto point = MakeBoundaryPoint(PositionAfterNode(&b));
+      auto point = CreateBoundaryPoint(PositionAfterNode(&b));
       REQUIRE(point);
       CHECK(point->Container.get() == &d);
       CHECK(point->Offset == 1);
-      CHECK(MakeContainerOffsetPosition(*point) == At(d, 1));
+      CHECK(CreateContainerOffsetPosition(*point) == At(d, 1));
     }
   }
 
@@ -256,7 +256,7 @@ namespace krys::boo::dom::tests
     CHECK(iterator.OffsetInLeafNode() == 2);
 
     CHECK(NextCandidate(At(ab, 2)).DeprecatedNode() == fixture.ById(u8"b").FirstChild());
-    CHECK(PreviousCandidate(At(ab, 1)) == MakeDeprecatedLegacyPosition(ShareRefPtr(&ab), 0));
+    CHECK(PreviousCandidate(At(ab, 1)) == CreateDeprecatedLegacyPosition(ShareRefPtr(&ab), 0));
   }
 
   TEST_CASE("Position: inline boxes and directions", "[DOM][Position]")

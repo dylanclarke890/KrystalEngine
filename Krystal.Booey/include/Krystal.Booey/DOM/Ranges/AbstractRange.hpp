@@ -92,7 +92,7 @@ namespace krys::boo::dom
   };
 
   /// @brief The boundary points of @p range, as they are now.
-  KRYS_NODISCARD inline SimpleRange MakeSimpleRange(const AbstractRange &range) noexcept
+  KRYS_NODISCARD inline SimpleRange CreateSimpleRange(const AbstractRange &range) noexcept
   {
     return {range.StartBoundaryPoint(), range.EndBoundaryPoint()};
   }

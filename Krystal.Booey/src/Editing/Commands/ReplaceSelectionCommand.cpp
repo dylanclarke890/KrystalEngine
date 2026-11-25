@@ -2108,6 +2108,6 @@ namespace krys::boo
 
   Maybe<dom::SimpleRange> ReplaceSelectionCommand::InsertedContentRange() const noexcept
   {
-    return dom::MakeSimpleRange(dom::PositionRange {_startOfInsertedContent, _endOfInsertedContent});
+    return dom::CreateSimpleRange(dom::PositionRange {_startOfInsertedContent, _endOfInsertedContent});
   }
 }

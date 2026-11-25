@@ -1271,7 +1271,8 @@ namespace krys::boo
     }
 
     // A key press other than Escape is an activation-triggering input event: the window is notified before
-    // the event is dispatched. https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
+    // the event is dispatched.
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (initialKeyEvent.GetType() != Type::KeyUp && initialKeyEvent.GetType() != Type::Char
         && initialKeyEvent.Key() != u8"Escape")
     {
@@ -2591,7 +2592,7 @@ namespace krys::boo
 
     KRYS_NODISCARD uint64 TextDistance(const dom::Position &start, const dom::Position &end) noexcept
     {
-      auto range = dom::MakeSimpleRange({start, end});
+      auto range = dom::CreateSimpleRange({start, end});
       if (!range)
       {
         return 0;

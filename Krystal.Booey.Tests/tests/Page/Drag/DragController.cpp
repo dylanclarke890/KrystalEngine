@@ -110,8 +110,8 @@ namespace krys::boo::tests
 
       void Select(Node &node, uint32 start, uint32 end) noexcept
       {
-        Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), start),
-                           dom::MakeContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
+        Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&node), start),
+                           dom::CreateContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
       }
 
       /// @brief Calls @p function for each event of @p type.

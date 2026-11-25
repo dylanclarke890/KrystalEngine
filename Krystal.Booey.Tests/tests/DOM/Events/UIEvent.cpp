@@ -140,7 +140,7 @@ namespace krys::boo::tests
 
       auto &text = fixture.TextIn(u8"editable");
       html::FocusAlgorithms::FocusingSteps(fixture.ById(u8"editable"));
-      fixture.Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 1),
+      fixture.Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&text), 1),
                                  Affinity::Downstream);
       CHECK(fixture.GetEditor().InsertText(u8"z", nullptr));
       all({"beforeinput", "textInput", "input"});

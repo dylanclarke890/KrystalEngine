@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/PositionIterator.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/PositionIterator.hpp"
 #include "Krystal.Booey/Editing/Selection/InlineRunAndOffset.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
@@ -421,16 +421,17 @@ namespace krys::boo::dom
       //      Going from 1 to 0 is correct.
       switch (moveType)
       {
-        case PositionMoveType::CodePoint: return MakeDeprecatedLegacyPosition(ShareRefPtr(node), offset - 1);
+        case PositionMoveType::CodePoint:
+          return CreateDeprecatedLegacyPosition(ShareRefPtr(node), offset - 1);
         case PositionMoveType::Character:
         {
           auto previousOffset = UncheckedPreviousOffset(node, offset);
-          return MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(previousOffset));
+          return CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(previousOffset));
         }
         case PositionMoveType::BackwardDeletion:
         {
           auto previousOffset = UncheckedPreviousOffsetForBackwardDeletion(node, offset);
-          return MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(previousOffset));
+          return CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(previousOffset));
         }
       }
     }
@@ -452,7 +453,7 @@ namespace krys::boo::dom
       return PositionAfterNode(previousSibling);
     }
 
-    return MakeContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex());
+    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex());
   }
 
   Position Position::Next(PositionMoveType moveType) const noexcept
@@ -497,7 +498,7 @@ namespace krys::boo::dom
       auto nextOffset = moveType == PositionMoveType::Character
                           ? static_cast<uint32>(UncheckedNextOffset(node, offset))
                           : offset + 1;
-      return MakeDeprecatedLegacyPosition(ShareRefPtr(node), nextOffset);
+      return CreateDeprecatedLegacyPosition(ShareRefPtr(node), nextOffset);
     }
 
     auto *parent = node->ParentNode();
@@ -517,7 +518,7 @@ namespace krys::boo::dom
       return PositionBeforeNode(nextSibling);
     }
 
-    return MakeContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex() + 1);
+    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex() + 1);
   }
 
   int32 Position::UncheckedPreviousOffset(const Node *node, uint32 current) noexcept
@@ -803,8 +804,8 @@ namespace krys::boo::dom
     auto *anchorNode = _anchorNode.get();
     PositionIterator lastVisible =
       _anchorType == AnchorType::PositionIsAfterAnchor
-        ? MakeDeprecatedLegacyPosition(ShareRefPtr(anchorNode),
-                                       static_cast<uint32>(CaretMaxOffset(*anchorNode)))
+        ? CreateDeprecatedLegacyPosition(ShareRefPtr(anchorNode),
+                                         static_cast<uint32>(CaretMaxOffset(*anchorNode)))
         : *this;
     PositionIterator currentPosition = lastVisible;
     bool startEditable = startNode->HasEditableStyle();
@@ -897,8 +898,8 @@ namespace krys::boo::dom
           // render tree which can have a different length due to case transformation.
           // Until we resolve that, disable this so we can run the layout tests!
           // ASSERT(currentOffset >= renderer->caretMaxOffset());
-          return MakeDeprecatedLegacyPosition(ShareRefPtr(&currentNode),
-                                              static_cast<uint32>(renderer->CaretMaxOffset()));
+          return CreateDeprecatedLegacyPosition(ShareRefPtr(&currentNode),
+                                                static_cast<uint32>(renderer->CaretMaxOffset()));
         }
 
         uint32 textOffset = static_cast<uint32>(currentPosition.OffsetInLeafNode());
@@ -945,8 +946,8 @@ namespace krys::boo::dom
     auto *anchorNode = _anchorNode.get();
     PositionIterator lastVisible =
       _anchorType == AnchorType::PositionIsAfterAnchor
-        ? MakeDeprecatedLegacyPosition(ShareRefPtr(anchorNode),
-                                       static_cast<uint32>(CaretMaxOffset(*anchorNode)))
+        ? CreateDeprecatedLegacyPosition(ShareRefPtr(anchorNode),
+                                         static_cast<uint32>(CaretMaxOffset(*anchorNode)))
         : *this;
     PositionIterator currentPosition = lastVisible;
     bool startEditable = startNode->HasEditableStyle();
@@ -1042,8 +1043,8 @@ namespace krys::boo::dom
         if (&currentNode != startNode)
         {
           krys_debug_assert(currentPosition.AtStartOfNode());
-          return MakeContainerOffsetPosition(ShareRefPtr(&currentNode),
-                                             static_cast<uint32>(textRenderer->CaretMinOffset()));
+          return CreateContainerOffsetPosition(ShareRefPtr(&currentNode),
+                                               static_cast<uint32>(textRenderer->CaretMinOffset()));
         }
 
         uint32 textOffset = static_cast<uint32>(currentPosition.OffsetInLeafNode());
@@ -1863,23 +1864,24 @@ namespace krys::boo::dom
     return offset < currentOffset;
   }
 
-  Position MakeContainerOffsetPosition(const BoundaryPoint &point) noexcept
+  Position CreateContainerOffsetPosition(const BoundaryPoint &point) noexcept
   {
-    return MakeContainerOffsetPosition(ShareRefPtr(point.Container.get()), static_cast<uint32>(point.Offset));
+    return CreateContainerOffsetPosition(ShareRefPtr(point.Container.get()),
+                                         static_cast<uint32>(point.Offset));
   }
 
-  Position MakeDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept
+  Position CreateDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept
   {
     return {krys::move(node), offset, Position::LegacyEditingPositionFlag::On};
   }
 
-  Position MakeDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept
+  Position CreateDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept
   {
-    return MakeDeprecatedLegacyPosition(ShareRefPtr(point.Container.get()),
-                                        static_cast<uint32>(point.Offset));
+    return CreateDeprecatedLegacyPosition(ShareRefPtr(point.Container.get()),
+                                          static_cast<uint32>(point.Offset));
   }
 
-  Maybe<BoundaryPoint> MakeBoundaryPoint(const Position &position) noexcept
+  Maybe<BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept
   {
     auto *container = position.GetContainerNode();
     if (!container)
@@ -1889,9 +1891,9 @@ namespace krys::boo::dom
     return BoundaryPoint {ShareRef(*container), static_cast<uint64>(position.ComputeOffsetInContainerNode())};
   }
 
-  Maybe<SimpleRange> MakeSimpleRange(const PositionRange &range) noexcept
+  Maybe<SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept
   {
-    return MakeSimpleRange(range.Start, range.End);
+    return CreateSimpleRange(range.Start, range.End);
   }
 
   template <TreeType treeType>
@@ -1928,7 +1930,7 @@ namespace krys::boo::dom
 
     // FIXME: Avoid computing node offset for cases where we don't need to.
 
-    return TreeOrder<treeType>(*MakeBoundaryPoint(a), *MakeBoundaryPoint(b));
+    return TreeOrder<treeType>(*CreateBoundaryPoint(a), *CreateBoundaryPoint(b));
   }
 
   std::partial_ordering operator<=>(const Position &a, const Position &b) noexcept

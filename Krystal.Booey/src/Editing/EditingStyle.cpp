@@ -42,12 +42,12 @@
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
@@ -2266,7 +2266,7 @@ namespace krys::boo
     if (selection.IsRange())
     {
       end = selection.End().Upstream();
-      auto range = dom::MakeSimpleRange(position, end);
+      auto range = dom::CreateSimpleRange(position, end);
       for (auto &intersectingNode : dom::IntersectingNodes(*range))
       {
         if (!Is<StyledElement>(intersectingNode))

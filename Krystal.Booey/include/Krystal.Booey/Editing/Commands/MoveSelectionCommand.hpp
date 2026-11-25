@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 
 namespace krys::boo
 {
