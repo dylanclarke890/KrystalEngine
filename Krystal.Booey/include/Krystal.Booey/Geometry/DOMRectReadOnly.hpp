@@ -30,10 +30,11 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include <cmath>
+#include <limits>
 
 namespace krys::boo
 {
-  /// @see https://drafts.csswg.org/geometry/#dictdef-domrectinit
+  /// @see https://drafts.csswg.org/geometry-1/#dictdef-domrectinit
   struct DOMRectInit
   {
     double X {0};
@@ -42,8 +43,30 @@ namespace krys::boo
     double Height {0};
   };
 
+  /// @brief The NaN-safe minimum of @p a and @p b: NaN if either is NaN, otherwise the smaller.
+  /// @see https://drafts.csswg.org/geometry-1/#nan-safe-minimum
+  KRYS_NODISCARD constexpr double NaNSafeMinimum(double a, double b) noexcept
+  {
+    if (a != a || b != b)
+    {
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+    return a < b ? a : b;
+  }
+
+  /// @brief The NaN-safe maximum of @p a and @p b: NaN if either is NaN, otherwise the larger.
+  /// @see https://drafts.csswg.org/geometry-1/#nan-safe-maximum
+  KRYS_NODISCARD constexpr double NaNSafeMaximum(double a, double b) noexcept
+  {
+    if (a != a || b != b)
+    {
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+    return a > b ? a : b;
+  }
+
   /// @brief A rectangle whose coordinates can't be changed through it.
-  /// @see https://drafts.csswg.org/geometry/#domrectreadonly
+  /// @see https://drafts.csswg.org/geometry-1/#DOMRect
   class DOMRectReadOnly : public RefCounted<DOMRectReadOnly>
   {
   protected:
@@ -61,81 +84,85 @@ namespace krys::boo
     }
 
   public:
-    KRYS_NODISCARD static Ref<DOMRectReadOnly> Create(double x, double y, double width,
-                                                      double height) noexcept
+#pragma region DOMRectReadOnly - https://drafts.csswg.org/geometry-1/#domrectreadonly
+
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrectreadonly
+    KRYS_NODISCARD static Ref<DOMRectReadOnly> Create(double x = 0, double y = 0, double width = 0,
+                                                      double height = 0) noexcept
     {
+      // 1. Let rect be a new DOMRectReadOnly or DOMRect object as appropriate.
+      // 2. Set rect's variables x coordinate to x, y coordinate to y, width dimension to width and height
+      //    dimension to height.
+      // 3. Return rect.
       return AdoptRef(*new DOMRectReadOnly(x, y, width, height));
     }
 
-    KRYS_NODISCARD static Ref<DOMRectReadOnly> FromRect(const DOMRectInit &init) noexcept
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-fromrect
+    KRYS_NODISCARD static Ref<DOMRectReadOnly> FromRect(const DOMRectInit &other) noexcept
     {
-      return Create(init.X, init.Y, init.Width, init.Height);
+      // https://drafts.csswg.org/geometry-1/#create-a-domrectreadonly-from-the-dictionary
+      // 1. Let rect be a new DOMRectReadOnly or DOMRect as appropriate.
+      // 2. Set rect's variables x coordinate to other's x dictionary member, y coordinate to other's y
+      //    dictionary member, width dimension to other's width dictionary member and height dimension to
+      //    other's height dictionary member.
+      // 3. Return rect.
+      return Create(other.X, other.Y, other.Width, other.Height);
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-x
     KRYS_NODISCARD double X() const noexcept
     {
       return _x;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-y
     KRYS_NODISCARD double Y() const noexcept
     {
       return _y;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-width
     KRYS_NODISCARD double Width() const noexcept
     {
       return _width;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-height
     KRYS_NODISCARD double Height() const noexcept
     {
       return _height;
     }
 
-    // Model NaN handling after Math.min, Math.max.
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-top
     KRYS_NODISCARD double Top() const noexcept
     {
-      return NanPropagatingMin(_y, _y + _height);
+      return NaNSafeMinimum(_y, _y + _height);
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-right
     KRYS_NODISCARD double Right() const noexcept
     {
-      return NanPropagatingMax(_x, _x + _width);
+      return NaNSafeMaximum(_x, _x + _width);
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-bottom
     KRYS_NODISCARD double Bottom() const noexcept
     {
-      return NanPropagatingMax(_y, _y + _height);
+      return NaNSafeMaximum(_y, _y + _height);
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-left
     KRYS_NODISCARD double Left() const noexcept
     {
-      return NanPropagatingMin(_x, _x + _width);
+      return NaNSafeMinimum(_x, _x + _width);
     }
+
+#pragma endregion
 
     KRYS_NODISCARD RectF ToRectF() const noexcept
     {
       return RectF(static_cast<float>(_x), static_cast<float>(_y), static_cast<float>(_width),
                    static_cast<float>(_height));
-    }
-
-  private:
-    KRYS_NODISCARD static double NanPropagatingMin(double a, double b) noexcept
-    {
-      if (std::isnan(a) || std::isnan(b))
-      {
-        return std::numeric_limits<double>::quiet_NaN();
-      }
-      return a < b ? a : b;
-    }
-
-    KRYS_NODISCARD static double NanPropagatingMax(double a, double b) noexcept
-    {
-      if (std::isnan(a) || std::isnan(b))
-      {
-        return std::numeric_limits<double>::quiet_NaN();
-      }
-      return a > b ? a : b;
     }
   };
 }

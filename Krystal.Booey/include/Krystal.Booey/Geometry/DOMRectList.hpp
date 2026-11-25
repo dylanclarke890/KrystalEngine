@@ -37,7 +37,7 @@
 namespace krys::boo
 {
   /// @brief A list of rectangles, such as an element's client rects.
-  /// @see https://drafts.csswg.org/geometry/#domrectlist
+  /// @see https://drafts.csswg.org/geometry-1/#DOMRectList
   class DOMRectList : public RefCounted<DOMRectList>
   {
   private:
@@ -68,16 +68,23 @@ namespace krys::boo
       return AdoptRef(*new DOMRectList());
     }
 
+#pragma region DOMRectList - https://drafts.csswg.org/geometry-1/#domrectlist
+
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectlist-length
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return static_cast<uint32>(_items.size());
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectlist-item
     KRYS_NODISCARD DOMRect *Item(uint32 index) const noexcept
     {
       return index < _items.size() ? _items[index].get() : nullptr;
     }
 
+#pragma endregion
+
+    /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
     {
       return index < _items.size();

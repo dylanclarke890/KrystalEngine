@@ -1436,6 +1436,7 @@ set(KRYSTAL_BOOEY_GEOMETRY_HEADERS
   include/Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp
   include/Krystal.Booey/Geometry/DOMPoint.hpp
   include/Krystal.Booey/Geometry/DOMPointReadOnly.hpp
+  include/Krystal.Booey/Geometry/DOMQuad.hpp
   include/Krystal.Booey/Geometry/DOMRect.hpp
   include/Krystal.Booey/Geometry/DOMRectList.hpp
   include/Krystal.Booey/Geometry/DOMRectReadOnly.hpp
@@ -1445,6 +1446,7 @@ set(KRYSTAL_BOOEY_GEOMETRY_SOURCES
   src/Geometry/DOMMatrix.cpp
   src/Geometry/DOMMatrixReadOnly.cpp
   src/Geometry/DOMPointReadOnly.cpp
+  src/Geometry/DOMQuad.cpp
   src/Geometry/DOMRectList.cpp
 )
 

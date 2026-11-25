@@ -77,6 +77,7 @@ namespace krys::boo::html
   ExceptionOr<void> CanvasPattern::SetTransform(DOMMatrix2DInit matrixInit) noexcept
   {
     // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
+    //    https://drafts.csswg.org/geometry-1/#create-a-dommatrixreadonly-from-the-2d-dictionary
     auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
     {

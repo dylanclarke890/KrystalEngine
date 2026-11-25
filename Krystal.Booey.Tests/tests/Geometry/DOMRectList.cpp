@@ -2,9 +2,17 @@
 #include "catch2/catch_test_macros.hpp"
 #include <cmath>
 
-namespace krys::boo::dom::tests
+namespace krys::boo::tests
 {
-  TEST_CASE("DOMRect: edges", "[Geometry][DOMRect]")
+  TEST_CASE(
+    "DOMRect: edges",
+    "[Geometry][DOMRect][geometry-1:DOMRect][geometry-1:dom-domrectreadonly-domrect-top]"
+    "[geometry-1:dom-domrectreadonly-domrect-right][geometry-1:dom-domrectreadonly-domrect-bottom]"
+    "[geometry-1:dom-domrectreadonly-domrect-left][geometry-1:create-a-domrectreadonly-from-the-dictionary]"
+    "[geometry-1:dom-domrectreadonly-domrectreadonly][geometry-1:dom-domrectreadonly-fromrect]"
+    "[geometry-1:dom-domrect-fromrect][geometry-1:dom-domrectreadonly-domrect-x]"
+    "[geometry-1:dom-domrectreadonly-domrect-y][geometry-1:dom-domrectreadonly-domrect-width]"
+    "[geometry-1:dom-domrectreadonly-domrect-height]")
   {
     auto rect = DOMRect::Create(10, 20, 30, 40);
     CHECK(rect->Left() == 10);
@@ -28,9 +36,17 @@ namespace krys::boo::dom::tests
 
     auto fromInit = DOMRectReadOnly::FromRect({1, 2, 3, 4});
     CHECK(fromInit->ToRectF() == RectF(1, 2, 3, 4));
+    auto mutableFromInit = DOMRect::FromRect({.Width = 5});
+    mutableFromInit->SetY(6);
+    CHECK(mutableFromInit->ToRectF() == RectF(0, 6, 5, 0));
+
+    // The constructors' arguments default to 0.
+    CHECK(DOMRectReadOnly::Create()->ToRectF() == RectF());
+    CHECK(DOMRect::Create(1)->ToRectF() == RectF(1, 0, 0, 0));
   }
 
-  TEST_CASE("DOMRectList: items", "[Geometry][DOMRectList]")
+  TEST_CASE("DOMRectList: items",
+            "[Geometry][DOMRectList][geometry-1:dom-domrectlist-length][geometry-1:dom-domrectlist-item]")
   {
     CHECK(DOMRectList::Create()->Length() == 0u);
 

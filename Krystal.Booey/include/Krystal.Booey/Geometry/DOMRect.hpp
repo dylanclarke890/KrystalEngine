@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   /// @brief A rectangle whose coordinates can be changed.
-  /// @see https://drafts.csswg.org/geometry/#domrect
+  /// @see https://drafts.csswg.org/geometry-1/#DOMRect
   class DOMRect : public DOMRectReadOnly
   {
     DOMRect() noexcept = default;
@@ -41,49 +41,58 @@ namespace krys::boo
     }
 
   public:
-    KRYS_NODISCARD static Ref<DOMRect> Create() noexcept
-    {
-      return AdoptRef(*new DOMRect());
-    }
+#pragma region DOMRect - https://drafts.csswg.org/geometry-1/#domrect
 
-    KRYS_NODISCARD static Ref<DOMRect> Create(double x, double y, double width, double height) noexcept
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrectreadonly
+    KRYS_NODISCARD static Ref<DOMRect> Create(double x = 0, double y = 0, double width = 0,
+                                              double height = 0) noexcept
     {
       return AdoptRef(*new DOMRect(x, y, width, height));
     }
 
-    KRYS_NODISCARD static Ref<DOMRect> Create(const RectF &rect) noexcept
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrect-fromrect
+    KRYS_NODISCARD static Ref<DOMRect> FromRect(const DOMRectInit &other) noexcept
     {
-      return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
+      // https://drafts.csswg.org/geometry-1/#create-a-domrectreadonly-from-the-dictionary
+      return Create(other.X, other.Y, other.Width, other.Height);
     }
 
-    KRYS_NODISCARD static Ref<DOMRect> Create(const RectI &rect) noexcept
-    {
-      return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
-    }
-
-    KRYS_NODISCARD static Ref<DOMRect> FromRect(const DOMRectInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Width, init.Height);
-    }
-
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-x
     void SetX(double x) noexcept
     {
       _x = x;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-y
     void SetY(double y) noexcept
     {
       _y = y;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-width
     void SetWidth(double width) noexcept
     {
       _width = width;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrect-height
     void SetHeight(double height) noexcept
     {
       _height = height;
+    }
+
+#pragma endregion
+
+    /// @brief A rectangle with @p rect's position and size.
+    KRYS_NODISCARD static Ref<DOMRect> Create(const RectF &rect) noexcept
+    {
+      return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
+    }
+
+    /// @brief A rectangle with @p rect's position and size.
+    KRYS_NODISCARD static Ref<DOMRect> Create(const RectI &rect) noexcept
+    {
+      return AdoptRef(*new DOMRect(rect.X(), rect.Y(), rect.Width(), rect.Height()));
     }
   };
 

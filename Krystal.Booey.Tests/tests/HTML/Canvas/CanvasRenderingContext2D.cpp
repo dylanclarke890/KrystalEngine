@@ -310,6 +310,7 @@ namespace krys::boo::tests
             "[HTML][Canvas][CanvasRenderingContext2D][html:dom-context-2d-scale]"
             "[html:dom-context-2d-rotate][html:dom-context-2d-translate]"
             "[html:dom-context-2d-transform][html:dom-context-2d-gettransform]"
+            "[geometry-1:create-a-dommatrixreadonly-from-the-2d-dictionary]"
             "[html:dom-context-2d-settransform][html:dom-context-2d-settransform-matrix]"
             "[html:dom-context-2d-resettransform]")
   {

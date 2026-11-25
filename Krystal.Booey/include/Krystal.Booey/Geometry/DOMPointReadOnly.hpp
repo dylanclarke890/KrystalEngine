@@ -38,11 +38,11 @@
 
 namespace krys::boo
 {
+  class DOMMatrixReadOnly;
+  class DOMPoint;
   struct DOMMatrixInit;
 
-  class DOMPoint;
-
-  /// @see https://drafts.csswg.org/geometry/#dictdef-dompointinit
+  /// @see https://drafts.csswg.org/geometry-1/#dictdef-dompointinit
   struct DOMPointInit
   {
     double X {0};
@@ -52,7 +52,7 @@ namespace krys::boo
   };
 
   /// @brief A point whose coordinates can't be changed through it.
-  /// @see https://drafts.csswg.org/geometry/#dompointreadonly
+  /// @see https://drafts.csswg.org/geometry-1/#DOMPoint
   class DOMPointReadOnly : public RefCounted<DOMPointReadOnly>
   {
   protected:
@@ -63,52 +63,58 @@ namespace krys::boo
     double _w;
 
   public:
-    KRYS_NODISCARD static Ref<DOMPointReadOnly> Create(double x, double y, double z, double w) noexcept
-    {
-      return AdoptRef(*new DOMPointReadOnly(x, y, z, w));
-    }
+#pragma region DOMPointReadOnly - https://drafts.csswg.org/geometry-1/#dompointreadonly
 
-    KRYS_NODISCARD static Ref<DOMPointReadOnly> Create(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-dompointreadonly
+    KRYS_NODISCARD static Ref<DOMPointReadOnly> Create(double x = 0, double y = 0, double z = 0,
+                                                       double w = 1) noexcept;
 
-    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPoint(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-frompoint
+    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPoint(const DOMPointInit &other) noexcept;
 
-    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPointF(const Point3F &p) noexcept
-    {
-      return Create(p.X(), p.Y(), p.Z(), 1);
-    }
-
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-x
     KRYS_NODISCARD double X() const noexcept
     {
       return _x;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-y
     KRYS_NODISCARD double Y() const noexcept
     {
       return _y;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-z
     KRYS_NODISCARD double Z() const noexcept
     {
       return _z;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-w
     KRYS_NODISCARD double W() const noexcept
     {
       return _w;
     }
 
-    /// @see https://drafts.csswg.org/geometry/#dom-dompointreadonly-matrixtransform
-    KRYS_NODISCARD ExceptionOr<Ref<DOMPoint>> MatrixTransform(DOMMatrixInit &&) const noexcept;
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-matrixtransform
+    KRYS_NODISCARD ExceptionOr<Ref<DOMPoint>> MatrixTransform(DOMMatrixInit matrix) const noexcept;
+
+#pragma endregion
+
+    /// @brief A point at @p point, with a w perspective of 1.
+    KRYS_NODISCARD static Ref<DOMPointReadOnly> FromPointF(const Point3F &point) noexcept
+    {
+      return Create(point.X(), point.Y(), point.Z(), 1);
+    }
 
   protected:
     DOMPointReadOnly(double x, double y, double z, double w) noexcept : _x(x), _y(y), _z(z), _w(w)
     {
     }
   };
+
+  /// @brief The point that @p matrix moves @p point to.
+  /// @see https://drafts.csswg.org/geometry-1/#transform-a-point-with-a-matrix
+  KRYS_NODISCARD Ref<DOMPoint> TransformPointWithMatrix(const DOMPointInit &point,
+                                                        const DOMMatrixReadOnly &matrix) noexcept;
 }

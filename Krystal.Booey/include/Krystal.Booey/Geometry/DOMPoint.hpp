@@ -35,44 +35,47 @@
 namespace krys::boo
 {
   /// @brief A point whose coordinates can be changed.
-  /// @see https://drafts.csswg.org/geometry/#dompoint
+  /// @see https://drafts.csswg.org/geometry-1/#DOMPoint
   class DOMPoint final : public DOMPointReadOnly
   {
   public:
-    KRYS_NODISCARD static Ref<DOMPoint> Create(double x, double y, double z = 0, double w = 1) noexcept
+#pragma region DOMPoint - https://drafts.csswg.org/geometry-1/#dompoint
+
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-dompointreadonly
+    KRYS_NODISCARD static Ref<DOMPoint> Create(double x = 0, double y = 0, double z = 0,
+                                               double w = 1) noexcept
     {
       return AdoptRef(*new DOMPoint(x, y, z, w));
     }
 
-    KRYS_NODISCARD static Ref<DOMPoint> Create(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompoint-frompoint
+    KRYS_NODISCARD static Ref<DOMPoint> FromPoint(const DOMPointInit &other) noexcept;
 
-    KRYS_NODISCARD static Ref<DOMPoint> FromPoint(const DOMPointInit &init) noexcept
-    {
-      return Create(init.X, init.Y, init.Z, init.W);
-    }
-
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-x
     void SetX(double x) noexcept
     {
       _x = x;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-y
     void SetY(double y) noexcept
     {
       _y = y;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-z
     void SetZ(double z) noexcept
     {
       _z = z;
     }
 
+    /// @see https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-w
     void SetW(double w) noexcept
     {
       _w = w;
     }
+
+#pragma endregion
 
   private:
     DOMPoint(double x, double y, double z, double w) noexcept : DOMPointReadOnly(x, y, z, w)

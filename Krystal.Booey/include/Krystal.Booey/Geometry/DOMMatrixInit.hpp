@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  /// @see https://drafts.csswg.org/geometry/#dictdef-dommatrixinit
+  /// @see https://drafts.csswg.org/geometry-1/#dictdef-dommatrixinit
   struct DOMMatrixInit : DOMMatrix2DInit
   {
     double M13 {0};

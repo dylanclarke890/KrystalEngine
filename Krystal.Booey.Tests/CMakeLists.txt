@@ -484,6 +484,8 @@ set(KRYSTAL_BOOEY_TESTS_FILEAPI_SOURCES
 
 set(KRYSTAL_BOOEY_TESTS_GEOMETRY_SOURCES
   tests/Geometry/DOMMatrix.cpp
+  tests/Geometry/DOMPoint.cpp
+  tests/Geometry/DOMQuad.cpp
   tests/Geometry/DOMRectList.cpp
 )
 

@@ -61,6 +61,7 @@ namespace krys::boo::html
   ExceptionOr<void> Path2D::AddPath(const Path2D &path, DOMMatrix2DInit transform) noexcept
   {
     // 2. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
+    //    https://drafts.csswg.org/geometry-1/#create-a-dommatrixreadonly-from-the-2d-dictionary
     auto checkValid = DOMMatrixReadOnly::ValidateAndFixup(transform);
     if (checkValid.HasException())
     {
