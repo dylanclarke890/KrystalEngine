@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
+﻿#include "Krystal.Booey/CSS/Containment/ContentVisibilityAutoStateChangeEvent.hpp"
 
 namespace krys::boo
 {

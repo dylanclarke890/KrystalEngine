@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -1057,20 +1057,20 @@ namespace krys::boo
       {
         if (oldStyle->ContentVisibility() == ContentVisibility::Auto)
         {
-          dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+          css::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
         }
         auto wasSkippedContent = oldStyle->ContentVisibility() == ContentVisibility::Hidden
-                                   ? dom::IsSkippedContent::Yes
-                                   : dom::IsSkippedContent::No;
+                                   ? css::IsSkippedContent::Yes
+                                   : css::IsSkippedContent::No;
         auto isSkippedContent = newStyle.ContentVisibility() == ContentVisibility::Hidden
-                                  ? dom::IsSkippedContent::Yes
-                                  : dom::IsSkippedContent::No;
-        dom::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
+                                  ? css::IsSkippedContent::Yes
+                                  : css::IsSkippedContent::No;
+        css::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
                                                               isSkippedContent);
       }
       if ((contentVisibilityChanged || !oldStyle) && newStyle.ContentVisibility() == ContentVisibility::Auto)
       {
-        dom::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
+        css::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
       }
     };
     if (oldStyle)
@@ -2809,7 +2809,7 @@ namespace krys::boo
 
     if (Style().ContentVisibility() == ContentVisibility::Auto && GetElement())
     {
-      dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+      css::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
     }
   }
 

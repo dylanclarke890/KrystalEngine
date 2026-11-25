@@ -348,6 +348,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Calc/TreeSimplification.hpp
   include/Krystal.Booey/CSS/Calc/TreeTraversal.hpp
   include/Krystal.Booey/CSS/Calc/Value.hpp
+  include/Krystal.Booey/CSS/Containment/ContentRelevancy.hpp
+  include/Krystal.Booey/CSS/Containment/ContentVisibilityAutoStateChangeEvent.hpp
+  include/Krystal.Booey/CSS/Containment/ContentVisibilityDocumentState.hpp
   include/Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyle.hpp
   include/Krystal.Booey/CSS/Counter/CounterStyleDescriptors.hpp
@@ -756,6 +759,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Calc/Value.cpp
   src/CSS/Calc/ValueEvaluation.cpp
   src/CSS/Calc/ValueParsing.cpp
+  src/CSS/Containment/ContentVisibilityAutoStateChangeEvent.cpp
+  src/CSS/Containment/ContentVisibilityDocumentState.cpp
   src/CSS/Values/ComputedStyleDependencies.cpp
   src/CSS/Counter/CounterStyle.cpp
   src/CSS/Counter/CounterStyleDescriptors.cpp
@@ -1073,8 +1078,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Collections/NodeList.hpp
   include/Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/StaticNodeList.hpp
-  include/Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp
-  include/Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp
   include/Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp
   include/Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp
   include/Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp
@@ -1082,7 +1085,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/ClipboardEvent.hpp
   include/Krystal.Booey/DOM/Events/CommandEvent.hpp
   include/Krystal.Booey/DOM/Events/CompositionEvent.hpp
-  include/Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp
   include/Krystal.Booey/DOM/Events/CustomEvent.hpp
   include/Krystal.Booey/DOM/Events/DragEvent.hpp
   include/Krystal.Booey/DOM/Events/Event.hpp
@@ -1240,7 +1242,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Collections/LiveNodeList.cpp
   src/DOM/Collections/StaticHTMLCollection.cpp
   src/DOM/Collections/StaticNodeList.cpp
-  src/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
   src/DOM/DataTransfer/DataTransfer.cpp
   src/DOM/DataTransfer/DataTransferItem.cpp
   src/DOM/DataTransfer/DataTransferItemList.cpp
@@ -1249,7 +1250,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/ClipboardEvent.cpp
   src/DOM/Events/CommandEvent.cpp
   src/DOM/Events/CompositionEvent.cpp
-  src/DOM/Events/ContentVisibilityAutoStateChangeEvent.cpp
   src/DOM/Events/DragEvent.cpp
   src/DOM/Events/Event.cpp
   src/DOM/Events/EventListener.cpp

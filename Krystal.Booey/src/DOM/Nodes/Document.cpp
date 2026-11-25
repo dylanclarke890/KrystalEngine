@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/CustomEvent.hpp"
 #include "Krystal.Booey/DOM/Events/DragEvent.hpp"
@@ -1886,7 +1886,7 @@ namespace krys::boo
       RefPtr<Element> focusedElement = std::exchange(_focusedElement, nullptr);
       focusedElement->SetFocus(false);
 
-      ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
+      ScheduleContentRelevancyUpdate(css::ContentRelevancy::Focused);
 
       if (auto *editorClient = GetEditor().Client())
       {
@@ -2296,11 +2296,11 @@ namespace krys::boo
     return *_lazyLoadImageObserver;
   }
 
-  dom::ContentVisibilityDocumentState &Document::GetContentVisibilityDocumentState() noexcept
+  css::ContentVisibilityDocumentState &Document::GetContentVisibilityDocumentState() noexcept
   {
     if (!_contentVisibilityDocumentState)
     {
-      _contentVisibilityDocumentState = CreateUnique<dom::ContentVisibilityDocumentState>();
+      _contentVisibilityDocumentState = CreateUnique<css::ContentVisibilityDocumentState>();
     }
     return *_contentVisibilityDocumentState;
   }
@@ -2310,16 +2310,16 @@ namespace krys::boo
     return _contentVisibilityDocumentState && _contentVisibilityDocumentState->HasObservationTargets();
   }
 
-  dom::DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
+  css::DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
     UpdateLayoutIfContentVisibilityChanged updateLayout) noexcept
   {
     if (_contentRelevancyUpdate.empty() || !IsObservingContentVisibilityTargets())
     {
-      return dom::DidUpdateAnyContentRelevancy::No;
+      return css::DidUpdateAnyContentRelevancy::No;
     }
-    const dom::DidUpdateAnyContentRelevancy result =
+    const css::DidUpdateAnyContentRelevancy result =
       _contentVisibilityDocumentState->UpdateRelevancyOfContentVisibilityElements(_contentRelevancyUpdate);
-    if (result == dom::DidUpdateAnyContentRelevancy::Yes
+    if (result == css::DidUpdateAnyContentRelevancy::Yes
         && updateLayout == UpdateLayoutIfContentVisibilityChanged::Yes)
     {
       (void)UpdateLayoutIgnorePendingStylesheets();
@@ -2328,7 +2328,7 @@ namespace krys::boo
     return result;
   }
 
-  void Document::ScheduleContentRelevancyUpdate(dom::ContentRelevancy contentRelevancy) noexcept
+  void Document::ScheduleContentRelevancyUpdate(css::ContentRelevancy contentRelevancy) noexcept
   {
     if (!IsObservingContentVisibilityTargets())
     {
@@ -2461,7 +2461,7 @@ namespace krys::boo
       // observed.
       if (_contentVisibilityDocumentState
           && _contentVisibilityDocumentState->DetermineInitialVisibleContentVisibility()
-               == dom::HadInitialVisibleContentVisibilityDetermination::Yes)
+               == css::HadInitialVisibleContentVisibilityDetermination::Yes)
       {
         continue;
       }
@@ -4378,7 +4378,7 @@ namespace krys::boo
         }
       }
       if (UpdateRelevancyOfContentVisibilityElements(UpdateLayoutIfContentVisibilityChanged::No)
-          == dom::DidUpdateAnyContentRelevancy::Yes)
+          == css::DidUpdateAnyContentRelevancy::Yes)
       {
         _ignorePendingStylesheets = oldIgnore;
         return UpdateLayout(layoutOptions, context);

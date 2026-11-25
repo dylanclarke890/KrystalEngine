@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/NodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
@@ -91,7 +91,7 @@ namespace krys::boo::dom
     RefPtr<StylePropertyMapReadOnly> _computedStyleMap;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
-    Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
+    Maybe<EnumSet<css::ContentRelevancy>> _contentRelevancy;
 
   public:
     ElementRareData() noexcept;
@@ -229,12 +229,12 @@ namespace krys::boo::dom
 
     /// @brief Why the element is relevant to the user, once its relevancy has been determined.
     /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user
-    KRYS_NODISCARD const Maybe<EnumSet<ContentRelevancy>> &GetContentRelevancy() const noexcept
+    KRYS_NODISCARD const Maybe<EnumSet<css::ContentRelevancy>> &GetContentRelevancy() const noexcept
     {
       return _contentRelevancy;
     }
 
-    void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
+    void SetContentRelevancy(EnumSet<css::ContentRelevancy> contentRelevancy) noexcept
     {
       _contentRelevancy = contentRelevancy;
     }

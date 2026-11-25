@@ -533,7 +533,7 @@ namespace krys::boo
 
     _pendingSelectionUpdate = true;
 
-    document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Selected);
+    document->ScheduleContentRelevancyUpdate(css::ContentRelevancy::Selected);
 
     // The rendering update brings the render tree's selection up to date; schedule one.
     if (auto *view = document->View())

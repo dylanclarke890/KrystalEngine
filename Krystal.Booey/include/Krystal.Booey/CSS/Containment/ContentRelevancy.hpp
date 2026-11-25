@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   /// @brief Why an element with `content-visibility: auto` is relevant to the user.
   /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user

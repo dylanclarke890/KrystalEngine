@@ -1530,14 +1530,14 @@ namespace krys::boo::html
       oldFocusedElement->SetFocus(false);
       document.SetSequentialFocusNavigationStartingPoint(nullptr);
 
-      document.ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
+      document.ScheduleContentRelevancyUpdate(css::ContentRelevancy::Focused);
     }
     if (element)
     {
       document.SetSequentialFocusNavigationStartingPoint(element);
       element->SetFocus(true, visibility);
 
-      document.ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
+      document.ScheduleContentRelevancyUpdate(css::ContentRelevancy::Focused);
     }
 
     if (auto *editorClient = document.GetEditor().Client())

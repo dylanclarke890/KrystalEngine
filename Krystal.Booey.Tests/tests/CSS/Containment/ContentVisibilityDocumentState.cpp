@@ -1,7 +1,7 @@
-﻿#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
+﻿#include "Krystal.Booey/CSS/Containment/ContentVisibilityDocumentState.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentVisibilityAutoStateChangeEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
@@ -141,7 +141,7 @@ namespace krys::boo::tests
     fixture.UpdateRendering();
     CHECK(fixture.Document->IsObservingContentVisibilityTargets());
     CHECK(a.IsRelevantToUser());
-    CHECK(a.GetContentRelevancy() == EnumSet<dom::ContentRelevancy> {dom::ContentRelevancy::OnScreen});
+    CHECK(a.GetContentRelevancy() == EnumSet<css::ContentRelevancy> {css::ContentRelevancy::OnScreen});
     CHECK(b.IsRelevantToUser());
     CHECK(aChanges.Skipped == List<bool> {false});
     CHECK(bChanges.Skipped == List<bool> {false});
@@ -194,7 +194,7 @@ namespace krys::boo::tests
     {
       Downcast<HTMLElement>(fixture.ById(u8"button")).Focus({.PreventScroll = true});
       fixture.UpdateRendering();
-      CHECK(far.GetContentRelevancy() == EnumSet<dom::ContentRelevancy> {dom::ContentRelevancy::Focused});
+      CHECK(far.GetContentRelevancy() == EnumSet<css::ContentRelevancy> {css::ContentRelevancy::Focused});
 
       Downcast<HTMLElement>(fixture.ById(u8"button")).Blur();
       fixture.UpdateRendering();
@@ -206,7 +206,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(
         fixture.Document->GetSelection()->SelectAllChildren(fixture.ById(u8"text")).HasException());
       fixture.UpdateRendering();
-      CHECK(far.GetContentRelevancy() == EnumSet<dom::ContentRelevancy> {dom::ContentRelevancy::Selected});
+      CHECK(far.GetContentRelevancy() == EnumSet<css::ContentRelevancy> {css::ContentRelevancy::Selected});
 
       fixture.Document->GetSelection()->RemoveAllRanges();
       fixture.UpdateRendering();
@@ -219,12 +219,12 @@ namespace krys::boo::tests
       REQUIRE_FALSE(dialog.ShowModal().HasException());
       fixture.UpdateRendering();
       CHECK(far.GetContentRelevancy()
-              .value_or(EnumSet<dom::ContentRelevancy> {})
-              .contains(dom::ContentRelevancy::IsInTopLayer));
+              .value_or(EnumSet<css::ContentRelevancy> {})
+              .contains(css::ContentRelevancy::IsInTopLayer));
 
       dialog.Close();
       fixture.UpdateRendering();
-      CHECK_FALSE(far.GetContentRelevancy().value().contains(dom::ContentRelevancy::IsInTopLayer));
+      CHECK_FALSE(far.GetContentRelevancy().value().contains(css::ContentRelevancy::IsInTopLayer));
     }
 
     SECTION("Scrolling into view")

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
@@ -59,9 +59,11 @@ namespace krys::i18n
 namespace krys::boo::css
 {
   class CSSFontSelector;
+  class ContentVisibilityDocumentState;
   class MediaQueryMatcher;
   struct ParserContext;
 
+  enum class DidUpdateAnyContentRelevancy : bool;
   enum class PropertyId : uint16;
 }
 
@@ -96,7 +98,6 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  class ContentVisibilityDocumentState;
   class DOMImplementation;
   class DocumentAlgorithms;
   class DocumentFontLoader;
@@ -109,7 +110,6 @@ namespace krys::boo::dom
   class TreeWalker;
   class UserActionElementSet;
 
-  enum class DidUpdateAnyContentRelevancy : bool;
   enum class FireEvents : bool;
   enum class FocusPreviousElement : bool;
   enum class PopoverState : uint8;
@@ -382,8 +382,8 @@ namespace krys::boo
     UniquePtr<html::LazyLoadImageObserver> _lazyLoadImageObserver;
     // The relevancy of the elements with `content-visibility: auto`, made on first use, and the reasons to
     // check again in the next rendering update.
-    UniquePtr<dom::ContentVisibilityDocumentState> _contentVisibilityDocumentState;
-    EnumSet<dom::ContentRelevancy> _contentRelevancyUpdate;
+    UniquePtr<css::ContentVisibilityDocumentState> _contentVisibilityDocumentState;
+    EnumSet<css::ContentRelevancy> _contentRelevancyUpdate;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -1160,7 +1160,7 @@ namespace krys::boo
     KRYS_NODISCARD html::LazyLoadImageObserver &GetLazyLoadImageObserver() noexcept;
 
     /// @brief The relevancy of the elements with `content-visibility: auto`, made on first use.
-    KRYS_NODISCARD dom::ContentVisibilityDocumentState &GetContentVisibilityDocumentState() noexcept;
+    KRYS_NODISCARD css::ContentVisibilityDocumentState &GetContentVisibilityDocumentState() noexcept;
 
     enum class UpdateLayoutIfContentVisibilityChanged : bool
     {
@@ -1171,13 +1171,13 @@ namespace krys::boo
     /// @brief The rendering update's content relevancy step: checks the relevancy of the elements with
     /// `content-visibility: auto` for the reasons scheduled, laying out if any changed (unless
     /// @p updateLayout is `No`).
-    dom::DidUpdateAnyContentRelevancy
+    css::DidUpdateAnyContentRelevancy
       UpdateRelevancyOfContentVisibilityElements(UpdateLayoutIfContentVisibilityChanged updateLayout =
                                                    UpdateLayoutIfContentVisibilityChanged::Yes) noexcept;
 
     /// @brief Has the next rendering update check the relevancy of the elements with
     /// `content-visibility: auto` for @p contentRelevancy.
-    void ScheduleContentRelevancyUpdate(dom::ContentRelevancy contentRelevancy) noexcept;
+    void ScheduleContentRelevancyUpdate(css::ContentRelevancy contentRelevancy) noexcept;
 
     /// @brief Makes the `content-visibility: auto` ancestor whose contents hide @p scrollAnchor relevant, so
     /// it can be scrolled to.

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserver.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
@@ -39,7 +39,7 @@ namespace krys::boo
   class Element;
 }
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   enum class DidUpdateAnyContentRelevancy : bool
   {

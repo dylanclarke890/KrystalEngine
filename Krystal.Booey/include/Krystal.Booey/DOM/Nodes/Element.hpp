@@ -3,7 +3,7 @@
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentRelevancy.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
@@ -1023,10 +1023,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRelevantToUser() const noexcept;
 
     /// @brief Why the element is relevant to the user, once its relevancy has been determined.
-    KRYS_NODISCARD Maybe<EnumSet<dom::ContentRelevancy>> GetContentRelevancy() const noexcept;
+    KRYS_NODISCARD Maybe<EnumSet<css::ContentRelevancy>> GetContentRelevancy() const noexcept;
 
     /// @brief Records why the element is relevant to the user, as content visibility determined.
-    void SetContentRelevancy(EnumSet<dom::ContentRelevancy> contentRelevancy) noexcept;
+    void SetContentRelevancy(EnumSet<css::ContentRelevancy> contentRelevancy) noexcept;
 
     /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
     /// shared between elements.

@@ -162,6 +162,7 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/Calc/TreeSerialisation.cpp
   tests/CSS/Calc/TreeSimplification.cpp
   tests/CSS/Calc/Value.cpp
+  tests/CSS/Containment/ContentVisibilityDocumentState.cpp
   tests/CSS/Counter/CounterStyle.cpp
   tests/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
   tests/CSS/CSSOM/CSSContainerRule.cpp
@@ -395,7 +396,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Collections/HTMLCollection.cpp
   tests/DOM/Collections/LiveCollection.cpp
   tests/DOM/Collections/NodeList.cpp
-  tests/DOM/ContentVisibility/ContentVisibilityDocumentState.cpp
   tests/DOM/DataTransfer/DataTransfer.cpp
   tests/DOM/Events/CustomEvent.cpp
   tests/DOM/Events/Event.cpp

@@ -3211,7 +3211,7 @@ namespace krys::boo
     document->AddTopLayerElement(*this);
     _eventTargetFlags.Add(dom::EventTargetFlag::IsInTopLayer);
 
-    document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
+    document->ScheduleContentRelevancyUpdate(css::ContentRelevancy::IsInTopLayer);
 
     // Being in the top layer changes what's inert, so the element and the root restyle.
     InvalidateStyleInternal();
@@ -3258,7 +3258,7 @@ namespace krys::boo
     NodeDocument().RemoveTopLayerElement(*this);
     _eventTargetFlags.Remove(dom::EventTargetFlag::IsInTopLayer);
 
-    NodeDocument().ScheduleContentRelevancyUpdate(dom::ContentRelevancy::IsInTopLayer);
+    NodeDocument().ScheduleContentRelevancyUpdate(css::ContentRelevancy::IsInTopLayer);
 
     // Being in the top layer changes what's inert, so the element and the root restyle.
     InvalidateStyleInternal();
@@ -3470,7 +3470,7 @@ namespace krys::boo
     return false;
   }
 
-  Maybe<EnumSet<dom::ContentRelevancy>> Element::GetContentRelevancy() const noexcept
+  Maybe<EnumSet<css::ContentRelevancy>> Element::GetContentRelevancy() const noexcept
   {
     if (!GetElementRareData())
     {
@@ -3479,7 +3479,7 @@ namespace krys::boo
     return GetElementRareData()->GetContentRelevancy();
   }
 
-  void Element::SetContentRelevancy(EnumSet<dom::ContentRelevancy> contentRelevancy) noexcept
+  void Element::SetContentRelevancy(EnumSet<css::ContentRelevancy> contentRelevancy) noexcept
   {
     EnsureElementRareData().SetContentRelevancy(contentRelevancy);
   }

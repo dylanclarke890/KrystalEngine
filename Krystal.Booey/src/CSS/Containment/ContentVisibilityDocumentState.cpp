@@ -23,11 +23,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
+#include "Krystal.Booey/CSS/Containment/ContentVisibilityAutoStateChangeEvent.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Events/ContentVisibilityAutoStateChangeEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverEntry.hpp"
@@ -36,7 +36,7 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   namespace
   {
@@ -134,7 +134,7 @@ namespace krys::boo::dom
     auto targetContainsSelection = [](Element &target)
     {
       auto selectionRange = target.NodeDocument().Selection().Selection().Range();
-      return selectionRange && Intersects<TreeType::ComposedTree>(*selectionRange, target);
+      return selectionRange && dom::Intersects<dom::TreeType::ComposedTree>(*selectionRange, target);
     };
 
     if (relevancyToCheck.contains(ContentRelevancy::Selected))
@@ -177,8 +177,8 @@ namespace krys::boo::dom
                                              init.Skipped = isSkippedContent == IsSkippedContent::Yes;
                                              auto event = ContentVisibilityAutoStateChangeEvent::Create(
                                                event_names::ContentVisibilityAutoStateChange, init);
-                                             (void)EventDispatcher::DispatchToTarget(*event,
-                                                                                     protectedTarget.get());
+                                             (void)dom::EventDispatcher::DispatchToTarget(
+                                               *event, protectedTarget.get());
                                            }
                                          });
     return true;
