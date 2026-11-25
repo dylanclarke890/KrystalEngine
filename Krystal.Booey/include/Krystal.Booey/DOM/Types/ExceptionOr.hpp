@@ -27,7 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 
 namespace krys::boo

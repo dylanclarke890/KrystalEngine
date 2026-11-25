@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Core/Utils/IsEOF.hpp"
 #include "Krystal.Core/Utils/SourceLocation.hpp"

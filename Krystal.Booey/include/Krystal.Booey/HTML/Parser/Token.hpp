@@ -28,7 +28,6 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"

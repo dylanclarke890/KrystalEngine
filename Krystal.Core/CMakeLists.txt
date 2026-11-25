@@ -59,7 +59,6 @@ target_precompile_headers(Krystal.Core PRIVATE
   <type_traits>
   <utility>
   <vector>
-  "include/Krystal.Core/Base.hpp"
   "include/Krystal.Core/Memory/IntrusivePtr.hpp"
   "include/Krystal.Core/Maths/Matrix.hpp"
   "include/Krystal.Core/Maths/Quaternion.hpp"
@@ -76,7 +75,6 @@ target_sources(Krystal.Core
       include/Krystal.Core/Assert.hpp
       include/Krystal.Core/Atomics.hpp
       include/Krystal.Core/Attributes.hpp
-      include/Krystal.Core/Base.hpp
       include/Krystal.Core/Concepts.hpp
       include/Krystal.Core/Debug.hpp
       include/Krystal.Core/Endian.hpp

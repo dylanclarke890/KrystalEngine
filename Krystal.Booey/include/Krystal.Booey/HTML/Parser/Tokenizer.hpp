@@ -30,7 +30,6 @@
 #include "Krystal.Booey/HTML/Parser/InputStream.hpp"
 #include "Krystal.Booey/HTML/Parser/Token.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"

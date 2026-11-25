@@ -24,7 +24,7 @@ namespace krys::boo::css
   {
     /// @brief Whether `AsText` may write @p longhand as part of @p shorthand.
     KRYS_NODISCARD constexpr bool CanSerialiseLonghandAsPartOf(PropertyId shorthand,
-                                                               PropertyId longhand) noexcept
+                                                               KRYS_MAYBE_UNUSED PropertyId longhand) noexcept
     {
       krys_debug_assert(IsShorthand(shorthand));
       krys_debug_assert(IsLonghand(longhand));
@@ -39,7 +39,7 @@ namespace krys::boo::css
         // text-decoration-skip-ink, its only longhand, is better supported on its own.
         case PropertyId::TextDecorationSkip: return false;
 
-        default:                        return true;
+        default:                             return true;
       }
     }
 

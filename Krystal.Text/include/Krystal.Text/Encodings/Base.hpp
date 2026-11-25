@@ -1,7 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Text/Encodings/EncodingId.hpp"
 #include <ranges>
 

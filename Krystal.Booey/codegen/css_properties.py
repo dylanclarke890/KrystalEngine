@@ -7358,7 +7358,6 @@ class GenerateInitialValues:
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Booey/CSS/Values/Units.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
-                    "Krystal.Core/Base.hpp",
                     "Krystal.Core/Types/Variant.hpp",
                 ],
             )
@@ -7711,9 +7710,10 @@ class GeneratePropertyId:
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Booey/CSS/Types/CSSOMString.hpp",
-                    "Krystal.Core/Base.hpp",
+                    "Krystal.Core/Attributes.hpp",
                     "Krystal.Core/Containers/Array.hpp",
                     "Krystal.Core/Containers/Span.hpp",
+                    "Krystal.Core/Numeric.hpp",
                 ],
             )
 

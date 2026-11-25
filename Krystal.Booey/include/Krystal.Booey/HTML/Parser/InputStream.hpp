@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Utils/IsEOF.hpp"
 #include "Krystal.Core/Utils/SourceLocation.hpp"
 #include "Krystal.Text/Encodings/Decode.hpp"

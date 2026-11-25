@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/BloomFilter.hpp"
 #include "Krystal.Core/Containers/List.hpp"

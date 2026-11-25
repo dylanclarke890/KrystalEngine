@@ -6,7 +6,6 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
