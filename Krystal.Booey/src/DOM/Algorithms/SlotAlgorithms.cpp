@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"

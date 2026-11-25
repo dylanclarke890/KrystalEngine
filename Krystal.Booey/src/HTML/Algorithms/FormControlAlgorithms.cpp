@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectedContentElement.hpp"

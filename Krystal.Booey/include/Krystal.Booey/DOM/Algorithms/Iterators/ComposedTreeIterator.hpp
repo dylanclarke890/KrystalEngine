@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ElementAndTextDescendantIterator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Core/Containers/List.hpp"

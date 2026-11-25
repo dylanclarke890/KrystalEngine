@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

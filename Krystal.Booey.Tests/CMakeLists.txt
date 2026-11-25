@@ -61,7 +61,7 @@ target_precompile_headers(Krystal.Booey.Tests
     <catch2/catch_test_macros.hpp>
     <catch2/matchers/catch_matchers_floating_point.hpp>
 
-    <Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp>
+    <Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp>
     <Krystal.Booey/DOM/Nodes/Attr.hpp>
     <Krystal.Booey/DOM/Nodes/Document.hpp>
     <Krystal.Booey/DOM/Events/EventTarget.hpp>
@@ -386,6 +386,8 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Algorithms/EventDispatcher.cpp
   tests/DOM/Algorithms/EventTargetAlgorithms.cpp
   tests/DOM/Algorithms/IteratorAlgorithms.cpp
+  tests/DOM/Algorithms/Iterators/ComposedTreeIterator.cpp
+  tests/DOM/Algorithms/Iterators/HTMLElementRanges.cpp
   tests/DOM/Algorithms/LiveRangeUpdater.cpp
   tests/DOM/Algorithms/Mixins.cpp
   tests/DOM/Algorithms/MutationAlgorithms.cpp
@@ -419,7 +421,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Internals/QualifiedNameCache.cpp
   tests/DOM/Internals/TreeScopeOrderedMap.cpp
   tests/DOM/Internals/UserActionElementSet.cpp
-  tests/DOM/Iterators/ComposedTreeIterator.cpp
   tests/DOM/Mixins/ChildNode.cpp
   tests/DOM/Mixins/DocumentOrShadowRoot.cpp
   tests/DOM/Mixins/NonDocumentTypeChildNode.cpp

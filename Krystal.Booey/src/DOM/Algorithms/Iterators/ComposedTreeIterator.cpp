@@ -23,7 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include <format>
 
 namespace krys::boo::dom

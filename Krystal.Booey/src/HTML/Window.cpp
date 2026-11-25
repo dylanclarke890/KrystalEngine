@@ -30,7 +30,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"

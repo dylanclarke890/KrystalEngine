@@ -44,7 +44,7 @@
 #include "Krystal.Booey/Accessibility/AXTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"

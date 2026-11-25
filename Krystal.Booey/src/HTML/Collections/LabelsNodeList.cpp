@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Collections/LabelsNodeList.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
 
 namespace krys::boo::html

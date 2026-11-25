@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Style/Update.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"

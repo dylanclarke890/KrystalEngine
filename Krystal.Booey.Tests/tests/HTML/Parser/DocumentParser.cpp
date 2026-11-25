@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Comment.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"

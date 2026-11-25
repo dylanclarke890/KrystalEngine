@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"

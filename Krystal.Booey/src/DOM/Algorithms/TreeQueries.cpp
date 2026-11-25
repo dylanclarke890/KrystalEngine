@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"

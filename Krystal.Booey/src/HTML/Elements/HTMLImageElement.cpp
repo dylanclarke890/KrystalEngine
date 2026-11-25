@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"

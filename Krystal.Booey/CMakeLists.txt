@@ -1080,6 +1080,11 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp
   include/Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/IteratorAlgorithms.hpp
+  include/Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp
+  include/Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp
+  include/Krystal.Booey/DOM/Algorithms/Iterators/ElementAndTextDescendantIterator.hpp
+  include/Krystal.Booey/DOM/Algorithms/Iterators/HTMLElementRanges.hpp
+  include/Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp
   include/Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp
   include/Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp
@@ -1143,10 +1148,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/PopoverData.hpp
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
-  include/Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp
-  include/Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp
-  include/Krystal.Booey/DOM/Iterators/ElementAndTextDescendantIterator.hpp
-  include/Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp
   include/Krystal.Booey/DOM/Mixins/ChildNode.hpp
   include/Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp
   include/Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp
@@ -1221,6 +1222,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Algorithms/ExtensibilityHooks.cpp
   src/DOM/Algorithms/FindRevealAlgorithms.cpp
   src/DOM/Algorithms/IteratorAlgorithms.cpp
+  src/DOM/Algorithms/Iterators/ComposedTreeIterator.cpp
   src/DOM/Algorithms/LiveRangeUpdater.cpp
   src/DOM/Algorithms/MutationAlgorithms.cpp
   src/DOM/Algorithms/MutationObserverAlgorithms.cpp
@@ -1274,7 +1276,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
   src/DOM/Internals/UserActionElementSet.cpp
-  src/DOM/Iterators/ComposedTreeIterator.cpp
   src/DOM/Mixins/ChildNode.cpp
   src/DOM/Mixins/DocumentOrShadowRoot.cpp
   src/DOM/Mixins/NonDocumentTypeChildNode.cpp
@@ -4185,7 +4186,7 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp
     include/Krystal.Booey/CSS/Values/Value.hpp
 
-    include/Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp
+    include/Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp
     include/Krystal.Booey/DOM/Nodes/Attr.hpp
     include/Krystal.Booey/DOM/Nodes/Document.hpp
     include/Krystal.Booey/DOM/Nodes/Node.hpp

@@ -38,7 +38,7 @@
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"

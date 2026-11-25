@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"

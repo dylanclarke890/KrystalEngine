@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 #include <ranges>
 
@@ -253,6 +253,14 @@ namespace krys::boo::dom::detail
     {
     }
 
+    /// @brief The children of @p root that a policy with its own first child (such as the HTML element
+    /// children's) walks.
+    ScopedSubtreeRange(match_constness_t<TNode, ContainerNode> &root) noexcept
+    requires(!IteratorPolicy::IsInclusive && requires { IteratorPolicy::FirstChild(root); })
+        : _root(&root), _begin(IteratorPolicy::FirstChild(root))
+    {
+    }
+
     iterator begin() const noexcept
     {
       if (_begin != nullptr)
@@ -280,11 +288,7 @@ namespace krys::boo::dom::detail
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
-      {
-        return TreeQueries::NextHTMLElementSibling(*current);
-      }
-      else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
         return TreeQueries::NextElementSibling(*current);
       }
@@ -309,11 +313,7 @@ namespace krys::boo::dom::detail
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
-      {
-        return TreeQueries::PreviousHTMLElementSibling(*current);
-      }
-      else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
         return TreeQueries::PreviousElementSibling(*current);
       }
@@ -470,12 +470,6 @@ namespace krys::boo::dom
     detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<Element, false>, Element>;
   using ConstChildElementRange =
     detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const Element, false>, const Element>;
-
-  using ChildHTMLElementRange =
-    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<HTMLElement, false>, HTMLElement>;
-  using ConstChildHTMLElementRange =
-    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const HTMLElement, false>,
-                               const HTMLElement>;
 
 #pragma region Node Range Algorithms
 

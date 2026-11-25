@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Collections/StaticNodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/MutationObserver/AttributesMutationRecord.hpp"
 #include "Krystal.Booey/DOM/MutationObserver/CharacterDataMutationRecord.hpp"
 #include "Krystal.Booey/DOM/MutationObserver/ChildListMutationRecord.hpp"

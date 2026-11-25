@@ -31,7 +31,7 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"

@@ -34,7 +34,7 @@
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
