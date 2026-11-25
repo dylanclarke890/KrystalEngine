@@ -40,7 +40,7 @@ namespace krys::boo::dom
   {
   private:
     TNode *_current {nullptr};
-    size_t _currentIndex {0};
+    size_t _currentIndex {0uz};
     size_t _count {0};
     List<TNode *> _list;
     bool _isCountValid {false};
@@ -66,6 +66,7 @@ namespace krys::boo::dom
         {
           _list.push_back(node);
         }
+
         _count = _list.size();
         _isCountValid = true;
         _isListValid = true;
@@ -94,10 +95,10 @@ namespace krys::boo::dom
         }
 
         _current = collection.CollectionBegin();
-        _currentIndex = 0;
+        _currentIndex = 0uz;
         if (!_current)
         {
-          _count = 0;
+          _count = 0uz;
           _isCountValid = true;
           return nullptr;
         }
@@ -109,13 +110,15 @@ namespace krys::boo::dom
         if (!next)
         {
           // The index wasn't reached, but the walk found how many there are.
-          _count = _currentIndex + 1;
+          _count = _currentIndex + 1uz;
           _isCountValid = true;
           return nullptr;
         }
+
         _current = next;
         ++_currentIndex;
       }
+
       return _current;
     }
 
