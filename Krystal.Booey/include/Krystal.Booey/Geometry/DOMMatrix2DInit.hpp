@@ -29,7 +29,7 @@
 
 namespace krys::boo
 {
-  /// @see https://drafts.fxtf.org/geometry/#dictdef-dommatrix2dinit
+  /// @see https://drafts.csswg.org/geometry/#dictdef-dommatrix2dinit
   struct DOMMatrix2DInit
   {
     Maybe<double> A;

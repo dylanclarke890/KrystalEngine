@@ -30,13 +30,13 @@
 namespace krys::boo
 {
   /// @brief A 4 by 4 matrix (or a 2D one) that can be changed.
-  /// @see https://drafts.fxtf.org/geometry/#dommatrix
+  /// @see https://drafts.csswg.org/geometry/#dommatrix
   class DOMMatrix : public DOMMatrixReadOnly
   {
     friend class DOMMatrixReadOnly;
 
   public:
-    /// @see https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
+    /// @see https://drafts.csswg.org/geometry/#dom-dommatrixreadonly-dommatrixreadonly
     KRYS_NODISCARD static ExceptionOr<Ref<DOMMatrix>>
       Create(Maybe<Variant<CSSOMString, List<double>>> init = null) noexcept;
 

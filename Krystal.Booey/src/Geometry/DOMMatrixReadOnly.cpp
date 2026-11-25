@@ -280,7 +280,7 @@ namespace krys::boo
     return matrix->TranslateSelf(tx, ty, tz);
   }
 
-  // https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-flipx
+  // https://drafts.csswg.org/geometry/#dom-dommatrixreadonly-flipx
   Ref<DOMMatrix> DOMMatrixReadOnly::FlipX() const noexcept
   {
     auto matrix = CloneAsDOMMatrix();
@@ -288,7 +288,7 @@ namespace krys::boo
     return matrix;
   }
 
-  // https://drafts.fxtf.org/geometry/#dom-dommatrixreadonly-flipy
+  // https://drafts.csswg.org/geometry/#dom-dommatrixreadonly-flipy
   Ref<DOMMatrix> DOMMatrixReadOnly::FlipY() const noexcept
   {
     auto matrix = CloneAsDOMMatrix();

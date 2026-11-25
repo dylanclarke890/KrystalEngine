@@ -31,7 +31,7 @@
 namespace krys::boo
 {
   /// @brief A rectangle whose coordinates can be changed.
-  /// @see https://drafts.fxtf.org/geometry/#domrect
+  /// @see https://drafts.csswg.org/geometry/#domrect
   class DOMRect : public DOMRectReadOnly
   {
     DOMRect() noexcept = default;

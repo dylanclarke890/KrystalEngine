@@ -42,7 +42,7 @@ namespace krys::boo
 
   class DOMPoint;
 
-  /// @see https://drafts.fxtf.org/geometry/#dictdef-dompointinit
+  /// @see https://drafts.csswg.org/geometry/#dictdef-dompointinit
   struct DOMPointInit
   {
     double X {0};
@@ -52,7 +52,7 @@ namespace krys::boo
   };
 
   /// @brief A point whose coordinates can't be changed through it.
-  /// @see https://drafts.fxtf.org/geometry/#dompointreadonly
+  /// @see https://drafts.csswg.org/geometry/#dompointreadonly
   class DOMPointReadOnly : public RefCounted<DOMPointReadOnly>
   {
   protected:
@@ -103,7 +103,7 @@ namespace krys::boo
       return _w;
     }
 
-    /// @see https://drafts.fxtf.org/geometry/#dom-dompointreadonly-matrixtransform
+    /// @see https://drafts.csswg.org/geometry/#dom-dompointreadonly-matrixtransform
     KRYS_NODISCARD ExceptionOr<Ref<DOMPoint>> MatrixTransform(DOMMatrixInit &&) const noexcept;
 
   protected:

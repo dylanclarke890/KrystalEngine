@@ -33,7 +33,7 @@
 
 namespace krys::boo
 {
-  /// @see https://drafts.fxtf.org/geometry/#dictdef-domrectinit
+  /// @see https://drafts.csswg.org/geometry/#dictdef-domrectinit
   struct DOMRectInit
   {
     double X {0};
@@ -43,7 +43,7 @@ namespace krys::boo
   };
 
   /// @brief A rectangle whose coordinates can't be changed through it.
-  /// @see https://drafts.fxtf.org/geometry/#domrectreadonly
+  /// @see https://drafts.csswg.org/geometry/#domrectreadonly
   class DOMRectReadOnly : public RefCounted<DOMRectReadOnly>
   {
   protected:

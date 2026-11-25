@@ -77,7 +77,7 @@ def GetSpec(name: str) -> Spec:
     if name in WHATWG_SPECS:
         return WHATWG_SPECS[name]
     if re.fullmatch(r"(css|selectors|mediaqueries|cssom|compositing|filter-effects|motion|fill-stroke|"
-                    r"scroll-animations|web-animations|resize-observer|pointerevents|uievents)[a-z0-9-]*", name):
+                    r"scroll-animations|web-animations|resize-observer|pointerevents|uievents|geometry)[a-z0-9-]*", name):
         unversioned = re.sub(r"-\d+$", "", name)
         return Spec(name, name, f"https://drafts.csswg.org/{name}/", REPO_ROOT / f"Krystal.Booey/docs/specs/css/{name}.md",
                     (f"https://drafts.csswg.org/{name}/", f"https://drafts.csswg.org/{unversioned}/",

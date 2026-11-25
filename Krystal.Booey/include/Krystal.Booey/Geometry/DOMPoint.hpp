@@ -35,7 +35,7 @@
 namespace krys::boo
 {
   /// @brief A point whose coordinates can be changed.
-  /// @see https://drafts.fxtf.org/geometry/#dompoint
+  /// @see https://drafts.csswg.org/geometry/#dompoint
   class DOMPoint final : public DOMPointReadOnly
   {
   public:

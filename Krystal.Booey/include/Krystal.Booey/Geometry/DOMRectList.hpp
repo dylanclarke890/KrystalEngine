@@ -37,7 +37,7 @@
 namespace krys::boo
 {
   /// @brief A list of rectangles, such as an element's client rects.
-  /// @see https://drafts.fxtf.org/geometry/#domrectlist
+  /// @see https://drafts.csswg.org/geometry/#domrectlist
   class DOMRectList : public RefCounted<DOMRectList>
   {
   private:
