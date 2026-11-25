@@ -2534,7 +2534,7 @@ namespace krys::boo
     // image overlays; see DIFFERENCES.md.)
     KRYS_NODISCARD RefPtr<Node> NodeToSelectOnMouseDownForNode(Node &targetNode) noexcept
     {
-      return dom::Position::RootUserSelectAllForNode(&targetNode);
+      return Position::RootUserSelectAllForNode(&targetNode);
     }
 
     KRYS_NODISCARD VisibleSelection
@@ -2547,9 +2547,9 @@ namespace krys::boo
       }
 
       VisibleSelection newSelection(selection);
-      newSelection.SetAnchor(dom::PositionBeforeNode(nodeToSelect.get())
+      newSelection.SetAnchor(PositionBeforeNode(nodeToSelect.get())
                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetFocus(dom::PositionAfterNode(nodeToSelect.get())
+      newSelection.SetFocus(PositionAfterNode(nodeToSelect.get())
                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
 
       return newSelection;
@@ -2590,9 +2590,9 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD uint64 TextDistance(const dom::Position &start, const dom::Position &end) noexcept
+    KRYS_NODISCARD uint64 TextDistance(const Position &start, const Position &end) noexcept
     {
-      auto range = dom::CreateSimpleRange({start, end});
+      auto range = CreateSimpleRange(PositionRange {start, end});
       if (!range)
       {
         return 0;
@@ -2629,7 +2629,7 @@ namespace krys::boo
                                                                        const VisibleSelection &selection,
                                                                        TextGranularity granularity) noexcept
   {
-    if (dom::Position::NodeIsUserSelectNone(targetNode))
+    if (Position::NodeIsUserSelectNone(targetNode))
     {
       return false;
     }
@@ -3219,7 +3219,7 @@ namespace krys::boo
     {
       visiblePosition = VisiblePosition(FirstPositionInOrBeforeNode(targetNode.get()));
     }
-    dom::Position pos = visiblePosition.DeepEquivalent();
+    Position pos = visiblePosition.DeepEquivalent();
 
     VisibleSelection newSelection = selection.Selection();
     TextGranularity granularity = TextGranularity::CharacterGranularity;
@@ -3245,8 +3245,8 @@ namespace krys::boo
           && pos.IsNotNull())
       {
         // Shift-click shouldn't deselect a selection that was made right-to-left.
-        dom::Position start = newSelection.Start();
-        dom::Position end = newSelection.End();
+        Position start = newSelection.Start();
+        Position end = newSelection.End();
         auto distanceToStart = TextDistance(start, pos);
         auto distanceToEnd = TextDistance(pos, end);
         if (distanceToStart <= distanceToEnd)
@@ -3316,7 +3316,7 @@ namespace krys::boo
       return true;
     }
 
-    return node->CanStartSelection() || dom::Position::NodeIsUserSelectAll(node);
+    return node->CanStartSelection() || Position::NodeIsUserSelectAll(node);
   }
 
   bool EventHandler::MouseDownMayStartSelect() const noexcept
@@ -3575,13 +3575,13 @@ namespace krys::boo
     }
 
     RefPtr<Node> rootUserSelectAllForMousePressNode =
-      dom::Position::RootUserSelectAllForNode(_mousePressNode.get());
+      Position::RootUserSelectAllForNode(_mousePressNode.get());
     if (rootUserSelectAllForMousePressNode
-        && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
+        && rootUserSelectAllForMousePressNode == Position::RootUserSelectAllForNode(target.get()))
     {
-      newSelection.SetAnchor(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
+      newSelection.SetAnchor(PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+      newSelection.SetFocus(PositionAfterNode(rootUserSelectAllForMousePressNode.get())
                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
     }
     else
@@ -3599,19 +3599,19 @@ namespace krys::boo
       // Reset base for user select all when base is inside user-select-all area and extent < base.
       if (rootUserSelectAllForMousePressNode && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetAnchor(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+        newSelection.SetAnchor(PositionAfterNode(rootUserSelectAllForMousePressNode.get())
                                  .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
 
-      RefPtr<Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
+      RefPtr<Node> rootUserSelectAllForTarget = Position::RootUserSelectAllForNode(target.get());
       if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetFocus(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
+        newSelection.SetFocus(PositionBeforeNode(rootUserSelectAllForTarget.get())
                                 .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else if (rootUserSelectAllForTarget && _mousePressNode->Renderer())
       {
-        newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
+        newSelection.SetFocus(PositionAfterNode(rootUserSelectAllForTarget.get())
                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else

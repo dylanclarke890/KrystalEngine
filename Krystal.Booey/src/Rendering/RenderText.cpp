@@ -853,7 +853,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD dom::PositionWithAffinity
+    KRYS_NODISCARD PositionWithAffinity
       CreatePositionWithAffinityForBox(const inline_iterator::BoxIterator &run, uint32 offset,
                                        ShouldAffinityBeDownstream shouldAffinityBeDownstream) noexcept
     {
@@ -869,7 +869,7 @@ namespace krys::boo
       return run->Renderer().CreatePositionWithAffinity(static_cast<int32>(offset), affinity);
     }
 
-    KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinityAfterAdjustingOffsetForBiDi(
+    KRYS_NODISCARD PositionWithAffinity CreatePositionWithAffinityAfterAdjustingOffsetForBiDi(
       const inline_iterator::TextBoxIterator &run, uint32 offset,
       ShouldAffinityBeDownstream shouldAffinityBeDownstream) noexcept
     {
@@ -981,9 +981,8 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
-    RenderText::PositionForPoint(const LayoutPoint &point, HitTestSource,
-                                 const RenderFragmentContainer * /*fragment*/) noexcept
+  PositionWithAffinity RenderText::PositionForPoint(const LayoutPoint &point, HitTestSource,
+                                                    const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto firstRun = inline_iterator::LineLeftmostTextBoxFor(*this);
 

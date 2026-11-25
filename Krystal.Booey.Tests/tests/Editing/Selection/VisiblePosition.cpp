@@ -140,9 +140,9 @@ namespace krys::boo::tests
     REQUIRE(imgBox);
     auto imageTop = imgBox->LocalToAbsolute().Y();
     auto beforeImage = fixture.PositionAt(5, imageTop + 10);
-    CHECK(beforeImage.DeepEquivalent() == dom::PositionBeforeNode(&img));
+    CHECK(beforeImage.DeepEquivalent() == PositionBeforeNode(&img));
     auto afterImage = fixture.PositionAt(35, imageTop + 10);
-    CHECK(afterImage.DeepEquivalent() == dom::PositionAfterNode(&img));
+    CHECK(afterImage.DeepEquivalent() == PositionAfterNode(&img));
   }
 
   TEST_CASE("VisiblePosition: caret rects", "[Editing][VisiblePosition]")
@@ -166,7 +166,7 @@ namespace krys::boo::tests
 
     // An empty editable block has a caret at its start, as tall as the font.
     auto &editable = fixture.ById(u8"e");
-    VisiblePosition inEmpty(dom::FirstPositionInNode(&editable));
+    VisiblePosition inEmpty(FirstPositionInNode(&editable));
     REQUIRE(inEmpty.IsNotNull());
     auto emptyCaret = inEmpty.LocalCaretRect();
     CHECK(emptyCaret.Renderer == editable.Renderer());

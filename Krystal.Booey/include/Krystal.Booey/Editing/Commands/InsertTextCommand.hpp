@@ -88,16 +88,16 @@ namespace krys::boo
       return true;
     }
 
-    dom::Position PositionInsideTextNode(const dom::Position &position) noexcept;
+    Position PositionInsideTextNode(const Position &position) noexcept;
 
-    dom::Position InsertTab(const dom::Position &position) noexcept;
+    Position InsertTab(const Position &position) noexcept;
 
     bool PerformTrivialReplace(utf8_stringview text, bool selectInsertedText) noexcept;
 
     bool PerformOverwrite(utf8_stringview text, bool selectInsertedText) noexcept;
 
-    void SetEndingSelectionWithoutValidation(const dom::Position &startPosition,
-                                             const dom::Position &endPosition) noexcept;
+    void SetEndingSelectionWithoutValidation(const Position &startPosition,
+                                             const Position &endPosition) noexcept;
   };
 }
 

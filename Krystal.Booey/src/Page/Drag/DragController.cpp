@@ -1140,7 +1140,7 @@ namespace krys::boo
         // a user can initiate a drag on a link without having any text
         // selected.  In this case, we should expand the selection to
         // the enclosing anchor element
-        dom::Position pos = sourceSelection.CanonicalAnchor();
+        Position pos = sourceSelection.CanonicalAnchor();
         if (RefPtr<Element> node = EnclosingAnchorElement(pos))
         {
           selection.SetSelection(VisibleSelection::SelectionFromContentsOfNode(node.get()));

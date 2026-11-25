@@ -46,7 +46,7 @@ namespace krys::boo
   class VisiblePosition
   {
   private:
-    dom::Position _deepPosition;
+    Position _deepPosition;
     Affinity _affinity {DefaultAffinity};
 
   public:
@@ -57,7 +57,7 @@ namespace krys::boo
     VisiblePosition() noexcept = default;
 
     // This constructor will ignore the passed-in affinity if the position is not at the end of a line.
-    VisiblePosition(const dom::Position &position, Affinity affinity = DefaultAffinity) noexcept;
+    VisiblePosition(const Position &position, Affinity affinity = DefaultAffinity) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {
@@ -74,7 +74,7 @@ namespace krys::boo
       return _deepPosition.IsOrphan();
     }
 
-    KRYS_NODISCARD dom::Position DeepEquivalent() const noexcept
+    KRYS_NODISCARD Position DeepEquivalent() const noexcept
     {
       return _deepPosition;
     }
@@ -158,11 +158,11 @@ namespace krys::boo
     }
 
   private:
-    KRYS_NODISCARD static dom::Position CanonicalPosition(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static Position CanonicalPosition(const Position &position) noexcept;
 
-    KRYS_NODISCARD dom::Position LeftVisuallyDistinctCandidate() const noexcept;
+    KRYS_NODISCARD Position LeftVisuallyDistinctCandidate() const noexcept;
 
-    KRYS_NODISCARD dom::Position RightVisuallyDistinctCandidate() const noexcept;
+    KRYS_NODISCARD Position RightVisuallyDistinctCandidate() const noexcept;
   };
 
   KRYS_NODISCARD std::partial_ordering operator<=>(const VisiblePosition &a,

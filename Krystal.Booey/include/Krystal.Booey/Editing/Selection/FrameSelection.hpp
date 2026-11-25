@@ -352,14 +352,13 @@ namespace krys::boo
     void MoveTo(const VisiblePosition &base, const VisiblePosition &extent,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
 
-    void MoveTo(const dom::Position &position, Affinity affinity,
+    void MoveTo(const Position &position, Affinity affinity,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
 
-    void MoveTo(const dom::Position &base, const dom::Position &extent, Affinity affinity,
+    void MoveTo(const Position &base, const Position &extent, Affinity affinity,
                 UserTriggered userTriggered = UserTriggered::No) noexcept;
 
-    void MoveWithoutValidationTo(const dom::Position &base, const dom::Position &extent,
-                                 bool selectionHasDirection,
+    void MoveWithoutValidationTo(const Position &base, const Position &extent, bool selectionHasDirection,
                                  EnumSet<SetSelectionOption> options = DefaultSetSelectionOptions()) noexcept;
 
     KRYS_NODISCARD const VisibleSelection &Selection() const noexcept
@@ -411,12 +410,12 @@ namespace krys::boo
 
     void SetBase(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No) noexcept;
 
-    void SetBase(const dom::Position &position, Affinity affinity,
+    void SetBase(const Position &position, Affinity affinity,
                  UserTriggered userTriggered = UserTriggered::No) noexcept;
 
     void SetExtent(const VisiblePosition &position, UserTriggered userTriggered = UserTriggered::No) noexcept;
 
-    void SetExtent(const dom::Position &position, Affinity affinity,
+    void SetExtent(const Position &position, Affinity affinity,
                    UserTriggered userTriggered = UserTriggered::No) noexcept;
 
     KRYS_NODISCARD bool IsNone() const noexcept

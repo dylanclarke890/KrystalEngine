@@ -312,9 +312,8 @@ namespace krys::boo
     ClearNeedsPreferredWidthsUpdate();
   }
 
-  dom::PositionWithAffinity
-    RenderFileUploadControl::PositionForPoint(const LayoutPoint &, HitTestSource,
-                                              const RenderFragmentContainer *) noexcept
+  PositionWithAffinity RenderFileUploadControl::PositionForPoint(const LayoutPoint &, HitTestSource,
+                                                                 const RenderFragmentContainer *) noexcept
   {
     return {};
   }

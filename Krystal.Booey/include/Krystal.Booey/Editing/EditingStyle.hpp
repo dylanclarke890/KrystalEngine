@@ -48,17 +48,13 @@ namespace krys::boo::css
   class StyleProperties;
 }
 
-namespace krys::boo::dom
-{
-  class Position;
-}
-
 namespace krys::boo
 {
   class CSSStyleProperties;
   class Document;
   class Element;
   class Node;
+  class Position;
   class RenderStyle;
   class StyledElement;
   class VisibleSelection;
@@ -130,7 +126,7 @@ namespace krys::boo
 
     EditingStyle(Node *node, PropertiesToInclude propertiesToInclude) noexcept;
 
-    EditingStyle(const dom::Position &position, PropertiesToInclude propertiesToInclude) noexcept;
+    EditingStyle(const Position &position, PropertiesToInclude propertiesToInclude) noexcept;
 
     explicit EditingStyle(const CSSStyleProperties *style) noexcept;
 
@@ -149,8 +145,8 @@ namespace krys::boo
                            PropertiesToInclude::OnlyEditingInheritableProperties) noexcept;
 
     KRYS_NODISCARD static Ref<EditingStyle>
-      Create(const dom::Position &position, PropertiesToInclude propertiesToInclude =
-                                              PropertiesToInclude::OnlyEditingInheritableProperties) noexcept;
+      Create(const Position &position, PropertiesToInclude propertiesToInclude =
+                                         PropertiesToInclude::OnlyEditingInheritableProperties) noexcept;
 
     KRYS_NODISCARD static Ref<EditingStyle> Create(const css::StyleProperties *style) noexcept;
 
@@ -176,7 +172,7 @@ namespace krys::boo
 
     void OverrideWithStyle(const css::StyleProperties &style) noexcept;
 
-    void OverrideTypingStyleAt(const EditingStyle &style, const dom::Position &position) noexcept;
+    void OverrideTypingStyleAt(const EditingStyle &style, const Position &position) noexcept;
 
     void Clear() noexcept;
 
@@ -228,7 +224,7 @@ namespace krys::boo
 
     KRYS_NODISCARD static bool ElementIsStyledSpanOrHTMLEquivalent(const Element &element) noexcept;
 
-    void PrepareToApplyAt(const dom::Position &position,
+    void PrepareToApplyAt(const Position &position,
                           ShouldPreserveWritingDirection shouldPreserveWritingDirection =
                             ShouldPreserveWritingDirection::No) noexcept;
 
@@ -358,7 +354,7 @@ namespace krys::boo
   public:
     StyleChange() noexcept = default;
 
-    StyleChange(EditingStyle *style, const dom::Position &position) noexcept;
+    StyleChange(EditingStyle *style, const Position &position) noexcept;
 
     ~StyleChange() noexcept;
 

@@ -6749,14 +6749,14 @@ namespace krys::boo
     return hitTestLocation.Intersects(borderShape.DeprecatedRoundedRect());
   }
 
-  dom::PositionWithAffinity RenderBox::PositionForPoint(const LayoutPoint &point, HitTestSource source,
-                                                        const RenderFragmentContainer *fragment) noexcept
+  PositionWithAffinity RenderBox::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                   const RenderFragmentContainer *fragment) noexcept
   {
     // no children...return this render object's element, if there is one, and offset 0
     if (!FirstChild())
     {
       return CreatePositionWithAffinity(NonPseudoElement() ? FirstPositionInOrBeforeNode(NonPseudoElement())
-                                                           : dom::Position());
+                                                           : Position());
     }
 
     if (IsRenderTable() && NonPseudoElement())

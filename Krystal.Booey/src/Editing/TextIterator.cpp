@@ -1235,9 +1235,9 @@ namespace krys::boo
     // The currPos.isNotNull() check is needed because positions in non-HTML content
     // (like SVG) do not have visible positions, and we don't want to emit for them either.
     VisiblePosition startPos =
-      VisiblePosition(dom::Position(RefPtr<Node>(_startContainer), static_cast<uint32>(_startOffset),
-                                    dom::Position::AnchorType::PositionIsOffsetInAnchor));
-    VisiblePosition currPos = VisiblePosition(dom::PositionBeforeNode(&currentNode));
+      VisiblePosition(Position(RefPtr<Node>(_startContainer), static_cast<uint32>(_startOffset),
+                               Position::AnchorType::PositionIsOffsetInAnchor));
+    VisiblePosition currPos = VisiblePosition(PositionBeforeNode(&currentNode));
     return startPos.IsNotNull() && currPos.IsNotNull() && !InSameLine(startPos, currPos);
   }
 
@@ -2092,10 +2092,10 @@ namespace krys::boo
           }
           else
           {
-            if (auto end = dom::CreateBoundaryPoint(
-                  VisiblePosition(dom::CreateDeprecatedLegacyPosition(textRunRange.Start))
-                    .Next()
-                    .DeepEquivalent()))
+            if (auto end =
+                  CreateBoundaryPoint(VisiblePosition(CreateDeprecatedLegacyPosition(textRunRange.Start))
+                                        .Next()
+                                        .DeepEquivalent()))
             {
               textRunRange.End = *end;
             }

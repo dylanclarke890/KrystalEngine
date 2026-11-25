@@ -111,7 +111,7 @@ namespace krys::boo
       LayoutPoint(pointLogicalLeft + fragmentedFlowLogicalLeft, pointLogicalTop + fragmentedFlowLogicalTop));
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     RenderFragmentContainer::PositionForPoint(const LayoutPoint &point, HitTestSource source,
                                               const RenderFragmentContainer *fragment) noexcept
   {

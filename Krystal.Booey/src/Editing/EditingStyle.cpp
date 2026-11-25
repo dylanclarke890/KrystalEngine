@@ -529,7 +529,7 @@ namespace krys::boo
     return CreateRef<EditingStyle>(node, propertiesToInclude);
   }
 
-  Ref<EditingStyle> EditingStyle::Create(const dom::Position &position,
+  Ref<EditingStyle> EditingStyle::Create(const Position &position,
                                          PropertiesToInclude propertiesToInclude) noexcept
   {
     return CreateRef<EditingStyle>(position, propertiesToInclude);
@@ -562,7 +562,7 @@ namespace krys::boo
     Init(node, propertiesToInclude);
   }
 
-  EditingStyle::EditingStyle(const dom::Position &position, PropertiesToInclude propertiesToInclude) noexcept
+  EditingStyle::EditingStyle(const Position &position, PropertiesToInclude propertiesToInclude) noexcept
   {
     Init(position.DeprecatedNode(), propertiesToInclude);
   }
@@ -834,7 +834,7 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::OverrideTypingStyleAt(const EditingStyle &style, const dom::Position &position) noexcept
+  void EditingStyle::OverrideTypingStyleAt(const EditingStyle &style, const Position &position) noexcept
   {
     MergeStyle(style._mutableStyle.get(), CSSPropertyOverrideMode::OverrideValues);
 
@@ -1481,7 +1481,7 @@ namespace krys::boo
     return matchedAttributes >= attributeCount;
   }
 
-  void EditingStyle::PrepareToApplyAt(const dom::Position &position,
+  void EditingStyle::PrepareToApplyAt(const Position &position,
                                       ShouldPreserveWritingDirection shouldPreserveWritingDirection) noexcept
   {
     if (!_mutableStyle)
@@ -2202,7 +2202,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    dom::Position position = AdjustedSelectionStartForStyleComputation(selection);
+    Position position = AdjustedSelectionStartForStyleComputation(selection);
 
     // If the pos is at the end of a text node, then this node is not fully selected.
     // Move it to the next deep equivalent position to avoid removing the style from this node.
@@ -2254,7 +2254,7 @@ namespace krys::boo
       return WritingDirection::Natural;
     }
 
-    dom::Position position = selection.Start().Downstream();
+    Position position = selection.Start().Downstream();
 
     RefPtr<Node> node = ShareRefPtr(position.DeprecatedNode());
     if (!node)
@@ -2262,7 +2262,7 @@ namespace krys::boo
       return WritingDirection::Natural;
     }
 
-    dom::Position end;
+    Position end;
     if (selection.IsRange())
     {
       end = selection.End().Upstream();
@@ -2386,7 +2386,7 @@ namespace krys::boo
 
   // FIXME: Styling with CSS (the editor's styleWithCSS), with rich editing commands; until then elements
   // express the styles they can, as is upstream's default.
-  StyleChange::StyleChange(EditingStyle *style, const dom::Position &position) noexcept
+  StyleChange::StyleChange(EditingStyle *style, const Position &position) noexcept
   {
     auto *document = position.DeprecatedNode() ? &position.DeprecatedNode()->NodeDocument() : nullptr;
     if (!style || style->IsEmpty() || !document || !document->Frame())

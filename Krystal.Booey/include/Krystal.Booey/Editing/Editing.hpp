@@ -57,11 +57,11 @@ namespace krys::boo
 #pragma region Node
 
   KRYS_NODISCARD RefPtr<ContainerNode>
-    HighestEditableRoot(const dom::Position &position,
+    HighestEditableRoot(const Position &position,
                         EditableType editableType = EditableType::ContentIsEditable) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> HighestEnclosingNodeOfType(
-    const dom::Position &position, bool (*nodeIsOfType)(const Node &),
+    const Position &position, bool (*nodeIsOfType)(const Node &),
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary,
     Node *stayWithin = nullptr) noexcept;
 
@@ -74,12 +74,12 @@ namespace krys::boo
     const RefPtr<Node> &node,
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary) noexcept;
 
-  KRYS_NODISCARD RefPtr<Element> EnclosingTableCell(const dom::Position &position) noexcept;
+  KRYS_NODISCARD RefPtr<Element> EnclosingTableCell(const Position &position) noexcept;
 
-  KRYS_NODISCARD RefPtr<Element> EnclosingAnchorElement(const dom::Position &position) noexcept;
+  KRYS_NODISCARD RefPtr<Element> EnclosingAnchorElement(const Position &position) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> EnclosingNodeOfType(
-    const dom::Position &position, bool (*nodeIsOfType)(const Node &),
+    const Position &position, bool (*nodeIsOfType)(const Node &),
     EditingBoundaryCrossingRule rule = EditingBoundaryCrossingRule::CannotCrossEditingBoundary) noexcept;
 
   // FIXME: Strange to name this isXXX, but return an element.
@@ -152,15 +152,15 @@ namespace krys::boo
 
 #pragma region SimpleRange
 
-  KRYS_NODISCARD dom::PositionRange PositionsForRange(const dom::SimpleRange &range) noexcept;
+  KRYS_NODISCARD PositionRange PositionsForRange(const dom::SimpleRange &range) noexcept;
 
 #pragma endregion
 
 #pragma region Position
 
-  KRYS_NODISCARD dom::Position NextCandidate(const dom::Position &position) noexcept;
+  KRYS_NODISCARD Position NextCandidate(const Position &position) noexcept;
 
-  KRYS_NODISCARD dom::Position PreviousCandidate(const dom::Position &position) noexcept;
+  KRYS_NODISCARD Position PreviousCandidate(const Position &position) noexcept;
 
   enum class SkipDisplayContents : bool
   {
@@ -168,49 +168,48 @@ namespace krys::boo
     Yes,
   };
 
-  KRYS_NODISCARD dom::Position NextVisuallyDistinctCandidate(
-    const dom::Position &position,
-    SkipDisplayContents skipDisplayContents = SkipDisplayContents::Yes) noexcept;
+  KRYS_NODISCARD Position NextVisuallyDistinctCandidate(
+    const Position &position, SkipDisplayContents skipDisplayContents = SkipDisplayContents::Yes) noexcept;
 
-  KRYS_NODISCARD dom::Position PreviousVisuallyDistinctCandidate(const dom::Position &position) noexcept;
+  KRYS_NODISCARD Position PreviousVisuallyDistinctCandidate(const Position &position) noexcept;
 
-  KRYS_NODISCARD inline dom::Position FirstPositionInOrBeforeNode(Node *node) noexcept
+  KRYS_NODISCARD inline Position FirstPositionInOrBeforeNode(Node *node) noexcept
   {
     if (!node)
     {
       return {};
     }
-    return EditingIgnoresContent(*node) ? dom::PositionBeforeNode(node) : dom::FirstPositionInNode(node);
+    return EditingIgnoresContent(*node) ? PositionBeforeNode(node) : FirstPositionInNode(node);
   }
 
-  KRYS_NODISCARD inline dom::Position LastPositionInOrAfterNode(Node *node) noexcept
+  KRYS_NODISCARD inline Position LastPositionInOrAfterNode(Node *node) noexcept
   {
     if (!node)
     {
       return {};
     }
-    return EditingIgnoresContent(*node) ? dom::PositionAfterNode(node) : dom::LastPositionInNode(node);
+    return EditingIgnoresContent(*node) ? PositionAfterNode(node) : LastPositionInNode(node);
   }
 
-  KRYS_NODISCARD dom::Position FirstEditablePositionAfterPositionInRoot(const dom::Position &position,
-                                                                        ContainerNode *highestRoot) noexcept;
+  KRYS_NODISCARD Position FirstEditablePositionAfterPositionInRoot(const Position &position,
+                                                                   ContainerNode *highestRoot) noexcept;
 
-  KRYS_NODISCARD dom::Position LastEditablePositionBeforePositionInRoot(const dom::Position &position,
-                                                                        ContainerNode *highestRoot) noexcept;
+  KRYS_NODISCARD Position LastEditablePositionBeforePositionInRoot(const Position &position,
+                                                                   ContainerNode *highestRoot) noexcept;
 
   KRYS_NODISCARD bool
-    IsEditablePosition(const dom::Position &position,
+    IsEditablePosition(const Position &position,
                        EditableType editableType = EditableType::ContentIsEditable) noexcept;
 
-  KRYS_NODISCARD bool IsRichlyEditablePosition(const dom::Position &position) noexcept;
+  KRYS_NODISCARD bool IsRichlyEditablePosition(const Position &position) noexcept;
 
-  KRYS_NODISCARD bool LineBreakExistsAtPosition(const dom::Position &position) noexcept;
+  KRYS_NODISCARD bool LineBreakExistsAtPosition(const Position &position) noexcept;
 
-  KRYS_NODISCARD bool IsAtUnsplittableElement(const dom::Position &position) noexcept;
+  KRYS_NODISCARD bool IsAtUnsplittableElement(const Position &position) noexcept;
 
-  void UpdatePositionForNodeRemoval(dom::Position &position, Node &node) noexcept;
+  void UpdatePositionForNodeRemoval(Position &position, Node &node) noexcept;
 
-  KRYS_NODISCARD text::TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
+  KRYS_NODISCARD text::TextDirection DirectionOfEnclosingBlock(const Position &position) noexcept;
 
   /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root
   /// is
@@ -253,10 +252,10 @@ namespace krys::boo
 #pragma region Element
 
   KRYS_NODISCARD Element *
-    EditableRootForPosition(const dom::Position &position,
+    EditableRootForPosition(const Position &position,
                             EditableType editableType = EditableType::ContentIsEditable) noexcept;
 
-  KRYS_NODISCARD RefPtr<Element> UnsplittableElementForPosition(const dom::Position &position) noexcept;
+  KRYS_NODISCARD RefPtr<Element> UnsplittableElementForPosition(const Position &position) noexcept;
 
 #pragma endregion
 
@@ -313,12 +312,11 @@ namespace krys::boo
 
   KRYS_NODISCARD Element *ElementIfEquivalent(const Element &first, Node &second) noexcept;
 
-  KRYS_NODISCARD Element *EnclosingElementWithTag(const dom::Position &position,
-                                                  html::TagName tagName) noexcept;
+  KRYS_NODISCARD Element *EnclosingElementWithTag(const Position &position, html::TagName tagName) noexcept;
 
   KRYS_NODISCARD bool IsNonTableCellHTMLBlockElement(const Node *node) noexcept;
 
-  KRYS_NODISCARD dom::Position
+  KRYS_NODISCARD Position
     AdjustedSelectionStartForStyleComputation(const VisibleSelection &selection) noexcept;
 
   /// @brief The highest node, from @p node up, that removing would leave nothing rendered behind.
@@ -332,7 +330,7 @@ namespace krys::boo
 
   KRYS_NODISCARD utf8_stringview NonBreakingSpaceString() noexcept;
 
-  KRYS_NODISCARD bool IsVisiblyAdjacent(const dom::Position &first, const dom::Position &second) noexcept;
+  KRYS_NODISCARD bool IsVisiblyAdjacent(const Position &first, const Position &second) noexcept;
 
 #pragma endregion
 

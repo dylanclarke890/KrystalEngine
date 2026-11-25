@@ -87,7 +87,7 @@ namespace krys::boo
              && (name.Namespace() == html::Namespace::HTML || name.Namespace() == html::Namespace::SVG);
     }
 
-    KRYS_NODISCARD dom::Position PositionAvoidingPrecedingNodes(dom::Position position) noexcept
+    KRYS_NODISCARD Position PositionAvoidingPrecedingNodes(Position position) noexcept
     {
       krys_debug_assert(position.IsNotNull());
 
@@ -102,7 +102,7 @@ namespace krys::boo
       //   <div>foo^</div>^
       // The two positions above are the same visual position, but we want to stay in the same block.
       auto enclosingBlockNode = EnclosingBlock(ShareRefPtr(position.GetContainerNode()));
-      for (dom::Position nextPosition = position; nextPosition.GetContainerNode() != enclosingBlockNode;
+      for (Position nextPosition = position; nextPosition.GetContainerNode() != enclosingBlockNode;
            position = nextPosition)
       {
         if (LineBreakExistsAtPosition(position))
@@ -112,7 +112,7 @@ namespace krys::boo
 
         if (position.GetContainerNode()->NonShadowBoundaryParentNode())
         {
-          nextPosition = dom::PositionInParentAfterNode(position.GetContainerNode());
+          nextPosition = PositionInParentAfterNode(position.GetContainerNode());
         }
 
         if (nextPosition == position)
@@ -266,7 +266,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD RefPtr<boo::Node>
-      NodeToSplitToAvoidPastingIntoInlineNodesWithStyle(const dom::Position &insertionPos) noexcept
+      NodeToSplitToAvoidPastingIntoInlineNodesWithStyle(const Position &insertionPos) noexcept
     {
       auto containingBlock = EnclosingBlock(ShareRefPtr(insertionPos.GetContainerNode()));
       return HighestEnclosingNodeOfType(insertionPos, IsInlineNodeWithStyle,
@@ -274,7 +274,7 @@ namespace krys::boo
                                         containingBlock.get());
     }
 
-    KRYS_NODISCARD bool HasBlankLineBetweenParagraphs(dom::Position &position) noexcept
+    KRYS_NODISCARD bool HasBlankLineBetweenParagraphs(Position &position) noexcept
     {
       bool reachedBoundaryStart = false;
       bool reachedBoundaryEnd = false;
@@ -334,7 +334,7 @@ namespace krys::boo
     {
       auto start = selection.Start();
       auto end = selection.End();
-      auto *ancestor = dom::CommonInclusiveAncestor(start, end);
+      auto *ancestor = CommonInclusiveAncestor(start, end);
       if (!ancestor)
       {
         return false;
@@ -346,8 +346,8 @@ namespace krys::boo
         return false;
       }
 
-      return dom::PositionBeforeNode(link).Downstream().Equals(start)
-             && dom::PositionAfterNode(link).Upstream().Equals(end);
+      return PositionBeforeNode(link).Downstream().Equals(start)
+             && PositionAfterNode(link).Upstream().Equals(end);
     }
   }
 
@@ -869,10 +869,10 @@ namespace krys::boo
       // FIXME: Tolerate differences in id, class, and style attributes.
       if (element->ParentNode() && IsNonTableCellHTMLBlockElement(element.get())
           && ElementIfEquivalent(*element, *element->ParentNode())
-          && VisiblePosition(dom::FirstPositionInNode(element->ParentNode()))
-               == VisiblePosition(dom::FirstPositionInNode(element.get()))
-          && VisiblePosition(dom::LastPositionInNode(element->ParentNode()))
-               == VisiblePosition(dom::LastPositionInNode(element.get())))
+          && VisiblePosition(FirstPositionInNode(element->ParentNode()))
+               == VisiblePosition(FirstPositionInNode(element.get()))
+          && VisiblePosition(LastPositionInNode(element->ParentNode()))
+               == VisiblePosition(LastPositionInNode(element.get())))
       {
         insertedNodes.WillRemoveNodePreservingChildren(element.get());
         RemoveNodePreservingChildren(*element);
@@ -910,7 +910,7 @@ namespace krys::boo
       if (IsProhibitedParagraphChild(*element))
       {
         if (auto *paragraphElement =
-              EnclosingElementWithTag(dom::PositionInParentBeforeNode(node.get()), html::TagName::p))
+              EnclosingElementWithTag(PositionInParentBeforeNode(node.get()), html::TagName::p))
         {
           auto *parent = paragraphElement->ParentNode();
           if (parent && parent->HasEditableStyle())
@@ -927,7 +927,7 @@ namespace krys::boo
       if (IsHeaderElement(*node))
       {
         if (auto headerElement =
-              HighestEnclosingNodeOfType(dom::PositionInParentBeforeNode(node.get()), IsHeaderElement))
+              HighestEnclosingNodeOfType(PositionInParentBeforeNode(node.get()), IsHeaderElement))
         {
           if (headerElement->ParentNode() && headerElement->ParentNode()->IsContentRichlyEditable())
           {
@@ -955,7 +955,7 @@ namespace krys::boo
     }
 
     VisiblePosition positionAtEndOfNode = LastPositionInOrAfterNode(&node);
-    VisiblePosition lastPositionInParagraph = dom::LastPositionInNode(&ancestor);
+    VisiblePosition lastPositionInParagraph = LastPositionInNode(&ancestor);
     if (positionAtEndOfNode == lastPositionInParagraph)
     {
       RemoveNode(node);
@@ -1088,7 +1088,7 @@ namespace krys::boo
     {
       auto placeholder = CreateHTMLElement(GetDocument(), u8"br");
       (void)InsertNodeBefore(*placeholder, *startOfParagraphToMove.DeepEquivalent().DeprecatedNode());
-      destination = VisiblePosition(dom::PositionBeforeNode(placeholder.get()));
+      destination = VisiblePosition(PositionBeforeNode(placeholder.get()));
     }
 
     MoveParagraph(startOfParagraphToMove, EndOfParagraph(startOfParagraphToMove), destination);
@@ -1170,7 +1170,7 @@ namespace krys::boo
 
     auto startBlock = EnclosingBlock(ShareRefPtr(visibleStart.DeepEquivalent().DeprecatedNode()));
 
-    dom::Position insertionPos = selection.Start();
+    Position insertionPos = selection.Start();
     bool selectionIsPlainText = !selection.IsContentRichlyEditable();
     RefPtr<Element> currentRoot = ShareRefPtr(selection.RootEditableElement());
 
@@ -1256,7 +1256,7 @@ namespace krys::boo
     VisiblePosition originalVisPosBeforeEndBR;
     if (endBR)
     {
-      originalVisPosBeforeEndBR = VisiblePosition(dom::PositionBeforeNode(endBR.get())).Previous();
+      originalVisPosBeforeEndBR = VisiblePosition(PositionBeforeNode(endBR.get())).Previous();
     }
 
     RefPtr<boo::Node> insertionBlock = EnclosingBlock(ShareRefPtr(insertionPos.DeprecatedNode()));
@@ -1268,11 +1268,11 @@ namespace krys::boo
       if (IsEndOfBlock(visibleInsertionPos)
           && !(IsStartOfBlock(visibleInsertionPos) && fragment.HasInterchangeNewlineAtEnd()))
       {
-        insertionPos = dom::PositionInParentAfterNode(insertionBlock.get());
+        insertionPos = PositionInParentAfterNode(insertionBlock.get());
       }
       else if (IsStartOfBlock(visibleInsertionPos))
       {
-        insertionPos = dom::PositionInParentBeforeNode(insertionBlock.get());
+        insertionPos = PositionInParentBeforeNode(insertionBlock.get());
       }
     }
 
@@ -1314,7 +1314,7 @@ namespace krys::boo
         {
           SplitTextNode(*insertionPos.ContainerText(),
                         static_cast<uint32>(insertionPos.OffsetInContainerNode()));
-          insertionPos = dom::FirstPositionInNode(insertionPos.GetContainerNode());
+          insertionPos = FirstPositionInNode(insertionPos.GetContainerNode());
         }
       }
 
@@ -1329,7 +1329,7 @@ namespace krys::boo
           }
           krys_debug_assert(splitStart);
           nodeToSplitTo = SplitTreeToNode(*splitStart, *nodeToSplitTo->ParentNode());
-          insertionPos = dom::PositionInParentBeforeNode(nodeToSplitTo.get());
+          insertionPos = PositionInParentBeforeNode(nodeToSplitTo.get());
         }
       }
     }
@@ -1529,7 +1529,7 @@ namespace krys::boo
       }
     }
 
-    dom::Position lastPositionToSelect;
+    Position lastPositionToSelect;
     if (fragment.HasInterchangeNewlineAtEnd())
     {
       VisiblePosition endOfInsertedContent = PositionAtEndOfInsertedContent();
@@ -1547,8 +1547,7 @@ namespace krys::boo
           {
             auto newListItem = CreateHTMLElement(GetDocument(), u8"li");
             InsertNodeAfter(*newListItem, *enclosingNode);
-            SetEndingSelection(
-              VisibleSelection(VisiblePosition(dom::FirstPositionInNode(newListItem.get()))));
+            SetEndingSelection(VisibleSelection(VisiblePosition(FirstPositionInNode(newListItem.get()))));
           }
           else
           {
@@ -1621,7 +1620,7 @@ namespace krys::boo
       return false;
     }
 
-    VisiblePosition visiblePos(dom::PositionBeforeNode(endBR));
+    VisiblePosition visiblePos(PositionBeforeNode(endBR));
 
     // Don't remove the br if nothing was inserted.
     if (visiblePos.Previous() == originalVisPosBeforeEndBR)
@@ -1736,11 +1735,11 @@ namespace krys::boo
     VisiblePosition startOfInsertedContent = PositionAtStartOfInsertedContent();
     VisiblePosition endOfInsertedContent = PositionAtEndOfInsertedContent();
 
-    dom::Position endUpstream = endOfInsertedContent.DeepEquivalent().Upstream();
+    Position endUpstream = endOfInsertedContent.DeepEquivalent().Upstream();
     RefPtr<boo::Node> endNode = ShareRefPtr(endUpstream.ComputeNodeBeforePosition());
     auto *endTextNode = DynamicDowncast<Text>(endNode.get());
     auto endOffset = endTextNode ? static_cast<uint32>(endTextNode->Length()) : 0u;
-    if (endUpstream.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
+    if (endUpstream.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor)
     {
       endNode = ShareRefPtr(endUpstream.GetContainerNode());
       endOffset = static_cast<uint32>(endUpstream.OffsetInContainerNode());
@@ -1774,10 +1773,10 @@ namespace krys::boo
 
     (void)GetDocument().UpdateLayout();
 
-    dom::Position startDownstream = startOfInsertedContent.DeepEquivalent().Downstream();
+    Position startDownstream = startOfInsertedContent.DeepEquivalent().Downstream();
     RefPtr<boo::Node> startNode = ShareRefPtr(startDownstream.ComputeNodeAfterPosition());
     uint32 startOffset = 0;
-    if (startDownstream.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
+    if (startDownstream.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor)
     {
       startNode = ShareRefPtr(startDownstream.GetContainerNode());
       startOffset = static_cast<uint32>(startDownstream.OffsetInContainerNode());
@@ -1808,15 +1807,15 @@ namespace krys::boo
         // Don't updateNodesInserted. Doing so would set m_endOfInsertedContent to be the node containing the
         // leading space, but m_endOfInsertedContent is supposed to mark the end of pasted content.
         (void)InsertNodeBefore(*node, *startNode);
-        _startOfInsertedContent = dom::FirstPositionInNode(node.get());
+        _startOfInsertedContent = FirstPositionInNode(node.get());
       }
     }
   }
 
-  void ReplaceSelectionCommand::CompleteHTMLReplacement(const dom::Position &lastPositionToSelect) noexcept
+  void ReplaceSelectionCommand::CompleteHTMLReplacement(const Position &lastPositionToSelect) noexcept
   {
-    dom::Position start = PositionAtStartOfInsertedContent().DeepEquivalent();
-    dom::Position end = PositionAtEndOfInsertedContent().DeepEquivalent();
+    Position start = PositionAtStartOfInsertedContent().DeepEquivalent();
+    Position end = PositionAtEndOfInsertedContent().DeepEquivalent();
 
     // Mutation events may have deleted start or end
     if (start.IsNotNull() && !start.IsOrphan() && end.IsNotNull() && !end.IsOrphan())
@@ -1882,13 +1881,13 @@ namespace krys::boo
     }
   }
 
-  void ReplaceSelectionCommand::MergeTextNodesAroundPosition(dom::Position &position,
-                                                             dom::Position &positionOnlyToBeUpdated) noexcept
+  void ReplaceSelectionCommand::MergeTextNodesAroundPosition(Position &position,
+                                                             Position &positionOnlyToBeUpdated) noexcept
   {
     bool positionIsOffsetInAnchor =
-      position.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor;
+      position.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor;
     bool positionOnlyToBeUpdatedIsOffsetInAnchor =
-      positionOnlyToBeUpdated.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor;
+      positionOnlyToBeUpdated.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor;
     RefPtr<Text> text;
     if (auto *container = DynamicDowncast<Text>(position.GetContainerNode());
         positionIsOffsetInAnchor && container)
@@ -1973,7 +1972,7 @@ namespace krys::boo
   // we put the list items into the existing list.
   RefPtr<boo::Node> ReplaceSelectionCommand::InsertAsListItems(Element &passedListElement,
                                                                boo::Node *insertionBlock,
-                                                               const dom::Position &position,
+                                                               const Position &position,
                                                                InsertedNodes &insertedNodes) noexcept
   {
     Ref<Element> listElement = DeepestSingleChildList(passedListElement);
@@ -2080,8 +2079,8 @@ namespace krys::boo
     // Our fragment creation code handles tabs, spaces, and newlines, so we don't have to worry about those
     // here.
 
-    dom::Position start = EndingSelection().Start();
-    dom::Position end = ReplaceSelectedTextInNode(textNode->Data());
+    Position start = EndingSelection().Start();
+    Position end = ReplaceSelectedTextInNode(textNode->Data());
     if (end.IsNull())
     {
       return false;
@@ -2089,8 +2088,7 @@ namespace krys::boo
 
     if (nodeAfterInsertionPos && nodeAfterInsertionPos->ParentNode()
         && HasTagName(nodeAfterInsertionPos.get(), html::TagName::br)
-        && ShouldRemoveEndBR(nodeAfterInsertionPos.get(),
-                             dom::PositionBeforeNode(nodeAfterInsertionPos.get())))
+        && ShouldRemoveEndBR(nodeAfterInsertionPos.get(), PositionBeforeNode(nodeAfterInsertionPos.get())))
     {
       RemoveNodeAndPruneAncestors(*nodeAfterInsertionPos);
     }
@@ -2108,6 +2106,6 @@ namespace krys::boo
 
   Maybe<dom::SimpleRange> ReplaceSelectionCommand::InsertedContentRange() const noexcept
   {
-    return dom::CreateSimpleRange(dom::PositionRange {_startOfInsertedContent, _endOfInsertedContent});
+    return CreateSimpleRange(PositionRange {_startOfInsertedContent, _endOfInsertedContent});
   }
 }

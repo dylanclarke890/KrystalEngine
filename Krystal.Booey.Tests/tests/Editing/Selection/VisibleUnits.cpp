@@ -26,7 +26,7 @@ namespace krys::boo::tests
 
     KRYS_NODISCARD VisiblePosition VisibleAt(Node &node, uint32 offset) noexcept
     {
-      return VisiblePosition(dom::CreateContainerOffsetPosition(ShareRefPtr(&node), offset));
+      return VisiblePosition(CreateContainerOffsetPosition(ShareRefPtr(&node), offset));
     }
 
     KRYS_NODISCARD int32 UnitOffsetOf(const VisiblePosition &position) noexcept

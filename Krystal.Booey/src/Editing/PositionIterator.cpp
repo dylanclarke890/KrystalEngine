@@ -33,7 +33,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   PositionIterator::PositionIterator(const Position &position) noexcept
       : _anchorNode(ShareRefPtr(position.AnchorNode())),

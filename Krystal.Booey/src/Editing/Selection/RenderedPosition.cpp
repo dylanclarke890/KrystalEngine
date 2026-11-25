@@ -39,13 +39,13 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD inline const RenderObject *RendererFromPosition(const dom::Position &position) noexcept
+    KRYS_NODISCARD inline const RenderObject *RendererFromPosition(const Position &position) noexcept
     {
       krys_debug_assert(position.IsNotNull());
       Node *rendererNode = nullptr;
       switch (position.GetAnchorType())
       {
-        case dom::Position::AnchorType::PositionIsOffsetInAnchor:
+        case Position::AnchorType::PositionIsOffsetInAnchor:
           rendererNode = position.ComputeNodeAfterPosition();
           if (!rendererNode || !rendererNode->Renderer())
           {
@@ -53,13 +53,13 @@ namespace krys::boo
           }
           break;
 
-        case dom::Position::AnchorType::PositionIsBeforeAnchor:
-        case dom::Position::AnchorType::PositionIsAfterAnchor:  break;
+        case Position::AnchorType::PositionIsBeforeAnchor:
+        case Position::AnchorType::PositionIsAfterAnchor:  break;
 
-        case dom::Position::AnchorType::PositionIsBeforeChildren:
+        case Position::AnchorType::PositionIsBeforeChildren:
           rendererNode = position.AnchorNode()->FirstChild();
           break;
-        case dom::Position::AnchorType::PositionIsAfterChildren:
+        case Position::AnchorType::PositionIsAfterChildren:
           rendererNode = position.AnchorNode()->LastChild();
           break;
       }
@@ -84,7 +84,7 @@ namespace krys::boo
   {
   }
 
-  RenderedPosition::RenderedPosition(const dom::Position &position, Affinity affinity) noexcept
+  RenderedPosition::RenderedPosition(const Position &position, Affinity affinity) noexcept
   {
     if (position.IsNull())
     {
@@ -246,30 +246,30 @@ namespace krys::boo
     return false;
   }
 
-  dom::Position RenderedPosition::PositionAtLeftBoundaryOfBiDiRun() const noexcept
+  Position RenderedPosition::PositionAtLeftBoundaryOfBiDiRun() const noexcept
   {
     krys_debug_assert(AtLeftBoundaryOfBidiRun());
 
     if (AtLeftmostOffsetInBox())
     {
-      return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
+      return CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
     }
 
-    return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(NextLeafOnLine()->Renderer().GetNode()),
-                                               NextLeafOnLine()->LeftmostCaretOffset());
+    return CreateDeprecatedLegacyPosition(ShareRefPtr(NextLeafOnLine()->Renderer().GetNode()),
+                                          NextLeafOnLine()->LeftmostCaretOffset());
   }
 
-  dom::Position RenderedPosition::PositionAtRightBoundaryOfBiDiRun() const noexcept
+  Position RenderedPosition::PositionAtRightBoundaryOfBiDiRun() const noexcept
   {
     krys_debug_assert(AtRightBoundaryOfBidiRun());
 
     if (AtRightmostOffsetInBox())
     {
-      return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
+      return CreateDeprecatedLegacyPosition(ShareRefPtr(_renderer->GetNode()), _offset);
     }
 
-    return dom::CreateDeprecatedLegacyPosition(ShareRefPtr(PreviousLeafOnLine()->Renderer().GetNode()),
-                                               PreviousLeafOnLine()->RightmostCaretOffset());
+    return CreateDeprecatedLegacyPosition(ShareRefPtr(PreviousLeafOnLine()->Renderer().GetNode()),
+                                          PreviousLeafOnLine()->RightmostCaretOffset());
   }
 
   RectI RenderedPosition::AbsoluteRect(CaretRectMode caretRectMode) const noexcept
@@ -301,7 +301,7 @@ namespace krys::boo
     return dom::BoundaryPoint {ShareRef(*node), Offset()};
   }
 
-  bool RenderObjectContainsPosition(const RenderObject *target, const dom::Position &position) noexcept
+  bool RenderObjectContainsPosition(const RenderObject *target, const Position &position) noexcept
   {
     for (auto *renderer = RendererFromPosition(position); renderer && renderer->GetNode();
          renderer = renderer->Parent())

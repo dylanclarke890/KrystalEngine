@@ -1010,7 +1010,7 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     RenderMultiColumnSet::PositionForPoint(const LayoutPoint &logicalPoint, HitTestSource source,
                                            const RenderFragmentContainer * /*fragment*/) noexcept
   {

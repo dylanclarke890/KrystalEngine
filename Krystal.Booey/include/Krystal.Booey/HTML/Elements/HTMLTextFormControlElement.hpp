@@ -5,7 +5,6 @@
 
 namespace krys::boo::dom
 {
-  class Position;
   struct SimpleRange;
 }
 
@@ -43,6 +42,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class Position;
   class VisiblePosition;
 
   /// @brief A form control whose value is text: an input or a textarea. Its text is in an inner text element
@@ -333,14 +333,14 @@ namespace krys::boo
 
   private:
     /// @brief The index in the value of a position in the inner text.
-    KRYS_NODISCARD uint32 IndexForPosition(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD uint32 IndexForPosition(const Position &position) const noexcept;
   };
 }
 
 namespace krys::boo::html
 {
   /// @brief The text control whose inner text @p position is in, or null.
-  KRYS_NODISCARD HTMLTextFormControlElement *EnclosingTextFormControl(const dom::Position &position) noexcept;
+  KRYS_NODISCARD HTMLTextFormControlElement *EnclosingTextFormControl(const Position &position) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLTextFormControlElement)

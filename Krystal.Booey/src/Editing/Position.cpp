@@ -57,7 +57,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <climits>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -316,7 +316,7 @@ namespace krys::boo::dom
     {
       return ShareRefPtr(container);
     }
-    return ShareRefPtr(TreeQueries::NextSkippingChildren(*container));
+    return ShareRefPtr(dom::TreeQueries::NextSkippingChildren(*container));
   }
 
   Node *Position::ComputeNodeBeforePosition() const noexcept
@@ -1798,7 +1798,7 @@ namespace krys::boo::dom
     {
       return nullptr;
     }
-    return CommonInclusiveAncestor<TreeType::ComposedTree>(*nodeA, *nodeB);
+    return dom::CommonInclusiveAncestor<dom::TreeType::ComposedTree>(*nodeA, *nodeB);
   }
 
   Position PositionInParentBeforeNode(Node *node) noexcept
@@ -1864,7 +1864,7 @@ namespace krys::boo::dom
     return offset < currentOffset;
   }
 
-  Position CreateContainerOffsetPosition(const BoundaryPoint &point) noexcept
+  Position CreateContainerOffsetPosition(const dom::BoundaryPoint &point) noexcept
   {
     return CreateContainerOffsetPosition(ShareRefPtr(point.Container.get()),
                                          static_cast<uint32>(point.Offset));
@@ -1875,28 +1875,29 @@ namespace krys::boo::dom
     return {krys::move(node), offset, Position::LegacyEditingPositionFlag::On};
   }
 
-  Position CreateDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept
+  Position CreateDeprecatedLegacyPosition(const dom::BoundaryPoint &point) noexcept
   {
     return CreateDeprecatedLegacyPosition(ShareRefPtr(point.Container.get()),
                                           static_cast<uint32>(point.Offset));
   }
 
-  Maybe<BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept
+  Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept
   {
     auto *container = position.GetContainerNode();
     if (!container)
     {
       return null;
     }
-    return BoundaryPoint {ShareRef(*container), static_cast<uint64>(position.ComputeOffsetInContainerNode())};
+    return dom::BoundaryPoint {ShareRef(*container),
+                               static_cast<uint64>(position.ComputeOffsetInContainerNode())};
   }
 
-  Maybe<SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept
+  Maybe<dom::SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept
   {
-    return CreateSimpleRange(range.Start, range.End);
+    return dom::CreateSimpleRange(range.Start, range.End);
   }
 
-  template <TreeType treeType>
+  template <dom::TreeType treeType>
   std::partial_ordering TreeOrder(const Position &a, const Position &b) noexcept
   {
     if (a.IsNull() || b.IsNull())
@@ -1909,7 +1910,7 @@ namespace krys::boo::dom
 
     if (!aContainer || !bContainer)
     {
-      if (!CommonInclusiveAncestor<treeType>(*a.AnchorNode(), *b.AnchorNode()))
+      if (!dom::CommonInclusiveAncestor<treeType>(*a.AnchorNode(), *b.AnchorNode()))
       {
         return std::partial_ordering::unordered;
       }
@@ -1935,12 +1936,12 @@ namespace krys::boo::dom
 
   std::partial_ordering operator<=>(const Position &a, const Position &b) noexcept
   {
-    return TreeOrder<TreeType::ComposedTree>(a, b);
+    return TreeOrder<dom::TreeType::ComposedTree>(a, b);
   }
 
-  template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const Position &,
-                                                                   const Position &) noexcept;
+  template std::partial_ordering TreeOrder<dom::TreeType::ComposedTree>(const Position &,
+                                                                        const Position &) noexcept;
 
-  template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const Position &,
-                                                                          const Position &) noexcept;
+  template std::partial_ordering TreeOrder<dom::TreeType::ShadowIncludingTree>(const Position &,
+                                                                               const Position &) noexcept;
 }

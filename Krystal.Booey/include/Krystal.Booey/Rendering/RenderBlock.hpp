@@ -70,10 +70,9 @@ namespace krys::boo
   // FIXME: This function should go on RenderObject as an instance method. Then
   // all cases in which positionForPoint recurs could call this instead to
   // prevent crossing editable boundaries. This would require many tests.
-  KRYS_NODISCARD dom::PositionWithAffinity
-    PositionForPointRespectingEditingBoundaries(RenderBlock &parent, RenderBox &child,
-                                                const LayoutPoint &pointInParentCoordinates,
-                                                HitTestSource source) noexcept;
+  KRYS_NODISCARD PositionWithAffinity PositionForPointRespectingEditingBoundaries(
+    RenderBlock &parent, RenderBox &child, const LayoutPoint &pointInParentCoordinates,
+    HitTestSource source) noexcept;
 
   class RenderBlock : public RenderBox
   {
@@ -430,12 +429,12 @@ namespace krys::boo
     /// @brief The block's `text-indent`, resolved against its content box.
     KRYS_NODISCARD LayoutUnit TextIndentOffset() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity
+    KRYS_NODISCARD PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept override;
 
     /// @brief The position nearest @p pointInLogicalContents among the block's lines.
-    KRYS_NODISCARD virtual dom::PositionWithAffinity
+    KRYS_NODISCARD virtual PositionWithAffinity
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
                                          HitTestSource source) noexcept;
 

@@ -752,8 +752,8 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point, HitTestSource source,
-                                                           const RenderFragmentContainer *fragment) noexcept
+  PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                      const RenderFragmentContainer *fragment) noexcept
   {
     return ContainingBlock()->PositionForPoint(point, source, fragment);
   }

@@ -34,17 +34,17 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include <compare>
 
+namespace krys::boo::dom
+{
+  struct BoundaryPoint;
+  struct SimpleRange;
+}
+
 namespace krys::boo
 {
   struct InlineBoxAndOffset;
   class RenderElement;
   class Text;
-}
-
-namespace krys::boo::dom
-{
-  struct BoundaryPoint;
-  struct SimpleRange;
 
   enum class PositionMoveType : uint8
   {
@@ -299,7 +299,7 @@ namespace krys::boo::dom
                                                                         uint32 offset) noexcept;
   };
 
-  template <TreeType = TreeType::Tree>
+  template <dom::TreeType = dom::TreeType::Tree>
   KRYS_NODISCARD std::partial_ordering TreeOrder(const Position &a, const Position &b) noexcept;
 
   KRYS_NODISCARD std::partial_ordering operator<=>(const Position &a, const Position &b) noexcept;
@@ -309,13 +309,13 @@ namespace krys::boo::dom
     return {krys::move(node), offset, Position::AnchorType::PositionIsOffsetInAnchor};
   }
 
-  KRYS_NODISCARD Position CreateContainerOffsetPosition(const BoundaryPoint &point) noexcept;
+  KRYS_NODISCARD Position CreateContainerOffsetPosition(const dom::BoundaryPoint &point) noexcept;
 
   KRYS_NODISCARD Position CreateDeprecatedLegacyPosition(RefPtr<Node> &&node, uint32 offset) noexcept;
 
-  KRYS_NODISCARD Position CreateDeprecatedLegacyPosition(const BoundaryPoint &point) noexcept;
+  KRYS_NODISCARD Position CreateDeprecatedLegacyPosition(const dom::BoundaryPoint &point) noexcept;
 
-  KRYS_NODISCARD Maybe<BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept;
+  KRYS_NODISCARD Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const Position &position) noexcept;
 
   KRYS_NODISCARD Position PositionInParentBeforeNode(Node *node) noexcept;
 
@@ -351,7 +351,7 @@ namespace krys::boo::dom
     Position End;
   };
 
-  KRYS_NODISCARD Maybe<SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept;
+  KRYS_NODISCARD Maybe<dom::SimpleRange> CreateSimpleRange(const PositionRange &range) noexcept;
 
   /// @brief A position and which side of a line break it belongs to.
   class PositionWithAffinity

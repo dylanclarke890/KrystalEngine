@@ -49,8 +49,8 @@ namespace krys::boo
     krys_assert(IsInline());
   }
 
-  dom::PositionWithAffinity RenderLineBreak::PositionForPoint(const LayoutPoint &, HitTestSource,
-                                                              const RenderFragmentContainer *) noexcept
+  PositionWithAffinity RenderLineBreak::PositionForPoint(const LayoutPoint &, HitTestSource,
+                                                         const RenderFragmentContainer *) noexcept
   {
     return CreatePositionWithAffinity(0, Affinity::Downstream);
   }

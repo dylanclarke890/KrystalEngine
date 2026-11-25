@@ -62,7 +62,7 @@ namespace krys::boo
 
     explicit RenderedPosition(const VisiblePosition &position) noexcept;
 
-    explicit RenderedPosition(const dom::Position &position, Affinity affinity) noexcept;
+    explicit RenderedPosition(const Position &position, Affinity affinity) noexcept;
 
     KRYS_NODISCARD bool IsEquivalent(const RenderedPosition &other) const noexcept;
 
@@ -122,9 +122,9 @@ namespace krys::boo
       return AtRightBoundaryOfBidiRun(ShouldMatchBidiLevel::MatchBidiLevel, bidiLevelOfRun);
     }
 
-    KRYS_NODISCARD dom::Position PositionAtLeftBoundaryOfBiDiRun() const noexcept;
+    KRYS_NODISCARD Position PositionAtLeftBoundaryOfBiDiRun() const noexcept;
 
-    KRYS_NODISCARD dom::Position PositionAtRightBoundaryOfBiDiRun() const noexcept;
+    KRYS_NODISCARD Position PositionAtRightBoundaryOfBiDiRun() const noexcept;
 
     KRYS_NODISCARD bool AtLeftmostOffsetInBox() const noexcept
     {
@@ -156,5 +156,5 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD bool RenderObjectContainsPosition(const RenderObject *target,
-                                                   const dom::Position &position) noexcept;
+                                                   const Position &position) noexcept;
 }

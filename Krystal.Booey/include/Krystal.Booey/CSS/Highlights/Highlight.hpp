@@ -41,8 +41,8 @@ namespace krys::boo::css
   {
   private:
     const Ref<dom::AbstractRange> _range;
-    dom::Position _startPosition;
-    dom::Position _endPosition;
+    boo::Position _startPosition;
+    boo::Position _endPosition;
 
     explicit HighlightRange(Ref<dom::AbstractRange> range) noexcept : _range(krys::move(range))
     {
@@ -59,22 +59,22 @@ namespace krys::boo::css
       return *_range;
     }
 
-    KRYS_NODISCARD const dom::Position &StartPosition() const noexcept
+    KRYS_NODISCARD const boo::Position &StartPosition() const noexcept
     {
       return _startPosition;
     }
 
-    void SetStartPosition(dom::Position startPosition) noexcept
+    void SetStartPosition(boo::Position startPosition) noexcept
     {
       _startPosition = krys::move(startPosition);
     }
 
-    KRYS_NODISCARD const dom::Position &EndPosition() const noexcept
+    KRYS_NODISCARD const boo::Position &EndPosition() const noexcept
     {
       return _endPosition;
     }
 
-    void SetEndPosition(dom::Position endPosition) noexcept
+    void SetEndPosition(boo::Position endPosition) noexcept
     {
       _endPosition = krys::move(endPosition);
     }

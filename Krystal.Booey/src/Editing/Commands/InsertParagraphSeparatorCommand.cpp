@@ -149,7 +149,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD bool IsEditableRootPhrasingContent(const dom::Position &position) noexcept
+    KRYS_NODISCARD bool IsEditableRootPhrasingContent(const Position &position) noexcept
     {
       auto editableRoot = HighestEditableRoot(position);
       if (!editableRoot)
@@ -183,7 +183,7 @@ namespace krys::boo
     return true;
   }
 
-  void InsertParagraphSeparatorCommand::CalculateStyleBeforeInsertion(const dom::Position &position) noexcept
+  void InsertParagraphSeparatorCommand::CalculateStyleBeforeInsertion(const Position &position) noexcept
   {
     // It is only important to set a style to apply later if we're at the boundaries of
     // a paragraph. Otherwise, content that is moved as part of the work of the command
@@ -295,7 +295,7 @@ namespace krys::boo
     // FIXME: The parentAnchoredEquivalent conversion needs to be moved into enclosingBlock.
     RefPtr<Element> startBlock =
       EnclosingBlock(ShareRefPtr(insertionPosition.ParentAnchoredEquivalent().GetContainerNode()));
-    dom::Position canonicalPos = VisiblePosition(insertionPosition).DeepEquivalent();
+    Position canonicalPos = VisiblePosition(insertionPosition).DeepEquivalent();
     if (!startBlock || !startBlock->NonShadowBoundaryParentNode()
         || IsEditableRootPhrasingContent(insertionPosition) || IsRenderedTable(startBlock.get())
         || IsTableCell(*startBlock)
@@ -414,7 +414,7 @@ namespace krys::boo
       }
 
       SetEndingSelection(
-        VisibleSelection(VisiblePosition(dom::FirstPositionInNode(parent.get()), Affinity::Downstream),
+        VisibleSelection(VisiblePosition(FirstPositionInNode(parent.get()), Affinity::Downstream),
                          EndingSelection().GetDirectionality()));
       return;
     }
@@ -489,7 +489,7 @@ namespace krys::boo
       {
         return;
       }
-      insertionPosition = dom::PositionInParentAfterNode(br.get());
+      insertionPosition = PositionInParentAfterNode(br.get());
       // If the insertion point is a break element, there is nothing else
       // we need to do.
       if (auto *renderer = visiblePos.DeepEquivalent().AnchorNode()->Renderer(); renderer && renderer->IsBR())
@@ -529,7 +529,7 @@ namespace krys::boo
 
     // Make sure we do not cause a rendered space to become unrendered.
     // FIXME: We need the affinity for pos, but pos.downstream() does not give it
-    dom::Position leadingWhitespace =
+    Position leadingWhitespace =
       insertionPosition.LeadingWhitespacePosition(VisiblePosition::DefaultAffinity);
     // FIXME: leadingWhitespacePosition is returning the position before preserved newlines for positions
     // after the preserved newline, causing the newline to be turned into a nbsp.
@@ -542,15 +542,15 @@ namespace krys::boo
     }
 
     // Split at pos if in the middle of a text node.
-    dom::Position positionAfterSplit;
+    Position positionAfterSplit;
     if (RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(*insertionPosition.GetContainerNode()));
-        textNode && insertionPosition.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
+        textNode && insertionPosition.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor)
     {
       bool atEnd = static_cast<size_t>(insertionPosition.OffsetInContainerNode()) >= textNode->Length();
       if (insertionPosition.DeprecatedEditingOffset() > 0 && !atEnd)
       {
         SplitTextNode(*textNode, static_cast<uint32>(insertionPosition.OffsetInContainerNode()));
-        positionAfterSplit = dom::FirstPositionInNode(textNode.get());
+        positionAfterSplit = FirstPositionInNode(textNode.get());
         if (!textNode->PreviousSibling())
         {
           return; // Bail out if mutation events detachd the split text node.
@@ -588,7 +588,7 @@ namespace krys::boo
     }
 
     // Move the start node and the siblings of the start node.
-    if (VisiblePosition(insertionPosition) != VisiblePosition(dom::PositionBeforeNode(blockToInsert.get())))
+    if (VisiblePosition(insertionPosition) != VisiblePosition(PositionBeforeNode(blockToInsert.get())))
     {
       RefPtr<boo::Node> n;
       if (insertionPosition.GetContainerNode() == startBlock)
@@ -608,7 +608,7 @@ namespace krys::boo
 
           for (n = ShareRefPtr(startBlock->FirstChild()); n; n = ShareRefPtr(n->NextSibling()))
           {
-            if (VisiblePosition(insertionPosition) <= VisiblePosition(dom::PositionBeforeNode(n.get())))
+            if (VisiblePosition(insertionPosition) <= VisiblePosition(PositionBeforeNode(n.get())))
             {
               break;
             }
@@ -638,7 +638,7 @@ namespace krys::boo
     }
 
     SetEndingSelection(
-      VisibleSelection(VisiblePosition(dom::FirstPositionInNode(blockToInsert.get()), Affinity::Downstream),
+      VisibleSelection(VisiblePosition(FirstPositionInNode(blockToInsert.get()), Affinity::Downstream),
                        EndingSelection().GetDirectionality()));
     ApplyStyleAfterInsertion(startBlock.get());
   }

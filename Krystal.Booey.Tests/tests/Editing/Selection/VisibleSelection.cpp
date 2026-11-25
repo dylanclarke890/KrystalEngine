@@ -25,7 +25,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD bool IsAt(const dom::Position &position, const Node &node, int32 offset) noexcept
+    KRYS_NODISCARD bool IsAt(const Position &position, const Node &node, int32 offset) noexcept
     {
       return position.DeprecatedNode() == &node && position.DeprecatedEditingOffset() == offset;
     }

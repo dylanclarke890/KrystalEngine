@@ -61,7 +61,7 @@ namespace krys::boo
 
     /// @brief @p position moved across the replacement: after the run by the change in length, within it to
     /// the same character.
-    KRYS_NODISCARD dom::Position Adjust(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD Position Adjust(const Position &position) const noexcept;
   };
 
   enum class ApplyStylePropertyLevel : bool
@@ -279,7 +279,7 @@ namespace krys::boo
     void ApplyStyle(const EditingStyle *style,
                     EditAction editingAction = EditAction::ChangeAttributes) noexcept;
 
-    void ApplyStyle(const EditingStyle *style, const dom::Position &start, const dom::Position &end,
+    void ApplyStyle(const EditingStyle *style, const Position &start, const Position &end,
                     EditAction editingAction = EditAction::ChangeAttributes,
                     ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
@@ -302,9 +302,9 @@ namespace krys::boo
 
     void InsertNodeAfter(boo::Node &insertChild, boo::Node &refChild) noexcept;
 
-    void InsertNodeAt(boo::Node &insertChild, const dom::Position &editingPosition) noexcept;
+    void InsertNodeAt(boo::Node &insertChild, const Position &editingPosition) noexcept;
 
-    void InsertNodeAtTabSpanPosition(boo::Node &node, const dom::Position &position) noexcept;
+    void InsertNodeAtTabSpanPosition(boo::Node &node, const Position &position) noexcept;
 
     bool InsertNodeBefore(boo::Node &insertChild, boo::Node &refChild,
                           ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
@@ -322,18 +322,18 @@ namespace krys::boo
     void RebalanceWhitespace() noexcept;
 
     /// @return The run it replaced, if any, to move positions in its text node across.
-    Maybe<WhitespaceRebalance> RebalanceWhitespaceAt(const dom::Position &position) noexcept;
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceAt(const Position &position) noexcept;
 
     /// @return The run it replaced, if any, to move positions in its text node across.
     Maybe<WhitespaceRebalance> RebalanceWhitespaceOnTextSubstring(Text &textNode, int32 startOffset,
                                                                   int32 endOffset) noexcept;
 
-    void PrepareWhitespaceAtPositionForSplit(dom::Position &position) noexcept;
+    void PrepareWhitespaceAtPositionForSplit(Position &position) noexcept;
 
     void ReplaceCollapsibleWhitespaceWithNonBreakingSpaceIfNeeded(
       const VisiblePosition &visiblePosition) noexcept;
 
-    KRYS_NODISCARD static RefPtr<Text> TextNodeForRebalance(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static RefPtr<Text> TextNodeForRebalance(const Position &position) noexcept;
 
     KRYS_NODISCARD static bool ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept;
 
@@ -357,20 +357,19 @@ namespace krys::boo
     void MoveRemainingSiblingsToNewParent(boo::Node *node, boo::Node *pastLastNodeToMove,
                                           Element &newParent) noexcept;
 
-    static void UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position,
-                                                               boo::Node &node) noexcept;
+    static void UpdatePositionForNodeRemovalPreservingChildren(Position &position, boo::Node &node) noexcept;
 
     void Prune(boo::Node *node) noexcept;
 
     void ReplaceTextInNode(Text &node, uint32 offset, uint32 count, utf8_stringview replacementText,
                            AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
 
-    dom::Position ReplaceSelectedTextInNode(utf8_stringview text) noexcept;
+    Position ReplaceSelectedTextInNode(utf8_stringview text) noexcept;
 
     void ReplaceTextInNodePreservingMarkers(Text &node, uint32 offset, uint32 count,
                                             utf8_stringview replacementText) noexcept;
 
-    dom::Position PositionOutsideTabSpan(const dom::Position &position) noexcept;
+    Position PositionOutsideTabSpan(const Position &position) noexcept;
 
     void SetNodeAttribute(Element &element, DOMStringAtom attribute, Maybe<DOMString> value) noexcept;
 
@@ -384,21 +383,21 @@ namespace krys::boo
 
     void DeleteInsignificantText(Text &textNode, uint32 start, uint32 end) noexcept;
 
-    void DeleteInsignificantText(const dom::Position &start, const dom::Position &end) noexcept;
+    void DeleteInsignificantText(const Position &start, const Position &end) noexcept;
 
-    void DeleteInsignificantTextDownstream(const dom::Position &position) noexcept;
+    void DeleteInsignificantTextDownstream(const Position &position) noexcept;
 
     RefPtr<Element> AppendBlockPlaceholder(Element &container) noexcept;
 
-    RefPtr<boo::Node> InsertBlockPlaceholder(const dom::Position &position) noexcept;
+    RefPtr<boo::Node> InsertBlockPlaceholder(const Position &position) noexcept;
 
     RefPtr<boo::Node> AddBlockPlaceholderIfNeeded(Element *container) noexcept;
 
-    void RemovePlaceholderAt(const dom::Position &position) noexcept;
+    void RemovePlaceholderAt(const Position &position) noexcept;
 
-    Ref<Element> InsertNewDefaultParagraphElementAt(const dom::Position &position) noexcept;
+    Ref<Element> InsertNewDefaultParagraphElementAt(const Position &position) noexcept;
 
-    RefPtr<boo::Node> MoveParagraphContentsToNewBlockIfNecessary(const dom::Position &position) noexcept;
+    RefPtr<boo::Node> MoveParagraphContentsToNewBlockIfNecessary(const Position &position) noexcept;
 
     void PushAnchorElementDown(Element &anchorElement) noexcept;
 
@@ -414,8 +413,8 @@ namespace krys::boo
                                  const VisiblePosition &endOfParagraphToMove, Element *blockElement,
                                  boo::Node *outerNode) noexcept;
 
-    void CloneParagraphUnderNewElement(const dom::Position &start, const dom::Position &end,
-                                       boo::Node *outerNode, Element *blockElement) noexcept;
+    void CloneParagraphUnderNewElement(const Position &start, const Position &end, boo::Node *outerNode,
+                                       Element *blockElement) noexcept;
 
     void CleanupAfterDeletion(const VisiblePosition &destination = VisiblePosition()) noexcept;
 
@@ -423,7 +422,7 @@ namespace krys::boo
 
     bool BreakOutOfEmptyListItem() noexcept;
 
-    dom::Position PositionAvoidingSpecialElementBoundary(const dom::Position &original) noexcept;
+    Position PositionAvoidingSpecialElementBoundary(const Position &original) noexcept;
 
     RefPtr<boo::Node> SplitTreeToNode(boo::Node &start, boo::Node &end, bool splitAncestor = false) noexcept;
 

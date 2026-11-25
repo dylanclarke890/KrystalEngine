@@ -41,8 +41,8 @@ namespace krys::boo::tests
 
       void Select(Node &start, uint32 startOffset, Node &end, uint32 endOffset) noexcept
       {
-        Document->Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&start), startOffset),
-                                     dom::CreateContainerOffsetPosition(ShareRefPtr(&end), endOffset),
+        Document->Selection().MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&start), startOffset),
+                                     CreateContainerOffsetPosition(ShareRefPtr(&end), endOffset),
                                      Affinity::Downstream);
         (void)Document->UpdateLayout();
         Document->Selection().UpdateAppearanceAfterUpdatingRendering();

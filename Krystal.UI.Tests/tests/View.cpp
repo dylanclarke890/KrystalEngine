@@ -1568,9 +1568,8 @@ namespace krys::ui::tests
     auto *text = view.Document().GetElementById(u8"a")->FirstChild();
 
     // Shift with the arrows extends a selection; without Shift, outside editable text, the arrows scroll.
-    selection.MoveTo(boo::dom::CreateContainerOffsetPosition(ShareRefPtr(text), 4),
-                     boo::dom::CreateContainerOffsetPosition(ShareRefPtr(text), 9),
-                     boo::Affinity::Downstream);
+    selection.MoveTo(boo::CreateContainerOffsetPosition(ShareRefPtr(text), 4),
+                     boo::CreateContainerOffsetPosition(ShareRefPtr(text), 9), boo::Affinity::Downstream);
     CHECK(view.KeyPressed(pal::Key::RightArrow, {pal::KeyModifier::Shift}));
     CHECK(selection.Selection().End().DeprecatedEditingOffset() == 10);
     CHECK(view.KeyPressed(pal::Key::RightArrow, {pal::KeyModifier::Shift, pal::KeyModifier::Control}));
@@ -1579,9 +1578,8 @@ namespace krys::ui::tests
     CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
 
     // Ctrl+C copies the selected text and its markup.
-    selection.MoveTo(boo::dom::CreateContainerOffsetPosition(ShareRefPtr(text), 4),
-                     boo::dom::CreateContainerOffsetPosition(ShareRefPtr(text), 15),
-                     boo::Affinity::Downstream);
+    selection.MoveTo(boo::CreateContainerOffsetPosition(ShareRefPtr(text), 4),
+                     boo::CreateContainerOffsetPosition(ShareRefPtr(text), 15), boo::Affinity::Downstream);
     CHECK(view.KeyPressed(pal::Key::C, {pal::KeyModifier::Control}, {u8"", u8"c"}));
     CHECK(pasteboard.Writes == 1);
     CHECK(pasteboard.Text == u8"quick brown");
@@ -1646,7 +1644,7 @@ namespace krys::ui::tests
     auto caretAt = [&](uint32 offset)
     {
       view.Document().Selection().MoveTo(
-        boo::dom::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), offset),
+        boo::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), offset),
         boo::Affinity::Downstream);
     };
 
@@ -1667,9 +1665,9 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::Z, {pal::KeyModifier::Control}, {u8"", u8"z"}));
 
     // Ctrl+X cuts, and Ctrl+V pastes.
-    view.Document().Selection().MoveTo(
-      boo::dom::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 0),
-      boo::dom::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 1), boo::Affinity::Downstream);
+    view.Document().Selection().MoveTo(boo::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 0),
+                                       boo::CreateContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 1),
+                                       boo::Affinity::Downstream);
     CHECK(view.KeyPressed(pal::Key::X, {pal::KeyModifier::Control}, {u8"", u8"x"}));
     CHECK(pasteboard.Text == u8"a");
     CHECK(markup() == "bc");

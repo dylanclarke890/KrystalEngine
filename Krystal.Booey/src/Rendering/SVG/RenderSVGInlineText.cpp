@@ -197,7 +197,7 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     RenderSVGInlineText::PositionForPoint(const LayoutPoint &point, HitTestSource,
                                           const RenderFragmentContainer * /*fragment*/) noexcept
   {

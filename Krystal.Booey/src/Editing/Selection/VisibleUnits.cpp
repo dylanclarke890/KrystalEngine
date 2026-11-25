@@ -93,9 +93,8 @@ namespace krys::boo
     }
 
     // FIXME: consolidate with code in previousLinePosition.
-    KRYS_NODISCARD dom::Position PreviousLineCandidatePosition(Node *node,
-                                                               const VisiblePosition &visiblePosition,
-                                                               EditableType editableType) noexcept
+    KRYS_NODISCARD Position PreviousLineCandidatePosition(Node *node, const VisiblePosition &visiblePosition,
+                                                          EditableType editableType) noexcept
     {
       auto highestRoot = HighestEditableRoot(visiblePosition.DeepEquivalent(), editableType);
       auto previousNode = PreviousLeafWithSameEditability(node, editableType);
@@ -115,11 +114,10 @@ namespace krys::boo
           break;
         }
 
-        dom::Position pos =
-          IsHTMLBRElement(*previousNode)
-            ? dom::PositionBeforeNode(previousNode.get())
-            : dom::CreateDeprecatedLegacyPosition(RefPtr<Node>(previousNode),
-                                                  static_cast<uint32>(CaretMaxOffset(*previousNode)));
+        Position pos = IsHTMLBRElement(*previousNode)
+                         ? PositionBeforeNode(previousNode.get())
+                         : CreateDeprecatedLegacyPosition(RefPtr<Node>(previousNode),
+                                                          static_cast<uint32>(CaretMaxOffset(*previousNode)));
 
         if (pos.IsCandidate())
         {
@@ -128,11 +126,11 @@ namespace krys::boo
 
         previousNode = PreviousLeafWithSameEditability(previousNode.get(), editableType);
       }
-      return dom::Position();
+      return Position();
     }
 
-    KRYS_NODISCARD dom::Position NextLineCandidatePosition(Node *node, const VisiblePosition &visiblePosition,
-                                                           EditableType editableType) noexcept
+    KRYS_NODISCARD Position NextLineCandidatePosition(Node *node, const VisiblePosition &visiblePosition,
+                                                      EditableType editableType) noexcept
     {
       auto highestRoot = HighestEditableRoot(visiblePosition.DeepEquivalent(), editableType);
       auto nextNode = NextLeafWithSameEditability(node, editableType);
@@ -151,9 +149,9 @@ namespace krys::boo
           break;
         }
 
-        dom::Position pos;
-        pos = dom::CreateDeprecatedLegacyPosition(RefPtr<Node>(nextNode),
-                                                  static_cast<uint32>(CaretMinOffset(*nextNode)));
+        Position pos;
+        pos = CreateDeprecatedLegacyPosition(RefPtr<Node>(nextNode),
+                                             static_cast<uint32>(CaretMinOffset(*nextNode)));
 
         if (pos.IsCandidate())
         {
@@ -162,7 +160,7 @@ namespace krys::boo
 
         nextNode = NextLeafWithSameEditability(nextNode.get(), editableType);
       }
-      return dom::Position();
+      return Position();
     }
 
     KRYS_NODISCARD bool IsTextOrLineBreakBox(const inline_iterator::LeafBoxIterator &box) noexcept
@@ -251,7 +249,7 @@ namespace krys::boo
           break;
         }
 
-        dom::Position position =
+        Position position =
           PreviousLineCandidatePosition(startNode, visiblePosition, EditableType::ContentIsEditable);
         if (position.IsNull())
         {
@@ -306,7 +304,7 @@ namespace krys::boo
           break;
         }
 
-        dom::Position position =
+        Position position =
           NextLineCandidatePosition(startNode, visiblePosition, EditableType::ContentIsEditable);
         if (position.IsNull())
         {
@@ -770,8 +768,7 @@ namespace krys::boo
 
       if (!next)
       {
-        return it.AtEnd() ? VisiblePosition(dom::CreateDeprecatedLegacyPosition(searchRange->Start))
-                          : position;
+        return it.AtEnd() ? VisiblePosition(CreateDeprecatedLegacyPosition(searchRange->Start)) : position;
       }
 
       auto &node = *(it.AtEnd() ? *searchRange : it.Range()).Start.Container;
@@ -779,7 +776,7 @@ namespace krys::boo
       if (textNode && !suffixLength && next <= textNode->Length())
       {
         // The next variable contains a usable index into a text node.
-        return VisiblePosition(dom::CreateDeprecatedLegacyPosition(ShareRefPtr(&node), next));
+        return VisiblePosition(CreateDeprecatedLegacyPosition(ShareRefPtr(&node), next));
       }
 
       // Use the character iterator to translate the next value into a DOM position.
@@ -789,13 +786,13 @@ namespace krys::boo
         charIt.Advance(static_cast<int32>(string.size() - suffixLength - next));
       }
       // FIXME: charIt can get out of shadow host.
-      return VisiblePosition(dom::CreateDeprecatedLegacyPosition(charIt.Range().End));
+      return VisiblePosition(CreateDeprecatedLegacyPosition(charIt.Range().End));
     }
 
     KRYS_NODISCARD VisiblePosition NextBoundary(const VisiblePosition &c,
                                                 BoundarySearchFunction searchFunction) noexcept
     {
-      dom::Position pos = c.DeepEquivalent();
+      Position pos = c.DeepEquivalent();
       auto boundary = pos.ParentEditingBoundary();
       if (!boundary)
       {
@@ -829,7 +826,7 @@ namespace krys::boo
 
       if (it.AtEnd() && next == string.size())
       {
-        pos = dom::CreateDeprecatedLegacyPosition(searchRange->End);
+        pos = CreateDeprecatedLegacyPosition(searchRange->End);
       }
       else if (next > prefixLength)
       {
@@ -843,17 +840,16 @@ namespace krys::boo
         }
 
         auto characterRange = charIt.Range();
-        pos = dom::CreateDeprecatedLegacyPosition(characterRange.End);
+        pos = CreateDeprecatedLegacyPosition(characterRange.End);
 
         if (charIt.Text()[0] == '\n')
         {
           // FIXME: workaround for collapsed range (where only start position is correct) emitted for some
           // emitted newlines (see rdar://5192593)
-          if (VisiblePosition(pos)
-              == VisiblePosition(dom::CreateDeprecatedLegacyPosition(characterRange.Start)))
+          if (VisiblePosition(pos) == VisiblePosition(CreateDeprecatedLegacyPosition(characterRange.Start)))
           {
             charIt.Advance(1);
-            pos = dom::CreateDeprecatedLegacyPosition(charIt.Range().Start);
+            pos = CreateDeprecatedLegacyPosition(charIt.Range().Start);
           }
         }
       }
@@ -1014,7 +1010,7 @@ namespace krys::boo
       {
         // There are VisiblePositions at offset 0 in blocks without
         // RootInlineBoxes, like empty editable blocks and bordered blocks.
-        dom::Position p = c.DeepEquivalent();
+        Position p = c.DeepEquivalent();
         if (p.DeprecatedNode()->Renderer() && p.DeprecatedNode()->Renderer()->IsRenderBlock()
             && !p.DeprecatedEditingOffset())
         {
@@ -1056,10 +1052,9 @@ namespace krys::boo
       }
 
       auto *startTextNode = DynamicDowncast<Text>(*startNode);
-      return startTextNode
-               ? VisiblePosition(dom::Position(ShareRefPtr(startTextNode),
-                                               inline_iterator::TextBoxIterator(*startBox)->Start()))
-               : VisiblePosition(dom::PositionBeforeNode(startNode));
+      return startTextNode ? VisiblePosition(Position(ShareRefPtr(startTextNode),
+                                                      inline_iterator::TextBoxIterator(*startBox)->Start()))
+                           : VisiblePosition(PositionBeforeNode(startNode));
     }
 
     KRYS_NODISCARD VisiblePosition StartOfLine(const VisiblePosition &c, LineEndpointComputationMode mode,
@@ -1079,7 +1074,7 @@ namespace krys::boo
         {
           if (!editableRoot->Contains(visPos.DeepEquivalent().GetContainerNode()))
           {
-            VisiblePosition newPosition = dom::FirstPositionInNode(editableRoot.get());
+            VisiblePosition newPosition = FirstPositionInNode(editableRoot.get());
             if (reachedBoundary)
             {
               *reachedBoundary = c == newPosition;
@@ -1119,7 +1114,7 @@ namespace krys::boo
       {
         // There are VisiblePositions at offset 0 in blocks without
         // RootInlineBoxes, like empty editable blocks and bordered blocks.
-        dom::Position p = c.DeepEquivalent();
+        Position p = c.DeepEquivalent();
         if (p.DeprecatedNode()->Renderer() && p.DeprecatedNode()->Renderer()->IsRenderBlock()
             && !p.DeprecatedEditingOffset())
         {
@@ -1159,10 +1154,10 @@ namespace krys::boo
         }
       }
 
-      dom::Position pos;
+      Position pos;
       if (IsHTMLBRElement(*endNode))
       {
-        pos = dom::PositionBeforeNode(endNode);
+        pos = PositionBeforeNode(endNode);
       }
       else if (auto *endTextNode = DynamicDowncast<Text>(*endNode); endTextNode && endBox->IsText())
       {
@@ -1172,11 +1167,11 @@ namespace krys::boo
         {
           endOffset += endTextBox->Length();
         }
-        pos = dom::Position(ShareRefPtr(endTextNode), endOffset);
+        pos = Position(ShareRefPtr(endTextNode), endOffset);
       }
       else
       {
-        pos = dom::PositionAfterNode(endNode);
+        pos = PositionAfterNode(endNode);
       }
 
       return VisiblePosition(pos, Affinity::Upstream);
@@ -1215,7 +1210,7 @@ namespace krys::boo
         {
           if (!editableRoot->Contains(visPos.DeepEquivalent().GetContainerNode()))
           {
-            VisiblePosition newPosition = dom::LastPositionInNode(editableRoot.get());
+            VisiblePosition newPosition = LastPositionInNode(editableRoot.get());
             if (reachedBoundary)
             {
               *reachedBoundary = c == newPosition;
@@ -1308,7 +1303,7 @@ namespace krys::boo
 
     KRYS_NODISCARD VisiblePosition PositionInLineBox(const inline_iterator::LineBoxIterator &lineBox,
                                                      LayoutUnit lineDirectionPoint,
-                                                     const dom::Position &p) noexcept
+                                                     const Position &p) noexcept
     {
       // FIXME: Can be wrong for multi-column layout and with transforms.
       auto pointInLine = AbsoluteLineDirectionPointToLocalPointInBlock(lineBox, lineDirectionPoint);
@@ -1323,7 +1318,7 @@ namespace krys::boo
       auto *node = renderer.GetNode();
       if (node && EditingIgnoresContent(*node))
       {
-        return dom::PositionInParentBeforeNode(node);
+        return PositionInParentBeforeNode(node);
       }
       auto *renderBox = DynamicDowncast<RenderBox>(renderer);
       auto localOffset = renderBox ? renderBox->LocationOffset() : LayoutSize {};
@@ -1335,7 +1330,7 @@ namespace krys::boo
   VisiblePosition PreviousLinePosition(const VisiblePosition &visiblePosition, LayoutUnit lineDirectionPoint,
                                        EditableType editableType) noexcept
   {
-    dom::Position p = visiblePosition.DeepEquivalent();
+    Position p = visiblePosition.DeepEquivalent();
     auto *node = p.DeprecatedNode();
 
     if (!node)
@@ -1365,7 +1360,7 @@ namespace krys::boo
 
     if (!lineBox)
     {
-      dom::Position position = PreviousLineCandidatePosition(node, visiblePosition, editableType);
+      Position position = PreviousLineCandidatePosition(node, visiblePosition, editableType);
       if (position.IsNotNull())
       {
         RenderedPosition renderedPosition(VisiblePosition {position});
@@ -1390,13 +1385,13 @@ namespace krys::boo
     {
       return VisiblePosition();
     }
-    return dom::FirstPositionInNode(rootElement);
+    return FirstPositionInNode(rootElement);
   }
 
   VisiblePosition NextLinePosition(const VisiblePosition &visiblePosition, LayoutUnit lineDirectionPoint,
                                    EditableType editableType) noexcept
   {
-    dom::Position p = visiblePosition.DeepEquivalent();
+    Position p = visiblePosition.DeepEquivalent();
     auto *node = p.DeprecatedNode();
     if (!node)
     {
@@ -1433,7 +1428,7 @@ namespace krys::boo
       {
         node = node->LastDescendant();
       }
-      dom::Position position = NextLineCandidatePosition(node, visiblePosition, editableType);
+      Position position = NextLineCandidatePosition(node, visiblePosition, editableType);
       if (position.IsNotNull())
       {
         RenderedPosition renderedPosition(VisiblePosition {position});
@@ -1458,7 +1453,7 @@ namespace krys::boo
     {
       return VisiblePosition();
     }
-    return dom::LastPositionInNode(rootElement);
+    return LastPositionInNode(rootElement);
   }
 
   // ---------
@@ -1515,7 +1510,7 @@ namespace krys::boo
   }
 
   RefPtr<Node> FindStartOfParagraph(Node *startNode, Node *highestRoot, Node *startBlock, int32 &offset,
-                                    dom::Position::AnchorType &type,
+                                    Position::AnchorType &type,
                                     EditingBoundaryCrossingRule boundaryCrossingRule) noexcept
   {
     Node *node = startNode;
@@ -1524,7 +1519,7 @@ namespace krys::boo
     while (n)
     {
       if (boundaryCrossingRule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary
-          && !dom::Position::NodeIsUserSelectAll(n) && n->HasEditableStyle() != startNodeIsEditable)
+          && !Position::NodeIsUserSelectAll(n) && n->HasEditableStyle() != startNodeIsEditable)
       {
         break;
       }
@@ -1560,7 +1555,7 @@ namespace krys::boo
       if (auto *renderText = DynamicDowncast<RenderText>(*r); renderText && renderText->HasRenderedText())
       {
         krys_debug_assert(Is<Text>(*n));
-        type = dom::Position::AnchorType::PositionIsOffsetInAnchor;
+        type = Position::AnchorType::PositionIsOffsetInAnchor;
         if (style.PreserveNewline())
         {
           const auto &text = renderText->Text();
@@ -1586,7 +1581,7 @@ namespace krys::boo
       else if (EditingIgnoresContent(*n) || IsRenderedTable(n))
       {
         node = n;
-        type = dom::Position::AnchorType::PositionIsBeforeAnchor;
+        type = Position::AnchorType::PositionIsBeforeAnchor;
         n = n->PreviousSibling() ? n->PreviousSibling() : dom::TreeQueries::PreviousPostOrder(*n, startBlock);
       }
       else
@@ -1599,7 +1594,7 @@ namespace krys::boo
   }
 
   RefPtr<Node> FindEndOfParagraph(Node *startNode, Node *highestRoot, Node *stayInsideBlock, int32 &offset,
-                                  dom::Position::AnchorType &type,
+                                  Position::AnchorType &type,
                                   EditingBoundaryCrossingRule boundaryCrossingRule) noexcept
   {
     Node *node = startNode;
@@ -1608,7 +1603,7 @@ namespace krys::boo
     while (n)
     {
       if (boundaryCrossingRule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary
-          && !dom::Position::NodeIsUserSelectAll(n) && n->HasEditableStyle() != startNodeIsEditable)
+          && !Position::NodeIsUserSelectAll(n) && n->HasEditableStyle() != startNodeIsEditable)
       {
         break;
       }
@@ -1647,7 +1642,7 @@ namespace krys::boo
       if (auto *renderText = DynamicDowncast<RenderText>(*r); renderText && renderText->HasRenderedText())
       {
         krys_debug_assert(Is<Text>(*n));
-        type = dom::Position::AnchorType::PositionIsOffsetInAnchor;
+        type = Position::AnchorType::PositionIsOffsetInAnchor;
         if (style.PreserveNewline())
         {
           const auto &text = renderText->Text();
@@ -1669,7 +1664,7 @@ namespace krys::boo
       else if (EditingIgnoresContent(*n) || IsRenderedTable(n))
       {
         node = n;
-        type = dom::Position::AnchorType::PositionIsAfterAnchor;
+        type = Position::AnchorType::PositionIsAfterAnchor;
         n = dom::TreeQueries::NextSkippingChildren(*n, stayInsideBlock);
       }
       else
@@ -1683,19 +1678,19 @@ namespace krys::boo
   namespace
   {
     KRYS_NODISCARD VisiblePosition PositionForParagraphNode(RefPtr<Node> &&node, int32 offset,
-                                                            dom::Position::AnchorType type) noexcept
+                                                            Position::AnchorType type) noexcept
     {
       if (auto *textNode = DynamicDowncast<Text>(node.get()))
       {
-        return dom::Position(ShareRefPtr(textNode), static_cast<uint32>(offset));
+        return Position(ShareRefPtr(textNode), static_cast<uint32>(offset));
       }
 
-      if (type == dom::Position::AnchorType::PositionIsOffsetInAnchor)
+      if (type == Position::AnchorType::PositionIsOffsetInAnchor)
       {
-        return dom::Position(krys::move(node), static_cast<uint32>(offset), type);
+        return Position(krys::move(node), static_cast<uint32>(offset), type);
       }
 
-      return dom::Position(krys::move(node), type);
+      return Position(krys::move(node), type);
     }
   }
 
@@ -1712,7 +1707,7 @@ namespace krys::boo
 
     if (IsRenderedAsNonInlineTableImageOrHR(startNode))
     {
-      return dom::PositionBeforeNode(startNode);
+      return PositionBeforeNode(startNode);
     }
 
     auto startBlock = EnclosingBlock(ShareRefPtr(startNode));
@@ -1740,7 +1735,7 @@ namespace krys::boo
 
     if (IsRenderedAsNonInlineTableImageOrHR(startNode))
     {
-      return dom::PositionAfterNode(startNode);
+      return PositionAfterNode(startNode);
     }
 
     auto stayInsideBlock = EnclosingBlock(ShareRefPtr(startNode));
@@ -1829,27 +1824,27 @@ namespace krys::boo
   VisiblePosition StartOfBlock(const VisiblePosition &visiblePosition,
                                EditingBoundaryCrossingRule rule) noexcept
   {
-    dom::Position position = visiblePosition.DeepEquivalent();
+    Position position = visiblePosition.DeepEquivalent();
     RefPtr<Element> startBlock;
     if (!position.GetContainerNode()
         || !(startBlock = EnclosingBlock(ShareRefPtr(position.GetContainerNode()), rule)))
     {
       return VisiblePosition();
     }
-    return dom::FirstPositionInNode(startBlock.get());
+    return FirstPositionInNode(startBlock.get());
   }
 
   VisiblePosition EndOfBlock(const VisiblePosition &visiblePosition,
                              EditingBoundaryCrossingRule rule) noexcept
   {
-    dom::Position position = visiblePosition.DeepEquivalent();
+    Position position = visiblePosition.DeepEquivalent();
     RefPtr<Element> endBlock;
     if (!position.GetContainerNode()
         || !(endBlock = EnclosingBlock(ShareRefPtr(position.GetContainerNode()), rule)))
     {
       return VisiblePosition();
     }
-    return dom::LastPositionInNode(endBlock.get());
+    return LastPositionInNode(endBlock.get());
   }
 
   bool InSameBlock(const VisiblePosition &a, const VisiblePosition &b) noexcept
@@ -1882,7 +1877,7 @@ namespace krys::boo
     // position to null, even when there's a valid candidate to be had, because the root HTML element
     // is not content editable.  So we construct directly from the valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    dom::Position firstCandidate = NextCandidate(dom::CreateDeprecatedLegacyPosition(documentElement, 0));
+    Position firstCandidate = NextCandidate(CreateDeprecatedLegacyPosition(documentElement, 0));
     if (firstCandidate.IsNull())
     {
       return VisiblePosition();
@@ -1906,9 +1901,9 @@ namespace krys::boo
     // when descending from the root element, so we construct the visible position directly from a
     // valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    dom::Position lastPosition =
-      dom::CreateDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
-    dom::Position lastCandidate = PreviousCandidate(lastPosition);
+    Position lastPosition =
+      CreateDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
+    Position lastCandidate = PreviousCandidate(lastPosition);
     if (lastCandidate.IsNull())
     {
       return VisiblePosition();
@@ -1936,13 +1931,13 @@ namespace krys::boo
   VisiblePosition StartOfEditableContent(const VisiblePosition &visiblePosition) noexcept
   {
     auto highestRoot = HighestEditableRoot(visiblePosition.DeepEquivalent());
-    return highestRoot ? VisiblePosition(dom::FirstPositionInNode(highestRoot.get())) : VisiblePosition {};
+    return highestRoot ? VisiblePosition(FirstPositionInNode(highestRoot.get())) : VisiblePosition {};
   }
 
   VisiblePosition EndOfEditableContent(const VisiblePosition &visiblePosition) noexcept
   {
     auto highestRoot = HighestEditableRoot(visiblePosition.DeepEquivalent());
-    return highestRoot ? VisiblePosition(dom::LastPositionInNode(highestRoot.get())) : VisiblePosition {};
+    return highestRoot ? VisiblePosition(LastPositionInNode(highestRoot.get())) : VisiblePosition {};
   }
 
   bool IsEndOfEditableOrNonEditableContent(const VisiblePosition &p) noexcept

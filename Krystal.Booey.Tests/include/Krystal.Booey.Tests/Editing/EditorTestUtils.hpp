@@ -428,8 +428,8 @@ namespace krys::boo::tests
 
     void Select(Node &node, uint32 start, uint32 end) noexcept
     {
-      Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&node), start),
-                         dom::CreateContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
+      Selection().MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&node), start),
+                         CreateContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
     }
 
     KRYS_NODISCARD HTMLBodyElement &Body() noexcept
@@ -451,8 +451,7 @@ namespace krys::boo::tests
 
     void SetCaret(Node &node, uint32 offset) noexcept
     {
-      Selection().MoveTo(dom::CreateContainerOffsetPosition(ShareRefPtr(&node), offset),
-                         Affinity::Downstream);
+      Selection().MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&node), offset), Affinity::Downstream);
     }
 
     /// @brief Runs the command named @p name, as if from a key binding.

@@ -54,8 +54,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTableCellEmpty(boo::Node &cell) noexcept
     {
       krys_debug_assert(IsTableCell(cell));
-      return VisiblePosition(dom::FirstPositionInNode(&cell))
-             == VisiblePosition(dom::LastPositionInNode(&cell));
+      return VisiblePosition(FirstPositionInNode(&cell)) == VisiblePosition(LastPositionInNode(&cell));
     }
 
     KRYS_NODISCARD bool IsTableRowEmpty(const boo::Node &row) noexcept
@@ -115,7 +114,7 @@ namespace krys::boo
       return false;
     }
 
-    KRYS_NODISCARD RefPtr<HTMLElement> FirstInSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> FirstInSpecialElement(const Position &position) noexcept
     {
       auto *rootEditableElement = position.RootEditableElement();
       for (auto *node = position.DeprecatedNode(); node && node->RootEditableElement() == rootEditableElement;
@@ -136,7 +135,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<HTMLElement> LastInSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD RefPtr<HTMLElement> LastInSpecialElement(const Position &position) noexcept
     {
       auto *rootEditableElement = position.RootEditableElement();
       for (auto *node = position.DeprecatedNode(); node && node->RootEditableElement() == rootEditableElement;
@@ -157,15 +156,15 @@ namespace krys::boo
       return nullptr;
     }
 
-    KRYS_NODISCARD std::pair<dom::Position, RefPtr<HTMLElement>>
-      PositionBeforeContainingSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD std::pair<Position, RefPtr<HTMLElement>>
+      PositionBeforeContainingSpecialElement(const Position &position) noexcept
     {
       auto element = FirstInSpecialElement(position);
       if (!element)
       {
         return {position, nullptr};
       }
-      auto result = dom::PositionInParentBeforeNode(element.get());
+      auto result = PositionInParentBeforeNode(element.get());
       if (result.IsNull()
           || result.GetContainerNode()->RootEditableElement()
                != position.GetContainerNode()->RootEditableElement())
@@ -175,15 +174,15 @@ namespace krys::boo
       return {result, krys::move(element)};
     }
 
-    KRYS_NODISCARD std::pair<dom::Position, RefPtr<HTMLElement>>
-      PositionAfterContainingSpecialElement(const dom::Position &position) noexcept
+    KRYS_NODISCARD std::pair<Position, RefPtr<HTMLElement>>
+      PositionAfterContainingSpecialElement(const Position &position) noexcept
     {
       auto element = LastInSpecialElement(position);
       if (!element)
       {
         return {position, nullptr};
       }
-      auto result = dom::PositionInParentAfterNode(element.get());
+      auto result = PositionInParentAfterNode(element.get());
       if (result.IsNull()
           || result.DeprecatedNode()->RootEditableElement()
                != position.GetContainerNode()->RootEditableElement())
@@ -193,7 +192,7 @@ namespace krys::boo
       return {result, krys::move(element)};
     }
 
-    KRYS_NODISCARD dom::Position FirstEditablePositionInNode(boo::Node *node) noexcept
+    KRYS_NODISCARD Position FirstEditablePositionInNode(boo::Node *node) noexcept
     {
       krys_debug_assert(node);
       auto *next = node;
@@ -201,7 +200,7 @@ namespace krys::boo
       {
         next = TreeQueries::Next(*next, node);
       }
-      return next ? FirstPositionInOrBeforeNode(next) : dom::Position();
+      return next ? FirstPositionInOrBeforeNode(next) : Position();
     }
 
     KRYS_NODISCARD bool ShouldRemoveContentOnly(const boo::Node &node) noexcept
@@ -209,10 +208,9 @@ namespace krys::boo
       return IsTableStructureNode(node) || node.IsRootEditableElement();
     }
 
-    void UpdatePositionForTextRemoval(boo::Node *node, int32 offset, int32 count,
-                                      dom::Position &position) noexcept
+    void UpdatePositionForTextRemoval(boo::Node *node, int32 offset, int32 count, Position &position) noexcept
     {
-      if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor
+      if (position.GetAnchorType() != Position::AnchorType::PositionIsOffsetInAnchor
           || position.GetContainerNode() != node)
       {
         return;
@@ -286,7 +284,7 @@ namespace krys::boo
                                              expandForSpecialElements, sanitizeMarkup, editingAction);
   }
 
-  void DeleteSelectionCommand::InitializeStartEnd(dom::Position &start, dom::Position &end) noexcept
+  void DeleteSelectionCommand::InitializeStartEnd(Position &start, Position &end) noexcept
   {
     start = _selectionToDelete.Start();
     end = _selectionToDelete.End();
@@ -296,11 +294,11 @@ namespace krys::boo
     // selection
     if (IsHTMLElementOfType(start.DeprecatedNode(), html::TagName::hr))
     {
-      start = dom::PositionBeforeNode(start.DeprecatedNode());
+      start = PositionBeforeNode(start.DeprecatedNode());
     }
     else if (IsHTMLElementOfType(end.DeprecatedNode(), html::TagName::hr))
     {
-      end = dom::PositionAfterNode(end.DeprecatedNode());
+      end = PositionAfterNode(end.DeprecatedNode());
     }
 
     // FIXME: This is only used so that moveParagraphs can avoid the bugs in special element expansion.
@@ -329,14 +327,14 @@ namespace krys::boo
 
       // If we're going to expand to include the startSpecialContainer, it must be fully selected.
       if (startSpecialContainer && !endSpecialContainer
-          && dom::PositionInParentAfterNode(startSpecialContainer.get()) >= end)
+          && PositionInParentAfterNode(startSpecialContainer.get()) >= end)
       {
         break;
       }
 
       // If we're going to expand to include the endSpecialContainer, it must be fully selected.
       if (endSpecialContainer && !startSpecialContainer
-          && start >= dom::PositionInParentBeforeNode(endSpecialContainer.get()))
+          && start >= PositionInParentBeforeNode(endSpecialContainer.get()))
       {
         break;
       }
@@ -361,8 +359,8 @@ namespace krys::boo
     }
   }
 
-  void DeleteSelectionCommand::SetStartingSelectionOnSmartDelete(const dom::Position &start,
-                                                                 const dom::Position &end) noexcept
+  void DeleteSelectionCommand::SetStartingSelectionOnSmartDelete(const Position &start,
+                                                                 const Position &end) noexcept
   {
     VisiblePosition newBase;
     VisiblePosition newExtent;
@@ -404,7 +402,7 @@ namespace krys::boo
         && hasBlankParagraphAfterEndOrIsEndOfContent)
     {
       _needPlaceholder = false;
-      dom::Position position;
+      Position position;
       if (endPositionIsBlankParagraph)
       {
         position = StartOfNextParagraph(StartOfNextParagraph(_downstreamEnd)).DeepEquivalent();
@@ -441,7 +439,7 @@ namespace krys::boo
 
   bool DeleteSelectionCommand::InitializePositionData() noexcept
   {
-    dom::Position start, end;
+    Position start, end;
     InitializeStartEnd(start, end);
 
     if (!IsEditablePosition(start, EditableType::ContentIsEditable))
@@ -503,7 +501,7 @@ namespace krys::boo
     if (_smartDelete)
     {
       // skip smart delete if the selection to delete already starts or ends with whitespace
-      dom::Position pos = VisiblePosition(_upstreamStart, _selectionToDelete.GetAffinity()).DeepEquivalent();
+      Position pos = VisiblePosition(_upstreamStart, _selectionToDelete.GetAffinity()).DeepEquivalent();
       bool skipSmartDelete =
         IsEditablePosition(pos)
         && pos.TrailingWhitespacePosition(VisiblePosition::DefaultAffinity, true).IsNotNull();
@@ -627,8 +625,8 @@ namespace krys::boo
     // FIXME: This code doesn't belong in here.
     // We detect the case where the start is an empty line consisting of BR not wrapped in a block element.
     if (upstreamStartIsBR && downstreamStartIsBR
-        && !(IsStartOfBlock(dom::PositionBeforeNode(nodeAfterUpstreamStart.get()))
-             && IsEndOfBlock(dom::PositionAfterNode(nodeAfterDownstreamStart.get())))
+        && !(IsStartOfBlock(PositionBeforeNode(nodeAfterUpstreamStart.get()))
+             && IsEndOfBlock(PositionAfterNode(nodeAfterDownstreamStart.get())))
         && (!nodeAfterUpstreamEnd || IsHTMLElementOfType(nodeAfterUpstreamEnd.get(), html::TagName::br)
             || nodeAfterUpstreamStart != nodeAfterUpstreamEnd->PreviousSibling()))
     {
@@ -655,7 +653,7 @@ namespace krys::boo
   {
     if (&node == _startBlock)
     {
-      auto prev = VisiblePosition(dom::FirstPositionInNode(_startBlock.get())).Previous();
+      auto prev = VisiblePosition(FirstPositionInNode(_startBlock.get())).Previous();
       if (!prev.IsNull() && !IsEndOfBlock(prev))
       {
         _needPlaceholder = true;
@@ -663,7 +661,7 @@ namespace krys::boo
     }
     else if (&node == _endBlock)
     {
-      auto next = VisiblePosition(dom::LastPositionInNode(_endBlock.get())).Next();
+      auto next = VisiblePosition(LastPositionInNode(_endBlock.get())).Next();
       if (!next.IsNull() && !IsStartOfBlock(next))
       {
         _needPlaceholder = true;
@@ -993,8 +991,7 @@ namespace krys::boo
             RefPtr<boo::Node> downstreamEndNode = ShareRefPtr(_downstreamEnd.DeprecatedNode());
             RemoveChildrenInRange(*downstreamEndNode, offset,
                                   static_cast<uint32>(_downstreamEnd.DeprecatedEditingOffset()));
-            _downstreamEnd =
-              dom::CreateDeprecatedLegacyPosition(RefPtr<boo::Node>(downstreamEndNode), offset);
+            _downstreamEnd = CreateDeprecatedLegacyPosition(RefPtr<boo::Node>(downstreamEndNode), offset);
           }
         }
       }
@@ -1016,9 +1013,9 @@ namespace krys::boo
         if (position->IsNotNull() && position->DeprecatedNode() == &textNode
             && position->DeprecatedEditingOffset() > static_cast<int32>(offset))
         {
-          *position = dom::CreateDeprecatedLegacyPosition(
-            ShareRefPtr<boo::Node>(&textNode),
-            static_cast<uint32>(position->DeprecatedEditingOffset() + delta));
+          *position =
+            CreateDeprecatedLegacyPosition(ShareRefPtr<boo::Node>(&textNode),
+                                           static_cast<uint32>(position->DeprecatedEditingOffset() + delta));
         }
       }
     };

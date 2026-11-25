@@ -53,7 +53,7 @@ namespace krys::boo
   }
 
   // Whether we should insert a break element or a '\n'.
-  bool InsertLineBreakCommand::ShouldUseBreakElement(const dom::Position &position) noexcept
+  bool InsertLineBreakCommand::ShouldUseBreakElement(const Position &position) noexcept
   {
     // An editing position like [input, 0] actually refers to the position before
     // the input element, and in that case we need to check the input element's
@@ -79,7 +79,7 @@ namespace krys::boo
       return;
     }
 
-    dom::Position position(caret.DeepEquivalent());
+    Position position(caret.DeepEquivalent());
 
     position = PositionAvoidingSpecialElementBoundary(position);
     position = PositionOutsideTabSpan(position);
@@ -121,7 +121,7 @@ namespace krys::boo
         (void)InsertNodeBefore(*cloneWithoutChildren(*nodeToInsert), *nodeToInsert);
       }
 
-      VisiblePosition endingPosition(dom::PositionBeforeNode(nodeToInsert.get()));
+      VisiblePosition endingPosition(PositionBeforeNode(nodeToInsert.get()));
       SetEndingSelection(VisibleSelection(endingPosition, EndingSelection().GetDirectionality()));
     }
     else if (position.DeprecatedEditingOffset() <= CaretMinOffset(*position.DeprecatedNode()))
@@ -129,13 +129,13 @@ namespace krys::boo
       InsertNodeAt(*nodeToInsert, position);
 
       // Insert an extra br or '\n' if the just inserted one collapsed.
-      if (!IsStartOfParagraph(dom::PositionBeforeNode(nodeToInsert.get())))
+      if (!IsStartOfParagraph(PositionBeforeNode(nodeToInsert.get())))
       {
         (void)InsertNodeBefore(*cloneWithoutChildren(*nodeToInsert), *nodeToInsert);
       }
 
-      SetEndingSelection(VisibleSelection(dom::PositionInParentAfterNode(nodeToInsert.get()),
-                                          Affinity::Downstream, EndingSelection().GetDirectionality()));
+      SetEndingSelection(VisibleSelection(PositionInParentAfterNode(nodeToInsert.get()), Affinity::Downstream,
+                                          EndingSelection().GetDirectionality()));
       // If we're inserting after all of the rendered text in a text node, or into a non-text node,
       // a simple insertion is sufficient.
     }
@@ -143,21 +143,21 @@ namespace krys::boo
              || !Is<Text>(*position.DeprecatedNode()))
     {
       InsertNodeAt(*nodeToInsert, position);
-      SetEndingSelection(VisibleSelection(dom::PositionInParentAfterNode(nodeToInsert.get()),
-                                          Affinity::Downstream, EndingSelection().GetDirectionality()));
+      SetEndingSelection(VisibleSelection(PositionInParentAfterNode(nodeToInsert.get()), Affinity::Downstream,
+                                          EndingSelection().GetDirectionality()));
     }
     else if (RefPtr<Text> textNode = ShareRefPtr(DynamicDowncast<Text>(*position.DeprecatedNode())))
     {
       // Split a text node
       SplitTextNode(*textNode, static_cast<uint32>(position.DeprecatedEditingOffset()));
       (void)InsertNodeBefore(*nodeToInsert, *textNode);
-      dom::Position endingPosition = dom::FirstPositionInNode(textNode.get());
+      Position endingPosition = FirstPositionInNode(textNode.get());
 
       // Handle whitespace that occurs after the split
       (void)document->UpdateLayoutIgnorePendingStylesheets();
       if (!endingPosition.IsRenderedCharacter())
       {
-        dom::Position positionBeforeTextNode(dom::PositionInParentBeforeNode(textNode.get()));
+        Position positionBeforeTextNode(PositionInParentBeforeNode(textNode.get()));
         // Clear out all whitespace and insert one non-breaking space
         DeleteInsignificantTextDownstream(endingPosition);
         krys_debug_assert(!textNode->Renderer() || textNode->Renderer()->Style().CollapseWhiteSpace());
@@ -171,7 +171,7 @@ namespace krys::boo
         {
           auto nbspNode = document->CreateTextNode(utf8_string(NonBreakingSpaceString()));
           InsertNodeAt(*nbspNode, positionBeforeTextNode);
-          endingPosition = dom::FirstPositionInNode(nbspNode.get());
+          endingPosition = FirstPositionInNode(nbspNode.get());
         }
       }
 

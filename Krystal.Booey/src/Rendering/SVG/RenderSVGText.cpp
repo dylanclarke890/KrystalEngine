@@ -776,9 +776,9 @@ namespace krys::boo
     return false;
   }
 
-  dom::PositionWithAffinity
-    RenderSVGText::PositionForPoint(const LayoutPoint &pointInContents, HitTestSource source,
-                                    const RenderFragmentContainer * /*fragment*/) noexcept
+  PositionWithAffinity RenderSVGText::PositionForPoint(const LayoutPoint &pointInContents,
+                                                       HitTestSource source,
+                                                       const RenderFragmentContainer * /*fragment*/) noexcept
   {
     inline_iterator::BoxIterator closestBox;
     inline_iterator::BoxIterator lastBox;

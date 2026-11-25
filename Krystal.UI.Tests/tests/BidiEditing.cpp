@@ -125,7 +125,7 @@ namespace krys::ui::tests
           return {};
         }
         auto offset = FromUTF16Offset(*node, static_cast<uint32>(std::stoul(text.substr(colon + 1))));
-        return boo::VisiblePosition(boo::dom::CreateDeprecatedLegacyPosition(ShareRefPtr(node), offset));
+        return boo::VisiblePosition(boo::CreateDeprecatedLegacyPosition(ShareRefPtr(node), offset));
       };
       auto a = endpoint(chrome);
       return !a.IsNull() && a == endpoint(booey);

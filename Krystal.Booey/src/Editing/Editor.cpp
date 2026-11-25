@@ -1223,7 +1223,7 @@ namespace krys::boo
     {
       // FIXME: We sometimes allow deletions at the start of editable roots, like when the caret is in an
       // empty list item.
-      auto previous = VisiblePosition {dom::CreateDeprecatedLegacyPosition(range.Start)}.Previous();
+      auto previous = VisiblePosition {CreateDeprecatedLegacyPosition(range.Start)}.Previous();
       if (previous.IsNull()
           || previous.DeepEquivalent().DeprecatedNode()->RootEditableElement()
                != range.Start.Container->RootEditableElement())
@@ -1647,8 +1647,8 @@ namespace krys::boo
 
     // The composition can start inside a composed character sequence, so we have to override checks.
     VisibleSelection selection;
-    selection.SetWithoutValidation(dom::CreateDeprecatedLegacyPosition(range->Start),
-                                   dom::CreateDeprecatedLegacyPosition(range->End));
+    selection.SetWithoutValidation(CreateDeprecatedLegacyPosition(range->Start),
+                                   CreateDeprecatedLegacyPosition(range->End));
     _document.Selection().SetSelection(selection, {});
   }
 
@@ -2049,7 +2049,7 @@ namespace krys::boo
   {
     (void)range.Start.GetDocument().UpdateLayout();
 
-    VisiblePosition start(dom::CreateDeprecatedLegacyPosition(range.Start));
+    VisiblePosition start(CreateDeprecatedLegacyPosition(range.Start));
 
     if (range.Collapsed())
     {
@@ -2060,7 +2060,7 @@ namespace krys::boo
       return startCaretRect;
     }
 
-    VisiblePosition end(dom::CreateDeprecatedLegacyPosition(range.End), Affinity::Upstream);
+    VisiblePosition end(CreateDeprecatedLegacyPosition(range.End), Affinity::Upstream);
 
     if (InSameLine(start, end))
     {

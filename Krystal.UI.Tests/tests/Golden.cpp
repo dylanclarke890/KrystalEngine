@@ -410,8 +410,8 @@ namespace krys::ui::tests
                 auto &document = view.Document();
                 auto *start = document.GetElementById(u8"start")->FirstChild();
                 auto *end = document.GetElementById(u8"end")->FirstChild();
-                document.Selection().MoveTo(boo::dom::CreateContainerOffsetPosition(ShareRefPtr(start), 14),
-                                            boo::dom::CreateContainerOffsetPosition(ShareRefPtr(end), 8),
+                document.Selection().MoveTo(boo::CreateContainerOffsetPosition(ShareRefPtr(start), 14),
+                                            boo::CreateContainerOffsetPosition(ShareRefPtr(end), 8),
                                             boo::Affinity::Downstream);
                 view.UpdateRendering();
               });
@@ -425,7 +425,7 @@ namespace krys::ui::tests
     field.Focus();
     auto &text = Downcast<boo::Text>(*field.FirstChild());
     document.Selection().MoveTo(
-      boo::dom::CreateContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
+      boo::CreateContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
       boo::Affinity::Downstream);
     document.GetEditor().SetComposition(u8"kanji henkan", underlines, 12, 12);
     view.UpdateRendering();

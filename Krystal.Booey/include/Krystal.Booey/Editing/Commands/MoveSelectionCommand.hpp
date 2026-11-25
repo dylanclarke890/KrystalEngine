@@ -38,17 +38,16 @@ namespace krys::boo
   {
   private:
     const Ref<DocumentFragment> _fragment;
-    dom::Position _position;
+    Position _position;
     bool _smartInsert;
     bool _smartDelete;
 
   public:
-    MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const dom::Position &position, bool smartInsert,
+    MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const Position &position, bool smartInsert,
                          bool smartDelete) noexcept;
 
     KRYS_NODISCARD static Ref<MoveSelectionCommand> Create(Ref<DocumentFragment> &&fragment,
-                                                           const dom::Position &position,
-                                                           bool smartInsert = false,
+                                                           const Position &position, bool smartInsert = false,
                                                            bool smartDelete = false) noexcept;
 
   private:

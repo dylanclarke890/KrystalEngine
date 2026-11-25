@@ -37,8 +37,8 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD dom::Position PositionForIndex(html::TextControlInnerTextElement *innerText,
-                                                  uint32 index) noexcept
+    KRYS_NODISCARD Position PositionForIndex(html::TextControlInnerTextElement *innerText,
+                                             uint32 index) noexcept
     {
       uint32 remainingCharactersToMoveForward = index;
       Node *lastBrOrText = innerText;
@@ -48,7 +48,7 @@ namespace krys::boo
         {
           if (!remainingCharactersToMoveForward)
           {
-            return dom::PositionBeforeNode(node);
+            return PositionBeforeNode(node);
           }
           remainingCharactersToMoveForward--;
           lastBrOrText = node;
@@ -57,7 +57,7 @@ namespace krys::boo
         {
           if (remainingCharactersToMoveForward < text->Length())
           {
-            return dom::Position(ShareRefPtr(text), remainingCharactersToMoveForward);
+            return Position(ShareRefPtr(text), remainingCharactersToMoveForward);
           }
           remainingCharactersToMoveForward -= static_cast<uint32>(text->Length());
           lastBrOrText = node;
@@ -496,8 +496,8 @@ namespace krys::boo
     auto previousSelectionDirection = _cachedSelectionDirection;
 
     CacheSelection(start, end, direction);
-    dom::Position startPosition = PositionForIndex(innerText.get(), start);
-    dom::Position endPosition;
+    Position startPosition = PositionForIndex(innerText.get(), start);
+    Position endPosition;
     if (start == end)
     {
       endPosition = startPosition;
@@ -854,7 +854,7 @@ namespace krys::boo
     return innerText ? InnerTextValueFrom(*innerText) : DOMString {};
   }
 
-  uint32 HTMLTextFormControlElement::IndexForPosition(const dom::Position &passedPosition) const noexcept
+  uint32 HTMLTextFormControlElement::IndexForPosition(const Position &passedPosition) const noexcept
   {
     auto innerText = InnerTextElement();
     if (!innerText || passedPosition.IsNull() || !innerText->Contains(passedPosition.AnchorNode()))
@@ -862,7 +862,7 @@ namespace krys::boo
       return 0;
     }
 
-    if (dom::PositionBeforeNode(innerText.get()) == passedPosition)
+    if (PositionBeforeNode(innerText.get()) == passedPosition)
     {
       return 0;
     }
@@ -986,7 +986,7 @@ namespace krys::boo
     return result;
   }
 
-  HTMLTextFormControlElement *html::EnclosingTextFormControl(const dom::Position &position) noexcept
+  HTMLTextFormControlElement *html::EnclosingTextFormControl(const Position &position) noexcept
   {
     auto *container = position.GetContainerNode();
     if (!container)

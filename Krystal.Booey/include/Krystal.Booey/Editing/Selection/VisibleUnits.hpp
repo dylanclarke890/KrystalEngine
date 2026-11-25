@@ -218,10 +218,10 @@ namespace krys::boo
                                              BoundarySearchFunction searchFunction) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> FindStartOfParagraph(Node *startNode, Node *highestRoot, Node *startBlock,
-                                                   int32 &offset, dom::Position::AnchorType &type,
+                                                   int32 &offset, Position::AnchorType &type,
                                                    EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> FindEndOfParagraph(Node *startNode, Node *highestRoot, Node *stayInsideBlock,
-                                                 int32 &offset, dom::Position::AnchorType &type,
+                                                 int32 &offset, Position::AnchorType &type,
                                                  EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 }

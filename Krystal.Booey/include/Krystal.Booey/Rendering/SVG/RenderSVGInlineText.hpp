@@ -101,9 +101,8 @@ namespace krys::boo
       return FloatLinesBoundingBox();
     }
 
-    KRYS_NODISCARD dom::PositionWithAffinity
-      PositionForPoint(const LayoutPoint &, HitTestSource,
-                       const RenderFragmentContainer * = nullptr) noexcept override;
+    KRYS_NODISCARD PositionWithAffinity PositionForPoint(
+      const LayoutPoint &, HitTestSource, const RenderFragmentContainer * = nullptr) noexcept override;
 
     KRYS_NODISCARD RectI LinesBoundingBox() const noexcept override;
 

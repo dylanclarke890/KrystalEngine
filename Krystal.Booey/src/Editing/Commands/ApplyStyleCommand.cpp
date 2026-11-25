@@ -163,7 +163,7 @@ namespace krys::boo
       RefPtr<boo::Node> Start;
       RefPtr<boo::Node> End;
       RefPtr<boo::Node> PastEndNode;
-      dom::Position PositionForStyleComputation;
+      Position PositionForStyleComputation;
       RefPtr<boo::Node> DummyElement;
       StyleChange Change;
 
@@ -226,8 +226,8 @@ namespace krys::boo
   {
   }
 
-  ApplyStyleCommand::ApplyStyleCommand(Document &document, const EditingStyle *style, dom::Position start,
-                                       dom::Position end, EditAction action,
+  ApplyStyleCommand::ApplyStyleCommand(Document &document, const EditingStyle *style, Position start,
+                                       Position end, EditAction action,
                                        ApplyStylePropertyLevel level) noexcept
       : CompositeEditCommand(document, action), _style(style->Copy()), _propertyLevel(level),
         _start(krys::move(start)), _end(krys::move(end)), _useEndingSelection(false), _removeOnly(false)
@@ -258,7 +258,7 @@ namespace krys::boo
   }
 
   Ref<ApplyStyleCommand> ApplyStyleCommand::Create(Document &document, const EditingStyle *style,
-                                                   const dom::Position &start, const dom::Position &end,
+                                                   const Position &start, const Position &end,
                                                    EditAction action, ApplyStylePropertyLevel level) noexcept
   {
     return CreateRef<ApplyStyleCommand>(document, style, start, end, action, level);
@@ -278,9 +278,9 @@ namespace krys::boo
     return CreateRef<ApplyStyleCommand>(document, style, isInlineElementToRemoveFunction, action);
   }
 
-  void ApplyStyleCommand::UpdateStartEnd(const dom::Position &newStart, const dom::Position &newEnd) noexcept
+  void ApplyStyleCommand::UpdateStartEnd(const Position &newStart, const Position &newEnd) noexcept
   {
-    krys_debug_assert(!std::is_gt(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(newStart, newEnd)));
+    krys_debug_assert(!std::is_gt(TreeOrder<dom::TreeType::ShadowIncludingTree>(newStart, newEnd)));
 
     if (!_useEndingSelection && (newStart != _start || newEnd != _end))
     {
@@ -296,7 +296,7 @@ namespace krys::boo
     _end = newEnd;
   }
 
-  dom::Position ApplyStyleCommand::StartPosition() noexcept
+  Position ApplyStyleCommand::StartPosition() noexcept
   {
     if (_useEndingSelection)
     {
@@ -306,7 +306,7 @@ namespace krys::boo
     return _start;
   }
 
-  dom::Position ApplyStyleCommand::EndPosition() noexcept
+  Position ApplyStyleCommand::EndPosition() noexcept
   {
     if (_useEndingSelection)
     {
@@ -423,9 +423,8 @@ namespace krys::boo
     }
 
     auto startPosition =
-      dom::CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, startIndex, behaviors));
-    auto endPosition =
-      dom::CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, endIndex, behaviors));
+      CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, startIndex, behaviors));
+    auto endPosition = CreateDeprecatedLegacyPosition(ResolveCharacterLocation(scope, endIndex, behaviors));
     UpdateStartEnd(startPosition, endPosition);
   }
 
@@ -651,7 +650,7 @@ namespace krys::boo
     // This will ensure we remove all traces of the relevant styles from the selection
     // and prevent us from adding redundant ones, as described in:
     // <rdar://problem/3724344> Bolding and unbolding creates extraneous tags
-    dom::Position removeStart = start.Upstream();
+    Position removeStart = start.Upstream();
     auto textDirection = style.TextDirection();
     RefPtr<EditingStyle> styleWithoutEmbedding;
     RefPtr<EditingStyle> embeddingStyle;
@@ -665,16 +664,16 @@ namespace krys::boo
 
       // Avoid removing the dir attribute and the unicode-bidi and direction properties from the unsplit
       // ancestors.
-      dom::Position embeddingRemoveStart = removeStart;
+      Position embeddingRemoveStart = removeStart;
       if (startUnsplitAncestor && NodeFullySelected(*startUnsplitAncestor, removeStart, end))
       {
-        embeddingRemoveStart = dom::PositionInParentAfterNode(startUnsplitAncestor.get());
+        embeddingRemoveStart = PositionInParentAfterNode(startUnsplitAncestor.get());
       }
 
-      dom::Position embeddingRemoveEnd = end;
+      Position embeddingRemoveEnd = end;
       if (endUnsplitAncestor && NodeFullySelected(*endUnsplitAncestor, removeStart, end))
       {
-        embeddingRemoveEnd = dom::PositionInParentBeforeNode(endUnsplitAncestor.get()).Downstream();
+        embeddingRemoveEnd = PositionInParentBeforeNode(endUnsplitAncestor.get()).Downstream();
       }
 
       if (embeddingRemoveEnd != removeStart || embeddingRemoveEnd != end)
@@ -736,10 +735,10 @@ namespace krys::boo
 
       if (embeddingStartNode || embeddingEndNode)
       {
-        dom::Position embeddingApplyStart =
-          embeddingStartNode ? dom::PositionInParentAfterNode(embeddingStartNode.get()) : start;
-        dom::Position embeddingApplyEnd =
-          embeddingEndNode ? dom::PositionInParentBeforeNode(embeddingEndNode.get()) : end;
+        Position embeddingApplyStart =
+          embeddingStartNode ? PositionInParentAfterNode(embeddingStartNode.get()) : start;
+        Position embeddingApplyEnd =
+          embeddingEndNode ? PositionInParentBeforeNode(embeddingEndNode.get()) : end;
         krys_debug_assert(embeddingApplyStart.IsNotNull() && embeddingApplyEnd.IsNotNull());
 
         if (!embeddingStyle)
@@ -763,8 +762,8 @@ namespace krys::boo
     }
   }
 
-  void ApplyStyleCommand::FixRangeAndApplyInlineStyle(EditingStyle &style, const dom::Position &start,
-                                                      const dom::Position &end) noexcept
+  void ApplyStyleCommand::FixRangeAndApplyInlineStyle(EditingStyle &style, const Position &start,
+                                                      const Position &end) noexcept
   {
     RefPtr<boo::Node> startNode = ShareRefPtr(start.DeprecatedNode());
 
@@ -795,7 +794,7 @@ namespace krys::boo
     // e.g. When applying font-size: large on <font color="blue">hello</font>, we need to include the font
     // element in our run to generate <font color="blue" size="4">hello</font> instead of <font
     // color="blue"><font size="4">hello</font></font>
-    auto range = *dom::CreateSimpleRange(dom::PositionRange {start, end});
+    auto range = *CreateSimpleRange(PositionRange {start, end});
     RefPtr<Element> editableRoot = ShareRefPtr(startNode->RootEditableElement());
     if (startNode != editableRoot)
     {
@@ -950,7 +949,7 @@ namespace krys::boo
       }
       if (_styledInlineElement
           && (!styledInlineHTMLElement
-              || !EnclosingElementWithTag(dom::PositionBeforeNode(node.get()),
+              || !EnclosingElementWithTag(PositionBeforeNode(node.get()),
                                           styledInlineHTMLElement->TagQualifiedName().TagName())))
       {
         return true;
@@ -1287,17 +1286,17 @@ namespace krys::boo
     }
   }
 
-  void ApplyStyleCommand::RemoveInlineStyle(EditingStyle &style, const dom::Position &start,
-                                            const dom::Position &end) noexcept
+  void ApplyStyleCommand::RemoveInlineStyle(EditingStyle &style, const Position &start,
+                                            const Position &end) noexcept
   {
     krys_debug_assert(start.IsNotNull());
     krys_debug_assert(end.IsNotNull());
     krys_debug_assert(start.AnchorNode()->IsConnected());
     krys_debug_assert(end.AnchorNode()->IsConnected());
-    krys_debug_assert(std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(start, end)));
+    krys_debug_assert(std::is_lteq(TreeOrder<dom::TreeType::ShadowIncludingTree>(start, end)));
     // FIXME: We should assert that start/end are not in the middle of a text node.
 
-    dom::Position pushDownStart = start.Downstream();
+    Position pushDownStart = start.Downstream();
     // If the pushDownStart is at the end of a text node, then this node is not fully selected.
     // Move it to the next deep quivalent position to avoid removing the style from this node.
     // e.g. if pushDownStart was at Position("hello", 5) in <b>hello<div>world</div></b>, we want
@@ -1309,7 +1308,7 @@ namespace krys::boo
     }
     // If pushDownEnd is at the start of a text node, then this node is not fully selected.
     // Move it to the previous deep equivalent position to avoid removing the style from this node.
-    dom::Position pushDownEnd = end.Upstream();
+    Position pushDownEnd = end.Upstream();
     if (Is<Text>(pushDownEnd.GetContainerNode()) && !pushDownEnd.ComputeOffsetInContainerNode())
     {
       pushDownEnd = PreviousVisuallyDistinctCandidate(pushDownEnd);
@@ -1323,8 +1322,8 @@ namespace krys::boo
     // are removed from the document during the work of this function.
     // If pushDownInlineStyleAroundNode has pruned start.deprecatedNode() or end.deprecatedNode(),
     // use pushDownStart or pushDownEnd instead, which pushDownInlineStyleAroundNode won't prune.
-    dom::Position s = start.IsNull() || start.IsOrphan() ? pushDownStart : start;
-    dom::Position e = end.IsNull() || end.IsOrphan() ? pushDownEnd : end;
+    Position s = start.IsNull() || start.IsOrphan() ? pushDownStart : start;
+    Position e = end.IsNull() || end.IsOrphan() ? pushDownEnd : end;
 
     RefPtr<boo::Node> node = ShareRefPtr(start.DeprecatedNode());
     while (node)
@@ -1361,8 +1360,8 @@ namespace krys::boo
           {
             // Since elem must have been fully selected, and it is at the start
             // of the selection, it is clear we can set the new s offset to 0.
-            krys_debug_assert(s.GetAnchorType() == dom::Position::AnchorType::PositionIsBeforeAnchor
-                              || s.GetAnchorType() == dom::Position::AnchorType::PositionIsBeforeChildren
+            krys_debug_assert(s.GetAnchorType() == Position::AnchorType::PositionIsBeforeAnchor
+                              || s.GetAnchorType() == Position::AnchorType::PositionIsBeforeChildren
                               || s.OffsetInContainerNode() <= 0);
             s = FirstPositionInOrBeforeNode(nextAfterElement.get());
           }
@@ -1393,8 +1392,8 @@ namespace krys::boo
     UpdateStartEnd(s, e);
   }
 
-  bool ApplyStyleCommand::NodeFullySelected(Element &element, const dom::Position &start,
-                                            const dom::Position &end) noexcept
+  bool ApplyStyleCommand::NodeFullySelected(Element &element, const Position &start,
+                                            const Position &end) noexcept
   {
     // The tree may have changed and Position::upstream() relies on an up-to-date layout.
     element.NodeDocument().UpdateLayoutIgnorePendingStylesheets();
@@ -1402,17 +1401,16 @@ namespace krys::boo
            && LastPositionInOrAfterNode(&element).Upstream() <= end;
   }
 
-  void ApplyStyleCommand::SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept
+  void ApplyStyleCommand::SplitTextAtStart(const Position &start, const Position &end) noexcept
   {
     krys_debug_assert(Is<Text>(start.GetContainerNode()));
 
-    dom::Position newEnd;
-    if (end.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
+    Position newEnd;
+    if (end.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor
         && start.GetContainerNode() == end.GetContainerNode())
     {
-      newEnd =
-        dom::Position(ShareRefPtr(end.ContainerText()),
-                      static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()));
+      newEnd = Position(ShareRefPtr(end.ContainerText()),
+                        static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()));
     }
     else
     {
@@ -1421,14 +1419,14 @@ namespace krys::boo
 
     RefPtr<Text> text = ShareRefPtr(start.ContainerText());
     SplitTextNode(*text, static_cast<uint32>(start.OffsetInContainerNode()));
-    UpdateStartEnd(dom::FirstPositionInNode(text.get()), newEnd);
+    UpdateStartEnd(FirstPositionInNode(text.get()), newEnd);
   }
 
-  void ApplyStyleCommand::SplitTextAtEnd(const dom::Position &start, const dom::Position &end) noexcept
+  void ApplyStyleCommand::SplitTextAtEnd(const Position &start, const Position &end) noexcept
   {
     krys_debug_assert(Is<Text>(end.GetContainerNode()));
 
-    bool shouldUpdateStart = start.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
+    bool shouldUpdateStart = start.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor
                              && start.GetContainerNode() == end.GetContainerNode();
     Ref<Text> text = ShareRef(Downcast<Text>(*end.DeprecatedNode()));
     SplitTextNode(*text, static_cast<uint32>(end.OffsetInContainerNode()));
@@ -1439,24 +1437,21 @@ namespace krys::boo
       return;
     }
 
-    dom::Position newStart =
-      shouldUpdateStart
-        ? dom::Position(RefPtr<Text>(prevNode), static_cast<uint32>(start.OffsetInContainerNode()))
-        : start;
-    UpdateStartEnd(newStart, dom::LastPositionInNode(prevNode.get()));
+    Position newStart =
+      shouldUpdateStart ? Position(RefPtr<Text>(prevNode), static_cast<uint32>(start.OffsetInContainerNode()))
+                        : start;
+    UpdateStartEnd(newStart, LastPositionInNode(prevNode.get()));
   }
 
-  void ApplyStyleCommand::SplitTextElementAtStart(const dom::Position &start,
-                                                  const dom::Position &end) noexcept
+  void ApplyStyleCommand::SplitTextElementAtStart(const Position &start, const Position &end) noexcept
   {
     krys_debug_assert(Is<Text>(start.GetContainerNode()));
 
-    dom::Position newEnd;
+    Position newEnd;
     if (start.GetContainerNode() == end.GetContainerNode())
     {
-      newEnd =
-        dom::Position(ShareRefPtr(end.ContainerText()),
-                      static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()));
+      newEnd = Position(ShareRefPtr(end.ContainerText()),
+                        static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()));
     }
     else
     {
@@ -1466,10 +1461,10 @@ namespace krys::boo
     RefPtr<boo::Node> container = ShareRefPtr(start.GetContainerNode());
     SplitTextNodeContainingElement(*start.ContainerText(),
                                    static_cast<uint32>(start.OffsetInContainerNode()));
-    UpdateStartEnd(dom::PositionBeforeNode(container.get()), newEnd);
+    UpdateStartEnd(PositionBeforeNode(container.get()), newEnd);
   }
 
-  void ApplyStyleCommand::SplitTextElementAtEnd(const dom::Position &start, const dom::Position &end) noexcept
+  void ApplyStyleCommand::SplitTextElementAtEnd(const Position &start, const Position &end) noexcept
   {
     krys_debug_assert(Is<Text>(end.GetContainerNode()));
 
@@ -1488,11 +1483,10 @@ namespace krys::boo
       return;
     }
 
-    dom::Position newStart =
-      shouldUpdateStart
-        ? dom::Position(RefPtr<Text>(firstTextNode), static_cast<uint32>(start.OffsetInContainerNode()))
-        : start;
-    UpdateStartEnd(newStart, dom::PositionAfterNode(firstTextNode.get()));
+    Position newStart = shouldUpdateStart ? Position(RefPtr<Text>(firstTextNode),
+                                                     static_cast<uint32>(start.OffsetInContainerNode()))
+                                          : start;
+    UpdateStartEnd(newStart, PositionAfterNode(firstTextNode.get()));
   }
 
   bool ApplyStyleCommand::ShouldSplitTextElement(Element *element, EditingStyle &style) noexcept
@@ -1501,12 +1495,12 @@ namespace krys::boo
     return htmlElement && ShouldRemoveInlineStyleFromElement(style, *htmlElement);
   }
 
-  bool ApplyStyleCommand::IsValidCaretPositionInTextNode(const dom::Position &position) noexcept
+  bool ApplyStyleCommand::IsValidCaretPositionInTextNode(const Position &position) noexcept
   {
     krys_debug_assert(position.IsNotNull());
 
     auto *node = position.GetContainerNode();
-    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor || !Is<Text>(node))
+    if (position.GetAnchorType() != Position::AnchorType::PositionIsOffsetInAnchor || !Is<Text>(node))
     {
       return false;
     }
@@ -1514,8 +1508,8 @@ namespace krys::boo
     return offsetInText > CaretMinOffset(*node) && offsetInText < CaretMaxOffset(*node);
   }
 
-  bool ApplyStyleCommand::MergeStartWithPreviousIfIdentical(const dom::Position &start,
-                                                            const dom::Position &end) noexcept
+  bool ApplyStyleCommand::MergeStartWithPreviousIfIdentical(const Position &start,
+                                                            const Position &end) noexcept
   {
     RefPtr<boo::Node> startNode = ShareRefPtr(start.GetContainerNode());
     if (start.ComputeOffsetInContainerNode())
@@ -1561,22 +1555,20 @@ namespace krys::boo
     uint32 startOffset = startChild->ComputeNodeIndex();
     uint32 endOffset = static_cast<uint32>(end.DeprecatedEditingOffset())
                        + (startNode == end.DeprecatedNode() ? startOffset : 0);
-    UpdateStartEnd(dom::Position(RefPtr<boo::Node>(startNode), startOffset,
-                                 dom::Position::AnchorType::PositionIsOffsetInAnchor),
-                   dom::Position(ShareRefPtr(end.DeprecatedNode()), endOffset,
-                                 dom::Position::AnchorType::PositionIsOffsetInAnchor));
+    UpdateStartEnd(
+      Position(RefPtr<boo::Node>(startNode), startOffset, Position::AnchorType::PositionIsOffsetInAnchor),
+      Position(ShareRefPtr(end.DeprecatedNode()), endOffset, Position::AnchorType::PositionIsOffsetInAnchor));
     return true;
   }
 
-  bool ApplyStyleCommand::MergeEndWithNextIfIdentical(const dom::Position &start,
-                                                      const dom::Position &end) noexcept
+  bool ApplyStyleCommand::MergeEndWithNextIfIdentical(const Position &start, const Position &end) noexcept
   {
     RefPtr<boo::Node> endNode = ShareRefPtr(end.GetContainerNode());
 
     if (IsAtomicNode(endNode.get()))
     {
       int32 endOffset = end.ComputeOffsetInContainerNode();
-      if (dom::OffsetIsBeforeLastNodeOffset(static_cast<uint32>(endOffset), endNode.get())
+      if (OffsetIsBeforeLastNodeOffset(static_cast<uint32>(endOffset), endNode.get())
           || end.DeprecatedNode()->NextSibling())
       {
         return false;
@@ -1613,12 +1605,11 @@ namespace krys::boo
 
     bool shouldUpdateStart = start.GetContainerNode() == endNode;
     uint32 endOffset = nextChild ? nextChild->ComputeNodeIndex() : nextElement->CountChildNodes();
-    UpdateStartEnd(
-      shouldUpdateStart
-        ? dom::Position(RefPtr<boo::Node>(nextElement), static_cast<uint32>(start.OffsetInContainerNode()),
-                        dom::Position::AnchorType::PositionIsOffsetInAnchor)
-        : start,
-      dom::Position(nextElement, endOffset, dom::Position::AnchorType::PositionIsOffsetInAnchor));
+    UpdateStartEnd(shouldUpdateStart ? Position(RefPtr<boo::Node>(nextElement),
+                                                static_cast<uint32>(start.OffsetInContainerNode()),
+                                                Position::AnchorType::PositionIsOffsetInAnchor)
+                                     : start,
+                   Position(nextElement, endOffset, Position::AnchorType::PositionIsOffsetInAnchor));
     return true;
   }
 
@@ -1711,16 +1702,15 @@ namespace krys::boo
     ApplyInlineStyleChange(start, end, styleChange, addStyledElement);
   }
 
-  dom::Position
-    ApplyStyleCommand::PositionToComputeInlineStyleChange(boo::Node &startNode,
-                                                          RefPtr<boo::Node> &dummyElement) noexcept
+  Position ApplyStyleCommand::PositionToComputeInlineStyleChange(boo::Node &startNode,
+                                                                 RefPtr<boo::Node> &dummyElement) noexcept
   {
     // It's okay to obtain the style at the startNode because we've removed all relevant styles from the
     // current run.
     if (!Is<Element>(startNode))
     {
       dummyElement = CreateStyleSpanElement(GetDocument());
-      InsertNodeAt(*dummyElement, dom::PositionBeforeNode(&startNode));
+      InsertNodeAt(*dummyElement, PositionBeforeNode(&startNode));
       return FirstPositionInOrBeforeNode(dummyElement.get());
     }
 

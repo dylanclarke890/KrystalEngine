@@ -150,7 +150,7 @@ namespace krys::boo
     auto &selection = NodeDocument().Selection();
 
     // Find selection start
-    VisiblePosition start(dom::FirstPositionInNode(this));
+    VisiblePosition start(FirstPositionInNode(this));
     for (uint32 i = 0; i < charnum; ++i)
     {
       start = start.Next();

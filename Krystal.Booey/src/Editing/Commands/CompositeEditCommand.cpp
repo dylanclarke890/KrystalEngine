@@ -587,9 +587,8 @@ namespace krys::boo
     ApplyCommandToComposite(ApplyStyleCommand::Create(GetDocument(), style, editingAction));
   }
 
-  void CompositeEditCommand::ApplyStyle(const EditingStyle *style, const dom::Position &start,
-                                        const dom::Position &end, EditAction editingAction,
-                                        ApplyStylePropertyLevel level) noexcept
+  void CompositeEditCommand::ApplyStyle(const EditingStyle *style, const Position &start, const Position &end,
+                                        EditAction editingAction, ApplyStylePropertyLevel level) noexcept
   {
     ApplyCommandToComposite(
       ApplyStyleCommand::Create(GetDocument(), style, start, end, editingAction, level));
@@ -672,13 +671,12 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::InsertNodeAt(boo::Node &insertChild,
-                                          const dom::Position &editingPosition) noexcept
+  void CompositeEditCommand::InsertNodeAt(boo::Node &insertChild, const Position &editingPosition) noexcept
   {
     krys_debug_assert(IsEditablePosition(editingPosition));
     // For editing positions like [table, 0], insert before the table,
     // likewise for replaced elements, brs, etc.
-    dom::Position p = editingPosition.ParentAnchoredEquivalent();
+    Position p = editingPosition.ParentAnchoredEquivalent();
     RefPtr<boo::Node> refChild = ShareRefPtr(p.DeprecatedNode());
     int32 offset = p.DeprecatedEditingOffset();
 
@@ -787,10 +785,10 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::UpdatePositionForNodeRemovalPreservingChildren(dom::Position &position,
+  void CompositeEditCommand::UpdatePositionForNodeRemovalPreservingChildren(Position &position,
                                                                             boo::Node &node) noexcept
   {
-    int32 offset = (position.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor)
+    int32 offset = (position.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor)
                      ? position.OffsetInContainerNode()
                      : 0;
     UpdatePositionForNodeRemoval(position, node);
@@ -917,14 +915,14 @@ namespace krys::boo
     }
   }
 
-  dom::Position CompositeEditCommand::ReplaceSelectedTextInNode(utf8_stringview text) noexcept
+  Position CompositeEditCommand::ReplaceSelectedTextInNode(utf8_stringview text) noexcept
   {
-    dom::Position start = EndingSelection().Start();
-    dom::Position end = EndingSelection().End();
+    Position start = EndingSelection().Start();
+    Position end = EndingSelection().End();
     if (start.GetContainerNode() != end.GetContainerNode() || !Is<Text>(start.GetContainerNode())
         || ParentTabSpanNode(start.GetContainerNode()))
     {
-      return dom::Position();
+      return Position();
     }
 
     RefPtr<Text> textNode = ShareRefPtr(start.ContainerText());
@@ -932,13 +930,13 @@ namespace krys::boo
     if (end.OffsetInContainerNode() < start.OffsetInContainerNode()
         || start.OffsetInContainerNode() > textLength || end.OffsetInContainerNode() > textLength)
     {
-      return dom::Position();
+      return Position();
     }
     ReplaceTextInNode(*textNode, static_cast<uint32>(start.OffsetInContainerNode()),
                       static_cast<uint32>(end.OffsetInContainerNode() - start.OffsetInContainerNode()), text);
 
-    return dom::Position(RefPtr<Text>(textNode), static_cast<uint32>(start.OffsetInContainerNode())
-                                                   + static_cast<uint32>(text.size()));
+    return Position(RefPtr<Text>(textNode),
+                    static_cast<uint32>(start.OffsetInContainerNode()) + static_cast<uint32>(text.size()));
   }
 
   void CompositeEditCommand::ReplaceTextInNodePreservingMarkers(Text &node, uint32 offset, uint32 count,
@@ -947,7 +945,7 @@ namespace krys::boo
     ReplaceTextInNode(node, offset, count, replacementText);
   }
 
-  dom::Position CompositeEditCommand::PositionOutsideTabSpan(const dom::Position &position) noexcept
+  Position CompositeEditCommand::PositionOutsideTabSpan(const Position &position) noexcept
   {
     if (!ParentTabSpanNode(position.AnchorNode()))
     {
@@ -956,34 +954,33 @@ namespace krys::boo
 
     switch (position.GetAnchorType())
     {
-      case dom::Position::AnchorType::PositionIsBeforeChildren:
-      case dom::Position::AnchorType::PositionIsAfterChildren:  krys_debug_assert(false); return position;
-      case dom::Position::AnchorType::PositionIsOffsetInAnchor: break;
-      case dom::Position::AnchorType::PositionIsBeforeAnchor:
-        return dom::PositionInParentBeforeNode(position.AnchorNode());
-      case dom::Position::AnchorType::PositionIsAfterAnchor:
-        return dom::PositionInParentAfterNode(position.AnchorNode());
+      case Position::AnchorType::PositionIsBeforeChildren:
+      case Position::AnchorType::PositionIsAfterChildren:  krys_debug_assert(false); return position;
+      case Position::AnchorType::PositionIsOffsetInAnchor: break;
+      case Position::AnchorType::PositionIsBeforeAnchor:
+        return PositionInParentBeforeNode(position.AnchorNode());
+      case Position::AnchorType::PositionIsAfterAnchor:
+        return PositionInParentAfterNode(position.AnchorNode());
     }
 
     RefPtr<Element> tabSpan = ShareRefPtr(ParentTabSpanNode(position.GetContainerNode()));
 
     if (position.OffsetInContainerNode() <= CaretMinOffset(*position.GetContainerNode()))
     {
-      return dom::PositionInParentBeforeNode(tabSpan.get());
+      return PositionInParentBeforeNode(tabSpan.get());
     }
 
     if (position.OffsetInContainerNode() >= CaretMaxOffset(*position.GetContainerNode()))
     {
-      return dom::PositionInParentAfterNode(tabSpan.get());
+      return PositionInParentAfterNode(tabSpan.get());
     }
 
     SplitTextNodeContainingElement(Downcast<Text>(*position.GetContainerNode()),
                                    static_cast<uint32>(position.OffsetInContainerNode()));
-    return dom::PositionInParentBeforeNode(tabSpan.get());
+    return PositionInParentBeforeNode(tabSpan.get());
   }
 
-  void CompositeEditCommand::InsertNodeAtTabSpanPosition(boo::Node &node,
-                                                         const dom::Position &position) noexcept
+  void CompositeEditCommand::InsertNodeAtTabSpanPosition(boo::Node &node, const Position &position) noexcept
   {
     // insert node before, after, or at split of tab span
     InsertNodeAt(node, PositionOutsideTabSpan(position));
@@ -1074,9 +1071,9 @@ namespace krys::boo
     return ContainsOnlyDeprecatedEditingWhitespace(text);
   }
 
-  RefPtr<Text> CompositeEditCommand::TextNodeForRebalance(const dom::Position &position) noexcept
+  RefPtr<Text> CompositeEditCommand::TextNodeForRebalance(const Position &position) noexcept
   {
-    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor)
+    if (position.GetAnchorType() != Position::AnchorType::PositionIsOffsetInAnchor)
     {
       return nullptr;
     }
@@ -1099,9 +1096,9 @@ namespace krys::boo
   }
 
   // FIXME: Doesn't go into text nodes that contribute adjacent text (siblings, cousins, etc).
-  dom::Position WhitespaceRebalance::Adjust(const dom::Position &position) const noexcept
+  Position WhitespaceRebalance::Adjust(const Position &position) const noexcept
   {
-    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor
+    if (position.GetAnchorType() != Position::AnchorType::PositionIsOffsetInAnchor
         || position.GetContainerNode() != Node.get())
     {
       return position;
@@ -1113,7 +1110,7 @@ namespace krys::boo
     }
     if (offset >= Offset + OldText.size())
     {
-      return dom::Position(RefPtr<Text>(Node), static_cast<uint32>(offset - OldText.size() + NewText.size()));
+      return Position(RefPtr<Text>(Node), static_cast<uint32>(offset - OldText.size() + NewText.size()));
     }
 
     // Within the run, to the same character: count the old run's characters before the offset, and step over
@@ -1132,11 +1129,10 @@ namespace krys::boo
         ++newOffset;
       }
     }
-    return dom::Position(RefPtr<Text>(Node), Offset + newOffset);
+    return Position(RefPtr<Text>(Node), Offset + newOffset);
   }
 
-  Maybe<WhitespaceRebalance>
-    CompositeEditCommand::RebalanceWhitespaceAt(const dom::Position &position) noexcept
+  Maybe<WhitespaceRebalance> CompositeEditCommand::RebalanceWhitespaceAt(const Position &position) noexcept
   {
     auto textNode = TextNodeForRebalance(position);
     if (!textNode)
@@ -1235,9 +1231,8 @@ namespace krys::boo
       return {};
     }
 
-    VisiblePosition visibleUpstreamPos(dom::Position(ShareRefPtr(&textNode), static_cast<uint32>(upstream)));
-    VisiblePosition visibleDownstreamPos(
-      dom::Position(ShareRefPtr(&textNode), static_cast<uint32>(downstream)));
+    VisiblePosition visibleUpstreamPos(Position(ShareRefPtr(&textNode), static_cast<uint32>(upstream)));
+    VisiblePosition visibleDownstreamPos(Position(ShareRefPtr(&textNode), static_cast<uint32>(downstream)));
 
     utf8_stringview string = utf8_stringview(text).substr(upstream, length);
     // FIXME: Because of the problem mentioned at the top of this function, we must also use nbsps at the
@@ -1263,7 +1258,7 @@ namespace krys::boo
     return rebalance;
   }
 
-  void CompositeEditCommand::PrepareWhitespaceAtPositionForSplit(dom::Position &position) noexcept
+  void CompositeEditCommand::PrepareWhitespaceAtPositionForSplit(Position &position) noexcept
   {
     if (!IsRichlyEditablePosition(position))
     {
@@ -1282,7 +1277,7 @@ namespace krys::boo
     }
 
     // Delete collapsed whitespace so that inserting nbsps doesn't uncollapse it.
-    dom::Position upstreamPos = position.Upstream();
+    Position upstreamPos = position.Upstream();
     DeleteInsignificantText(upstreamPos, position.Downstream());
     position = upstreamPos.Downstream();
 
@@ -1300,7 +1295,7 @@ namespace krys::boo
       return;
     }
 
-    dom::Position pos = visiblePosition.DeepEquivalent().Downstream();
+    Position pos = visiblePosition.DeepEquivalent().Downstream();
     if (!pos.GetContainerNode() || !Is<Text>(*pos.GetContainerNode())
         || IsHTMLElementOfType(pos.DeprecatedNode(), html::TagName::br))
     {
@@ -1419,8 +1414,7 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::DeleteInsignificantText(const dom::Position &start,
-                                                     const dom::Position &end) noexcept
+  void CompositeEditCommand::DeleteInsignificantText(const Position &start, const Position &end) noexcept
   {
     if (!(start < end))
     {
@@ -1454,7 +1448,7 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::DeleteInsignificantTextDownstream(const dom::Position &position) noexcept
+  void CompositeEditCommand::DeleteInsignificantTextDownstream(const Position &position) noexcept
   {
     DeleteInsignificantText(position, VisiblePosition(position).Next().DeepEquivalent().Downstream());
   }
@@ -1474,7 +1468,7 @@ namespace krys::boo
     return placeholder;
   }
 
-  RefPtr<boo::Node> CompositeEditCommand::InsertBlockPlaceholder(const dom::Position &position) noexcept
+  RefPtr<boo::Node> CompositeEditCommand::InsertBlockPlaceholder(const Position &position) noexcept
   {
     if (position.IsNull())
     {
@@ -1514,7 +1508,7 @@ namespace krys::boo
   }
 
   // Assumes that the position is at a placeholder and does the removal without much checking.
-  void CompositeEditCommand::RemovePlaceholderAt(const dom::Position &position) noexcept
+  void CompositeEditCommand::RemovePlaceholderAt(const Position &position) noexcept
   {
     krys_debug_assert(LineBreakExistsAtPosition(position));
 
@@ -1529,8 +1523,7 @@ namespace krys::boo
     DeleteTextFromNode(Downcast<Text>(*anchorNode), static_cast<uint32>(position.OffsetInContainerNode()), 1);
   }
 
-  Ref<Element>
-    CompositeEditCommand::InsertNewDefaultParagraphElementAt(const dom::Position &position) noexcept
+  Ref<Element> CompositeEditCommand::InsertNewDefaultParagraphElementAt(const Position &position) noexcept
   {
     auto &document = GetDocument();
     auto paragraphElement = CreateDefaultParagraphElement(document);
@@ -1542,7 +1535,7 @@ namespace krys::boo
   // If the paragraph is not entirely within it's own block, create one and move the paragraph into
   // it, and return that block.  Otherwise return 0.
   RefPtr<boo::Node>
-    CompositeEditCommand::MoveParagraphContentsToNewBlockIfNecessary(const dom::Position &position) noexcept
+    CompositeEditCommand::MoveParagraphContentsToNewBlockIfNecessary(const Position &position) noexcept
   {
     if (position.IsNull())
     {
@@ -1564,8 +1557,8 @@ namespace krys::boo
     VisiblePosition next = visibleParagraphEnd.Next();
     VisiblePosition visibleEnd = next.IsNotNull() ? next : visibleParagraphEnd;
 
-    dom::Position upstreamStart = visibleParagraphStart.DeepEquivalent().Upstream();
-    dom::Position upstreamEnd = visibleEnd.DeepEquivalent().Upstream();
+    Position upstreamStart = visibleParagraphStart.DeepEquivalent().Upstream();
+    Position upstreamEnd = visibleEnd.DeepEquivalent().Upstream();
 
     // If there are no VisiblePositions in the same block as pos then
     // upstreamStart will be outside the paragraph
@@ -1583,7 +1576,7 @@ namespace krys::boo
       {
         // If the block is the root editable element and it contains no visible content, create a new
         // block but don't try and move content into it, since there's nothing for moveParagraphs to move.
-        if (!dom::Position::HasRenderedNonAnonymousDescendantsWithHeight(
+        if (!Position::HasRenderedNonAnonymousDescendantsWithHeight(
               Downcast<RenderElement>(*upstreamStart.DeprecatedNode()->Renderer())))
         {
           return InsertNewDefaultParagraphElementAt(upstreamStart);
@@ -1626,7 +1619,7 @@ namespace krys::boo
       IsHTMLElementOfType(visibleParagraphEnd.DeepEquivalent().DeprecatedNode(), html::TagName::br);
 
     MoveParagraphs(visibleParagraphStart, visibleParagraphEnd,
-                   VisiblePosition(dom::FirstPositionInNode(newBlock.get())));
+                   VisiblePosition(FirstPositionInNode(newBlock.get())));
 
     if (newBlock->LastChild() && IsHTMLElementOfType(newBlock->LastChild(), html::TagName::br) && !endWasBr)
     {
@@ -1650,8 +1643,7 @@ namespace krys::boo
   // Clone the paragraph between start and end under blockElement,
   // preserving the hierarchy up to outerNode.
 
-  void CompositeEditCommand::CloneParagraphUnderNewElement(const dom::Position &start,
-                                                           const dom::Position &end,
+  void CompositeEditCommand::CloneParagraphUnderNewElement(const Position &start, const Position &end,
                                                            boo::Node *passedOuterNode,
                                                            Element *blockElement) noexcept
   {
@@ -1758,7 +1750,7 @@ namespace krys::boo
         && IsEndOfParagraph(caretAfterDelete))
     {
       // Note: We want the rightmost candidate.
-      dom::Position position = caretAfterDelete.DeepEquivalent().Downstream();
+      Position position = caretAfterDelete.DeepEquivalent().Downstream();
       RefPtr<boo::Node> node = ShareRefPtr(position.DeprecatedNode());
       krys_debug_assert(node);
       // Normally deletion will leave a br as a placeholder.
@@ -1822,10 +1814,10 @@ namespace krys::boo
     // We upstream() the end and downstream() the start so that we don't include collapsed whitespace in the
     // move. When we paste a fragment, spaces after the end and before the start are treated as though they
     // were rendered.
-    dom::Position start = startOfParagraphToMove.DeepEquivalent().Downstream();
-    dom::Position end = startOfParagraphToMove == endOfParagraphToMove
-                          ? start
-                          : endOfParagraphToMove.DeepEquivalent().Upstream();
+    Position start = startOfParagraphToMove.DeepEquivalent().Downstream();
+    Position end = startOfParagraphToMove == endOfParagraphToMove
+                     ? start
+                     : endOfParagraphToMove.DeepEquivalent().Upstream();
 
     CloneParagraphUnderNewElement(start, end, outerNode, blockElement);
 
@@ -2039,9 +2031,9 @@ namespace krys::boo
       // in a call to rangeFromLocationAndLength with a location past the end
       // of the document (which will return null).
       auto scope = dom::CreateRangeSelectingNodeContents(*editableRoot);
-      auto startPosition = dom::CreateDeprecatedLegacyPosition(
+      auto startPosition = CreateDeprecatedLegacyPosition(
         ResolveCharacterLocation(scope, destinationIndex + *startIndex, behaviors));
-      auto endPosition = dom::CreateDeprecatedLegacyPosition(
+      auto endPosition = CreateDeprecatedLegacyPosition(
         ResolveCharacterLocation(scope, destinationIndex + *endIndex, behaviors));
       SetEndingSelection(
         VisibleSelection(startPosition, endPosition, Affinity::Downstream, originalDirectionality));
@@ -2066,7 +2058,7 @@ namespace krys::boo
       return {};
     }
 
-    return VisibleSelection(EndingSelection().Start().Previous(dom::PositionMoveType::BackwardDeletion),
+    return VisibleSelection(EndingSelection().Start().Previous(PositionMoveType::BackwardDeletion),
                             EndingSelection().End());
   }
 
@@ -2150,7 +2142,7 @@ namespace krys::boo
     }
 
     (void)AppendBlockPlaceholder(*newBlock);
-    SetEndingSelection(VisibleSelection(dom::FirstPositionInNode(newBlock.get()), Affinity::Downstream,
+    SetEndingSelection(VisibleSelection(FirstPositionInNode(newBlock.get()), Affinity::Downstream,
                                         EndingSelection().GetDirectionality()));
 
     style->PrepareToApplyAt(EndingSelection().Start());
@@ -2166,8 +2158,7 @@ namespace krys::boo
   // that anchor, as in NSTextView.
   // FIXME: This is only an approximation of NSTextViews insertion behavior, which varies depending on how
   // the caret was made.
-  dom::Position
-    CompositeEditCommand::PositionAvoidingSpecialElementBoundary(const dom::Position &original) noexcept
+  Position CompositeEditCommand::PositionAvoidingSpecialElementBoundary(const Position &original) noexcept
   {
     if (original.IsNull())
     {
@@ -2176,7 +2167,7 @@ namespace krys::boo
 
     VisiblePosition visiblePos(original);
     RefPtr<Element> enclosingAnchor = EnclosingAnchorElement(original);
-    dom::Position result = original;
+    Position result = original;
 
     if (!enclosingAnchor)
     {
@@ -2186,8 +2177,8 @@ namespace krys::boo
     // Don't avoid block level anchors, because that would insert content into the wrong paragraph.
     if (enclosingAnchor && !IsBlock(*enclosingAnchor))
     {
-      VisiblePosition firstInAnchor(dom::FirstPositionInNode(enclosingAnchor.get()));
-      VisiblePosition lastInAnchor(dom::LastPositionInNode(enclosingAnchor.get()));
+      VisiblePosition firstInAnchor(FirstPositionInNode(enclosingAnchor.get()));
+      VisiblePosition lastInAnchor(LastPositionInNode(enclosingAnchor.get()));
       // If visually just after the anchor, insert *inside* the anchor unless it's the last
       // VisiblePosition in the document, to match NSTextView.
       if (visiblePos == lastInAnchor)
@@ -2206,14 +2197,14 @@ namespace krys::boo
         }
         // Don't insert outside an anchor if doing so would skip over a line break.  It would
         // probably be safe to move the line break so that we could still avoid the anchor here.
-        dom::Position downstream(visiblePos.DeepEquivalent().Downstream());
+        Position downstream(visiblePos.DeepEquivalent().Downstream());
         if (LineBreakExistsAtVisiblePosition(visiblePos)
             && downstream.DeprecatedNode()->IsDescendantOf(enclosingAnchor.get()))
         {
           return original;
         }
 
-        result = dom::PositionInParentAfterNode(enclosingAnchor.get());
+        result = PositionInParentAfterNode(enclosingAnchor.get());
       }
       // If visually just before an anchor, insert *outside* the anchor unless it's the first
       // VisiblePosition in a paragraph, to match NSTextView.
@@ -2232,7 +2223,7 @@ namespace krys::boo
           return original;
         }
 
-        result = dom::PositionInParentBeforeNode(enclosingAnchor.get());
+        result = PositionInParentBeforeNode(enclosingAnchor.get());
       }
     }
 
@@ -2268,7 +2259,7 @@ namespace krys::boo
         break;
       }
       // Do not split a node when doing so introduces an empty node.
-      VisiblePosition positionInParent = dom::FirstPositionInNode(parentNode.get());
+      VisiblePosition positionInParent = FirstPositionInNode(parentNode.get());
       VisiblePosition positionInNode = FirstPositionInOrBeforeNode(node.get());
       if (positionInParent != positionInNode)
       {

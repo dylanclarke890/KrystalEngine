@@ -46,9 +46,9 @@ namespace krys::boo::tests
   }
 
   /// @brief The position @p offset into @p node.
-  KRYS_NODISCARD inline dom::Position At(Node &node, uint32 offset) noexcept
+  KRYS_NODISCARD inline Position At(Node &node, uint32 offset) noexcept
   {
-    return dom::CreateContainerOffsetPosition(ShareRefPtr(&node), offset);
+    return CreateContainerOffsetPosition(ShareRefPtr(&node), offset);
   }
 
   /// @brief An event listener that calls a function.

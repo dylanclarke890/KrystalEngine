@@ -2991,7 +2991,7 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     PositionForPointRespectingEditingBoundaries(RenderBlock &parent, RenderBox &child,
                                                 const LayoutPoint &pointInParentCoordinates,
                                                 HitTestSource source) noexcept
@@ -3040,8 +3040,8 @@ namespace krys::boo
                                                 Affinity::Upstream);
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,
-                                                                            HitTestSource) noexcept
+  PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,
+                                                                       HitTestSource) noexcept
   {
     krys_unreachable();
   }
@@ -3077,8 +3077,8 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
-                                                          const RenderFragmentContainer *fragment) noexcept
+  PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                     const RenderFragmentContainer *fragment) noexcept
   {
     if (IsRenderTable())
     {
