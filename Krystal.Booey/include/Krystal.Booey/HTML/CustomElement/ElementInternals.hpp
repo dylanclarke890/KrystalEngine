@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
+#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementFormValue.hpp"
@@ -63,7 +63,7 @@ namespace krys::boo::html
   /// validity and labels.
   /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#elementinternals
   class KRYS_EMPTY_BASE_CLASS ElementInternals : public RefCounted<ElementInternals>,
-                                                 public dom::mixins::ARIAMixin<ElementInternals>
+                                                 public ax::mixins::ARIAMixin<ElementInternals>
   {
     friend HTMLElement *detail::GetElement(ElementInternals &internals) noexcept;
 
@@ -109,19 +109,24 @@ namespace krys::boo::html
     ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
                                   HTMLElement *validationAnchor = nullptr) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-willvalidate
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-willvalidate
     KRYS_NODISCARD ExceptionOr<bool> WillValidate() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-validity
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-validity
     KRYS_NODISCARD ExceptionOr<ValidityState> Validity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
     KRYS_NODISCARD ExceptionOr<DOMString> ValidationMessage() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-reportvalidity
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-reportvalidity
     ExceptionOr<bool> ReportValidity() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-checkvalidity
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-checkvalidity
     ExceptionOr<bool> CheckValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-elementinternals-labels

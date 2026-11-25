@@ -1170,7 +1170,7 @@ namespace krys::boo::style
     return _document->StyleScope();
   }
 
-  dom::DocumentOrShadowRoot &Scope::TreeScope() noexcept
+  DocumentOrShadowRoot &Scope::TreeScope() noexcept
   {
     if (_shadowRoot)
     {

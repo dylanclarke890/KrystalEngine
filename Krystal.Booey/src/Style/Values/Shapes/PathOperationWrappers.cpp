@@ -65,7 +65,7 @@ namespace krys::boo::style
 
       auto fragment = SVGURIReference::FragmentIdentifierFromIRIString(styleUrl, state.GetDocument());
 
-      const auto &treeScope = [&]() -> const dom::DocumentOrShadowRoot &
+      const auto &treeScope = [&]() -> const DocumentOrShadowRoot &
       {
         if (const auto *element = state.GetElement())
         {

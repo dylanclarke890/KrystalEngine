@@ -114,7 +114,7 @@ namespace krys::boo
   }
 
   LegacyRenderSVGResourceContainer *
-    StyleCachedImage::UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &treeScope,
+    StyleCachedImage::UncheckedRenderSVGResource(DocumentOrShadowRoot &treeScope,
                                                  const DOMStringAtom &fragment) const noexcept
   {
     auto *renderSVGResource = ReferencedSVGResources::ReferencedRenderResource(treeScope, fragment);

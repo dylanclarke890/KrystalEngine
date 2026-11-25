@@ -202,7 +202,7 @@ add_custom_command(
 
 # Every header and source is listed here; a file that isn't listed isn't built.
 set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
-  include/Krystal.Booey/DOM/Mixins/ARIAMixin.hpp
+  include/Krystal.Booey/Accessibility/ARIAMixin.hpp
   include/Krystal.Booey/Accessibility/AXLogger.hpp
   include/Krystal.Booey/Accessibility/AXNotifications.hpp
   include/Krystal.Booey/Accessibility/AXObjectCache.hpp
@@ -230,7 +230,7 @@ set(KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS
 )
 
 set(KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES
-  src/DOM/Mixins/ARIAMixin.cpp
+  src/Accessibility/ARIAMixin.cpp
   src/Accessibility/AXLogger.cpp
   src/Accessibility/AXObjectCache.cpp
   src/Accessibility/AXTableHelpers.cpp

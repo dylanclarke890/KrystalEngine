@@ -209,7 +209,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
-      PaintingResourceFromSVGPaint(dom::DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
+      PaintingResourceFromSVGPaint(DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
                                    DOMStringAtom &id, bool &hasPendingResource) noexcept
     {
       auto paintUrl = paint.TryAnyUrl();

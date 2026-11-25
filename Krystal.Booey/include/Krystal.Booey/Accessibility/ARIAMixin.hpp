@@ -33,7 +33,7 @@ namespace krys::boo
     SetAttrAssociatedElements(krys::boo::DOMStringAtom(attributeName), elements);                            \
   }
 
-namespace krys::boo::dom::mixins
+namespace krys::boo::ax::mixins
 {
   /// @brief The IDL attributes of an element's ARIA role, states and properties, each reflecting the content
   /// attribute of the same name (`ariaLabel` reflects `aria-label`). On an element they reflect its
@@ -119,7 +119,8 @@ namespace krys::boo::dom::mixins
     }
 
     /// @brief The `DOMString?` getter of a reflected attribute.
-    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
     KRYS_NODISCARD Maybe<DOMString> ReflectedString(DOMStringAtom name) const noexcept;
 
     /// @brief The `DOMString?` setter of a reflected attribute.

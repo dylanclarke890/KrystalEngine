@@ -69,16 +69,20 @@ namespace krys::boo::dom
   class DocumentAlgorithms;
   class IdTargetObserverRegistry;
   class NodeAlgorithms;
-  struct SVGResourcesMap;
   class TreeScopeOrderedMap;
+}
+
+namespace krys::boo
+{
+  struct SVGResourcesMap;
 
   /// @brief The state and members shared by documents and shadow roots, the roots of node trees.
   /// @see https://dom.spec.whatwg.org/#mixin-documentorshadowroot
   /// @see https://html.spec.whatwg.org/multipage/dom.html#documentorshadowroot
   class DocumentOrShadowRoot
   {
-    friend class DocumentAlgorithms;
-    friend class NodeAlgorithms;
+    friend class dom::DocumentAlgorithms;
+    friend class dom::NodeAlgorithms;
 
     friend class html::CustomElementAlgorithms;
 
@@ -91,8 +95,8 @@ namespace krys::boo::dom
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
-    UniquePtr<TreeScopeOrderedMap> _elementsById;
-    UniquePtr<TreeScopeOrderedMap> _imageMapsByName;
+    UniquePtr<dom::TreeScopeOrderedMap> _elementsById;
+    UniquePtr<dom::TreeScopeOrderedMap> _imageMapsByName;
     UniquePtr<html::RadioButtonGroups> _radioButtonGroups;
     mutable UniquePtr<SVGResourcesMap> _svgResourcesMap;
 

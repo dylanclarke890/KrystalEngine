@@ -51,7 +51,7 @@
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include <algorithm>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   using WeakSVGElementSet = List<WeakPtr<SVGElement>>;
 
@@ -330,7 +330,7 @@ namespace krys::boo::dom
   {
     if (!_elementsById)
     {
-      _elementsById = CreateUnique<TreeScopeOrderedMap>();
+      _elementsById = CreateUnique<dom::TreeScopeOrderedMap>();
     }
     _elementsById->Add(krys::move(id), element);
   }
@@ -381,7 +381,7 @@ namespace krys::boo::dom
   {
     if (!_imageMapsByName)
     {
-      _imageMapsByName = CreateUnique<TreeScopeOrderedMap>();
+      _imageMapsByName = CreateUnique<dom::TreeScopeOrderedMap>();
     }
     _imageMapsByName->Add(krys::move(name), map);
   }
@@ -448,8 +448,8 @@ namespace krys::boo::dom
     }
 
     // The element retargeted against this, if that's in this tree.
-    auto *retargeted = DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(element, _rootNode));
-    if (!retargeted || &TreeQueries::Root(*retargeted) != &_rootNode)
+    auto *retargeted = DynamicDowncast<Node>(dom::EventTargetAlgorithms::Retarget(element, _rootNode));
+    if (!retargeted || &dom::TreeQueries::Root(*retargeted) != &_rootNode)
     {
       return nullptr;
     }
@@ -468,14 +468,14 @@ namespace krys::boo::dom
     }
 
     // 2. Set candidate to the result of retargeting candidate against this.
-    auto *retargeted = DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(candidate, _rootNode));
+    auto *retargeted = DynamicDowncast<Node>(dom::EventTargetAlgorithms::Retarget(candidate, _rootNode));
     if (!retargeted)
     {
       return nullptr;
     }
 
     // 3. If candidate's root is not this, then return null.
-    if (&TreeQueries::Root(*retargeted) != &_rootNode)
+    if (&dom::TreeQueries::Root(*retargeted) != &_rootNode)
     {
       return nullptr;
     }
@@ -560,7 +560,7 @@ namespace krys::boo::dom
     /// @brief @p node retargeted against @p scope, or null if it isn't a node.
     KRYS_NODISCARD RefPtr<Node> RetargetToScope(Node &node, ContainerNode &scope) noexcept
     {
-      return ShareRefPtr(DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(&node, scope)));
+      return ShareRefPtr(DynamicDowncast<Node>(dom::EventTargetAlgorithms::Retarget(&node, scope)));
     }
   }
 

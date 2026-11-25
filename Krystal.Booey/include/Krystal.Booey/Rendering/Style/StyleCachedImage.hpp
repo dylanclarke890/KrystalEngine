@@ -29,10 +29,7 @@
 
 namespace krys::boo
 {
-  namespace dom
-  {
-    class DocumentOrShadowRoot;
-  }
+  class DocumentOrShadowRoot;
 
   class LegacyRenderSVGResourceContainer;
 
@@ -116,7 +113,7 @@ namespace krys::boo
     StyleCachedImage(style::Url &&, Ref<css::ImageValue> &&, float) noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
-      UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &, const DOMStringAtom &fragment) const noexcept;
+      UncheckedRenderSVGResource(DocumentOrShadowRoot &, const DOMStringAtom &fragment) const noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
       UncheckedRenderSVGResource(const RenderElement *) const noexcept;

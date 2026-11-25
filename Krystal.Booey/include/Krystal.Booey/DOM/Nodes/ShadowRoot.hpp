@@ -120,7 +120,7 @@ namespace krys::boo
   /// @brief The root of a shadow tree, attached to its host element.
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
   /// @see https://dom.spec.whatwg.org/#concept-shadow-root
-  class ShadowRoot : public DocumentFragment, public dom::DocumentOrShadowRoot
+  class ShadowRoot : public DocumentFragment, public DocumentOrShadowRoot
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 

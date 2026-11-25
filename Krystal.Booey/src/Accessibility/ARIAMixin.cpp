@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
+﻿#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
 
-namespace krys::boo::dom::mixins
+namespace krys::boo::ax::mixins
 {
   template <typename TTarget>
   RefPtr<Element> ARIAMixin<TTarget>::AriaActiveDescendantElement() const noexcept

@@ -105,7 +105,7 @@ namespace krys::boo
   };
 
   KRYS_NODISCARD inline LegacyRenderSVGResourceContainer *
-    GetRenderSVGResourceContainerById(dom::DocumentOrShadowRoot &treeScope, const DOMStringAtom &id) noexcept
+    GetRenderSVGResourceContainerById(DocumentOrShadowRoot &treeScope, const DOMStringAtom &id) noexcept
   {
     if (id.View().empty())
     {
@@ -121,7 +121,7 @@ namespace krys::boo
   }
 
   template <typename TRenderer>
-  KRYS_NODISCARD TRenderer *GetRenderSVGResourceById(dom::DocumentOrShadowRoot &treeScope,
+  KRYS_NODISCARD TRenderer *GetRenderSVGResourceById(DocumentOrShadowRoot &treeScope,
                                                      const DOMStringAtom &id) noexcept
   {
     return DynamicDowncast<TRenderer>(GetRenderSVGResourceContainerById(treeScope, id));

@@ -29,11 +29,6 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
-{
-  class DocumentOrShadowRoot;
-}
-
 namespace krys::boo::style
 {
   struct SVGMarkerResource;
@@ -43,6 +38,7 @@ namespace krys::boo::style
 namespace krys::boo
 {
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class SVGElement;
 
@@ -80,11 +76,11 @@ namespace krys::boo
     };
 
     KRYS_NODISCARD static TargetElementResult
-      TargetElementFromIRIString(DOMStringView iri, const dom::DocumentOrShadowRoot &treeScope,
+      TargetElementFromIRIString(DOMStringView iri, const DocumentOrShadowRoot &treeScope,
                                  Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static TargetElementResult
-      TargetElementFromIRIString(const style::Url &iri, const dom::DocumentOrShadowRoot &treeScope,
+      TargetElementFromIRIString(const style::Url &iri, const DocumentOrShadowRoot &treeScope,
                                  Document *externalDocument = nullptr) noexcept;
 
     KRYS_NODISCARD static bool IsExternalURIReference(DOMStringView uri, const Document &document) noexcept;

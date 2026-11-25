@@ -59,7 +59,6 @@ namespace krys
 
 namespace krys::boo::dom
 {
-  class DocumentOrShadowRoot;
   class Position;
   class PositionWithAffinity;
   struct SimpleRange;
@@ -74,6 +73,7 @@ namespace krys::boo
 {
   class ControlPart;
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class FrameViewLayoutContext;
   class HitTestLocation;
@@ -1822,7 +1822,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Document &GetDocument() const noexcept;
 
-    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;

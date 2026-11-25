@@ -29,6 +29,7 @@ namespace krys::boo
 {
   class ContainerNode;
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class NodeList;
   class RenderBox;
@@ -40,7 +41,6 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   class DocumentAlgorithms;
-  class DocumentOrShadowRoot;
   class ElementAlgorithms;
   class ExtensibilityHooks;
   class LiveCollection;
@@ -746,11 +746,11 @@ namespace krys::boo
 
     /// @brief The document or shadow root of the tree this node is in: its shadow root's when its root is
     /// one, its document's otherwise (even while it's disconnected).
-    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() const noexcept;
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScope() const noexcept;
 
     /// @brief The tree scope the node's SVG references are looked up in: its own, or, inside a `<use>`
     /// element's shadow tree, the `<use>` element's.
-    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief Whether the node's root is a shadow root (the node is in a shadow tree). The node tree of the
     /// shadow root's host is its light tree.

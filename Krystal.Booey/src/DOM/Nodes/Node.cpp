@@ -12,6 +12,7 @@
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
@@ -21,7 +22,6 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
@@ -144,7 +144,7 @@ namespace krys::boo
     NodeDocument().AddListenerTypeIfNeeded(listener.Type());
   }
 
-  dom::DocumentOrShadowRoot &Node::TreeScope() const noexcept
+  DocumentOrShadowRoot &Node::TreeScope() const noexcept
   {
     if (_containingShadowRoot)
     {
@@ -153,7 +153,7 @@ namespace krys::boo
     return NodeDocument();
   }
 
-  dom::DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
+  DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
   {
     if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this);
         shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)

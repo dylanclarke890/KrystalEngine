@@ -265,7 +265,7 @@ namespace krys::boo
 
   /// @brief A document: the root of a node tree. It's an XML document unless it's an `HTMLDocument`.
   /// @see https://dom.spec.whatwg.org/#concept-document
-  class Document : public ContainerNode, public dom::DocumentOrShadowRoot, public FontSelectorClient
+  class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
     KRYS_TYPE_CAST_TRAITS_ACCESS();

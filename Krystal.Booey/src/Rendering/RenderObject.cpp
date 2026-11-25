@@ -2207,7 +2207,7 @@ namespace krys::boo
     return _node.NodeDocument();
   }
 
-  dom::DocumentOrShadowRoot &RenderObject::TreeScopeForSVGReferences() const noexcept
+  DocumentOrShadowRoot &RenderObject::TreeScopeForSVGReferences() const noexcept
   {
     return _node.TreeScopeForSVGReferences();
   }

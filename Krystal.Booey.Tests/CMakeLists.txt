@@ -94,6 +94,7 @@ set(KRYSTAL_BOOEY_TESTS_ACCESSIBILITY_HEADERS
 )
 
 set(KRYSTAL_BOOEY_TESTS_ACCESSIBILITY_SOURCES
+  tests/Accessibility/ARIAMixin.cpp
   tests/Accessibility/AXActions.cpp
   tests/Accessibility/AXImageMap.cpp
   tests/Accessibility/AXListBoxOption.cpp
@@ -419,7 +420,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Internals/TreeScopeOrderedMap.cpp
   tests/DOM/Internals/UserActionElementSet.cpp
   tests/DOM/Iterators/ComposedTreeIterator.cpp
-  tests/DOM/Mixins/ARIAMixin.cpp
   tests/DOM/Mixins/ChildNode.cpp
   tests/DOM/Mixins/DocumentOrShadowRoot.cpp
   tests/DOM/Mixins/NonDocumentTypeChildNode.cpp

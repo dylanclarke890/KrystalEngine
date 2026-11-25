@@ -137,8 +137,7 @@ namespace krys::boo
     return !net::EqualIgnoringFragmentIdentifier(url, document.GetUrl());
   }
 
-  auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri,
-                                                   const dom::DocumentOrShadowRoot &treeScope,
+  auto SVGURIReference::TargetElementFromIRIString(DOMStringView iri, const DocumentOrShadowRoot &treeScope,
                                                    Document *externalDocument) noexcept -> TargetElementResult
   {
     // If there's no fragment identifier contained within the IRI string, we can't lookup an element.
@@ -192,7 +191,7 @@ namespace krys::boo
   }
 
   auto SVGURIReference::TargetElementFromIRIString(const style::Url &iri,
-                                                   const dom::DocumentOrShadowRoot &treeScope,
+                                                   const DocumentOrShadowRoot &treeScope,
                                                    Document *externalDocument) noexcept -> TargetElementResult
   {
     return TargetElementFromIRIString(iri.Resolved.String(), treeScope, externalDocument);
