@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Style/Invalidation/ChildChangeInvalidation.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

@@ -21,7 +21,7 @@
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/TransientRegisteredObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"

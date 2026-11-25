@@ -30,7 +30,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverEntry.hpp"
+#include "Krystal.Booey/IntersectionObserver/IntersectionObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"

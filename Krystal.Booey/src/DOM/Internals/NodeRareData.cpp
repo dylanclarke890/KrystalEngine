@@ -38,8 +38,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/TransientRegisteredObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom

@@ -12,8 +12,8 @@
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 

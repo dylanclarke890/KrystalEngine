@@ -408,6 +408,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp
   include/Krystal.Booey/CSS/Highlights/Highlight.hpp
   include/Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObservation.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserverCallback.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserverEntry.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserverOptions.hpp
+  include/Krystal.Booey/CSS/ResizeObserver/ResizeObserverSize.hpp
   include/Krystal.Booey/CSS/CSSOM/Markup.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaList.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp
@@ -820,6 +827,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Geometry/DOMRectList.cpp
   src/CSS/Highlights/Highlight.cpp
   src/CSS/Highlights/HighlightRegistry.cpp
+  src/CSS/ResizeObserver/ResizeObservation.cpp
+  src/CSS/ResizeObserver/ResizeObserver.cpp
   src/CSS/CSSOM/Markup.cpp
   src/CSS/CSSOM/MediaList.cpp
   src/CSS/CSSOM/MediaQueryList.cpp
@@ -1168,25 +1177,14 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Nodes/TextDirectionState.hpp
   include/Krystal.Booey/DOM/Nodes/XHTMLDocument.hpp
   include/Krystal.Booey/DOM/Nodes/XMLDocument.hpp
-  include/Krystal.Booey/DOM/Observers/Intersection/IntersectionObserver.hpp
-  include/Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverCallback.hpp
-  include/Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverEntry.hpp
-  include/Krystal.Booey/DOM/Observers/Intersection/IntersectionObserverMarginBox.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/AttributesMutationRecord.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/CharacterDataMutationRecord.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/ChildListMutationRecord.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/EmptyNodeMutationRecord.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/MutationRecord.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/RegisteredObserver.hpp
-  include/Krystal.Booey/DOM/Observers/Mutation/TransientRegisteredObserver.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObservation.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserver.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserverBoxOptions.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserverCallback.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserverEntry.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserverOptions.hpp
-  include/Krystal.Booey/DOM/Observers/Resize/ResizeObserverSize.hpp
+  include/Krystal.Booey/DOM/MutationObserver/AttributesMutationRecord.hpp
+  include/Krystal.Booey/DOM/MutationObserver/CharacterDataMutationRecord.hpp
+  include/Krystal.Booey/DOM/MutationObserver/ChildListMutationRecord.hpp
+  include/Krystal.Booey/DOM/MutationObserver/EmptyNodeMutationRecord.hpp
+  include/Krystal.Booey/DOM/MutationObserver/MutationObserver.hpp
+  include/Krystal.Booey/DOM/MutationObserver/MutationRecord.hpp
+  include/Krystal.Booey/DOM/MutationObserver/RegisteredObserver.hpp
+  include/Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp
   include/Krystal.Booey/DOM/Parsing/DocumentParser.hpp
   include/Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp
   include/Krystal.Booey/DOM/Ranges/AbstractRange.hpp
@@ -1306,16 +1304,12 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Nodes/StyledElement.cpp
   src/DOM/Nodes/Text.cpp
   src/DOM/Nodes/TextDirectionState.cpp
-  src/DOM/Observers/Intersection/IntersectionObserver.cpp
-  src/DOM/Observers/Intersection/IntersectionObserverEntry.cpp
-  src/DOM/Observers/Mutation/AttributesMutationRecord.cpp
-  src/DOM/Observers/Mutation/CharacterDataMutationRecord.cpp
-  src/DOM/Observers/Mutation/ChildListMutationRecord.cpp
-  src/DOM/Observers/Mutation/EmptyNodeMutationRecord.cpp
-  src/DOM/Observers/Mutation/MutationObserver.cpp
-  src/DOM/Observers/Mutation/MutationRecord.cpp
-  src/DOM/Observers/Resize/ResizeObservation.cpp
-  src/DOM/Observers/Resize/ResizeObserver.cpp
+  src/DOM/MutationObserver/AttributesMutationRecord.cpp
+  src/DOM/MutationObserver/CharacterDataMutationRecord.cpp
+  src/DOM/MutationObserver/ChildListMutationRecord.cpp
+  src/DOM/MutationObserver/EmptyNodeMutationRecord.cpp
+  src/DOM/MutationObserver/MutationObserver.cpp
+  src/DOM/MutationObserver/MutationRecord.cpp
   src/DOM/Parsing/DocumentParser.cpp
   src/DOM/Ranges/BoundaryPoint.cpp
   src/DOM/Ranges/Position.cpp
@@ -2276,6 +2270,18 @@ set(KRYSTAL_BOOEY_INPUT_SOURCES
   src/Input/PointerLockController.cpp
   src/Input/SpatialNavigation.cpp
   src/Input/WheelEventDeltaFilter.cpp
+)
+
+set(KRYSTAL_BOOEY_INTERSECTIONOBSERVER_HEADERS
+  include/Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp
+  include/Krystal.Booey/IntersectionObserver/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/IntersectionObserver/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/IntersectionObserver/IntersectionObserverMarginBox.hpp
+)
+
+set(KRYSTAL_BOOEY_INTERSECTIONOBSERVER_SOURCES
+  src/IntersectionObserver/IntersectionObserver.cpp
+  src/IntersectionObserver/IntersectionObserverEntry.cpp
 )
 
 set(KRYSTAL_BOOEY_LAYOUT_HEADERS
@@ -4224,6 +4230,7 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_HTML_HEADERS}
       ${KRYSTAL_BOOEY_INFRA_HEADERS}
       ${KRYSTAL_BOOEY_INPUT_HEADERS}
+      ${KRYSTAL_BOOEY_INTERSECTIONOBSERVER_HEADERS}
       ${KRYSTAL_BOOEY_LAYOUT_HEADERS}
       ${KRYSTAL_BOOEY_LOADER_HEADERS}
       ${KRYSTAL_BOOEY_MATHML_HEADERS}
@@ -4247,6 +4254,7 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}
     ${KRYSTAL_BOOEY_HTML_SOURCES}
     ${KRYSTAL_BOOEY_INPUT_SOURCES}
+    ${KRYSTAL_BOOEY_INTERSECTIONOBSERVER_SOURCES}
     ${KRYSTAL_BOOEY_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_MATHML_SOURCES}

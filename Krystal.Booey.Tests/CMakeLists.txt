@@ -203,6 +203,7 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/Geometry/DOMQuad.cpp
   tests/CSS/Geometry/DOMRectList.cpp
   tests/CSS/Highlights/Highlight.cpp
+  tests/CSS/ResizeObserver/ResizeObserver.cpp
   tests/CSS/Parser/AtRuleId.cpp
   tests/CSS/Parser/CustomPropertySyntax.cpp
   tests/CSS/Parser/KeywordLookup.cpp
@@ -442,10 +443,8 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Nodes/ShadowRoot.cpp
   tests/DOM/Nodes/StyledElement.cpp
   tests/DOM/Nodes/Text.cpp
-  tests/DOM/Observers/Intersection/IntersectionObserver.cpp
-  tests/DOM/Observers/Mutation/MutationObserver.cpp
-  tests/DOM/Observers/Mutation/MutationRecord.cpp
-  tests/DOM/Observers/Resize/ResizeObserver.cpp
+  tests/DOM/MutationObserver/MutationObserver.cpp
+  tests/DOM/MutationObserver/MutationRecord.cpp
   tests/DOM/Ranges/AbstractRange.cpp
   tests/DOM/Ranges/BoundaryPoint.cpp
   tests/DOM/Ranges/Position.cpp
@@ -645,6 +644,10 @@ set(KRYSTAL_BOOEY_TESTS_INPUT_SOURCES
   tests/Input/PointerLockController.cpp
   tests/Input/SpatialNavigation.cpp
   tests/Input/WheelEventDeltaFilter.cpp
+)
+
+set(KRYSTAL_BOOEY_TESTS_INTERSECTIONOBSERVER_SOURCES
+  tests/IntersectionObserver/IntersectionObserver.cpp
 )
 
 set(KRYSTAL_BOOEY_TESTS_LAYOUT_HEADERS
@@ -969,6 +972,7 @@ target_sources(Krystal.Booey.Tests
     ${KRYSTAL_BOOEY_TESTS_HTML_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_INFRA_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_INPUT_SOURCES}
+    ${KRYSTAL_BOOEY_TESTS_INTERSECTIONOBSERVER_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_LAYOUT_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_LOADER_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_MATHML_SOURCES}

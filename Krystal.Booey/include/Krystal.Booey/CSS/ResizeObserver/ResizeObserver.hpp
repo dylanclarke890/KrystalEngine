@@ -1,0 +1,143 @@
+﻿/*
+ * Copyright (C) 2019 Igalia S.L.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserverCallback.hpp"
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserverOptions.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include <limits>
+
+namespace krys::boo
+{
+  class Document;
+  class Element;
+  class ResizeObservation;
+
+  /// @brief The resize observers observing an element.
+  struct ResizeObserverData
+  {
+    List<WeakPtr<ResizeObserver>> Observers;
+  };
+
+  /// @brief Reports changes to the sizes of the elements it observes, in the rendering update after layout.
+  /// Whoever made it keeps it: it stops observing when it's destroyed.
+  /// @see https://drafts.csswg.org/resize-observer/#resize-observer-interface
+  class ResizeObserver : public RefCounted<ResizeObserver>, public CanMakeWeakPtr<ResizeObserver>
+  {
+    KRYS_NON_COPY_MOVABLE(ResizeObserver);
+
+  private:
+    WeakPtr<Document> _document;
+    ResizeObserverCallback _callback;
+    // Whether the observer is the user agent's own (the document's, for the last remembered sizes), which the
+    // document gathers and delivers itself.
+    bool _isNative {false};
+    bool _hasSkippedObservations {false};
+    List<Ref<ResizeObservation>> _observations;
+    List<Ref<ResizeObservation>> _activeObservations;
+    List<Ref<Element>> _activeObservationTargets;
+    // An observed element is reported at least once, so it's kept until its first observation.
+    List<Ref<Element>> _targetsWaitingForFirstObservation;
+
+    ResizeObserver(Document &document, ResizeObserverCallback &&callback, bool isNative) noexcept;
+
+  public:
+    /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-resizeobserver
+    KRYS_NODISCARD static Ref<ResizeObserver> Create(Document &document,
+                                                     ResizeObserverCallback &&callback) noexcept;
+
+    /// @brief An observer for the user agent's own use, gathered and delivered by the document rather than
+    /// with the document's other observers.
+    KRYS_NODISCARD static Ref<ResizeObserver>
+      CreateNativeObserver(Document &document, ResizeObserverCallback &&callback) noexcept;
+
+    ~ResizeObserver() noexcept;
+
+    KRYS_NODISCARD bool HasObservations() const noexcept
+    {
+      return !_observations.empty();
+    }
+
+    KRYS_NODISCARD bool HasActiveObservations() const noexcept
+    {
+      return !_activeObservations.empty();
+    }
+
+    /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-observe
+    void Observe(Element &target, const ResizeObserverOptions &options = {}) noexcept;
+
+    /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-unobserve
+    void Unobserve(Element &target) noexcept;
+
+    /// @see https://drafts.csswg.org/resize-observer/#dom-resizeobserver-disconnect
+    void Disconnect() noexcept;
+
+    /// @brief An observed element is being destroyed.
+    void TargetDestroyed(Element &target) noexcept;
+
+    KRYS_NODISCARD static size_t MaxElementDepth() noexcept
+    {
+      return std::numeric_limits<size_t>::max();
+    }
+
+    /// @brief Makes the observations whose targets changed size and are deeper than @p deeperThan active,
+    /// noting whether any shallower ones were skipped.
+    /// @return The depth of the shallowest active observation, or `MaxElementDepth()` if there's none.
+    /// @see https://drafts.csswg.org/resize-observer/#gather-active-observations-h
+    KRYS_NODISCARD size_t GatherObservations(size_t deeperThan) noexcept;
+
+    /// @brief Calls the callback with the active observations' entries.
+    /// @see https://drafts.csswg.org/resize-observer/#broadcast-active-resize-observations
+    void DeliverObservations() noexcept;
+
+    KRYS_NODISCARD bool HasSkippedObservations() const noexcept
+    {
+      return _hasSkippedObservations;
+    }
+
+    void SetHasSkippedObservations(bool skipped) noexcept
+    {
+      _hasSkippedObservations = skipped;
+    }
+
+    /// @brief Forgets the sizes last reported for @p target, so it's reported again.
+    void ResetObservationSize(Element &target) noexcept;
+
+  private:
+    bool RemoveTarget(Element &target) noexcept;
+
+    void RemoveAllTargets() noexcept;
+
+    bool RemoveObservation(const Element &target) noexcept;
+
+    void ObserveInternal(Element &target, ResizeObserverBoxOptions boxOptions) noexcept;
+  };
+}

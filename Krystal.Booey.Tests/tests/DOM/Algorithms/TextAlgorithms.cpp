@@ -7,8 +7,8 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/XMLDocument.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationObserver.hpp"
-#include "Krystal.Booey/DOM/Observers/Mutation/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Booey/DOM/Ranges/Range.hpp"
 #include <limits>
 
