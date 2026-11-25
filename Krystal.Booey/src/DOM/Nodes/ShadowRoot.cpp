@@ -254,14 +254,12 @@ namespace krys::boo
   ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ReplaceChildrenWithMarkup(markup, {});
+    return ReplaceChildrenWithMarkup(markup);
   }
 
 #pragma endregion
 
-  ExceptionOr<void>
-    ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup,
-                                          EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+  ExceptionOr<void> ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup) noexcept
   {
     if (markup.empty())
     {
@@ -270,7 +268,7 @@ namespace krys::boo
 
     RefPtr<Element> host = ShareRefPtr(Host());
     krys_assert(host);
-    auto fragment = CreateFragmentForInnerOuterHTML(*host, markup, parserContentPolicy);
+    auto fragment = CreateFragmentForInnerOuterHTML(*host, markup);
     if (fragment.HasException())
     {
       return fragment.ReleaseException();

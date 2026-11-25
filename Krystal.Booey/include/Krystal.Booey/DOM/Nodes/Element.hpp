@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Mixins/ARIAMixin.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
@@ -12,7 +13,6 @@
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -86,7 +86,6 @@ namespace krys::boo::dom
   struct GetHTMLOptions;
   struct ShadowRootInit;
 
-  enum class ParserContentPolicy : uint8;
   enum class PopoverState : uint8;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
@@ -455,7 +454,8 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
                                         const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -464,7 +464,8 @@ namespace krys::boo
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
     ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -472,7 +473,8 @@ namespace krys::boo
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
     ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -480,7 +482,8 @@ namespace krys::boo
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
     /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
     ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -488,7 +491,8 @@ namespace krys::boo
 
     /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
     /// @p options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
     ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -497,7 +501,8 @@ namespace krys::boo
 
     /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
     ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
 
     /// @brief The same, with default options.
@@ -505,7 +510,8 @@ namespace krys::boo
 
     /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
     /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
     ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
                                             const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -536,7 +542,8 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-outerhtml
     ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-insertadjacenthtml
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-insertadjacenthtml
     ExceptionOr<void> InsertAdjacentHTML(dom::InsertAdjacentWhere where, DOMStringView markup) noexcept;
 
 #pragma endregion
@@ -890,7 +897,8 @@ namespace krys::boo
     void SetIsCustomElementUpgradeCandidate() noexcept;
 
     /// @brief Enqueues an upgrade of the element to @p elementInterface's definition.
-    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-a-custom-element-upgrade-reaction
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/custom-elements.html#enqueue-a-custom-element-upgrade-reaction
     void EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept;
 
     /// @brief Sets the behaviour the element's definition created for it, and the registry it uses.
@@ -1749,7 +1757,8 @@ namespace krys::boo
 
     /// @brief Sets an element reflection attribute's element: the content attribute becomes empty, or is
     /// removed if @p element is null.
-    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:element
     void SetElementAttribute(const DOMStringAtom &attributeName, Element *element) noexcept;
 
     /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
@@ -1948,9 +1957,7 @@ namespace krys::boo
     void SynchronizeAnimatedSVGAttributes() const noexcept;
 
     /// @brief Replaces the element's children (a template's content's) with @p markup parsed in its context.
-    ExceptionOr<void>
-      ReplaceChildrenWithMarkup(DOMStringView markup,
-                                EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
+    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup) noexcept;
   };
 }
 

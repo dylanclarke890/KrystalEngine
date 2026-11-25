@@ -5,6 +5,8 @@
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/CSS/TypedOM/ComputedStylePropertyMapReadOnly.hpp"
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
@@ -47,12 +49,9 @@
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
-#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
-#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -77,6 +76,7 @@
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
+#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollBehavior.hpp"
@@ -2488,9 +2488,7 @@ namespace krys::boo
     }
   }
 
-  ExceptionOr<void>
-    Element::ReplaceChildrenWithMarkup(DOMStringView markup,
-                                       EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+  ExceptionOr<void> Element::ReplaceChildrenWithMarkup(DOMStringView markup) noexcept
   {
     Ref<ContainerNode> container = ShareRef<ContainerNode>(*this);
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(*this))
@@ -2506,7 +2504,7 @@ namespace krys::boo
       return dom::MutationAlgorithms::ReplaceAll(nullptr, *container);
     }
 
-    auto fragment = CreateFragmentForInnerOuterHTML(*this, markup, parserContentPolicy);
+    auto fragment = CreateFragmentForInnerOuterHTML(*this, markup);
     if (fragment.HasException())
     {
       return fragment.ReleaseException();
@@ -2716,7 +2714,7 @@ namespace krys::boo
   ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ReplaceChildrenWithMarkup(markup, {});
+    return ReplaceChildrenWithMarkup(markup);
   }
 
   ExceptionOr<DOMString> Element::OuterHTML() const noexcept

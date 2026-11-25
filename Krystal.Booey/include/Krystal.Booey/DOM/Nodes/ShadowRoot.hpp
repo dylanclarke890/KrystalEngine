@@ -53,8 +53,6 @@ namespace krys::boo::dom
 
   struct GetHTMLOptions;
 
-  enum class ParserContentPolicy : uint8;
-
   /// @see https://dom.spec.whatwg.org/#enumdef-shadowrootmode
   enum class ShadowRootMode : uint8
   {
@@ -276,7 +274,8 @@ namespace krys::boo
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -285,7 +284,8 @@ namespace krys::boo
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
                                         const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -349,9 +349,7 @@ namespace krys::boo
 
   private:
     /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
-    ExceptionOr<void>
-      ReplaceChildrenWithMarkup(DOMStringView markup,
-                                EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept;
+    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup) noexcept;
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent

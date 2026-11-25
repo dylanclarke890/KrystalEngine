@@ -1394,26 +1394,20 @@ namespace krys::boo
       (void)fragment.RemoveChild(element);
     }
 
-    KRYS_NODISCARD Ref<DocumentFragment>
-      ParseHTMLIntoFragment(utf8_stringview markup, Element &contextElement,
-                            bool allowDeclarativeShadowRoots = false) noexcept
+    KRYS_NODISCARD Ref<DocumentFragment> ParseHTMLIntoFragment(utf8_stringview markup,
+                                                               Element &contextElement) noexcept
     {
-      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup),
-                                                 allowDeclarativeShadowRoots);
+      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup));
     }
 
     // FIXME: The template document for contexts that are templates.
-    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
-      CreateFragmentForMarkup(Element &contextElement, utf8_stringview markup,
-                              EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> CreateFragmentForMarkup(Element &contextElement,
+                                                                              utf8_stringview markup) noexcept
     {
       auto &document = contextElement.NodeDocument();
-      if (Is<HTMLDocument>(document)
-          || parserContentPolicy.contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
+      if (Is<HTMLDocument>(document))
       {
-        return ParseHTMLIntoFragment(
-          markup, contextElement,
-          parserContentPolicy.contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
+        return ParseHTMLIntoFragment(markup, contextElement);
       }
 
       Ref<DocumentFragment> fragment = document.CreateDocumentFragment();
@@ -1829,17 +1823,16 @@ namespace krys::boo
     return markup;
   }
 
-  ExceptionOr<Ref<DocumentFragment>>
-    CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
-                                    EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+  ExceptionOr<Ref<DocumentFragment>> CreateFragmentForInnerOuterHTML(Element &contextElement,
+                                                                     utf8_stringview markup) noexcept
   {
-    return CreateFragmentForMarkup(contextElement, markup, parserContentPolicy);
+    return CreateFragmentForMarkup(contextElement, markup);
   }
 
   ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
                                                               utf8_stringview markup) noexcept
   {
-    auto result = CreateFragmentForMarkup(element, markup, {});
+    auto result = CreateFragmentForMarkup(element, markup);
     if (result.HasException())
     {
       return result.ReleaseException();
