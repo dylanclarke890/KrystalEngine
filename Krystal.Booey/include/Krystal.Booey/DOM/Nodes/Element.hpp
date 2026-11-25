@@ -12,7 +12,7 @@
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"

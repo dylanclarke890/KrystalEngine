@@ -20,7 +20,7 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"

@@ -1,11 +1,11 @@
-﻿#include "Krystal.Booey/Geometry/DOMPoint.hpp"
+﻿#include "Krystal.Booey/CSS/Geometry/DOMPoint.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMMatrix.hpp"
 
 namespace krys::boo::tests
 {
   TEST_CASE("DOMPoint: made from coordinates and dictionaries",
-            "[Geometry][DOMPoint][geometry-1:dom-dompointreadonly-dompointreadonly]"
+            "[CSS][Geometry][DOMPoint][geometry-1:dom-dompointreadonly-dompointreadonly]"
             "[geometry-1:dom-dompointreadonly-frompoint][geometry-1:dom-dompoint-frompoint]"
             "[geometry-1:create-a-dompointreadonly-from-the-dictionary][geometry-1:DOMPoint]"
             "[geometry-1:dom-dompointreadonly-x][geometry-1:dom-dompointreadonly-y]"
@@ -36,7 +36,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("DOMPoint: transforming with a matrix",
-            "[Geometry][DOMPoint][geometry-1:dom-dompointreadonly-matrixtransform]"
+            "[CSS][Geometry][DOMPoint][geometry-1:dom-dompointreadonly-matrixtransform]"
             "[geometry-1:transform-a-point-with-a-matrix]")
   {
     auto point = DOMPointReadOnly::Create(1, 2, 3, 1);

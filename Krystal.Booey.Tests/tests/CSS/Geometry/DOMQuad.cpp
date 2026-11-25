@@ -1,12 +1,12 @@
-﻿#include "Krystal.Booey/Geometry/DOMQuad.hpp"
+﻿#include "Krystal.Booey/CSS/Geometry/DOMQuad.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include <cmath>
 
 namespace krys::boo::tests
 {
   TEST_CASE("DOMQuad: made from points, rectangles and dictionaries",
-            "[Geometry][DOMQuad][geometry-1:dom-domquad-domquad][geometry-1:dom-domquad-fromrect]"
+            "[CSS][Geometry][DOMQuad][geometry-1:dom-domquad-domquad][geometry-1:dom-domquad-fromrect]"
             "[geometry-1:create-a-domquad-from-the-domrectinit-dictionary][geometry-1:dom-domquad-fromquad]"
             "[geometry-1:create-a-domquad-from-the-domquadinit-dictionary][geometry-1:dom-domquad-p1]"
             "[geometry-1:dom-domquad-p2][geometry-1:dom-domquad-p3][geometry-1:dom-domquad-p4]")
@@ -44,7 +44,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("DOMQuad: bounds",
-            "[Geometry][DOMQuad][geometry-1:dom-domquad-getbounds][geometry-1:nan-safe-minimum]"
+            "[CSS][Geometry][DOMQuad][geometry-1:dom-domquad-getbounds][geometry-1:nan-safe-minimum]"
             "[geometry-1:nan-safe-maximum]")
   {
     auto quad =

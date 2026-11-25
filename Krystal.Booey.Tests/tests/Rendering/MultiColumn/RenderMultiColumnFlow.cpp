@@ -3,8 +3,8 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 
 namespace krys::boo::layout::tests
 {

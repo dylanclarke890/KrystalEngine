@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

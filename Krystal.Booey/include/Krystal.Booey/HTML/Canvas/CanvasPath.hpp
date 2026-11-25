@@ -29,7 +29,7 @@
 #pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
-#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Graphics/Paths/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/Span.hpp"

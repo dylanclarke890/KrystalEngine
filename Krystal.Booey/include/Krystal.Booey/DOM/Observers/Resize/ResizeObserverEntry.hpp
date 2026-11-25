@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverSize.hpp"
-#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Core/Geometry/Size.hpp"

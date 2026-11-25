@@ -23,25 +23,27 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "Krystal.Booey/Geometry/DOMMatrix2DInit.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 
 namespace krys::boo
 {
-  /// @see https://drafts.csswg.org/geometry-1/#dictdef-dommatrixinit
-  struct DOMMatrixInit : DOMMatrix2DInit
+  DOMRectList::DOMRectList(const List<QuadF> &quads) noexcept
   {
-    double M13 {0};
-    double M14 {0};
-    double M23 {0};
-    double M24 {0};
-    double M31 {0};
-    double M32 {0};
-    double M33 {1};
-    double M34 {0};
-    double M43 {0};
-    double M44 {1};
-    Maybe<bool> Is2D;
-  };
+    _items.reserve(quads.size());
+    for (const auto &quad : quads)
+    {
+      _items.push_back(DOMRect::Create(quad.BoundingBox()));
+    }
+  }
+
+  DOMRectList::DOMRectList(const List<RectF> &rects) noexcept
+  {
+    _items.reserve(rects.size());
+    for (const auto &rect : rects)
+    {
+      _items.push_back(DOMRect::Create(rect));
+    }
+  }
+
+  DOMRectList::~DOMRectList() noexcept = default;
 }

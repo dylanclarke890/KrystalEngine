@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"

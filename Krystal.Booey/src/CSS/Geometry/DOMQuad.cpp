@@ -1,5 +1,5 @@
-﻿#include "Krystal.Booey/Geometry/DOMQuad.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+﻿#include "Krystal.Booey/CSS/Geometry/DOMQuad.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Core/Move.hpp"
 
 namespace krys::boo

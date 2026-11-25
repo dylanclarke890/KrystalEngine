@@ -41,7 +41,7 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMMatrix.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"

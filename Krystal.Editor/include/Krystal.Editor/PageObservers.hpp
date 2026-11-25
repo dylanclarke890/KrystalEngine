@@ -9,7 +9,7 @@
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverSize.hpp"
-#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"

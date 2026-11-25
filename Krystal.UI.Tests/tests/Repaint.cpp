@@ -5,7 +5,7 @@
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"

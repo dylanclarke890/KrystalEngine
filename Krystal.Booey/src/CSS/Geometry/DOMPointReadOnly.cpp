@@ -27,9 +27,9 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
-#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
-#include "Krystal.Booey/Geometry/DOMPoint.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMMatrix.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPoint.hpp"
 #include "Krystal.Core/Move.hpp"
 
 namespace krys::boo

@@ -17,7 +17,7 @@
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"

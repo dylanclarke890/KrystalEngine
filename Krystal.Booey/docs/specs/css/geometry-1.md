@@ -21,7 +21,7 @@ Status: n/a (introduction)
 ## [2. The DOMPoint interfaces](https://drafts.csswg.org/geometry-1/#DOMPoint)
 
 Status: reviewed (2026-11-25)
-> Code: Geometry/DOMPointReadOnly.hpp and DOMPoint.hpp; the coordinates are doubles that may be NaN or infinite. toJSON() doesn't apply (see DIFFERENCES.md).
+> Code: CSS/Geometry/DOMPointReadOnly.hpp and DOMPoint.hpp; the coordinates are doubles that may be NaN or infinite. toJSON() doesn't apply (see DIFFERENCES.md).
 <!-- definitions: point point-x-coordinate point-y-coordinate point-z-coordinate point-w-perspective dom-dompoint-dompoint create-a-dompoint-from-the-dictionary dom-dompointreadonly-x -->
 
 - [x] [DOMPointReadOnly.DOMPointReadOnly(x, y, z, w)](https://drafts.csswg.org/geometry-1/#dom-dompointreadonly-dompointreadonly) — The DOMPointReadOnly(x, y, z, w) and DOMPoint(x, y, z, w) constructors, when invoked, must run the following steps:
@@ -70,7 +70,7 @@ Status: reviewed (2026-11-25)
 ## [3. The DOMRect interfaces](https://drafts.csswg.org/geometry-1/#DOMRect)
 
 Status: reviewed (2026-11-25)
-> Code: Geometry/DOMRectReadOnly.hpp and DOMRect.hpp; NaNSafeMinimum and NaNSafeMaximum are the NaN-safe minimum and maximum. toJSON() doesn't apply.
+> Code: CSS/Geometry/DOMRectReadOnly.hpp and DOMRect.hpp; NaNSafeMinimum and NaNSafeMaximum are the NaN-safe minimum and maximum. toJSON() doesn't apply.
 <!-- definitions: rectangle rectangle-origin rectangle-x-coordinate rectangle-y-coordinate rectangle-width-dimension rectangle-height-dimension dom-domrect-domrect create-a-domrect-from-the-dictionary dom-domrectreadonly-domrect-x -->
 
 - [x] [DOMRectReadOnly.DOMRectReadOnly(x, y, width, height)](https://drafts.csswg.org/geometry-1/#dom-domrectreadonly-domrectreadonly) — The DOMRectReadOnly(x, y, width, height) and DOMRect(x, y, width, height) constructors, when invoked, must run the following steps:
@@ -104,7 +104,7 @@ Status: reviewed (2026-11-25)
 ## [4. The DOMRectList interface](https://drafts.csswg.org/geometry-1/#DOMRectList)
 
 Status: reviewed (2026-11-25)
-> Code: Geometry/DOMRectList.hpp.
+> Code: CSS/Geometry/DOMRectList.hpp.
 
 - [x] [DOMRectList.length](https://drafts.csswg.org/geometry-1/#dom-domrectlist-length) — The length attribute must return the total number of DOMRect objects associated with the object.
 
@@ -113,7 +113,7 @@ Status: reviewed (2026-11-25)
 ## [5. The DOMQuad interface](https://drafts.csswg.org/geometry-1/#DOMQuad)
 
 Status: reviewed (2026-11-25)
-> Code: Geometry/DOMQuad.hpp, added in this review. DOMQuadInit's members default to the default point, so a missing one makes the same point as an empty dictionary. toJSON() doesn't apply.
+> Code: CSS/Geometry/DOMQuad.hpp, added in this review. DOMQuadInit's members default to the default point, so a missing one makes the same point as an empty dictionary. toJSON() doesn't apply.
 <!-- definitions: quadrilateral quadrilateral-point-1 quadrilateral-point-2 quadrilateral-point-3 quadrilateral-point-4 dom-domquad-p1 -->
 
 - [x] [DOMQuad.DOMQuad(p1, p2, p3, p4)](https://drafts.csswg.org/geometry-1/#dom-domquad-domquad) — The DOMQuad(p1, p2, p3, p4) constructor, when invoked, must run the following steps:
@@ -160,7 +160,7 @@ Status: reviewed (2026-11-25)
 ## [6. The DOMMatrix interfaces](https://drafts.csswg.org/geometry-1/#DOMMatrix)
 
 Status: reviewed (2026-11-25)
-> Code: Geometry/DOMMatrixReadOnly.hpp and DOMMatrix.hpp. The matrix is a TransformationMatrix, whose Multiply post-multiplies; is 2D is _is2D.
+> Code: CSS/Geometry/DOMMatrixReadOnly.hpp and DOMMatrix.hpp. The matrix is a TransformationMatrix, whose Multiply post-multiplies; is 2D is _is2D.
 <!-- definitions: matrix post-multiply pre-multiply multiply matrix-m11-element matrix-m12-element matrix-m13-element matrix-m14-element matrix-m21-element matrix-m22-element matrix-m23-element matrix-m24-element matrix-m31-element matrix-m32-element matrix-m33-element matrix-m34-element matrix-m41-element matrix-m42-element matrix-m43-element matrix-m44-element -->
 
 ### [6.1. DOMMatrix2DInit and DOMMatrixInit dictionaries](https://drafts.csswg.org/geometry-1/#dommatrixinit-dictionary)
@@ -434,7 +434,7 @@ Status: n/a (WebKitCSSMatrix is a legacy window alias, and there are no global o
 ## [Document conventions](https://drafts.csswg.org/geometry-1/#conventions)
 
 Status: reviewed (2026-11-25)
-> Code: NaNSafeMinimum and NaNSafeMaximum in Geometry/DOMRectReadOnly.hpp.
+> Code: NaNSafeMinimum and NaNSafeMaximum in CSS/Geometry/DOMRectReadOnly.hpp.
 <!-- definitions: nan-safe-minimum nan-safe-maximum -->
 
 ## [Changes since last publication](https://drafts.csswg.org/geometry-1/#changes)

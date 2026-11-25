@@ -13,7 +13,7 @@ namespace krys::boo::css::tests
   {
     using LP = LengthPercentage<>;
 
-    Position LeftTop()
+    Position ShapeLeftTop()
     {
       return PositionAt({keywords::Left {}}, {keywords::Top {}});
     }
@@ -37,7 +37,7 @@ namespace krys::boo::css::tests
     ShapeFunction MakeShape(Shape::CommandsType commands, Maybe<FillRule> fillRule = {})
     {
       return ShapeFunction {Shape {
-        .FillRule = krys::move(fillRule), .StartingPoint = LeftTop(), .Commands = krys::move(commands)}};
+        .FillRule = krys::move(fillRule), .StartingPoint = ShapeLeftTop(), .Commands = krys::move(commands)}};
     }
   }
 
@@ -46,7 +46,7 @@ namespace krys::boo::css::tests
     CHECK(SerialiseForTest(MoveCommand {ToPosition {CentrePosition()}}) == u8"move to center center");
     CHECK(SerialiseForTest(MoveCommand {ByCoordinatePair {Coordinates(LP {1_css_px}, LP {2_css_percentage})}})
           == u8"move by 1px 2%");
-    CHECK(SerialiseForTest(LineCommand {ToPosition {LeftTop()}}) == u8"line to left top");
+    CHECK(SerialiseForTest(LineCommand {ToPosition {ShapeLeftTop()}}) == u8"line to left top");
     CHECK(SerialiseForTest(LineCommand {ByCoordinatePair {Coordinates(LP {-1_css_px}, LP {0_css_px})}})
           == u8"line by -1px 0px");
   }
@@ -68,11 +68,11 @@ namespace krys::boo::css::tests
   TEST_CASE("ShapeFunction(Serialise curve and smooth)", "[CSS][Shapes][ShapeFunction]")
   {
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::To {
-            .Offset = CentrePosition(), .ControlPoint1 = AbsoluteControlPoint {.Offset = LeftTop()}}})
+            .Offset = CentrePosition(), .ControlPoint1 = AbsoluteControlPoint {.Offset = ShapeLeftTop()}}})
           == u8"curve to center center with left top");
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::To {
             .Offset = CentrePosition(),
-            .ControlPoint1 = AbsoluteControlPoint {.Offset = LeftTop(), .Anchor = keywords::Start {}},
+            .ControlPoint1 = AbsoluteControlPoint {.Offset = ShapeLeftTop(), .Anchor = keywords::Start {}},
             .ControlPoint2 = AbsoluteControlPoint {.Offset = CentrePosition(), .Anchor = keywords::End {}}}})
           == u8"curve to center center with left top from start / center center from end");
     CHECK(SerialiseForTest(CurveCommand {CurveCommand::By {
@@ -82,10 +82,10 @@ namespace krys::boo::css::tests
                                                    .Anchor = keywords::Origin {}}}})
           == u8"curve by 1px 2px with 3px 4px / 5px 6px from origin");
 
-    CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::To {.Offset = LeftTop()}})
+    CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::To {.Offset = ShapeLeftTop()}})
           == u8"smooth to left top");
     CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::To {
-            .Offset = LeftTop(), .ControlPoint = AbsoluteControlPoint {.Offset = CentrePosition()}}})
+            .Offset = ShapeLeftTop(), .ControlPoint = AbsoluteControlPoint {.Offset = CentrePosition()}}})
           == u8"smooth to left top with center center");
     CHECK(SerialiseForTest(SmoothCommand {SmoothCommand::By {
             .Offset = Coordinates(LP {1_css_px}, LP {2_css_px}),
@@ -138,7 +138,7 @@ namespace krys::boo::css::tests
     CHECK(MakeShape({MoveCommand {ToPosition {CentrePosition()}}})
           != MakeShape({LineCommand {ToPosition {CentrePosition()}}}));
     // `to` and `by` are different commands, even if they reach the same point.
-    CHECK(MakeShape({LineCommand {ToPosition {LeftTop()}}})
+    CHECK(MakeShape({LineCommand {ToPosition {ShapeLeftTop()}}})
           != MakeShape({LineCommand {ByCoordinatePair {Coordinates(LP {0_css_px}, LP {0_css_px})}}}));
     CHECK(Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}})
           == Arc(ArcCommand::To {CentrePosition()}, {LP {10_css_px}, LP {10_css_px}}));

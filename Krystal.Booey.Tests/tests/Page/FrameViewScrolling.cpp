@@ -11,7 +11,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"

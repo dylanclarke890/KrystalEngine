@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Geometry/DOMRectReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 
 namespace krys::boo

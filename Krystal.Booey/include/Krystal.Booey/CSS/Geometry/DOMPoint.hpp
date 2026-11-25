@@ -30,7 +30,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
 
 namespace krys::boo
 {

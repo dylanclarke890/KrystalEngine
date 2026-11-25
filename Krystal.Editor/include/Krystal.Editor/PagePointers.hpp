@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/Events/TouchList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"

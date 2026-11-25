@@ -396,6 +396,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Font/FontFaceSource.hpp
   include/Krystal.Booey/CSS/Font/SegmentedFontFace.hpp
   include/Krystal.Booey/CSS/Font/FontSelectionValueInlines.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMMatrix.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMMatrix2DInit.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMMatrixInit.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMMatrixReadOnly.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMPoint.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMQuad.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMRect.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMRectList.hpp
+  include/Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp
   include/Krystal.Booey/CSS/CSSOM/Markup.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaList.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp
@@ -801,6 +811,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Font/FontFaceSet.cpp
   src/CSS/Font/FontFaceSource.cpp
   src/CSS/Font/SegmentedFontFace.cpp
+  src/CSS/Geometry/DOMMatrix.cpp
+  src/CSS/Geometry/DOMMatrixReadOnly.cpp
+  src/CSS/Geometry/DOMPointReadOnly.cpp
+  src/CSS/Geometry/DOMQuad.cpp
+  src/CSS/Geometry/DOMRectList.cpp
   src/CSS/CSSOM/Markup.cpp
   src/CSS/CSSOM/MediaList.cpp
   src/CSS/CSSOM/MediaQueryList.cpp
@@ -1427,27 +1442,6 @@ set(KRYSTAL_BOOEY_FILEAPI_SOURCES
   src/FileAPI/Blob.cpp
   src/FileAPI/File.cpp
   src/FileAPI/FileList.cpp
-)
-
-set(KRYSTAL_BOOEY_GEOMETRY_HEADERS
-  include/Krystal.Booey/Geometry/DOMMatrix.hpp
-  include/Krystal.Booey/Geometry/DOMMatrix2DInit.hpp
-  include/Krystal.Booey/Geometry/DOMMatrixInit.hpp
-  include/Krystal.Booey/Geometry/DOMMatrixReadOnly.hpp
-  include/Krystal.Booey/Geometry/DOMPoint.hpp
-  include/Krystal.Booey/Geometry/DOMPointReadOnly.hpp
-  include/Krystal.Booey/Geometry/DOMQuad.hpp
-  include/Krystal.Booey/Geometry/DOMRect.hpp
-  include/Krystal.Booey/Geometry/DOMRectList.hpp
-  include/Krystal.Booey/Geometry/DOMRectReadOnly.hpp
-)
-
-set(KRYSTAL_BOOEY_GEOMETRY_SOURCES
-  src/Geometry/DOMMatrix.cpp
-  src/Geometry/DOMMatrixReadOnly.cpp
-  src/Geometry/DOMPointReadOnly.cpp
-  src/Geometry/DOMQuad.cpp
-  src/Geometry/DOMRectList.cpp
 )
 
 set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
@@ -4225,7 +4219,6 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_DOM_HEADERS}
       ${KRYSTAL_BOOEY_EDITING_HEADERS}
       ${KRYSTAL_BOOEY_FILEAPI_HEADERS}
-      ${KRYSTAL_BOOEY_GEOMETRY_HEADERS}
       ${KRYSTAL_BOOEY_GRAPHICS_HEADERS}
       ${KRYSTAL_BOOEY_HISTORY_HEADERS}
       ${KRYSTAL_BOOEY_HTML_HEADERS}
@@ -4250,7 +4243,6 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_DOM_SOURCES}
     ${KRYSTAL_BOOEY_EDITING_SOURCES}
     ${KRYSTAL_BOOEY_FILEAPI_SOURCES}
-    ${KRYSTAL_BOOEY_GEOMETRY_SOURCES}
     ${KRYSTAL_BOOEY_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}
     ${KRYSTAL_BOOEY_HTML_SOURCES}

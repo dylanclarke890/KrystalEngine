@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/Geometry/DOMRectList.hpp"
+﻿#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include <cmath>
 
@@ -6,7 +6,7 @@ namespace krys::boo::tests
 {
   TEST_CASE(
     "DOMRect: edges",
-    "[Geometry][DOMRect][geometry-1:DOMRect][geometry-1:dom-domrectreadonly-domrect-top]"
+    "[CSS][Geometry][DOMRect][geometry-1:DOMRect][geometry-1:dom-domrectreadonly-domrect-top]"
     "[geometry-1:dom-domrectreadonly-domrect-right][geometry-1:dom-domrectreadonly-domrect-bottom]"
     "[geometry-1:dom-domrectreadonly-domrect-left][geometry-1:create-a-domrectreadonly-from-the-dictionary]"
     "[geometry-1:dom-domrectreadonly-domrectreadonly][geometry-1:dom-domrectreadonly-fromrect]"
@@ -45,8 +45,9 @@ namespace krys::boo::tests
     CHECK(DOMRect::Create(1)->ToRectF() == RectF(1, 0, 0, 0));
   }
 
-  TEST_CASE("DOMRectList: items",
-            "[Geometry][DOMRectList][geometry-1:dom-domrectlist-length][geometry-1:dom-domrectlist-item]")
+  TEST_CASE(
+    "DOMRectList: items",
+    "[CSS][Geometry][DOMRectList][geometry-1:dom-domrectlist-length][geometry-1:dom-domrectlist-item]")
   {
     CHECK(DOMRectList::Create()->Length() == 0u);
 

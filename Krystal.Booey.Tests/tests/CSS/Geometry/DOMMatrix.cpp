@@ -1,18 +1,18 @@
-﻿#include "Krystal.Booey/Geometry/DOMMatrix.hpp"
+﻿#include "Krystal.Booey/CSS/Geometry/DOMMatrix.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/Geometry/DOMPoint.hpp"
+#include "Krystal.Booey/CSS/Geometry/DOMPoint.hpp"
 #include <cmath>
 
 namespace krys::boo::tests
 {
   using Catch::Approx;
 
-  TEST_CASE(
-    "DOMMatrix: made from nothing, lists and strings",
-    "[Geometry][DOMMatrix][geometry-1:dom-dommatrixreadonly-dommatrixreadonly][geometry-1:create-a-2d-matrix]"
-    "[geometry-1:create-a-3d-matrix][geometry-1:parse-a-string-into-an-abstract-matrix]"
-    "[geometry-1:dom-dommatrix-setmatrixvalue]")
+  TEST_CASE("DOMMatrix: made from nothing, lists and strings",
+            "[CSS][Geometry][DOMMatrix][geometry-1:dom-dommatrixreadonly-dommatrixreadonly][geometry-1:"
+            "create-a-2d-matrix]"
+            "[geometry-1:create-a-3d-matrix][geometry-1:parse-a-string-into-an-abstract-matrix]"
+            "[geometry-1:dom-dommatrix-setmatrixvalue]")
   {
     // With nothing, the matrix is the 2D identity.
     auto identity = DOMMatrix::Create().ReleaseValue();
@@ -97,11 +97,11 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE(
-    "DOMMatrix: validating and fixing up dictionaries",
-    "[Geometry][DOMMatrix][geometry-1:matrix-validate-and-fixup-2d][geometry-1:matrix-validate-and-fixup]"
-    "[geometry-1:create-a-dommatrixreadonly-from-the-dictionary][geometry-1:dom-dommatrix-frommatrix]"
-    "[geometry-1:dom-dommatrixreadonly-frommatrix]")
+  TEST_CASE("DOMMatrix: validating and fixing up dictionaries",
+            "[CSS][Geometry][DOMMatrix][geometry-1:matrix-validate-and-fixup-2d][geometry-1:matrix-validate-"
+            "and-fixup]"
+            "[geometry-1:create-a-dommatrixreadonly-from-the-dictionary][geometry-1:dom-dommatrix-frommatrix]"
+            "[geometry-1:dom-dommatrixreadonly-frommatrix]")
   {
     // The letters fill in the matrix entries they alias.
     DOMMatrixInit init;
@@ -150,7 +150,7 @@ namespace krys::boo::tests
 
   TEST_CASE(
     "DOMMatrix: operations",
-    "[Geometry][DOMMatrix][geometry-1:immutable-transformation-methods]"
+    "[CSS][Geometry][DOMMatrix][geometry-1:immutable-transformation-methods]"
     "[geometry-1:mutable-transformation-methods][geometry-1:dommatrix-attributes][geometry-1:matrix-is-2d]"
     "[geometry-1:dom-dommatrixreadonly-translate][geometry-1:dom-dommatrixreadonly-scale]"
     "[geometry-1:dom-dommatrixreadonly-scalenonuniform][geometry-1:dom-dommatrixreadonly-scale3d]"
@@ -283,7 +283,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("DOMMatrix: attributes",
-            "[Geometry][DOMMatrix]"
+            "[CSS][Geometry][DOMMatrix]"
             "[geometry-1:dom-dommatrixreadonly-m11][geometry-1:dom-dommatrixreadonly-m12]"
             "[geometry-1:dom-dommatrixreadonly-m13][geometry-1:dom-dommatrixreadonly-m14]"
             "[geometry-1:dom-dommatrixreadonly-m21][geometry-1:dom-dommatrixreadonly-m22]"
@@ -364,7 +364,7 @@ namespace krys::boo::tests
 
   TEST_CASE(
     "DOMMatrix: points, arrays and strings",
-    "[Geometry][DOMMatrix][geometry-1:dom-dommatrixreadonly-transformpoint]"
+    "[CSS][Geometry][DOMMatrix][geometry-1:dom-dommatrixreadonly-transformpoint]"
     "[geometry-1:dom-dompointreadonly-matrixtransform][geometry-1:transform-a-point-with-a-matrix]"
     "[geometry-1:dom-dommatrixreadonly-fromfloat32array][geometry-1:dom-dommatrixreadonly-fromfloat64array]"
     "[geometry-1:dommatrixreadonly-stringification-behavior]"

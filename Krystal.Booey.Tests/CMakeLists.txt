@@ -198,6 +198,10 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/CSSOM/StyleSheetList.cpp
   tests/CSS/Font/CSSFontSelector.cpp
   tests/CSS/Font/FontFace.cpp
+  tests/CSS/Geometry/DOMMatrix.cpp
+  tests/CSS/Geometry/DOMPoint.cpp
+  tests/CSS/Geometry/DOMQuad.cpp
+  tests/CSS/Geometry/DOMRectList.cpp
   tests/CSS/Parser/AtRuleId.cpp
   tests/CSS/Parser/CustomPropertySyntax.cpp
   tests/CSS/Parser/KeywordLookup.cpp
@@ -480,13 +484,6 @@ set(KRYSTAL_BOOEY_TESTS_EDITING_SOURCES
 
 set(KRYSTAL_BOOEY_TESTS_FILEAPI_SOURCES
   tests/FileAPI/Blob.cpp
-)
-
-set(KRYSTAL_BOOEY_TESTS_GEOMETRY_SOURCES
-  tests/Geometry/DOMMatrix.cpp
-  tests/Geometry/DOMPoint.cpp
-  tests/Geometry/DOMQuad.cpp
-  tests/Geometry/DOMRectList.cpp
 )
 
 set(KRYSTAL_BOOEY_TESTS_GRAPHICS_HEADERS
@@ -968,7 +965,6 @@ target_sources(Krystal.Booey.Tests
     ${KRYSTAL_BOOEY_TESTS_DOM_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_EDITING_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_FILEAPI_SOURCES}
-    ${KRYSTAL_BOOEY_TESTS_GEOMETRY_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_HTML_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_INFRA_SOURCES}
