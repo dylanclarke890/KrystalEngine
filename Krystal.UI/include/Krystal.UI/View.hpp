@@ -783,7 +783,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
 
     /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
-    void DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept;
+    void DragStarted(boo::DragItem item, boo::DataTransfer &dataTransfer) noexcept;
 
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.

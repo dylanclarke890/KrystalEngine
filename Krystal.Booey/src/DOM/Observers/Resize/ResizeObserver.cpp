@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/DOM/Observers/Resize/ResizeObservation.hpp"
 #include "Krystal.Booey/DOM/Observers/Resize/ResizeObserverEntry.hpp"
 #include <algorithm>
 

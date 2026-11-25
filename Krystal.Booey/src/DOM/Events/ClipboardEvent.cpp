@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 
 namespace krys::boo
 {
@@ -11,7 +11,7 @@ namespace krys::boo
   ClipboardEvent::~ClipboardEvent() noexcept = default;
 
   Ref<ClipboardEvent> ClipboardEvent::Create(const DOMStringAtom &type,
-                                             Ref<dom::DataTransfer> &&dataTransfer) noexcept
+                                             Ref<DataTransfer> &&dataTransfer) noexcept
   {
     ClipboardEventInit init;
     init.Bubbles = true;

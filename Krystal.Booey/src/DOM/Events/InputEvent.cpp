@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/DOM/Events/InputEvent.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 
 namespace krys::boo
 {
@@ -40,7 +40,7 @@ namespace krys::boo
 
   Ref<InputEvent> InputEvent::Create(const DOMStringAtom &type, Window *view, DOMStringView inputType,
                                      bool cancelable, Maybe<DOMString> data,
-                                     RefPtr<dom::DataTransfer> &&dataTransfer,
+                                     RefPtr<DataTransfer> &&dataTransfer,
                                      const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,
                                      dom::IsInputMethodComposing isInputMethodComposing) noexcept
   {

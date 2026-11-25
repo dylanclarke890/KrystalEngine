@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/Page/Drag/DragActions.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
@@ -43,6 +43,6 @@ namespace krys::boo
     // Should be Maybe<>.
     EnumSet<DragSourceAction> Type;
     /// @brief Used on only the source side of dragging.
-    RefPtr<dom::DataTransfer> DataTransfer;
+    RefPtr<DataTransfer> DataTransfer;
   };
 }

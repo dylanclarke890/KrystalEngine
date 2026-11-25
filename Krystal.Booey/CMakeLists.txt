@@ -1078,15 +1078,11 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Collections/NodeList.hpp
   include/Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/StaticNodeList.hpp
-  include/Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp
-  include/Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp
-  include/Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp
   include/Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp
   include/Krystal.Booey/DOM/Events/ClipboardEvent.hpp
   include/Krystal.Booey/DOM/Events/CommandEvent.hpp
   include/Krystal.Booey/DOM/Events/CompositionEvent.hpp
   include/Krystal.Booey/DOM/Events/CustomEvent.hpp
-  include/Krystal.Booey/DOM/Events/DragEvent.hpp
   include/Krystal.Booey/DOM/Events/Event.hpp
   include/Krystal.Booey/DOM/Events/EventListener.hpp
   include/Krystal.Booey/DOM/Events/EventListenerHandle.hpp
@@ -1242,15 +1238,11 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Collections/LiveNodeList.cpp
   src/DOM/Collections/StaticHTMLCollection.cpp
   src/DOM/Collections/StaticNodeList.cpp
-  src/DOM/DataTransfer/DataTransfer.cpp
-  src/DOM/DataTransfer/DataTransferItem.cpp
-  src/DOM/DataTransfer/DataTransferItemList.cpp
   src/DOM/Events/BeforeTextInsertedEvent.cpp
   src/DOM/Events/UIEvent.cpp
   src/DOM/Events/ClipboardEvent.cpp
   src/DOM/Events/CommandEvent.cpp
   src/DOM/Events/CompositionEvent.cpp
-  src/DOM/Events/DragEvent.cpp
   src/DOM/Events/Event.cpp
   src/DOM/Events/EventListener.cpp
   src/DOM/Events/EventListenerHandle.cpp
@@ -1889,6 +1881,10 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/CustomElement/ElementInternals.hpp
   include/Krystal.Booey/HTML/CustomElement/FormAssociatedCustomElement.hpp
   include/Krystal.Booey/HTML/CustomElement/ValidityStateFlags.hpp
+  include/Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp
+  include/Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp
+  include/Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp
+  include/Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAudioElement.hpp
@@ -2096,6 +2092,10 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/CustomElement/CustomStateSet.cpp
   src/HTML/CustomElement/ElementInternals.cpp
   src/HTML/CustomElement/FormAssociatedCustomElement.cpp
+  src/HTML/DragAndDrop/DataTransfer.cpp
+  src/HTML/DragAndDrop/DataTransferItem.cpp
+  src/HTML/DragAndDrop/DataTransferItemList.cpp
+  src/HTML/DragAndDrop/DragEvent.cpp
   src/HTML/Elements/HTMLAnchorElement.cpp
   src/HTML/Elements/HTMLAreaElement.cpp
   src/HTML/Elements/HTMLAudioElement.cpp

@@ -1,5 +1,5 @@
-﻿#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+﻿#include "Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 
 namespace krys::boo
 {
@@ -12,7 +12,7 @@ namespace krys::boo
                        const PointD &screenLocation, const PointD &windowLocation, double movementX,
                        double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
                        EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
-                       dom::DataTransfer *dataTransfer) noexcept
+                       DataTransfer *dataTransfer) noexcept
       : MouseEvent(krys::move(type), eventInitDict, view, screenLocation, windowLocation, movementX,
                    movementY, modifiers, button, buttons, relatedTarget, force, syntheticClickType, {}, {},
                    Simulated::No),
@@ -28,7 +28,7 @@ namespace krys::boo
                                    double movementX, double movementY, EnumSet<Modifier> modifiers,
                                    MouseButton button, uint16 buttons, EventTarget *relatedTarget,
                                    double force, SyntheticClickType syntheticClickType,
-                                   dom::DataTransfer *dataTransfer) noexcept
+                                   DataTransfer *dataTransfer) noexcept
   {
     UIEventInit init;
     init.Bubbles = canBubble;

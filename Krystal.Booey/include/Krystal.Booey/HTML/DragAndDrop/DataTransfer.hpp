@@ -25,10 +25,7 @@ namespace krys::boo
   class FileList;
   class Pasteboard;
   enum class WebContentReadingPolicy : bool;
-}
 
-namespace krys::boo::dom
-{
   class DataTransferItemList;
 
   /// @brief The data of a drag, a clipboard event or an input event, and what a page may do with it.

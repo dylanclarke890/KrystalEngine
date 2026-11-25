@@ -27,7 +27,6 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
@@ -41,6 +40,7 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
@@ -928,7 +928,7 @@ namespace krys::boo
   }
 
   void DragController::PrepareForDragStart(Frame &source, EnumSet<boo::DragSourceAction> actionMask,
-                                           Element &element, dom::DataTransfer &dataTransfer,
+                                           Element &element, DataTransfer &dataTransfer,
                                            const PointI &dragOrigin) const noexcept
   {
     Ref protectedSource = ShareRef(source);
@@ -1027,7 +1027,7 @@ namespace krys::boo
 
     krys_debug_assert(state.DataTransfer);
 
-    Ref<dom::DataTransfer> dataTransfer = ShareRef(*state.DataTransfer);
+    Ref<DataTransfer> dataTransfer = ShareRef(*state.DataTransfer);
     if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
     {
       dragImage = DragImage {dataTransfer->CreateDragImage(src.Document(), dragImageOffset)};
@@ -1310,7 +1310,7 @@ namespace krys::boo
     return image.Size().Height() * image.Size().Width() <= MaxOriginalImageArea;
   }
 
-  void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
+  void DragController::DeclareAndWriteDragImage(DataTransfer &dataTransfer, Element &element,
                                                 const net::Url &url, utf8_stringview label) noexcept
   {
     auto *frame = element.NodeDocument().Frame();

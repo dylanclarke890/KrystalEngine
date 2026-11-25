@@ -56,13 +56,13 @@
 
 namespace krys::boo::dom
 {
-  class DataTransfer;
   enum class TextEventInputType : uint8;
 }
 
 namespace krys::boo
 {
   class AutoscrollController;
+  class DataTransfer;
   class Element;
   class Event;
   class Frame;
@@ -612,7 +612,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool ShouldAllowMouseDownToStartDrag() noexcept;
 
     bool DispatchDragEvent(DOMStringAtom eventType, Element &target, const PlatformMouseEvent &event,
-                           dom::DataTransfer &dataTransfer) noexcept;
+                           DataTransfer &dataTransfer) noexcept;
 
     DragTargetResponse DispatchDragEnterOrDragOverEvent(DOMStringAtom eventType, Element &target,
                                                         const PlatformMouseEvent &event,
@@ -629,7 +629,7 @@ namespace krys::boo
 
     void DispatchEventToDragSourceElement(DOMStringAtom eventType, const PlatformMouseEvent &event) noexcept;
 
-    bool DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept;
+    bool DispatchDragStartEventOnSourceElement(DataTransfer &dataTransfer) noexcept;
 
     KRYS_NODISCARD bool DragHysteresisExceeded(const PointF &dragViewportLocation) const noexcept;
 

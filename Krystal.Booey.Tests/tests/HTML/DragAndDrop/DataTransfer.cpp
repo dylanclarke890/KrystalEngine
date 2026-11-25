@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+﻿#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/PasteboardCustomData.hpp"
@@ -15,7 +15,6 @@ namespace krys::boo::tests
 {
   namespace
   {
-    using dom::DataTransfer;
     using StoreMode = DataTransfer::StoreMode;
 
     KRYS_NODISCARD List<utf8_string> StringList(std::initializer_list<utf8_stringview> strings) noexcept

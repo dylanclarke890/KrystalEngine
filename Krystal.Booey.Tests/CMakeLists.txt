@@ -396,7 +396,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Collections/HTMLCollection.cpp
   tests/DOM/Collections/LiveCollection.cpp
   tests/DOM/Collections/NodeList.cpp
-  tests/DOM/DataTransfer/DataTransfer.cpp
   tests/DOM/Events/CustomEvent.cpp
   tests/DOM/Events/Event.cpp
   tests/DOM/Events/EventListenerHandle.cpp
@@ -557,6 +556,7 @@ set(KRYSTAL_BOOEY_TESTS_HTML_SOURCES
   tests/HTML/Collections/RadioNodeList.cpp
   tests/HTML/CustomElement/CustomElementRegistry.cpp
   tests/HTML/CustomElement/ElementInternals.cpp
+  tests/HTML/DragAndDrop/DataTransfer.cpp
   tests/HTML/Elements/HTMLAnchorElement.cpp
   tests/HTML/Elements/HTMLBaseElement.cpp
   tests/HTML/Elements/HTMLButtonElement.cpp

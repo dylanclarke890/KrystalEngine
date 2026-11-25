@@ -23,14 +23,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Markup/PasteboardFileListReader.hpp"
 #include "Krystal.Booey/Editing/Markup/WebContentReader.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
@@ -50,11 +50,11 @@ namespace krys::boo
     KRYS_NON_COPY_MOVABLE(DragImageLoader);
 
   private:
-    WeakPtr<dom::DataTransfer> _dataTransfer;
+    WeakPtr<DataTransfer> _dataTransfer;
     WeakPtr<const Document> _document;
 
   public:
-    KRYS_NODISCARD static Ref<DragImageLoader> Create(dom::DataTransfer &dataTransfer,
+    KRYS_NODISCARD static Ref<DragImageLoader> Create(DataTransfer &dataTransfer,
                                                       const Document &document) noexcept
     {
       return AdoptRef(*new DragImageLoader(dataTransfer, document));
@@ -71,20 +71,20 @@ namespace krys::boo
       image->RemoveClient(*this);
     }
 
-    void MoveToDataTransfer(dom::DataTransfer &newDataTransfer) noexcept
+    void MoveToDataTransfer(DataTransfer &newDataTransfer) noexcept
     {
       _dataTransfer = CreateWeakPtr(&newDataTransfer);
     }
 
   private:
-    DragImageLoader(dom::DataTransfer &dataTransfer, const Document &document) noexcept
+    DragImageLoader(DataTransfer &dataTransfer, const Document &document) noexcept
         : _dataTransfer(CreateWeakPtr(&dataTransfer)), _document(CreateWeakPtr(&document))
     {
     }
 
     void ImageChanged(CachedImage *, const RectI *) noexcept final
     {
-      if (RefPtr<dom::DataTransfer> dataTransfer = ShareRefPtr(_dataTransfer.get()))
+      if (RefPtr<DataTransfer> dataTransfer = ShareRefPtr(_dataTransfer.get()))
       {
         dataTransfer->UpdateDragImage(_document.get());
       }
@@ -92,7 +92,7 @@ namespace krys::boo
   };
 }
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {

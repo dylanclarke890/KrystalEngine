@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
@@ -10,7 +10,7 @@ namespace krys::boo
   /// @see https://w3c.github.io/clipboard-apis/#dictdef-clipboardeventinit
   struct ClipboardEventInit : EventInit
   {
-    RefPtr<dom::DataTransfer> ClipboardData;
+    RefPtr<DataTransfer> ClipboardData;
   };
 
   /// @brief A clipboard event: `copy`, `cut` and `paste`, and the legacy `beforecopy`, `beforecut` and
@@ -19,7 +19,7 @@ namespace krys::boo
   class ClipboardEvent final : public Event
   {
   private:
-    RefPtr<dom::DataTransfer> _clipboardData;
+    RefPtr<DataTransfer> _clipboardData;
 
   public:
     /// @brief The dictionary its constructor takes.
@@ -33,10 +33,10 @@ namespace krys::boo
     /// @brief A trusted clipboard event carrying @p dataTransfer, which bubbles, can be cancelled and crosses
     /// shadow boundaries.
     KRYS_NODISCARD static Ref<ClipboardEvent> Create(const DOMStringAtom &type,
-                                                     Ref<dom::DataTransfer> &&dataTransfer) noexcept;
+                                                     Ref<DataTransfer> &&dataTransfer) noexcept;
 
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboarddata
-    KRYS_NODISCARD dom::DataTransfer *ClipboardData() const noexcept
+    KRYS_NODISCARD DataTransfer *ClipboardData() const noexcept
     {
       return _clipboardData.get();
     }

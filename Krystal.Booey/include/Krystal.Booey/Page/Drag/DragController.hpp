@@ -37,13 +37,9 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
 
-namespace krys::boo::dom
-{
-  class DataTransfer;
-}
-
 namespace krys::boo
 {
+  class DataTransfer;
   class Document;
   class DragData;
   class Element;
@@ -179,7 +175,7 @@ namespace krys::boo
     /// @brief Writes what a drag of @p element (the selection, an image or a link, as @p actionMask says)
     /// carries by default to @p dataTransfer, before `dragstart` lets the page change it.
     void PrepareForDragStart(Frame &sourceFrame, EnumSet<DragSourceAction> actionMask, Element &sourceElement,
-                             dom::DataTransfer &dataTransfer, const PointI &dragOrigin) const noexcept;
+                             DataTransfer &dataTransfer, const PointI &dragOrigin) const noexcept;
 
     /// @brief Starts the drag @p state describes, handing it to the client.
     /// @return Whether it started.
@@ -236,8 +232,8 @@ namespace krys::boo
       return *_client;
     }
 
-    static void DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
-                                         const net::Url &url, utf8_stringview label) noexcept;
+    static void DeclareAndWriteDragImage(DataTransfer &dataTransfer, Element &element, const net::Url &url,
+                                         utf8_stringview label) noexcept;
   };
 
   /// @brief Whether @p element is a link a press may drag: an `a` with an `href` that isn't editable, or an

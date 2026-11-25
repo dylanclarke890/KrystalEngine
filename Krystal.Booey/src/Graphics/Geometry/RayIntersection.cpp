@@ -26,6 +26,7 @@
 
 #include "Krystal.Booey/Graphics/Geometry/RayIntersection.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"
 #include <cmath>
 

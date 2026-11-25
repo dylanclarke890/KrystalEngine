@@ -29,7 +29,6 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
@@ -64,6 +63,7 @@
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -539,7 +539,7 @@ namespace krys::boo
   {
   }
 
-  RefPtr<dom::DataTransfer> CompositeEditCommand::InputEventDataTransfer() const noexcept
+  RefPtr<DataTransfer> CompositeEditCommand::InputEventDataTransfer() const noexcept
   {
     return nullptr;
   }

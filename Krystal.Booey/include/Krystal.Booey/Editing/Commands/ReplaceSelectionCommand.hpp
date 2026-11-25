@@ -132,7 +132,7 @@ namespace krys::boo
   private:
     KRYS_NODISCARD DOMString InputEventData() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept final;
+    KRYS_NODISCARD RefPtr<DataTransfer> InputEventDataTransfer() const noexcept final;
 
     bool WillApplyCommand() noexcept final;
 

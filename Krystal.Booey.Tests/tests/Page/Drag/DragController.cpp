@@ -3,10 +3,10 @@
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/DragClient.hpp"
@@ -36,7 +36,7 @@ namespace krys::boo::tests
       }
 
       void WillPerformDragSourceAction(DragSourceAction action, const PointI &,
-                                       dom::DataTransfer &) noexcept override
+                                       DataTransfer &) noexcept override
       {
         SourceActions.push_back(action);
       }
@@ -46,7 +46,7 @@ namespace krys::boo::tests
         return Mask;
       }
 
-      void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer, boo::Frame &) noexcept override
+      void StartDrag(DragItem dragItem, DataTransfer &dataTransfer, boo::Frame &) noexcept override
       {
         ++Starts;
         LastItem = krys::move(dragItem);
@@ -217,7 +217,7 @@ namespace krys::boo::tests
       }
     };
 
-    KRYS_NODISCARD dom::DataTransfer &DataTransferOf(Event &event) noexcept
+    KRYS_NODISCARD DataTransfer &DataTransferOf(Event &event) noexcept
     {
       auto *dataTransfer = Downcast<DragEvent>(event).GetDataTransfer();
       krys_assert(dataTransfer);

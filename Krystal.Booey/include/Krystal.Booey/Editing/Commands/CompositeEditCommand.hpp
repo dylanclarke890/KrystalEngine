@@ -39,13 +39,13 @@
 
 namespace krys::boo::dom
 {
-  class DataTransfer;
   class StaticRange;
 }
 
 namespace krys::boo
 {
   class ContainerNode;
+  class DataTransfer;
   class EditingStyle;
   class Element;
   class Text;
@@ -241,7 +241,7 @@ namespace krys::boo
     }
 
     /// @brief The data transfer the command's input events carry: what it pastes or drops, if anything.
-    KRYS_NODISCARD virtual RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<DataTransfer> InputEventDataTransfer() const noexcept;
 
     KRYS_NODISCARD virtual bool IsBeforeInputEventCancelable() const noexcept
     {

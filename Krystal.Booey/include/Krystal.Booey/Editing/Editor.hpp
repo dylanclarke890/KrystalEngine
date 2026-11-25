@@ -48,7 +48,6 @@ namespace krys::net
 
 namespace krys::boo::dom
 {
-  class DataTransfer;
   class Range;
   struct SimpleRange;
   class StaticRange;
@@ -63,6 +62,7 @@ namespace krys::boo::css
 namespace krys::boo
 {
   class CompositeEditCommand;
+  class DataTransfer;
   class Document;
   class DocumentFragment;
   class EditCommandComposition;
@@ -581,7 +581,7 @@ namespace krys::boo
     bool DispatchClipboardEvent(RefPtr<Element> target, ClipboardEventKind kind) noexcept;
 
     static bool DispatchClipboardEvent(const RefPtr<Element> &target, ClipboardEventKind kind,
-                                       const Ref<dom::DataTransfer> &dataTransfer) noexcept;
+                                       const Ref<DataTransfer> &dataTransfer) noexcept;
 
     KRYS_NODISCARD RefPtr<Element> FindEventTargetFromSelection() const noexcept;
 

@@ -29,15 +29,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/FileAPI/File.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/EventLoop/TaskSource.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   Ref<DataTransferItem> DataTransferItem::Create(WeakPtr<DataTransferItemList> &&list, DOMStringView type,
                                                  Kind kind) noexcept

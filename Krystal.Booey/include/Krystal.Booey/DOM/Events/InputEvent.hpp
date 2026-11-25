@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
@@ -51,7 +51,7 @@ namespace krys::boo
   struct InputEventInit : UIEventInit
   {
     Maybe<DOMString> Data;
-    RefPtr<dom::DataTransfer> DataTransfer;
+    RefPtr<DataTransfer> DataTransfer;
     bool IsComposing {false};
     DOMString InputType;
   };
@@ -63,7 +63,7 @@ namespace krys::boo
   private:
     DOMString _inputType;
     Maybe<DOMString> _data;
-    RefPtr<dom::DataTransfer> _dataTransfer;
+    RefPtr<DataTransfer> _dataTransfer;
     List<RefPtr<dom::StaticRange>> _targetRanges;
     bool _isInputMethodComposing {false};
 
@@ -77,11 +77,12 @@ namespace krys::boo
     ~InputEvent() noexcept override;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
-    KRYS_NODISCARD static Ref<InputEvent>
-      Create(const DOMStringAtom &type, Window *view, DOMStringView inputType, bool cancelable,
-             Maybe<DOMString> data, RefPtr<dom::DataTransfer> &&dataTransfer,
-             const List<RefPtr<dom::StaticRange>> &targetRanges, int32 detail,
-             dom::IsInputMethodComposing isInputMethodComposing) noexcept;
+    KRYS_NODISCARD static Ref<InputEvent> Create(const DOMStringAtom &type, Window *view,
+                                                 DOMStringView inputType, bool cancelable,
+                                                 Maybe<DOMString> data, RefPtr<DataTransfer> &&dataTransfer,
+                                                 const List<RefPtr<dom::StaticRange>> &targetRanges,
+                                                 int32 detail,
+                                                 dom::IsInputMethodComposing isInputMethodComposing) noexcept;
 
     KRYS_NODISCARD bool IsInputEvent() const noexcept final
     {
@@ -101,7 +102,7 @@ namespace krys::boo
     }
 
     /// @see https://w3c.github.io/input-events/#dom-inputevent-datatransfer
-    KRYS_NODISCARD const RefPtr<dom::DataTransfer> &GetDataTransfer() const noexcept
+    KRYS_NODISCARD const RefPtr<DataTransfer> &GetDataTransfer() const noexcept
     {
       return _dataTransfer;
     }

@@ -23,16 +23,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItemList.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransferItem.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include <algorithm>
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -265,7 +265,7 @@ namespace krys::boo::dom
     std::erase_if(items, [](auto &item) { return !item->IsFile(); });
   }
 
-  // https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdata
+  // https://html.spec.whatwg.org/#dom-datatransfer-setdata
   void DataTransferItemList::DidSetStringData(DOMStringView type) noexcept
   {
     if (!_items)

@@ -44,7 +44,7 @@ namespace krys::boo
   class FileList final : public RefCounted<FileList>
   {
     // FileLists can only be changed by their owners.
-    friend class dom::DataTransfer;
+    friend class DataTransfer;
     friend class html::FileInputType;
     KRYS_NON_COPY_MOVABLE(FileList);
 

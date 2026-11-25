@@ -2,7 +2,7 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -375,7 +375,7 @@ namespace krys::ui
     }
 
     void WillPerformDragSourceAction(boo::DragSourceAction, const PointI &,
-                                     boo::dom::DataTransfer &) noexcept override
+                                     boo::DataTransfer &) noexcept override
     {
     }
 
@@ -385,7 +385,7 @@ namespace krys::ui
       return boo::AnyDragSourceAction();
     }
 
-    void StartDrag(boo::DragItem item, boo::dom::DataTransfer &dataTransfer, boo::Frame &) noexcept override
+    void StartDrag(boo::DragItem item, boo::DataTransfer &dataTransfer, boo::Frame &) noexcept override
     {
       if (_view)
       {
@@ -2594,7 +2594,7 @@ namespace krys::ui
     }
   }
 
-  void View::DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept
+  void View::DragStarted(boo::DragItem item, boo::DataTransfer &dataTransfer) noexcept
   {
     ActiveDrag drag;
     drag.Data = dataTransfer.GetPasteboard().GetSelectionData();

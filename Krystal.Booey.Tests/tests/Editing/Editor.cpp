@@ -3,7 +3,6 @@
 #include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/CSS/CSSOM/CSSStyleDeclaration.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
@@ -19,6 +18,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -421,7 +421,7 @@ namespace krys::boo::tests
 
     SECTION("A cancelled copy puts what its listeners wrote on the clipboard")
     {
-      RefPtr<dom::DataTransfer> clipboardData;
+      RefPtr<DataTransfer> clipboardData;
       ListenWith(fixture, event_names::Copy,
                  [&](Event &event)
                  {
@@ -540,8 +540,8 @@ namespace krys::boo::tests
       CHECK(custom == u8"custom");
 
       EditorFixture other(u8"<div contenteditable>x</div>");
-      auto otherData = dom::DataTransfer::CreateForCopyAndPaste(
-        *other.Document, dom::DataTransfer::StoreMode::Readonly, Pasteboard::CreateForCopyAndPaste());
+      auto otherData = DataTransfer::CreateForCopyAndPaste(*other.Document, DataTransfer::StoreMode::Readonly,
+                                                           Pasteboard::CreateForCopyAndPaste());
       other.Pasteboard.CustomData = fixture.Pasteboard.CustomData;
       CHECK(otherData->Types(*other.Document).empty());
       CHECK(otherData->GetData(*other.Document, u8"application/x-custom").empty());
@@ -549,7 +549,7 @@ namespace krys::boo::tests
 
     SECTION("Pastes' input events carry what's pasted, except in text fields")
     {
-      RefPtr<dom::DataTransfer> dataTransfer;
+      RefPtr<DataTransfer> dataTransfer;
       int32 events = 0;
       ListenWith(fixture, event_names::BeforeInput,
                  [&](Event &event)

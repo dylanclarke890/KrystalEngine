@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"

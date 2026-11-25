@@ -30,8 +30,6 @@
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
@@ -51,6 +49,8 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -3827,8 +3827,7 @@ namespace krys::boo
   }
 
   bool EventHandler::DispatchDragEvent(DOMStringAtom eventType, Element &dragTarget,
-                                       const PlatformMouseEvent &event,
-                                       dom::DataTransfer &dataTransfer) noexcept
+                                       const PlatformMouseEvent &event, DataTransfer &dataTransfer) noexcept
   {
     Ref<Frame> frame = ShareRef(_frame);
     RefPtr<FrameView> view = ShareRefPtr(frame->View());
@@ -3887,7 +3886,7 @@ namespace krys::boo
     UniquePtr<Pasteboard> &&pasteboard, EnumSet<DragOperation> sourceOperationMask,
     bool draggingFiles) noexcept
   {
-    auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+    auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
       target.NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
     bool accept = DispatchDragEvent(krys::move(eventType), target, event, *dataTransfer);
     dataTransfer->MakeInvalidForSecurity();
@@ -3945,7 +3944,7 @@ namespace krys::boo
 
       if (RefPtr<Element> dragTarget = _dragTarget)
       {
-        auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+        auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
           dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
         (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
         dataTransfer->MakeInvalidForSecurity();
@@ -3985,7 +3984,7 @@ namespace krys::boo
     {
       DispatchEventToDragSourceElement(event_names::Drag, event);
 
-      auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+      auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
       (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
@@ -4002,7 +4001,7 @@ namespace krys::boo
     bool preventedDefault = false;
     if (RefPtr<Element> dragTarget = _dragTarget)
     {
-      Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
+      Ref<DataTransfer> dataTransfer = DataTransfer::CreateForDrop(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
       preventedDefault = DispatchDragEvent(event_names::Drop, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
@@ -4122,7 +4121,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept
+  bool EventHandler::DispatchDragStartEventOnSourceElement(DataTransfer &dataTransfer) noexcept
   {
     Ref<Element> draggedElement = ShareRef(*DraggedElement());
     _frame.GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement, dataTransfer,
@@ -4243,14 +4242,13 @@ namespace krys::boo
       return false;
     }
 
-    dragState.DataTransfer = dom::DataTransfer::CreateForDrag(*document);
+    dragState.DataTransfer = DataTransfer::CreateForDrag(*document);
     auto hasNonDefaultPasteboardData = HasNonDefaultPasteboardData::No;
 
     if (dragState.ShouldDispatchEvents)
     {
       krys_debug_assert(DraggedElement());
-      auto dragStartDataTransfer =
-        dom::DataTransfer::CreateForDragStartEvent(DraggedElement()->NodeDocument());
+      auto dragStartDataTransfer = DataTransfer::CreateForDragStartEvent(DraggedElement()->NodeDocument());
       _mouseDownMayStartDrag = DispatchDragStartEventOnSourceElement(*dragStartDataTransfer);
       if (Downcast<StaticPasteboard>(dragStartDataTransfer->GetPasteboard()).HasNonDefaultData())
       {

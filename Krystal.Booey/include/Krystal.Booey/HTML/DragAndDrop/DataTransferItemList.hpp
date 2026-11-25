@@ -46,16 +46,13 @@ namespace krys::boo
 {
   class Document;
   class File;
-}
 
-namespace krys::boo::dom
-{
   class DataTransfer;
   class DataTransferItem;
 
   /// @brief A data transfer's items, made from its types and files when first asked for.
   /// @note The data transfer owns its item list.
-  /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransferitemlist-interface
+  /// @see https://html.spec.whatwg.org/#the-datatransferitemlist-interface
   class DataTransferItemList final : public CanMakeWeakPtr<DataTransferItemList>
   {
     KRYS_NON_COPY_MOVABLE(DataTransferItemList);
@@ -83,7 +80,7 @@ namespace krys::boo::dom
       return _dataTransfer;
     }
 
-    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-length
+    /// @see https://html.spec.whatwg.org/#dom-datatransferitemlist-length
     KRYS_NODISCARD uint32 Length() const noexcept;
 
     KRYS_NODISCARD RefPtr<DataTransferItem> Item(uint32 index) noexcept;
@@ -93,7 +90,7 @@ namespace krys::boo::dom
     /// @brief Adds the string @p data of @p type.
     /// @return The new item, null if the data transfer can't be written; `NotSupportedError` if it has a
     /// string of that type.
-    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-add
+    /// @see https://html.spec.whatwg.org/#dom-datatransferitemlist-add
     KRYS_NODISCARD ExceptionOr<RefPtr<DataTransferItem>> Add(Document &document, DOMStringView data,
                                                              DOMStringView type) noexcept;
 
@@ -101,10 +98,10 @@ namespace krys::boo::dom
     /// @return The new item, or null if the data transfer can't be written.
     RefPtr<DataTransferItem> Add(Ref<File> &&file) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-remove
+    /// @see https://html.spec.whatwg.org/#dom-datatransferitemlist-remove
     ExceptionOr<void> Remove(uint32 index) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransferitemlist-clear
+    /// @see https://html.spec.whatwg.org/#dom-datatransferitemlist-clear
     void Clear() noexcept;
 
     /// @brief Removes the string item of @p type, or all the string items if none.
