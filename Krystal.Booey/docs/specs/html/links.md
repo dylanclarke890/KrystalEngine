@@ -41,7 +41,7 @@ Status: reviewed (2026-11-01)
 #### [4.6.3 API for hyperlink elements](https://html.spec.whatwg.org/multipage/links.html#api-for-hyperlink-elements)
 
 Status: reviewed (2026-11-01)
-> `UrlDecomposition`, shared with `Location`, computes the url again from `href` each time (`FullUrl`), and updates `href` through `SetFullUrl`. There are no origins to extract.
+> `UrlDecomposition`, the base class of `HTMLAnchorElement` and `HTMLAreaElement`, computes the url again from `href` each time (`FullUrl`), and updates `href` through `SetFullUrl`. There are no origins to extract.
 > Fixed: the setters wrote an `href` from the document's URL for a link without one, where they should do nothing.
 <!-- definitions: hyperlink-element concept-hyperlink-url-set update-href attr-hyperlink-hreflang attr-hyperlink-type -->
 
