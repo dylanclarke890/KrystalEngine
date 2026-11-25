@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+﻿#include "Krystal.Booey/DOM/Collections/DOMStringMap.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -14,7 +14,7 @@ namespace krys::boo::dom::tests
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
     }
 
-    KRYS_NODISCARD List<std::string> DatasetNames(const DatasetDOMStringMap &dataset) noexcept
+    KRYS_NODISCARD List<std::string> DatasetNames(const DOMStringMap &dataset) noexcept
     {
       List<std::string> names;
       for (const auto &name : dataset.SupportedPropertyNames())
@@ -25,8 +25,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DatasetDOMStringMap", "[DOM][Element][DatasetDOMStringMap][html:dom-dataset]"
-                                   "[html:concept-domstringmap-pairs]")
+  TEST_CASE("DOMStringMap", "[DOM][Element][DOMStringMap][html:dom-dataset]"
+                            "[html:concept-domstringmap-pairs]")
   {
     auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"div").ReleaseValue();
@@ -35,7 +35,6 @@ namespace krys::boo::dom::tests
     SECTION("is the same object each time")
     {
       CHECK(&element->Dataset() == &dataset);
-      CHECK(&dataset.GetElement() == element.get());
     }
 
     SECTION("names the data attributes as properties, in attribute order")

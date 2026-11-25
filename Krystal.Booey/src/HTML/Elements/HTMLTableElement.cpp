@@ -240,14 +240,14 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::HTMLCollection> HTMLTableElement::TBodies() noexcept
+  Ref<HTMLCollection> HTMLTableElement::TBodies() noexcept
   {
     if (auto *tBodies = _tBodies.get())
     {
       return ShareRef(*tBodies);
     }
 
-    Ref<dom::HTMLCollection> tBodies = CreateRef<dom::LiveHTMLCollection>(
+    Ref<HTMLCollection> tBodies = CreateRef<LiveHTMLCollection>(
       *this, [](const Element &element) { return IsTableChildWithTagName(element, html::TagName::tbody); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _tBodies = CreateWeakPtr(tBodies.get());
@@ -280,14 +280,14 @@ namespace krys::boo
     return nullptr;
   }
 
-  Ref<dom::HTMLCollection> HTMLTableElement::Rows() noexcept
+  Ref<HTMLCollection> HTMLTableElement::Rows() noexcept
   {
     if (auto *rows = _rows.get())
     {
       return ShareRef(*rows);
     }
 
-    Ref<dom::HTMLCollection> rows = CreateRef<html::HTMLTableRowsCollection>(*this);
+    Ref<HTMLCollection> rows = CreateRef<html::HTMLTableRowsCollection>(*this);
     _rows = CreateWeakPtr(rows.get());
     return rows;
   }

@@ -31,6 +31,7 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
+  class NodeList;
   class RenderBox;
   class RenderObject;
   class RenderStyle;
@@ -47,7 +48,6 @@ namespace krys::boo::dom
   class MutationAlgorithms;
   class MutationObserver;
   class MutationObserverAlgorithms;
-  class NodeList;
   class TreeQueries;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
@@ -290,7 +290,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-childnodes
-    KRYS_NODISCARD Ref<dom::NodeList> ChildNodes() noexcept;
+    KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-first-child
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild

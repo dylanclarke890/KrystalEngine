@@ -11,17 +11,14 @@
 namespace krys::boo
 {
   class Element;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://dom.spec.whatwg.org/#interface-htmlcollection
   class HTMLCollection : public RefCounted<HTMLCollection>, public CanMakeWeakPtr<HTMLCollection>
   {
   public:
     virtual ~HTMLCollection() noexcept = default;
 
-#pragma region HTMLCollection - https://dom.spec.whatwg.org/#interface-htmlcollection
+#pragma region HTMLCollection - https://dom.spec.whatwg.org/#htmlcollection
 
     /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-item
     KRYS_NODISCARD virtual RefPtr<Element> Item(size_t index) noexcept = 0;
@@ -50,11 +47,12 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-length
     KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
 
+#pragma endregion
+
     /// @brief The IDs and HTML `name` values of the elements, once each, in tree order.
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-names
     KRYS_NODISCARD virtual List<DOMString> SupportedPropertyNames() const noexcept = 0;
 
-  protected:
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
     {
@@ -67,7 +65,5 @@ namespace krys::boo::dom
       auto supportedNames = SupportedPropertyNames();
       return std::find(supportedNames.begin(), supportedNames.end(), name) != supportedNames.end();
     }
-
-#pragma endregion
   };
 }

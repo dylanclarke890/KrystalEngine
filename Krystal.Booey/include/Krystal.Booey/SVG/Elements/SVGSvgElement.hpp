@@ -92,10 +92,10 @@ namespace krys::boo
     }
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getIntersectionList
-    KRYS_NODISCARD Ref<dom::NodeList> GetIntersectionList(SVGRect &, SVGElement *referenceElement) noexcept;
+    KRYS_NODISCARD Ref<NodeList> GetIntersectionList(SVGRect &, SVGElement *referenceElement) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getEnclosureList
-    KRYS_NODISCARD Ref<dom::NodeList> GetEnclosureList(SVGRect &, SVGElement *referenceElement) noexcept;
+    KRYS_NODISCARD Ref<NodeList> GetEnclosureList(SVGRect &, SVGElement *referenceElement) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkIntersection
     KRYS_NODISCARD static bool CheckIntersection(const Ref<SVGElement> &, SVGRect &) noexcept;
@@ -276,7 +276,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Frame *FrameForCurrentScale() const noexcept;
 
-    KRYS_NODISCARD Ref<dom::NodeList>
+    KRYS_NODISCARD Ref<NodeList>
       CollectIntersectionOrEnclosureList(SVGRect &, SVGElement *,
                                          bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept;
 

@@ -11,6 +11,7 @@
 namespace krys::boo
 {
   class CSSStyleSheet;
+  class DOMTokenList;
   class HTMLLinkElement;
 }
 
@@ -23,11 +24,6 @@ namespace krys::boo::css
 namespace krys::boo::style
 {
   class Scope;
-}
-
-namespace krys::boo::dom
-{
-  class DOMTokenList;
 }
 
 namespace krys::boo::html
@@ -57,9 +53,9 @@ namespace krys::boo
     };
 
   private:
-    UniquePtr<dom::DOMTokenList> _relList;
-    UniquePtr<dom::DOMTokenList> _sizes;
-    UniquePtr<dom::DOMTokenList> _blocking;
+    UniquePtr<DOMTokenList> _relList;
+    UniquePtr<DOMTokenList> _sizes;
+    UniquePtr<DOMTokenList> _blocking;
 
     RefPtr<CSSStyleSheet> _sheet;
     CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
@@ -111,7 +107,7 @@ namespace krys::boo
     void As(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-rellist
-    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
     KRYS_NODISCARD DOMString Media() const noexcept;
@@ -138,7 +134,7 @@ namespace krys::boo
     void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-sizes
-    KRYS_NODISCARD dom::DOMTokenList &Sizes() noexcept;
+    KRYS_NODISCARD DOMTokenList &Sizes() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesrcset
     KRYS_NODISCARD dom::USVString ImageSrcset() const noexcept;
@@ -159,7 +155,7 @@ namespace krys::boo
     void ReferrerPolicy(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-blocking
-    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;

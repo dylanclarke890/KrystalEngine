@@ -15,13 +15,12 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
+  class HTMLCollection;
   class Node;
 }
 
 namespace krys::boo::dom
 {
-  class HTMLCollection;
-
   /// @see https://dom.spec.whatwg.org/#mutation-algorithms
   class NodeAlgorithms
   {

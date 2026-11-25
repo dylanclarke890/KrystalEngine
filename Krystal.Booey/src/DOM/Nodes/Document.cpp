@@ -445,19 +445,19 @@ namespace krys::boo
     return FirstElementChild();
   }
 
-  Ref<dom::HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
+  Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
-  Ref<dom::HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
-                                                            DOMStringAtom localName) noexcept
+  Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
+                                                       DOMStringAtom localName) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceUri),
                                                        krys::move(localName));
   }
 
-  Ref<dom::HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
+  Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
@@ -1050,8 +1050,8 @@ namespace krys::boo
     }
 
     /// @brief The document's collection that @p cache holds, or a new one that it holds from now on.
-    KRYS_NODISCARD Ref<dom::HTMLCollection> CachedDocumentCollection(
-      WeakPtr<dom::HTMLCollection> &cache, Document &document, dom::LiveHTMLCollectionFilterFunc &&filter,
+    KRYS_NODISCARD Ref<HTMLCollection> CachedDocumentCollection(
+      WeakPtr<HTMLCollection> &cache, Document &document, LiveHTMLCollectionFilterFunc &&filter,
       dom::LiveCollectionInvalidation invalidation = dom::LiveCollectionInvalidation::TreeOnly) noexcept
     {
       if (auto collection = cache.lock())
@@ -1059,7 +1059,7 @@ namespace krys::boo
         return ShareRef(*collection.get());
       }
 
-      auto collection = CreateRef<dom::LiveHTMLCollection>(document, krys::move(filter), invalidation);
+      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter), invalidation);
       cache = CreateWeakPtr(collection.get());
       return collection;
     }
@@ -1131,24 +1131,24 @@ namespace krys::boo
     return ShareRefPtr(html::DOMTreeAccessors::GetHeadElement(*this));
   }
 
-  Ref<dom::HTMLCollection> Document::Images() noexcept
+  Ref<HTMLCollection> Document::Images() noexcept
   {
     return CachedDocumentCollection(_images, *this, [](const Element &element)
                                     { return IsHTMLElementOfType<HTMLImageElement>(element); });
   }
 
-  Ref<dom::HTMLCollection> Document::Embeds() noexcept
+  Ref<HTMLCollection> Document::Embeds() noexcept
   {
     return CachedDocumentCollection(_embeds, *this, [](const Element &element)
                                     { return IsHTMLElementOfType<HTMLEmbedElement>(element); });
   }
 
-  Ref<dom::HTMLCollection> Document::Plugins() noexcept
+  Ref<HTMLCollection> Document::Plugins() noexcept
   {
     return Embeds();
   }
 
-  Ref<dom::HTMLCollection> Document::Links() noexcept
+  Ref<HTMLCollection> Document::Links() noexcept
   {
     return CachedDocumentCollection(
       _links, *this,
@@ -1161,13 +1161,13 @@ namespace krys::boo
       dom::LiveCollectionInvalidation::Href);
   }
 
-  Ref<dom::HTMLCollection> Document::Forms() noexcept
+  Ref<HTMLCollection> Document::Forms() noexcept
   {
     return CachedDocumentCollection(_forms, *this, [](const Element &element)
                                     { return IsHTMLElementOfType<HTMLFormElement>(element); });
   }
 
-  Ref<dom::HTMLCollection> Document::Scripts() noexcept
+  Ref<HTMLCollection> Document::Scripts() noexcept
   {
     return CachedDocumentCollection(_scripts, *this, [](const Element &element)
                                     { return IsHTMLElementOfType<HTMLScriptElement>(element); });
@@ -1248,7 +1248,7 @@ namespace krys::boo
     SetBodyColorAttribute(*this, u8"bgcolor", krys::move(value));
   }
 
-  Ref<dom::HTMLCollection> Document::Anchors() noexcept
+  Ref<HTMLCollection> Document::Anchors() noexcept
   {
     return CachedDocumentCollection(
       _anchors, *this, [](const Element &element)
@@ -1256,7 +1256,7 @@ namespace krys::boo
       dom::LiveCollectionInvalidation::Name);
   }
 
-  Ref<dom::HTMLCollection> Document::Applets() noexcept
+  Ref<HTMLCollection> Document::Applets() noexcept
   {
     return CachedDocumentCollection(_applets, *this, [](const Element &) { return false; });
   }
@@ -1313,9 +1313,9 @@ namespace krys::boo
     return false;
   }
 
-  Ref<dom::NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
+  Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   {
-    return CreateRef<dom::LiveNodeList>(
+    return CreateRef<LiveNodeList>(
       *this,
       [name = DOMString(elementName)](const Node &node)
       {
@@ -1340,7 +1340,7 @@ namespace krys::boo
 
 #pragma region ParentNode
 
-  Ref<dom::HTMLCollection> Document::Children() noexcept
+  Ref<HTMLCollection> Document::Children() noexcept
   {
     return EnsureNodeRareData().Children(*this);
   }
@@ -1399,7 +1399,7 @@ namespace krys::boo
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<dom::NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }

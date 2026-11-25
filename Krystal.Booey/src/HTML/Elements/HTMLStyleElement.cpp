@@ -61,13 +61,13 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"media", krys::move(value));
   }
 
-  dom::DOMTokenList &HTMLStyleElement::Blocking() noexcept
+  DOMTokenList &HTMLStyleElement::Blocking() noexcept
   {
     if (!_blocking)
     {
       // `render` is the only supported blocking token.
-      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
-                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                       { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
     return *_blocking;
   }

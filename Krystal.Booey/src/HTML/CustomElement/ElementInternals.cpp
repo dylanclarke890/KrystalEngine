@@ -159,7 +159,7 @@ namespace krys::boo::html
     return Exception {ExceptionCode::NotSupportedError};
   }
 
-  ExceptionOr<RefPtr<dom::NodeList>> ElementInternals::Labels() noexcept
+  ExceptionOr<RefPtr<NodeList>> ElementInternals::Labels() noexcept
   {
     if (auto *element = ElementAsFormAssociatedCustom())
     {

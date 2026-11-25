@@ -11,7 +11,7 @@ namespace krys::boo
   {
   }
 
-  Ref<dom::HTMLCollection> HTMLDataListElement::Options() noexcept
+  Ref<HTMLCollection> HTMLDataListElement::Options() noexcept
   {
     if (auto *options = _options.get())
     {
@@ -19,9 +19,9 @@ namespace krys::boo
     }
     // The options IDL attribute must return an HTMLCollection rooted at the datalist node, whose filter
     // matches option elements.
-    Ref<dom::HTMLCollection> options = CreateRef<dom::LiveHTMLCollection>(
-      *this, [](const Element &element) { return Is<HTMLOptionElement>(element); });
-    _options = CreateWeakPtr<dom::HTMLCollection>(options.get());
+    Ref<HTMLCollection> options = CreateRef<LiveHTMLCollection>(*this, [](const Element &element)
+                                                                { return Is<HTMLOptionElement>(element); });
+    _options = CreateWeakPtr<HTMLCollection>(options.get());
     return options;
   }
 

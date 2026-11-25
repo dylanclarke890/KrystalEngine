@@ -293,7 +293,7 @@ namespace krys::boo
     return EditabilityFromContentEditableAttr(*this) != Node::Editability::ReadOnly;
   }
 
-  RefPtr<dom::NodeList> HTMLElement::Labels() noexcept
+  RefPtr<NodeList> HTMLElement::Labels() noexcept
   {
     if (!IsLabelable())
     {
@@ -305,8 +305,8 @@ namespace krys::boo
     {
       return labels;
     }
-    Ref<dom::NodeList> labels = CreateRef<html::LabelsNodeList>(*this);
-    cachedLabels = CreateWeakPtr<dom::NodeList>(labels.get());
+    Ref<NodeList> labels = CreateRef<html::LabelsNodeList>(*this);
+    cachedLabels = CreateWeakPtr<NodeList>(labels.get());
     return labels;
   }
 

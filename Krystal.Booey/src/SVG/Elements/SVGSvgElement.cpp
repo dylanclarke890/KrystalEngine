@@ -342,13 +342,13 @@ namespace krys::boo
     }
   }
 
-  Ref<dom::NodeList> SVGSvgElement::GetIntersectionList(SVGRect &rect, SVGElement *referenceElement) noexcept
+  Ref<NodeList> SVGSvgElement::GetIntersectionList(SVGRect &rect, SVGElement *referenceElement) noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, this);
     return CollectIntersectionOrEnclosureList(rect, referenceElement, CheckIntersectionWithoutUpdatingLayout);
   }
 
-  Ref<dom::NodeList> SVGSvgElement::GetEnclosureList(SVGRect &rect, SVGElement *referenceElement) noexcept
+  Ref<NodeList> SVGSvgElement::GetEnclosureList(SVGRect &rect, SVGElement *referenceElement) noexcept
   {
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, this);
     return CollectIntersectionOrEnclosureList(rect, referenceElement, CheckEnclosureWithoutUpdatingLayout);
@@ -366,9 +366,9 @@ namespace krys::boo
     return CheckEnclosureWithoutUpdatingLayout(*element, rect);
   }
 
-  Ref<dom::NodeList>
-    SVGSvgElement::CollectIntersectionOrEnclosureList(SVGRect &rect, SVGElement *referenceElement,
-                                                      bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept
+  Ref<NodeList> SVGSvgElement::CollectIntersectionOrEnclosureList(SVGRect &rect, SVGElement *referenceElement,
+                                                                  bool (*checkFunction)(SVGElement &,
+                                                                                        SVGRect &)) noexcept
   {
     dom::SmallNodeList elements;
     ContainerNode &root = referenceElement ? static_cast<ContainerNode &>(*referenceElement) : *this;
@@ -380,7 +380,7 @@ namespace krys::boo
         elements.push_back(ShareRef(*element));
       }
     }
-    return AdoptRef(*new dom::StaticNodeList(krys::move(elements)));
+    return AdoptRef(*new StaticNodeList(krys::move(elements)));
   }
 
   void SVGSvgElement::DeselectAll() noexcept

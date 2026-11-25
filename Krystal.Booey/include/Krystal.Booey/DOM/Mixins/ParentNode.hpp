@@ -11,12 +11,8 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
-  class Node;
-}
-
-namespace krys::boo::dom
-{
   class HTMLCollection;
+  class Node;
   class NodeList;
 }
 

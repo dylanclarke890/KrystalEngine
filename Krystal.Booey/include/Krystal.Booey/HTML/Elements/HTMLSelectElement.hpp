@@ -7,11 +7,6 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo::html
 {
   class HTMLOptionsCollection;
@@ -19,6 +14,7 @@ namespace krys::boo::html
 
 namespace krys::boo
 {
+  class HTMLCollection;
   class HTMLOptGroupElement;
   class KeyboardEvent;
 
@@ -66,8 +62,8 @@ namespace krys::boo
     /// @brief The options, optgroups and hrs of the select, in order.
     mutable List<WeakPtr<HTMLElement>> _listItems;
     // [SameObject] collections, held weakly as they hold the select.
-    WeakPtr<dom::HTMLCollection> _options;
-    WeakPtr<dom::HTMLCollection> _selectedOptions;
+    WeakPtr<HTMLCollection> _options;
+    WeakPtr<HTMLCollection> _selectedOptions;
     List<bool> _lastOnChangeSelection;
     List<bool> _cachedStateForActiveSelection;
     html::TypeAhead _typeAhead;
@@ -181,7 +177,7 @@ namespace krys::boo
     ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-selectedoptions
-    KRYS_NODISCARD Ref<dom::HTMLCollection> SelectedOptions() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> SelectedOptions() noexcept;
 
     /// @brief The index of the first selected option in the list of options, or -1 if none is.
     /// @see https://html.spec.whatwg.org/#dom-select-selectedindex

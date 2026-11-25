@@ -78,12 +78,12 @@ namespace krys::boo
     html::Reflect<bool>(*this, u8"defer", krys::move(value));
   }
 
-  dom::DOMTokenList &HTMLScriptElement::Blocking() noexcept
+  DOMTokenList &HTMLScriptElement::Blocking() noexcept
   {
     if (!_blocking)
     {
-      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
-                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                       { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

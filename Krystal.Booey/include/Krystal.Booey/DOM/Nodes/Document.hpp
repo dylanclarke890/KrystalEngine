@@ -100,7 +100,6 @@ namespace krys::boo::dom
   class DOMImplementation;
   class DocumentAlgorithms;
   class DocumentFontLoader;
-  class HTMLCollection;
   class HighlightRegistry;
   class LiveRangeUpdater;
   class MutationAlgorithms;
@@ -230,6 +229,7 @@ namespace krys::boo
   class GraphicsClient;
   class HTMLBaseElement;
   class HTMLBodyElement;
+  class HTMLCollection;
   class HTMLDialogElement;
   class HTMLElement;
   class HTMLHeadElement;
@@ -438,13 +438,13 @@ namespace krys::boo
     UniquePtr<dom::ScriptedAnimationController> _scriptedAnimationController;
     dom::DocumentLoadTimingInfo _loadTiming;
     // The [SameObject] collections of the DOM tree accessors, while something holds them.
-    WeakPtr<dom::HTMLCollection> _images;
-    WeakPtr<dom::HTMLCollection> _embeds;
-    WeakPtr<dom::HTMLCollection> _links;
-    WeakPtr<dom::HTMLCollection> _forms;
-    WeakPtr<dom::HTMLCollection> _scripts;
-    WeakPtr<dom::HTMLCollection> _anchors;
-    WeakPtr<dom::HTMLCollection> _applets;
+    WeakPtr<HTMLCollection> _images;
+    WeakPtr<HTMLCollection> _embeds;
+    WeakPtr<HTMLCollection> _links;
+    WeakPtr<HTMLCollection> _forms;
+    WeakPtr<HTMLCollection> _scripts;
+    WeakPtr<HTMLCollection> _anchors;
+    WeakPtr<HTMLCollection> _applets;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
@@ -566,14 +566,14 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<const Element> DocumentElement() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbytagname
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbytagnamens
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceUri,
-                                                                   DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceUri,
+                                                              DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbyclassname
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createelement
     KRYS_NODISCARD ExceptionOr<Ref<Element>>
@@ -718,22 +718,22 @@ namespace krys::boo
     KRYS_NODISCARD RefPtr<const HTMLHeadElement> Head() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-images
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Images() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Images() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-embeds
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Embeds() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Embeds() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-plugins
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Plugins() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Plugins() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-links
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Links() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Links() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-forms
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Forms() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Forms() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-scripts
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Scripts() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Scripts() noexcept;
 
 #pragma region Document Obsolete members - https://html.spec.whatwg.org/#Document-partial
 
@@ -774,17 +774,17 @@ namespace krys::boo
 
     /// @brief The `a` elements with `name` attributes.
     /// @see https://html.spec.whatwg.org/#dom-document-anchors
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Anchors() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Anchors() noexcept;
 
     /// @brief An empty collection, for historical reasons.
     /// @see https://html.spec.whatwg.org/#dom-document-applets
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Applets() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Applets() noexcept;
 
 #pragma endregion
 
     /// @brief The HTML elements whose `name` attribute is @p elementName, live, in tree order.
     /// @see https://html.spec.whatwg.org/#dom-document-getelementsbyname
-    KRYS_NODISCARD Ref<dom::NodeList> GetElementsByName(DOMStringView elementName) noexcept;
+    KRYS_NODISCARD Ref<NodeList> GetElementsByName(DOMStringView elementName) noexcept;
 
     // dynamic markup insertion
     // [CEReactions] Document open(optional DOMString unused1, optional DOMString unused2);
@@ -2161,7 +2161,7 @@ namespace krys::boo
 
     /// @brief Returns the child elements.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-children
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Children() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
 
     /// @brief Returns the first child that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild
@@ -2214,7 +2214,7 @@ namespace krys::boo
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 

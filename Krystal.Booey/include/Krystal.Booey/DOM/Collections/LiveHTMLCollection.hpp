@@ -9,10 +9,7 @@
 namespace krys::boo
 {
   class ContainerNode;
-}
 
-namespace krys::boo::dom
-{
   using LiveHTMLCollectionFilterFunc = Func<bool(const Element &)>;
 
   /// @brief A live element collection: a view of the root's descendant elements that match the filter, in
@@ -20,43 +17,58 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#concept-collection
   /// @see https://dom.spec.whatwg.org/#concept-collection-live
   /// @see https://dom.spec.whatwg.org/#represented-by-the-collection
-  class LiveHTMLCollection : public HTMLCollection, public LiveCollection
+  class LiveHTMLCollection : public HTMLCollection, public dom::LiveCollection
   {
-    friend class CollectionIndexCache<LiveHTMLCollection, Element>;
+    friend class dom::CollectionIndexCache<LiveHTMLCollection, Element>;
 
   private:
     LiveHTMLCollectionFilterFunc _filter;
-    mutable CollectionIndexCache<LiveHTMLCollection, Element> _indexCache;
+    mutable dom::CollectionIndexCache<LiveHTMLCollection, Element> _indexCache;
     /// @brief The first element with each ID or HTML `name` value, once a name has been looked up. The
     /// document counts it, as it depends on those attributes whatever the collection's invalidation.
     mutable HashMap<DOMString, Element *> _namedItems;
     mutable bool _hasNamedItems {false};
 
   public:
-    LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter,
-                       LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly,
-                       LiveCollectionTraversal traversal = LiveCollectionTraversal::Descendants) noexcept;
+    LiveHTMLCollection(
+      ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter,
+      dom::LiveCollectionInvalidation invalidation = dom::LiveCollectionInvalidation::TreeOnly,
+      dom::LiveCollectionTraversal traversal = dom::LiveCollectionTraversal::Descendants) noexcept;
 
     ~LiveHTMLCollection() noexcept override;
 
+#pragma region HTMLCollection - https://dom.spec.whatwg.org/#htmlcollection
+
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-item
     KRYS_NODISCARD RefPtr<Element> Item(size_t index) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-item
     KRYS_NODISCARD RefPtr<const Element> Item(size_t index) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-item
     KRYS_NODISCARD RefPtr<Element> operator[](size_t index) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-item
     KRYS_NODISCARD RefPtr<const Element> operator[](size_t index) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key
     KRYS_NODISCARD RefPtr<Element> NamedItem(DOMStringView name) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key
     KRYS_NODISCARD RefPtr<const Element> NamedItem(DOMStringView name) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key
     KRYS_NODISCARD RefPtr<Element> operator[](DOMStringView name) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key
     KRYS_NODISCARD RefPtr<const Element> operator[](DOMStringView name) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-length
     KRYS_NODISCARD size_t Length() const noexcept override;
 
+#pragma endregion
+
+    /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-names
     KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept override;
 
     void InvalidateCache() noexcept override;

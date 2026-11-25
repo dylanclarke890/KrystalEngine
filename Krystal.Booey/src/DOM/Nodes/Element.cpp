@@ -19,7 +19,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
@@ -1978,32 +1978,32 @@ namespace krys::boo
     return dom::ElementAlgorithms::GetAttributeValue(*this, u8"class");
   }
 
-  dom::DOMTokenList &Element::ClassList() noexcept
+  DOMTokenList &Element::ClassList() noexcept
   {
     if (_domTokenList == nullptr)
     {
-      _domTokenList = dom::DOMTokenList::Create(*this, u8"class");
+      _domTokenList = DOMTokenList::Create(*this, u8"class");
     }
 
     return *_domTokenList;
   }
 
-  dom::DOMTokenList &Element::Part() noexcept
+  DOMTokenList &Element::Part() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.PartList())
     {
-      rareData.SetPartList(dom::DOMTokenList::Create(*this, u8"part"));
+      rareData.SetPartList(DOMTokenList::Create(*this, u8"part"));
     }
     return *rareData.PartList();
   }
 
-  dom::DatasetDOMStringMap &Element::Dataset() noexcept
+  DOMStringMap &Element::Dataset() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.Dataset())
     {
-      rareData.SetDataset(CreateUnique<dom::DatasetDOMStringMap>(*this));
+      rareData.SetDataset(CreateUnique<DOMStringMap>(*this));
     }
     return *rareData.Dataset();
   }
@@ -2394,19 +2394,19 @@ namespace krys::boo
     return query.Value().Matches(*this);
   }
 
-  Ref<dom::HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
+  Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByTagName(*this, krys::move(qualifiedName));
   }
 
-  Ref<dom::HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
-                                                           DOMStringAtom localName) noexcept
+  Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                      DOMStringAtom localName) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByTagNameNS(*this, krys::move(namespaceURI),
                                                        krys::move(localName));
   }
 
-  Ref<dom::HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
+  Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
     return dom::NodeAlgorithms::GetElementsByClassName(*this, krys::move(classNames));
   }
@@ -2926,7 +2926,7 @@ namespace krys::boo
 
 #pragma region ParentNode
 
-  Ref<dom::HTMLCollection> Element::Children() noexcept
+  Ref<HTMLCollection> Element::Children() noexcept
   {
     return EnsureElementRareData().Children(*this);
   }
@@ -2985,7 +2985,7 @@ namespace krys::boo
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<dom::NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }

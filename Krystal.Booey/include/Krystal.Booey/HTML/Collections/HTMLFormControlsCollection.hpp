@@ -15,7 +15,7 @@ namespace krys::boo::html
 
   /// @brief A form's `elements`: its listed elements, wherever they are in the tree.
   /// @see https://html.spec.whatwg.org/#htmlformcontrolscollection
-  class HTMLFormControlsCollection final : public dom::LiveHTMLCollection
+  class HTMLFormControlsCollection final : public LiveHTMLCollection
   {
   private:
     Ref<HTMLFormElement> _ownerNode;

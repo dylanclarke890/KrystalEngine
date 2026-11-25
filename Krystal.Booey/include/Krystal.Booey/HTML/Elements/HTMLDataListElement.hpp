@@ -4,13 +4,9 @@
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo
 {
+  class HTMLCollection;
   class HTMLOptionElement;
 
   /// @see https://html.spec.whatwg.org/#htmldatalistelement
@@ -20,14 +16,14 @@ namespace krys::boo
 
   private:
     // A [SameObject] collection, held weakly as it holds the datalist.
-    WeakPtr<dom::HTMLCollection> _options;
+    WeakPtr<HTMLCollection> _options;
 
   public:
     HTMLDataListElement(Document &document) noexcept;
 
     /// @brief The option elements that are descendants of the datalist.
     /// @see https://html.spec.whatwg.org/#dom-datalist-options
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Options() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Options() noexcept;
 
     /// @brief The options that are suggestions: those that aren't disabled and have a value, in tree order.
     /// @see https://html.spec.whatwg.org/#concept-input-list

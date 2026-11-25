@@ -11,14 +11,14 @@
 namespace krys::boo
 {
   class ContainerNode;
+  class HTMLCollection;
   class Node;
+  class NodeList;
 }
 
 namespace krys::boo::dom
 {
-  class HTMLCollection;
   class LiveCollection;
-  class NodeList;
   class TransientRegisteredObserver;
 
   /// @brief The data a node needs only some of the time, made when it's first needed; an element's is an

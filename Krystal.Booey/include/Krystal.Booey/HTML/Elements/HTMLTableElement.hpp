@@ -3,13 +3,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo
 {
+  class HTMLCollection;
   class HTMLTableCaptionElement;
   class HTMLTableRowElement;
   class HTMLTableSectionElement;
@@ -70,14 +66,14 @@ namespace krys::boo
 
     /// @brief The table's `tbody` children.
     /// @see https://html.spec.whatwg.org/#dom-table-tbodies
-    KRYS_NODISCARD Ref<dom::HTMLCollection> TBodies() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> TBodies() noexcept;
 
     /// @brief A new `tbody`, inserted after the table's last `tbody`, or at its end.
     /// @see https://html.spec.whatwg.org/#dom-table-createtbody
     Ref<HTMLTableSectionElement> CreateTBody() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-table-rows
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Rows() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Rows() noexcept;
 
     /// @brief A new row at @p index in the table's rows (-1 for the end), in a new `tbody` if the table has
     /// no rows or bodies: an `IndexSizeError` if @p index is less than -1 or more than the number of rows.
@@ -211,8 +207,8 @@ namespace krys::boo
                                                // frame/border are present, to none otherwise).
     uint16 _padding {1};
     mutable RefPtr<css::MutableStyleProperties> _sharedCellStyle;
-    WeakPtr<dom::HTMLCollection> _rows;
-    WeakPtr<dom::HTMLCollection> _tBodies;
+    WeakPtr<HTMLCollection> _rows;
+    WeakPtr<HTMLCollection> _tBodies;
   };
 }
 

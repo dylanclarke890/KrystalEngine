@@ -26,12 +26,11 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class Node;
+  class NodeList;
 }
 
 namespace krys::boo::dom
 {
-  class NodeList;
-
   /// @brief A change to a node, as delivered to a mutation observer.
   /// @see https://dom.spec.whatwg.org/#interface-mutationrecord
   class MutationRecord : public RefCounted<MutationRecord>

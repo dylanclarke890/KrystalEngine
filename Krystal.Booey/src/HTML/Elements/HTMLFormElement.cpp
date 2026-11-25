@@ -235,17 +235,17 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
-  dom::DOMTokenList &HTMLFormElement::RelList() noexcept
+  DOMTokenList &HTMLFormElement::RelList() noexcept
   {
     if (!_relList)
     {
-      _relList = dom::DOMTokenList::Create(*this, u8"rel",
-                                           [](Document &, DOMStringView token)
-                                           {
-                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                    || text::IsASCIICaselessEqual(token, u8"opener");
-                                           });
+      _relList = DOMTokenList::Create(*this, u8"rel",
+                                      [](Document &, DOMStringView token)
+                                      {
+                                        return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                               || text::IsASCIICaselessEqual(token, u8"noopener")
+                                               || text::IsASCIICaselessEqual(token, u8"opener");
+                                      });
     }
 
     return *_relList;
@@ -259,7 +259,7 @@ namespace krys::boo
       return ShareRef(static_cast<html::HTMLFormControlsCollection &>(*elements));
     }
     auto elements = CreateRef<html::HTMLFormControlsCollection>(*this);
-    _elements = CreateWeakPtr<dom::HTMLCollection>(elements.get());
+    _elements = CreateWeakPtr<HTMLCollection>(elements.get());
     return elements;
   }
 
@@ -1174,7 +1174,7 @@ namespace krys::boo
     }
 
     auto list = CreateRef<html::RadioNodeList>(*this, name, candidates);
-    cached = CreateWeakPtr<dom::NodeList>(list.get());
+    cached = CreateWeakPtr<NodeList>(list.get());
     return list;
   }
 

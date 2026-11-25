@@ -52,7 +52,7 @@ namespace krys::boo
 
 #pragma region ParentNode
 
-  Ref<dom::HTMLCollection> DocumentFragment::Children() noexcept
+  Ref<HTMLCollection> DocumentFragment::Children() noexcept
   {
     return EnsureNodeRareData().Children(*this);
   }
@@ -111,7 +111,7 @@ namespace krys::boo
     return dom::mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<dom::NodeList>> DocumentFragment::QuerySelectorAll(DOMStringView selectors) noexcept
+  ExceptionOr<Ref<NodeList>> DocumentFragment::QuerySelectorAll(DOMStringView selectors) noexcept
   {
     return dom::mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }

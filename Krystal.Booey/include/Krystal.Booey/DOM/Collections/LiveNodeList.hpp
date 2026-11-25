@@ -6,8 +6,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
+  class Node;
+
   using LiveNodeListFilterFunc = Func<bool(const Node &node)>;
 
   /// @brief A live node list: a view of the root's descendants that match the filter, in tree order, cached
@@ -15,28 +17,37 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#concept-collection
   /// @see https://dom.spec.whatwg.org/#concept-collection-live
   /// @see https://dom.spec.whatwg.org/#represented-by-the-collection
-  class LiveNodeList : public NodeList, public LiveCollection
+  class LiveNodeList : public NodeList, public dom::LiveCollection
   {
-    friend class CollectionIndexCache<LiveNodeList, Node>;
+    friend class dom::CollectionIndexCache<LiveNodeList, Node>;
 
   private:
     LiveNodeListFilterFunc _filter;
-    mutable CollectionIndexCache<LiveNodeList, Node> _indexCache;
+    mutable dom::CollectionIndexCache<LiveNodeList, Node> _indexCache;
 
   public:
-    LiveNodeList(Node &root, LiveNodeListFilterFunc &&filter,
-                 LiveCollectionInvalidation invalidation = LiveCollectionInvalidation::TreeOnly,
-                 LiveCollectionTraversal traversal = LiveCollectionTraversal::Descendants) noexcept;
+    LiveNodeList(Node &root, LiveNodeListFilterFunc filter,
+                 dom::LiveCollectionInvalidation invalidation = dom::LiveCollectionInvalidation::TreeOnly,
+                 dom::LiveCollectionTraversal traversal = dom::LiveCollectionTraversal::Descendants) noexcept;
 
+#pragma region NodeList - https://dom.spec.whatwg.org/#nodelist
+
+    /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD RefPtr<Node> Item(size_t index) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD RefPtr<const Node> Item(size_t index) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD RefPtr<Node> operator[](size_t index) noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD RefPtr<const Node> operator[](size_t index) const noexcept override;
 
+    /// @see https://dom.spec.whatwg.org/#dom-nodelist-length
     KRYS_NODISCARD size_t Length() const noexcept override;
+
+#pragma endregion
 
     void InvalidateCache() noexcept override;
 
@@ -58,8 +69,8 @@ namespace krys::boo::dom
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::LiveNodeList)
-  static bool IsType(const krys::boo::dom::NodeList &target) noexcept
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LiveNodeList)
+  static bool IsType(const krys::boo::NodeList &target) noexcept
   {
     return target.IsLiveNodeList();
   }

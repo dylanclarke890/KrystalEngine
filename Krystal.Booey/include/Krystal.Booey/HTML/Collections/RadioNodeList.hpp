@@ -47,7 +47,7 @@ namespace krys::boo::html
   /// @brief The listed elements of a form with an ID or name, as its named getter returns them when there are
   /// several.
   /// @see https://html.spec.whatwg.org/#radionodelist
-  class RadioNodeList final : public dom::LiveNodeList
+  class RadioNodeList final : public LiveNodeList
   {
   private:
     Ref<ContainerNode> _ownerNode;

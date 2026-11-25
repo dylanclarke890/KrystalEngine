@@ -17,10 +17,6 @@ namespace krys::boo
 {
   class Document;
   class HTMLElement;
-}
-
-namespace krys::boo::dom
-{
   class NodeList;
 }
 
@@ -648,7 +644,7 @@ namespace krys::boo
 
     /// @brief The labels of a labelable element, in tree order; null for other elements.
     /// @see https://html.spec.whatwg.org/#dom-lfe-labels
-    KRYS_NODISCARD RefPtr<dom::NodeList> Labels() noexcept;
+    KRYS_NODISCARD RefPtr<NodeList> Labels() noexcept;
 
 #pragma endregion
 

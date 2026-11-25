@@ -451,7 +451,7 @@ Status: reviewed (2026-11-01)
 ##### [3.2.6.6 Embedding custom non-visible data with the data-* attributes](https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes)
 
 Status: reviewed (2026-11-01)
-> `Element::Dataset` and `DatasetDOMStringMap`, which looks at attributes' local names, as upstream. A custom data attribute is checked by the sanitizer (`SanitizerAlgorithms`).
+> `Element::Dataset` and `DOMStringMap`, which looks at attributes' local names, as upstream. A custom data attribute is checked by the sanitizer (`SanitizerAlgorithms`).
 <!-- definitions: attr-data-* concept-domstringmap-element -->
 
 - [x] [custom data attribute](https://html.spec.whatwg.org/#custom-data-attribute) — A custom data attribute is an attribute in no namespace whose name starts with the string "data-", has at least one character after the hyphen, is a valid attribute local name, and contains no ASCII upper alphas.

@@ -75,7 +75,7 @@ namespace krys::boo
     if (localName == u8"shape")
     {
       // The rectangle state is the missing and invalid value default, so rect and rectangle are left to it.
-      auto shape = value.value_or(DOMStringView());
+      auto shape = value.value_or({});
       if (text::IsASCIICaselessEqual(shape, u8"default"))
       {
         _shape = AreaShape::Default;
@@ -96,7 +96,7 @@ namespace krys::boo
     }
     else if (localName == u8"coords")
     {
-      _coords = html::Numbers::ParseListOfFloatingPointNumbers(value.value_or(DOMStringView()));
+      _coords = html::Numbers::ParseListOfFloatingPointNumbers(value.value_or({}));
       InvalidateCachedRegion();
     }
   }
@@ -355,17 +355,17 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
-  dom::DOMTokenList &HTMLAreaElement::RelList() noexcept
+  DOMTokenList &HTMLAreaElement::RelList() noexcept
   {
     if (!_relList)
     {
-      _relList = dom::DOMTokenList::Create(*this, u8"rel",
-                                           [](Document &, DOMStringView token)
-                                           {
-                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                    || text::IsASCIICaselessEqual(token, u8"opener");
-                                           });
+      _relList = DOMTokenList::Create(*this, u8"rel",
+                                      [](Document &, DOMStringView token)
+                                      {
+                                        return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                               || text::IsASCIICaselessEqual(token, u8"noopener")
+                                               || text::IsASCIICaselessEqual(token, u8"opener");
+                                      });
     }
 
     return *_relList;

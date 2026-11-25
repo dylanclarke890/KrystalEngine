@@ -13,7 +13,7 @@ namespace krys::boo::html::tests
   }
 
   /// @brief The ids of @p collection's elements, in order.
-  KRYS_NODISCARD inline List<std::string> TableIds(const dom::HTMLCollection &collection) noexcept
+  KRYS_NODISCARD inline List<std::string> TableIds(const HTMLCollection &collection) noexcept
   {
     List<std::string> ids;
     for (size_t i = 0; i < collection.Length(); ++i)

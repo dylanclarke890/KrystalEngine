@@ -3,13 +3,9 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTablePartElement.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo
 {
+  class HTMLCollection;
   class HTMLTableRowElement;
 
   /// @see https://html.spec.whatwg.org/#htmltablesectionelement
@@ -18,7 +14,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableSectionElement);
 
   private:
-    WeakPtr<dom::HTMLCollection> _rows;
+    WeakPtr<HTMLCollection> _rows;
 
   public:
     HTMLTableSectionElement(Document &document) noexcept;
@@ -27,7 +23,7 @@ namespace krys::boo
 
     /// @brief The section's `tr` children.
     /// @see https://html.spec.whatwg.org/#dom-tbody-rows
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Rows() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Rows() noexcept;
 
     /// @brief A new row at @p index in the section's rows (-1 for the end): an `IndexSizeError` if @p index
     /// is less than -1 or more than the number of rows.

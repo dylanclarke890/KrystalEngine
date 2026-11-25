@@ -41,7 +41,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOutputElement);
 
   private:
-    UniquePtr<dom::DOMTokenList> _htmlFor;
+    UniquePtr<DOMTokenList> _htmlFor;
     Maybe<DOMString> _defaultValueOverride;
 
   public:
@@ -57,7 +57,7 @@ namespace krys::boo
 #pragma region HTMLOutputElement - https://html.spec.whatwg.org/#htmloutputelement
 
     /// @see https://html.spec.whatwg.org/#dom-output-htmlfor
-    KRYS_NODISCARD dom::DOMTokenList &HtmlFor() noexcept;
+    KRYS_NODISCARD DOMTokenList &HtmlFor() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-output-name
     KRYS_NODISCARD DOMString Name() const noexcept override;

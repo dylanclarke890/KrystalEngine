@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
-#include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+#include "Krystal.Booey/DOM/Collections/DOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -37,7 +37,7 @@ namespace krys::boo::dom
     _partList = krys::move(partList);
   }
 
-  void ElementRareData::SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept
+  void ElementRareData::SetDataset(UniquePtr<DOMStringMap> &&dataset) noexcept
   {
     _dataset = krys::move(dataset);
   }

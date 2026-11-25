@@ -16,7 +16,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLStyleElement);
 
   private:
-    UniquePtr<dom::DOMTokenList> _blocking;
+    UniquePtr<DOMTokenList> _blocking;
     html::InlineStyleSheetOwner _styleSheetOwner;
     /// @brief Whether the parser made the element, which makes it potentially render-blocking.
     bool _createdByParser {false};
@@ -43,7 +43,7 @@ namespace krys::boo
     void Media(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-style-blocking
-    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
 #pragma endregion
 

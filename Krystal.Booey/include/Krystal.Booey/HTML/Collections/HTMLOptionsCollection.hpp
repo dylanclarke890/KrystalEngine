@@ -16,7 +16,7 @@ namespace krys::boo::html
 {
   /// @brief A select's `options`: the options in its list of options.
   /// @see https://html.spec.whatwg.org/#htmloptionscollection
-  class HTMLOptionsCollection final : public dom::LiveHTMLCollection
+  class HTMLOptionsCollection final : public LiveHTMLCollection
   {
   public:
     using OptionOrOptGroupElement = Variant<RefPtr<HTMLOptionElement>, RefPtr<HTMLOptGroupElement>>;

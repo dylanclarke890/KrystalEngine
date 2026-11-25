@@ -90,14 +90,14 @@ namespace krys::boo
     return -1;
   }
 
-  Ref<dom::HTMLCollection> HTMLTableRowElement::Cells() noexcept
+  Ref<HTMLCollection> HTMLTableRowElement::Cells() noexcept
   {
     if (auto *cells = _cells.get())
     {
       return ShareRef(*cells);
     }
 
-    Ref<dom::HTMLCollection> cells = CreateRef<dom::LiveHTMLCollection>(
+    Ref<HTMLCollection> cells = CreateRef<LiveHTMLCollection>(
       *this, [](const Element &element) { return html::AsTableElement<HTMLTableCellElement>(&element); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _cells = CreateWeakPtr(cells.get());

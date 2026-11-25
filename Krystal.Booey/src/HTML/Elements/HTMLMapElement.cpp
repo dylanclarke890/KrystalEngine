@@ -75,10 +75,10 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  Ref<dom::HTMLCollection> HTMLMapElement::Areas() noexcept
+  Ref<HTMLCollection> HTMLMapElement::Areas() noexcept
   {
-    return CreateRef<dom::LiveHTMLCollection>(*this, [](const Element &element)
-                                              { return Is<HTMLAreaElement>(element); });
+    return CreateRef<LiveHTMLCollection>(*this,
+                                         [](const Element &element) { return Is<HTMLAreaElement>(element); });
   }
 
 #pragma endregion

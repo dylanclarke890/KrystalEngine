@@ -18,7 +18,7 @@ namespace krys::boo
     friend class html::TreeBuilder;
 
   private:
-    UniquePtr<dom::DOMTokenList> _blocking;
+    UniquePtr<DOMTokenList> _blocking;
     Document *_parserDocument {nullptr};
     bool _forceAsync : 1 {true};
     bool _alreadyStarted : 1 {false};
@@ -61,7 +61,7 @@ namespace krys::boo
     void Defer(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-blocking
-    KRYS_NODISCARD dom::DOMTokenList &Blocking() noexcept;
+    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-crossorigin
     KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;

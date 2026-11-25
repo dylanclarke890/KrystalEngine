@@ -2,13 +2,9 @@
 
 #include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo
 {
+  class HTMLCollection;
   class HTMLLegendElement;
 
   /// @see https://html.spec.whatwg.org/#htmlfieldsetelement
@@ -19,7 +15,7 @@ namespace krys::boo
   private:
     List<WeakPtr<HTMLElement>> _invalidDescendants;
     // A [SameObject] collection, held weakly as it holds the fieldset.
-    WeakPtr<dom::HTMLCollection> _elements;
+    WeakPtr<HTMLCollection> _elements;
 
   public:
     HTMLFieldSetElement(Document &document) noexcept;
@@ -49,7 +45,7 @@ namespace krys::boo
 
     /// @brief The fieldset's listed elements.
     /// @see https://html.spec.whatwg.org/#dom-fieldset-elements
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Elements() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Elements() noexcept;
 
 #pragma endregion
 

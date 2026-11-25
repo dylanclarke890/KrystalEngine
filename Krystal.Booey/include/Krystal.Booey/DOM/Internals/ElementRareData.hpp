@@ -18,6 +18,8 @@
 
 namespace krys::boo
 {
+  class DOMStringMap;
+  class DOMTokenList;
   class Element;
   class ElementAnimationRareData;
   struct IntersectionObserverData;
@@ -37,8 +39,6 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
-  class DatasetDOMStringMap;
-  class DOMTokenList;
   class PopoverData;
 
   /// @brief The elements set through an element's element reflection attributes, by attribute name.
@@ -86,7 +86,7 @@ namespace krys::boo::dom
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
     UniquePtr<ResizeObserverData> _resizeObserverData;
     UniquePtr<DOMTokenList> _partList;
-    UniquePtr<DatasetDOMStringMap> _dataset;
+    UniquePtr<DOMStringMap> _dataset;
     RefPtr<StylePropertyMap> _attributeStyleMap;
     RefPtr<StylePropertyMapReadOnly> _computedStyleMap;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
@@ -172,12 +172,12 @@ namespace krys::boo::dom
     void SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept;
 
     /// @brief The element's `dataset`, once it's been asked for.
-    KRYS_NODISCARD DatasetDOMStringMap *Dataset() const noexcept
+    KRYS_NODISCARD DOMStringMap *Dataset() const noexcept
     {
       return _dataset.get();
     }
 
-    void SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept;
+    void SetDataset(UniquePtr<DOMStringMap> &&dataset) noexcept;
 
     /// @brief The element's `attributeStyleMap`, once it's been asked for.
     KRYS_NODISCARD StylePropertyMap *AttributeStyleMap() const noexcept

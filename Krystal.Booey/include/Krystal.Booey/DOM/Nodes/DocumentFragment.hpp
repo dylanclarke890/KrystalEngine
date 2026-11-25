@@ -5,15 +5,11 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 
-namespace krys::boo::dom
-{
-  class HTMLCollection;
-}
-
 namespace krys::boo
 {
   class Document;
   class Element;
+  class HTMLCollection;
 
   /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class DocumentFragment : public ContainerNode
@@ -68,7 +64,7 @@ namespace krys::boo
 
     /// @brief Returns the child elements.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-children
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Children() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
 
     /// @brief Returns the first child that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild
@@ -121,7 +117,7 @@ namespace krys::boo
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 

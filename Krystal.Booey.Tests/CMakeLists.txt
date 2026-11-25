@@ -390,7 +390,7 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Algorithms/SlotAlgorithms.cpp
   tests/DOM/Algorithms/TextAlgorithms.cpp
   tests/DOM/Algorithms/TreeQueries.cpp
-  tests/DOM/Collections/DatasetDOMStringMap.cpp
+  tests/DOM/Collections/DOMStringMap.cpp
   tests/DOM/Collections/DOMTokenList.cpp
   tests/DOM/Collections/HTMLCollection.cpp
   tests/DOM/Collections/LiveCollection.cpp

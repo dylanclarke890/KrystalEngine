@@ -224,17 +224,17 @@ namespace krys::boo
     return SVGElement::ChildShouldCreateRenderer(child);
   }
 
-  dom::DOMTokenList &SVGAElement::RelList() noexcept
+  DOMTokenList &SVGAElement::RelList() noexcept
   {
     if (!_relList)
     {
-      _relList = dom::DOMTokenList::Create(*this, SVGNames::RelAttr().LocalName(),
-                                           [](Document &, DOMStringView token)
-                                           {
-                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                    || text::IsASCIICaselessEqual(token, u8"opener");
-                                           });
+      _relList = DOMTokenList::Create(*this, SVGNames::RelAttr().LocalName(),
+                                      [](Document &, DOMStringView token)
+                                      {
+                                        return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                               || text::IsASCIICaselessEqual(token, u8"noopener")
+                                               || text::IsASCIICaselessEqual(token, u8"opener");
+                                      });
     }
     return *_relList;
   }

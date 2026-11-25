@@ -33,7 +33,7 @@ namespace krys::boo
     void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-map-areas
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Areas() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Areas() noexcept;
 
 #pragma endregion
 

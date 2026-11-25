@@ -43,12 +43,8 @@ namespace krys::boo
   class Element;
   class HTMLElement;
   class HTMLFormElement;
-  class ShadowRoot;
-}
-
-namespace krys::boo::dom
-{
   class NodeList;
+  class ShadowRoot;
 }
 
 namespace krys::boo::html
@@ -129,7 +125,7 @@ namespace krys::boo::html
     ExceptionOr<bool> CheckValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-labels
-    KRYS_NODISCARD ExceptionOr<RefPtr<dom::NodeList>> Labels() noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<NodeList>> Labels() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-elementinternals-states
     KRYS_NODISCARD CustomStateSet &States() noexcept;

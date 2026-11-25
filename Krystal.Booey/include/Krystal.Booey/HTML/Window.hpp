@@ -47,7 +47,6 @@
 namespace krys::boo::dom
 {
   class EventDispatcher;
-  class HTMLCollection;
 }
 
 namespace krys::boo::html
@@ -63,6 +62,7 @@ namespace krys::boo
   class Document;
   class Element;
   class Frame;
+  class HTMLCollection;
   class MediaQueryList;
   class VisualViewport;
 
@@ -141,7 +141,7 @@ namespace krys::boo
     /// their `name`, and HTML elements by their ID): the element if there's one, an `HTMLCollection` of them
     /// if there are several, nothing if there are none.
     /// @see https://html.spec.whatwg.org/#dom-window-nameditem
-    KRYS_NODISCARD Maybe<Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>>
+    KRYS_NODISCARD Maybe<Variant<RefPtr<Element>, RefPtr<HTMLCollection>>>
       NamedItem(DOMStringView name) const noexcept;
 
     /// @brief The names `NamedItem` finds something for, in tree order.

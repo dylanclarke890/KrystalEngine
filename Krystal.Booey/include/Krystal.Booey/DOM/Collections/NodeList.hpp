@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Nodes/Node.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
@@ -10,10 +9,7 @@
 namespace krys::boo
 {
   class Node;
-}
 
-namespace krys::boo::dom
-{
   /// @see https://dom.spec.whatwg.org/#interface-nodelist
   class NodeList : public RefCounted<NodeList>, public CanMakeWeakPtr<NodeList>
   {
@@ -32,38 +28,36 @@ namespace krys::boo::dom
       using value_type = RefPtr<Node>;
       using difference_type = std::ptrdiff_t;
 
-      Iterator(NodeList *list, size_t index) : _list(list), _index(index)
+      Iterator(NodeList *list, size_t index) noexcept : _list(list), _index(index)
       {
       }
 
-      RefPtr<Node> operator*() const
+      KRYS_NODISCARD RefPtr<Node> operator*() const noexcept
       {
         return _list->Item(_index);
       }
 
-      Iterator &operator++()
+      Iterator &operator++() noexcept
       {
         ++_index;
         return *this;
       }
 
-      bool operator==(const Iterator &other) const
+      bool operator==(const Iterator &other) const noexcept
       {
         return _list == other._list && _index == other._index;
       }
 
-      bool operator!=(const Iterator &other) const
+      bool operator!=(const Iterator &other) const noexcept
       {
         return !(*this == other);
       }
-
-      /// @see https://webidl.spec.whatwg.org/#dfn-iterable
     };
 
   public:
     virtual ~NodeList() noexcept = default;
 
-#pragma region NodeList - https://dom.spec.whatwg.org/#interface-nodelist
+#pragma region NodeList - https://dom.spec.whatwg.org/#nodelist
 
     /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD virtual RefPtr<Node> Item(size_t index) noexcept = 0;
@@ -83,7 +77,7 @@ namespace krys::boo::dom
     /// @see https://webidl.spec.whatwg.org/#dfn-iterable
     Iterator begin() noexcept
     {
-      return Iterator(this, 0);
+      return Iterator(this, 0uz);
     }
 
     /// @see https://webidl.spec.whatwg.org/#dfn-iterable
@@ -92,22 +86,18 @@ namespace krys::boo::dom
       return Iterator(this, Length());
     }
 
-  protected:
+#pragma endregion
+
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
     {
       return index < Length();
     }
 
-#pragma endregion
-
-#pragma region Type Checks
-
+  protected:
     KRYS_NODISCARD virtual bool IsLiveNodeList() const noexcept
     {
       return false;
     }
-
-#pragma endregion
   };
 }

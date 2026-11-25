@@ -73,17 +73,13 @@ namespace krys::boo::xml
 namespace krys::boo::dom
 {
   class DOMRectList;
-  class DOMTokenList;
-  class DatasetDOMStringMap;
   class DocumentAlgorithms;
   class ElementAlgorithms;
   class ElementFactory;
   class ElementRareData;
   class ExtensibilityHooks;
-  class HTMLCollection;
   class NamedNodeMap;
   class NodeAlgorithms;
-  class NodeList;
   class PopoverData;
   class SlotAlgorithms;
   class TreeQueries;
@@ -149,10 +145,14 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class DOMStringMap;
+  class DOMTokenList;
   class HTMLButtonElement;
+  class HTMLCollection;
   class HTMLElement;
   class HTMLSlotElement;
   class LayoutUnit;
+  class NodeList;
   class PlatformKeyboardEvent;
   class PlatformMouseEvent;
   class PseudoElement;
@@ -208,7 +208,7 @@ namespace krys::boo
     /// @brief The associated `NamedNodeMap`, created on first use.
     UniquePtr<dom::NamedNodeMap> _namedNodeMap;
     /// @brief The `classList`, created on first use.
-    UniquePtr<dom::DOMTokenList> _domTokenList;
+    UniquePtr<DOMTokenList> _domTokenList;
     /// @see https://dom.spec.whatwg.org/#concept-element-attribute
     List<Ref<Attr>> _attributes;
     /// @brief Kept as given, but ignored: customized built-in elements aren't supported.
@@ -275,14 +275,14 @@ namespace krys::boo
     KRYS_NODISCARD DOMString ClassName() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-classlist
-    KRYS_NODISCARD dom::DOMTokenList &ClassList() noexcept;
+    KRYS_NODISCARD DOMTokenList &ClassList() noexcept;
 
     /// @see https://drafts.csswg.org/css-shadow-parts/#dom-element-part
-    KRYS_NODISCARD dom::DOMTokenList &Part() noexcept;
+    KRYS_NODISCARD DOMTokenList &Part() noexcept;
 
     /// @brief The element's `data-*` attributes, by property name.
     /// @see https://html.spec.whatwg.org/#dom-dataset
-    KRYS_NODISCARD dom::DatasetDOMStringMap &Dataset() noexcept;
+    KRYS_NODISCARD DOMStringMap &Dataset() noexcept;
 
     /// @brief The element's computed style, as a read-only property map.
     /// @see https://drafts.css-houdini.org/css-typed-om/#dom-element-computedstylemap
@@ -392,14 +392,14 @@ namespace krys::boo
     KRYS_NODISCARD ExceptionOr<bool> Matches(DOMStringView selectors) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
-                                                                   DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                              DOMStringAtom localName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname
-    KRYS_NODISCARD Ref<dom::HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
     ExceptionOr<Element *> InsertAdjacentElement(dom::InsertAdjacentWhere where, Element &element) noexcept;
@@ -682,7 +682,7 @@ namespace krys::boo
 
     /// @brief Returns the child elements.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-children
-    KRYS_NODISCARD Ref<dom::HTMLCollection> Children() noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
 
     /// @brief Returns the first child that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild
@@ -735,7 +735,7 @@ namespace krys::boo
 
     /// @brief Returns all element descendants of `this` that match `selectors`.
     /// @see https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall
-    KRYS_NODISCARD ExceptionOr<Ref<dom::NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 

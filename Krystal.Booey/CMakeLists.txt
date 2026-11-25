@@ -1064,7 +1064,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp
   include/Krystal.Booey/DOM/Algorithms/TreeQueries.hpp
   include/Krystal.Booey/DOM/Collections/CollectionIndexCache.hpp
-  include/Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp
+  include/Krystal.Booey/DOM/Collections/DOMStringMap.hpp
   include/Krystal.Booey/DOM/Collections/DOMTokenList.hpp
   include/Krystal.Booey/DOM/Collections/HTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/LiveCollection.hpp
@@ -1233,7 +1233,7 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Algorithms/SlotAlgorithms.cpp
   src/DOM/Algorithms/TextAlgorithms.cpp
   src/DOM/Algorithms/TreeQueries.cpp
-  src/DOM/Collections/DatasetDOMStringMap.cpp
+  src/DOM/Collections/DOMStringMap.cpp
   src/DOM/Collections/DOMTokenList.cpp
   src/DOM/Collections/LiveCollection.cpp
   src/DOM/Collections/LiveHTMLCollection.cpp
@@ -4189,7 +4189,6 @@ target_precompile_headers(Krystal.Booey
     include/Krystal.Booey/DOM/Types/DOMString.hpp
     include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
     include/Krystal.Booey/DOM/Types/USVString.hpp
-    include/Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp
     include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
 
     include/Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp

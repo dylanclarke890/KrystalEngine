@@ -13,7 +13,7 @@ namespace krys::boo::html
   /// @brief The labels of a labelable element: the `label` elements in its tree whose labeled control it is,
   /// in tree order.
   /// @see https://html.spec.whatwg.org/#dom-lfe-labels
-  class LabelsNodeList final : public dom::LiveNodeList
+  class LabelsNodeList final : public LiveNodeList
   {
   private:
     Ref<HTMLElement> _ownerNode;

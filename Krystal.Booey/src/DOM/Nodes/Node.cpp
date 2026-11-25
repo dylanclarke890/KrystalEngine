@@ -243,7 +243,7 @@ namespace krys::boo
     return FirstChild() != nullptr;
   }
 
-  Ref<dom::NodeList> Node::ChildNodes() noexcept
+  Ref<NodeList> Node::ChildNodes() noexcept
   {
     return EnsureNodeRareData().ChildNodes(*this);
   }

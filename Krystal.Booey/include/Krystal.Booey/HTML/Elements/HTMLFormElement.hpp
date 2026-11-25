@@ -30,17 +30,17 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLFormElement);
 
   private:
-    UniquePtr<dom::DOMTokenList> _relList;
-    WeakPtr<dom::HTMLCollection> _elements;
+    UniquePtr<DOMTokenList> _relList;
+    WeakPtr<HTMLCollection> _elements;
     FormSubmission::Attributes _attributes;
     HashMap<DOMStringAtom, WeakPtr<HTMLElement>> _pastNamesMap;
     html::RadioButtonGroups _radioButtonGroups;
     mutable WeakPtr<HTMLFormControlElement> _defaultButton;
     List<WeakPtr<HTMLElement>> _listedElements;
     /// @brief The form's RadioNodeLists by name, which remove themselves as they're destroyed.
-    HashMap<DOMString, WeakPtr<dom::NodeList>> _radioNodeLists;
+    HashMap<DOMString, WeakPtr<NodeList>> _radioNodeLists;
     /// @brief The same for images, which are candidates only if no listed element is.
-    HashMap<DOMString, WeakPtr<dom::NodeList>> _imageRadioNodeLists;
+    HashMap<DOMString, WeakPtr<NodeList>> _imageRadioNodeLists;
     /// @brief The images whose form owner this is, in no particular order.
     List<WeakPtr<HTMLImageElement>> _imageElements;
     List<WeakPtr<HTMLElement>> _invalidFormControls;
@@ -120,7 +120,7 @@ namespace krys::boo
     void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-rellist
-    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-elements
     KRYS_NODISCARD Ref<html::HTMLFormControlsCollection> Elements() noexcept;

@@ -47,12 +47,11 @@ namespace krys::boo
   class ContainerNode;
   class Document;
   class Element;
+  class NodeList;
 }
 
 namespace krys::boo::dom
 {
-  class NodeList;
-
   /// @brief Runs the selectors of a list against elements, choosing a fast path for the common
   /// single-selector shapes.
   class SelectorDataList

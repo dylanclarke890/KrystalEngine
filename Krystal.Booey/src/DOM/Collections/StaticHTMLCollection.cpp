@@ -1,22 +1,19 @@
 ﻿#include "Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
-#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo
 {
-  dom::StaticHTMLCollection::StaticHTMLCollection(dom::SmallElementList &&elements) noexcept
+  StaticHTMLCollection::StaticHTMLCollection(dom::SmallElementList &&elements) noexcept
       : _elements(krys::move(elements))
   {
   }
 
-  RefPtr<Element> dom::StaticHTMLCollection::Item(size_t index) noexcept
+#pragma region HTMLCollection - https://dom.spec.whatwg.org/#htmlcollection
+
+  RefPtr<Element> StaticHTMLCollection::Item(size_t index) noexcept
   {
     if (index < _elements.size())
     {
@@ -26,22 +23,22 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<const Element> dom::StaticHTMLCollection::Item(size_t index) const noexcept
+  RefPtr<const Element> StaticHTMLCollection::Item(size_t index) const noexcept
   {
-    return const_cast<dom::StaticHTMLCollection *>(this)->Item(index);
+    return const_cast<StaticHTMLCollection *>(this)->Item(index);
   }
 
-  RefPtr<Element> dom::StaticHTMLCollection::operator[](size_t index) noexcept
-  {
-    return Item(index);
-  }
-
-  RefPtr<const Element> dom::StaticHTMLCollection::operator[](size_t index) const noexcept
+  RefPtr<Element> StaticHTMLCollection::operator[](size_t index) noexcept
   {
     return Item(index);
   }
 
-  RefPtr<Element> dom::StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
+  RefPtr<const Element> StaticHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<Element> StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
     // 1. If key is the empty string, return null.
     if (name.empty())
@@ -69,27 +66,29 @@ namespace krys::boo
     return nullptr;
   }
 
-  RefPtr<const Element> dom::StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  RefPtr<const Element> StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    return const_cast<dom::StaticHTMLCollection *>(this)->NamedItem(name);
+    return const_cast<StaticHTMLCollection *>(this)->NamedItem(name);
   }
 
-  RefPtr<Element> dom::StaticHTMLCollection::operator[](DOMStringView name) noexcept
-  {
-    return NamedItem(name);
-  }
-
-  RefPtr<const Element> dom::StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  RefPtr<Element> StaticHTMLCollection::operator[](DOMStringView name) noexcept
   {
     return NamedItem(name);
   }
 
-  size_t dom::StaticHTMLCollection::Length() const noexcept
+  RefPtr<const Element> StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t StaticHTMLCollection::Length() const noexcept
   {
     return _elements.size();
   }
 
-  List<DOMString> dom::StaticHTMLCollection::SupportedPropertyNames() const noexcept
+#pragma endregion
+
+  List<DOMString> StaticHTMLCollection::SupportedPropertyNames() const noexcept
   {
     // 1. Let result be an empty list.
     List<DOMString> supportedNames;

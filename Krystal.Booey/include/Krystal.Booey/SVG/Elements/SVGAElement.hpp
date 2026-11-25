@@ -26,7 +26,7 @@
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   class DOMTokenList;
 }
@@ -55,7 +55,7 @@ namespace krys::boo
 
     EnumSet<SVGALinkRelation> _linkRelations;
 
-    UniquePtr<dom::DOMTokenList> _relList;
+    UniquePtr<DOMTokenList> _relList;
 
   public:
     explicit SVGAElement(Document &document) noexcept;
@@ -74,7 +74,7 @@ namespace krys::boo
     }
 
     /// @see https://svgwg.org/svg2-draft/linking.html#__svg__SVGAElement__relList
-    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGAElement, SVGGraphicsElement, SVGURIReference>;
 

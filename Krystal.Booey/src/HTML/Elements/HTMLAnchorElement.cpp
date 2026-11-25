@@ -144,17 +144,17 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"rel", krys::move(value));
   }
 
-  dom::DOMTokenList &HTMLAnchorElement::RelList() noexcept
+  DOMTokenList &HTMLAnchorElement::RelList() noexcept
   {
     if (!_relList)
     {
-      _relList = dom::DOMTokenList::Create(*this, u8"rel",
-                                           [](Document &, DOMStringView token)
-                                           {
-                                             return text::IsASCIICaselessEqual(token, u8"noreferrer")
-                                                    || text::IsASCIICaselessEqual(token, u8"noopener")
-                                                    || text::IsASCIICaselessEqual(token, u8"opener");
-                                           });
+      _relList = DOMTokenList::Create(*this, u8"rel",
+                                      [](Document &, DOMStringView token)
+                                      {
+                                        return text::IsASCIICaselessEqual(token, u8"noreferrer")
+                                               || text::IsASCIICaselessEqual(token, u8"noopener")
+                                               || text::IsASCIICaselessEqual(token, u8"opener");
+                                      });
     }
 
     return *_relList;

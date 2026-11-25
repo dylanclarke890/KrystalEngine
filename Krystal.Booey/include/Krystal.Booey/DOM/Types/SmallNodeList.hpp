@@ -13,13 +13,19 @@ namespace krys::boo
 namespace krys::boo::dom
 {
   /// @brief Covers 99.5%. See webkit.org/b/80706
-  constexpr size_t OptimalSmallNodeListSize = 11;
+  constexpr inline size_t OptimalSmallNodeListSize = 11uz;
+
+  /// @note Might need to tweak this
+  constexpr inline size_t OptimalSmallElementListSize = 11uz;
+  
+  /// @note Might need to tweak this
+  constexpr inline size_t OptimalSmallTextNodeListSize = 4uz;
 
   using SmallNodeList = SmallList<Ref<Node>, OptimalSmallNodeListSize>;
-  using SmallElementList = SmallList<Ref<Element>, OptimalSmallNodeListSize>;
 
-  // FIXME: OptimalSmallNodeListSize is for the generic node case, not text nodes specifically. Might
-  // need to tweak this constant.
-  using SmallTextNodeList = SmallList<Ref<Text>, OptimalSmallNodeListSize>;
-  using SmallConstTextNodeList = SmallList<Ref<const Text>, OptimalSmallNodeListSize>;
+  using SmallElementList = SmallList<Ref<Element>, OptimalSmallElementListSize>;
+  
+  using SmallTextNodeList = SmallList<Ref<Text>, OptimalSmallTextNodeListSize>;
+  
+  using SmallConstTextNodeList = SmallList<Ref<const Text>, OptimalSmallTextNodeListSize>;
 }

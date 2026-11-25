@@ -261,8 +261,8 @@ namespace krys::boo::tests
     // Several are a live collection.
     auto twice = window.NamedItem(u8"twice");
     REQUIRE(twice);
-    REQUIRE(std::holds_alternative<RefPtr<dom::HTMLCollection>>(*twice));
-    auto collection = std::get<RefPtr<dom::HTMLCollection>>(*twice);
+    REQUIRE(std::holds_alternative<RefPtr<HTMLCollection>>(*twice));
+    auto collection = std::get<RefPtr<HTMLCollection>>(*twice);
     CHECK(collection->Length() == 2);
     REQUIRE_FALSE(fixture.ById(u8"box").SetAttribute(u8"id", u8"twice").HasException());
     CHECK(collection->Length() == 3);

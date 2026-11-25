@@ -12,7 +12,7 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLAnchorElement);
 
   private:
-    UniquePtr<dom::DOMTokenList> _relList;
+    UniquePtr<DOMTokenList> _relList;
     /// @brief Whether the shift key was down when the mouse was last pressed on the link, for a drag it
     /// starts.
     bool _wasShiftKeyDownOnMouseDown {false};
@@ -69,7 +69,7 @@ namespace krys::boo
     void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-rellist
-    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-a-hreflang
     KRYS_NODISCARD DOMString HrefLang() const noexcept;

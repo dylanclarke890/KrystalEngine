@@ -59,11 +59,11 @@ namespace krys::boo
 
 #pragma region HTMLOutputElement
 
-  dom::DOMTokenList &HTMLOutputElement::HtmlFor() noexcept
+  DOMTokenList &HTMLOutputElement::HtmlFor() noexcept
   {
     if (!_htmlFor)
     {
-      _htmlFor = dom::DOMTokenList::Create(*this, u8"for");
+      _htmlFor = DOMTokenList::Create(*this, u8"for");
     }
 
     return *_htmlFor;

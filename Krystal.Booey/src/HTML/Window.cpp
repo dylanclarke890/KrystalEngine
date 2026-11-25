@@ -163,7 +163,7 @@ namespace krys::boo
     return id && *id == name;
   }
 
-  Maybe<Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>>
+  Maybe<Variant<RefPtr<Element>, RefPtr<HTMLCollection>>>
     boo::Window::NamedItem(DOMStringView name) const noexcept
   {
     // The named objects are in a document tree with window's associated Document as their root. There are no
@@ -199,16 +199,16 @@ namespace krys::boo
     // If objects has only one element, return that element.
     if (!several)
     {
-      return Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>(krys::move(first));
+      return Variant<RefPtr<Element>, RefPtr<HTMLCollection>>(krys::move(first));
     }
 
     // Otherwise return an HTMLCollection rooted at window's associated Document, whose filter matches only
     // named objects of window with the name name.
-    RefPtr<dom::HTMLCollection> collection = CreateRef<dom::LiveHTMLCollection>(
+    RefPtr<HTMLCollection> collection = CreateRef<LiveHTMLCollection>(
       *document, [name = DOMString(name)](const Element &element)
       { return IsNamedObject(element, name) && element.IsInDocumentTree(); },
       dom::LiveCollectionInvalidation::IdOrName);
-    return Variant<RefPtr<Element>, RefPtr<dom::HTMLCollection>>(krys::move(collection));
+    return Variant<RefPtr<Element>, RefPtr<HTMLCollection>>(krys::move(collection));
   }
 
   List<DOMString> boo::Window::SupportedPropertyNames() const noexcept

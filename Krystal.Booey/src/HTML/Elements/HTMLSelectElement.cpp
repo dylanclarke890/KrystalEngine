@@ -45,7 +45,7 @@ namespace krys::boo
   namespace
   {
     /// @brief A select's selected options.
-    class SelectedOptionsCollection final : public dom::LiveHTMLCollection
+    class SelectedOptionsCollection final : public LiveHTMLCollection
     {
     private:
       HTMLSelectElement &_select;
@@ -796,14 +796,14 @@ namespace krys::boo
     return _contentsUseBaseAppearance;
   }
 
-  Ref<dom::HTMLCollection> HTMLSelectElement::SelectedOptions() noexcept
+  Ref<HTMLCollection> HTMLSelectElement::SelectedOptions() noexcept
   {
     if (auto *selectedOptions = _selectedOptions.get())
     {
       return ShareRef(*selectedOptions);
     }
-    Ref<dom::LiveHTMLCollection> selectedOptions = CreateRef<SelectedOptionsCollection>(*this);
-    _selectedOptions = CreateWeakPtr<dom::HTMLCollection>(selectedOptions.get());
+    Ref<LiveHTMLCollection> selectedOptions = CreateRef<SelectedOptionsCollection>(*this);
+    _selectedOptions = CreateWeakPtr<HTMLCollection>(selectedOptions.get());
     return selectedOptions;
   }
 
@@ -815,7 +815,7 @@ namespace krys::boo
       return ShareRef(static_cast<html::HTMLOptionsCollection &>(*options));
     }
     auto options = CreateRef<html::HTMLOptionsCollection>(*this);
-    _options = CreateWeakPtr<dom::HTMLCollection>(options.get());
+    _options = CreateWeakPtr<HTMLCollection>(options.get());
     return options;
   }
 
@@ -1321,7 +1321,7 @@ namespace krys::boo
   {
     if (auto *selectedOptions = _selectedOptions.get())
     {
-      static_cast<dom::LiveHTMLCollection *>(selectedOptions)->InvalidateCache();
+      static_cast<LiveHTMLCollection *>(selectedOptions)->InvalidateCache();
     }
   }
 

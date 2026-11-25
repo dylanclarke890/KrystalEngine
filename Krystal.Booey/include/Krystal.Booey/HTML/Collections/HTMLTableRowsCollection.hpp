@@ -41,7 +41,7 @@ namespace krys::boo::html
   /// @brief A table's rows: those of its `thead`s, then those that are its children or in its `tbody`s, then
   /// those of its `tfoot`s, each in tree order.
   /// @see https://html.spec.whatwg.org/#dom-table-rows
-  class HTMLTableRowsCollection final : public dom::LiveHTMLCollection
+  class HTMLTableRowsCollection final : public LiveHTMLCollection
   {
   private:
     Ref<HTMLTableElement> _table;

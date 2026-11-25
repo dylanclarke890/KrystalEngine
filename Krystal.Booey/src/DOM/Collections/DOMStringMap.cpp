@@ -1,10 +1,10 @@
-﻿#include "Krystal.Booey/DOM/Collections/DatasetDOMStringMap.hpp"
+﻿#include "Krystal.Booey/DOM/Collections/DOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo
 {
   namespace
   {
@@ -98,12 +98,14 @@ namespace krys::boo::dom
     }
   }
 
-  bool DatasetDOMStringMap::IsSupportedPropertyName(DOMStringView name) const noexcept
+#pragma region DOMStringMap - https://html.spec.whatwg.org/#domstringmap
+
+  bool DOMStringMap::IsSupportedPropertyName(DOMStringView name) const noexcept
   {
     return FindDatasetAttribute(_element, name) != nullptr;
   }
 
-  List<DOMString> DatasetDOMStringMap::SupportedPropertyNames() const noexcept
+  List<DOMString> DOMStringMap::SupportedPropertyNames() const noexcept
   {
     // To get a DOMStringMap's name-value pairs (only the names here):
     // 1. Let list be an empty list of name-value pairs.
@@ -130,7 +132,7 @@ namespace krys::boo::dom
     return names;
   }
 
-  Maybe<DOMString> DatasetDOMStringMap::NamedItem(DOMStringView name) const noexcept
+  Maybe<DOMString> DOMStringMap::NamedItem(DOMStringView name) const noexcept
   {
     if (auto *attribute = FindDatasetAttribute(_element, name))
     {
@@ -139,7 +141,7 @@ namespace krys::boo::dom
     return null;
   }
 
-  ExceptionOr<void> DatasetDOMStringMap::SetNamedItem(DOMStringView name, DOMString value) noexcept
+  ExceptionOr<void> DOMStringMap::SetNamedItem(DOMStringView name, DOMString value) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -159,7 +161,7 @@ namespace krys::boo::dom
     return _element.SetAttribute(DOMStringAtom(DatasetPropertyNameToAttributeName(name)), krys::move(value));
   }
 
-  void DatasetDOMStringMap::DeleteNamedProperty(DOMStringView name) noexcept
+  void DOMStringMap::DeleteNamedProperty(DOMStringView name) noexcept
   {
     html::CEReactionsScope ceReactions;
 
@@ -169,4 +171,6 @@ namespace krys::boo::dom
     // 3. Remove an attribute by name given name and the DOMStringMap's associated element.
     _element.RemoveAttribute(DOMStringAtom(DatasetPropertyNameToAttributeName(name)));
   }
+
+#pragma endregion
 }

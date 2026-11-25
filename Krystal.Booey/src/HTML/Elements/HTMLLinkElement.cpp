@@ -773,18 +773,18 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"as", krys::move(value));
   }
 
-  KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::RelList() noexcept
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::RelList() noexcept
   {
     if (!_relList)
     {
-      _relList = dom::DOMTokenList::Create(*this, u8"rel",
-                                           // The link types Booey processes.
-                                           [](Document &, DOMStringView token)
-                                           {
-                                             return text::IsASCIICaselessEqual(token, u8"stylesheet")
-                                                    || text::IsASCIICaselessEqual(token, u8"alternate")
-                                                    || text::IsASCIICaselessEqual(token, u8"icon");
-                                           });
+      _relList = DOMTokenList::Create(*this, u8"rel",
+                                      // The link types Booey processes.
+                                      [](Document &, DOMStringView token)
+                                      {
+                                        return text::IsASCIICaselessEqual(token, u8"stylesheet")
+                                               || text::IsASCIICaselessEqual(token, u8"alternate")
+                                               || text::IsASCIICaselessEqual(token, u8"icon");
+                                      });
     }
 
     return *_relList;
@@ -830,11 +830,11 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
-  KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Sizes() noexcept
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::Sizes() noexcept
   {
     if (!_sizes)
     {
-      _sizes = dom::DOMTokenList::Create(*this, u8"sizes");
+      _sizes = DOMTokenList::Create(*this, u8"sizes");
     }
 
     return *_sizes;
@@ -870,12 +870,12 @@ namespace krys::boo
     html::Reflect<DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
-  KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Blocking() noexcept
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::Blocking() noexcept
   {
     if (!_blocking)
     {
-      _blocking = dom::DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
-                                            { return text::IsASCIICaselessEqual(token, u8"render"); });
+      _blocking = DOMTokenList::Create(*this, u8"blocking", [](Document &, DOMStringView token)
+                                       { return text::IsASCIICaselessEqual(token, u8"render"); });
     }
 
     return *_blocking;

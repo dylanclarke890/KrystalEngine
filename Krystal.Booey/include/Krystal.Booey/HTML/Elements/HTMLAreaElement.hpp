@@ -27,7 +27,7 @@ namespace krys::boo
     };
 
   private:
-    UniquePtr<dom::DOMTokenList> _relList;
+    UniquePtr<DOMTokenList> _relList;
     // The region of the shape at the last size it was hit tested at.
     Maybe<Path> _region;
     List<double> _coords;
@@ -117,7 +117,7 @@ namespace krys::boo
     void Rel(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-rellist
-    KRYS_NODISCARD dom::DOMTokenList &RelList() noexcept;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-area-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;

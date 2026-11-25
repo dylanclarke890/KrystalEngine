@@ -15,14 +15,14 @@ namespace krys::boo
 
 #pragma region HTMLTableSectionElement
 
-  Ref<dom::HTMLCollection> HTMLTableSectionElement::Rows() noexcept
+  Ref<HTMLCollection> HTMLTableSectionElement::Rows() noexcept
   {
     if (auto *rows = _rows.get())
     {
       return ShareRef(*rows);
     }
 
-    Ref<dom::HTMLCollection> rows = CreateRef<dom::LiveHTMLCollection>(
+    Ref<HTMLCollection> rows = CreateRef<LiveHTMLCollection>(
       *this, [](const Element &element) { return html::AsTableElement<HTMLTableRowElement>(&element); },
       dom::LiveCollectionInvalidation::TreeOnly, dom::LiveCollectionTraversal::Children);
     _rows = CreateWeakPtr(rows.get());
