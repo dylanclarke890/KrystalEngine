@@ -24,7 +24,8 @@
  */
 
 #include "Krystal.Booey/Rendering/Painting/MarkedText.hpp"
-#include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
@@ -74,16 +75,16 @@ namespace krys::boo
     }
 
     // 2. Sort offsets such that begin offsets are in paint order and end offsets are in reverse paint order.
-    std::ranges::sort(offsets,
-                      [](const Offset &a, const Offset &b)
-                      {
-                        return a.Value < b.Value
-                               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind
-                                   && a.OffsetKind == Offset::Begin
-                                   && a.Text->MarkedType < b.Text->MarkedType)
-                               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind
-                                   && a.OffsetKind == Offset::End && a.Text->MarkedType > b.Text->MarkedType);
-                      });
+    std::ranges::stable_sort(
+      offsets,
+      [](const Offset &a, const Offset &b)
+      {
+        return a.Value < b.Value
+               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind && a.OffsetKind == Offset::Begin
+                   && a.Text->MarkedType < b.Text->MarkedType)
+               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind && a.OffsetKind == Offset::End
+                   && a.Text->MarkedType > b.Text->MarkedType);
+      });
 
     // 3. Compute intersection.
     List<MarkedText> result;
@@ -134,12 +135,20 @@ namespace krys::boo
     // Fix up; sort the marked texts so that they are in paint order.
     if (overlapStrategy == OverlapStrategy::None)
     {
-      std::ranges::sort(result,
-                        [](const MarkedText &a, const MarkedText &b)
-                        {
-                          return a.StartOffset < b.StartOffset
-                                 || (a.StartOffset == b.StartOffset && a.MarkedType < b.MarkedType);
-                        });
+      // Stable, so that highlights of equal priority keep the order they were registered in.
+      std::ranges::stable_sort(result,
+                               [](const MarkedText &a, const MarkedText &b)
+                               {
+                                 if (a.StartOffset != b.StartOffset)
+                                 {
+                                   return a.StartOffset < b.StartOffset;
+                                 }
+                                 if (a.MarkedType != b.MarkedType)
+                                 {
+                                   return a.MarkedType < b.MarkedType;
+                                 }
+                                 return a.Priority < b.Priority;
+                               });
     }
     return result;
   }
@@ -179,7 +188,15 @@ namespace krys::boo
           {
             continue;
           }
-          if (auto *staticRange = DynamicDowncast<dom::StaticRange>(highlightRange->Range());
+          // A range in another tree, or an invalid static range, is ignored.
+          // https://drafts.csswg.org/css-highlight-api-1/#range-invalidation
+          auto &range = highlightRange->Range();
+          if (&dom::TreeQueries::ShadowIncludingRoot(*range.StartContainer()) != &document
+              || &dom::TreeQueries::ShadowIncludingRoot(*range.EndContainer()) != &document)
+          {
+            continue;
+          }
+          if (auto *staticRange = DynamicDowncast<dom::StaticRange>(range);
               staticRange && !staticRange->IsValid())
           {
             continue;
@@ -205,32 +222,18 @@ namespace krys::boo
 
           if (highlightStart < highlightEnd)
           {
+            // Kept in paint order: by priority, then by registration, so the most recently registered of
+            // equal priority is on top. https://drafts.csswg.org/css-highlight-api-1/#priorities
             int32 currentPriority = highlight->Priority();
-            // If we can just append it to the end, do that instead.
-            if (markedTexts.empty() || markedTexts.back().Priority <= currentPriority)
-            {
-              markedTexts.emplace_back(highlightStart, highlightEnd, Type::Highlight, highlightName,
-                                       currentPriority);
-            }
-            else
-            {
-              // Gets the first place such that it > currentPriority.
-              auto it = std::upper_bound(markedTexts.begin(), markedTexts.end(), currentPriority,
-                                         [](int32 targetMarkedTextPriority, const MarkedText &markedText)
-                                         { return targetMarkedTextPriority > markedText.Priority; });
-
-              auto insertIndex = it == markedTexts.end() ? 0 : std::distance(markedTexts.begin(), it) - 1;
-
-              markedTexts.insert(
-                markedTexts.begin() + insertIndex,
-                MarkedText(highlightStart, highlightEnd, Type::Highlight, highlightName, currentPriority));
-            }
+            auto it = std::ranges::upper_bound(markedTexts, currentPriority, {}, &MarkedText::Priority);
+            markedTexts.insert(
+              it, MarkedText(highlightStart, highlightEnd, Type::Highlight, highlightName, currentPriority));
           }
         }
       }
     }
 
-    auto appendMarkedTextHighlights = [&](const dom::HighlightRegistry &registry, Type markedTextType)
+    auto appendMarkedTextHighlights = [&](const HighlightRegistry &registry, Type markedTextType)
     {
       for (auto &[name, highlight] : registry.Map())
       {

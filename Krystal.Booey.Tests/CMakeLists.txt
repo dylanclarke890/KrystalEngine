@@ -202,6 +202,7 @@ set(KRYSTAL_BOOEY_TESTS_CSS_SOURCES
   tests/CSS/Geometry/DOMPoint.cpp
   tests/CSS/Geometry/DOMQuad.cpp
   tests/CSS/Geometry/DOMRectList.cpp
+  tests/CSS/Highlights/Highlight.cpp
   tests/CSS/Parser/AtRuleId.cpp
   tests/CSS/Parser/CustomPropertySyntax.cpp
   tests/CSS/Parser/KeywordLookup.cpp
@@ -411,7 +412,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Events/ToggleEvent.cpp
   tests/DOM/Events/UIEvent.cpp
   tests/DOM/Events/WheelEvent.cpp
-  tests/DOM/Highlights/Highlight.cpp
   tests/DOM/Internals/ElementFactory.cpp
   tests/DOM/Internals/EventFactory.cpp
   tests/DOM/Internals/QualifiedNameCache.cpp

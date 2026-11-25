@@ -29,7 +29,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Selection/RenderHighlight.hpp"
-#include "Krystal.Booey/DOM/Highlights/Highlight.hpp"
+#include "Krystal.Booey/CSS/Highlights/Highlight.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include <limits>
@@ -68,7 +68,7 @@ namespace krys::boo
     _current = placeholder->Spanner();
   }
 
-  bool RenderHighlight::SetRenderRange(const dom::HighlightRange &highlightRange) noexcept
+  bool RenderHighlight::SetRenderRange(const css::HighlightRange &highlightRange) noexcept
   {
     if (highlightRange.StartPosition().IsNull() || highlightRange.EndPosition().IsNull())
     {

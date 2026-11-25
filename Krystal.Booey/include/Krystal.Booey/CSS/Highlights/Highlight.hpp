@@ -33,60 +33,65 @@
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   /// @brief A range in a highlight, with the positions its painting starts and ends at (worked out at each
   /// rendering update).
   class HighlightRange : public RefCounted<HighlightRange>, public CanMakeWeakPtr<HighlightRange>
   {
   private:
-    const Ref<AbstractRange> _range;
-    Position _startPosition;
-    Position _endPosition;
+    const Ref<dom::AbstractRange> _range;
+    dom::Position _startPosition;
+    dom::Position _endPosition;
 
-    explicit HighlightRange(Ref<AbstractRange> &&range) noexcept : _range(krys::move(range))
+    explicit HighlightRange(Ref<dom::AbstractRange> range) noexcept : _range(krys::move(range))
     {
     }
 
   public:
-    KRYS_NODISCARD static Ref<HighlightRange> Create(Ref<AbstractRange> &&range) noexcept
+    KRYS_NODISCARD static Ref<HighlightRange> Create(Ref<dom::AbstractRange> range) noexcept
     {
       return AdoptRef(*new HighlightRange(krys::move(range)));
     }
 
-    KRYS_NODISCARD AbstractRange &Range() const noexcept
+    KRYS_NODISCARD dom::AbstractRange &Range() const noexcept
     {
       return *_range;
     }
 
-    KRYS_NODISCARD const Position &StartPosition() const noexcept
+    KRYS_NODISCARD const dom::Position &StartPosition() const noexcept
     {
       return _startPosition;
     }
 
-    void SetStartPosition(Position &&startPosition) noexcept
+    void SetStartPosition(dom::Position startPosition) noexcept
     {
       _startPosition = krys::move(startPosition);
     }
 
-    KRYS_NODISCARD const Position &EndPosition() const noexcept
+    KRYS_NODISCARD const dom::Position &EndPosition() const noexcept
     {
       return _endPosition;
     }
 
-    void SetEndPosition(Position &&endPosition) noexcept
+    void SetEndPosition(dom::Position endPosition) noexcept
     {
       _endPosition = krys::move(endPosition);
     }
   };
+}
 
-  /// @brief A set of ranges painted in their own way: a custom highlight, named in a `HighlightRegistry` and
+namespace krys::boo
+{
+  /// @brief A custom highlight: a set of ranges painted in their own way, named in a `HighlightRegistry` and
   /// styled by `::highlight(name)`.
-  /// @see https://drafts.csswg.org/css-highlight-api-1/#highlight
+  /// @see https://drafts.csswg.org/css-highlight-api-1/#custom-highlight
   class Highlight : public RefCounted<Highlight>
   {
   public:
+    /// @brief The highlight's meaning, for assistive technologies.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#enumdef-highlighttype
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#highlight-types
     enum class Type : uint8
     {
       Highlight,
@@ -95,62 +100,78 @@ namespace krys::boo::dom
     };
 
   private:
-    List<Ref<HighlightRange>> _highlightRanges;
+    List<Ref<css::HighlightRange>> _highlightRanges;
     Type _type {Type::Highlight};
     int32 _priority {0};
 
-    explicit Highlight(List<Ref<AbstractRange>> initialRanges) noexcept;
+    Highlight() noexcept = default;
 
   public:
+#pragma region Highlight - https://drafts.csswg.org/css-highlight-api-1/#highlight
+
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-highlight
-    KRYS_NODISCARD static Ref<Highlight> Create(List<Ref<AbstractRange>> initialRanges = {}) noexcept;
+    KRYS_NODISCARD static Ref<Highlight> Create(List<Ref<dom::AbstractRange>> initialRanges = {}) noexcept;
 
-    /// @brief Repaints the renderers of the nodes @p range intersects.
-    static void RepaintRange(const AbstractRange &range) noexcept;
-
-    /// @brief The number of ranges (the setlike's `size`).
+    /// @brief The number of ranges.
+    /// @see https://webidl.spec.whatwg.org/#js-setlike
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _highlightRanges.size();
     }
 
     /// @brief Whether @p range is one of the highlight's ranges.
-    KRYS_NODISCARD bool Has(const AbstractRange &range) const noexcept;
+    /// @see https://webidl.spec.whatwg.org/#js-setlike
+    KRYS_NODISCARD bool Has(const dom::AbstractRange &range) const noexcept;
 
-    /// @brief Adds @p range, or moves it to the end if it's there already.
+    /// @brief Adds @p range at the end, unless it's there already.
     /// @return Whether it was added.
-    bool Add(AbstractRange &range) noexcept;
+    /// @see https://webidl.spec.whatwg.org/#js-set-add
+    bool Add(dom::AbstractRange &range) noexcept;
 
     /// @brief Removes @p range.
     /// @return Whether it was there.
-    bool Delete(const AbstractRange &range) noexcept;
+    /// @see https://webidl.spec.whatwg.org/#js-set-delete
+    bool Delete(const dom::AbstractRange &range) noexcept;
 
     /// @brief Removes every range.
+    /// @see https://webidl.spec.whatwg.org/#js-set-clear
     void Clear() noexcept;
 
+    // FIXME: Expose the type to assistive technologies.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-type
     KRYS_NODISCARD Type GetType() const noexcept
     {
       return _type;
     }
 
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-type
     void SetType(Type type) noexcept
     {
       _type = type;
     }
 
-    /// @brief Which of overlapping highlights is painted on top: the higher priority.
-    /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-priority
+    /// @brief Which of overlapping highlights is painted on top: the higher priority, or of equal ones, the
+    /// one registered last.
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#priority
     KRYS_NODISCARD int32 Priority() const noexcept
     {
       return _priority;
     }
 
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlight-priority
     void SetPriority(int32 priority) noexcept;
 
+#pragma endregion
+
+    /// @brief Repaints the renderers of the nodes @p range intersects.
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#repaint
+    static void RepaintRange(const dom::AbstractRange &range) noexcept;
+
+    /// @brief Repaints each of the highlight's ranges.
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#repaint
     void Repaint() noexcept;
 
-    KRYS_NODISCARD const List<Ref<HighlightRange>> &HighlightRanges() const noexcept
+    KRYS_NODISCARD const List<Ref<css::HighlightRange>> &HighlightRanges() const noexcept
     {
       return _highlightRanges;
     }

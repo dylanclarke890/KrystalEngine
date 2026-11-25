@@ -29,6 +29,15 @@ namespace krys::boo::tests
     CHECK(frontmost[3] == MarkedText {6, 8, Type::SpellingError});
     CHECK(frontmost[4] == MarkedText {8, 10, Type::Unmarked});
 
+    // Overlapping highlights are in priority order, and of equal priorities, in the order they came.
+    auto highlights = MarkedText::Subdivide({{0, 10, Type::Highlight, u8"high", 5},
+                                             {0, 10, Type::Highlight, u8"first", 0},
+                                             {0, 10, Type::Highlight, u8"second", 0}});
+    REQUIRE(highlights.size() == 3);
+    CHECK(highlights[0].HighlightName == u8"first");
+    CHECK(highlights[1].HighlightName == u8"second");
+    CHECK(highlights[2].HighlightName == u8"high");
+
     // Touching ranges stay apart, and empty ones vanish.
     auto touching =
       MarkedText::Subdivide({{0, 4, Type::Unmarked}, {4, 4, Type::Selection}, {4, 9, Type::Unmarked}});

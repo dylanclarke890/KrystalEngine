@@ -101,7 +101,6 @@ namespace krys::boo::dom
   class DOMImplementation;
   class DocumentAlgorithms;
   class DocumentFontLoader;
-  class HighlightRegistry;
   class LiveRangeUpdater;
   class MutationAlgorithms;
   class NodeAlgorithms;
@@ -236,6 +235,7 @@ namespace krys::boo
   class HTMLHtmlElement;
   class HTMLInputElement;
   class HTMLTitleElement;
+  class HighlightRegistry;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -387,8 +387,8 @@ namespace krys::boo
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
-    RefPtr<dom::HighlightRegistry> _highlightRegistry;
-    RefPtr<dom::HighlightRegistry> _fragmentHighlightRegistry;
+    RefPtr<HighlightRegistry> _highlightRegistry;
+    RefPtr<HighlightRegistry> _fragmentHighlightRegistry;
     dom::SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
       dom::SequentialFocusNavigationStartingPointPosition::At};
 
@@ -664,8 +664,9 @@ namespace krys::boo
       _allowDeclarativeShadowRoots = allow;
     }
 
-    // resource metadata management - https://html.spec.whatwg.org/multipage/dom.html#resource-metadata-management
-    // (No domain, referrer or cookie: origins and HTTP semantics aren't planned; see OVERVIEW.md.)
+    // resource metadata management -
+    // https://html.spec.whatwg.org/multipage/dom.html#resource-metadata-management (No domain, referrer or
+    // cookie: origins and HTTP semantics aren't planned; see OVERVIEW.md.)
 
     /// @brief When the document's source was last modified, in the user's local time zone, as
     /// `MM/DD/YYYY hh:mm:ss`.
@@ -1217,11 +1218,13 @@ namespace krys::boo
     /// @brief Sets the sequential focus navigation starting point to @p node (as when the user clicks it), or
     /// unsets it if @p node is null, the document or its document element (navigation then starts from the
     /// start of the document).
-    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     void SetSequentialFocusNavigationStartingPoint(Node *node) noexcept;
 
     /// @brief The sequential focus navigation starting point, if it's set.
-    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     KRYS_NODISCARD Node *SequentialFocusNavigationStartingPoint() const noexcept
     {
       return _sequentialFocusNavigationStartingPoint.get();
@@ -1385,17 +1388,17 @@ namespace krys::boo
 
     /// @brief The document's custom highlights, which `::highlight()` styles.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
-    KRYS_NODISCARD dom::HighlightRegistry &GetHighlightRegistry() noexcept;
+    KRYS_NODISCARD HighlightRegistry &GetHighlightRegistry() noexcept;
 
     /// @brief The same, if it's been made.
-    KRYS_NODISCARD dom::HighlightRegistry *HighlightRegistryIfExists() const noexcept;
+    KRYS_NODISCARD HighlightRegistry *HighlightRegistryIfExists() const noexcept;
 
     /// @brief The highlights of the target text, which `::target-text` styles: the host marks it, as there
     /// are no text directives.
-    KRYS_NODISCARD dom::HighlightRegistry &FragmentHighlightRegistry() noexcept;
+    KRYS_NODISCARD HighlightRegistry &FragmentHighlightRegistry() noexcept;
 
     /// @brief The same, if it's been made.
-    KRYS_NODISCARD dom::HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
+    KRYS_NODISCARD HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
 
     /// @brief Whether any highlight is registered, so text may need painting with highlights.
     KRYS_NODISCARD bool HasHighlight() const noexcept;
@@ -1662,7 +1665,8 @@ namespace krys::boo
     /// @brief Drops @p timer, which stopped.
     void RemoveTimer(dom::DocumentTimer &timer) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(dom::FrameRequestCallback &&callback) noexcept;
 
     /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
@@ -1671,11 +1675,13 @@ namespace krys::boo
     /// @brief Resumes them.
     void ResumeScriptedAnimationControllerCallbacks() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 id) noexcept;
 
     /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
-    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     void ServiceRequestAnimationFrameCallbacks() noexcept;
 
     /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:

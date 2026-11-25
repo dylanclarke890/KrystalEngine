@@ -25,70 +25,113 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Highlights/Highlight.hpp"
+#include "Krystal.Booey/CSS/Highlights/Highlight.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class Document;
+  class ShadowRoot;
+}
 
 namespace krys::boo::dom
 {
   class StaticRange;
+}
+
+namespace krys::boo
+{
+  /// @brief A highlight hit by `highlightsFromPoint()`, with those of its ranges that were hit.
+  /// @see https://drafts.csswg.org/css-highlight-api-1/#dictdef-highlighthitresult
+  struct HighlightHitResult
+  {
+    Ref<boo::Highlight> Highlight;
+    List<Ref<dom::AbstractRange>> Ranges;
+  };
+
+  /// @see https://drafts.csswg.org/css-highlight-api-1/#dictdef-highlightsfrompointoptions
+  struct HighlightsFromPointOptions
+  {
+    /// @brief The shadow roots whose highlights can be returned.
+    List<Ref<ShadowRoot>> ShadowRoots;
+  };
 
   /// @brief A document's custom highlights by name, in the order they were registered (which is the order
-  /// they're painted in, below their priority).
+  /// they're painted in, below their priority). The document's is `CSS.highlights`.
   /// @see https://drafts.csswg.org/css-highlight-api-1/#highlight-registry
   class HighlightRegistry : public RefCounted<HighlightRegistry>
   {
   private:
+    WeakPtr<Document> _document;
     HashMap<DOMStringAtom, Ref<Highlight>> _map;
     List<DOMStringAtom> _highlightNames;
 
-    HighlightRegistry() noexcept = default;
+    explicit HighlightRegistry(Document &document) noexcept;
 
   public:
-    KRYS_NODISCARD static Ref<HighlightRegistry> Create() noexcept
-    {
-      return AdoptRef(*new HighlightRegistry);
-    }
+    /// @brief The registry of @p document's custom highlights.
+    KRYS_NODISCARD static Ref<HighlightRegistry> Create(Document &document) noexcept;
 
-    /// @brief Registers @p value as the highlight named @p key, in place of any highlight of that name.
-    void Set(const DOMStringAtom &key, Ref<Highlight> &&value) noexcept;
+#pragma region HighlightRegistry - https://drafts.csswg.org/css-highlight-api-1/#highlightregistry
+
+    /// @brief Registers @p value as the highlight named @p key, in place of any highlight of that name (which
+    /// keeps its place in the order).
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#custom-highlight-name
+    /// @see https://webidl.spec.whatwg.org/#js-map-set
+    void Set(const DOMStringAtom &key, Ref<Highlight> value) noexcept;
 
     /// @brief The highlight named @p key, if any.
+    /// @see https://webidl.spec.whatwg.org/#js-map-get
     KRYS_NODISCARD Highlight *Get(const DOMStringAtom &key) const noexcept;
 
+    /// @see https://webidl.spec.whatwg.org/#js-map-has
     KRYS_NODISCARD bool Has(const DOMStringAtom &key) const noexcept
     {
       return _map.contains(key);
     }
 
-    /// @brief Unregisters every highlight, clearing them.
-    void Clear() noexcept;
-
     /// @brief Unregisters the highlight named @p key.
     /// @return Whether there was one.
+    /// @see https://webidl.spec.whatwg.org/#js-map-delete
     bool Delete(const DOMStringAtom &key) noexcept;
+
+    /// @brief Unregisters every highlight.
+    /// @see https://webidl.spec.whatwg.org/#js-map-clear
+    void Clear() noexcept;
+
+    /// @brief The number of registered names.
+    /// @see https://webidl.spec.whatwg.org/#js-maplike
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _map.size();
+    }
+
+    /// @brief The highlights with a range at (@p x, @p y), in viewport coordinates, highest priority first.
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-highlightregistry-highlightsfrompoint
+    KRYS_NODISCARD List<HighlightHitResult>
+      HighlightsFromPoint(float x, float y, const HighlightsFromPointOptions &options = {}) const noexcept;
+
+#pragma endregion
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
       return _map.empty();
     }
 
-    KRYS_NODISCARD size_t Size() const noexcept
-    {
-      return _map.size();
-    }
-
     /// @brief Adds @p value to the registry's annotation highlight (the text fragments' highlight).
-    void AddAnnotationHighlightWithRange(Ref<StaticRange> &&value) noexcept;
+    void AddAnnotationHighlightWithRange(Ref<dom::StaticRange> value) noexcept;
 
     KRYS_NODISCARD const HashMap<DOMStringAtom, Ref<Highlight>> &Map() const noexcept
     {
       return _map;
     }
 
+    /// @brief The registered names, in the order they were registered.
     KRYS_NODISCARD const List<DOMStringAtom> &HighlightNames() const noexcept
     {
       return _highlightNames;

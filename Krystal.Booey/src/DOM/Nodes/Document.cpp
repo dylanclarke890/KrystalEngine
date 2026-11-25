@@ -11,6 +11,7 @@
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
@@ -43,7 +44,6 @@
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
@@ -3486,30 +3486,30 @@ namespace krys::boo
     return _domWindow.get();
   }
 
-  dom::HighlightRegistry &Document::GetHighlightRegistry() noexcept
+  HighlightRegistry &Document::GetHighlightRegistry() noexcept
   {
     if (!_highlightRegistry)
     {
-      _highlightRegistry = dom::HighlightRegistry::Create();
+      _highlightRegistry = HighlightRegistry::Create(*this);
     }
     return *_highlightRegistry;
   }
 
-  dom::HighlightRegistry &Document::FragmentHighlightRegistry() noexcept
+  HighlightRegistry &Document::FragmentHighlightRegistry() noexcept
   {
     if (!_fragmentHighlightRegistry)
     {
-      _fragmentHighlightRegistry = dom::HighlightRegistry::Create();
+      _fragmentHighlightRegistry = HighlightRegistry::Create(*this);
     }
     return *_fragmentHighlightRegistry;
   }
 
-  dom::HighlightRegistry *Document::HighlightRegistryIfExists() const noexcept
+  HighlightRegistry *Document::HighlightRegistryIfExists() const noexcept
   {
     return _highlightRegistry.get();
   }
 
-  dom::HighlightRegistry *Document::FragmentHighlightRegistryIfExists() const noexcept
+  HighlightRegistry *Document::FragmentHighlightRegistryIfExists() const noexcept
   {
     return _fragmentHighlightRegistry.get();
   }
@@ -3522,8 +3522,8 @@ namespace krys::boo
 
   namespace
   {
-    void CollectHighlightRangesFromRegister(List<WeakPtr<dom::HighlightRange>> &highlightRanges,
-                                            const dom::HighlightRegistry &highlightRegistry) noexcept
+    void CollectHighlightRangesFromRegister(List<WeakPtr<css::HighlightRange>> &highlightRanges,
+                                            const HighlightRegistry &highlightRegistry) noexcept
     {
       for (auto &[name, highlight] : highlightRegistry.Map())
       {
@@ -3549,7 +3549,7 @@ namespace krys::boo
 
   void Document::UpdateHighlightPositions() noexcept
   {
-    List<WeakPtr<dom::HighlightRange>> highlightRanges;
+    List<WeakPtr<css::HighlightRange>> highlightRanges;
     if (_highlightRegistry)
     {
       CollectHighlightRangesFromRegister(highlightRanges, *_highlightRegistry);
@@ -3561,7 +3561,7 @@ namespace krys::boo
 
     for (auto &weakRangeData : highlightRanges)
     {
-      RefPtr<dom::HighlightRange> highlightRange = ShareRefPtr(weakRangeData.get());
+      RefPtr<css::HighlightRange> highlightRange = ShareRefPtr(weakRangeData.get());
       if (!highlightRange)
       {
         continue;
@@ -3581,7 +3581,7 @@ namespace krys::boo
         if (auto init = dom::StaticRangeInit::Create(simpleRange->Start, simpleRange->End);
             !init.HasException())
         {
-          dom::Highlight::RepaintRange(*CreateRef<dom::StaticRange>(init.ReleaseValue()));
+          Highlight::RepaintRange(*CreateRef<dom::StaticRange>(init.ReleaseValue()));
         }
       }
 
@@ -3594,7 +3594,7 @@ namespace krys::boo
         highlightRange->SetEndPosition(krys::move(endPosition));
       }
 
-      dom::Highlight::RepaintRange(highlightRange->Range());
+      Highlight::RepaintRange(highlightRange->Range());
     }
   }
 

@@ -406,6 +406,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Geometry/DOMRect.hpp
   include/Krystal.Booey/CSS/Geometry/DOMRectList.hpp
   include/Krystal.Booey/CSS/Geometry/DOMRectReadOnly.hpp
+  include/Krystal.Booey/CSS/Highlights/Highlight.hpp
+  include/Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp
   include/Krystal.Booey/CSS/CSSOM/Markup.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaList.hpp
   include/Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp
@@ -816,6 +818,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Geometry/DOMPointReadOnly.cpp
   src/CSS/Geometry/DOMQuad.cpp
   src/CSS/Geometry/DOMRectList.cpp
+  src/CSS/Highlights/Highlight.cpp
+  src/CSS/Highlights/HighlightRegistry.cpp
   src/CSS/CSSOM/Markup.cpp
   src/CSS/CSSOM/MediaList.cpp
   src/CSS/CSSOM/MediaQueryList.cpp
@@ -1118,8 +1122,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/UIEvent.hpp
   include/Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp
   include/Krystal.Booey/DOM/Events/WheelEvent.hpp
-  include/Krystal.Booey/DOM/Highlights/Highlight.hpp
-  include/Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp
   include/Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp
   include/Krystal.Booey/DOM/Internals/ElementFactory.hpp
   include/Krystal.Booey/DOM/Internals/ElementRareData.hpp
@@ -1268,8 +1270,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/TouchEvent.cpp
   src/DOM/Events/TouchList.cpp
   src/DOM/Events/WheelEvent.cpp
-  src/DOM/Highlights/Highlight.cpp
-  src/DOM/Highlights/HighlightRegistry.cpp
   src/DOM/Internals/DocumentFontLoader.cpp
   src/DOM/Internals/ElementFactory.cpp
   src/DOM/Internals/ElementRareData.cpp

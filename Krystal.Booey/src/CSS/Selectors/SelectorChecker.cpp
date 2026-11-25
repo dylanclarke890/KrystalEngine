@@ -1373,6 +1373,7 @@ namespace krys::boo::css
                                    { return std::ranges::contains(partNames, part); });
       }
 
+      // https://drafts.csswg.org/css-highlight-api-1/#custom-highlight-pseudo-element
       case SelectorPseudoElement::Highlight:
       {
         // Without a request, it matches so the element is marked as having the pseudo-element.
