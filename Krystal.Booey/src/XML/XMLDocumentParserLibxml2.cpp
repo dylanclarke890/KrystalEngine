@@ -184,15 +184,16 @@ namespace krys::boo::xml
   }
 
   XMLDocumentParser::XMLDocumentParser(boo::Document &document) noexcept
-      : DocumentParser(document), _currentNode(ShareRefPtr<ContainerNode>(&document))
+      : _document(CreateWeakPtr(&document)), _currentNode(ShareRefPtr<ContainerNode>(&document))
   {
   }
 
   XMLDocumentParser::XMLDocumentParser(DocumentFragment &fragment,
                                        HashMap<DOMStringAtom, DOMStringAtom> &&prefixToNamespaceMap,
                                        DOMStringAtom defaultNamespaceURI) noexcept
-      : DocumentParser(fragment.NodeDocument()), _currentNode(ShareRefPtr<ContainerNode>(&fragment)),
-        _parsingFragment(true), _prefixToNamespaceMap(krys::move(prefixToNamespaceMap)),
+      : _document(CreateWeakPtr(&fragment.NodeDocument())),
+        _currentNode(ShareRefPtr<ContainerNode>(&fragment)), _parsingFragment(true),
+        _prefixToNamespaceMap(krys::move(prefixToNamespaceMap)),
         _defaultNamespaceURI(krys::move(defaultNamespaceURI))
   {
   }
@@ -209,6 +210,7 @@ namespace krys::boo::xml
   XMLDocumentParser::~XMLDocumentParser() noexcept
   {
     // A parser is always detached before it's destroyed.
+    krys_debug_assert(!_document);
     krys_debug_assert(_currentNodeStack.empty());
     krys_debug_assert(!_currentNode);
   }
@@ -839,7 +841,7 @@ namespace krys::boo::xml
     sax.ignorableWhitespace = IgnorableWhitespaceHandler;
     sax.entityDecl = xmlSAX2EntityDecl;
     sax.initialized = XML_SAX2_MAGIC;
-    DocumentParser::StartParsing();
+    _state = ParserState::Parsing;
     _sawError = false;
 
     if (_parsingFragment)
@@ -888,7 +890,7 @@ namespace krys::boo::xml
       InsertErrorMessageBlock();
     }
 
-    DocumentParser::StopParsing();
+    _state = ParserState::Stopped;
     if (Context())
     {
       xmlStopParser(Context());

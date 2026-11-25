@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Parsing/DocumentParser.hpp"
+#include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/XML/XMLErrors.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
@@ -8,6 +8,7 @@
 #include "Krystal.Core/Containers/Span.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Utils/SourceLocation.hpp"
 #include <cstdarg>
 
@@ -58,10 +59,25 @@ namespace krys::boo::xml
 
   /// @brief Parses an XML document, or a fragment of one, with libxml2, building the tree from its SAX
   /// callbacks. A document that isn't well formed gets the errors shown in it (XMLErrors).
+  /// @note It goes from parsing to stopping (the source has ended) to stopped, and is detached from its
+  /// document last, which it must be before it's destroyed.
   /// @see https://html.spec.whatwg.org/multipage/xhtml.html#parsing-xhtml-documents
-  class XMLDocumentParser final : public dom::DocumentParser
+  class XMLDocumentParser final : public RefCounted<XMLDocumentParser>
   {
+    KRYS_NON_COPY_MOVABLE(XMLDocumentParser);
+
   private:
+    enum class ParserState : uint8
+    {
+      Parsing,
+      Stopping,
+      Stopped,
+      Detached,
+    };
+
+    ParserState _state {ParserState::Parsing};
+    /// @brief The document being built; null once the parser is detached.
+    WeakPtr<boo::Document> _document;
     RefPtr<XMLParserContext> _context;
     /// @brief Character data not yet added to the text node it goes in.
     utf8_string _bufferedText;
@@ -104,7 +120,7 @@ namespace krys::boo::xml
 
     XMLDocumentParser() = delete;
 
-    ~XMLDocumentParser() noexcept override;
+    ~XMLDocumentParser() noexcept;
 
     /// @brief Parses @p source into @p fragment, with the namespaces in scope on @p contextElement.
     /// @return Whether @p source was well formed.
@@ -115,17 +131,42 @@ namespace krys::boo::xml
     /// @brief Whether the parser understands XML @p version (only 1.0).
     KRYS_NODISCARD static bool SupportsXMLVersion(DOMStringView version) noexcept;
 
-#pragma region dom::DocumentParser
+    /// @brief Parses @p source, the next part of the source.
+    void Append(DOMString source) noexcept;
 
-    void Append(DOMString source) noexcept final;
+    /// @brief Tells the parser there's no more source, so it finishes the document.
+    void Finish() noexcept;
 
-    void Finish() noexcept final;
+    /// @brief Stops parsing at once, as on a fatal error in the source; the parser keeps its document.
+    void StopParsing() noexcept;
 
-    void StopParsing() noexcept final;
+    /// @brief Lets go of the document. A parse in progress unwinds without making more nodes.
+    void Detach() noexcept;
 
-    void Detach() noexcept final;
+    /// @brief The document being built; only while the parser is attached.
+    KRYS_NODISCARD boo::Document *Document() const noexcept
+    {
+      krys_debug_assert(_document);
+      return _document.get();
+    }
 
-#pragma endregion
+    /// @brief Whether the parser is still taking source.
+    KRYS_NODISCARD bool IsParsing() const noexcept
+    {
+      return _state == ParserState::Parsing;
+    }
+
+    /// @brief Whether the parser has stopped (or been detached), so it makes no more nodes.
+    KRYS_NODISCARD bool IsStopped() const noexcept
+    {
+      return _state >= ParserState::Stopped;
+    }
+
+    /// @brief Whether the parser has let go of its document.
+    KRYS_NODISCARD bool IsDetached() const noexcept
+    {
+      return _state == ParserState::Detached;
+    }
 
     /// @brief Records an error or warning at @p position, stopping the parse if it's fatal.
     void HandleError(XMLErrors::Type, const char *message, SourceLocation position) noexcept;

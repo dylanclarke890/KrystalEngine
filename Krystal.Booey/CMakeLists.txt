@@ -1185,7 +1185,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/MutationObserver/MutationRecord.hpp
   include/Krystal.Booey/DOM/MutationObserver/RegisteredObserver.hpp
   include/Krystal.Booey/DOM/MutationObserver/TransientRegisteredObserver.hpp
-  include/Krystal.Booey/DOM/Parsing/DocumentParser.hpp
   include/Krystal.Booey/DOM/Parsing/ParserContentPolicy.hpp
   include/Krystal.Booey/DOM/Ranges/AbstractRange.hpp
   include/Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp
@@ -1310,7 +1309,6 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/MutationObserver/EmptyNodeMutationRecord.cpp
   src/DOM/MutationObserver/MutationObserver.cpp
   src/DOM/MutationObserver/MutationRecord.cpp
-  src/DOM/Parsing/DocumentParser.cpp
   src/DOM/Ranges/BoundaryPoint.cpp
   src/DOM/Ranges/Position.cpp
   src/DOM/Ranges/PositionIterator.cpp
