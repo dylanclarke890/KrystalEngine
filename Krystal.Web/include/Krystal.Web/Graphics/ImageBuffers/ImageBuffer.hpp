@@ -1,0 +1,235 @@
+﻿/*
+ * Copyright (C) 2006 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2007-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 Torch Mobile (Beijing) Co. Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Web/Graphics/ImageBuffers/ImageBufferBackend.hpp"
+#include "Krystal.Web/Graphics/RenderingResourceIdentifier.hpp"
+#include <utility>
+
+namespace krys::web
+{
+  class DestinationColorSpace;
+  class GraphicsClient;
+  class GraphicsContext;
+  class GraphicsLayerContentsDisplayDelegate;
+  class NativeImage;
+  class PixelBuffer;
+  struct PixelBufferFormat;
+  class PixelBufferSourceView;
+
+  /// @brief What an image buffer is made with: its logical size, how many backend pixels a unit has, and what
+  /// it's for.
+  struct ImageBufferParameters
+  {
+    SizeF LogicalSize;
+    float ResolutionScale;
+    RenderingPurpose Purpose {RenderingPurpose::Unspecified};
+  };
+
+  /// @brief An offscreen surface drawn into through a graphics context, then drawn (or tiled) as an image.
+  /// @note The host makes accelerated buffers with its own backend (`GraphicsClient`); without one, and for
+  /// every other mode, the buffer records into a display list.
+  /// FIXME: The bitmap backend, colour spaces and pixel formats, volatility, cloning and serialisation come
+  /// with bitmap images, and data URLs with B14e.
+  class ImageBuffer final : public RefCounted<ImageBuffer>, public CanMakeWeakPtr<ImageBuffer>
+  {
+  public:
+    using Parameters = ImageBufferParameters;
+
+  private:
+    Parameters _parameters;
+    ImageBufferBackend::Info _backendInfo;
+    UniquePtr<ImageBufferBackend> _backend;
+    RenderingResourceIdentifier _renderingResourceIdentifier;
+
+  public:
+    /// @brief A buffer of @p size logical units, @p resolutionScale backend pixels a unit, drawn as @p mode
+    /// asks: by @p graphicsClient's backend when it has one, otherwise into a display list; null when the
+    /// backend size is empty.
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, RenderingMode mode,
+                                                     RenderingPurpose purpose, float resolutionScale,
+                                                     const DestinationColorSpace &colorSpace,
+                                                     GraphicsClient *graphicsClient = nullptr) noexcept;
+
+    /// @brief An unaccelerated buffer for no purpose in particular, in sRGB.
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, float resolutionScale) noexcept;
+
+    /// @brief A buffer whose backend is a @p TBackend, made from the backend parameters and @p arguments;
+    /// null when the backend size is empty or the backend can't be made.
+    template <typename TBackend, typename... TArguments>
+    KRYS_NODISCARD static RefPtr<ImageBuffer> Create(const SizeF &size, float resolutionScale,
+                                                     RenderingPurpose purpose,
+                                                     TArguments &&...arguments) noexcept
+    {
+      Parameters parameters {size, resolutionScale, purpose};
+      auto backendParameters = BackendParameters(parameters);
+      if (backendParameters.BackendSize.IsEmpty())
+      {
+        return nullptr;
+      }
+      UniquePtr<ImageBufferBackend> backend =
+        TBackend::Create(backendParameters, std::forward<TArguments>(arguments)...);
+      if (!backend)
+      {
+        return nullptr;
+      }
+      ImageBufferBackend::Info backendInfo {TBackend::BackendRenderingMode,
+                                            ImageBufferBackend::CalculateBaseTransform(backendParameters)};
+      return AdoptRef(*new ImageBuffer(parameters, backendInfo, krys::move(backend)));
+    }
+
+    ~ImageBuffer() noexcept;
+
+    KRYS_NODISCARD static SizeI CalculateBackendSize(SizeF logicalSize, float resolutionScale) noexcept;
+
+    KRYS_NODISCARD static ImageBufferBackendParameters BackendParameters(const Parameters &) noexcept;
+
+    KRYS_NODISCARD static bool SizeNeedsClamping(const SizeF &) noexcept;
+
+    KRYS_NODISCARD static bool SizeNeedsClamping(const SizeF &, SizeF &scale) noexcept;
+
+    KRYS_NODISCARD GraphicsContext &Context() const noexcept;
+
+    void FlushDrawingContext() noexcept;
+
+    /// @brief Flushes what's been drawn without waiting for it to be done; returns whether it was flushed.
+    bool FlushDrawingContextAsync() noexcept;
+
+    /// @brief Makes what's been drawn ready for the compositor, before it composites.
+    void PrepareForDisplay() noexcept;
+
+    /// @brief What shows the buffer as a layer's contents; null when it's painted instead.
+    KRYS_NODISCARD RefPtr<GraphicsLayerContentsDisplayDelegate> LayerContentsDisplayDelegate() const noexcept;
+
+    KRYS_NODISCARD SizeI BackendSize() const noexcept;
+
+    /// @brief An immutable copy of what's been drawn; null if the backend can't make one.
+    KRYS_NODISCARD RefPtr<NativeImage> CopyNativeImage() const noexcept;
+
+    /// @brief An image of what's been drawn that may follow later drawing; for uses that end before the next
+    /// draw.
+    KRYS_NODISCARD RefPtr<NativeImage> CreateNativeImageReference() const noexcept;
+
+    /// @brief An image of what's been drawn, as the buffer goes.
+    KRYS_NODISCARD RefPtr<NativeImage> SinkIntoNativeImage() noexcept;
+
+    KRYS_NODISCARD static RefPtr<NativeImage> SinkIntoNativeImage(RefPtr<ImageBuffer>) noexcept;
+
+    /// @brief Reads @p srcRect (in logical units) into a new pixel buffer of @p outputFormat; what's outside
+    /// the buffer is transparent black. Null if the pixel buffer can't be made.
+    KRYS_NODISCARD RefPtr<PixelBuffer> GetPixelBuffer(const PixelBufferFormat &destinationFormat,
+                                                      const RectI &sourceRect) const noexcept;
+
+    /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black) as a
+    /// `data:` URL; `data:,` if it can't be.
+    KRYS_NODISCARD utf8_string ToDataUrl(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
+
+    /// @brief What's been drawn, encoded as @p mimeType (PNG, JPEG or WebP; a JPEG is drawn over black);
+    /// empty if it can't be.
+    KRYS_NODISCARD List<uint8> ToData(utf8_stringview mimeType, Maybe<double> quality = {}) const noexcept;
+
+    KRYS_NODISCARD static utf8_string ToDataUrl(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
+                                                Maybe<double> quality = {}) noexcept;
+
+    KRYS_NODISCARD static List<uint8> ToData(const Ref<ImageBuffer> &source, utf8_stringview mimeType,
+                                             Maybe<double> quality = {}) noexcept;
+
+    /// @brief Writes @p srcRect of @p pixelBuffer at @p destPoint, replacing what's there, whatever the
+    /// context's state.
+    void PutPixelBuffer(
+      const PixelBufferSourceView &pixelBuffer, const RectI &sourceRect, const PointI &destinationPoint = {},
+      AlphaPremultiplication destinationFormat = AlphaPremultiplication::Premultiplied) noexcept;
+
+    /// @brief Turns what's drawn into a luminance mask (for `mask-mode: luminance`).
+    /// @brief Turns what's drawn into a luminance mask: alpha is the luminance of the colours, converted to
+    /// @p colorSpace (linear sRGB for SVG's `color-interpolation: linearRGB`), times the alpha.
+    void ConvertToLuminanceMask(const DestinationColorSpace &colorSpace) noexcept;
+
+    void ConvertToLuminanceMask() noexcept;
+
+    KRYS_NODISCARD RenderingResourceIdentifier GetRenderingResourceIdentifier() const noexcept
+    {
+      return _renderingResourceIdentifier;
+    }
+
+    KRYS_NODISCARD SizeF LogicalSize() const noexcept
+    {
+      return _parameters.LogicalSize;
+    }
+
+    KRYS_NODISCARD SizeI TruncatedLogicalSize() const noexcept // You probably should be calling
+                                                               // logicalSize() instead.
+    {
+      return SizeI(_parameters.LogicalSize);
+    }
+
+    KRYS_NODISCARD float ResolutionScale() const noexcept
+    {
+      return _parameters.ResolutionScale;
+    }
+
+    KRYS_NODISCARD const Parameters &GetParameters() const noexcept
+    {
+      return _parameters;
+    }
+
+    KRYS_NODISCARD RenderingPurpose Purpose() const noexcept
+    {
+      return _parameters.Purpose;
+    }
+
+    KRYS_NODISCARD RenderingMode GetRenderingMode() const noexcept
+    {
+      return _backendInfo.Mode;
+    }
+
+    KRYS_NODISCARD AffineTransform BaseTransform() const noexcept
+    {
+      return _backendInfo.BaseTransform;
+    }
+
+    /// @brief The backend holding what's drawn, for drawing backends that render it (Krystal.Booey reads the
+    /// display list a buffer recorded).
+    KRYS_NODISCARD ImageBufferBackend *Backend() const noexcept
+    {
+      return _backend.get();
+    }
+
+  private:
+    ImageBuffer(const Parameters &, const ImageBufferBackend::Info &, UniquePtr<ImageBufferBackend> &&,
+                RenderingResourceIdentifier = RenderingResourceIdentifier::Generate()) noexcept;
+  };
+}

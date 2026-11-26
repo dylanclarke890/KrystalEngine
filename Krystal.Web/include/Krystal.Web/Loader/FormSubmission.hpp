@@ -1,0 +1,225 @@
+﻿/*
+ * Copyright (C) 2010 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/Url.hpp"
+#include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+
+namespace krys::web::html
+{
+  class DOMFormData;
+}
+
+namespace krys::web
+{
+  class Event;
+  class FrameLoadRequest;
+  class HTMLFormControlElement;
+  class HTMLFormElement;
+
+  enum class FormSubmissionTrigger : uint8
+  {
+    SubmittedByJavaScript,
+    NotSubmittedByJavaScript,
+  };
+
+  /// @brief A form's submission: its method, action, target, encoding type and entry list, which the host
+  /// handles. Krystal.Web doesn't encode the entries: the host turns them into a request if it wants one.
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
+  class FormSubmission : public RefCounted<FormSubmission>, public CanMakeWeakPtr<FormSubmission>
+  {
+  public:
+    enum class Method : uint8
+    {
+      Get,
+      Post,
+      Dialog,
+    };
+
+    /// @brief The submission attributes of a form, which a submitter's own attributes override.
+    class Attributes
+    {
+    private:
+      Method _method {Method::Get};
+      DOMString _action;
+      DOMString _target;
+      DOMString _encodingType {u8"application/x-www-form-urlencoded"};
+      DOMString _acceptCharset;
+
+    public:
+      KRYS_NODISCARD Method GetMethod() const noexcept
+      {
+        return _method;
+      }
+
+      KRYS_NODISCARD static Method ParseMethodType(utf8_stringview type) noexcept;
+
+      void UpdateMethodType(utf8_stringview type) noexcept;
+
+      KRYS_NODISCARD static utf8_stringview MethodString(Method method) noexcept;
+
+      KRYS_NODISCARD const DOMString &Action() const noexcept
+      {
+        return _action;
+      }
+
+      void ParseAction(utf8_stringview action) noexcept;
+
+      KRYS_NODISCARD const DOMString &Target() const noexcept
+      {
+        return _target;
+      }
+
+      void SetTarget(utf8_stringview target) noexcept
+      {
+        _target = DOMString(target);
+      }
+
+      KRYS_NODISCARD const DOMString &EncodingType() const noexcept
+      {
+        return _encodingType;
+      }
+
+      KRYS_NODISCARD static utf8_stringview ParseEncodingType(utf8_stringview type) noexcept;
+
+      void UpdateEncodingType(utf8_stringview type) noexcept;
+
+      KRYS_NODISCARD const DOMString &AcceptCharset() const noexcept
+      {
+        return _acceptCharset;
+      }
+
+      void SetAcceptCharset(utf8_stringview value) noexcept
+      {
+        _acceptCharset = DOMString(value);
+      }
+    };
+
+  private:
+    Method _method;
+    bool _wasCancelled {false};
+    net::Url _action;
+    DOMString _target;
+    DOMString _encodingType;
+    RefPtr<html::DOMFormData> _entryList;
+    RefPtr<web::Event> _event;
+    Maybe<DOMString> _returnValue; // for form[method=dialog]
+    RefPtr<HTMLFormElement> _form;
+    RefPtr<HTMLFormControlElement> _submitter;
+    FormSubmissionTrigger _trigger {FormSubmissionTrigger::NotSubmittedByJavaScript};
+
+  public:
+    /// @brief A dialog's submission, with the submitter's result.
+    FormSubmission(Maybe<DOMString> returnValue, net::Url action, DOMStringView target,
+                   DOMStringView encodingType, web::Event *event) noexcept;
+
+    /// @brief A `GET` or `POST` submission of @p entryList.
+    FormSubmission(Method method, net::Url action, DOMStringView target, DOMStringView encodingType,
+                   Ref<html::DOMFormData> &&entryList, web::Event *event) noexcept;
+
+    ~FormSubmission() noexcept;
+
+    KRYS_NODISCARD static Ref<FormSubmission> Create(HTMLFormElement &form,
+                                                     HTMLFormControlElement *overrideSubmitter,
+                                                     const Attributes &attributes, web::Event *event,
+                                                     FormSubmissionTrigger trigger) noexcept;
+
+    KRYS_NODISCARD Method GetMethod() const noexcept
+    {
+      return _method;
+    }
+
+    KRYS_NODISCARD const net::Url &Action() const noexcept
+    {
+      return _action;
+    }
+
+    KRYS_NODISCARD const DOMString &Target() const noexcept
+    {
+      return _target;
+    }
+
+    /// @brief The form's encoding type (`enctype`, or the submitter's `formenctype`), for the host to encode
+    /// the entries with: `application/x-www-form-urlencoded`, `multipart/form-data` or `text/plain`.
+    KRYS_NODISCARD const DOMString &EncodingType() const noexcept
+    {
+      return _encodingType;
+    }
+
+    /// @brief The entries submitted, in tree order; null for a dialog.
+    KRYS_NODISCARD html::DOMFormData *EntryList() const noexcept;
+
+    KRYS_NODISCARD web::Event *Event() const noexcept
+    {
+      return _event.get();
+    }
+
+    KRYS_NODISCARD const Maybe<DOMString> &ReturnValue() const noexcept
+    {
+      return _returnValue;
+    }
+
+    /// @brief The submitted form.
+    KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
+
+    /// @brief The submit button that submitted the form, if any.
+    KRYS_NODISCARD HTMLFormControlElement *Submitter() const noexcept;
+
+    KRYS_NODISCARD FormSubmissionTrigger Trigger() const noexcept
+    {
+      return _trigger;
+    }
+
+    /// @brief Gives @p frameRequest the submission's target, method and action.
+    void PopulateFrameLoadRequest(FrameLoadRequest &frameRequest) const noexcept;
+
+    void ClearTarget() noexcept
+    {
+      _target = {};
+    }
+
+    void Cancel() noexcept
+    {
+      _wasCancelled = true;
+    }
+
+    KRYS_NODISCARD bool WasCancelled() const noexcept
+    {
+      return _wasCancelled;
+    }
+  };
+}

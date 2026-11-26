@@ -1,0 +1,229 @@
+﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/ViewTestUtils.hpp"
+#include "Krystal.Booey/View.hpp"
+#include "Krystal.Gfx.Tests/Golden.hpp"
+#include "Krystal.Web/Dom/Events/EventListener.hpp"
+#include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Editing/Editor.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Events/UI/CompositionEvent.hpp"
+#include "Krystal.Web/Events/UI/InputEvent.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Loader/Cache/MemoryCache.hpp"
+#include <string>
+
+namespace krys::boo::tests
+{
+  namespace
+  {
+    KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
+    {
+      return std::string(reinterpret_cast<const char *>(text.data()), text.size());
+    }
+
+    /// @brief Records the key, composition and input events as "type data", in order.
+    struct EventLog : web::EventListenerCallback
+    {
+      List<std::string> Events;
+
+      void HandleEvent(web::Event &event) noexcept override
+      {
+        auto type = Narrow(event.Type().View());
+        if (event.IsCompositionEvent())
+        {
+          Events.push_back(type + " " + Narrow(Downcast<web::CompositionEvent>(event).Data()));
+        }
+        else if (event.IsInputEvent())
+        {
+          auto &input = Downcast<web::InputEvent>(event);
+          Events.push_back(type + " " + Narrow(input.InputType())
+                           + (input.IsComposing() ? " composing" : ""));
+        }
+        else if (event.IsKeyboardEvent())
+        {
+          auto &key = Downcast<web::KeyboardEvent>(event);
+          Events.push_back(type + " " + std::to_string(key.KeyCode()));
+        }
+      }
+    };
+  }
+
+  TEST_CASE("View: the input method", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { position: absolute;"
+      u8" left: 10px; width: 200px; font: inherit }</style><input id=field style='top: 20px'>"
+      u8"<input id=password type=password style='top: 60px'><div id=plain tabindex=0>x</div>"
+      u8"<div id=editable contenteditable style='position: absolute; top: 100px; width: 200px'></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    auto log = CreateRef<EventLog>();
+    for (auto type : {web::event_names::CompositionStart, web::event_names::CompositionUpdate,
+                      web::event_names::CompositionEnd, web::event_names::Input, web::event_names::KeyDown,
+                      web::event_names::KeyPress})
+    {
+      view.Document().AddEventListener(web::DOMStringAtom(type), log, true);
+    }
+    int32 discarded = 0;
+    view.SetCompositionDiscardedHandler([&discarded] { ++discarded; });
+
+    auto &field = Downcast<web::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
+    auto &editor = view.Document().GetEditor();
+    auto value = [&field]
+    {
+      return Narrow(field.Value());
+    };
+
+    SECTION("The focus decides whether it's on")
+    {
+      CHECK_FALSE(view.AcceptsTextInput());
+      field.Focus();
+      CHECK(view.AcceptsTextInput());
+      Downcast<web::HTMLElement>(*view.Document().GetElementById(u8"password")).Focus();
+      CHECK_FALSE(view.AcceptsTextInput());
+      Downcast<web::HTMLElement>(*view.Document().GetElementById(u8"plain")).Focus();
+      CHECK_FALSE(view.AcceptsTextInput());
+    }
+
+    field.Focus();
+    view.UpdateRendering();
+
+    SECTION("Composing and committing")
+    {
+      // The caret's rect places the input method's windows: in the field.
+      auto caret = view.TextInputRect();
+      REQUIRE(caret);
+      CHECK(caret->X() >= 10);
+      CHECK(caret->Y() >= 20);
+      CHECK(caret->MaxY() <= 60);
+
+      // The keys the input method takes don't reach the page.
+      CHECK(view.KeyPressed(pal::Key::K, {}, {.HandledByInputMethod = true}));
+      CHECK(log->Events.empty());
+
+      // A composition comes as a key press with key code 229.
+      pal::CompositionClause target {.Start = 0, .End = 3, .Target = true};
+      view.SetComposition(u8"か", Span<const pal::CompositionClause>(&target, 1), 3);
+      CHECK(value() == "か");
+      CHECK(editor.HasComposition());
+      CHECK(log->Events
+            == List<std::string> {"keydown 229", "compositionstart ", "compositionupdate か",
+                                  "input insertCompositionText composing"});
+      auto composition = view.TextInputRect();
+      REQUIRE(composition);
+      CHECK(composition->X() == caret->X());
+
+      log->Events.clear();
+      view.SetComposition(u8"かな", {}, 6);
+      CHECK(value() == "かな");
+      CHECK(log->Events.back() == "input insertCompositionText composing");
+
+      // The result takes its place.
+      log->Events.clear();
+      view.ConfirmComposition(u8"仮名");
+      CHECK(value() == "仮名");
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(log->Events.front() == "keydown 229");
+      CHECK(std::ranges::find(log->Events, "compositionend 仮名") != log->Events.end());
+
+      // Emptied, a composition goes.
+      view.SetComposition(u8"x", {}, 1);
+      CHECK(value() == "仮名x");
+      view.SetComposition(u8"", {}, 0);
+      CHECK(value() == "仮名");
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(discarded == 0);
+    }
+
+    SECTION("A result without a composition")
+    {
+      // As the emoji panel's may come.
+      view.ConfirmComposition(u8"😀");
+      CHECK(value() == "😀");
+      CHECK(log->Events.back() == "compositionend 😀");
+    }
+
+    SECTION("Text without a key press")
+    {
+      CHECK(view.InsertText(u8"😀"));
+      CHECK(value() == "😀");
+      CHECK(log->Events.front() == "keypress 128512");
+    }
+
+    SECTION("The page ends the composition")
+    {
+      view.SetComposition(u8"ab", {}, 2);
+
+      // Losing the window's focus confirms it.
+      view.SetFocused(false);
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "ab");
+      CHECK(std::ranges::find(log->Events, "compositionend ab") != log->Events.end());
+      CHECK(discarded == 1);
+      view.SetFocused(true);
+
+      // The selection leaving it cancels it, leaving its text.
+      view.SetComposition(u8"cd", {}, 2);
+      field.SetSelectionRange(0, 0);
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "abcd");
+      CHECK(discarded == 2);
+
+      // A press confirms it.
+      field.SetSelectionRange(4, 4);
+      view.SetComposition(u8"ef", {}, 2);
+      view.MousePressed({300, 250}, pal::MouseButton::Left);
+      view.MouseReleased({300, 250}, pal::MouseButton::Left);
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "abcdef");
+      CHECK(discarded == 3);
+      CHECK_FALSE(view.AcceptsTextInput());
+    }
+
+    SECTION("The selection going ends the composition")
+    {
+      view.SetComposition(u8"ab", {}, 2);
+      log->Events.clear();
+      view.Document().Selection().Clear();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(value() == "ab");
+      CHECK(log->Events == List<std::string> {"compositionend "});
+      CHECK(discarded == 1);
+    }
+
+    SECTION("The page's edits move and end the composition")
+    {
+      auto &editable = Downcast<web::HTMLElement>(*view.Document().GetElementById(u8"editable"));
+      editable.Focus();
+      view.SetComposition(u8"ab", {}, 2);
+      auto *text = DynamicDowncast<web::Text>(editable.FirstChild());
+      REQUIRE(text);
+      REQUIRE(editor.CompositionNode() == text);
+
+      // Text after it leaves it be.
+      (void)text->AppendData(u8"z");
+      CHECK(editor.HasComposition());
+      CHECK(editor.CompositionStart() == 0);
+      CHECK(editor.CompositionEnd() == 2);
+
+      // Taking its text away loses it, though the selection moves without a notification; the input
+      // method's next update ends it and starts another.
+      log->Events.clear();
+      (void)text->Remove();
+      CHECK_FALSE(editor.HasComposition());
+      CHECK(editor.HasLostComposition());
+      CHECK_FALSE(editor.CompositionRange());
+      view.SetComposition(u8"cd", {}, 2);
+      CHECK(editor.HasComposition());
+      CHECK(Narrow(editable.TextContent().value_or(u8"")) == "cd");
+      CHECK(log->Events.front() == "keydown 229");
+      CHECK(log->Events[1] == "compositionend ");
+      CHECK(log->Events[2] == "compositionstart ");
+      CHECK(discarded == 0);
+    }
+  }
+}

@@ -1,0 +1,491 @@
+﻿#pragma once
+
+#include "Krystal.Web.Tests/StringTestUtils.hpp"
+#include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Web/Dom/Events/EventListener.hpp"
+#include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Editing/Commands/UndoStep.hpp"
+#include "Krystal.Web/Editing/Editor.hpp"
+#include "Krystal.Web/Editing/Markup/Markup.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Page/Clients/EditorClient.hpp"
+#include "Krystal.Web/Page/Clients/WebClient.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Page/FrameView.hpp"
+#include "Krystal.Web/Platform/Pasteboard/Pasteboard.hpp"
+#include "Krystal.Web/Platform/Pasteboard/PasteboardCustomData.hpp"
+#include "Krystal.Web/Platform/Pasteboard/PasteboardStrategy.hpp"
+#include "Krystal.Web/Platform/Pasteboard/SelectionData.hpp"
+#include "Krystal.Web/Platform/PlatformStrategies.hpp"
+#include <string>
+
+namespace krys::web::tests
+{
+  /// @brief An editor client that allows selection changes and binds Shift+Right to extending the
+  /// selection.
+  struct TestEditorClient final : EditorClient
+  {
+    int32 KeyEvents {0};
+
+    KRYS_NODISCARD bool ShouldChangeSelectedRange(const Maybe<dom::SimpleRange> &,
+                                                  const Maybe<dom::SimpleRange> &, Affinity,
+                                                  bool) noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool CanCopyCut(web::Frame *, bool defaultValue) const noexcept final
+    {
+      return defaultValue;
+    }
+
+    KRYS_NODISCARD bool CanPaste(web::Frame *, bool defaultValue) const noexcept final
+    {
+      return defaultValue;
+    }
+
+    bool HandleKeyboardEvent(KeyboardEvent &event) noexcept final
+    {
+      ++KeyEvents;
+      if (event.Type() != event_names::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
+      {
+        return false;
+      }
+      auto &document = Downcast<Node>(*event.Target()).NodeDocument();
+      return document.GetEditor().GetCommand(u8"MoveRightAndModifySelection").Execute(&event);
+    }
+
+    void RespondToChangedContents() noexcept final
+    {
+    }
+
+    int32 DiscardedCompositions {0};
+    int32 CompositionUpdates {0};
+    /// @brief Whether the host's input method would be on, for the focused element.
+    bool InputMethodEnabled {false};
+
+    // Abandons the composition if the selection changed for any reason but the input method's own action.
+    void RespondToChangedSelection(web::Frame *frame) noexcept final
+    {
+      if (!frame || !frame->Document())
+      {
+        return;
+      }
+      auto &document = *frame->Document();
+      auto &editor = document.GetEditor();
+      if (editor.HasComposition() && !editor.IgnoreSelectionChanges() && !document.Selection().IsNone())
+      {
+        editor.CancelComposition();
+        DiscardedComposition(document);
+      }
+    }
+
+    void DiscardedComposition(const Document &) noexcept final
+    {
+      ++DiscardedCompositions;
+    }
+
+    void DidUpdateComposition() noexcept final
+    {
+      ++CompositionUpdates;
+    }
+
+    void HandleInputMethodKeydown(KeyboardEvent &event) noexcept final
+    {
+      auto *platformEvent = event.UnderlyingPlatformEvent();
+      if (platformEvent && platformEvent->HandledByInputMethod())
+      {
+        event.SetDefaultHandled();
+      }
+    }
+
+    void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept final
+    {
+      auto *platformEvent = event.UnderlyingPlatformEvent();
+      auto &editor = Downcast<Node>(*event.Target()).NodeDocument().GetEditor();
+      if (const auto &underlines = platformEvent->PreeditUnderlines())
+      {
+        auto rangeStart = static_cast<uint32>(platformEvent->PreeditSelectionRangeStart().value_or(0));
+        auto rangeLength = static_cast<uint32>(platformEvent->PreeditSelectionRangeLength().value_or(0));
+        editor.SetComposition(platformEvent->Text(), *underlines, rangeStart, rangeStart + rangeLength);
+      }
+      else
+      {
+        editor.ConfirmComposition(platformEvent->Text());
+      }
+    }
+
+    void SetInputMethodState(Element *element) noexcept final
+    {
+      InputMethodEnabled = element && element->ShouldUseInputMethod();
+    }
+
+    KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept final
+    {
+      return false;
+    }
+
+    List<Ref<UndoStep>> UndoStack;
+    List<Ref<UndoStep>> RedoStack;
+    bool IsInRedo {false};
+
+    void RegisterUndoStep(UndoStep &step) noexcept final
+    {
+      if (!IsInRedo)
+      {
+        RedoStack.clear();
+      }
+      UndoStack.push_back(ShareRef(step));
+    }
+
+    void RegisterRedoStep(UndoStep &step) noexcept final
+    {
+      RedoStack.push_back(ShareRef(step));
+    }
+
+    void ClearUndoRedoOperations() noexcept final
+    {
+      UndoStack.clear();
+      RedoStack.clear();
+    }
+
+    KRYS_NODISCARD bool CanUndo() const noexcept final
+    {
+      return !UndoStack.empty();
+    }
+
+    KRYS_NODISCARD bool CanRedo() const noexcept final
+    {
+      return !RedoStack.empty();
+    }
+
+    void Undo() noexcept final
+    {
+      if (!CanUndo())
+      {
+        return;
+      }
+      auto step = krys::move(UndoStack.back());
+      UndoStack.pop_back();
+      step->Unapply();
+    }
+
+    void Redo() noexcept final
+    {
+      if (!CanRedo())
+      {
+        return;
+      }
+      auto step = krys::move(RedoStack.back());
+      RedoStack.pop_back();
+      IsInRedo = true;
+      step->Reapply();
+      IsInRedo = false;
+    }
+
+    /// @brief The text control notifications, in order.
+    List<std::string> TextControlNotifications;
+
+    void TextFieldDidBeginEditing(web::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("begin editing");
+    }
+
+    void TextFieldDidEndEditing(web::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("end editing");
+    }
+
+    void TextDidChangeInTextField(web::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("field changed");
+    }
+
+    bool DoTextFieldCommandFromEvent(web::Element &, web::KeyboardEvent *) noexcept final
+    {
+      return false;
+    }
+
+    void TextWillBeDeletedInTextField(web::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("will delete");
+    }
+
+    void TextDidChangeInTextArea(web::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("area changed");
+    }
+  };
+
+  /// @brief A clipboard in memory, holding text, markup, files and pages' custom data as a host's would, and
+  /// counting what's written to it.
+  struct RecordingPasteboardStrategy final : PasteboardStrategy
+  {
+    int32 Writes {0};
+    int64 Changes {0};
+    utf8_string Text;
+    utf8_string Markup;
+    List<utf8_string> FilePaths;
+    RefPtr<SharedBuffer> CustomData;
+
+    KRYS_NODISCARD List<utf8_string> Types(utf8_stringview) noexcept final
+    {
+      List<utf8_string> types;
+      if (!Text.empty())
+      {
+        types.emplace_back(u8"text/plain");
+      }
+      if (!Markup.empty())
+      {
+        types.emplace_back(u8"text/html");
+      }
+      if (!FilePaths.empty())
+      {
+        types.emplace_back(u8"text/uri-list");
+      }
+      if (CustomData)
+      {
+        types.emplace_back(PasteboardCustomData::WebType());
+      }
+      return types;
+    }
+
+    KRYS_NODISCARD utf8_string ReadTextFromClipboard(utf8_stringview, utf8_stringview type) noexcept final
+    {
+      if (type.starts_with(u8"text/plain"))
+      {
+        return Text;
+      }
+      return type == u8"text/html" ? Markup : utf8_string();
+    }
+
+    KRYS_NODISCARD List<utf8_string> ReadFilePathsFromClipboard(utf8_stringview) noexcept final
+    {
+      return FilePaths;
+    }
+
+    KRYS_NODISCARD RefPtr<SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
+                                                                utf8_stringview type) noexcept final
+    {
+      return type == PasteboardCustomData::WebType() ? CustomData : nullptr;
+    }
+
+    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData selectionData) noexcept final
+    {
+      ClearClipboard(pasteboardName);
+      ++Writes;
+      Text = selectionData.Text();
+      Markup = selectionData.Markup();
+      CustomData = selectionData.CustomData();
+    }
+
+    void ClearClipboard(utf8_stringview) noexcept final
+    {
+      ++Changes;
+      Text.clear();
+      Markup.clear();
+      FilePaths.clear();
+      CustomData = nullptr;
+    }
+
+    KRYS_NODISCARD int64 ChangeCount(utf8_stringview) noexcept final
+    {
+      return Changes;
+    }
+
+    KRYS_NODISCARD List<utf8_string> TypesSafeForDOMToReadAndWrite(utf8_stringview pasteboardName,
+                                                                   utf8_stringview origin) noexcept final
+    {
+      List<utf8_string> domTypes;
+      auto add = [&](utf8_stringview type)
+      {
+        if (std::ranges::find(domTypes, type) == domTypes.end())
+        {
+          domTypes.emplace_back(type);
+        }
+      };
+      if (CustomData)
+      {
+        auto customData = PasteboardCustomData::FromSharedBuffer(*CustomData);
+        if (customData.Origin() == origin)
+        {
+          for (auto &type : customData.OrderedTypes())
+          {
+            add(type);
+          }
+        }
+      }
+      for (auto &type : Types(pasteboardName))
+      {
+        if (Pasteboard::IsSafeTypeForDOMToReadAndWrite(type))
+        {
+          add(type);
+        }
+      }
+      return domTypes;
+    }
+
+    int64 WriteCustomData(const List<PasteboardCustomData> &data,
+                          utf8_stringview pasteboardName) noexcept final
+    {
+      if (data.size() != 1)
+      {
+        return Changes;
+      }
+
+      SelectionData selectionData;
+      const auto &customData = data[0];
+      customData.ForEachPlatformString(
+        [&](auto &type, auto &string)
+        {
+          if (type == u8"text/plain")
+          {
+            selectionData.SetText(string);
+          }
+          else if (type == u8"text/html")
+          {
+            selectionData.SetMarkup(string);
+          }
+        });
+      if (customData.HasSameOriginCustomData() || !customData.Origin().empty())
+      {
+        selectionData.SetCustomData(customData.CreateSharedBuffer());
+      }
+      WriteToClipboard(pasteboardName, krys::move(selectionData));
+      return Changes;
+    }
+  };
+
+  /// @brief Counts the events of a type, cancelling them if asked.
+  struct CountingListener : public EventListenerCallback
+  {
+    int32 Count {0};
+    bool Cancel {false};
+    bool LastWasTrustedClipboardEvent {false};
+
+    void HandleEvent(Event &event) noexcept override
+    {
+      ++Count;
+      LastWasTrustedClipboardEvent = event.IsClipboardEvent() && event.IsTrusted() && event.Bubbles()
+                                     && event.Cancelable() && event.Composed();
+      if (Cancel)
+      {
+        event.PreventDefault();
+      }
+    }
+  };
+
+  /// @brief A document in a page whose editor client is a `TestEditorClient`, with a pasteboard strategy
+  /// that records writes, and the Krystal.Web client given, if any.
+  struct EditorFixture : style::tests::ResolverFixture
+  {
+    TestEditorClient *Client {nullptr};
+    RecordingPasteboardStrategy Pasteboard;
+
+    explicit EditorFixture(utf8_stringview markup, UniquePtr<WebClient> webClient = nullptr) noexcept
+        : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
+                            + utf8_string(markup),
+                          style::tests::WithView::No)
+    {
+      auto client = CreateUnique<TestEditorClient>();
+      Client = client.get();
+      Frame = web::Frame::Create(krys::move(webClient), krys::move(client));
+      Frame->CreateView({400, 300});
+      Frame->SetDocument(ShareRefPtr<web::Document>(Document.get()));
+      (void)Document->UpdateLayout();
+      PlatformStrategies::Singleton().SetPasteboardStrategy(&Pasteboard);
+    }
+
+    ~EditorFixture() noexcept
+    {
+      PlatformStrategies::Singleton().SetPasteboardStrategy(nullptr);
+    }
+
+    KRYS_NODISCARD web::Text &TextIn(DOMStringView id) noexcept
+    {
+      return Downcast<web::Text>(*ById(id).FirstChild());
+    }
+
+    KRYS_NODISCARD Editor &GetEditor() noexcept
+    {
+      return Document->GetEditor();
+    }
+
+    KRYS_NODISCARD FrameSelection &Selection() noexcept
+    {
+      return Document->Selection();
+    }
+
+    void Select(Node &node, uint32 start, uint32 end) noexcept
+    {
+      Selection().MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&node), start),
+                         CreateContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
+    }
+
+    KRYS_NODISCARD HTMLBodyElement &Body() noexcept
+    {
+      auto *body = Document->Body().get(); // The document keeps it alive.
+      return *body;
+    }
+
+    /// @brief The markup of @p element's children.
+    KRYS_NODISCARD static utf8_string InnerHTML(const Node &node) noexcept
+    {
+      return SerializeFragment(node, SerializedNodes::SubtreesOfChildren);
+    }
+
+    KRYS_NODISCARD static dom::SimpleRange CollapsedRange(Node &node, uint64 offset) noexcept
+    {
+      return {{ShareRef(node), offset}, {ShareRef(node), offset}};
+    }
+
+    void SetCaret(Node &node, uint32 offset) noexcept
+    {
+      Selection().MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&node), offset), Affinity::Downstream);
+    }
+
+    /// @brief Runs the command named @p name, as if from a key binding.
+    bool Run(utf8_stringview name, utf8_stringview value = {}) noexcept
+    {
+      return GetEditor().GetCommand(name).Execute(value);
+    }
+
+    KRYS_NODISCARD Ref<CountingListener> Listen(utf8_stringview type) noexcept
+    {
+      auto listener = CreateRef<CountingListener>();
+      Document->AddEventListener(DOMStringAtom(type), listener, true);
+      return listener;
+    }
+  };
+
+  /// @brief Presses @p key (a raw key down with @p keyCode and @p modifiers) in @p fixture's frame.
+  /// @return Whether the page handled the key.
+  inline bool PressKey(EditorFixture &fixture, const utf8_string &key, int32 keyCode,
+                       EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+  {
+    return fixture.Frame->GetEventHandler().KeyEvent(PlatformKeyboardEvent(
+      PlatformEvent::Type::RawKeyDown, u8"", u8"", key, key, keyCode, false, false, false, modifiers, {}));
+  }
+
+  /// @brief The `<input>` element with id @p id in @p fixture's document.
+  KRYS_NODISCARD inline HTMLInputElement &InputById(EditorFixture &fixture, utf8_stringview id) noexcept
+  {
+    return Downcast<HTMLInputElement>(fixture.ById(id));
+  }
+
+  /// @brief The `<option>` element with id @p id in @p fixture's document.
+  KRYS_NODISCARD inline HTMLOptionElement &OptionById(EditorFixture &fixture, utf8_stringview id) noexcept
+  {
+    return Downcast<HTMLOptionElement>(fixture.ById(id));
+  }
+}

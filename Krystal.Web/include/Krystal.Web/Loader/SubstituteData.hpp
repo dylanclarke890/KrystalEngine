@@ -1,0 +1,68 @@
+﻿/**
+ * Copyright (C) 2007 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Net/Url.hpp"
+
+namespace krys::web
+{
+  /// @brief A document's content the host gives directly, in place of loading the request's URL: markup and
+  /// the type it's in.
+  class SubstituteData
+  {
+  private:
+    utf8_string _content;
+    utf8_string _mimeType {u8"text/html"};
+    net::Url _responseUrl;
+
+  public:
+    SubstituteData() noexcept = default;
+
+    /// @param responseURL The document's URL; the request's if null.
+    SubstituteData(utf8_string content, utf8_string mimeType, net::Url responseUrl) noexcept
+        : _content(krys::move(content)), _mimeType(krys::move(mimeType)),
+          _responseUrl(krys::move(responseUrl))
+    {
+    }
+
+    KRYS_NODISCARD const utf8_string &Content() const noexcept
+    {
+      return _content;
+    }
+
+    KRYS_NODISCARD const utf8_string &MimeType() const noexcept
+    {
+      return _mimeType;
+    }
+
+    KRYS_NODISCARD const net::Url &ResponseUrl() const noexcept
+    {
+      return _responseUrl;
+    }
+  };
+}

@@ -1,0 +1,249 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Transforms/TransformList.hpp"
+#include "Krystal.Web/Graphics/Animation/AnimationUtilities.hpp"
+
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Web/Rendering/RenderBox.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationClient.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationContext.hpp"
+#include "Krystal.Web/Style/Values/Transforms/Functions/Matrix3DTransformFunction.hpp"
+
+namespace krys::web::style
+{
+  void TransformList::Apply(TransformationMatrix &matrix, const SizeF &size, size_t start) const noexcept
+  {
+    for (size_t i = start; i < _value.size(); ++i)
+    {
+      _value[i]->Apply(matrix, size);
+    }
+  }
+
+  bool TransformList::Has3DOperation() const noexcept
+  {
+    return std::ranges::any_of(*this, [](auto &function) { return function->Is3DOperation(); });
+  }
+
+  bool TransformList::IsRepresentableIn2D() const noexcept
+  {
+    return std::ranges::all_of(*this, [](auto &function) { return function->IsRepresentableIn2D(); });
+  }
+
+  bool TransformList::AffectedByTransformOrigin() const noexcept
+  {
+    return std::ranges::any_of(*this, [](auto &function) { return function->IsAffectedByTransformOrigin(); });
+  }
+
+  bool TransformList::IsInvertible(const LayoutSize &size) const noexcept
+  {
+    TransformationMatrix transform;
+    Apply(transform, size);
+    return transform.IsInvertible();
+  }
+
+  bool TransformList::ContainsNonInvertibleMatrix(const LayoutSize &boxSize) const noexcept
+  {
+    return (HasTransformOfType<TransformFunctionType::Matrix>()
+            || HasTransformOfType<TransformFunctionType::Matrix3D>())
+           && !IsInvertible(boxSize);
+  }
+
+  TransformFunctionSizeDependencies TransformList::ComputeSizeDependencies() const noexcept
+  {
+    TransformFunctionSizeDependencies result {};
+    for (auto &function : _value)
+    {
+      auto [isWidthDependent, isHeightDependent] = function->ComputeSizeDependencies();
+      if (isWidthDependent)
+      {
+        result.IsWidthDependent = true;
+      }
+      if (isHeightDependent)
+      {
+        result.IsHeightDependent = true;
+      }
+    }
+    return result;
+  }
+
+  // MARK: - Blending
+
+  KRYS_NODISCARD static bool ShouldFallBackToDiscreteInterpolation(const TransformList &from,
+                                                                   const TransformList &to,
+                                                                   const LayoutSize &boxSize) noexcept
+  {
+    return from.ContainsNonInvertibleMatrix(boxSize) || to.ContainsNonInvertibleMatrix(boxSize);
+  }
+
+  bool Blending<TransformList>::CanBlend(const TransformList &from, const TransformList &to,
+                                         CompositeOperation compositeOperation) noexcept
+  {
+    if (compositeOperation == CompositeOperation::Replace)
+    {
+      return !ShouldFallBackToDiscreteInterpolation(from, to, {});
+    }
+    return true;
+  }
+
+  TransformList Blending<TransformList>::Blend(const TransformList &from, const TransformList &to,
+                                               const BlendingContext &context) noexcept
+  {
+    return BlendTransformLists(from, to, context, LayoutSize(), null);
+  }
+
+  TransformList Blending<TransformList>::Blend(const TransformList &from, const TransformList &to,
+                                               const interpolation::Context &context) noexcept
+  {
+    auto *renderBox = DynamicDowncast<RenderBox>(context.Client.Renderer());
+    auto boxSize = renderBox ? renderBox->BorderBoxRect().Size() : LayoutSize();
+
+    // The precomputed prefix can't be used when accumulating, as the values accumulated may differ from those
+    // of the keyframes, nor for properties other than `transform`, as it's only computed for that one.
+    Maybe<uint32> prefixLengthFromContext;
+    if (context.CompositeOperation != CompositeOperation::Accumulate
+        && context.Property == AnimatableCSSProperty(css::PropertyId::Transform))
+    {
+      prefixLengthFromContext = context.Client.TransformFunctionListPrefix();
+    }
+
+    return BlendTransformLists(from, to, context, boxSize, prefixLengthFromContext);
+  }
+
+  TransformList Blending<TransformList>::BlendTransformLists(const TransformList &from,
+                                                             const TransformList &to,
+                                                             const BlendingContext &context,
+                                                             LayoutSize boxSize,
+                                                             Maybe<uint32> prefixLengthFromContext) noexcept
+  {
+    auto fromLength = static_cast<uint32>(from.size());
+    auto toLength = static_cast<uint32>(to.size());
+    auto maxLength = std::max(fromLength, toLength);
+
+    if (context.CompositeOperation == CompositeOperation::Add)
+    {
+      krys_debug_assert(context.Progress == 1.0);
+
+      return TransformList::Container(std::from_range, std::views::iota(0uz, fromLength + toLength)
+                                                         | std::views::transform(
+                                                           [&](auto index)
+                                                           {
+                                                             if (index < fromLength)
+                                                             {
+                                                               return from[index];
+                                                             }
+                                                             return to[index - fromLength];
+                                                           }));
+    }
+
+    bool shouldFallBackToDiscrete = ShouldFallBackToDiscreteInterpolation(from, to, boxSize);
+
+    auto createBlendedMatrixFunctionFromOperationsSuffix = [&](size_t i) -> TransformFunction
+    {
+      TransformationMatrix fromTransform;
+      from.Apply(fromTransform, boxSize, i);
+
+      TransformationMatrix toTransform;
+      to.Apply(toTransform, boxSize, i);
+
+      auto progress = context.Progress;
+      auto compositeOperation = context.CompositeOperation;
+      if (shouldFallBackToDiscrete)
+      {
+        progress = progress < 0.5 ? 0 : 1;
+        compositeOperation = CompositeOperation::Replace;
+      }
+
+      toTransform.Blend(fromTransform, progress, compositeOperation);
+      return TransformFunction {Matrix3DTransformFunction::Create(toTransform)};
+    };
+
+    auto createBlendedFunction = [&](size_t i) -> TransformFunction
+    {
+      const TransformFunctionBase *fromFunction = (i < fromLength) ? from._value[i].Value.get() : nullptr;
+      const TransformFunctionBase *toFunction = (i < toLength) ? to._value[i].Value.get() : nullptr;
+
+      if (fromFunction && toFunction)
+      {
+        return TransformFunction {toFunction->Blend(fromFunction, context)};
+      }
+      if (!fromFunction)
+      {
+        return TransformFunction {toFunction->Blend(nullptr, 1 - context.Progress, true)};
+      }
+      return TransformFunction {fromFunction->Blend(nullptr, context, true)};
+    };
+
+    if (shouldFallBackToDiscrete)
+    {
+      return TransformList {createBlendedMatrixFunctionFromOperationsSuffix(0)};
+    }
+
+    auto prefixLength = [&]() -> Maybe<uint32>
+    {
+      // If either of the transform list is empty, then we should not attempt to do a matrix blend.
+      if (!fromLength || !toLength)
+      {
+        return {};
+      }
+
+      for (uint32 i = 0; i < maxLength; i++)
+      {
+        if (prefixLengthFromContext && i >= *prefixLengthFromContext)
+        {
+          return i;
+        }
+
+        const TransformFunctionBase *fromFunction = (i < fromLength) ? from._value[i].Value.get() : nullptr;
+        const TransformFunctionBase *toFunction = (i < toLength) ? to._value[i].Value.get() : nullptr;
+        if (fromFunction && toFunction && !fromFunction->SharedPrimitiveType(toFunction))
+        {
+          return i;
+        }
+      }
+
+      return {};
+    }();
+
+    if (prefixLength)
+    {
+      return TransformList::Container(std::from_range,
+                                      std::views::iota(0uz, *prefixLength + 1)
+                                        | std::views::transform(
+                                          [&](auto i)
+                                          {
+                                            if (i == *prefixLength)
+                                            {
+                                              return createBlendedMatrixFunctionFromOperationsSuffix(i);
+                                            }
+                                            return createBlendedFunction(i);
+                                          }));
+    }
+
+    return TransformList::Container(
+      std::from_range, std::views::iota(0uz, maxLength)
+                         | std::views::transform([&](auto i) { return createBlendedFunction(i); }));
+  }
+}

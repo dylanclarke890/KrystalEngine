@@ -1,0 +1,249 @@
+﻿/*
+ * Copyright (C) 2016 The Chromium Authors. All rights reserved
+ * Copyright (C) 2021 Metrological Group B.V.
+ * Copyright (C) 2021 Igalia S.L.
+ * Copyright (C) 2023-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/UnicodeRange.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Text/Encodings/Decode.hpp"
+#include "Krystal.Text/Encodings/UTF.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/UnicodeRangeValue.hpp"
+
+namespace krys::web::css::parse_property
+{
+  namespace
+  {
+    KRYS_NODISCARD bool ConsumeOptionalDelimiter(TokenRange &tokens, char32 value) noexcept
+    {
+      if (!(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == value))
+      {
+        return false;
+      }
+
+      tokens.Discard();
+      return true;
+    }
+
+    KRYS_NODISCARD CSSOMStringView ConsumeIdentifier(TokenRange &tokens) noexcept
+    {
+      if (tokens.Peek().Type() != TokenType::Ident)
+      {
+        return {};
+      }
+
+      return tokens.Consume().IdentCodePoints();
+    }
+
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalNumber(StringBuilder &str, TokenRange &tokens,
+                                                       TokenType type = TokenType::Number) noexcept
+    {
+      if (tokens.Peek().Type() != type)
+      {
+        return false;
+      }
+
+      str.Append(tokens.Consume().OriginalText());
+      return true;
+    }
+
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(StringBuilder &str, TokenRange &tokens,
+                                                          char8_t value) noexcept
+    {
+      if (!ConsumeOptionalDelimiter(tokens, value))
+      {
+        return false;
+      }
+
+      str.Append(value);
+      return true;
+    }
+
+    void ConsumeAndAppendOptionalQuestionMarks(StringBuilder &str, TokenRange &tokens) noexcept
+    {
+      while (ConsumeAndAppendOptionalDelimiter(str, tokens, '?'))
+      {
+      }
+    }
+
+    KRYS_NODISCARD CSSOMString ConsumeUnicodeRangeString(TokenRange &tokens) noexcept
+    {
+      if (!krys::text::IsASCIICaselessEqual(ConsumeIdentifier(tokens), u8"u"))
+      {
+        return {};
+      }
+
+      StringBuilder builder;
+      if (ConsumeAndAppendOptionalNumber(builder, tokens, TokenType::Dimension))
+      {
+        ConsumeAndAppendOptionalQuestionMarks(builder, tokens);
+      }
+      else if (ConsumeAndAppendOptionalNumber(builder, tokens))
+      {
+        if (!(ConsumeAndAppendOptionalNumber(builder, tokens, TokenType::Dimension)
+              || ConsumeAndAppendOptionalNumber(builder, tokens)))
+        {
+          ConsumeAndAppendOptionalQuestionMarks(builder, tokens);
+        }
+      }
+      else if (ConsumeOptionalDelimiter(tokens, '+'))
+      {
+        builder.Append(u8'+');
+        if (auto identifier = ConsumeIdentifier(tokens); !identifier.empty())
+        {
+          builder.Append(identifier);
+        }
+        else if (!ConsumeAndAppendOptionalDelimiter(builder, tokens, '?'))
+        {
+          return {};
+        }
+
+        ConsumeAndAppendOptionalQuestionMarks(builder, tokens);
+      }
+      else
+      {
+        return {};
+      }
+
+      return krys::move(builder).ToString();
+    }
+
+    struct UnicodeRange
+    {
+      char32 start;
+      char32 end;
+    };
+  }
+
+  // MARK: <unicode-tokens-token> consuming (unresolved)
+  static Maybe<UnicodeRange> ConsumeUnicodeRangeTokenUnresolved(TokenRange &tokens) noexcept
+  {
+    auto unicodeRangeString = ConsumeUnicodeRangeString(tokens);
+    if (unicodeRangeString.empty())
+    {
+      return null;
+    }
+
+    auto decodeResult = krys::text::Decode<krys::text::UTF8>(unicodeRangeString);
+    krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
+    auto &asUTF32 = decodeResult.Output;
+
+    utf32_stringview buffer = asUTF32;
+    if (buffer.empty() || buffer[0] != U'+')
+    {
+      return null;
+    }
+    buffer = buffer.substr(1uz);
+
+    char32 start = 0;
+    size_t hexDigitCount = 0uz;
+
+    while (!buffer.empty() && krys::text::IsASCIIHexDigit(buffer[0]))
+    {
+      if (++hexDigitCount > 6)
+      {
+        return null;
+      }
+
+      start <<= 4;
+      start |= krys::text::ToASCIIHexValue(buffer[0]);
+      buffer = buffer.substr(1uz);
+    }
+
+    auto end = start;
+    while (!buffer.empty() && buffer[0] == U'?')
+    {
+      if (++hexDigitCount > 6)
+      {
+        return null;
+      }
+
+      start <<= 4;
+      end <<= 4;
+      end |= 0xF;
+      buffer = buffer.substr(1uz);
+    }
+
+    if (!hexDigitCount)
+    {
+      return null;
+    }
+
+    if (start == end && !buffer.empty())
+    {
+      if (buffer[0] != U'-')
+      {
+        return null;
+      }
+      buffer = buffer.substr(1uz);
+
+      end = 0;
+      hexDigitCount = 0;
+      while (!buffer.empty() && krys::text::IsASCIIHexDigit(buffer[0]))
+      {
+        if (++hexDigitCount > 6)
+        {
+          return null;
+        }
+
+        end <<= 4;
+        end |= krys::text::ToASCIIHexValue(buffer[0]);
+        buffer = buffer.substr(1uz);
+      }
+
+      if (!hexDigitCount)
+      {
+        return null;
+      }
+    }
+
+    if (!buffer.empty())
+    {
+      return null;
+    }
+
+    return UnicodeRange {start, end};
+  }
+
+  RefPtr<Value> ConsumeUnicodeRangeToken(TokenRange &tokens) noexcept
+  {
+    auto rangeCopy = tokens;
+
+    auto unicodeRange = ConsumeUnicodeRangeTokenUnresolved(rangeCopy);
+    rangeCopy.DiscardWhitespace();
+
+    if (!unicodeRange || unicodeRange->end > krys::text::MaxUnicodeChar
+        || unicodeRange->start > unicodeRange->end)
+    {
+      return nullptr;
+    }
+
+    tokens = rangeCopy;
+    return UnicodeRangeValue::Create(unicodeRange->start, unicodeRange->end);
+  }
+}

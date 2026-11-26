@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/Dom/Nodes/Document.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
-#include "Krystal.Booey/Html/Canvas/CanvasGradient.hpp"
-#include "Krystal.Booey/Html/Canvas/CanvasPattern.hpp"
-#include "Krystal.Booey/Html/Canvas/CanvasRenderingContext2D.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLCanvasElement.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/Html/ImageData/ImageData.hpp"
-#include "Krystal.Booey/Svg/Elements/SVGImageElement.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Web/Html/Canvas/CanvasGradient.hpp"
+#include "Krystal.Web/Html/Canvas/CanvasPattern.hpp"
+#include "Krystal.Web/Html/Canvas/CanvasRenderingContext2D.hpp"
+#include "Krystal.Web/Html/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLImageElement.hpp"
+#include "Krystal.Web/Html/ImageData/ImageData.hpp"
+#include "Krystal.Web/Svg/Elements/SVGImageElement.hpp"
 #include <algorithm>
 #include <format>
 #include <numbers>
@@ -46,22 +46,22 @@ namespace krys::editor
     constexpr static float BarWidth = 28.f;
 
   private:
-    WeakPtr<boo::Document> _document;
-    List<boo::EventListenerHandle> _listeners;
-    RefPtr<boo::html::CanvasRenderingContext2D> _chart;
-    RefPtr<boo::html::CanvasRenderingContext2D> _pad;
-    RefPtr<boo::html::CanvasRenderingContext2D> _palette;
-    RefPtr<boo::html::CanvasPattern> _barPattern;
+    WeakPtr<web::Document> _document;
+    List<web::EventListenerHandle> _listeners;
+    RefPtr<web::html::CanvasRenderingContext2D> _chart;
+    RefPtr<web::html::CanvasRenderingContext2D> _pad;
+    RefPtr<web::html::CanvasRenderingContext2D> _palette;
+    RefPtr<web::html::CanvasPattern> _barPattern;
     List<float> _values;
     uint32 _seed {0x25'45'F4'91u};
     float _sinceValue {0};
     int32 _drawPointer {-1};
     double _lastX {0};
     double _lastY {0};
-    boo::DOMString _colour {u8"#1a2240"};
+    web::DOMString _colour {u8"#1a2240"};
 
   public:
-    explicit PageCanvas2D(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageCanvas2D(web::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       _chart = Context(u8"chart");
       if (!_chart)
@@ -110,13 +110,13 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD RefPtr<boo::html::CanvasRenderingContext2D> Context(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<web::html::CanvasRenderingContext2D> Context(utf8_stringview id) const noexcept
     {
-      auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(ById(id).get());
+      auto *canvas = DynamicDowncast<web::HTMLCanvasElement>(ById(id).get());
       return canvas ? canvas->GetContext2d() : nullptr;
     }
 
-    KRYS_NODISCARD RefPtr<boo::Element> ById(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<web::Element> ById(utf8_stringview id) const noexcept
     {
       return _document ? _document->GetElementById(id) : nullptr;
     }
@@ -141,9 +141,9 @@ namespace krys::editor
       {
         return;
       }
-      tile->SetFillStyle(boo::DOMString(u8"#ffd166"));
+      tile->SetFillStyle(web::DOMString(u8"#ffd166"));
       tile->FillRect(0, 0, 12, 12);
-      tile->SetStrokeStyle(boo::DOMString(u8"#ef476f"));
+      tile->SetStrokeStyle(web::DOMString(u8"#ef476f"));
       tile->SetLineWidth(3);
       tile->BeginPath();
       tile->MoveTo(-3, 3);
@@ -154,7 +154,7 @@ namespace krys::editor
       tile->LineTo(15, 9);
       tile->Stroke();
 
-      auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(ById(u8"chart-tile").get());
+      auto *canvas = DynamicDowncast<web::HTMLCanvasElement>(ById(u8"chart-tile").get());
       auto pattern = _chart->CreatePattern(ShareRefPtr(canvas), u8"repeat");
       if (!pattern.HasException())
       {
@@ -176,7 +176,7 @@ namespace krys::editor
     void DrawChart() noexcept
     {
       auto &context = *_chart;
-      using boo::DOMString;
+      using web::DOMString;
 
       context.Reset();
       context.Scale(2, 2);
@@ -187,8 +187,8 @@ namespace krys::editor
       context.SetLineDash({4, 4});
       context.SetStrokeStyle(DOMString(u8"#c9d1e6"));
       context.SetFillStyle(DOMString(u8"#5b6584"));
-      context.SetTextAlign(boo::html::CanvasTextAlign::Right);
-      context.SetTextBaseline(boo::html::CanvasTextBaseline::Middle);
+      context.SetTextAlign(web::html::CanvasTextAlign::Right);
+      context.SetTextBaseline(web::html::CanvasTextBaseline::Middle);
       for (int32 step = 0; step <= 4; ++step)
       {
         const float value = MaxValue * static_cast<float>(step) / 4.f;
@@ -232,7 +232,7 @@ namespace krys::editor
       }
       line();
       context.SetLineWidth(2.5);
-      context.SetLineJoin(boo::html::CanvasLineJoin::Round);
+      context.SetLineJoin(web::html::CanvasLineJoin::Round);
       context.SetStrokeStyle(DOMString(u8"#4f6df5"));
       context.Stroke();
 
@@ -241,7 +241,7 @@ namespace krys::editor
       const float barTop = ValueY(latest);
       if (_barPattern)
       {
-        context.SetFillStyle(Ref<boo::html::CanvasPattern>(_barPattern));
+        context.SetFillStyle(Ref<web::html::CanvasPattern>(_barPattern));
       }
       else
       {
@@ -249,11 +249,11 @@ namespace krys::editor
       }
       context.FillRect(BarLeft, barTop, BarWidth, PlotBottom - barTop);
       context.SetFillStyle(DOMString(u8"#1a2240"));
-      context.SetTextAlign(boo::html::CanvasTextAlign::Center);
-      context.SetTextBaseline(boo::html::CanvasTextBaseline::Bottom);
+      context.SetTextAlign(web::html::CanvasTextAlign::Center);
+      context.SetTextBaseline(web::html::CanvasTextBaseline::Bottom);
       context.FillText(Text(std::format("{}", static_cast<int32>(latest))), BarLeft + BarWidth / 2,
                        barTop - 3);
-      context.SetTextBaseline(boo::html::CanvasTextBaseline::Top);
+      context.SetTextBaseline(web::html::CanvasTextBaseline::Top);
       context.FillText(u8"now", BarLeft + BarWidth / 2, PlotBottom + 4);
 
       if (auto caption = ById(u8"chart-caption"))
@@ -270,7 +270,7 @@ namespace krys::editor
         return;
       }
       auto &context = *_palette;
-      auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(ById(u8"pad-palette").get());
+      auto *canvas = DynamicDowncast<web::HTMLCanvasElement>(ById(u8"pad-palette").get());
       const auto width = static_cast<float>(canvas->Width());
       const auto height = static_cast<float>(canvas->Height());
 
@@ -307,16 +307,16 @@ namespace krys::editor
     {
       auto pad = ById(u8"pad");
       auto listen =
-        [&](boo::Element &element, utf8_stringview type, Func<void(boo::PointerEvent &)> &&callback)
+        [&](web::Element &element, utf8_stringview type, Func<void(web::PointerEvent &)> &&callback)
       {
         _listeners.push_back(element.AddEventListener(
-          boo::DOMStringAtom(type), [callback = krys::move(callback)](boo::Event &event)
-          { callback(static_cast<boo::PointerEvent &>(event)); }));
+          web::DOMStringAtom(type), [callback = krys::move(callback)](web::Event &event)
+          { callback(static_cast<web::PointerEvent &>(event)); }));
       };
 
       // The pointer that presses the pad captures itself to it, and draws until it lets go.
       listen(*pad, u8"pointerdown",
-             [this](boo::PointerEvent &pointer)
+             [this](web::PointerEvent &pointer)
              {
                if (auto element = ById(u8"pad"))
                {
@@ -329,10 +329,10 @@ namespace krys::editor
                }
              });
       listen(*pad, u8"gotpointercapture",
-             [this](boo::PointerEvent &pointer) { _drawPointer = static_cast<int32>(pointer.PointerId()); });
-      listen(*pad, u8"lostpointercapture", [this](boo::PointerEvent &) { _drawPointer = -1; });
+             [this](web::PointerEvent &pointer) { _drawPointer = static_cast<int32>(pointer.PointerId()); });
+      listen(*pad, u8"lostpointercapture", [this](web::PointerEvent &) { _drawPointer = -1; });
       listen(*pad, u8"pointermove",
-             [this](boo::PointerEvent &pointer)
+             [this](web::PointerEvent &pointer)
              {
                auto element = ById(u8"pad");
                if (!element || static_cast<int32>(pointer.PointerId()) != _drawPointer)
@@ -348,7 +348,7 @@ namespace krys::editor
       if (auto palette = ById(u8"pad-palette"))
       {
         listen(*palette, u8"pointerdown",
-               [this](boo::PointerEvent &pointer)
+               [this](web::PointerEvent &pointer)
                {
                  if (auto element = ById(u8"pad-palette"))
                  {
@@ -362,11 +362,11 @@ namespace krys::editor
       {
         _listeners.push_back(
           clear->AddEventListener(u8"click",
-                                  [this](boo::Event &)
+                                  [this](web::Event &)
                                   {
                                     if (_pad && _document)
                                     {
-                                      auto &canvas = Downcast<boo::HTMLCanvasElement>(*ById(u8"pad"));
+                                      auto &canvas = Downcast<web::HTMLCanvasElement>(*ById(u8"pad"));
                                       _pad->ClearRect(0, 0, canvas.Width(), canvas.Height());
                                     }
                                   }));
@@ -374,11 +374,11 @@ namespace krys::editor
     }
 
     /// @brief Where @p pointer is in @p element's canvas's pixels.
-    KRYS_NODISCARD static std::pair<double, double> PadPoint(boo::Element &element,
-                                                             const boo::PointerEvent &pointer) noexcept
+    KRYS_NODISCARD static std::pair<double, double> PadPoint(web::Element &element,
+                                                             const web::PointerEvent &pointer) noexcept
     {
       auto rect = element.GetBoundingClientRect();
-      auto &canvas = Downcast<boo::HTMLCanvasElement>(element);
+      auto &canvas = Downcast<web::HTMLCanvasElement>(element);
       const double scaleX = rect->Width() > 0 ? canvas.Width() / rect->Width() : 1.0;
       const double scaleY = rect->Height() > 0 ? canvas.Height() / rect->Height() : 1.0;
       return {(pointer.ClientX() - rect->Left()) * scaleX, (pointer.ClientY() - rect->Top()) * scaleY};
@@ -391,9 +391,9 @@ namespace krys::editor
         return;
       }
       auto &context = *_pad;
-      context.SetStrokeStyle(boo::DOMString(_colour));
+      context.SetStrokeStyle(web::DOMString(_colour));
       context.SetLineWidth(6);
-      context.SetLineCap(boo::html::CanvasLineCap::Round);
+      context.SetLineCap(web::html::CanvasLineCap::Round);
       context.BeginPath();
       context.MoveTo(static_cast<float>(_lastX), static_cast<float>(_lastY));
       context.LineTo(static_cast<float>(x), static_cast<float>(y));
@@ -426,9 +426,9 @@ namespace krys::editor
       }
     }
 
-    KRYS_NODISCARD static boo::DOMString Text(const std::string &text) noexcept
+    KRYS_NODISCARD static web::DOMString Text(const std::string &text) noexcept
     {
-      return boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size());
+      return web::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size());
     }
   };
 }

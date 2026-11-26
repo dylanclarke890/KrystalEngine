@@ -1,0 +1,85 @@
+﻿/*
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Css/Values/ValueId.hpp"
+
+namespace krys::web::css
+{
+  struct PropertyParserState;
+  class TokenRange;
+  class Value;
+  using GridNamedAreaMapRow = SmallList<CSSOMString, 8uz>;
+  class GridLineNamesValue;
+
+  namespace parse_property
+  {
+    // https://drafts.csswg.org/css-grid/
+
+    enum class AllowEmpty : bool
+    {
+      No,
+      Yes,
+    };
+
+    enum TrackListType : uint8
+    {
+      GridTemplate,
+      GridTemplateNoRepeat,
+      GridAuto,
+    };
+
+    KRYS_NODISCARD bool IsGridBreadthIdent(ValueId) noexcept;
+
+    // Parses a single <string> token from a <'grid-template-areas'> production.
+    KRYS_NODISCARD Maybe<GridNamedAreaMapRow>
+      ConsumeUnresolvedGridTemplateAreasRow(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    KRYS_NODISCARD RefPtr<GridLineNamesValue>
+      ConsumeGridLineNames(TokenRange &tokens, PropertyParserState &state,
+                           AllowEmpty allowEmpty = AllowEmpty::No) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridLine(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTrackSize(TokenRange &tokens,
+                                                      PropertyParserState &state) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTrackList(TokenRange &tokens, PropertyParserState &state,
+                                                      TrackListType = TrackListType::GridAuto) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTemplatesRowsOrColumns(TokenRange &tokens,
+                                                                   PropertyParserState &state) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridTemplateAreas(TokenRange &tokens,
+                                                          PropertyParserState &state) noexcept;
+
+    KRYS_NODISCARD RefPtr<Value> ConsumeGridAutoFlow(TokenRange &tokens, PropertyParserState &state) noexcept;
+  }
+}

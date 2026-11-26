@@ -1,0 +1,197 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Masking/Clip.hpp"
+
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/RectValue.hpp"
+#include "Krystal.Web/Graphics/Animation/AnimationUtilities.hpp"
+#include "Krystal.Web/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Style/Values/CSSValueConversion.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
+
+namespace krys::web::style
+{
+  // MARK: - Conversion
+
+  Clip CSSValueConversion<Clip>::operator()(BuilderState &state, const css::Value &value) noexcept
+  {
+    if (value.ValueId() == css::ValueId::Auto)
+    {
+      return css::keywords::Auto {};
+    }
+
+    const auto *rectValue = RequiredDowncast<css::RectValue>(state, value);
+    if (!rectValue)
+    {
+      return css::keywords::Auto {};
+    }
+
+    const auto *primitiveValueTop = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Top);
+    if (!primitiveValueTop)
+    {
+      return css::keywords::Auto {};
+    }
+    const auto *primitiveValueRight = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Right);
+    if (!primitiveValueRight)
+    {
+      return css::keywords::Auto {};
+    }
+    const auto *primitiveValueBottom =
+      RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Bottom);
+    if (!primitiveValueBottom)
+    {
+      return css::keywords::Auto {};
+    }
+    const auto *primitiveValueLeft = RequiredDowncast<css::PrimitiveValue>(state, *rectValue->Sides().Left);
+    if (!primitiveValueLeft)
+    {
+      return css::keywords::Auto {};
+    }
+
+    auto convertEdge = [&](const css::PrimitiveValue &primitiveValue) -> ClipEdge
+    {
+      if (primitiveValue.ValueId() == css::ValueId::Auto)
+      {
+        return css::keywords::Auto {};
+      }
+      return ConvertCSSValueToStyle<Length<>>(state, primitiveValue);
+    };
+
+    return ClipRect {
+      convertEdge(*primitiveValueTop),
+      convertEdge(*primitiveValueRight),
+      convertEdge(*primitiveValueBottom),
+      convertEdge(*primitiveValueLeft),
+    };
+  }
+
+  Ref<css::Value> CSSValueCreation<ClipRect>::operator()(css::ValuePool &pool, const RenderStyle &style,
+                                                         const ClipRect &clipRect) noexcept
+  {
+    return css::RectValue::Create({
+      CreateCSSValue(pool, style, clipRect.Value->Top()),
+      CreateCSSValue(pool, style, clipRect.Value->Right()),
+      CreateCSSValue(pool, style, clipRect.Value->Bottom()),
+      CreateCSSValue(pool, style, clipRect.Value->Left()),
+    });
+  }
+
+  // MARK: - Blending
+
+  template <>
+  struct Blending<ClipEdge>
+  {
+    KRYS_NODISCARD static bool CanBlend(const ClipEdge &, const ClipEdge &) noexcept;
+
+    KRYS_NODISCARD static bool RequiresInterpolationForAccumulativeIteration(const ClipEdge &,
+                                                                             const ClipEdge &) noexcept;
+
+    KRYS_NODISCARD ClipEdge Blend(const ClipEdge &, const ClipEdge &, const BlendingContext &) noexcept;
+  };
+
+  template <>
+  struct Blending<ClipRect>
+  {
+    KRYS_NODISCARD static bool CanBlend(const ClipRect &, const ClipRect &) noexcept;
+
+    KRYS_NODISCARD static bool RequiresInterpolationForAccumulativeIteration(const ClipRect &,
+                                                                             const ClipRect &) noexcept;
+
+    KRYS_NODISCARD static ClipRect Blend(const ClipRect &, const ClipRect &,
+                                         const BlendingContext &) noexcept;
+  };
+
+  bool Blending<ClipEdge>::CanBlend(const ClipEdge &a, const ClipEdge &b) noexcept
+  {
+    return a.IsAuto() == b.IsAuto();
+  }
+
+  bool Blending<ClipEdge>::RequiresInterpolationForAccumulativeIteration(const ClipEdge &a,
+                                                                         const ClipEdge &b) noexcept
+  {
+    return a.IsAuto() != b.IsAuto();
+  }
+
+  ClipEdge Blending<ClipEdge>::Blend(const ClipEdge &a, const ClipEdge &b,
+                                     const BlendingContext &context) noexcept
+  {
+    if (a.IsAuto() || b.IsAuto())
+    {
+      return context.Progress < 0.5 ? a : b;
+    }
+
+    krys_debug_assert(CanBlend(a, b));
+    return style::Blend(*a.TryValue(), *b.TryValue(), context);
+  }
+
+  bool Blending<ClipRect>::CanBlend(const ClipRect &a, const ClipRect &b) noexcept
+  {
+    return style::CanBlend(a.Value->Top(), b.Value->Top())
+           && style::CanBlend(a.Value->Right(), b.Value->Right())
+           && style::CanBlend(a.Value->Bottom(), b.Value->Bottom())
+           && style::CanBlend(a.Value->Left(), b.Value->Left());
+  }
+
+  bool Blending<ClipRect>::RequiresInterpolationForAccumulativeIteration(const ClipRect &a,
+                                                                         const ClipRect &b) noexcept
+  {
+    return style::RequiresInterpolationForAccumulativeIteration(a.Value->Top(), b.Value->Top())
+           && style::RequiresInterpolationForAccumulativeIteration(a.Value->Right(), b.Value->Right())
+           && style::RequiresInterpolationForAccumulativeIteration(a.Value->Bottom(), b.Value->Bottom())
+           && style::RequiresInterpolationForAccumulativeIteration(a.Value->Left(), b.Value->Left());
+  }
+
+  ClipRect Blending<ClipRect>::Blend(const ClipRect &a, const ClipRect &b,
+                                     const BlendingContext &context) noexcept
+  {
+    return ClipRect {
+      style::Blend(a.Value->Top(), b.Value->Top(), context),
+      style::Blend(a.Value->Right(), b.Value->Right(), context),
+      style::Blend(a.Value->Bottom(), b.Value->Bottom(), context),
+      style::Blend(a.Value->Left(), b.Value->Left(), context),
+    };
+  }
+
+  bool Blending<Clip>::CanBlend(const Clip &a, const Clip &b) noexcept
+  {
+    return !a.IsAuto() && !b.IsAuto() && style::CanBlend(*a._value, *b._value);
+  }
+
+  bool Blending<Clip>::RequiresInterpolationForAccumulativeIteration(const Clip &a, const Clip &b) noexcept
+  {
+    return style::RequiresInterpolationForAccumulativeIteration(
+      a._value.value_or(ClipRect {css::keywords::Auto {}}),
+      b._value.value_or(ClipRect {css::keywords::Auto {}}));
+  }
+
+  Clip Blending<Clip>::Blend(const Clip &a, const Clip &b, const BlendingContext &context) noexcept
+  {
+    return style::Blend(a._value.value_or(ClipRect {css::keywords::Auto {}}),
+                        b._value.value_or(ClipRect {css::keywords::Auto {}}), context);
+  }
+}

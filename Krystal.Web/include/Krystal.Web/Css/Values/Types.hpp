@@ -1,0 +1,895 @@
+﻿/*
+ * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/IterationStatus.hpp"
+#include "Krystal.Core/Utils/Apply.hpp"
+#include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Net/Url.hpp"
+#include "Krystal.Web/Css/Values/Aggregates.hpp"
+#include "Krystal.Web/Css/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Web/Css/Values/Concepts.hpp"
+#include "Krystal.Web/Css/Values/Value.hpp"
+#include "Krystal.Web/Css/Values/ValueId.hpp"
+#include "Krystal.Web/Css/Values/ValueListBuilder.hpp"
+
+namespace krys::web::css
+{
+  class ValuePool;
+
+#pragma region Serialisation
+
+  struct SerialisationContext;
+
+  template <typename CSSType>
+  struct Serialiser;
+
+  struct SerialiseInvoker
+  {
+    template <typename CSSType, typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                    Rest &&...rest) const noexcept
+    {
+      Serialiser<CSSType> {}(builder, context, value, std::forward<Rest>(rest)...);
+    }
+
+    template <typename CSSType, typename... Rest>
+    KRYS_NODISCARD CSSOMString operator()(const SerialisationContext &context, const CSSType &value,
+                                          Rest &&...rest) const noexcept
+    {
+      StringBuilder builder;
+      this->operator()(builder, context, value, std::forward<Rest>(rest)...);
+      return krys::move(builder).ToString();
+    }
+  };
+
+  constexpr SerialiseInvoker Serialise {};
+
+  void SerialiseCustomIdentifier(StringBuilder &, const SerialisationContext &,
+                                 const CustomIdentifier &) noexcept;
+
+  void SerialisePropertyIdentifier(StringBuilder &, const SerialisationContext &,
+                                   const PropertyIdentifier &) noexcept;
+
+  void SerialiseString(StringBuilder &, const SerialisationContext &, const CSSOMStringAtom &) noexcept;
+
+  void SerialiseString(StringBuilder &, const SerialisationContext &, const CSSOMString &) noexcept;
+
+  template <typename CSSType, typename... Rest>
+  void SerialiseOnOptionalLike(StringBuilder &builder, const SerialisationContext &context,
+                               const CSSType &value, Rest &&...rest) noexcept
+  {
+    if (!value)
+    {
+      return;
+    }
+
+    Serialise(builder, context, *value, std::forward<Rest>(rest)...);
+  }
+
+  template <typename CSSType, typename... Rest>
+  void SerialiseOnTupleLike(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                            // Passed to each element's conversion, so never forwarded.
+                            // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
+                            CSSOMStringView separator, Rest &&...rest) noexcept
+  {
+    CSSOMStringView swappedSeparator = u8"";
+    auto caller = krys::CreateVisitor(
+      [&]<OptionalLike T>(const T &element)
+      {
+        if (!element)
+        {
+          return;
+        }
+
+        builder.Append(std::exchange(swappedSeparator, separator));
+        Serialise(builder, context, *element, rest...);
+      },
+      [&](const auto &element)
+      {
+        builder.Append(std::exchange(swappedSeparator, separator));
+        Serialise(builder, context, element, rest...);
+      });
+
+    krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
+  }
+
+  template <typename CSSType, typename... Rest>
+  void SerialiseOnTupleLikeCoalescing(StringBuilder &builder, const SerialisationContext &context,
+                                      const CSSType &value, CSSOMStringView separator,
+                                      Rest &&...rest) noexcept
+  {
+    if constexpr (std::tuple_size_v<CSSType> == 2)
+    {
+      if (get<0>(value) != get<1>(value))
+      {
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
+                             std::forward<Rest>(rest)...);
+        return;
+      }
+
+      Serialise(builder, context, get<0>(value), std::forward<Rest>(rest)...);
+    }
+    else if constexpr (std::tuple_size_v<CSSType> == 4)
+    {
+      if (get<3>(value) != get<1>(value))
+      {
+        SerialiseOnTupleLike(builder, context,
+                             std::tuple {get<0>(value), get<1>(value), get<2>(value), get<3>(value)},
+                             separator, std::forward<Rest>(rest)...);
+        return;
+      }
+
+      if (get<2>(value) != get<0>(value))
+      {
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value), get<2>(value)},
+                             separator, std::forward<Rest>(rest)...);
+        return;
+      }
+
+      if (get<1>(value) != get<0>(value))
+      {
+        SerialiseOnTupleLike(builder, context, std::tuple {get<0>(value), get<1>(value)}, separator,
+                             std::forward<Rest>(rest)...);
+        return;
+      }
+      Serialise(builder, context, get<0>(value), std::forward<Rest>(rest)...);
+    }
+  }
+
+  template <typename CSSType, typename... Rest>
+  void SerialiseOnRangeLike(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                            // Passed to each element's conversion, so never forwarded.
+                            // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
+                            CSSOMStringView separator, Rest &&...rest) noexcept
+  {
+    CSSOMStringView swappedSeparator = u8"";
+    for (const auto &element : value)
+    {
+      builder.Append(std::exchange(swappedSeparator, separator));
+      Serialise(builder, context, element, rest...);
+    }
+  }
+
+  template <typename CSSType, typename... Rest>
+  void SerialiseOnVariantLike(StringBuilder &builder, const SerialisationContext &context,
+                              const CSSType &value, Rest &&...rest) noexcept
+  {
+    krys::SwitchOn(value, [&](const auto &alternative)
+                   { Serialise(builder, context, alternative, std::forward<Rest>(rest)...); });
+  }
+
+  // Constrained for `TreatAsEmptyLike`.
+  template <EmptyLike CSSType>
+  struct Serialiser<CSSType>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &, const SerialisationContext &, const CSSType &, Rest &&...) noexcept
+    {
+    }
+  };
+
+  // Constrained for `TreatAsOptionalLike`.
+  template <OptionalLike CSSType>
+  struct Serialiser<CSSType>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                    Rest &&...rest) noexcept
+    {
+      SerialiseOnOptionalLike(builder, context, value, std::forward<Rest>(rest)...);
+    }
+  };
+
+  // Constrained for `TreatAsTupleLike`.
+  template <TupleLike CSSType>
+  struct Serialiser<CSSType>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                    Rest &&...rest) noexcept
+    {
+      if constexpr (SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
+      {
+        SerialiseOnTupleLikeCoalescing(builder, context, value, SerialisationSeparatorString<CSSType>,
+                                       std::forward<Rest>(rest)...);
+      }
+      else
+      {
+        SerialiseOnTupleLike(builder, context, value, SerialisationSeparatorString<CSSType>,
+                             std::forward<Rest>(rest)...);
+      }
+    }
+  };
+
+  // Constrained for `TreatAsRangeLike`.
+  template <RangeLike CSSType>
+  struct Serialiser<CSSType>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                    Rest &&...rest) noexcept
+    {
+      SerialiseOnRangeLike(builder, context, value, SerialisationSeparatorString<CSSType>,
+                           std::forward<Rest>(rest)...);
+    }
+  };
+
+  // Constrained for `TreatAsVariantLike`.
+  template <VariantLike CSSType>
+  struct Serialiser<CSSType>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSType &value,
+                    Rest &&...rest) noexcept
+    {
+      SerialiseOnVariantLike(builder, context, value, std::forward<Rest>(rest)...);
+    }
+  };
+
+  // Specialization for `KeywordValueConstant`.
+  template <ValueId C>
+  struct Serialiser<KeywordValueConstant<C>>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &,
+                    const KeywordValueConstant<C> &value, Rest &&...) noexcept
+    {
+      builder.Append(ToLower(value.Value));
+    }
+  };
+
+  // Specialization for `CustomIdentifier`.
+  template <>
+  struct Serialiser<CustomIdentifier>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const CustomIdentifier &value, Rest &&...) noexcept
+    {
+      SerialiseCustomIdentifier(builder, context, value);
+    }
+  };
+
+  // Specialization for `PropertyIdentifier`.
+  template <>
+  struct Serialiser<PropertyIdentifier>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const PropertyIdentifier &value, Rest &&...) noexcept
+    {
+      SerialisePropertyIdentifier(builder, context, value);
+    }
+  };
+
+  // Specialization for `CSSOMString`.
+  template <>
+  struct Serialiser<CSSOMString>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSOMString &value,
+                    Rest &&...) noexcept
+    {
+      SerialiseString(builder, context, value);
+    }
+  };
+
+  // Specialization for `CSSOMStringAtom`.
+  template <>
+  struct Serialiser<CSSOMStringAtom>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const CSSOMStringAtom &value,
+                    Rest &&...) noexcept
+    {
+      SerialiseString(builder, context, value);
+    }
+  };
+
+  // Specialization for `FunctionNotation`.
+  template <ValueId Name, typename CSSType>
+  struct Serialiser<FunctionNotation<Name, CSSType>>
+  {
+    template <typename... Rest>
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const FunctionNotation<Name, CSSType> &value, Rest &&...rest) noexcept
+    {
+      builder.Append(ToLower(value.Name));
+      builder.Append(u8'(');
+      Serialise(builder, context, value.Parameters, std::forward<Rest>(rest)...);
+      builder.Append(u8')');
+    }
+  };
+
+#pragma endregion
+
+#pragma region ComputedStyleDependencies
+
+  template <typename CSSType>
+  struct ComputedStyleDependenciesCollector;
+
+  struct ComputedStyleDependenciesCollectorInvoker
+  {
+    template <typename CSSType>
+    void operator()(ComputedStyleDependencies &dependencies, const CSSType &value) const noexcept
+    {
+      ComputedStyleDependenciesCollector<CSSType> {}(dependencies, value);
+    }
+
+    template <typename CSSType>
+    KRYS_NODISCARD ComputedStyleDependencies operator()(const CSSType &value) const noexcept
+    {
+      ComputedStyleDependencies dependencies;
+      this->operator()(dependencies, value);
+      return dependencies;
+    }
+  };
+
+  constexpr ComputedStyleDependenciesCollectorInvoker CollectComputedStyleDependencies {};
+
+  template <typename CSSType>
+  void CollectComputedStyleDependenciesOnOptionalLike(ComputedStyleDependencies &dependencies,
+                                                      const CSSType &value) noexcept
+  {
+    if (!value)
+    {
+      return;
+    }
+
+    CollectComputedStyleDependencies(dependencies, *value);
+  }
+
+  template <typename CSSType>
+  void CollectComputedStyleDependenciesOnTupleLike(ComputedStyleDependencies &dependencies,
+                                                   const CSSType &value) noexcept
+  {
+    krys::apply([&](const auto &...x) { (..., CollectComputedStyleDependencies(dependencies, x)); }, value);
+  }
+
+  template <typename CSSType>
+  void CollectComputedStyleDependenciesOnRangeLike(ComputedStyleDependencies &dependencies,
+                                                   const CSSType &value) noexcept
+  {
+    for (const auto &element : value)
+    {
+      CollectComputedStyleDependencies(dependencies, element);
+    }
+  }
+
+  template <typename CSSType>
+  void CollectComputedStyleDependenciesOnVariantLike(ComputedStyleDependencies &dependencies,
+                                                     const CSSType &value) noexcept
+  {
+    krys::SwitchOn(value, [&](const auto &alternative)
+                   { CollectComputedStyleDependencies(dependencies, alternative); });
+  }
+
+  // Constrained for `TreatAsEmptyLike`.
+  template <EmptyLike CSSType>
+  struct ComputedStyleDependenciesCollector<CSSType>
+  {
+    void operator()(ComputedStyleDependencies &, const CSSType &) noexcept
+    {
+    }
+  };
+
+  // Constrained for `TreatAsOptionalLike`.
+  template <OptionalLike CSSType>
+  struct ComputedStyleDependenciesCollector<CSSType>
+  {
+    void operator()(ComputedStyleDependencies &dependencies, const CSSType &value) noexcept
+    {
+      CollectComputedStyleDependenciesOnOptionalLike(dependencies, value);
+    }
+  };
+
+  // Constrained for `TreatAsTupleLike`.
+  template <TupleLike CSSType>
+  struct ComputedStyleDependenciesCollector<CSSType>
+  {
+    void operator()(ComputedStyleDependencies &dependencies, const CSSType &value) noexcept
+    {
+      CollectComputedStyleDependenciesOnTupleLike(dependencies, value);
+    }
+  };
+
+  // Constrained for `TreatAsRangeLike`.
+  template <RangeLike CSSType>
+  struct ComputedStyleDependenciesCollector<CSSType>
+  {
+    void operator()(ComputedStyleDependencies &dependencies, const CSSType &value) noexcept
+    {
+      CollectComputedStyleDependenciesOnRangeLike(dependencies, value);
+    }
+  };
+
+  // Constrained for `TreatAsVariantLike`.
+  template <VariantLike CSSType>
+  struct ComputedStyleDependenciesCollector<CSSType>
+  {
+    void operator()(ComputedStyleDependencies &dependencies, const CSSType &value) noexcept
+    {
+      CollectComputedStyleDependenciesOnVariantLike(dependencies, value);
+    }
+  };
+
+  // Specialization for `KeywordValueConstant`.
+  template <ValueId C>
+  struct ComputedStyleDependenciesCollector<KeywordValueConstant<C>>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const KeywordValueConstant<C> &) noexcept
+    {
+      // Nothing to do.
+    }
+  };
+
+  // Specialization for `CustomIdentifier`.
+  template <>
+  struct ComputedStyleDependenciesCollector<CustomIdentifier>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const CustomIdentifier &) noexcept
+    {
+      // Nothing to do.
+    }
+  };
+
+  // Specialization for `PropertyIdentifier`.
+  template <>
+  struct ComputedStyleDependenciesCollector<PropertyIdentifier>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const PropertyIdentifier &) noexcept
+    {
+      // Nothing to do.
+    }
+  };
+
+  // Specialization for `CSSOMStringAtom`.
+  template <>
+  struct ComputedStyleDependenciesCollector<CSSOMStringAtom>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const CSSOMStringAtom &) noexcept
+    {
+      // Nothing to do.
+    }
+  };
+
+  // Specialization for `CSSOMString`.
+  template <>
+  struct ComputedStyleDependenciesCollector<CSSOMString>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const CSSOMString &) noexcept
+    {
+      // Nothing to do.
+    }
+  };
+
+  // Specialization for `net::Url`.
+  template <>
+  struct ComputedStyleDependenciesCollector<net::Url>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const net::Url &)
+    {
+      // Nothing to do.
+    }
+  };
+
+#pragma endregion
+
+#pragma region ValueChildrenVisitor
+
+  template <typename CSSType>
+  struct ValueChildrenVisitor;
+
+  struct ValueChildrenVisitorInvoker
+  {
+    template <typename CSSType>
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func,
+                               const CSSType &value) const
+    {
+      return ValueChildrenVisitor<CSSType> {}(func, value);
+    }
+  };
+
+  constexpr ValueChildrenVisitorInvoker VisitValueChildren {};
+
+  template <typename CSSType>
+  KRYS_NODISCARD IterationStatus VisitValueChildrenOnOptionalLike(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+  {
+    return value ? VisitValueChildren(func, *value) : IterationStatus::Continue;
+  }
+
+  template <typename CSSType>
+  KRYS_NODISCARD IterationStatus VisitValueChildrenOnTupleLike(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+  {
+    // Process a single element of the tuple-like, updating result, and return true if result ==
+    // IterationStatus::Done to short circuit the fold in the apply lambda.
+    auto process = [&](const auto &x, IterationStatus &result) -> bool
+    {
+      result = VisitValueChildren(func, x);
+      return result == IterationStatus::Done;
+    };
+
+    return krys::apply(
+      [&](const auto &...x)
+      {
+        auto result = IterationStatus::Continue;
+        (process(x, result) || ...);
+        return result;
+      },
+      value);
+  }
+
+  template <typename CSSType>
+  KRYS_NODISCARD IterationStatus VisitValueChildrenOnRangeLike(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+  {
+    for (const auto &element : value)
+    {
+      if (VisitValueChildren(func, element) == IterationStatus::Done)
+      {
+        return IterationStatus::Done;
+      }
+    }
+    return IterationStatus::Continue;
+  }
+
+  template <typename CSSType>
+  KRYS_NODISCARD IterationStatus VisitValueChildrenOnVariantLike(
+    KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+  {
+    return krys::SwitchOn(value,
+                          [&](const auto &alternative) { return VisitValueChildren(func, alternative); });
+  }
+
+  // Constrained for `TreatAsEmptyLike`.
+  template <EmptyLike CSSType>
+  struct ValueChildrenVisitor<CSSType>
+  {
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &, const CSSType &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Constrained for `TreatAsOptionalLike`.
+  template <OptionalLike CSSType>
+  struct ValueChildrenVisitor<CSSType>
+  {
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+    {
+      return VisitValueChildrenOnOptionalLike(func, value);
+    }
+  };
+
+  // Constrained for `TreatAsTupleLike`.
+  template <TupleLike CSSType>
+  struct ValueChildrenVisitor<CSSType>
+  {
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+    {
+      return VisitValueChildrenOnTupleLike(func, value);
+    }
+  };
+
+  // Constrained for `TreatAsRangeLike`.
+  template <RangeLike CSSType>
+  struct ValueChildrenVisitor<CSSType>
+  {
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+    {
+      return VisitValueChildrenOnRangeLike(func, value);
+    }
+  };
+
+  // Constrained for `TreatAsVariantLike`.
+  template <VariantLike CSSType>
+  struct ValueChildrenVisitor<CSSType>
+  {
+    IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &func, const CSSType &value)
+    {
+      return VisitValueChildrenOnVariantLike(func, value);
+    }
+  };
+
+  // Specialization for `Constant`.
+  template <ValueId C>
+  struct ValueChildrenVisitor<KeywordValueConstant<C>>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const KeywordValueConstant<C> &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Specialization for `CustomIdentifier`.
+  template <>
+  struct ValueChildrenVisitor<CustomIdentifier>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const CustomIdentifier &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Specialization for `PropertyIdentifier`.
+  template <>
+  struct ValueChildrenVisitor<PropertyIdentifier>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const PropertyIdentifier &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Specialization for `CSSOMStringAtom`.
+  template <>
+  struct ValueChildrenVisitor<CSSOMStringAtom>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const CSSOMStringAtom &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Specialization for `CSSOMString`.
+  template <>
+  struct ValueChildrenVisitor<CSSOMString>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const CSSOMString &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+  // Specialization for `net::Url`.
+  template <>
+  struct ValueChildrenVisitor<net::Url>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const net::Url &)
+    {
+      return IterationStatus::Continue;
+    }
+  };
+
+#pragma endregion
+
+#pragma region ValueCreation
+
+  template <typename CSSType>
+  struct ValueCreation;
+
+  struct ValueCreationInvoker
+  {
+    template <typename CSSType, typename... Args>
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) const noexcept
+    {
+      return ValueCreation<CSSType> {}(pool, value, std::forward<Args>(args)...);
+    }
+  };
+
+  constexpr ValueCreationInvoker CreateValue {};
+
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(ValueId keyword) noexcept;
+
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CustomIdentifier &identifier) noexcept;
+
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const PropertyIdentifier &identifier) noexcept;
+
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMStringAtom &string) noexcept;
+
+  KRYS_NODISCARD Ref<Value> CreatePrimitiveValue(const CSSOMString &string) noexcept;
+
+  KRYS_NODISCARD Ref<Value> CreateFunctionValue(ValueId name, Ref<Value> &&arguments) noexcept;
+
+  template <SerialisationSeparatorType>
+  KRYS_NODISCARD Ref<Value> CreateCoalescingPairValue(Ref<Value> &&, Ref<Value> &&) noexcept;
+
+  template <>
+  KRYS_NODISCARD Ref<Value>
+    CreateCoalescingPairValue<SerialisationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&) noexcept;
+
+  template <SerialisationSeparatorType>
+  KRYS_NODISCARD Ref<Value> CreateCoalescingQuadValue(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
+                                                      Ref<Value> &&) noexcept;
+
+  template <>
+  KRYS_NODISCARD Ref<Value>
+    CreateCoalescingQuadValue<SerialisationSeparatorType::Space>(Ref<Value> &&, Ref<Value> &&, Ref<Value> &&,
+                                                                 Ref<Value> &&) noexcept;
+
+  template <SerialisationSeparatorType>
+  KRYS_NODISCARD Ref<Value> CreateListValue(ValueListBuilder &&) noexcept;
+
+  template <>
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Space>(ValueListBuilder &&) noexcept;
+
+  template <>
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Comma>(ValueListBuilder &&) noexcept;
+
+  template <>
+  KRYS_NODISCARD Ref<Value> CreateListValue<SerialisationSeparatorType::Slash>(ValueListBuilder &&) noexcept;
+
+  // Constrained for `TreatAsVariantLike`.
+  template <VariantLike CSSType>
+  struct ValueCreation<CSSType>
+  {
+    template <typename... Args>
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) noexcept
+    {
+      return krys::SwitchOn(value, [&](const auto &alternative)
+                            { return CreateValue(pool, alternative, std::forward<Args>(args)...); });
+    }
+  };
+
+  // Constrained for `TreatAsTupleLike`
+  template <TupleLike CSSType>
+  struct ValueCreation<CSSType>
+  {
+    template <typename... Args>
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) noexcept
+    {
+      if constexpr (std::tuple_size_v<CSSType> == 1
+                    && SerialisationSeparator<CSSType> == SerialisationSeparatorType::None)
+      {
+        return CreateValue(pool, get<0>(value), std::forward<Args>(args)...);
+      }
+      else if constexpr (std::tuple_size_v<CSSType> == 2
+                         && SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
+      {
+        return CreateCoalescingPairValue<SerialisationSeparator<CSSType>>(
+          CreateValue(pool, get<0>(value), args...), CreateValue(pool, get<1>(value), args...));
+      }
+      else if constexpr (std::tuple_size_v<CSSType> == 4
+                         && SerialisationCoalescing<CSSType> == SerialisationCoalescingType::Minimal)
+      {
+        return CreateCoalescingQuadValue<SerialisationSeparator<CSSType>>(
+          CreateValue(pool, get<0>(value), args...), CreateValue(pool, get<1>(value), args...),
+          CreateValue(pool, get<2>(value), args...), CreateValue(pool, get<3>(value), args...));
+      }
+      else
+      {
+        ValueListBuilder list;
+
+        auto caller = krys::CreateVisitor(
+          [&]<OptionalLike T>(const T &element)
+          {
+            if (!element)
+            {
+              return;
+            }
+
+            list.push_back(CreateValue(pool, *element, args...));
+          },
+          [&](const auto &element) { list.push_back(CreateValue(pool, element, args...)); });
+
+        krys::apply([&](const auto &...x) { (..., caller(x)); }, value);
+
+        return CreateListValue<SerialisationSeparator<CSSType>>(krys::move(list));
+      }
+    }
+  };
+
+  // Constrained for `TreatAsRangeLike`
+  template <RangeLike CSSType>
+  struct ValueCreation<CSSType>
+  {
+    template <typename... Args>
+    // Passed to each element's conversion, so never forwarded.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &pool, const CSSType &value, Args &&...args) noexcept
+    {
+      ValueListBuilder list;
+      for (const auto &element : value)
+      {
+        list.push_back(CreateValue(pool, element, args...));
+      }
+
+      return CreateListValue<SerialisationSeparator<CSSType>>(krys::move(list));
+    }
+  };
+
+  // Specialization for `KeywordValueConstant`.
+  template <ValueId Id>
+  struct ValueCreation<KeywordValueConstant<Id>>
+  {
+    template <typename... Args>
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const KeywordValueConstant<Id> &, Args &&...) noexcept
+    {
+      return CreatePrimitiveValue(Id);
+    }
+  };
+
+  // Specialization for `CustomIdentifier`.
+  template <>
+  struct ValueCreation<CustomIdentifier>
+  {
+    template <typename... Args>
+    KRYS_NODISCARD Ref<Value> operator()(ValuePool &, const CustomIdentifier &customIdentifier,
+                                         Args &&...) noexcept
+    {
+      return CreatePrimitiveValue(customIdentifier);
+    }
+  };
+
+  // Specialization for `PropertyIdentifier`.
+  template <>
+  struct ValueCreation<PropertyIdentifier>
+  {
+    template <typename... Args>
+    Ref<Value> operator()(ValuePool &, const PropertyIdentifier &propertyIdentifier, Args &&...) noexcept
+    {
+      return CreatePrimitiveValue(propertyIdentifier);
+    }
+  };
+
+  // Specialization for `CSSOMStringAtom`.
+  template <>
+  struct ValueCreation<CSSOMStringAtom>
+  {
+    template <typename... Args>
+    Ref<Value> operator()(ValuePool &, const CSSOMStringAtom &string, Args &&...) noexcept
+    {
+      return CreatePrimitiveValue(string);
+    }
+  };
+
+  // Specialization for `CSSOMString`.
+  template <>
+  struct ValueCreation<CSSOMString>
+  {
+    template <typename... Args>
+    Ref<Value> operator()(ValuePool &, const CSSOMString &string, Args &&...) noexcept
+    {
+      return CreatePrimitiveValue(string);
+    }
+  };
+
+  // Specialization for `FunctionNotation`.
+  template <ValueId Name, typename CSSType>
+  struct ValueCreation<FunctionNotation<Name, CSSType>>
+  {
+    template <typename... Args>
+    Ref<Value> operator()(ValuePool &pool, const FunctionNotation<Name, CSSType> &value,
+                          Args &&...args) noexcept
+    {
+      return CreateFunctionValue(value.Name,
+                                 CreateValue(pool, value.Parameters, std::forward<Args>(args)...));
+    }
+  };
+
+#pragma endregion
+}

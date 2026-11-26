@@ -1,0 +1,505 @@
+﻿/*
+ * Copyright (C) 2007-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2012, 2013 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (C) 2025 Sam Weinig. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Interpolation/Interpolation.hpp"
+#include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Web/Css/Properties/Property.hpp"
+#include "Krystal.Web/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/Style/CustomProperty.hpp"
+#include "Krystal.Web/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationClient.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationFunctions.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationWrapperBase.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationWrapperMap.hpp"
+#include "Krystal.Web/Style/Scope/Scope.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Web/Style/Values/Transforms/TransformList.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style::interpolation
+{
+  namespace
+  {
+    // MARK: - Standard property interpolation support
+
+    void InterpolateStandardProperty(css::PropertyId property, RenderStyle &destination,
+                                     const RenderStyle &from, const RenderStyle &to, double progress,
+                                     CompositeOperation compositeOperation,
+                                     IterationCompositeOperation iterationCompositeOperation,
+                                     double currentIteration, const Client &client) noexcept
+    {
+      krys_debug_assert(property != css::PropertyId::Invalid && property != css::PropertyId::Custom);
+
+      auto *wrapper = WrapperMap::Singleton().GetWrapper(property);
+      if (!wrapper)
+      {
+        return;
+      }
+
+      auto isDiscrete = !wrapper->CanInterpolate(from, to, compositeOperation);
+      Context context {property,
+                       progress,
+                       isDiscrete,
+                       compositeOperation,
+                       iterationCompositeOperation,
+                       currentIteration,
+                       from.Color(),
+                       to.Color(),
+                       client};
+      if (!css::AnimationUsesNonNormalizedDiscreteInterpolation(property))
+      {
+        context.NormalizeProgress();
+      }
+      wrapper->Interpolate(destination, from, to, context);
+    }
+
+    // MARK: - Custom property interpolation support
+
+    KRYS_NODISCARD Maybe<CustomProperty::Value> InterpolateSyntaxValues(const RenderStyle &fromStyle,
+                                                                        const RenderStyle &toStyle,
+                                                                        const CustomProperty::Value &from,
+                                                                        const CustomProperty::Value &to,
+                                                                        const Context &context) noexcept
+    {
+      if (from.index() != to.index())
+      {
+        return null;
+      }
+
+      return std::visit(
+        krys::CreateVisitor(
+          [&]<Numeric T>(const T &fromNumeric) -> Maybe<CustomProperty::Value>
+          { return CustomProperty::Value {style::Blend(fromNumeric, std::get<T>(to), context)}; },
+          [&](const Color &fromStyleColor) -> Maybe<CustomProperty::Value>
+          {
+            const auto &toStyleColor = std::get<Color>(to);
+            if (!fromStyleColor.IsCurrentColor() || !toStyleColor.IsCurrentColor())
+            {
+              return CustomProperty::Value {
+                Color {BlendFunc(fromStyle.ColorResolvingCurrentColor(fromStyleColor),
+                                 toStyle.ColorResolvingCurrentColor(toStyleColor), context)}};
+            }
+            return null;
+          },
+          [&](const TransformFunction &fromTransform) -> Maybe<CustomProperty::Value>
+          {
+            return CustomProperty::Value {
+              style::Blend(fromTransform, std::get<TransformFunction>(to), context)};
+          },
+          [&](const auto &) -> Maybe<CustomProperty::Value> { return null; }),
+        from);
+    }
+
+    KRYS_NODISCARD Maybe<CustomProperty::Value>
+      FirstValueInSyntaxValueLists(const CustomProperty::ValueList &a,
+                                   const CustomProperty::ValueList &b) noexcept
+    {
+      if (!a.Values.empty())
+      {
+        return a.Values[0];
+      }
+      if (!b.Values.empty())
+      {
+        return b.Values[0];
+      }
+      return null;
+    }
+
+    KRYS_NODISCARD Maybe<CustomProperty::ValueList>
+      InterpolateSyntaxValueLists(const RenderStyle &fromStyle, const RenderStyle &toStyle,
+                                  const CustomProperty::ValueList &from, const CustomProperty::ValueList &to,
+                                  const Context &context) noexcept
+    {
+      // We should only attempt to interpolate lists containing the same types. Since we know all items in a
+      // list are of the same type, it is sufficient to check the first value from each list.
+      if (!from.Values.empty() && !to.Values.empty()
+          && from.Values.front().index() != to.Values.front().index())
+      {
+        return null;
+      }
+
+      // https://drafts.css-houdini.org/css-properties-values-api-1/#animation-behavior-of-custom-properties
+      auto firstValue = FirstValueInSyntaxValueLists(from, to);
+
+      if (!firstValue)
+      {
+        return null;
+      }
+
+      // <transform-function> lists are special in that they don't require matching numbers of items.
+      if (std::holds_alternative<TransformFunction>(*firstValue))
+      {
+        auto transformListFromSyntaxValueList = [](const CustomProperty::ValueList &list)
+        {
+          return TransformList {TransformList::Container(
+            std::from_range, list.Values
+                               | std::views::transform(
+                                 [&](const auto &syntaxValue)
+                                 {
+                                   krys_debug_assert(std::holds_alternative<TransformFunction>(syntaxValue));
+                                   return std::get<TransformFunction>(syntaxValue);
+                                 }))};
+        };
+
+        auto fromTransformList = transformListFromSyntaxValueList(from);
+        auto toTransformList = transformListFromSyntaxValueList(to);
+        auto interpolatedTransformList = style::Blend(fromTransformList, toTransformList, context);
+
+        List<CustomProperty::Value> interpolatedSyntaxValues;
+        interpolatedSyntaxValues.reserve(interpolatedTransformList.size());
+        for (const auto &transformFunction : interpolatedTransformList)
+        {
+          interpolatedSyntaxValues.emplace_back(transformFunction);
+        }
+
+        return CustomProperty::ValueList {krys::move(interpolatedSyntaxValues), from.Separator};
+      }
+
+      // Other lists must have matching sizes.
+      if (from.Values.size() != to.Values.size())
+      {
+        return null;
+      }
+
+      List<CustomProperty::Value> interpolatedSyntaxValues;
+      interpolatedSyntaxValues.reserve(from.Values.size());
+      for (size_t i = 0; i < from.Values.size(); ++i)
+      {
+        auto interpolatedSyntaxValue =
+          InterpolateSyntaxValues(fromStyle, toStyle, from.Values[i], to.Values[i], context);
+        if (!interpolatedSyntaxValue)
+        {
+          return null;
+        }
+        interpolatedSyntaxValues.push_back(krys::move(*interpolatedSyntaxValue));
+      }
+
+      return CustomProperty::ValueList {krys::move(interpolatedSyntaxValues), from.Separator};
+    }
+
+    KRYS_NODISCARD Ref<const CustomProperty> InterpolatedCustomProperty(const RenderStyle &fromStyle,
+                                                                        const RenderStyle &toStyle,
+                                                                        const CustomProperty &from,
+                                                                        const CustomProperty &to,
+                                                                        const Context &context) noexcept
+    {
+      if (std::holds_alternative<CustomProperty::Value>(from.GetValue())
+          && std::holds_alternative<CustomProperty::Value>(to.GetValue()))
+      {
+        const auto &fromSyntaxValue = std::get<CustomProperty::Value>(from.GetValue());
+        const auto &toSyntaxValue = std::get<CustomProperty::Value>(to.GetValue());
+        if (auto interpolatedSyntaxValue =
+              InterpolateSyntaxValues(fromStyle, toStyle, fromSyntaxValue, toSyntaxValue, context))
+        {
+          return CustomProperty::CreateForValue(from.GetName(), krys::move(*interpolatedSyntaxValue));
+        }
+      }
+
+      if (std::holds_alternative<CustomProperty::ValueList>(from.GetValue())
+          && std::holds_alternative<CustomProperty::ValueList>(to.GetValue()))
+      {
+        const auto &fromSyntaxValueList = std::get<CustomProperty::ValueList>(from.GetValue());
+        const auto &toSyntaxValueList = std::get<CustomProperty::ValueList>(to.GetValue());
+        if (auto interpolatedSyntaxValueList = InterpolateSyntaxValueLists(
+              fromStyle, toStyle, fromSyntaxValueList, toSyntaxValueList, context))
+        {
+          return CustomProperty::CreateForValueList(from.GetName(), krys::move(*interpolatedSyntaxValueList));
+        }
+      }
+
+      // Use a discrete interpolation for all other cases.
+      return ShareRef(context.Progress < 0.5 ? from : to);
+    }
+
+    KRYS_NODISCARD Pair<const CustomProperty *, const CustomProperty *>
+      CustomPropertyValuesForInterpolation(const CSSOMStringAtom &customProperty,
+                                           const RenderStyle &fromStyle, const RenderStyle &toStyle) noexcept
+    {
+      return {fromStyle.CustomPropertyValue(customProperty), toStyle.CustomPropertyValue(customProperty)};
+    }
+
+    void InterpolateCustomProperty(const CSSOMStringAtom &customProperty, RenderStyle &destination,
+                                   const RenderStyle &from, const RenderStyle &to, double progress,
+                                   CompositeOperation compositeOperation,
+                                   IterationCompositeOperation iterationCompositeOperation,
+                                   double currentIteration, const Client &client) noexcept
+    {
+      Context context {
+        customProperty, progress,   false, compositeOperation, iterationCompositeOperation, currentIteration,
+        from.Color(),   to.Color(), client};
+
+      auto [fromValue, toValue] = CustomPropertyValuesForInterpolation(customProperty, from, to);
+      if (!fromValue || !toValue)
+      {
+        return;
+      }
+
+      bool isInherited =
+        client.Document()->StyleScope().GetCustomPropertyRegistry().IsInherited(customProperty);
+      destination.SetCustomPropertyValue(InterpolatedCustomProperty(from, to, *fromValue, *toValue, context),
+                                         isInherited);
+    }
+
+    KRYS_NODISCARD bool SyntaxValuesRequireInterpolationForAccumulativeIteration(
+      const CustomProperty::Value &a, const CustomProperty::Value &b, bool isList) noexcept
+    {
+      return std::visit(krys::CreateVisitor(
+                          [&b, isList](const LengthPercentage<> &aLengthPercentage)
+                          {
+                            krys_debug_assert(std::holds_alternative<LengthPercentage<>>(b));
+                            return !isList
+                                   && style::RequiresInterpolationForAccumulativeIteration(
+                                     aLengthPercentage, std::get<LengthPercentage<>>(b));
+                          },
+                          [](const TransformFunction &) { return true; }, [](const Color &) { return true; },
+                          [](const auto &) { return false; }),
+                        a);
+    }
+
+    KRYS_NODISCARD bool TypeOfSyntaxValueCanBeInterpolated(const CustomProperty::Value &syntaxValue) noexcept
+    {
+      return std::visit(krys::CreateVisitor([]<Numeric T>(const T &) { return true; },
+                                            [](const ImageWrapper &) { return false; }, [](const Color &)
+                                            { return true; }, [](const Url &) { return false; },
+                                            [](const css::CustomIdentifier &) { return false; },
+                                            [](const CSSOMString &) { return false; },
+                                            [](const TransformFunction &) { return true; }),
+                        syntaxValue);
+    }
+  }
+
+  // MARK: - Exposed functions
+
+  bool IsAdditiveOrCumulative(const AnimatableCSSProperty &property) noexcept
+  {
+    return std::visit(
+      krys::CreateVisitor([](css::PropertyId propertyId)
+                          { return !css::AnimationUsesNonAdditiveOrCumulativeInterpolation(propertyId); },
+                          [](const CSSOMStringAtom &) { return true; }),
+      property);
+  }
+
+  bool IsAccelerated(const AnimatableCSSProperty &property, const Settings &settings) noexcept
+  {
+    return std::visit(krys::CreateVisitor([&](css::PropertyId propertyId)
+                                          { return css::AnimationIsAccelerated(propertyId, settings); },
+                                          [](const CSSOMStringAtom &) { return false; }),
+                      property);
+  }
+
+  bool CanInterpolate(const AnimatableCSSProperty &property) noexcept
+  {
+    return std::visit(krys::CreateVisitor(
+                        [](css::PropertyId propertyId)
+                        {
+                          return propertyId == css::PropertyId::Custom
+                                 || WrapperMap::Singleton().GetWrapper(propertyId) != nullptr;
+                        },
+                        [](const CSSOMStringAtom &)
+                        {
+                          // FIXME: This should only be true for properties that are registered custom
+                          // properties.
+                          return true;
+                        }),
+                      property);
+  }
+
+  bool Equals(const AnimatableCSSProperty &property, const RenderStyle &a, const RenderStyle &b,
+              const web::Document &) noexcept
+  {
+    return std::visit(krys::CreateVisitor(
+                        [&](css::PropertyId propertyId)
+                        {
+                          if (auto *wrapper = WrapperMap::Singleton().GetWrapper(propertyId))
+                          {
+                            return wrapper->Equals(a, b);
+                          }
+                          return true;
+                        },
+                        [&](const CSSOMStringAtom &customProperty)
+                        {
+                          auto [aCustomPropertyValue, bCustomPropertyValue] =
+                            CustomPropertyValuesForInterpolation(customProperty, a, b);
+                          if (aCustomPropertyValue && bCustomPropertyValue)
+                          {
+                            return *aCustomPropertyValue == *bCustomPropertyValue;
+                          }
+                          return !aCustomPropertyValue && !bCustomPropertyValue;
+                        }),
+                      property);
+  }
+
+  bool CanInterpolate(const AnimatableCSSProperty &property, const RenderStyle &a, const RenderStyle &b,
+                      const web::Document &) noexcept
+  {
+    return std::visit(
+      krys::CreateVisitor(
+        [&](css::PropertyId propertyId)
+        {
+          if (auto *wrapper = WrapperMap::Singleton().GetWrapper(propertyId))
+          {
+            return wrapper->CanInterpolate(a, b, CompositeOperation::Replace);
+          }
+          return true;
+        },
+        [&](const CSSOMStringAtom &customProperty)
+        {
+          auto [aCustomPropertyValue, bCustomPropertyValue] =
+            CustomPropertyValuesForInterpolation(customProperty, a, b);
+          if (!aCustomPropertyValue || !bCustomPropertyValue || aCustomPropertyValue == bCustomPropertyValue)
+          {
+            return false;
+          }
+          const auto &aVariantValue = aCustomPropertyValue->GetValue();
+          const auto &bVariantValue = bCustomPropertyValue->GetValue();
+          if (aVariantValue.index() != bVariantValue.index())
+          {
+            return false;
+          }
+          return std::visit(krys::CreateVisitor(
+                              [&bVariantValue](const CustomProperty::ValueList &aValueList)
+                              {
+                                const auto &bValueList = std::get<CustomProperty::ValueList>(bVariantValue);
+                                if (aValueList == bValueList)
+                                {
+                                  return false;
+                                }
+                                if (auto firstValue = FirstValueInSyntaxValueLists(aValueList, bValueList))
+                                {
+                                  // List sizes must match except for transform lists.
+                                  if (!std::holds_alternative<TransformFunction>(*firstValue)
+                                      && aValueList.Values.size() != bValueList.Values.size())
+                                  {
+                                    return false;
+                                  }
+                                  return TypeOfSyntaxValueCanBeInterpolated(*firstValue);
+                                }
+                                return false;
+                              },
+                              [&bVariantValue](const CustomProperty::Value &aSyntaxValue)
+                              {
+                                const auto &bSyntaxValue = std::get<CustomProperty::Value>(bVariantValue);
+                                return aSyntaxValue != bSyntaxValue
+                                       && TypeOfSyntaxValueCanBeInterpolated(aSyntaxValue);
+                              },
+                              [](const auto &) { return false; }),
+                            aVariantValue);
+        }),
+      property);
+  }
+
+  void Interpolate(const AnimatableCSSProperty &property, RenderStyle &destination, const RenderStyle &from,
+                   const RenderStyle &to, double progress, CompositeOperation compositeOperation,
+                   IterationCompositeOperation iterationCompositeOperation, double currentIteration,
+                   const Client &client) noexcept
+  {
+    std::visit(
+      krys::CreateVisitor(
+        [&](css::PropertyId propertyId)
+        {
+          InterpolateStandardProperty(propertyId, destination, from, to, progress, compositeOperation,
+                                      iterationCompositeOperation, currentIteration, client);
+        },
+        [&](const CSSOMStringAtom &customProperty)
+        {
+          InterpolateCustomProperty(customProperty, destination, from, to, progress, compositeOperation,
+                                    iterationCompositeOperation, currentIteration, client);
+        }),
+      property);
+  }
+
+  void Interpolate(const AnimatableCSSProperty &property, RenderStyle &destination, const RenderStyle &from,
+                   const RenderStyle &to, double progress, CompositeOperation compositeOperation,
+                   const Client &client) noexcept
+  {
+    Interpolate(property, destination, from, to, progress, compositeOperation,
+                IterationCompositeOperation::Replace, 0, client);
+  }
+
+  bool RequiresInterpolationForAccumulativeIteration(const AnimatableCSSProperty &property,
+                                                     const RenderStyle &a, const RenderStyle &b,
+                                                     const Client &) noexcept
+  {
+    return std::visit(
+      krys::CreateVisitor(
+        [&](css::PropertyId propertyId)
+        {
+          if (auto *wrapper = WrapperMap::Singleton().GetWrapper(propertyId))
+          {
+            return wrapper->RequiresInterpolationForAccumulativeIteration(a, b);
+          }
+          return false;
+        },
+        [&](const CSSOMStringAtom &customProperty)
+        {
+          auto [from, to] = CustomPropertyValuesForInterpolation(customProperty, a, b);
+          if (!from || !to)
+          {
+            return false;
+          }
+
+          if (std::holds_alternative<CustomProperty::ValueList>(from->GetValue())
+              && std::holds_alternative<CustomProperty::ValueList>(to->GetValue()))
+          {
+            const auto &fromSyntaxValues = std::get<CustomProperty::ValueList>(from->GetValue()).Values;
+            const auto &toSyntaxValues = std::get<CustomProperty::ValueList>(to->GetValue()).Values;
+            if (fromSyntaxValues.size() != toSyntaxValues.size())
+            {
+              return false;
+            }
+            for (size_t i = 0; i < fromSyntaxValues.size(); ++i)
+            {
+              if (!SyntaxValuesRequireInterpolationForAccumulativeIteration(fromSyntaxValues[i],
+                                                                            toSyntaxValues[i], true))
+              {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          if (std::holds_alternative<CustomProperty::Value>(from->GetValue())
+              && std::holds_alternative<CustomProperty::Value>(to->GetValue()))
+          {
+            const auto &fromSyntaxValue = std::get<CustomProperty::Value>(from->GetValue());
+            const auto &toSyntaxValue = std::get<CustomProperty::Value>(to->GetValue());
+            return SyntaxValuesRequireInterpolationForAccumulativeIteration(fromSyntaxValue, toSyntaxValue,
+                                                                            false);
+          }
+
+          return false;
+        }),
+      property);
+  }
+}

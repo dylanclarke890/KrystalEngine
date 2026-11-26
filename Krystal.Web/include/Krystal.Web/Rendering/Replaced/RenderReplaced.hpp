@@ -1,0 +1,230 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ * Copyright (C) 2004, 2005, 2006, 2007, 2009 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Web/Rendering/RenderBox.hpp"
+
+namespace krys::web
+{
+  enum class ShouldComputePreferred : bool
+  {
+    ComputeActual,
+    ComputePreferred,
+  };
+
+  /// @brief A box whose content is outside CSS: images, media, frames, form controls.
+  // FIXME: Media and the other replaced elements come with their renderers.
+  class RenderReplaced : public RenderBox
+  {
+    KRYS_NON_COPY_MOVABLE(RenderReplaced);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderReplaced);
+
+  private:
+    mutable LayoutSize _intrinsicSize;
+
+  public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    ~RenderReplaced() noexcept override;
+
+    KRYS_NODISCARD bool CanHaveChildren() const noexcept override
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
+    {
+      return u8"RenderReplaced";
+    }
+
+    KRYS_NODISCARD virtual bool ShouldRespectZeroIntrinsicWidth() const noexcept;
+
+    KRYS_NODISCARD PositionWithAffinity
+      PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                       const RenderFragmentContainer *fragment = nullptr) noexcept final;
+
+    KRYS_NODISCARD bool IsSelected() const noexcept;
+
+    // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
+    KRYS_NODISCARD LayoutRect LocalSelectionRect(bool checkWhetherSelected = true) const noexcept;
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent = true) noexcept final;
+
+  protected:
+    KRYS_NODISCARD virtual bool ShouldDrawSelectionTint() const noexcept;
+
+  public:
+    KRYS_NODISCARD LayoutRect ReplacedContentRect(const LayoutSize &intrinsicSize) const noexcept;
+
+    KRYS_NODISCARD LayoutRect ReplacedContentRect() const noexcept
+    {
+      return ReplacedContentRect(IntrinsicSize());
+    }
+
+    bool SetNeedsLayoutIfNeededAfterIntrinsicSizeChange() noexcept;
+
+    KRYS_NODISCARD LayoutSize IntrinsicSize() const noexcept final;
+
+    KRYS_NODISCARD SizeF IntrinsicRatio() const noexcept;
+
+    KRYS_NODISCARD bool ShouldInvalidatePreferredWidths() const noexcept override;
+
+    KRYS_NODISCARD double ComputeIntrinsicAspectRatio() const noexcept;
+
+    KRYS_NODISCARD virtual bool PaintsContent() const noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD LayoutUnit
+      ComputeReplacedLogicalHeightUsing(const style::PreferredSize &logicalHeight) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit
+      ComputeReplacedLogicalHeightUsing(const style::MinimumSize &logicalHeight) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit
+      ComputeReplacedLogicalHeightUsing(const style::MaximumSize &logicalHeight) const noexcept;
+
+    KRYS_NODISCARD virtual LayoutUnit ComputeReplacedLogicalWidth(
+      ShouldComputePreferred shouldComputePreferred = ShouldComputePreferred::ComputeActual) const noexcept;
+
+    KRYS_NODISCARD virtual LayoutUnit
+      ComputeReplacedLogicalHeight(Maybe<LayoutUnit> estimatedUsedWidth = null) const noexcept;
+
+    KRYS_NODISCARD bool ReplacedMinLogicalHeightComputesAsNone() const noexcept;
+
+    void ComputeReplacedOutOfFlowPositionedLogicalWidth(
+      LogicalExtentComputedValues &computedValues) const noexcept;
+
+    void ComputeReplacedOutOfFlowPositionedLogicalHeight(
+      LogicalExtentComputedValues &computedValues) const noexcept;
+
+    KRYS_NODISCARD bool ReplacedMaxLogicalHeightComputesAsNone() const noexcept;
+
+  protected:
+    RenderReplaced(Type type, Element &element, RenderStyle &&style,
+                   EnumSet<ReplacedFlag> flags = {}) noexcept;
+
+    KRYS_NODISCARD RepaintRects
+      LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
+
+    RenderReplaced(Type type, Element &element, RenderStyle &&style, const LayoutSize &intrinsicSize,
+                   EnumSet<ReplacedFlag> flags = {}) noexcept;
+
+    RenderReplaced(Type type, Document &document, RenderStyle &&style, const LayoutSize &intrinsicSize,
+                   EnumSet<ReplacedFlag> flags = {}) noexcept;
+
+    void Layout() noexcept override;
+
+    KRYS_NODISCARD bool ShouldPaint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
+    /// @brief Paints the replaced content, in the foreground and selection phases, inside the box's rounded
+    /// content box.
+    virtual void PaintReplaced(PaintInfo &, const LayoutPoint &) noexcept
+    {
+    }
+
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
+                                       LayoutUnit &maxLogicalWidth) const noexcept final;
+
+    KRYS_NODISCARD virtual LayoutUnit MinimumReplacedHeight() const noexcept
+    {
+      return 0_lu;
+    }
+
+    void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
+
+    KRYS_NODISCARD virtual SizeF ComputeIntrinsicSize() const noexcept;
+
+    KRYS_NODISCARD virtual SizeF PreferredAspectRatio() const noexcept;
+
+    void SetIntrinsicSize(const LayoutSize &intrinsicSize) noexcept
+    {
+      _intrinsicSize = intrinsicSize;
+    }
+
+    virtual void IntrinsicSizeChanged() noexcept;
+
+    KRYS_NODISCARD virtual bool HasRelativeIntrinsicLogicalWidth() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD LayoutUnit ComputeReplacedLogicalWidthRespectingMinMaxWidth(
+      LayoutUnit logicalWidth,
+      ShouldComputePreferred shouldComputePreferred = ShouldComputePreferred::ComputeActual) const noexcept;
+
+  private:
+    KRYS_NODISCARD LayoutUnit ComputeConstrainedLogicalWidth() const noexcept;
+
+    template <typename SizeType>
+    KRYS_NODISCARD LayoutUnit ComputeReplacedLogicalWidthUsing(const SizeType &logicalWidth) const noexcept;
+
+    template <typename SizeType>
+    KRYS_NODISCARD LayoutUnit
+      ComputeReplacedLogicalHeightUsingGeneric(const SizeType &logicalHeight) const noexcept;
+
+    KRYS_NODISCARD LayoutUnit
+      ComputeReplacedLogicalHeightRespectingMinMaxHeight(LayoutUnit logicalHeight) const noexcept;
+
+    KRYS_NODISCARD bool
+      ReplacedMinMaxLogicalHeightComputesAsNone(const auto &logicalHeight,
+                                                const auto &initialLogicalHeight) const noexcept;
+
+    void ComputeAspectRatioAdjustedIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
+                                                          LayoutUnit &maxLogicalWidth) const noexcept;
+
+    KRYS_NODISCARD virtual RenderBox *EmbeddedContentBox() const noexcept
+    {
+      return nullptr;
+    }
+
+    void ComputePreferredLogicalWidths() noexcept final;
+
+    void ComputeAspectRatioInformationForRenderBox(RenderBox *contentRenderer, SizeF &constrainedSize,
+                                                   SizeF &preferredAspectRatio) const noexcept;
+
+    void ComputeIntrinsicSizesConstrainedByTransferredMinMaxSizes(RenderBox *contentRenderer,
+                                                                  SizeF &intrinsicSize,
+                                                                  SizeF &intrinsicRatio) const noexcept;
+
+    KRYS_NODISCARD bool HasReplacedLogicalHeight() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderReplaced)
+  KRYS_NODISCARD static bool IsType(const krys::web::RenderObject &renderer) noexcept
+  {
+    return renderer.IsRenderReplaced();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -1,0 +1,107 @@
+﻿/*
+ * Copyright (C) 2007 Eric Seidel <eric@webkit.org>
+ * Copyright (C) 2008 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Web/Graphics/Paths/Path.hpp"
+#include "Krystal.Web/Svg/Elements/SVGAnimationElement.hpp"
+
+namespace krys
+{
+  class AffineTransform;
+}
+
+namespace krys::web
+{
+  /// @brief The `<animateMotion>` element: moves its target along a motion path.
+  /// @see https://svgwg.org/specs/animations/#AnimateMotionElement
+  class SVGAnimateMotionElement final : public SVGAnimationElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGAnimateMotionElement);
+
+    enum RotateMode : uint8
+    {
+      RotateAngle,
+      RotateAuto,
+      RotateAutoReverse,
+    };
+
+  private:
+    // Note: we do not support percentage values for to/from coords as the spec implies we should (opera
+    // doesn't either)
+    PointF _fromPoint;
+    PointF _toPoint;
+    Maybe<PointF> _toPointAtEndOfDuration;
+
+    Path _path;
+    Path _animationPath;
+
+  public:
+    explicit SVGAnimateMotionElement(Document &) noexcept;
+
+    void UpdateAnimationPath() noexcept;
+
+  private:
+    KRYS_NODISCARD bool HasValidAttributeType() const noexcept override;
+
+    KRYS_NODISCARD bool HasValidAttributeName() const noexcept override;
+
+    void AttributeChanged(const QualifiedName &, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
+
+    void StartAnimation() noexcept override;
+
+    void StopAnimation(SVGElement *targetElement) noexcept override;
+
+    bool SetFromAndToValues(DOMStringView fromString, DOMStringView toString) noexcept override;
+
+    bool SetFromAndByValues(DOMStringView fromString, DOMStringView byString) noexcept override;
+
+    bool SetToAtEndOfDurationValue(DOMStringView toAtEndOfDurationString) noexcept override;
+
+    void CalculateAnimatedValue(float percentage, uint32 repeatCount) noexcept override;
+
+    void ApplyResultsToTarget() noexcept override;
+
+    KRYS_NODISCARD Maybe<float> CalculateDistance(DOMStringView fromString,
+                                                  DOMStringView toString) noexcept override;
+
+    KRYS_NODISCARD RotateMode GetRotateMode() const noexcept;
+
+    void BuildTransformForProgress(AffineTransform *, float percentage) const noexcept;
+
+    void UpdateAnimationMode() noexcept override;
+
+    void OnChildrenChanged() noexcept final;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::SVGAnimateMotionElement)
+  KRYS_NODISCARD static bool IsType(const krys::web::SVGElement &element) noexcept
+  {
+    return element.Interface() == krys::web::SVGElementInterface::AnimateMotion;
+  }
+  KRYS_NODISCARD static bool IsType(const krys::web::Node &node) noexcept
+  {
+    auto *svgElement = krys::DynamicDowncast<krys::web::SVGElement>(node);
+    return svgElement && IsType(*svgElement);
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

@@ -1,0 +1,146 @@
+﻿/*
+ * Copyright (C) 2016-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/ListHashSet.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Style/Change.hpp"
+#include <limits>
+#include <utility>
+
+namespace krys::web
+{
+  class ContainerNode;
+  class Document;
+  class Element;
+  class RenderStyle;
+  class SVGElement;
+  class Text;
+}
+
+namespace krys::web::style
+{
+  /// @brief The new style of an element and how it changed.
+  struct ElementUpdate
+  {
+    UniquePtr<RenderStyle> Style;
+    EnumSet<Change> Changes;
+    bool RecompositeLayer {false};
+    bool MayNeedRebuildRoot {false};
+  };
+
+  /// @brief The part of a text node whose rendering needs updating, and the style it inherits through a
+  /// `display: contents` parent.
+  struct TextUpdate
+  {
+    uint32 Offset {0};
+    uint32 Length {std::numeric_limits<uint32>::max()};
+    Maybe<UniquePtr<RenderStyle>> InheritedDisplayContentsStyle;
+  };
+
+  /// @brief The result of a style resolution: the new styles of the elements and text nodes whose rendering
+  /// changed, and the roots of the subtrees they're in.
+  class Update final : public CanMakeCheckedPtr<Update>
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Update);
+    KRYS_NON_COPY_MOVABLE(Update);
+
+  private:
+    Ref<web::Document> _document;
+    ListHashSet<RefPtr<ContainerNode>> _roots;
+    ListHashSet<RefPtr<Element>> _rebuildRoots;
+    // Node maps: the render tree updater holds element updates while it adds more.
+    NodeHashMap<RefPtr<const Element>, ElementUpdate> _elements;
+    NodeHashMap<RefPtr<const Text>, TextUpdate> _texts;
+    UniquePtr<RenderStyle> _initialContainingBlockUpdate;
+
+  public:
+    explicit Update(web::Document &document) noexcept;
+
+    ~Update() noexcept;
+
+    KRYS_NODISCARD const ListHashSet<RefPtr<ContainerNode>> &Roots() const noexcept
+    {
+      return _roots;
+    }
+
+    KRYS_NODISCARD ListHashSet<RefPtr<Element>> TakeRebuildRoots() noexcept
+    {
+      return std::exchange(_rebuildRoots, {});
+    }
+
+    KRYS_NODISCARD const ElementUpdate *GetElementUpdate(const Element &element) const noexcept;
+
+    KRYS_NODISCARD ElementUpdate *GetElementUpdate(const Element &element) noexcept;
+
+    KRYS_NODISCARD const TextUpdate *GetTextUpdate(const Text &text) const noexcept;
+
+    KRYS_NODISCARD const RenderStyle *InitialContainingBlockUpdate() const noexcept
+    {
+      return _initialContainingBlockUpdate.get();
+    }
+
+    /// @brief The element's new style, or else the style it's rendered with.
+    KRYS_NODISCARD const RenderStyle *ElementStyle(const Element &element) const noexcept;
+
+    KRYS_NODISCARD RenderStyle *ElementStyle(const Element &element) noexcept;
+
+    KRYS_NODISCARD const web::Document &Document() const noexcept
+    {
+      return *_document;
+    }
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return !Size();
+    }
+
+    KRYS_NODISCARD uint32 Size() const noexcept
+    {
+      return static_cast<uint32>(_elements.size() + _texts.size());
+    }
+
+    void AddElement(Element &element, Element *parent, ElementUpdate &&elementUpdate) noexcept;
+
+    void AddText(Text &text, Element *parent, TextUpdate &&textUpdate) noexcept;
+
+    void AddText(Text &text, TextUpdate &&textUpdate) noexcept;
+
+    void AddSVGRendererUpdate(SVGElement &element) noexcept;
+
+    void AddInitialContainingBlockUpdate(UniquePtr<RenderStyle> style) noexcept;
+
+  private:
+    void AddPossibleRoot(Element *element) noexcept;
+
+    void AddPossibleRebuildRoot(Element &element, Element *parent) noexcept;
+  };
+}

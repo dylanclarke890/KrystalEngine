@@ -1,0 +1,272 @@
+﻿/*
+ * Copyright (C) 2022 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/TypedOM/Numeric/CSSNumericType.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/TypedOM/CSSNumericValue.hpp"
+#include "Krystal.Web/Css/Values/Units.hpp"
+#include <utility>
+
+namespace krys::web
+{
+  Maybe<CSSNumericType> CSSNumericType::Create(css::UnitType unit, int32 exponent) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-create-a-type
+    CSSNumericType type;
+    auto category = css::CategoryForUnitType(unit);
+    if (!category)
+    {
+      return null;
+    }
+
+    switch (*category)
+    {
+      case css::Category::Integer:
+      case css::Category::Number:
+      {
+        return type;
+      }
+      case css::Category::Percentage:
+      {
+        type.Percent = exponent;
+        return type;
+      }
+      case css::Category::Length:
+      {
+        type.Length = exponent;
+        return type;
+      }
+      case css::Category::Angle:
+      {
+        type.Angle = exponent;
+        return type;
+      }
+      case css::Category::Time:
+      {
+        type.Time = exponent;
+        return type;
+      }
+      case css::Category::Frequency:
+      {
+        type.Frequency = exponent;
+        return type;
+      }
+      case css::Category::Resolution:
+      {
+        type.Resolution = exponent;
+        return type;
+      }
+      case css::Category::Flex:
+      {
+        type.Flex = exponent;
+        return type;
+      }
+      case css::Category::LengthPercentage:
+      case css::Category::AnglePercentage:
+      {
+        break;
+      }
+    }
+
+    return null;
+  }
+
+  Maybe<CSSNumericType> CSSNumericType::AddTypes(CSSNumericType a, CSSNumericType b) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-add-two-types
+    if (a.PercentHint && b.PercentHint && *a.PercentHint != *b.PercentHint)
+    {
+      return null;
+    }
+
+    if (a.PercentHint)
+    {
+      b.ApplyPercentHint(*a.PercentHint);
+    }
+    if (b.PercentHint)
+    {
+      a.ApplyPercentHint(*b.PercentHint);
+    }
+
+    if (a == b)
+    {
+      return a;
+    }
+
+    for (auto type : css::EachBaseType())
+    {
+      if (type == CSSNumericBaseType::Percent)
+      {
+        continue;
+      }
+      if (!a.ValueForType(type) && !b.ValueForType(type))
+      {
+        continue;
+      }
+      a.ApplyPercentHint(type);
+      b.ApplyPercentHint(type);
+      if (a.ValueForType(type) != b.ValueForType(type))
+      {
+        return null;
+      }
+    }
+
+    return a;
+  }
+
+  template <typename TArgument>
+  KRYS_NODISCARD static Maybe<CSSNumericType>
+    TypeFromList(const List<Ref<CSSNumericValue>> &values,
+                 Maybe<CSSNumericType> (*function)(TArgument, TArgument) noexcept) noexcept
+  {
+    if (values.empty())
+    {
+      return null;
+    }
+    Maybe<CSSNumericType> type = values[0]->Type();
+    for (size_t i = 1; i < values.size(); ++i)
+    {
+      type = function(*type, values[i]->Type());
+      if (!type)
+      {
+        return null;
+      }
+    }
+    return type;
+  }
+
+  Maybe<CSSNumericType> CSSNumericType::AddTypes(const List<Ref<CSSNumericValue>> &values) noexcept
+  {
+    return TypeFromList<CSSNumericType>(values, &CSSNumericType::AddTypes);
+  }
+
+  Maybe<CSSNumericType> CSSNumericType::MultiplyTypes(const CSSNumericType &a,
+                                                      const CSSNumericType &b) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#cssnumericvalue-multiply-two-types
+    if (a.PercentHint && b.PercentHint && *a.PercentHint != *b.PercentHint)
+    {
+      return null;
+    }
+
+    auto add = [](BaseTypeStorage left, BaseTypeStorage right) -> BaseTypeStorage
+    {
+      if (!left)
+      {
+        return right;
+      }
+      if (!right)
+      {
+        return left;
+      }
+      return *left + *right;
+    };
+
+    return CSSNumericType {
+      .Length = add(a.Length, b.Length),
+      .Angle = add(a.Angle, b.Angle),
+      .Time = add(a.Time, b.Time),
+      .Frequency = add(a.Frequency, b.Frequency),
+      .Resolution = add(a.Resolution, b.Resolution),
+      .Flex = add(a.Flex, b.Flex),
+      .Percent = add(a.Percent, b.Percent),
+      .PercentHint = a.PercentHint ? a.PercentHint : b.PercentHint,
+    };
+  }
+
+  Maybe<CSSNumericType> CSSNumericType::MultiplyTypes(const List<Ref<CSSNumericValue>> &values) noexcept
+  {
+    return TypeFromList<const CSSNumericType &>(values, &CSSNumericType::MultiplyTypes);
+  }
+
+  utf8_string CSSNumericType::DebugString() const noexcept
+  {
+    StringBuilder builder;
+    builder.Append(u8'{');
+    auto appendEntry = [&](utf8_stringview name, const BaseTypeStorage &value)
+    {
+      if (value)
+      {
+        builder.Append(u8' ', name, u8':', *value);
+      }
+    };
+    appendEntry(u8"length", Length);
+    appendEntry(u8"angle", Angle);
+    appendEntry(u8"time", Time);
+    appendEntry(u8"frequency", Frequency);
+    appendEntry(u8"resolution", Resolution);
+    appendEntry(u8"flex", Flex);
+    appendEntry(u8"percent", Percent);
+    if (PercentHint)
+    {
+      builder.Append(u8" percentHint:", css::DebugString(*PercentHint));
+    }
+    builder.Append(u8" }");
+    return krys::move(builder).ToString();
+  }
+
+  auto CSSNumericType::ValueForType(CSSNumericBaseType type) noexcept -> BaseTypeStorage &
+  {
+    switch (type)
+    {
+      case CSSNumericBaseType::Length:     return Length;
+      case CSSNumericBaseType::Angle:      return Angle;
+      case CSSNumericBaseType::Time:       return Time;
+      case CSSNumericBaseType::Frequency:  return Frequency;
+      case CSSNumericBaseType::Resolution: return Resolution;
+      case CSSNumericBaseType::Flex:       return Flex;
+      case CSSNumericBaseType::Percent:    return Percent;
+    }
+    krys_unreachable();
+  }
+
+  void CSSNumericType::ApplyPercentHint(CSSNumericBaseType hint) noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#apply-the-percent-hint
+    auto &optional = ValueForType(hint);
+    if (!optional)
+    {
+      optional = 0;
+    }
+    if (Percent)
+    {
+      *optional += *std::exchange(Percent, 0);
+    }
+    PercentHint = hint;
+  }
+
+  size_t CSSNumericType::NonZeroEntryCount() const noexcept
+  {
+    size_t count {0};
+    count += Length && *Length;
+    count += Angle && *Angle;
+    count += Time && *Time;
+    count += Frequency && *Frequency;
+    count += Resolution && *Resolution;
+    count += Flex && *Flex;
+    count += Percent && *Percent;
+    return count;
+  }
+}

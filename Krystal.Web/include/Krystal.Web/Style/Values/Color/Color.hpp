@@ -1,0 +1,313 @@
+﻿/*
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Web/Css/Values/Color/Color.hpp"
+#include "Krystal.Web/Css/Values/Color/ColorDescriptors.hpp"
+#include "Krystal.Web/Css/Values/Color/ColorType.hpp"
+#include "Krystal.Web/Css/Values/ValueId.hpp"
+#include "Krystal.Web/Style/Values/Color/ColorOptions.hpp"
+#include "Krystal.Web/Style/Values/Color/CurrentColor.hpp"
+#include "Krystal.Web/Style/Values/Color/ResolvedColor.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web
+{
+  class Document;
+  class RenderStyle;
+}
+
+namespace krys::web::style
+{
+  // The following style color kinds are forward declared and stored in
+  // UniquePtrs to avoid unnecessarily growing the size of Color for the
+  // uncommon case of un-resolvability due to currentColor.
+  struct ColorLayers;
+  struct ColorMix;
+  struct ContrastColor;
+
+  template <typename Descriptor>
+  struct RelativeColor;
+
+  /// @brief A computed `<color>`: a resolved colour, or one that depends on `currentcolor` and is resolved at
+  /// use time.
+  struct Color
+  {
+  private:
+    friend struct krys::MarkableTraits<Color>;
+
+    struct EmptyToken
+    {
+      KRYS_NODISCARD constexpr bool operator==(const EmptyToken &) const noexcept = default;
+    };
+
+    // FIXME: Replace Variant with a generic CompactPointerVariant type.
+    using ColorKind =
+      Variant<EmptyToken, ResolvedColor, CurrentColor, UniquePtr<ColorLayers>, UniquePtr<ColorMix>,
+              UniquePtr<ContrastColor>, UniquePtr<RelativeColor<css::RGBFunctionModernRelative>>,
+              UniquePtr<RelativeColor<css::HSLFunctionModern>>, UniquePtr<RelativeColor<css::HWBFunction>>,
+              UniquePtr<RelativeColor<css::LabFunction>>, UniquePtr<RelativeColor<css::LCHFunction>>,
+              UniquePtr<RelativeColor<css::OKLabFunction>>, UniquePtr<RelativeColor<css::OKLCHFunction>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedA98RGB<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedDisplayP3<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedLinearDisplayP3<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedProPhotoRGB<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedRec2020<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedSRGBA<float>>>>,
+              UniquePtr<RelativeColor<css::ColorRGBFunction<ExtendedLinearSRGBA<float>>>>,
+              UniquePtr<RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D50>>>>,
+              UniquePtr<RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D65>>>>>;
+
+    // The indirect alternatives are never null, except after a move.
+    ColorKind _value;
+
+    explicit Color(EmptyToken) noexcept;
+
+    explicit Color(ColorKind &&kind) noexcept;
+
+  public:
+    // The default constructor initializes to style::CurrentColor to preserve old behavior,
+    // we might want to remove it entirely at some point.
+    Color() noexcept;
+
+    Color(css::keywords::Currentcolor) noexcept;
+
+    // Convenience constructors that create style::ResolvedColor.
+    Color(web::Color color) noexcept;
+
+    Color(SRGBA<uint8> color) noexcept;
+
+    Color(css::keywords::Transparent) noexcept;
+
+    Color(css::keywords::Black) noexcept;
+
+    Color(css::keywords::White) noexcept;
+
+    Color(ResolvedColor &&color) noexcept;
+
+    Color(CurrentColor &&color) noexcept;
+
+    explicit Color(ColorLayers &&color) noexcept;
+
+    explicit Color(ColorMix &&color) noexcept;
+
+    explicit Color(ContrastColor &&color) noexcept;
+
+    explicit Color(RelativeColor<css::RGBFunctionModernRelative> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::HSLFunctionModern> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::HWBFunction> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::LabFunction> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::LCHFunction> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::OKLabFunction> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::OKLCHFunction> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedA98RGB<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedDisplayP3<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedLinearDisplayP3<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedProPhotoRGB<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedRec2020<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedSRGBA<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorRGBFunction<ExtendedLinearSRGBA<float>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D50>>> &&color) noexcept;
+
+    explicit Color(RelativeColor<css::ColorXYZFunction<XYZA<float, WhitePoint::D65>>> &&color) noexcept;
+
+    Color(const Color &other) noexcept;
+
+    Color &operator=(const Color &other) noexcept;
+
+    Color(Color &&) noexcept;
+
+    Color &operator=(Color &&) noexcept;
+
+    ~Color() noexcept;
+
+    KRYS_NODISCARD bool operator==(const Color &other) const noexcept;
+
+    KRYS_NODISCARD static const Color &GetCurrentColor() noexcept;
+
+    KRYS_NODISCARD bool ContainsCurrentColor() const noexcept;
+
+    KRYS_NODISCARD bool IsCurrentColor() const noexcept;
+
+    KRYS_NODISCARD bool IsColorMix() const noexcept;
+
+    KRYS_NODISCARD bool IsContrastColor() const noexcept;
+
+    KRYS_NODISCARD bool IsRelativeColor() const noexcept;
+
+    KRYS_NODISCARD bool IsResolvedColor() const noexcept;
+
+    /// @attention The colour must be a resolved colour (`IsResolvedColor()`).
+    KRYS_NODISCARD const web::Color &GetResolvedColor() const noexcept;
+
+    KRYS_NODISCARD web::Color ResolveColor(const web::Color &currentColor) const noexcept;
+
+    /// @brief This helper allows us to treat all the alternatives in ColorKind
+    /// as const references, pretending the UniquePtrs don't exist.
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const;
+
+  private:
+    template <typename T>
+    KRYS_NODISCARD static ColorKind CreateIndirectColor(T color) noexcept;
+
+    KRYS_NODISCARD static ColorKind Copy(const ColorKind &other) noexcept;
+  };
+
+  KRYS_NODISCARD web::Color ResolveColor(const Color &value, const web::Color &currentColor) noexcept;
+
+  KRYS_NODISCARD bool ContainsCurrentColor(const Color &value) noexcept;
+
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
+                                       const Color &value) noexcept;
+
+  KRYS_NODISCARD CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                                             const Color &value) noexcept;
+
+  template <>
+  struct Serialiser<Color>
+  {
+    void operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                    const RenderStyle &style, const Color &value) noexcept;
+  };
+
+  // MARK: - Conversion
+
+  struct ColorResolutionState;
+
+  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, ColorResolutionState &state) noexcept;
+
+  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, Ref<const Document> document,
+                                    const RenderStyle &style,
+                                    const css::ToLengthConversionData &conversionData) noexcept;
+
+  KRYS_NODISCARD Color ToStyleColor(const css::Color &value, const BuilderState &builderState) noexcept;
+
+  template <>
+  struct ToCSS<Color>
+  {
+    KRYS_NODISCARD css::Color operator()(const Color &value, const RenderStyle &style) noexcept;
+  };
+
+  template <>
+  struct ToStyle<css::Color>
+  {
+    KRYS_NODISCARD Color operator()(const css::Color &value, const BuilderState &builderState) noexcept;
+  };
+
+  template <>
+  struct CSSValueConversion<Color>
+  {
+    KRYS_NODISCARD Color operator()(BuilderState &builderState, const css::Value &value) noexcept;
+  };
+
+  template <>
+  struct CSSValueCreation<Color>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &pool, const RenderStyle &style,
+                                              const Color &value) noexcept;
+  };
+
+  // MARK: - Blending
+
+  template <>
+  struct Blending<Color>
+  {
+    KRYS_NODISCARD static bool Equals(const Color &a, const Color &b, const RenderStyle &aStyle,
+                                      const RenderStyle &bStyle) noexcept;
+
+    KRYS_NODISCARD static bool CanBlend(const Color &a, const Color &b) noexcept;
+
+    KRYS_NODISCARD static constexpr bool RequiresInterpolationForAccumulativeIteration(const Color &,
+                                                                                       const Color &) noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD static Color Blend(const Color &a, const Color &b, const RenderStyle &aStyle,
+                                      const RenderStyle &bStyle, const BlendingContext &context) noexcept;
+  };
+
+  // MARK: - Color Implementation
+
+  template <typename... F>
+  decltype(auto) Color::SwitchOn(F &&...f) const
+  {
+    auto visitor = CreateVisitor(std::forward<F>(f)...);
+    using ResultType = decltype(visitor(std::declval<ResolvedColor>()));
+
+    return krys::SwitchOn(
+      _value, [&](const EmptyToken &) -> ResultType { krys_unreachable(); },
+      [&](const ResolvedColor &resolvedColor) -> ResultType { return visitor(resolvedColor); },
+      [&](const CurrentColor &currentColor) -> ResultType { return visitor(currentColor); },
+      [&]<typename T>(const UniquePtr<T> &color) -> ResultType { return visitor(*color); });
+  }
+}
+
+namespace krys
+{
+  template <>
+  struct MarkableTraits<web::style::Color>
+  {
+    KRYS_NODISCARD static bool IsEmptyValue(const web::style::Color &color) noexcept
+    {
+      return std::holds_alternative<web::style::Color::EmptyToken>(color._value);
+    }
+
+    KRYS_NODISCARD static web::style::Color EmptyValue() noexcept
+    {
+      return web::style::Color(web::style::Color::EmptyToken());
+    }
+  };
+}
+
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::Color)

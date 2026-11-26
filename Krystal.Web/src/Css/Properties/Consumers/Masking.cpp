@@ -1,0 +1,172 @@
+﻿/*
+ * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/Masking.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Shapes.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Url.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParsing.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/RectValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValueListBuilder.hpp"
+
+namespace krys::web::css::parse_property
+{
+  RefPtr<Value> ConsumeClipRectFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // rect() = rect( <top>, <right>, <bottom>, <left> )
+    // "<top>, <right>, <bottom>, and <left> may either have a <length> value or auto."
+    // https://drafts.fxtf.org/css-masking/#funcdef-clip-rect
+
+    if (tokens.Peek().FunctionId() != ValueId::Rect)
+    {
+      return nullptr;
+    }
+
+    TokenRange args = ConsumeFunction(tokens);
+
+    auto ConsumeClipComponent = [&] -> RefPtr<PrimitiveValue>
+    {
+      if (args.Peek().ValueId() == ValueId::Auto)
+      {
+        return ConsumeIdent(args);
+      }
+
+      return PrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
+    };
+
+    // Support both rect(t, r, b, l) and rect(t r b l).
+    //
+    // "User agents must support separation with commas, but may also support
+    //  separation without commas (but not a combination), because a previous
+    //  revision of this specification was ambiguous in this respect"
+    auto top = ConsumeClipComponent();
+    if (!top)
+    {
+      return nullptr;
+    }
+
+    bool needsComma = ConsumeComma(args);
+
+    auto right = ConsumeClipComponent();
+    if (!right || (needsComma && !ConsumeComma(args)))
+    {
+      return nullptr;
+    }
+
+    auto bottom = ConsumeClipComponent();
+    if (!bottom || (needsComma && !ConsumeComma(args)))
+    {
+      return nullptr;
+    }
+
+    auto left = ConsumeClipComponent();
+    if (!left || !args.IsAtEnd())
+    {
+      return nullptr;
+    }
+
+    return RectValue::Create(
+      SideValues {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
+  }
+
+  RefPtr<Value> ConsumeClipPath(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'clip-path'> = none | <clip-source> | [ <basic-shape> || <geometry-box> ]
+    // <clip-source> = <url>
+    // https://drafts.fxtf.org/css-masking/#propdef-clip-path
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    if (auto url = ConsumeUrl(tokens, state, {}))
+    {
+      return url;
+    }
+
+    RefPtr<Value> shape;
+    RefPtr<Value> box;
+
+    auto ConsumeShape = [&]() -> bool
+    {
+      if (shape)
+      {
+        return false;
+      }
+
+      shape = ConsumeBasicShape(tokens, state, {});
+      return !!shape;
+    };
+
+    auto ConsumeBox = [&]() -> bool
+    {
+      if (box)
+      {
+        return false;
+      }
+
+      box = PropertyParsing::ConsumeGeometryBox(tokens);
+      return !!box;
+    };
+
+    while (!tokens.IsAtEnd())
+    {
+      if (ConsumeShape() || ConsumeBox())
+      {
+        continue;
+      }
+
+      break;
+    }
+
+    bool hasShape = !!shape;
+
+    ValueListBuilder list;
+    if (shape)
+    {
+      list.push_back(krys::move(shape));
+    }
+    // Default value is border-box.
+    if (box && (box->ValueId() != ValueId::BorderBox || !hasShape))
+    {
+      list.push_back(krys::move(box));
+    }
+
+    if (list.empty())
+    {
+      return nullptr;
+    }
+
+    return ValueList::CreateSpaceSeparated(krys::move(list));
+  }
+}

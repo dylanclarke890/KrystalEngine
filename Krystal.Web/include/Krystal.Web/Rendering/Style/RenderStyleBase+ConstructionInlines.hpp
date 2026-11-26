@@ -1,0 +1,51 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Rendering/Style/RenderStyleBase.hpp"
+#include "Krystal.Web/Style/Computed/ComputedStyle+ConstructionInlines.hpp"
+
+namespace krys::web
+{
+  inline RenderStyleBase::RenderStyleBase(RenderStyleBase &&) noexcept = default;
+
+  inline RenderStyleBase &RenderStyleBase::operator=(RenderStyleBase &&) noexcept = default;
+
+  inline RenderStyleBase::RenderStyleBase(CreateDefaultStyleTag) noexcept
+      : _computedStyle(style::ComputedStyle::CreateDefaultStyle)
+  {
+  }
+
+  inline RenderStyleBase::RenderStyleBase(const RenderStyleBase &other, CloneTag) noexcept
+      : _computedStyle(other._computedStyle, style::ComputedStyle::Clone)
+  {
+  }
+
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): its members are swapped out.
+  inline RenderStyleBase::RenderStyleBase(RenderStyleBase &a, RenderStyleBase &&b) noexcept
+      : _computedStyle(a._computedStyle, krys::move(b._computedStyle))
+  {
+  }
+}

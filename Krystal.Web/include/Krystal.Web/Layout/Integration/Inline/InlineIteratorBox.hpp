@@ -1,0 +1,392 @@
+﻿/*
+ * Copyright (C) 2019-2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Move.hpp"
+#include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorInlineContentBoxPath.hpp"
+#include "Krystal.Web/Rendering/Selection/RenderObjectHighlightState.hpp"
+
+namespace krys::web
+{
+  class RenderBox;
+  class RenderLineBreak;
+}
+
+namespace krys::web::inline_iterator
+{
+  class InlineBoxIterator;
+  class LeafBoxIterator;
+  class LineBoxIterator;
+  class TextBoxIterator;
+
+  struct EndIterator
+  {
+  };
+
+  /// @brief A box on a line: text, an inline box, an atomic inline box, a line break or a block level box.
+  class Box
+  {
+    friend class BoxIterator;
+    friend class InlineBoxIterator;
+    friend class LeafBoxIterator;
+    friend class TextBoxIterator;
+
+  public:
+
+  protected:
+    InlineContentBoxPath _path;
+
+  public:
+    explicit Box(InlineContentBoxPath path) noexcept : _path(krys::move(path))
+    {
+    }
+
+    KRYS_NODISCARD bool IsSVGText() const noexcept;
+
+    KRYS_NODISCARD bool IsText() const noexcept
+    {
+      return _path.IsText();
+    }
+
+    KRYS_NODISCARD bool IsInlineBox() const noexcept
+    {
+      return _path.IsInlineBox();
+    }
+
+    KRYS_NODISCARD bool IsRootInlineBox() const noexcept
+    {
+      return _path.IsRootInlineBox();
+    }
+
+    KRYS_NODISCARD bool IsLineBreak() const noexcept
+    {
+      return _path.IsLineBreak();
+    }
+
+    KRYS_NODISCARD bool IsBlockLevelBox() const noexcept
+    {
+      return _path.IsBlockLevelBox();
+    }
+
+    KRYS_NODISCARD bool IsAtomicInlineBox() const noexcept
+    {
+      return _path.IsAtomicInlineBox();
+    }
+
+    KRYS_NODISCARD RectF VisualRect() const noexcept;
+
+    KRYS_NODISCARD RectF VisualRectIgnoringBlockDirection() const noexcept
+    {
+      return _path.VisualRectIgnoringBlockDirection();
+    }
+
+    /// @brief Visual in inline direction, logical for writing mode.
+    KRYS_NODISCARD RectF LogicalRectIgnoringInlineDirection() const noexcept
+    {
+      auto rect = VisualRectIgnoringBlockDirection();
+      return IsHorizontal() ? rect : rect.TransposedRect();
+    }
+
+    KRYS_NODISCARD float LogicalTop() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().Y();
+    }
+
+    KRYS_NODISCARD float LogicalBottom() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().MaxY();
+    }
+
+    KRYS_NODISCARD float LogicalHeight() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().Height();
+    }
+
+    KRYS_NODISCARD float LogicalWidth() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().Width();
+    }
+
+    KRYS_NODISCARD float LogicalLeft() const noexcept
+    {
+      return IsHorizontal() ? VisualRect().X() : VisualRect().Y();
+    }
+
+    KRYS_NODISCARD float LogicalRight() const noexcept
+    {
+      return LogicalLeft() + LogicalWidth();
+    }
+
+    /// @brief Line-relative left/right coords (they are still considered logical values as there's no flip
+    /// for writing mode).
+    KRYS_NODISCARD float LogicalLeftIgnoringInlineDirection() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().X();
+    }
+
+    KRYS_NODISCARD float LogicalRightIgnoringInlineDirection() const noexcept
+    {
+      return LogicalRectIgnoringInlineDirection().MaxX();
+    }
+
+    KRYS_NODISCARD bool IsHorizontal() const noexcept
+    {
+      return _path.IsHorizontal();
+    }
+
+    KRYS_NODISCARD uint32 MinimumCaretOffset() const noexcept
+    {
+      return _path.MinimumCaretOffset();
+    }
+
+    KRYS_NODISCARD uint32 MaximumCaretOffset() const noexcept
+    {
+      return _path.MaximumCaretOffset();
+    }
+
+    KRYS_NODISCARD uint32 LeftmostCaretOffset() const noexcept
+    {
+      return IsLeftToRightDirection() ? MinimumCaretOffset() : MaximumCaretOffset();
+    }
+
+    KRYS_NODISCARD uint32 RightmostCaretOffset() const noexcept
+    {
+      return IsLeftToRightDirection() ? MaximumCaretOffset() : MinimumCaretOffset();
+    }
+
+    /// @note IsLeftToRightDirection() here is not the same as GetWritingMode().IsBidiLTR().
+    KRYS_NODISCARD text::BidiLevel BidiLevel() const noexcept
+    {
+      return _path.BidiLevel();
+    }
+
+    KRYS_NODISCARD text::TextDirection Direction() const noexcept
+    {
+      return BidiLevel() % 2 ? text::TextDirection::RTL : text::TextDirection::LTR;
+    }
+
+    KRYS_NODISCARD bool IsLeftToRightDirection() const noexcept
+    {
+      return Direction() == text::TextDirection::LTR;
+    }
+
+    KRYS_NODISCARD bool IsInlineFlipped() const noexcept
+    {
+      return !(IsLeftToRightDirection() == GetWritingMode().IsLogicalLeftLineLeft());
+    }
+
+    KRYS_NODISCARD const RenderObject &Renderer() const noexcept
+    {
+      return _path.Renderer();
+    }
+
+    KRYS_NODISCARD const RenderBlockFlow &FormattingContextRoot() const noexcept
+    {
+      return _path.FormattingContextRoot();
+    }
+
+    KRYS_NODISCARD const RenderStyle &Style() const noexcept
+    {
+      return _path.Style();
+    }
+
+    KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
+
+    KRYS_NODISCARD const inline_display::Box *GetInlineBox() const noexcept
+    {
+      return &ContentPath().GetBox();
+    }
+
+    // Text-relative left/right
+    KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLine() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLine() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLineRightwardOnLineIgnoringLineBreak() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLineLeftwardOnLineIgnoringLineBreak() const noexcept;
+
+    // Coordinate-relative left/right
+    KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLine() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLine() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLogicalRightwardOnLineIgnoringLineBreak() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator NextLogicalLeftwardOnLineIgnoringLineBreak() const noexcept;
+
+    KRYS_NODISCARD InlineBoxIterator ParentInlineBox() const noexcept;
+
+    KRYS_NODISCARD LineBoxIterator GetLineBox() const noexcept;
+
+    KRYS_NODISCARD size_t LineIndex() const noexcept
+    {
+      return _path.LineIndex();
+    }
+
+    KRYS_NODISCARD const InlineContentBoxPath &ContentPath() const noexcept
+    {
+      return _path;
+    }
+
+    /// @brief How much of the selection the box holds: for text, which part of the renderer's selection is in
+    /// the box.
+    KRYS_NODISCARD RenderObjectHighlightState SelectionState() const noexcept;
+
+  private:
+    KRYS_NODISCARD bool HasRenderer() const noexcept
+    {
+      return _path.HasRenderer();
+    }
+  };
+
+  /// @brief Iterates the boxes of a line, in visual order.
+  class BoxIterator
+  {
+  protected:
+    Box _box;
+
+  public:
+    /// @brief An iterator at the end.
+    BoxIterator() noexcept : _box(InlineContentBoxPath {})
+    {
+    }
+
+    explicit BoxIterator(InlineContentBoxPath path) noexcept : _box(krys::move(path))
+    {
+    }
+
+    explicit BoxIterator(Box box) noexcept : _box(krys::move(box))
+    {
+    }
+
+    KRYS_NODISCARD explicit operator bool() const noexcept
+    {
+      return !AtEnd();
+    }
+
+    KRYS_NODISCARD bool operator==(const BoxIterator &other) const noexcept;
+
+    KRYS_NODISCARD bool operator==(EndIterator) const noexcept
+    {
+      return AtEnd();
+    }
+
+    KRYS_NODISCARD const Box &operator*() const noexcept
+    {
+      return _box;
+    }
+
+    KRYS_NODISCARD const Box *operator->() const noexcept
+    {
+      return &_box;
+    }
+
+    BoxIterator &TraverseLineRightwardOnLine() noexcept;
+
+    BoxIterator &TraverseLineRightwardOnLineSkippingChildren() noexcept;
+
+    BoxIterator &operator++() noexcept
+    {
+      return TraverseLineRightwardOnLine();
+    }
+
+    KRYS_NODISCARD bool AtEnd() const noexcept
+    {
+      return _box._path.AtEnd();
+    }
+  };
+
+  /// @brief Iterates the leaf boxes (everything but inline boxes) of a line.
+  class LeafBoxIterator : public BoxIterator
+  {
+  public:
+    LeafBoxIterator() noexcept = default;
+
+    explicit LeafBoxIterator(InlineContentBoxPath path) noexcept : BoxIterator(krys::move(path))
+    {
+    }
+
+    explicit LeafBoxIterator(const Box &box) noexcept : BoxIterator(box)
+    {
+    }
+
+    // Text-relative left/right
+    LeafBoxIterator &TraverseLineRightwardOnLine() noexcept;
+
+    LeafBoxIterator &TraverseLineLeftwardOnLine() noexcept;
+
+    LeafBoxIterator &TraverseLineRightwardOnLineIgnoringLineBreak() noexcept;
+
+    LeafBoxIterator &TraverseLineLeftwardOnLineIgnoringLineBreak() noexcept;
+
+    // Coordinate-relative left/right
+    LeafBoxIterator &TraverseLogicalRightwardOnLine() noexcept;
+
+    LeafBoxIterator &TraverseLogicalLeftwardOnLine() noexcept;
+
+    LeafBoxIterator &TraverseLogicalRightwardOnLineIgnoringLineBreak() noexcept;
+
+    LeafBoxIterator &TraverseLogicalLeftwardOnLineIgnoringLineBreak() noexcept;
+
+    LeafBoxIterator &operator++() noexcept
+    {
+      return TraverseLineRightwardOnLine();
+    }
+  };
+
+  /// @brief A range from an iterator to the end, for range-based for loops.
+  template <typename TIterator>
+  class BoxRange
+  {
+  private:
+    TIterator _begin;
+
+  public:
+    explicit BoxRange(TIterator begin) noexcept : _begin(krys::move(begin))
+    {
+    }
+
+    KRYS_NODISCARD TIterator begin() const noexcept
+    {
+      return _begin;
+    }
+
+    KRYS_NODISCARD EndIterator end() const noexcept
+    {
+      return {};
+    }
+  };
+
+  KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderLineBreak &renderer) noexcept;
+
+  KRYS_NODISCARD LeafBoxIterator BoxFor(const RenderBox &renderer) noexcept;
+
+  KRYS_NODISCARD LeafBoxIterator BoxFor(const layout_integration::InlineContent &content,
+                                        size_t boxIndex) noexcept;
+}

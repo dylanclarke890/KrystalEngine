@@ -1,0 +1,914 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2006, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2006, 2007 Rob Buis <buis@kde.org>
+ * Copyright (C) 2009-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2013 Samsung Electronics. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Web/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Web/Html/Attributes/EventHandlerAttributes.hpp"
+#include "Krystal.Web/Html/Mixins/HTMLOrSVGOrMathMLElement.hpp"
+#include "Krystal.Web/Svg/Properties/SVGPropertyOwner.hpp"
+#include "Krystal.Web/Svg/SVGParsingError.hpp"
+
+namespace krys
+{
+  class AffineTransform;
+}
+
+namespace krys::web
+{
+  class SVGAnimatedProperty;
+  class SVGAnimatedString;
+  class SVGAttributeAnimator;
+  class SVGConditionalProcessingAttributes;
+  class SVGElementRareData;
+  class SVGPropertyAnimatorFactory;
+  class SVGPropertyRegistry;
+  class SVGResourceElementClient;
+  class SVGSvgElement;
+  class SVGUseElement;
+
+  enum class ColorInterpolation : uint8;
+
+  enum class SVGElementFlag : uint8
+  {
+    IsSvgGraphicsElement,
+    IsSvgGeometryElement,
+    IsSvgTextContentElement,
+    IsSvgTextPositioningElement,
+  };
+
+  consteval SVGElementFlag MaxEnumValue(SVGElementFlag) noexcept
+  {
+    return SVGElementFlag::IsSvgTextPositioningElement;
+  }
+
+  using SVGElementFlags = EnumSet<SVGElementFlag>;
+
+  enum class SVGElementInterface : uint8
+  {
+    None,
+    A,
+    Animate,
+    AnimateMotion,
+    AnimateTransform,
+    Circle,
+    ClipPath,
+    Defs,
+    Desc,
+    Ellipse,
+    FEBlend,
+    FEColorMatrix,
+    FEComponentTransfer,
+    FEComposite,
+    FEConvolveMatrix,
+    FEDiffuseLighting,
+    FEDisplacementMap,
+    FEDistantLight,
+    FEDropShadow,
+    FEFlood,
+    FEFuncA,
+    FEFuncB,
+    FEFuncG,
+    FEFuncR,
+    FEGaussianBlur,
+    FEImage,
+    FEMerge,
+    FEMergeNode,
+    FEMorphology,
+    FEOffset,
+    FEPointLight,
+    FESpecularLighting,
+    FESpotLight,
+    FETile,
+    FETurbulence,
+    Filter,
+    ForeignObject,
+    G,
+    Graphics,
+    Geometry,
+    Image,
+    Line,
+    LinearGradient,
+    Marker,
+    Mask,
+    Metadata,
+    MPath,
+    Path,
+    Pattern,
+    Polygon,
+    Polyline,
+    RadialGradient,
+    Rect,
+    Script,
+    Set,
+    Stop,
+    Switch,
+    Style,
+    Svg,
+    Symbol,
+    Text,
+    TextPath,
+    Title,
+    TSpan,
+    Unknown,
+    Use,
+    View,
+  };
+
+  consteval SVGElementInterface MaxEnumValue(SVGElementInterface) noexcept
+  {
+    return SVGElementInterface::View;
+  }
+
+  template <typename TOwner, typename... TBaseTypes>
+  class SVGPropertyOwnerRegistry;
+}
+
+namespace krys::web::svg
+{
+  enum class AnimationMode : uint8;
+  enum class CalcMode : uint8;
+  enum class CTMScope : bool;
+}
+
+namespace krys::web
+{
+  /// @brief An element in the SVG namespace.
+  /// @note Subclasses react to their attributes in `AttributeChanged` (parsing them into their properties,
+  /// then calling their base's), and to an attribute or a property having changed in `SVGAttributeChanged`.
+  /// @see https://svgwg.org/svg2-draft/types.html#InterfaceSVGElement
+  class SVGElement : public StyledElement, public SVGPropertyOwner
+  {
+    KRYS_TYPE_CAST_TRAITS_ACCESS();
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
+
+  protected:
+    SVGElementFlags _svgElementFlags;
+    SVGElementInterface _interface : EnumBitWidth<SVGElementInterface> {SVGElementInterface::None};
+
+  private:
+    UniquePtr<SVGElementRareData> _svgRareData;
+
+    List<WeakPtr<SVGElement>> _childElementsWithRelativeLengths;
+    bool _hasRegisteredWithParentForRelativeLengths : 1 {false};
+    bool _selfHasRelativeLengths : 1 {false};
+    bool _hasInitializedRelativeLengthsState : 1 {false};
+
+    const UniquePtr<SVGPropertyAnimatorFactory> _propertyAnimatorFactory;
+
+    UniquePtr<SVGPropertyRegistry> _propertyRegistry;
+    Ref<SVGAnimatedString> _className;
+
+  protected:
+    SVGElement(Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
+               SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags {},
+               dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
+
+    // For the elements whose only properties are SVGElement's (script and unknown elements).
+    SVGElement(Document &document, SVGElementInterface interface, SVGElementFlags flags = SVGElementFlags {},
+               dom::NodeFlags nodeFlags = dom::NodeFlags {}) noexcept;
+
+  public:
+    explicit SVGElement(Document &document) noexcept;
+
+    ~SVGElement() noexcept override;
+
+    /// @brief The element's interface, which its tag name selects.
+    KRYS_NODISCARD SVGElementInterface Interface() const noexcept
+    {
+      return _interface;
+    }
+
+    /// @brief The colour space the element's filter effects operate in: its `color-interpolation-filters`.
+    KRYS_NODISCARD web::ColorInterpolation GetColorInterpolation() const noexcept;
+
+#pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
+
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
+    KRYS_NODISCARD int32 TabIndex() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-tabindex
+    void TabIndex(int32 value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
+    KRYS_NODISCARD bool Autofocus() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/multipage/dom.html#dom-fe-autofocus
+    void Autofocus(bool value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
+    void Focus(const dom::FocusOptions &options = {}) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
+    }
+
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
+    void Blur() noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Blur(*this);
+    }
+
+#pragma endregion
+
+    KRYS_NODISCARD virtual bool IsSVGAnimationElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSMILElement() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether this is an `<svg>` element inside another SVG element.
+    KRYS_NODISCARD bool IsInnerSVGSVGElement() const noexcept;
+
+    /// @brief Whether this is an `<svg>` element that establishes an SVG document fragment: it has no parent
+    /// node, its parent isn't an SVG element, or its parent is a `<foreignObject>`.
+    KRYS_NODISCARD bool IsOutermostSVGSVGElement() const noexcept;
+
+    /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGElement__ownerSVGElement
+    KRYS_NODISCARD SVGSvgElement *OwnerSVGElement() const noexcept;
+
+    enum class ViewportElementType : uint8
+    {
+      Any,        // Returns first SVGSVGElement, SVGImageElement, or symbol
+      SVGSVGOnly, // Returns only SVGSVGElement
+    };
+
+    /// @see https://svgwg.org/svg2-draft/types.html#__svg__SVGElement__viewportElement
+    KRYS_NODISCARD SVGElement *
+      ViewportElement(ViewportElementType type = ViewportElementType::Any) const noexcept;
+
+    KRYS_NODISCARD virtual bool SupportsMarkers() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the element or one of its descendants has lengths relative to the viewport.
+    KRYS_NODISCARD bool HasRelativeLengths() const noexcept;
+
+    KRYS_NODISCARD bool InstanceUpdatesBlocked() const noexcept;
+
+    void SetInstanceUpdatesBlocked(bool value) noexcept;
+
+    KRYS_NODISCARD virtual AffineTransform LocalCoordinateSpaceTransform(svg::CTMScope) const noexcept;
+
+    // For SVGTests
+    KRYS_NODISCARD virtual bool IsValid() const noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &) const noexcept override;
+
+    /// @brief Reacts to the attribute @p attributeName, or the property that reflects it, having changed.
+    virtual void SVGAttributeChanged(const QualifiedName &attributeName) noexcept;
+
+    void SendLoadEventIfPossible() noexcept;
+
+    KRYS_NODISCARD virtual AffineTransform *EnsureSupplementalTransform() noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual AffineTransform *SupplementalTransform() const noexcept
+    {
+      return nullptr;
+    }
+
+    void SetAnimatedSVGAttributesAreDirty() noexcept;
+
+    void SetPresentationalHintStyleIsDirty() noexcept;
+
+    void UpdateSVGRendererForElementChange() noexcept;
+
+    /// @brief The object bounding box of a rendered graphics element, in its renderer's local coordinates.
+    KRYS_NODISCARD Maybe<RectF> GetBoundingBox() const noexcept;
+
+    /// @brief Whether the element's renderer is one inside an SVG renderer tree (not the outermost `<svg>`'s
+    /// box), whose bounds come from SVG geometry rather than the box model.
+    KRYS_NODISCARD bool HasAssociatedSVGLayoutBox() const noexcept;
+
+    /// @brief The element's instances: the clones made of it in the shadow trees of `<use>` elements.
+    KRYS_NODISCARD List<Ref<SVGElement>> Instances() const noexcept;
+
+    KRYS_NODISCARD List<Ref<SVGElement>> ReferencingElements() const noexcept;
+
+    KRYS_NODISCARD List<WeakPtr<SVGResourceElementClient>> ReferencingCSSClients() const noexcept;
+
+    void AddReferencingCSSClient(SVGResourceElementClient &) noexcept;
+
+    void RemoveReferencingCSSClient(SVGResourceElementClient &) noexcept;
+
+    void AddReferencingElement(SVGElement &element) noexcept;
+
+    void RemoveReferencingElement(SVGElement &element) noexcept;
+
+    void RemoveElementReference() noexcept;
+
+    /// @brief The element this is an instance of, if it's in a `<use>` element's shadow tree.
+    KRYS_NODISCARD SVGElement *CorrespondingElement() const noexcept;
+
+    KRYS_NODISCARD SVGUseElement *CorrespondingUseElement() const noexcept;
+
+    void SetCorrespondingElement(SVGElement *correspondingElement) noexcept;
+
+    KRYS_NODISCARD virtual bool HaveLoadedRequiredResources() noexcept;
+
+    /// @brief Whether the element waits for ids as a pending resource of its tree scope.
+    KRYS_NODISCARD bool HasPendingResources() const noexcept
+    {
+      return _nodeFlags.contains(dom::NodeFlag::HasPendingResources);
+    }
+
+    void SetHasPendingResources() noexcept
+    {
+      _nodeFlags.Add(dom::NodeFlag::HasPendingResources);
+    }
+
+    void ClearHasPendingResources() noexcept
+    {
+      _nodeFlags.Remove(dom::NodeFlag::HasPendingResources);
+    }
+
+    /// @brief Rebuilds what the element made from the resources it was waiting for, now that an element has
+    /// taken their id.
+    virtual void BuildPendingResource() noexcept
+    {
+    }
+
+    KRYS_NODISCARD Maybe<style::UnadjustedStyle>
+      ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
+                         const RenderStyle *shadowHostStyle) noexcept override;
+
+    /// @brief The animatable attribute named @p localName, or the null name if there's none.
+    KRYS_NODISCARD static QualifiedName AnimatableAttributeForName(DOMStringView localName) noexcept;
+#if KRYS_DEBUG
+    KRYS_NODISCARD bool IsAnimatableAttribute(const QualifiedName &) const noexcept;
+#endif
+
+    KRYS_NODISCARD css::MutableStyleProperties *AnimatedSMILStyleProperties() const noexcept;
+
+    KRYS_NODISCARD css::MutableStyleProperties &EnsureAnimatedSMILStyleProperties() noexcept;
+
+    void SetUseOverrideComputedStyle(bool) noexcept;
+
+    void CallClearTarget() noexcept
+    {
+      ClearTarget();
+    }
+
+    class InstanceInvalidationGuard;
+    class InstanceUpdateBlocker;
+
+    using PropertyRegistry = SVGPropertyOwnerRegistry<SVGElement>;
+
+    KRYS_NODISCARD const SVGPropertyRegistry &GetPropertyRegistry() const noexcept
+    {
+      return *_propertyRegistry;
+    }
+
+    void DetachAllProperties() noexcept;
+
+    KRYS_NODISCARD bool IsAnimatedPropertyAttribute(const QualifiedName &attributeName) const noexcept;
+
+    KRYS_NODISCARD bool IsAnimatedAttribute(const QualifiedName &attributeName) const noexcept;
+
+    KRYS_NODISCARD bool IsAnimatedStyleAttribute(const QualifiedName &attributeName) const noexcept;
+
+    /// @brief Writes the property that reflects @p name back to the attribute, if it has changed.
+    void SynchronizeSVGAttribute(const QualifiedName &name) noexcept;
+
+    /// @brief Writes the properties that have changed back to the attributes they reflect.
+    void SynchronizeAllSVGAttributes() noexcept;
+
+    void CommitPropertyChange(SVGProperty *property) noexcept override;
+
+    void CommitPropertyChange(SVGAnimatedProperty &animatedProperty) noexcept;
+
+    KRYS_NODISCARD SVGPropertyAnimatorFactory &PropertyAnimatorFactory() noexcept
+    {
+      return *_propertyAnimatorFactory;
+    }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const QualifiedName &, svg::AnimationMode,
+                                                               svg::CalcMode, bool isAccumulated,
+                                                               bool isAdditive) noexcept;
+
+    void AnimatorWillBeDeleted(const QualifiedName &) noexcept;
+
+    using Node::ComputedStyle;
+
+    KRYS_NODISCARD const RenderStyle *
+      ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
+
+    KRYS_NODISCARD const SVGElement *AttributeContextElement() const noexcept override
+    {
+      return this;
+    }
+
+    // These are needed for the RenderTree, animation and DOM.
+    KRYS_NODISCARD DOMStringAtom ClassName() const noexcept;
+
+    KRYS_NODISCARD SVGAnimatedString &ClassNameAnimated() noexcept
+    {
+      return *_className;
+    }
+
+    KRYS_NODISCARD SVGConditionalProcessingAttributes &ConditionalProcessingAttributes() noexcept;
+
+    KRYS_NODISCARD SVGConditionalProcessingAttributes *
+      ConditionalProcessingAttributesIfExists() const noexcept;
+
+    void InvalidateInstances() noexcept;
+
+    /// @brief The property a presentation attribute maps to, or `PropertyId::Invalid` if the attribute isn't
+    /// one.
+    /// @see https://svgwg.org/svg2-draft/styling.html#PresentationAttributes
+    KRYS_NODISCARD static css::PropertyId
+      CssPropertyIdForSVGAttributeName(const DOMStringAtom &localName,
+                                       const DOMStringAtom &namespaceURI) noexcept;
+
+  protected:
+    void FinishParsingChildren() noexcept override;
+
+#if KRYS_DEBUG
+    KRYS_NODISCARD virtual bool FilterOutAnimatableAttribute(const QualifiedName &) const noexcept;
+#endif
+
+    /// @brief The attribute change steps of SVG elements, run for every change to one of the element's
+    /// attributes. Overrides parse the attributes they reflect, then call their base's.
+    /// @param oldValue The previous value, or null if the attribute was added.
+    /// @param value The new value, or null if the attribute was removed.
+    virtual void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                  Maybe<DOMStringView> value) noexcept;
+
+    KRYS_NODISCARD SVGElementRareData &EnsureSVGRareData() noexcept;
+
+    static void ReportAttributeParsingError(SVGParsingError error, const QualifiedName &name,
+                                            DOMStringView value) noexcept;
+
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
+
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
+    void OnInsert() noexcept override;
+
+    /// @brief Focuses the element if it's focusable, and clicks it, as in Chrome.
+    bool AccessKeyAction(bool sendMouseEvents) noexcept override;
+
+    void OnPostConnection() noexcept override;
+
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+
+    void DidAddEventListener(const EventListener &listener) noexcept override;
+
+    void DidRemoveEventListener(const EventListener &listener) noexcept override;
+
+    KRYS_NODISCARD virtual bool NeedsPendingResourceHandling() const noexcept
+    {
+      return true;
+    }
+
+    void OnChildrenChanged() noexcept override;
+
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
+
+    KRYS_NODISCARD virtual bool SelfHasRelativeLengths() const noexcept
+    {
+      return false;
+    }
+
+    void UpdateRelativeLengthsInformation() noexcept;
+
+    void UpdateRelativeLengthsInformationForChild(bool hasRelativeLengths, SVGElement &element) noexcept;
+
+  public:
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-attributes
+
+    KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+    KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+
+#pragma endregion
+
+  protected:
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsSVGAElement() const noexcept
+    {
+      return _interface == SVGElementInterface::A;
+    }
+
+    KRYS_NODISCARD bool IsSVGCircleElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Circle;
+    }
+
+    KRYS_NODISCARD bool IsSVGClipPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::ClipPath;
+    }
+
+    KRYS_NODISCARD bool IsSVGDefsElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Defs;
+    }
+
+    KRYS_NODISCARD bool IsSVGDescElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Desc;
+    }
+
+    KRYS_NODISCARD bool IsSVGEllipseElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Ellipse;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEBlendElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEBlend;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEColorMatrixElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEColorMatrix;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEComponentTransferElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEComponentTransfer;
+    }
+
+    KRYS_NODISCARD bool IsSVGFECompositeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEComposite;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEConvolveMatrixElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEConvolveMatrix;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDiffuseLightingElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDiffuseLighting;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDisplacementMapElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDisplacementMap;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDistantLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDistantLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDropShadowElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDropShadow;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFloodElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFlood;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncAElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncA;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncBElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncB;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncGElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncG;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncRElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncR;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEGaussianBlurElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEGaussianBlur;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEImageElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEImage;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMergeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMerge;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMergeNodeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMergeNode;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMorphologyElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMorphology;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEOffsetElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEOffset;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEPointLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEPointLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFESpecularLightingElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FESpecularLighting;
+    }
+
+    KRYS_NODISCARD bool IsSVGFESpotLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FESpotLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFETileElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FETile;
+    }
+
+    KRYS_NODISCARD bool IsSVGFETurbulenceElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FETurbulence;
+    }
+
+    KRYS_NODISCARD bool IsSVGFilterElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Filter;
+    }
+
+    /// @brief Whether the element is a filter primitive.
+    KRYS_NODISCARD virtual bool IsFilterEffect() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool IsSVGForeignObjectElement() const noexcept
+    {
+      return _interface == SVGElementInterface::ForeignObject;
+    }
+
+    KRYS_NODISCARD bool IsSVGGElement() const noexcept
+    {
+      return _interface == SVGElementInterface::G;
+    }
+
+    KRYS_NODISCARD bool IsSVGGeometryElement() const noexcept
+    {
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgGeometryElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGGraphicsElement() const noexcept
+    {
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgGraphicsElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGImageElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Image;
+    }
+
+    KRYS_NODISCARD bool IsSVGLineElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Line;
+    }
+
+    KRYS_NODISCARD bool IsSVGLinearGradientElement() const noexcept
+    {
+      return _interface == SVGElementInterface::LinearGradient;
+    }
+
+    KRYS_NODISCARD bool IsSVGMarkerElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Marker;
+    }
+
+    KRYS_NODISCARD bool IsSVGMaskElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Mask;
+    }
+
+    KRYS_NODISCARD bool IsSVGMetadataElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Metadata;
+    }
+
+    KRYS_NODISCARD bool IsSVGPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Path;
+    }
+
+    KRYS_NODISCARD bool IsSVGPatternElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Pattern;
+    }
+
+    KRYS_NODISCARD bool IsSVGPolygonElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Polygon;
+    }
+
+    KRYS_NODISCARD bool IsSVGPolylineElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Polyline;
+    }
+
+    KRYS_NODISCARD bool IsSVGRadialGradientElement() const noexcept
+    {
+      return _interface == SVGElementInterface::RadialGradient;
+    }
+
+    KRYS_NODISCARD bool IsSVGRectElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Rect;
+    }
+
+    KRYS_NODISCARD bool IsSVGScriptElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Script;
+    }
+
+    KRYS_NODISCARD bool IsSVGStopElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Stop;
+    }
+
+    KRYS_NODISCARD bool IsSVGStyleElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Style;
+    }
+
+    KRYS_NODISCARD bool IsSVGSvgElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Svg;
+    }
+
+    KRYS_NODISCARD bool IsSVGSwitchElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Switch;
+    }
+
+    KRYS_NODISCARD bool IsSVGSymbolElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Symbol;
+    }
+
+    KRYS_NODISCARD bool IsSVGTextContentElement() const noexcept
+    {
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgTextContentElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGTextElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Text;
+    }
+
+    KRYS_NODISCARD bool IsSVGTextPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::TextPath;
+    }
+
+    KRYS_NODISCARD bool IsSVGTextPositioningElement() const noexcept
+    {
+      return _svgElementFlags.contains(SVGElementFlag::IsSvgTextPositioningElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGTitleElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Title;
+    }
+
+    KRYS_NODISCARD bool IsSVGTSpanElement() const noexcept
+    {
+      return _interface == SVGElementInterface::TSpan;
+    }
+
+    // NOTE: SVGUnknownElement type check is not needed here as Node already has it.
+
+    KRYS_NODISCARD bool IsSVGUseElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Use;
+    }
+
+    KRYS_NODISCARD bool IsSVGViewElement() const noexcept
+    {
+      return _interface == SVGElementInterface::View;
+    }
+
+#pragma endregion
+
+  private:
+    void WillRecalcStyle(EnumSet<style::Change>) noexcept override;
+
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept final;
+
+    virtual void ClearTarget() noexcept
+    {
+    }
+
+    void BuildPendingResourcesIfNeeded() noexcept;
+  };
+
+  class SVGElement::InstanceInvalidationGuard
+  {
+    KRYS_NON_COPY_MOVABLE(InstanceInvalidationGuard);
+
+  private:
+    Ref<SVGElement> _element;
+
+  public:
+    explicit InstanceInvalidationGuard(SVGElement &element) noexcept : _element(ShareRef(element))
+    {
+    }
+
+    ~InstanceInvalidationGuard() noexcept
+    {
+      _element->InvalidateInstances();
+    }
+  };
+
+  class SVGElement::InstanceUpdateBlocker
+  {
+    KRYS_NON_COPY_MOVABLE(InstanceUpdateBlocker);
+
+  private:
+    Ref<SVGElement> _element;
+
+  public:
+    explicit InstanceUpdateBlocker(SVGElement &element) noexcept : _element(ShareRef(element))
+    {
+      _element->SetInstanceUpdatesBlocked(true);
+    }
+
+    ~InstanceUpdateBlocker() noexcept
+    {
+      _element->SetInstanceUpdatesBlocked(false);
+    }
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::SVGElement)
+  KRYS_NODISCARD static bool IsType(const krys::web::Node &target) noexcept
+  {
+    return target.IsSVGElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

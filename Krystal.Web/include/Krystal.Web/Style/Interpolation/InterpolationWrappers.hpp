@@ -1,0 +1,717 @@
+﻿/*
+ * Copyright (C) 2007-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2012, 2013 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (C) 2025 Sam Weinig. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Inc. ("Apple") nor the names of
+ *     its contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#ifndef KRYS_STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP
+  #error "Please do not include this file anywhere except from generated code."
+#endif
+
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationContext.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationFunctions.hpp"
+#include "Krystal.Web/Style/Interpolation/InterpolationWrapperBase.hpp"
+#include "Krystal.Web/Style/Values/Primitives/LengthWrapperBlending.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+#include <algorithm>
+
+namespace krys::web::style::interpolation
+{
+  // MARK: - Base Wrappers
+
+  template <typename T, typename TGetter = T>
+  class WrapperWithGetter : public WrapperBase
+  {
+  private:
+    TGetter (RenderStyleProperties::*_getter)() const noexcept;
+
+  public:
+    WrapperWithGetter(css::PropertyId property,
+                      TGetter (RenderStyleProperties::*getter)() const noexcept) noexcept
+        : WrapperBase(property), _getter(getter)
+    {
+    }
+
+    KRYS_NODISCARD TGetter Value(const RenderStyle &style) const noexcept
+    {
+      return (style.*_getter)();
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept override
+    {
+      if (&a == &b)
+      {
+        return true;
+      }
+      return Value(a) == Value(b);
+    }
+  };
+
+  template <typename T, typename TGetter = T, typename TSetter = T>
+  class Wrapper : public WrapperWithGetter<T, TGetter>
+  {
+  protected:
+    void (RenderStyleProperties::*_setter)(TSetter) noexcept;
+
+  public:
+    Wrapper(css::PropertyId property, TGetter (RenderStyleProperties::*getter)() const noexcept,
+            void (RenderStyleProperties::*setter)(TSetter) noexcept) noexcept
+        : WrapperWithGetter<T, TGetter>(property, getter), _setter(setter)
+    {
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept override
+    {
+      (destination.*_setter)(BlendFunc(this->Value(from), this->Value(to), context));
+    }
+  };
+
+  // Deduction guide for getter/setters that return and take values.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  Wrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+          void (TSetterStyle::*setter)(T) noexcept) -> Wrapper<T, T, T>;
+
+  // Deduction guide for getter/setters that return const references and take r-value references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  Wrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,
+          void (TSetterStyle::*setter)(T &&) noexcept) -> Wrapper<T, const T &, T &&>;
+
+  // MARK: - Typed Wrappers
+
+  template <typename T, typename TGetter = T, typename TSetter = T>
+  class StyleTypeWrapper : public WrapperBase
+  {
+  private:
+    TGetter (RenderStyleProperties::*_getter)() const noexcept;
+    void (RenderStyleProperties::*_setter)(TSetter) noexcept;
+
+  public:
+    StyleTypeWrapper(css::PropertyId property, TGetter (RenderStyleProperties::*getter)() const noexcept,
+                     void (RenderStyleProperties::*setter)(TSetter) noexcept) noexcept
+        : WrapperBase(property), _getter(getter), _setter(setter)
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &from, const RenderStyle &to) const noexcept override
+    {
+      if (&from == &to)
+      {
+        return true;
+      }
+      return style::EqualsForBlending(this->Value(from), this->Value(to), from, to);
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &from, const RenderStyle &to,
+                                       CompositeOperation operation) const noexcept override
+    {
+      return style::CanBlend(this->Value(from), this->Value(to), from, to, operation);
+    }
+
+    KRYS_NODISCARD bool
+      RequiresInterpolationForAccumulativeIteration(const RenderStyle &from,
+                                                    const RenderStyle &to) const noexcept override
+    {
+      return style::RequiresInterpolationForAccumulativeIteration(this->Value(from), this->Value(to), from,
+                                                                  to);
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept override
+    {
+      (destination.*_setter)(style::Blend(this->Value(from), this->Value(to), from, to, context));
+    }
+
+  private:
+    KRYS_NODISCARD TGetter Value(const RenderStyle &style) const noexcept
+    {
+      return (style.*_getter)();
+    }
+  };
+
+  // Deduction guide for getter/setters that return and take values.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  StyleTypeWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                   void (TSetterStyle::*setter)(T) noexcept) -> StyleTypeWrapper<T, T, T>;
+
+  // Deduction guide for getter/setters that return const references and take values.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  StyleTypeWrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,
+                   void (TSetterStyle::*setter)(T) noexcept) -> StyleTypeWrapper<T, const T &, T>;
+
+  // Deduction guide for getter/setters that return const references and take r-value references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  StyleTypeWrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,
+                   void (TSetterStyle::*setter)(T &&) noexcept) -> StyleTypeWrapper<T, const T &, T &&>;
+
+  // Deduction guide for getter/setters that return values and take r-value references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  StyleTypeWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                   void (TSetterStyle::*setter)(T &&) noexcept) -> StyleTypeWrapper<T, T, T &&>;
+
+  // MARK: - Discrete Wrappers
+
+  template <typename T, typename TGetter = T, typename TSetter = T>
+  class DiscreteWrapper : public WrapperWithGetter<T, TGetter>
+  {
+  private:
+    void (RenderStyleProperties::*_setter)(TSetter) noexcept;
+
+  public:
+    DiscreteWrapper(css::PropertyId property, TGetter (RenderStyleProperties::*getter)() const noexcept,
+                    void (RenderStyleProperties::*setter)(TSetter) noexcept) noexcept
+        : WrapperWithGetter<T, TGetter>(property, getter), _setter(setter)
+    {
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &, const RenderStyle &,
+                                       CompositeOperation) const noexcept final
+    {
+      return false;
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept override
+    {
+      krys_debug_assert(!context.Progress || context.Progress == 1.0);
+      (destination.*_setter)(T {this->Value(context.Progress ? to : from)});
+    }
+  };
+
+  // Deduction guide for getter/setters that return and take values.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  DiscreteWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                  void (TSetterStyle::*setter)(T) noexcept) -> DiscreteWrapper<T, T, T>;
+
+  // Deduction guide for getter/setters that return values and take const references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  DiscreteWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                  void (TSetterStyle::*setter)(const T &) noexcept) -> DiscreteWrapper<T, T, const T &>;
+
+  // Deduction guide for getter/setters that return const references and take r-value references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  DiscreteWrapper(css::PropertyId, const T &(TGetterStyle::*getter)() const noexcept,
+                  void (TSetterStyle::*setter)(T &&) noexcept) -> DiscreteWrapper<T, const T &, T &&>;
+
+  // Deduction guide for getter/setters that return values and take r-value references.
+  template <typename T, typename TGetterStyle, typename TSetterStyle>
+  DiscreteWrapper(css::PropertyId, T (TGetterStyle::*getter)() const noexcept,
+                  void (TSetterStyle::*setter)(T &&) noexcept) -> DiscreteWrapper<T, T, T &&>;
+
+  template <typename T>
+  class NonNormalizedDiscreteWrapper final : public Wrapper<T>
+  {
+  public:
+    NonNormalizedDiscreteWrapper(css::PropertyId property,
+                                 T (RenderStyleProperties::*getter)() const noexcept,
+                                 void (RenderStyleProperties::*setter)(T) noexcept) noexcept
+        : Wrapper<T>(property, getter, setter)
+    {
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &, const RenderStyle &,
+                                       CompositeOperation) const noexcept final
+    {
+      return false;
+    }
+  };
+
+  // MARK: - Font Property Wrappers
+
+  class FontSizeWrapper final : public Wrapper<float>
+  {
+  public:
+    FontSizeWrapper() noexcept
+        : Wrapper<float>(css::PropertyId::FontSize, &RenderStyleProperties::ComputedFontSize,
+                         &RenderStyleProperties::SetFontSize)
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
+    {
+      return a.SpecifiedFontSize() == b.SpecifiedFontSize();
+    }
+  };
+
+  // MARK: - Color Property Wrappers
+
+  class ColorWrapper final : public WrapperWithGetter<const web::Color &>
+  {
+  private:
+    void (RenderStyleProperties::*_setter)(web::Color &&) noexcept;
+
+  public:
+    ColorWrapper(css::PropertyId property,
+                 const web::Color &(RenderStyleProperties::*getter)() const noexcept,
+                 void (RenderStyleProperties::*setter)(web::Color &&) noexcept) noexcept
+        : WrapperWithGetter<const web::Color &>(property, getter), _setter(setter)
+    {
+    }
+
+    KRYS_NODISCARD bool
+      RequiresInterpolationForAccumulativeIteration(const RenderStyle &,
+                                                    const RenderStyle &) const noexcept override
+    {
+      return true;
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept override
+    {
+      (destination.*_setter)(BlendFunc(Value(from), Value(to), context));
+    }
+  };
+
+  class CaretColorWrapper final : public StyleTypeWrapper<style::Color, const style::Color &, style::Color &&>
+  {
+    using Base = StyleTypeWrapper<style::Color, const style::Color &, style::Color &&>;
+
+  public:
+    CaretColorWrapper() noexcept
+        : Base(css::PropertyId::CaretColor, &RenderStyleProperties::CaretColor,
+               &RenderStyleProperties::SetCaretColor)
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
+    {
+      return a.HasAutoCaretColor() == b.HasAutoCaretColor() && Base::Equals(a, b);
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &from, const RenderStyle &to,
+                                       CompositeOperation) const noexcept final
+    {
+      return !from.HasAutoCaretColor() && !to.HasAutoCaretColor();
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept final
+    {
+      if (CanInterpolate(from, to, CompositeOperation::Replace))
+      {
+        Base::Interpolate(destination, from, to, context);
+        return;
+      }
+
+      const auto &blendingRenderStyle = context.Progress < 0.5 ? from : to;
+      if (blendingRenderStyle.HasAutoCaretColor())
+      {
+        destination.SetHasAutoCaretColor();
+      }
+      else
+      {
+        destination.SetCaretColor(style::Color {blendingRenderStyle.CaretColor()});
+      }
+    }
+  };
+
+  // MARK: - Other Custom Wrappers
+
+  class CounterWrapper final : public WrapperBase
+  {
+  public:
+    explicit CounterWrapper(css::PropertyId property) noexcept : WrapperBase(property)
+    {
+      krys_debug_assert(property == css::PropertyId::CounterIncrement
+                        || property == css::PropertyId::CounterReset
+                        || property == css::PropertyId::CounterSet);
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &, const RenderStyle &,
+                                       CompositeOperation) const noexcept final
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
+    {
+      const auto &mapA = a.GetCounterDirectives().Map;
+      const auto &mapB = b.GetCounterDirectives().Map;
+      if (mapA.size() != mapB.size())
+      {
+        return false;
+      }
+      for (const auto &[key, aDirective] : mapA)
+      {
+        auto it = mapB.find(key);
+        if (it == mapB.end())
+        {
+          return false;
+        }
+        const auto &bDirective = it->second;
+        if ((Property() == css::PropertyId::CounterIncrement
+             && aDirective.IncrementValue != bDirective.IncrementValue)
+            || (Property() == css::PropertyId::CounterReset && aDirective.ResetValue != bDirective.ResetValue)
+            || (Property() == css::PropertyId::CounterSet && aDirective.SetValue != bDirective.SetValue))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept final
+    {
+      krys_debug_assert(context.IsDiscrete);
+      krys_debug_assert(!context.Progress || context.Progress == 1);
+
+      // Clear all existing values in the existing set of directives.
+      for (auto &[key, directive] : destination.AccessCounterDirectives().Map)
+      {
+        Field(directive) = null;
+      }
+
+      const auto &style = context.Progress ? to : from;
+      auto &targetDirectives = destination.AccessCounterDirectives().Map;
+      for (const auto &[key, directive] : style.GetCounterDirectives().Map)
+      {
+        Field(targetDirectives[key]) = Field(directive);
+      }
+    }
+
+  private:
+    KRYS_NODISCARD Maybe<int32> &Field(CounterDirectives &directives) const noexcept
+    {
+      if (Property() == css::PropertyId::CounterIncrement)
+      {
+        return directives.IncrementValue;
+      }
+      if (Property() == css::PropertyId::CounterReset)
+      {
+        return directives.ResetValue;
+      }
+      return directives.SetValue;
+    }
+
+    KRYS_NODISCARD const Maybe<int32> &Field(const CounterDirectives &directives) const noexcept
+    {
+      return Field(const_cast<CounterDirectives &>(directives));
+    }
+  };
+
+  class VisibilityWrapper final : public Wrapper<Visibility>
+  {
+  public:
+    VisibilityWrapper() noexcept
+        : Wrapper(css::PropertyId::Visibility, &RenderStyleProperties::Visibility,
+                  &RenderStyleProperties::SetVisibility)
+    {
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &from, const RenderStyle &to,
+                                       CompositeOperation) const noexcept final
+    {
+      // https://drafts.csswg.org/web-animations-1/#animating-visibility
+      // If neither value is visible, then discrete animation is used.
+      return Value(from) == Visibility::Visible || Value(to) == Visibility::Visible;
+    }
+  };
+
+  // MARK: - CoordinatedValueList Wrappers
+
+  // Wrapper base class for an animatable property in a CoordinatedValueList
+  template <typename TListValue>
+  class CoordinatedValueListPropertyWrapperBase
+  {
+  private:
+    css::PropertyId _property;
+
+  public:
+    explicit CoordinatedValueListPropertyWrapperBase(css::PropertyId property) noexcept : _property(property)
+    {
+    }
+
+    virtual ~CoordinatedValueListPropertyWrapperBase() noexcept = default;
+
+    KRYS_NODISCARD css::PropertyId Property() const noexcept
+    {
+      return _property;
+    }
+
+    KRYS_NODISCARD virtual bool Equals(const TListValue &, const TListValue &) const noexcept = 0;
+
+    virtual void Interpolate(TListValue &, const TListValue &, const TListValue &,
+                             const Context &) const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanInterpolate(const TListValue &, const TListValue &) const noexcept
+    {
+      return true;
+    }
+  };
+
+  template <typename TStyle, typename TListValue>
+  class CoordinatedValueListPropertyStyleTypeWrapper final
+      : public CoordinatedValueListPropertyWrapperBase<TListValue>
+  {
+  private:
+    const TStyle &(TListValue::*_getter)() const noexcept;
+    void (TListValue::*_setter)(TStyle &&) noexcept;
+
+  public:
+    CoordinatedValueListPropertyStyleTypeWrapper(css::PropertyId property,
+                                                 const TStyle &(TListValue::*getter)() const noexcept,
+                                                 void (TListValue::*setter)(TStyle &&) noexcept) noexcept
+        : CoordinatedValueListPropertyWrapperBase<TListValue>(property), _getter(getter), _setter(setter)
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const TListValue &from, const TListValue &to) const noexcept override
+    {
+      if (&from == &to)
+      {
+        return true;
+      }
+      return style::EqualsForBlending(Value(from), Value(to));
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const TListValue &from, const TListValue &to) const noexcept final
+    {
+      return style::CanBlend(Value(from), Value(to));
+    }
+
+    void Interpolate(TListValue &destination, const TListValue &from, const TListValue &to,
+                     const Context &context) const noexcept final
+    {
+      (destination.*_setter)(style::Blend(Value(from), Value(to), context));
+    }
+
+  private:
+    KRYS_NODISCARD const TStyle &Value(const TListValue &value) const noexcept
+    {
+      return (value.*_getter)();
+    }
+  };
+
+  template <typename T, typename TListValue, typename TGetter = T, typename TSetter = T>
+  class DiscreteCoordinatedValueListPropertyWrapper final
+      : public CoordinatedValueListPropertyWrapperBase<TListValue>
+  {
+  private:
+    TGetter (TListValue::*_getter)() const noexcept;
+    void (TListValue::*_setter)(TSetter) noexcept;
+
+  public:
+    DiscreteCoordinatedValueListPropertyWrapper(css::PropertyId property,
+                                                TGetter (TListValue::*getter)() const noexcept,
+                                                void (TListValue::*setter)(TSetter) noexcept) noexcept
+        : CoordinatedValueListPropertyWrapperBase<TListValue>(property), _getter(getter), _setter(setter)
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const TListValue &a, const TListValue &b) const noexcept final
+    {
+      return Value(a) == Value(b);
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const TListValue &, const TListValue &) const noexcept final
+    {
+      return false;
+    }
+
+    void Interpolate(TListValue &destination, const TListValue &from, const TListValue &to,
+                     const Context &context) const noexcept final
+    {
+      krys_debug_assert(!context.Progress || context.Progress == 1.0);
+      (destination.*_setter)(T {context.Progress ? Value(to) : Value(from)});
+    }
+
+  private:
+    KRYS_NODISCARD TGetter Value(const TListValue &list) const noexcept
+    {
+      return (list.*_getter)();
+    }
+  };
+
+  // Deduction guide for getter/setters that return and take values.
+  template <typename T, typename TListValue>
+  DiscreteCoordinatedValueListPropertyWrapper(css::PropertyId, T (TListValue::*getter)() const noexcept,
+                                              void (TListValue::*setter)(T) noexcept)
+    -> DiscreteCoordinatedValueListPropertyWrapper<T, TListValue, T, T>;
+
+  // Deduction guide for getter/setters that return const references and take r-value references.
+  template <typename T, typename TListValue>
+  DiscreteCoordinatedValueListPropertyWrapper(css::PropertyId,
+                                              const T &(TListValue::*getter)() const noexcept,
+                                              void (TListValue::*setter)(T &&) noexcept)
+    -> DiscreteCoordinatedValueListPropertyWrapper<T, TListValue, const T &, T &&>;
+
+  // Deduction guide for getter/setters that return values and take r-value references.
+  template <typename T, typename TListValue>
+  DiscreteCoordinatedValueListPropertyWrapper(css::PropertyId, T (TListValue::*getter)() const noexcept,
+                                              void (TListValue::*setter)(T &&) noexcept)
+    -> DiscreteCoordinatedValueListPropertyWrapper<T, TListValue, T, T &&>;
+
+  template <typename T, typename TRepeatedValueWrapper>
+  class CoordinatedValueListPropertyWrapper final : public WrapperBase
+  {
+  public:
+    using ListType = T;
+    using ListValue = typename ListType::value_type;
+
+    using ListGetter = const ListType &(RenderStyleBase::*)() const noexcept;
+    using ListAccessor = ListType &(RenderStyleBase::*)() noexcept;
+    using ListSetter = void (RenderStyleBase::*)(ListType &&) noexcept;
+
+  private:
+    ListGetter _listGetter;
+    ListAccessor _listAccessor;
+    ListSetter _listSetter;
+    TRepeatedValueWrapper _repeatedValueWrapper;
+
+  public:
+    CoordinatedValueListPropertyWrapper(css::PropertyId property, ListGetter getter, ListAccessor accessor,
+                                        ListSetter setter,
+                                        TRepeatedValueWrapper repeatedValueWrapper) noexcept
+        : WrapperBase(property), _listGetter(getter), _listAccessor(accessor), _listSetter(setter),
+          _repeatedValueWrapper(krys::move(repeatedValueWrapper))
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &from, const RenderStyle &to) const noexcept final
+    {
+      if (&from == &to)
+      {
+        return true;
+      }
+
+      const auto &fromList = (from.*_listGetter)();
+      const auto &toList = (to.*_listGetter)();
+
+      auto numberOfValues = std::min(fromList.ComputedLength(), toList.ComputedLength());
+      for (size_t i = 0; i < numberOfValues; ++i)
+      {
+        if (!_repeatedValueWrapper.Equals(fromList[i], toList[i]))
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    KRYS_NODISCARD bool CanInterpolate(const RenderStyle &from, const RenderStyle &to,
+                                       CompositeOperation) const noexcept final
+    {
+      const auto &fromList = (from.*_listGetter)();
+      const auto &toList = (to.*_listGetter)();
+
+      auto numberOfValues = std::min(fromList.ComputedLength(), toList.ComputedLength());
+      for (size_t i = 0; i < numberOfValues; ++i)
+      {
+        const auto &fromValue = fromList[i];
+        const auto &toValue = toList[i];
+
+        // First check if the owner values allow interpolation.
+        if (!style::CanBlend(fromValue, toValue))
+        {
+          return false;
+        }
+
+        // Then check if the individual property values allow interpolation.
+        if (!_repeatedValueWrapper.CanInterpolate(fromValue, toValue))
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept final
+    {
+      const auto *fromList = &(from.*_listGetter)();
+      const auto *toList = &(to.*_listGetter)();
+      auto &destinationList = (destination.*_listAccessor)();
+
+      if (context.IsDiscrete)
+      {
+        krys_debug_assert(!context.Progress || context.Progress == 1.0);
+        const auto *list = context.Progress ? toList : fromList;
+        fromList = list;
+        toList = list;
+      }
+
+      auto numberOfDestinationValues = destinationList.ComputedLength();
+      auto numberOfValues = std::min(fromList->ComputedLength(), toList->ComputedLength());
+
+      for (size_t i = 0; i < numberOfValues; ++i)
+      {
+        if (i >= numberOfDestinationValues)
+        {
+          destinationList.Append(ListValue {});
+        }
+
+        _repeatedValueWrapper.Interpolate(destinationList[i], (*fromList)[i], (*toList)[i], context);
+      }
+
+      destinationList.PrepareForUse();
+    }
+  };
+
+  // MARK: - Shorthand Wrapper
+
+  class ShorthandWrapper final : public WrapperBase
+  {
+  private:
+    List<WrapperBase *> _longhandWrappers;
+
+  public:
+    ShorthandWrapper(css::PropertyId property, List<WrapperBase *> &&longhandWrappers) noexcept
+        : WrapperBase(property), _longhandWrappers(krys::move(longhandWrappers))
+    {
+    }
+
+    KRYS_NODISCARD bool Equals(const RenderStyle &a, const RenderStyle &b) const noexcept final
+    {
+      if (&a == &b)
+      {
+        return true;
+      }
+
+      return std::ranges::all_of(_longhandWrappers,
+                                 [&](WrapperBase *wrapper) { return wrapper->Equals(a, b); });
+    }
+
+    void Interpolate(RenderStyle &destination, const RenderStyle &from, const RenderStyle &to,
+                     const Context &context) const noexcept final
+    {
+      for (auto *wrapper : _longhandWrappers)
+      {
+        wrapper->Interpolate(destination, from, to, context);
+      }
+    }
+  };
+}

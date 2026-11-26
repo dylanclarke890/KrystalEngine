@@ -1,0 +1,262 @@
+﻿/*
+ * Copyright (C) Research In Motion Limited 2011. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/SVG/SVGPathData.hpp"
+#include "Krystal.Web/Graphics/Paths/Path.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Svg/Elements/SVGCircleElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGEllipseElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGLineElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGPathElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGPolygonElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGPolylineElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGRectElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGUseElement.hpp"
+#include "Krystal.Web/Svg/SVGLengthContext.hpp"
+#include "Krystal.Web/Svg/SVGPoint.hpp"
+#include "Krystal.Web/Svg/SVGPointList.hpp"
+
+namespace krys::web
+{
+  namespace
+  {
+    Path PathFromCircleElement(const SVGCircleElement &element) noexcept
+    {
+      RenderElement *renderer = element.Renderer();
+      if (!renderer)
+      {
+        return {};
+      }
+
+      Path path;
+      const auto &style = renderer->Style();
+      SVGLengthContext lengthContext(&element);
+      float r = lengthContext.ValueForLength(style.R(), style::ZoomNeeded {});
+      if (r > 0)
+      {
+        float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
+        float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
+        path.AddEllipseInRect(RectF(cx - r, cy - r, r * 2, r * 2));
+      }
+      return path;
+    }
+
+    Path PathFromEllipseElement(const SVGEllipseElement &element) noexcept
+    {
+      RenderElement *renderer = element.Renderer();
+      if (!renderer)
+      {
+        return {};
+      }
+
+      const auto &style = renderer->Style();
+      SVGLengthContext lengthContext(&element);
+      float rx = lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width);
+      if (rx <= 0)
+      {
+        return {};
+      }
+
+      float ry = lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height);
+      if (ry <= 0)
+      {
+        return {};
+      }
+
+      Path path;
+      float cx = lengthContext.ValueForLength(style.Cx(), style::ZoomNeeded {}, SVGLengthMode::Width);
+      float cy = lengthContext.ValueForLength(style.Cy(), style::ZoomNeeded {}, SVGLengthMode::Height);
+      path.AddEllipseInRect(RectF(cx - rx, cy - ry, rx * 2, ry * 2));
+      return path;
+    }
+
+    Path PathFromLineElement(const SVGLineElement &element) noexcept
+    {
+      Path path;
+      SVGLengthContext lengthContext(&element);
+      path.MoveTo(PointF(element.X1().Value(lengthContext), element.Y1().Value(lengthContext)));
+      path.AddLineTo(PointF(element.X2().Value(lengthContext), element.Y2().Value(lengthContext)));
+      return path;
+    }
+
+    Path PathFromPathElement(const SVGPathElement &element) noexcept
+    {
+      return element.GetPath();
+    }
+
+    Path PathFromPolygonElement(const SVGPolygonElement &element) noexcept
+    {
+      const auto &points = element.Points().Items();
+      if (points.empty())
+      {
+        return {};
+      }
+
+      Path path;
+      path.MoveTo(points.front()->Value());
+
+      size_t size = points.size();
+      for (size_t i = 1; i < size; ++i)
+      {
+        path.AddLineTo(points[i]->Value());
+      }
+
+      path.CloseSubpath();
+      return path;
+    }
+
+    Path PathFromPolylineElement(const SVGPolylineElement &element) noexcept
+    {
+      const auto &points = element.Points().Items();
+      if (points.empty())
+      {
+        return {};
+      }
+
+      Path path;
+      path.MoveTo(points.front()->Value());
+
+      size_t size = points.size();
+      for (size_t i = 1; i < size; ++i)
+      {
+        path.AddLineTo(points[i]->Value());
+      }
+      return path;
+    }
+
+    Path PathFromRectElement(const SVGRectElement &element) noexcept
+    {
+      RenderElement *renderer = element.Renderer();
+      if (!renderer)
+      {
+        return {};
+      }
+
+      const auto &style = renderer->Style();
+      auto usedZoom = style.UsedZoomForLength();
+      SVGLengthContext lengthContext(&element);
+      auto size = SizeF {lengthContext.ValueForLength(style.Width(), usedZoom, SVGLengthMode::Width),
+                         lengthContext.ValueForLength(style.Height(), usedZoom, SVGLengthMode::Height)};
+
+      if (size.IsEmpty())
+      {
+        return {};
+      }
+
+      auto location =
+        PointF {lengthContext.ValueForLength(style.X(), style::ZoomNeeded {}, SVGLengthMode::Width),
+                lengthContext.ValueForLength(style.Y(), style::ZoomNeeded {}, SVGLengthMode::Height)};
+
+      auto radii =
+        SizeF {lengthContext.ValueForLength(style.Rx(), style::ZoomNeeded {}, SVGLengthMode::Width),
+               lengthContext.ValueForLength(style.Ry(), style::ZoomNeeded {}, SVGLengthMode::Height)};
+
+      // Per SVG spec: if one of radii.x() and radii.y() is auto or negative, then the other corner
+      // radius value is used. If both are auto or negative, then they are both set to 0.
+      if (style.Rx().IsAuto() || radii.Width() < 0)
+      {
+        radii.SetWidth(std::max(0.f, radii.Height()));
+      }
+      if (style.Ry().IsAuto() || radii.Height() < 0)
+      {
+        radii.SetHeight(std::max(0.f, radii.Width()));
+      }
+
+      Path path;
+      if (radii.Width() <= 0 && radii.Height() <= 0)
+      {
+        path.AddRect({location, size});
+        return path;
+      }
+
+      // The used values of 'rx' and 'ry' for a 'rect' are never more than 50% of the used
+      // value of width for the same shape.
+      radii = radii.ConstrainedBetween(radii, size / 2);
+
+      // FIXME: We currently enforce using beziers here, as at least on CoreGraphics/Lion, as
+      // the native method uses a different line dash origin, causing svg/custom/dashOrigin.svg to fail.
+      // See bug https://bugs.webkit.org/show_bug.cgi?id=79932 which tracks this issue.
+      path.AddRoundedRect(RectF {location, size}, radii, PathRoundedRect::Strategy::PreferBezier);
+      return path;
+    }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Path PathFromUseElement(const SVGUseElement &element) noexcept
+    {
+      RefPtr<SVGElement> clipChildElement = element.ClipChild();
+      if (!clipChildElement)
+      {
+        return {};
+      }
+
+      SVGLengthContext lengthContext(&element);
+      auto x = element.X().Value(lengthContext);
+      auto y = element.Y().Value(lengthContext);
+
+      auto path = PathFromGraphicsElement(*clipChildElement);
+      if (x || y)
+      {
+        path.Translate(SizeF(x, y));
+      }
+
+      return path;
+    }
+  }
+
+  Path PathFromGraphicsElement(const SVGElement &element) noexcept
+  {
+    if (auto *circle = DynamicDowncast<SVGCircleElement>(element))
+    {
+      return PathFromCircleElement(*circle);
+    }
+    if (auto *ellipse = DynamicDowncast<SVGEllipseElement>(element))
+    {
+      return PathFromEllipseElement(*ellipse);
+    }
+    if (auto *line = DynamicDowncast<SVGLineElement>(element))
+    {
+      return PathFromLineElement(*line);
+    }
+    if (auto *path = DynamicDowncast<SVGPathElement>(element))
+    {
+      return PathFromPathElement(*path);
+    }
+    if (auto *polygon = DynamicDowncast<SVGPolygonElement>(element))
+    {
+      return PathFromPolygonElement(*polygon);
+    }
+    if (auto *polyline = DynamicDowncast<SVGPolylineElement>(element))
+    {
+      return PathFromPolylineElement(*polyline);
+    }
+    if (auto *rect = DynamicDowncast<SVGRectElement>(element))
+    {
+      return PathFromRectElement(*rect);
+    }
+    if (auto *use = DynamicDowncast<SVGUseElement>(element))
+    {
+      return PathFromUseElement(*use);
+    }
+
+    return {};
+  }
+}

@@ -1,0 +1,448 @@
+﻿/*
+ * Copyright (C) 2003-2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontTaggedSettings.hpp"
+
+namespace krys::web
+{
+  class FontFeatureValues;
+
+  enum class TextRenderingMode : uint8
+  {
+    Auto,
+    OptimizeSpeed,
+    OptimizeLegibility,
+    GeometricPrecision,
+  };
+
+  enum class FontSmoothingMode : uint8
+  {
+    Auto,
+    None,
+    Antialiased,
+    SubpixelAntialiased,
+  };
+
+  enum class FontOrientation : bool
+  {
+    Horizontal,
+    Vertical,
+  };
+
+  enum class NonCJKGlyphOrientation : bool
+  {
+    Mixed,
+    Upright,
+  };
+
+  struct ExpansionBehavior
+  {
+    enum class Behavior : uint8
+    {
+      Forbid,
+      Allow,
+      Force,
+    };
+
+    constexpr static uint32 BitsOfKind = 2;
+    Behavior Left : BitsOfKind;
+    Behavior Right : BitsOfKind;
+
+    constexpr ExpansionBehavior() noexcept : Left(Behavior::Forbid), Right(Behavior::Allow)
+    {
+    }
+
+    constexpr ExpansionBehavior(Behavior left, Behavior right) noexcept : Left(left), Right(right)
+    {
+    }
+
+    KRYS_NODISCARD constexpr bool operator==(const ExpansionBehavior &) const noexcept = default;
+
+    KRYS_NODISCARD constexpr static ExpansionBehavior DefaultBehavior() noexcept
+    {
+      return {};
+    }
+
+    KRYS_NODISCARD constexpr static ExpansionBehavior AllowRightOnly() noexcept
+    {
+      return {Behavior::Forbid, Behavior::Allow};
+    }
+
+    KRYS_NODISCARD constexpr static ExpansionBehavior AllowLeftOnly() noexcept
+    {
+      return {Behavior::Allow, Behavior::Forbid};
+    }
+
+    KRYS_NODISCARD constexpr static ExpansionBehavior ForceLeftOnly() noexcept
+    {
+      return {Behavior::Force, Behavior::Forbid};
+    }
+
+    KRYS_NODISCARD constexpr static ExpansionBehavior ForbidAll() noexcept
+    {
+      return {Behavior::Forbid, Behavior::Forbid};
+    }
+  };
+
+  enum class FontSynthesisLonghandValue : bool
+  {
+    None,
+    Auto,
+  };
+
+  enum class FontVariantLigatures : uint8
+  {
+    Normal,
+    Yes,
+    No,
+  };
+
+  enum class FontVariantPosition : uint8
+  {
+    Normal,
+    Subscript,
+    Superscript,
+  };
+
+  enum class FontVariantCaps : uint8
+  {
+    Normal,
+    Small,
+    AllSmall,
+    Petite,
+    AllPetite,
+    Unicase,
+    Titling,
+  };
+
+  enum class FontVariantNumericFigure : uint8
+  {
+    Normal,
+    LiningNumbers,
+    OldStyleNumbers,
+  };
+
+  enum class FontVariantNumericSpacing : uint8
+  {
+    Normal,
+    ProportionalNumbers,
+    TabularNumbers,
+  };
+
+  enum class FontVariantNumericFraction : uint8
+  {
+    Normal,
+    DiagonalFractions,
+    StackedFractions,
+  };
+
+  enum class FontVariantNumericOrdinal : bool
+  {
+    Normal,
+    Yes,
+  };
+
+  enum class FontVariantNumericSlashedZero : bool
+  {
+    Normal,
+    Yes,
+  };
+
+  struct FontVariantAlternatesValues
+  {
+    friend struct krys::MarkableTraits<FontVariantAlternatesValues>;
+
+    Maybe<CSSOMString> Stylistic;
+    List<CSSOMString> Styleset;
+    List<CSSOMString> CharacterVariant;
+    Maybe<CSSOMString> Swash;
+    Maybe<CSSOMString> Ornaments;
+    Maybe<CSSOMString> Annotation;
+    bool HistoricalForms {false};
+
+    KRYS_NODISCARD bool operator==(const FontVariantAlternatesValues &) const noexcept = default;
+
+  private:
+    bool _isEmpty {false};
+  };
+}
+
+namespace krys
+{
+  class TextStream;
+
+  template <>
+  struct MarkableTraits<web::FontVariantAlternatesValues>
+  {
+    KRYS_NODISCARD static bool IsEmptyValue(const web::FontVariantAlternatesValues &value) noexcept
+    {
+      return value._isEmpty;
+    }
+
+    KRYS_NODISCARD static web::FontVariantAlternatesValues EmptyValue() noexcept
+    {
+      web::FontVariantAlternatesValues emptyValue;
+      emptyValue._isEmpty = true;
+      return emptyValue;
+    }
+  };
+}
+
+namespace krys::web
+{
+  class FontVariantAlternates
+  {
+    using Values = FontVariantAlternatesValues;
+
+  private:
+    Markable<Values> _values;
+
+    FontVariantAlternates() noexcept = default;
+
+  public:
+    KRYS_NODISCARD bool operator==(const FontVariantAlternates &) const noexcept = default;
+
+    KRYS_NODISCARD bool IsNormal() const noexcept
+    {
+      return !_values;
+    }
+
+    KRYS_NODISCARD const Values &GetValues() const noexcept
+    {
+      krys_debug_assert(!IsNormal());
+      return *_values;
+    }
+
+    KRYS_NODISCARD Values &ValuesRef() noexcept
+    {
+      if (IsNormal())
+      {
+        SetValues();
+      }
+
+      return *_values;
+    }
+
+    void SetValues() noexcept
+    {
+      _values = Values {};
+    }
+
+    KRYS_NODISCARD static FontVariantAlternates Normal() noexcept
+    {
+      return {};
+    }
+  };
+
+  enum class FontVariantEastAsianVariant : uint8
+  {
+    Normal,
+    Jis78,
+    Jis83,
+    Jis90,
+    Jis04,
+    Simplified,
+    Traditional,
+  };
+
+  enum class FontVariantEastAsianWidth : uint8
+  {
+    Normal,
+    Full,
+    Proportional,
+  };
+
+  enum class FontVariantEastAsianRuby : uint8
+  {
+    Normal,
+    Yes,
+  };
+
+  enum class FontVariantEmoji : uint8
+  {
+    Normal,
+    Text,
+    Emoji,
+    Unicode,
+  };
+
+  struct FontVariantSettings
+  {
+    FontVariantLigatures CommonLigatures {FontVariantLigatures::Normal};
+    FontVariantLigatures DiscretionaryLigatures {FontVariantLigatures::Normal};
+    FontVariantLigatures HistoricalLigatures {FontVariantLigatures::Normal};
+    FontVariantLigatures ContextualAlternates {FontVariantLigatures::Normal};
+    FontVariantPosition Position {FontVariantPosition::Normal};
+    FontVariantCaps Caps {FontVariantCaps::Normal};
+    FontVariantNumericFigure NumericFigure {FontVariantNumericFigure::Normal};
+    FontVariantNumericSpacing NumericSpacing {FontVariantNumericSpacing::Normal};
+    FontVariantNumericFraction NumericFraction {FontVariantNumericFraction::Normal};
+    FontVariantNumericOrdinal NumericOrdinal {FontVariantNumericOrdinal::Normal};
+    FontVariantNumericSlashedZero NumericSlashedZero {FontVariantNumericSlashedZero::Normal};
+    FontVariantAlternates Alternates {FontVariantAlternates::Normal()};
+    FontVariantEastAsianVariant EastAsianVariant {FontVariantEastAsianVariant::Normal};
+    FontVariantEastAsianWidth EastAsianWidth {FontVariantEastAsianWidth::Normal};
+    FontVariantEastAsianRuby EastAsianRuby {FontVariantEastAsianRuby::Normal};
+    FontVariantEmoji Emoji {FontVariantEmoji::Normal};
+
+    KRYS_NODISCARD bool IsAllNormal() const noexcept
+    {
+      return CommonLigatures == FontVariantLigatures::Normal
+             && DiscretionaryLigatures == FontVariantLigatures::Normal
+             && HistoricalLigatures == FontVariantLigatures::Normal
+             && ContextualAlternates == FontVariantLigatures::Normal
+             && Position == FontVariantPosition::Normal && Caps == FontVariantCaps::Normal
+             && NumericFigure == FontVariantNumericFigure::Normal
+             && NumericSpacing == FontVariantNumericSpacing::Normal
+             && NumericFraction == FontVariantNumericFraction::Normal
+             && NumericOrdinal == FontVariantNumericOrdinal::Normal
+             && NumericSlashedZero == FontVariantNumericSlashedZero::Normal && Alternates.IsNormal()
+             && EastAsianVariant == FontVariantEastAsianVariant::Normal
+             && EastAsianWidth == FontVariantEastAsianWidth::Normal
+             && EastAsianRuby == FontVariantEastAsianRuby::Normal && Emoji == FontVariantEmoji::Normal;
+    }
+
+    KRYS_NODISCARD bool operator==(const FontVariantSettings &) const noexcept = default;
+  };
+
+  struct FontVariantLigaturesValues
+  {
+    FontVariantLigatures Common {FontVariantLigatures::Normal};
+    FontVariantLigatures Discretionary {FontVariantLigatures::Normal};
+    FontVariantLigatures Historical {FontVariantLigatures::Normal};
+    FontVariantLigatures Contextual {FontVariantLigatures::Normal};
+
+    KRYS_NODISCARD constexpr bool operator==(const FontVariantLigaturesValues &) const noexcept = default;
+  };
+
+  struct FontVariantNumericValues
+  {
+    FontVariantNumericFigure Figure {FontVariantNumericFigure::Normal};
+    FontVariantNumericSpacing Spacing {FontVariantNumericSpacing::Normal};
+    FontVariantNumericFraction Fraction {FontVariantNumericFraction::Normal};
+    FontVariantNumericOrdinal Ordinal {FontVariantNumericOrdinal::Normal};
+    FontVariantNumericSlashedZero SlashedZero {FontVariantNumericSlashedZero::Normal};
+
+    KRYS_NODISCARD constexpr bool operator==(const FontVariantNumericValues &) const noexcept = default;
+  };
+
+  struct FontVariantEastAsianValues
+  {
+    FontVariantEastAsianVariant Variant {FontVariantEastAsianVariant::Normal};
+    FontVariantEastAsianWidth Width {FontVariantEastAsianWidth::Normal};
+    FontVariantEastAsianRuby Ruby {FontVariantEastAsianRuby::Normal};
+
+    KRYS_NODISCARD constexpr bool operator==(const FontVariantEastAsianValues &) const noexcept = default;
+  };
+
+  enum class FontWidthVariant : uint8
+  {
+    RegularWidth,
+    HalfWidth,
+    ThirdWidth,
+    QuarterWidth,
+    LastFontWidthVariant = QuarterWidth,
+  };
+
+  constexpr uint32 FontWidthVariantWidth = 2;
+
+  static_assert(!(static_cast<uint32>(FontWidthVariant::LastFontWidthVariant) >> FontWidthVariantWidth),
+                "FontWidthVariantWidth is correct");
+
+  enum class Kerning : uint8
+  {
+    Auto,
+    Normal,
+    NoShift,
+  };
+
+  enum class FontOpticalSizing : bool
+  {
+    None,
+    Auto,
+  };
+
+  // https://www.microsoft.com/typography/otspec/fvar.htm#VAT
+  enum class FontStyleAxis : uint8
+  {
+    slnt,
+    ital,
+  };
+
+  enum class AllowUserInstalledFonts : bool
+  {
+    No,
+    Yes,
+  };
+
+  using FeaturesMap = HashMap<FontTag, int, FourCharacterTagHash>;
+
+  KRYS_NODISCARD FeaturesMap ComputeFeatureSettingsFromVariants(const FontVariantSettings &,
+                                                                const RefPtr<FontFeatureValues> &) noexcept;
+
+  enum class ResolvedEmojiPolicy : uint8
+  {
+    NoPreference,
+    RequireText,
+    RequireEmoji,
+  };
+
+  enum class ColorGlyphType : uint8
+  {
+    Outline,
+    Color,
+  };
+}
+
+namespace krys
+{
+  template <>
+  struct FastHash<web::FontVariantAlternatesValues>
+  {
+    KRYS_NODISCARD size_t operator()(const web::FontVariantAlternatesValues &key) const noexcept;
+  };
+
+  template <>
+  struct FastHash<web::FontVariantAlternates>
+  {
+    KRYS_NODISCARD size_t operator()(const web::FontVariantAlternates &key) const noexcept;
+  };
+}
+
+namespace krys::web
+{
+  TextStream &operator<<(TextStream &ts, FontSmoothingMode mode) noexcept;
+}

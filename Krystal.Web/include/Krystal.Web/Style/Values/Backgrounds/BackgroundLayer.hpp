@@ -1,0 +1,323 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003, 2005, 2006, 2007, 2008, 2014 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Web/Css/Properties/PropertyId.hpp"
+#include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Style/Values/Backgrounds/BackgroundSize.hpp"
+#include "Krystal.Web/Style/Values/Backgrounds/RepeatStyle.hpp"
+#include "Krystal.Web/Style/Values/Images/ImageOrNone.hpp"
+#include "Krystal.Web/Style/Values/Masking/MaskMode.hpp"
+#include "Krystal.Web/Style/Values/Primitives/CoordinatedValueListValue.hpp"
+#include "Krystal.Web/Style/Values/Primitives/Position.hpp"
+#include <tuple>
+
+namespace krys::web
+{
+  class RenderElement;
+}
+
+namespace krys::web::style
+{
+  // macro(ownerType, property, type, lowercaseName, uppercaseName)
+
+  // clang-format off
+#define KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE(macro)                          \
+  macro(BackgroundLayer, BackgroundImage, ImageOrNone, image, Image)             \
+  macro(BackgroundLayer, BackgroundPositionX, PositionX, positionX, PositionX)   \
+  macro(BackgroundLayer, BackgroundPositionY, PositionY, positionY, PositionY)   \
+  macro(BackgroundLayer, BackgroundSize, BackgroundSize, size, Size)             \
+  macro(BackgroundLayer, BackgroundRepeat, RepeatStyle, repeat, Repeat)
+
+#define KRYS_FOR_EACH_BACKGROUND_LAYER_ENUM(macro)                                          \
+  macro(BackgroundLayer, BackgroundAttachment, FillAttachment, attachment, Attachment)      \
+  macro(BackgroundLayer, BackgroundClip, FillBox, clip, Clip)                               \
+  macro(BackgroundLayer, BackgroundOrigin, FillBox, origin, Origin)                         \
+  macro(BackgroundLayer, BackgroundBlendMode, BlendMode, blendMode, BlendMode)
+
+#define KRYS_FOR_EACH_BACKGROUND_LAYER_SHORTHAND(macro) \
+  macro(BackgroundLayer, BackgroundPosition, Position, position, Position)
+
+#define KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY(macro) \
+  KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE(macro)      \
+  KRYS_FOR_EACH_BACKGROUND_LAYER_ENUM(macro)
+  // clang-format on
+
+  /// @brief One layer of an element's background: the `background-*` values at one index.
+  /// @note The generated `FillAttachment()` and `FillRepeat()` setters hide those types inside the class.
+  /// FIXME: `hasOpaqueImage` (it asks the image whether it's known to be opaque).
+  struct BackgroundLayer
+  {
+  private:
+    ImageOrNone _image;
+    PositionX _positionX;
+    PositionY _positionY;
+    BackgroundSize _size;
+    RepeatStyle _repeat;
+    uint8 _attachment : 2;
+    uint8 _clip : FillBoxBitWidth;
+    uint8 _origin : FillBoxBitWidth;
+    uint8 _blendMode : 5;
+    mutable uint8 _clipMax : FillBoxBitWidth; // maximum _clip value from this to bottom layer
+
+    KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY(KRYS_DECLARE_COORDINATED_VALUE_LIST_IS_SET_AND_IS_FILLED_MEMBERS)
+
+  public:
+    BackgroundLayer() noexcept;
+
+    BackgroundLayer(css::keywords::None) noexcept;
+
+    BackgroundLayer(ImageOrNone &&) noexcept;
+
+    BackgroundLayer(RefPtr<StyleImage> &&) noexcept;
+
+    KRYS_NODISCARD const ImageOrNone &GetImage() const noexcept
+    {
+      return _image;
+    }
+
+    KRYS_NODISCARD const PositionX &GetPositionX() const noexcept
+    {
+      return _positionX;
+    }
+
+    KRYS_NODISCARD const PositionY &GetPositionY() const noexcept
+    {
+      return _positionY;
+    }
+
+    KRYS_NODISCARD const BackgroundSize &GetSize() const noexcept
+    {
+      return _size;
+    }
+
+    KRYS_NODISCARD const RepeatStyle &GetRepeat() const noexcept
+    {
+      return _repeat;
+    }
+
+    KRYS_NODISCARD FillAttachment GetAttachment() const noexcept
+    {
+      return static_cast<web::FillAttachment>(_attachment);
+    }
+
+    KRYS_NODISCARD FillBox GetClip() const noexcept
+    {
+      return static_cast<FillBox>(_clip);
+    }
+
+    KRYS_NODISCARD FillBox GetOrigin() const noexcept
+    {
+      return static_cast<FillBox>(_origin);
+    }
+
+    KRYS_NODISCARD BlendMode GetBlendMode() const noexcept
+    {
+      return static_cast<BlendMode>(_blendMode);
+    }
+
+    KRYS_NODISCARD constexpr static CompositeOperator GetComposite() noexcept
+    {
+      return CompositeOperator::SourceOver;
+    }
+
+    KRYS_NODISCARD constexpr static MaskMode GetMaskMode() noexcept
+    {
+      return MaskMode::MatchSource;
+    }
+
+    KRYS_NODISCARD static CompositeOperator CompositeForPainting(bool /* isLastLayer */) noexcept
+    {
+      return GetComposite();
+    }
+
+    KRYS_NODISCARD static ImageOrNone InitialImage() noexcept
+    {
+      return css::keywords::None {};
+    }
+
+    KRYS_NODISCARD static PositionX InitialPositionX() noexcept
+    {
+      using namespace css::literals;
+      return 0_css_percentage;
+    }
+
+    KRYS_NODISCARD static PositionY InitialPositionY() noexcept
+    {
+      using namespace css::literals;
+      return 0_css_percentage;
+    }
+
+    KRYS_NODISCARD static BackgroundSize InitialSize() noexcept
+    {
+      return css::keywords::Auto {};
+    }
+
+    KRYS_NODISCARD constexpr static RepeatStyle InitialRepeat() noexcept
+    {
+      return {.Values {web::FillRepeat::Repeat, web::FillRepeat::Repeat}};
+    }
+
+    KRYS_NODISCARD constexpr static FillAttachment InitialAttachment() noexcept
+    {
+      return web::FillAttachment::ScrollBackground;
+    }
+
+    KRYS_NODISCARD constexpr static FillBox InitialClip() noexcept
+    {
+      return FillBox::BorderBox;
+    }
+
+    KRYS_NODISCARD constexpr static FillBox InitialOrigin() noexcept
+    {
+      return FillBox::PaddingBox;
+    }
+
+    KRYS_NODISCARD constexpr static BlendMode InitialBlendMode() noexcept
+    {
+      return BlendMode::Normal;
+    }
+
+    KRYS_NODISCARD bool HasImage() const noexcept
+    {
+      return _image.IsImage();
+    }
+
+    /// @brief Whether the layer has an image known to cover what it paints.
+    KRYS_NODISCARD bool HasOpaqueImage(const RenderElement &) const noexcept;
+
+    KRYS_NODISCARD bool HasRepeatXY() const noexcept
+    {
+      return GetRepeat() == web::FillRepeat::Repeat;
+    }
+
+    KRYS_NODISCARD bool ClipOccludesNextLayers() const noexcept
+    {
+      return _clip == _clipMax;
+    }
+
+    void SetClipMax(FillBox clipMax) const noexcept
+    {
+      _clipMax = static_cast<uint8>(clipMax);
+    }
+
+    KRYS_NODISCARD bool operator==(const BackgroundLayer &) const noexcept;
+
+    KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE(KRYS_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_REFERENCE)
+    KRYS_FOR_EACH_BACKGROUND_LAYER_ENUM(KRYS_DECLARE_COORDINATED_VALUE_LIST_GETTER_AND_SETTERS_ENUM)
+
+    // Support for the `background-position` shorthand.
+    KRYS_NODISCARD static Position InitialPosition() noexcept
+    {
+      return {InitialPositionX(), InitialPositionY()};
+    }
+
+    KRYS_NODISCARD Position GetPosition() const noexcept
+    {
+      return {_positionX, _positionY};
+    }
+
+    void SetPosition(Position &&position) noexcept
+    {
+      SetPositionX(krys::move(position.X));
+      SetPositionY(krys::move(position.Y));
+    }
+
+    void FillPosition(Position &&position) noexcept
+    {
+      FillPositionX(krys::move(position.X));
+      FillPositionY(krys::move(position.Y));
+    }
+
+    void ClearPosition() noexcept
+    {
+      ClearPositionX();
+      ClearPositionY();
+    }
+
+    KRYS_NODISCARD bool IsPositionUnset() const noexcept
+    {
+      return IsPositionXUnset() && IsPositionYUnset();
+    }
+
+    KRYS_NODISCARD bool IsPositionSet() const noexcept
+    {
+      return IsPositionXSet() || IsPositionYSet();
+    }
+
+    KRYS_NODISCARD bool IsPositionFilled() const noexcept
+    {
+      return IsPositionXFilled() || IsPositionYFilled();
+    }
+
+    // CoordinatedValueList interface.
+    constexpr static auto ComputedValueUsesUsedValues = true;
+    constexpr static auto BaseProperty = css::PropertyNameConstant<css::PropertyId::BackgroundImage> {};
+    constexpr static auto Properties =
+      std::tuple {KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY(KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY)};
+
+    KRYS_NODISCARD static BackgroundLayer Clone(const BackgroundLayer &other) noexcept
+    {
+      return other;
+    }
+
+    KRYS_NODISCARD bool IsInitial() const noexcept
+    {
+      return _image.IsNone();
+    }
+
+  private:
+    // Needed by macros to access members.
+    KRYS_NODISCARD BackgroundLayer &Data() noexcept
+    {
+      return *this;
+    }
+
+    KRYS_NODISCARD const BackgroundLayer &Data() const noexcept
+    {
+      return *this;
+    }
+  };
+
+  KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE(KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_REFERENCE)
+  KRYS_FOR_EACH_BACKGROUND_LAYER_ENUM(KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_ENUM)
+  KRYS_FOR_EACH_BACKGROUND_LAYER_SHORTHAND(KRYS_DECLARE_COORDINATED_VALUE_LIST_PROPERTY_ACCESSOR_SHORTHAND)
+
+  // MARK: - Blending
+
+  template <>
+  struct Blending<BackgroundLayer>
+  {
+    KRYS_NODISCARD static bool CanBlend(const BackgroundLayer &, const BackgroundLayer &) noexcept;
+  };
+
+#undef KRYS_FOR_EACH_BACKGROUND_LAYER_REFERENCE
+#undef KRYS_FOR_EACH_BACKGROUND_LAYER_ENUM
+#undef KRYS_FOR_EACH_BACKGROUND_LAYER_SHORTHAND
+#undef KRYS_FOR_EACH_BACKGROUND_LAYER_PROPERTY
+}

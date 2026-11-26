@@ -1,0 +1,87 @@
+﻿/*
+ * Copyright (C) 2012 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+
+namespace krys::web
+{
+  class Element;
+}
+
+namespace krys::web::dom
+{
+  class IdTargetObserver;
+
+  /// @brief The observers of a tree scope's IDs, told when the element with an ID changes.
+  class IdTargetObserverRegistry final
+  {
+    friend class IdTargetObserver;
+    KRYS_NON_COPY_MOVABLE(IdTargetObserverRegistry);
+
+  private:
+    struct ObserverSet final
+    {
+      HashSet<IdTargetObserver *> Observers;
+    };
+
+    using IdToObserverSetMap = HashMap<DOMStringAtom, UniquePtr<ObserverSet>>;
+
+    IdToObserverSetMap _registry;
+    ObserverSet *_notifyingObserversInSet {};
+
+  public:
+    IdTargetObserverRegistry() noexcept = default;
+
+    ~IdTargetObserverRegistry() noexcept = default;
+
+    /// @brief Tells the observers of @p id that @p element gained or lost it.
+    void NotifyObservers(Element &element, const DOMStringAtom &id) noexcept;
+
+  private:
+    void AddObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept;
+
+    void RemoveObserver(const DOMStringAtom &id, IdTargetObserver &observer) noexcept;
+
+    void NotifyObserversInternal(Element &element, const DOMStringAtom &id) noexcept;
+  };
+
+  inline void IdTargetObserverRegistry::NotifyObservers(Element &element, const DOMStringAtom &id) noexcept
+  {
+    krys_debug_assert(!id.View().empty());
+    krys_debug_assert(!_notifyingObserversInSet);
+    if (_registry.empty())
+    {
+      return;
+    }
+    NotifyObserversInternal(element, id);
+  }
+}

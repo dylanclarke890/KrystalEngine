@@ -1,0 +1,321 @@
+﻿/*
+ * Copyright (C) 2008-2021 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Values/Images/Gradient.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Values/Primitives/NumericTypesSerialisation.hpp"
+
+namespace krys::web::css
+{
+  // MARK: - Gradient Color Stop
+
+  namespace
+  {
+    template <typename C, typename P>
+    void ColorStopSerialisationForCSS(StringBuilder &builder, const SerialisationContext &context,
+                                      const GradientColorStop<C, P> &stop) noexcept
+    {
+      if (stop.Color && stop.Position)
+      {
+        Serialise(builder, context, *stop.Color);
+        builder.Append(u8' ');
+        Serialise(builder, context, *stop.Position);
+      }
+      else if (stop.Color)
+      {
+        Serialise(builder, context, *stop.Color);
+      }
+      else if (stop.Position)
+      {
+        Serialise(builder, context, *stop.Position);
+      }
+    }
+  }
+
+  void Serialiser<GradientAngularColorStop>::operator()(StringBuilder &builder,
+                                                        const SerialisationContext &context,
+                                                        const GradientAngularColorStop &stop) noexcept
+  {
+    ColorStopSerialisationForCSS(builder, context, stop);
+  }
+
+  void Serialiser<GradientLinearColorStop>::operator()(StringBuilder &builder,
+                                                       const SerialisationContext &context,
+                                                       const GradientLinearColorStop &stop) noexcept
+  {
+    ColorStopSerialisationForCSS(builder, context, stop);
+  }
+
+  // MARK: - Gradient Color Interpolation
+
+  namespace
+  {
+    bool AppendColorInterpolationMethod(StringBuilder &builder,
+                                        GradientColorInterpolationMethod colorInterpolationMethod,
+                                        bool needsLeadingSpace) noexcept
+    {
+      return krys::SwitchOn(
+        colorInterpolationMethod.Method.ColourSpace,
+        [&](const ColourInterpolationMethod::OKLab &)
+        {
+          if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::OKLab)
+          {
+            builder.Append(needsLeadingSpace ? u8" in oklab" : u8"in oklab");
+            return true;
+          }
+          return false;
+        },
+        [&](const ColourInterpolationMethod::SRGB &)
+        {
+          if (colorInterpolationMethod.DefaultMethod != GradientColorInterpolationMethod::Default::SRGB)
+          {
+            builder.Append(needsLeadingSpace ? u8" in srgb" : u8"in srgb");
+            return true;
+          }
+          return false;
+        },
+        [&]<typename MethodColourSpace>(const MethodColourSpace &methodColorSpace)
+        {
+          builder.Append(needsLeadingSpace ? u8" in " : u8"in ");
+          builder.Append(SerialisationForCSS(methodColorSpace.InterpolationColourSpace));
+          if constexpr (hasHueInterpolationMethod<MethodColourSpace>)
+          {
+            SerialisationForCSS(builder, methodColorSpace.HueInterpolationMethod);
+          }
+          return true;
+        });
+    }
+  }
+
+  // MARK: - LinearGradient
+
+  void Serialiser<LinearGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
+                                              const LinearGradient &gradient) noexcept
+  {
+    bool wroteSomething = false;
+
+    krys::SwitchOn(
+      gradient.GradientLine,
+      [&](const Angle<> &angle)
+      {
+        krys::SwitchOn(
+          angle,
+          [&](const Angle<>::Raw &angleRaw)
+          {
+            if (ConvertToValueInUnitsOf<AngleUnit::Deg>(angleRaw) == 180)
+            {
+              return;
+            }
+
+            Serialise(builder, context, angleRaw);
+            wroteSomething = true;
+          },
+          [&](const Angle<>::Calc &angleCalc)
+          {
+            Serialise(builder, context, angleCalc);
+            wroteSomething = true;
+          });
+      },
+      [&](const Horizontal &horizontal)
+      {
+        builder.Append(u8"to ");
+        Serialise(builder, context, horizontal);
+        wroteSomething = true;
+      },
+      [&](const Vertical &vertical)
+      {
+        if (std::holds_alternative<keywords::Bottom>(vertical))
+        {
+          return;
+        }
+
+        builder.Append(u8"to ");
+        Serialise(builder, context, vertical);
+        wroteSomething = true;
+      },
+      [&](const SpaceSeparatedTuple<Horizontal, Vertical> &pair)
+      {
+        builder.Append(u8"to ");
+        Serialise(builder, context, pair);
+        wroteSomething = true;
+      });
+
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
+    {
+      wroteSomething = true;
+    }
+
+    if (wroteSomething)
+    {
+      builder.Append(u8", ");
+    }
+
+    Serialise(builder, context, gradient.Stops);
+  }
+
+  // MARK: - RadialGradient
+
+  void Serialiser<RadialGradient::Ellipse>::operator()(StringBuilder &builder,
+                                                       const SerialisationContext &context,
+                                                       const RadialGradient::Ellipse &ellipse) noexcept
+  {
+    auto lengthBefore = builder.Length();
+
+    krys::SwitchOn(
+      ellipse.Size, [&](const RadialGradient::Ellipse::SizeType &size) { Serialise(builder, context, size); },
+      [&](const RadialGradient::Extent &extent)
+      {
+        if (!std::holds_alternative<keywords::FarthestCorner>(extent))
+        {
+          Serialise(builder, context, extent);
+        }
+      });
+
+    if (ellipse.Position)
+    {
+      if (!IsCenterPosition(*ellipse.Position))
+      {
+        bool wroteSomething = builder.Length() != lengthBefore;
+        if (wroteSomething)
+        {
+          builder.Append(u8' ');
+        }
+
+        builder.Append(u8"at ");
+        Serialise(builder, context, *ellipse.Position);
+      }
+    }
+  }
+
+  void Serialiser<RadialGradient::Circle>::operator()(StringBuilder &builder,
+                                                      const SerialisationContext &context,
+                                                      const RadialGradient::Circle &circle) noexcept
+  {
+    krys::SwitchOn(
+      circle.Size, [&](const RadialGradient::Circle::Length &length) { Serialise(builder, context, length); },
+      [&](const RadialGradient::Extent &extent)
+      {
+        if (!std::holds_alternative<keywords::FarthestCorner>(extent))
+        {
+          builder.Append(u8"circle ");
+          Serialise(builder, context, extent);
+        }
+        else
+        {
+          builder.Append(u8"circle");
+        }
+      });
+
+    if (circle.Position)
+    {
+      if (!IsCenterPosition(*circle.Position))
+      {
+        builder.Append(u8" at ");
+        Serialise(builder, context, *circle.Position);
+      }
+    }
+  }
+
+  void Serialiser<RadialGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
+                                              const RadialGradient &gradient) noexcept
+  {
+    auto lengthBefore = builder.Length();
+    Serialise(builder, context, gradient.GradientBox);
+    bool wroteSomething = builder.Length() != lengthBefore;
+
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
+    {
+      wroteSomething = true;
+    }
+
+    if (wroteSomething)
+    {
+      builder.Append(u8", ");
+    }
+
+    Serialise(builder, context, gradient.Stops);
+  }
+
+  // MARK: - ConicGradient
+
+  void Serialiser<ConicGradient::GradientBoxType>::operator()(
+    StringBuilder &builder, const SerialisationContext &context,
+    const ConicGradient::GradientBoxType &gradientBox) noexcept
+  {
+    bool wroteSomething = false;
+
+    if (gradientBox.Angle)
+    {
+      krys::SwitchOn(
+        *gradientBox.Angle,
+        [&](const Angle<>::Raw &angleRaw)
+        {
+          if (angleRaw.Value)
+          {
+            builder.Append(u8"from ");
+            Serialise(builder, context, angleRaw);
+            wroteSomething = true;
+          }
+        },
+        [&](const Angle<>::Calc &angleCalc)
+        {
+          builder.Append(u8"from ");
+          Serialise(builder, context, angleCalc);
+          wroteSomething = true;
+        });
+    }
+
+    if (gradientBox.Position && !IsCenterPosition(*gradientBox.Position))
+    {
+      if (wroteSomething)
+      {
+        builder.Append(u8' ');
+      }
+      builder.Append(u8"at ");
+      Serialise(builder, context, *gradientBox.Position);
+    }
+  }
+
+  void Serialiser<ConicGradient>::operator()(StringBuilder &builder, const SerialisationContext &context,
+                                             const ConicGradient &gradient) noexcept
+  {
+    auto lengthBefore = builder.Length();
+    Serialise(builder, context, gradient.GradientBox);
+    bool wroteSomething = builder.Length() != lengthBefore;
+
+    if (AppendColorInterpolationMethod(builder, gradient.ColourInterpolationMethod, wroteSomething))
+    {
+      wroteSomething = true;
+    }
+
+    if (wroteSomething)
+    {
+      builder.Append(u8", ");
+    }
+
+    Serialise(builder, context, gradient.Stops);
+  }
+}

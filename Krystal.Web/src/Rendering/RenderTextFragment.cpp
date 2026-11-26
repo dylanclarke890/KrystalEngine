@@ -1,0 +1,143 @@
+﻿/*
+ * (C) 1999 Lars Knoll (knoll@kde.org)
+ * (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2004, 2005, 2006, 2007 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#include "Krystal.Web/Rendering/RenderTextFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Rendering/Iterators/RenderAncestorIterator.hpp"
+#include "Krystal.Web/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
+#include "Krystal.Web/Rendering/RenderBlock.hpp"
+#include "Krystal.Web/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Web/Rendering/RenderView.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Updating/RenderTreeBuilder.hpp"
+
+namespace krys::web
+{
+  RenderTextFragment::RenderTextFragment(web::Text &textNode, utf8_stringview text, size_t startOffset,
+                                         size_t length) noexcept
+      : RenderText(Type::TextFragment, textNode, utf8_string(text.substr(startOffset, length))),
+        _start(startOffset), _end(length)
+  {
+  }
+
+  RenderTextFragment::RenderTextFragment(Document &document, utf8_stringview text, size_t startOffset,
+                                         size_t length) noexcept
+      : RenderText(Type::TextFragment, document, utf8_string(text.substr(startOffset, length))),
+        _start(startOffset), _end(length)
+  {
+  }
+
+  RenderTextFragment::RenderTextFragment(Document &document, utf8_string text) noexcept
+      : RenderText(Type::TextFragment, document, text), _start(0), _end(text.size()),
+        _contentString(krys::move(text))
+  {
+  }
+
+  bool RenderTextFragment::CanBeSelectionLeaf() const noexcept
+  {
+    return TextNode() && TextNode()->HasEditableStyle();
+  }
+
+  RenderTextFragment::~RenderTextFragment() noexcept
+  {
+    krys_debug_assert(!_firstLetter);
+  }
+
+  RenderBoxModelObject *RenderTextFragment::FirstLetter() const noexcept
+  {
+    return _firstLetter.get();
+  }
+
+  void RenderTextFragment::SetFirstLetter(RenderBoxModelObject &firstLetter) noexcept
+  {
+    _firstLetter = CreateWeakPtr(&firstLetter);
+  }
+
+  void RenderTextFragment::SetTextInternal(utf8_string newText, bool force) noexcept
+  {
+    RenderText::SetTextInternal(krys::move(newText), force);
+
+    _start = 0;
+    _end = Text().size();
+    if (!_firstLetter)
+    {
+      return;
+    }
+    if (auto *builder = RenderTreeBuilder::Current())
+    {
+      builder->Destroy(*_firstLetter);
+    }
+    else
+    {
+      RenderTreeBuilder(*GetDocument().GetRenderView()).Destroy(*_firstLetter);
+    }
+    krys_debug_assert(!_firstLetter);
+    krys_debug_assert(!TextNode() || TextNode()->Renderer() == this);
+  }
+
+  utf8_string RenderTextFragment::PreviousCharacter() const noexcept
+  {
+    if (Start())
+    {
+      utf8_stringview original = TextNode() ? utf8_stringview(TextNode()->Data()) : _contentString;
+      if (Start() <= original.size())
+      {
+        // The code point that ends where the fragment starts.
+        auto start = Start() - 1;
+        while (start > 0 && (original[start] & 0xC0) == 0x80)
+        {
+          --start;
+        }
+        return utf8_string(original.substr(start, Start() - start));
+      }
+    }
+    return RenderText::PreviousCharacter();
+  }
+
+  RenderBlock *RenderTextFragment::BlockForAccompanyingFirstLetter() noexcept
+  {
+    if (!_firstLetter)
+    {
+      return nullptr;
+    }
+    for (auto &block : AncestorsOfType<RenderBlock>(*_firstLetter))
+    {
+      // The first letter of a multi-column flow's content is its container's.
+      if (Is<RenderMultiColumnFlow>(block))
+      {
+        break;
+      }
+      if (block.Style().HasPseudoStyle(PseudoElementType::FirstLetter) && block.CanHaveChildren())
+      {
+        return &block;
+      }
+    }
+    return nullptr;
+  }
+
+  void RenderTextFragment::SetContentString(utf8_string text) noexcept
+  {
+    _contentString = text;
+    SetText(krys::move(text));
+  }
+}

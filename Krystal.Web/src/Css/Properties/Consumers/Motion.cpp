@@ -1,0 +1,261 @@
+﻿/*
+ * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/Motion.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/AngleDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/MetaConsumer.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Position.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Shapes.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Url.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParsing.hpp"
+#include "Krystal.Web/Css/Values/Motion/RayFunction.hpp"
+#include "Krystal.Web/Css/Values/Primitives/Position.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/RayValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+
+namespace krys::web::css::parse_property
+{
+  KRYS_NODISCARD static Maybe<RaySize> RaySizeFromValueId(ValueId id) noexcept
+  {
+    switch (id)
+    {
+      case ValueId::ClosestSide:
+      {
+        return RaySize {keywords::ClosestSide {}};
+      }
+      case ValueId::ClosestCorner:
+      {
+        return RaySize {keywords::ClosestCorner {}};
+      }
+      case ValueId::FarthestSide:
+      {
+        return RaySize {keywords::FarthestSide {}};
+      }
+      case ValueId::FarthestCorner:
+      {
+        return RaySize {keywords::FarthestCorner {}};
+      }
+      case ValueId::Sides:
+      {
+        return RaySize {keywords::Sides {}};
+      }
+      default:
+      {
+        return null;
+      }
+    }
+  }
+
+  KRYS_NODISCARD static RefPtr<Value> ConsumeRayFunction(TokenRange &tokens,
+                                                         PropertyParserState &state) noexcept
+  {
+    // ray( <angle> && <ray-size>? && contain? && [at <position>]? )
+    // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides
+    // https://drafts.fxtf.org/motion-1/#ray-function
+
+    if (tokens.Peek().Type() != TokenType::Function || tokens.Peek().FunctionId() != ValueId::Ray)
+    {
+      return {};
+    }
+
+    auto args = ConsumeFunction(tokens);
+
+    Maybe<Angle<>> angle;
+    Maybe<RaySize> size;
+    Maybe<keywords::Contain> contain;
+    Maybe<Position> position;
+
+    auto ConsumeAngle = [&] -> bool
+    {
+      if (angle)
+      {
+        return false;
+      }
+
+      angle = MetaConsumer<Angle<>>::Consume(args, state);
+      return angle.has_value();
+    };
+
+    auto ConsumeSize = [&] -> bool
+    {
+      if (size)
+      {
+        return false;
+      }
+
+      size = ConsumeIdentUsingMapping(args, RaySizeFromValueId);
+      return size.has_value();
+    };
+
+    auto ConsumeContain = [&] -> bool
+    {
+      if (contain || !ConsumeIdentRaw<ValueId::Contain>(args).has_value())
+      {
+        return false;
+      }
+
+      contain = keywords::Contain {};
+      return true;
+    };
+
+    auto ConsumeAtPosition = [&] -> bool
+    {
+      if (position || !ConsumeIdentRaw<ValueId::At>(args).has_value())
+      {
+        return false;
+      }
+
+      position = ConsumePositionUnresolved(args, state);
+      return position.has_value();
+    };
+
+    while (!args.IsAtEnd())
+    {
+      if (ConsumeAngle() || ConsumeSize() || ConsumeContain() || ConsumeAtPosition())
+      {
+        continue;
+      }
+
+      return {};
+    }
+
+    // The <angle> argument is the only one that is required.
+    if (!angle)
+    {
+      return {};
+    }
+
+    return RayValue::Create(
+      RayFunction {.Parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
+                                      krys::move(contain), krys::move(position)}});
+  }
+
+  RefPtr<Value> ConsumeOffsetPath(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'offset-path'> = none | <offset-path> || <coord-box>
+    //
+    // NOTE: The sub-production, <offset-path> (without the quotation marks) is distinct and defined as:
+    //    <offset-path> = <ray()> | <url> | <basic-shape>
+    //
+    // So, this expands out to a grammar of:
+    //
+    // <'offset-path'> = none | [ <ray()> | <url> | <basic-shape> || <coord-box> ]
+    //
+    // which is almost the same as <'clip-path'> above, with the following differences:
+    //
+    // 1. <'clip-path'> does not support `ray()`.
+    // 2. <'clip-path'> does not allow a `box` to be provided with `<url>`.
+    // 3. <'clip-path'> specifies `<geometry-box>` rather than `<coord-box>`.
+    //
+    // https://drafts.fxtf.org/motion-1/#propdef-offset-path
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    // FIXME: It should be possible to consume both a <url> and <coord-box>.
+    if (auto url = ConsumeUrl(tokens, state, {}))
+    {
+      return url;
+    }
+
+    RefPtr<Value> shapeOrRay;
+    RefPtr<Value> box;
+
+    auto ConsumeRay = [&]() -> bool
+    {
+      if (shapeOrRay)
+      {
+        return false;
+      }
+
+      shapeOrRay = ConsumeRayFunction(tokens, state);
+      return !!shapeOrRay;
+    };
+
+    auto ConsumeShape = [&]() -> bool
+    {
+      if (shapeOrRay)
+      {
+        return false;
+      }
+
+      shapeOrRay = ConsumeBasicShape(tokens, state, PathParsingOption::RejectPathFillRule);
+      return !!shapeOrRay;
+    };
+
+    auto ConsumeBox = [&]() -> bool
+    {
+      if (box)
+      {
+        return false;
+      }
+
+      // FIXME: The Motion Path spec calls for this to be a <coord-box>, not a <geometry-box>, the difference
+      // being that the former does not contain "margin-box" as a valid term. However, the spec also has a few
+      // examples using "margin-box", so there seems to be some abiguity to be resolved. See:
+      // https://github.com/w3c/fxtf-drafts/issues/481.
+      box = PropertyParsing::ConsumeGeometryBox(tokens);
+      return !!box;
+    };
+
+    while (!tokens.IsAtEnd())
+    {
+      if (ConsumeRay() || ConsumeShape() || ConsumeBox())
+      {
+        continue;
+      }
+
+      break;
+    }
+
+    bool hasShapeOrRay = !!shapeOrRay;
+
+    ValueListBuilder list;
+    if (shapeOrRay)
+    {
+      list.push_back(krys::move(shapeOrRay));
+    }
+
+    // Default value is border-box.
+    if (box && (box->ValueId() != ValueId::BorderBox || !hasShapeOrRay))
+    {
+      list.push_back(krys::move(box));
+    }
+
+    if (list.empty())
+    {
+      return nullptr;
+    }
+
+    return ValueList::CreateSpaceSeparated(krys::move(list));
+  }
+}

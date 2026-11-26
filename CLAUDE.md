@@ -2,7 +2,7 @@
 
 C++ game engine (latest standard, CMake + vcpkg). Each module has its own `CMakeLists.txt`, `include/<Module>/` and `src/` (same folder structure), and keeps its documents in `docs/` and scripts in `tools/`.
 
-**Working on Krystal.Booey or its tests? Read `Krystal.Booey/CLAUDE.md` first.** Krystal.Gfx and Krystal.UI are described in their `docs/OVERVIEW.md`.
+**Working on Krystal.Web or its tests? Read `Krystal.Web/CLAUDE.md` first.** Krystal.Gfx and Krystal.Booey are described in their `docs/OVERVIEW.md`.
 
 ## Code style
 

@@ -1,0 +1,109 @@
+﻿/*
+ * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Html/Canvas/CanvasRenderingContext2DBase.hpp"
+
+namespace krys::text
+{
+  enum class TextDirection : bool;
+}
+
+namespace krys::web
+{
+  class HTMLCanvasElement;
+  class Path;
+  class RenderStyle;
+}
+
+namespace krys::web::html
+{
+  class Path2D;
+
+  /// @brief A `<canvas>`'s 2D context, `GetContext(u8"2d")`.
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#canvasrenderingcontext2d
+  class CanvasRenderingContext2D final : public CanvasRenderingContext2DBase
+  {
+  public:
+    KRYS_NODISCARD static UniquePtr<CanvasRenderingContext2D>
+      Create(CanvasBase &, CanvasRenderingContext2DSettings &&, bool usesCSSCompatibilityParseMode) noexcept;
+
+    CanvasRenderingContext2D(CanvasBase &, CanvasRenderingContext2DSettings &&,
+                             bool usesCSSCompatibilityParseMode) noexcept;
+
+    ~CanvasRenderingContext2D() noexcept override;
+
+    KRYS_NODISCARD HTMLCanvasElement &Canvas() const noexcept;
+
+    /// @brief Sets the font, a CSS `font` value relative to the canvas's font; ignored if it isn't one.
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-font
+    void SetFont(DOMStringView) noexcept;
+
+    /// @brief Draws a focus ring along the current path if @p element, which must be the canvas's fallback
+    /// content, has the focus.
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-drawfocusifneeded
+    void DrawFocusIfNeeded(Element &element) noexcept;
+
+    /// @brief Draws a focus ring along @p path if @p element, which must be the canvas's fallback content,
+    /// has the focus.
+    void DrawFocusIfNeeded(Path2D &path, Element &element) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-direction
+    KRYS_NODISCARD CanvasDirection GetDirection() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-filltext
+    void FillText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-stroketext
+    void StrokeText(DOMStringView text, double x, double y, Maybe<double> maxWidth = null) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-measuretext
+    KRYS_NODISCARD Ref<TextMetrics> MeasureText(DOMStringView text) noexcept;
+
+  private:
+    KRYS_NODISCARD const FontProxy *GetFontProxy() noexcept final;
+
+    KRYS_NODISCARD Maybe<style::Filter> SetFilterStringWithoutUpdatingStyle(DOMStringView) noexcept override;
+
+    KRYS_NODISCARD RefPtr<web::Filter> CreateFilter(const RectF &bounds) const noexcept override;
+
+    KRYS_NODISCARD IntOutsets CalculateFilterOutsets(const RectF &bounds) const noexcept override;
+
+    KRYS_NODISCARD StringAtom InheritedLanguage() const noexcept final;
+
+    void SetFontWithoutUpdatingStyle(DOMStringView) noexcept;
+
+    void DrawFocusIfNeededInternal(const Path &, Element &) noexcept;
+
+    void DrawTextInternal(DOMStringView text, double x, double y, bool fill,
+                          Maybe<double> maxWidth = null) noexcept;
+
+    KRYS_NODISCARD text::TextDirection
+      ToTextDirection(Direction, const RenderStyle **computedStyle = nullptr) const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_TRAITS_CANVAS_RENDERING_CONTEXT(krys::web::html::CanvasRenderingContext2D, Is2d())

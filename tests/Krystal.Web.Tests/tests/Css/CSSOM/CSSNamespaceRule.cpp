@@ -1,0 +1,34 @@
+﻿#include "Krystal.Web/Css/CSSOM/CSSNamespaceRule.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/CSSOMTestUtils.hpp"
+
+namespace krys::web::css::tests
+{
+  TEST_CASE("CSSNamespaceRule", "[CSS][CSSOM][CSSNamespaceRule]")
+  {
+    auto sheet = SheetFromText(u8"@namespace url(http://www.w3.org/1999/xhtml); "
+                               u8"@namespace svg url(\"http://www.w3.org/2000/svg\"); "
+                               u8"@namespace \\31 x \"a\\\"b\";");
+
+    SECTION("default")
+    {
+      auto &rule = RuleAt<CSSNamespaceRule>(*sheet, 0);
+      CHECK(TypeOf(rule) == RuleType::Namespace);
+      CHECK(rule.Prefix() == null);
+      CHECK(ToNarrow(rule.NamespaceURI().ToString()) == "http://www.w3.org/1999/xhtml");
+      CHECK(RuleText(rule) == "@namespace url(\"http://www.w3.org/1999/xhtml\");");
+    }
+
+    SECTION("prefixed")
+    {
+      auto &rule = RuleAt<CSSNamespaceRule>(*sheet, 1);
+      CHECK(ToNarrow(rule.Prefix().ToString()) == "svg");
+      CHECK(RuleText(rule) == "@namespace svg url(\"http://www.w3.org/2000/svg\");");
+    }
+
+    SECTION("escaped")
+    {
+      CHECK(RuleText(*sheet->Item(2)) == "@namespace \\31 x url(\"a\\\"b\");");
+    }
+  }
+}

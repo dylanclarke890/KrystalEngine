@@ -1,0 +1,1036 @@
+﻿/*
+ * Copyright (C) 2004-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Google Inc. All rights reserved.
+ * Portions Copyright (c) 2011 Motorola Mobility, Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Editing/Editing.hpp"
+#include "Krystal.Web/Editing/Selection/VisibleUnits.hpp"
+#include "Krystal.Web/Editing/TextIterator.hpp"
+#include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/LineSelection.hpp"
+#include "Krystal.Web/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Web/Rendering/Selection/CaretRectComputation.hpp"
+#include <algorithm>
+
+namespace krys::web
+{
+  VisiblePosition::VisiblePosition(const Position &position, Affinity affinity) noexcept
+      : _deepPosition {CanonicalPosition(position)}
+  {
+    if (affinity == Affinity::Upstream && !IsNull())
+    {
+      auto upstreamCopy = *this;
+      upstreamCopy._affinity = Affinity::Upstream;
+      if (!InSameLine(*this, upstreamCopy))
+      {
+        _affinity = Affinity::Upstream;
+      }
+    }
+  }
+
+  VisiblePosition VisiblePosition::Next(EditingBoundaryCrossingRule rule,
+                                        bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    // FIXME: Support CanSkipEditingBoundary
+    krys_debug_assert(rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary
+                      || rule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
+    VisiblePosition next(NextVisuallyDistinctCandidate(_deepPosition), _affinity);
+
+    if (rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary)
+    {
+      return next;
+    }
+
+    return HonorEditingBoundaryAtOrAfter(next, reachedBoundary);
+  }
+
+  VisiblePosition VisiblePosition::Previous(EditingBoundaryCrossingRule rule,
+                                            bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    // FIXME: Support CanSkipEditingBoundary
+    krys_debug_assert(rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary
+                      || rule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
+    // find first previous DOM position that is visible
+    Position pos = PreviousVisuallyDistinctCandidate(_deepPosition);
+
+    // return null visible position if there is no previous visible position
+    if (pos.AtStartOfTree())
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    VisiblePosition prev = pos;
+    krys_debug_assert(prev != *this);
+
+    if (rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary)
+    {
+      return prev;
+    }
+
+    return HonorEditingBoundaryAtOrBefore(prev, reachedBoundary);
+  }
+
+  Position VisiblePosition::LeftVisuallyDistinctCandidate() const noexcept
+  {
+    Position p = _deepPosition;
+    if (p.IsNull())
+    {
+      return Position();
+    }
+
+    Position downstreamStart = p.Downstream();
+    text::TextDirection primaryDirection = p.PrimaryDirection();
+
+    inline_iterator::LineLogicalOrderCache orderCache;
+
+    while (true)
+    {
+      auto [box, offset] = p.GetInlineBoxAndOffset(_affinity, primaryDirection);
+      if (!box)
+      {
+        return primaryDirection == text::TextDirection::LTR ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                                                            : NextVisuallyDistinctCandidate(_deepPosition);
+      }
+
+      const RenderObject *renderer = &box->Renderer();
+
+      while (true)
+      {
+        if ((renderer->IsBlockLevelReplacedOrAtomicInline() || renderer->IsBR())
+            && offset == box->RightmostCaretOffset())
+        {
+          return box->IsLeftToRightDirection() ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                                               : NextVisuallyDistinctCandidate(_deepPosition);
+        }
+
+        if (!renderer->GetNode())
+        {
+          box.TraverseLineLeftwardOnLine();
+          if (!box)
+          {
+            return primaryDirection == text::TextDirection::LTR
+                     ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                     : NextVisuallyDistinctCandidate(_deepPosition);
+          }
+          renderer = &box->Renderer();
+          offset = box->RightmostCaretOffset();
+          continue;
+        }
+
+        // Note that this may underflow the (unsigned) offset. This is fine and handled below.
+        offset = static_cast<uint32>(box->IsLeftToRightDirection()
+                                       ? renderer->PreviousOffset(static_cast<int32>(offset))
+                                       : renderer->NextOffset(static_cast<int32>(offset)));
+
+        auto caretMinOffset = box->MinimumCaretOffset();
+        auto caretMaxOffset = box->MaximumCaretOffset();
+
+        if (offset > caretMinOffset && offset < caretMaxOffset)
+        {
+          break;
+        }
+
+        if (offset != box->LeftmostCaretOffset())
+        {
+          // Overshot to the left.
+          auto previousBox = box->NextLineLeftwardOnLineIgnoringLineBreak();
+          if (!previousBox)
+          {
+            Position positionOnLeft = primaryDirection == text::TextDirection::LTR
+                                        ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                                        : NextVisuallyDistinctCandidate(_deepPosition);
+            auto boxOnLeft = positionOnLeft.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
+            if (boxOnLeft && boxOnLeft->GetLineBox() == box->GetLineBox())
+            {
+              return Position();
+            }
+            return positionOnLeft;
+          }
+
+          // Reposition at the other logical position corresponding to our edge's visual position and go for
+          // another round.
+          box = previousBox;
+          renderer = &box->Renderer();
+          offset = previousBox->RightmostCaretOffset();
+          continue;
+        }
+
+        uint8 level = box->BidiLevel();
+        auto previousBox = box->NextLineLeftwardOnLine();
+
+        if (box->Direction() == primaryDirection)
+        {
+          if (!previousBox)
+          {
+            auto logicalStart =
+              primaryDirection == text::TextDirection::LTR
+                ? inline_iterator::FirstLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache)
+                : inline_iterator::LastLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache);
+            if (logicalStart)
+            {
+              box = logicalStart;
+              renderer = &box->Renderer();
+              offset = primaryDirection == text::TextDirection::LTR ? box->MinimumCaretOffset()
+                                                                    : box->MaximumCaretOffset();
+            }
+            break;
+          }
+          if (previousBox->BidiLevel() >= level)
+          {
+            break;
+          }
+
+          level = previousBox->BidiLevel();
+
+          auto nextBox = box;
+          do
+          {
+            nextBox.TraverseLineRightwardOnLine();
+          } while (nextBox && nextBox->BidiLevel() > level);
+
+          if (nextBox && nextBox->BidiLevel() == level)
+          {
+            break;
+          }
+
+          box = previousBox;
+          renderer = &box->Renderer();
+          offset = box->RightmostCaretOffset();
+          if (box->Direction() == primaryDirection)
+          {
+            break;
+          }
+          continue;
+        }
+
+        while (previousBox && !previousBox->Renderer().GetNode())
+        {
+          previousBox.TraverseLineLeftwardOnLine();
+        }
+
+        if (previousBox)
+        {
+          box = previousBox;
+          renderer = &box->Renderer();
+          offset = box->RightmostCaretOffset();
+          if (box->BidiLevel() > level)
+          {
+            do
+            {
+              previousBox = previousBox.TraverseLineLeftwardOnLine();
+            } while (previousBox && previousBox->BidiLevel() > level);
+
+            if (!previousBox || previousBox->BidiLevel() < level)
+            {
+              continue;
+            }
+          }
+        }
+        else
+        {
+          // Trailing edge of a secondary box. Set to the leading edge of the entire box.
+          while (true)
+          {
+            while (auto nextBox = box->NextLineRightwardOnLine())
+            {
+              if (nextBox->BidiLevel() < level)
+              {
+                break;
+              }
+              box = nextBox;
+            }
+            if (box->BidiLevel() == level)
+            {
+              break;
+            }
+            level = box->BidiLevel();
+            while (auto prevBox = box->NextLineLeftwardOnLine())
+            {
+              if (prevBox->BidiLevel() < level)
+              {
+                break;
+              }
+              box = prevBox;
+            }
+            if (box->BidiLevel() == level)
+            {
+              break;
+            }
+            level = box->BidiLevel();
+          }
+          renderer = &box->Renderer();
+          offset = primaryDirection == text::TextDirection::LTR ? box->MinimumCaretOffset()
+                                                                : box->MaximumCaretOffset();
+        }
+        break;
+      }
+
+      p = CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+
+      if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
+      {
+        return p;
+      }
+
+      krys_debug_assert(p != _deepPosition);
+    }
+  }
+
+  VisiblePosition VisiblePosition::Left(bool stayInEditableContent, bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    Position pos = LeftVisuallyDistinctCandidate();
+    // FIXME: Why can't we move left from the last position in a tree?
+    if (pos.AtStartOfTree() || pos.AtEndOfTree())
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    VisiblePosition left = pos;
+    krys_debug_assert(left != *this);
+
+    if (!stayInEditableContent)
+    {
+      return left;
+    }
+
+    return DirectionOfEnclosingBlock(left.DeepEquivalent()) == text::TextDirection::LTR
+             ? HonorEditingBoundaryAtOrBefore(left, reachedBoundary)
+             : HonorEditingBoundaryAtOrAfter(left, reachedBoundary);
+  }
+
+  Position VisiblePosition::RightVisuallyDistinctCandidate() const noexcept
+  {
+    Position p = _deepPosition;
+    if (p.IsNull())
+    {
+      return Position();
+    }
+
+    Position downstreamStart = p.Downstream();
+    text::TextDirection primaryDirection = p.PrimaryDirection();
+
+    inline_iterator::LineLogicalOrderCache orderCache;
+
+    while (true)
+    {
+      auto [box, offset] = p.GetInlineBoxAndOffset(_affinity, primaryDirection);
+      if (!box)
+      {
+        return primaryDirection == text::TextDirection::LTR
+                 ? NextVisuallyDistinctCandidate(_deepPosition)
+                 : PreviousVisuallyDistinctCandidate(_deepPosition);
+      }
+
+      const RenderObject *renderer = &box->Renderer();
+
+      while (true)
+      {
+        if ((renderer->IsBlockLevelReplacedOrAtomicInline() || renderer->IsBR())
+            && offset == box->LeftmostCaretOffset())
+        {
+          return box->IsLeftToRightDirection() ? NextVisuallyDistinctCandidate(_deepPosition)
+                                               : PreviousVisuallyDistinctCandidate(_deepPosition);
+        }
+
+        if (!renderer->GetNode())
+        {
+          box.TraverseLineRightwardOnLine();
+          if (!box)
+          {
+            return primaryDirection == text::TextDirection::LTR
+                     ? NextVisuallyDistinctCandidate(_deepPosition)
+                     : PreviousVisuallyDistinctCandidate(_deepPosition);
+          }
+          renderer = &box->Renderer();
+          offset = box->LeftmostCaretOffset();
+          continue;
+        }
+
+        // Note that this may underflow the (unsigned) offset. This is fine and handled below.
+        offset = static_cast<uint32>(box->IsLeftToRightDirection()
+                                       ? renderer->NextOffset(static_cast<int32>(offset))
+                                       : renderer->PreviousOffset(static_cast<int32>(offset)));
+
+        auto caretMinOffset = box->MinimumCaretOffset();
+        auto caretMaxOffset = box->MaximumCaretOffset();
+
+        if (offset > caretMinOffset && offset < caretMaxOffset)
+        {
+          break;
+        }
+
+        if (offset != box->RightmostCaretOffset())
+        {
+          // Overshot to the right.
+          auto nextBox = box->NextLineRightwardOnLineIgnoringLineBreak();
+          if (!nextBox)
+          {
+            Position positionOnRight = primaryDirection == text::TextDirection::LTR
+                                         ? NextVisuallyDistinctCandidate(_deepPosition)
+                                         : PreviousVisuallyDistinctCandidate(_deepPosition);
+            auto boxOnRight = positionOnRight.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
+            if (boxOnRight && boxOnRight->GetLineBox() == box->GetLineBox())
+            {
+              return Position();
+            }
+            return positionOnRight;
+          }
+
+          // Reposition at the other logical position corresponding to our edge's visual position and go for
+          // another round.
+          box = nextBox;
+          renderer = &box->Renderer();
+          offset = nextBox->LeftmostCaretOffset();
+          continue;
+        }
+
+        uint8 level = box->BidiLevel();
+        auto nextBox = box->NextLineRightwardOnLine();
+
+        if (box->Direction() == primaryDirection)
+        {
+          if (!nextBox)
+          {
+            auto logicalEnd =
+              primaryDirection == text::TextDirection::LTR
+                ? inline_iterator::LastLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache)
+                : inline_iterator::FirstLeafOnLineInLogicalOrderWithNode(box->GetLineBox(), orderCache);
+
+            if (logicalEnd)
+            {
+              box = logicalEnd;
+              renderer = &box->Renderer();
+              offset = primaryDirection == text::TextDirection::LTR ? box->MaximumCaretOffset()
+                                                                    : box->MinimumCaretOffset();
+            }
+            break;
+          }
+
+          if (nextBox->BidiLevel() >= level)
+          {
+            break;
+          }
+
+          level = nextBox->BidiLevel();
+
+          auto previousBox = box;
+          do
+          {
+            previousBox.TraverseLineLeftwardOnLine();
+          } while (previousBox && previousBox->BidiLevel() > level);
+
+          if (previousBox && previousBox->BidiLevel() == level) // For example, abc FED 123 ^ CBA
+          {
+            break;
+          }
+
+          // For example, abc 123 ^ CBA or 123 ^ CBA abc
+          box = nextBox;
+          renderer = &box->Renderer();
+          offset = box->LeftmostCaretOffset();
+          if (box->Direction() == primaryDirection)
+          {
+            break;
+          }
+          continue;
+        }
+
+        while (nextBox && !nextBox->Renderer().GetNode())
+        {
+          nextBox.TraverseLineRightwardOnLine();
+        }
+
+        if (nextBox)
+        {
+          box = nextBox;
+          renderer = &box->Renderer();
+          offset = box->LeftmostCaretOffset();
+
+          if (box->BidiLevel() > level)
+          {
+            do
+            {
+              nextBox.TraverseLineRightwardOnLine();
+            } while (nextBox && nextBox->BidiLevel() > level);
+
+            if (!nextBox || nextBox->BidiLevel() < level)
+            {
+              continue;
+            }
+          }
+        }
+        else
+        {
+          // Trailing edge of a secondary box. Set to the leading edge of the entire box.
+          while (true)
+          {
+            while (auto previousBox = box->NextLineLeftwardOnLine())
+            {
+              if (previousBox->BidiLevel() < level)
+              {
+                break;
+              }
+              box = previousBox;
+            }
+            if (box->BidiLevel() == level)
+            {
+              break;
+            }
+            level = box->BidiLevel();
+            while (auto followingBox = box->NextLineRightwardOnLine())
+            {
+              if (followingBox->BidiLevel() < level)
+              {
+                break;
+              }
+              box = followingBox;
+            }
+            if (box->BidiLevel() == level)
+            {
+              break;
+            }
+            level = box->BidiLevel();
+          }
+          renderer = &box->Renderer();
+          offset = primaryDirection == text::TextDirection::LTR ? box->MaximumCaretOffset()
+                                                                : box->MinimumCaretOffset();
+        }
+        break;
+      }
+
+      p = CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+
+      if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
+      {
+        return p;
+      }
+
+      krys_debug_assert(p != _deepPosition);
+    }
+  }
+
+  VisiblePosition VisiblePosition::Right(bool stayInEditableContent, bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    Position pos = RightVisuallyDistinctCandidate();
+    // FIXME: Why can't we move left from the last position in a tree?
+    if (pos.AtStartOfTree() || pos.AtEndOfTree())
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    VisiblePosition right = pos;
+    krys_debug_assert(right != *this);
+
+    if (!stayInEditableContent)
+    {
+      return right;
+    }
+
+    return DirectionOfEnclosingBlock(right.DeepEquivalent()) == text::TextDirection::LTR
+             ? HonorEditingBoundaryAtOrAfter(right, reachedBoundary)
+             : HonorEditingBoundaryAtOrBefore(right, reachedBoundary);
+  }
+
+  VisiblePosition VisiblePosition::HonorEditingBoundaryAtOrBefore(const VisiblePosition &position,
+                                                                  bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    if (position.IsNull())
+    {
+      return position;
+    }
+
+    auto highestRoot = HighestEditableRoot(DeepEquivalent());
+
+    // Return empty position if pos is not somewhere inside the editable region containing this position
+    if (highestRoot && !position.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*highestRoot))
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    // Return position itself if the two are from the very same editable region, or both are non-editable
+    // FIXME: In the non-editable case, just because the new position is non-editable doesn't mean movement
+    // to it is allowed.  VisibleSelection::adjustForEditableContent has this problem too.
+    if (HighestEditableRoot(position.DeepEquivalent()) == highestRoot)
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = *this == position;
+      }
+      return position;
+    }
+
+    // Return empty position if this position is non-editable, but pos is editable
+    // FIXME: Move to the previous non-editable region.
+    if (!highestRoot)
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    // Return the last position before pos that is in the same editable region as this position
+    return LastEditablePositionBeforePositionInRoot(position.DeepEquivalent(), highestRoot.get());
+  }
+
+  VisiblePosition VisiblePosition::HonorEditingBoundaryAtOrAfter(const VisiblePosition &otherPosition,
+                                                                 bool *reachedBoundary) const noexcept
+  {
+    if (reachedBoundary)
+    {
+      *reachedBoundary = false;
+    }
+    if (otherPosition.IsNull())
+    {
+      return otherPosition;
+    }
+
+    auto highestRoot = HighestEditableRoot(DeepEquivalent());
+
+    // Return empty position if otherPosition is not somewhere inside the editable region containing this
+    // position
+    if (highestRoot && !otherPosition.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*highestRoot))
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    // Return otherPosition itself if the two are from the very same editable region, or both are non-editable
+    // FIXME: In the non-editable case, just because the new position is non-editable doesn't mean movement
+    // to it is allowed.  VisibleSelection::adjustForEditableContent has this problem too.
+    if (HighestEditableRoot(otherPosition.DeepEquivalent()) == highestRoot)
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = *this == otherPosition;
+      }
+      return otherPosition;
+    }
+
+    // Return empty position if this position is non-editable, but otherPosition is editable
+    // FIXME: Move to the next non-editable region.
+    if (!highestRoot)
+    {
+      if (reachedBoundary)
+      {
+        *reachedBoundary = true;
+      }
+      return VisiblePosition();
+    }
+
+    // Return the next position after pos that is in the same editable region as this position
+    return FirstEditablePositionAfterPositionInRoot(otherPosition.DeepEquivalent(), highestRoot.get());
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Position CanonicalizeCandidate(const Position &candidate) noexcept
+    {
+      if (candidate.IsNull())
+      {
+        return Position();
+      }
+      krys_debug_assert(candidate.IsCandidate());
+      Position upstream = candidate.Upstream();
+      if (upstream.IsCandidate())
+      {
+        return upstream;
+      }
+      return candidate;
+    }
+  }
+
+  Position VisiblePosition::CanonicalPosition(const Position &passedPosition) noexcept
+  {
+    // The updateLayout call below can do so much that even the position passed
+    // in to us might get changed as a side effect. Specifically, there are code
+    // paths that pass selection endpoints, and updateLayout can change the selection.
+    Position position = passedPosition;
+
+    // FIXME (9535):  Canonicalizing to the leftmost candidate means that if we're at a line wrap, we will
+    // ask renderers to paint downstream carets for other renderers.
+    // To fix this, we need to either a) add code to all paintCarets to pass the responsibility off to
+    // the appropriate renderer for VisiblePosition's like these, or b) canonicalize to the rightmost
+    // candidate unless the affinity is upstream.
+    if (position.IsNull())
+    {
+      return Position();
+    }
+
+    krys_debug_assert(position.GetDocument());
+    position.GetDocument()->UpdateLayoutIgnorePendingStylesheets();
+
+    auto *node = position.GetContainerNode();
+
+    Position candidate = position.Upstream();
+    if (candidate.IsCandidate())
+    {
+      return candidate;
+    }
+    candidate = position.Downstream();
+    if (candidate.IsCandidate())
+    {
+      return candidate;
+    }
+
+    // When neither upstream or downstream gets us to a candidate (upstream/downstream won't leave
+    // blocks or enter new ones), we search forward and backward until we find one.
+    Position next = CanonicalizeCandidate(NextCandidate(position));
+    Position prev = CanonicalizeCandidate(PreviousCandidate(position));
+    auto *nextNode = next.DeprecatedNode();
+    auto *prevNode = prev.DeprecatedNode();
+
+    // The new position must be in the same editable element. Enforce that first.
+    // Unless the descent is from a non-editable html element to an editable body.
+    if (node && Is<HTMLHtmlElement>(*node) && !node->HasEditableStyle())
+    {
+      auto body = node->NodeDocument().Body();
+      if (body && body->HasEditableStyle())
+      {
+        return next.IsNotNull() ? next : prev;
+      }
+    }
+
+    auto *editingRoot = EditableRootForPosition(position);
+
+    // If the html element is editable, descending into its body will look like a descent
+    // from non-editable to editable content since rootEditableElement() always stops at the body.
+    if ((editingRoot && Is<HTMLHtmlElement>(*editingRoot))
+        || (node && (Is<Document>(*node) || Is<ShadowRoot>(*node))))
+    {
+      return next.IsNotNull() ? next : prev;
+    }
+
+    bool prevIsInSameEditableElement = prevNode && EditableRootForPosition(prev) == editingRoot;
+    bool nextIsInSameEditableElement = nextNode && EditableRootForPosition(next) == editingRoot;
+    if (prevIsInSameEditableElement && !nextIsInSameEditableElement)
+    {
+      return prev;
+    }
+
+    if (nextIsInSameEditableElement && !prevIsInSameEditableElement)
+    {
+      return next;
+    }
+
+    if (!nextIsInSameEditableElement && !prevIsInSameEditableElement)
+    {
+      return Position();
+    }
+
+    // The new position should be in the same block flow element. Favor that.
+    auto *originalBlock = DeprecatedEnclosingBlockFlowElement(node);
+    bool nextIsOutsideOriginalBlock = !nextNode->IsDescendantOf(originalBlock) && nextNode != originalBlock;
+    bool prevIsOutsideOriginalBlock = !prevNode->IsDescendantOf(originalBlock) && prevNode != originalBlock;
+    if (nextIsOutsideOriginalBlock && !prevIsOutsideOriginalBlock)
+    {
+      return prev;
+    }
+
+    return next;
+  }
+
+  char32 VisiblePosition::CharacterAfter() const noexcept
+  {
+    // We canonicalize to the first of two equivalent candidates, but the second of the two candidates
+    // is the one that will be inside the text node containing the character after this visible position.
+    Position pos = _deepPosition.Downstream();
+    if (!pos.GetContainerNode() || !Is<Text>(*pos.GetContainerNode()))
+    {
+      return 0;
+    }
+    switch (pos.GetAnchorType())
+    {
+      case Position::AnchorType::PositionIsAfterChildren:
+      case Position::AnchorType::PositionIsAfterAnchor:
+      case Position::AnchorType::PositionIsBeforeAnchor:
+      case Position::AnchorType::PositionIsBeforeChildren: return 0;
+      case Position::AnchorType::PositionIsOffsetInAnchor: break;
+    }
+    int32 offset = pos.OffsetInContainerNode();
+    auto *textNode = pos.ContainerText();
+    const auto &data = textNode->Data();
+    int32 length = static_cast<int32>(data.size());
+    if (offset >= length)
+    {
+      return 0;
+    }
+
+    auto decoded =
+      text::DecodeUTF8(Span<const char8>(data.data() + offset, static_cast<size_t>(length - offset)));
+    return decoded.IsValid ? decoded.CodePoint : 0;
+  }
+
+  InlineBoxAndOffset VisiblePosition::GetInlineBoxAndOffset() const noexcept
+  {
+    return _deepPosition.GetInlineBoxAndOffset(_affinity);
+  }
+
+  InlineBoxAndOffset
+    VisiblePosition::GetInlineBoxAndOffset(text::TextDirection primaryDirection) const noexcept
+  {
+    return _deepPosition.GetInlineBoxAndOffset(_affinity, primaryDirection);
+  }
+
+  VisiblePosition::LocalCaretRectResult VisiblePosition::LocalCaretRect() const noexcept
+  {
+    auto *node = _deepPosition.AnchorNode();
+    if (!node)
+    {
+      return {};
+    }
+
+    auto boxAndOffset = GetInlineBoxAndOffset();
+    auto *renderer =
+      boxAndOffset.Box ? const_cast<RenderObject *>(&boxAndOffset.Box->Renderer()) : node->Renderer();
+    if (!renderer)
+    {
+      return {};
+    }
+
+    return {ComputeLocalCaretRect(*renderer, boxAndOffset), renderer};
+  }
+
+  RectI VisiblePosition::AbsoluteCaretBounds(bool *insideFixed) const noexcept
+  {
+    RenderBlock *renderer = nullptr;
+    LayoutRect localRect = LocalCaretRectInRendererForCaretPainting(*this, renderer);
+    return AbsoluteBoundsForLocalCaretRect(renderer, localRect, insideFixed);
+  }
+
+  RectF VisiblePosition::AbsoluteSelectionBoundsForLine() const noexcept
+  {
+    auto box = GetInlineBoxAndOffset().Box;
+    if (!box)
+    {
+      return {};
+    }
+
+    auto line = box->GetLineBox();
+    return line->FormattingContextRoot()
+      .LocalToAbsoluteQuad(QuadF(LineSelection::PhysicalRect(*line)))
+      .BoundingBox();
+  }
+
+  int32 VisiblePosition::LineDirectionPointForBlockDirectionNavigation() const noexcept
+  {
+    auto localRect = LocalCaretRect();
+    if (localRect.Rect.IsEmpty() || !localRect.Renderer)
+    {
+      return 0;
+    }
+
+    // This ignores transforms on purpose, for now. Vertical navigation is done
+    // without consulting transforms, so that 'up' in transformed text is 'up'
+    // relative to the text, not absolute 'up'.
+    auto *renderer = localRect.Renderer;
+    auto caretPoint = renderer->LocalToAbsolute(PointF(localRect.Rect.Location()));
+    const RenderObject *containingBlock = renderer->ContainingBlock();
+    if (!containingBlock)
+    {
+      containingBlock =
+        renderer; // Just use ourselves to determine the writing mode if we have no containing block.
+    }
+    return static_cast<int32>(containingBlock->IsHorizontalWritingMode() ? caretPoint.X() : caretPoint.Y());
+  }
+
+  // FIXME: Maybe this should be deprecated too, like the underlying function?
+  Element *EnclosingBlockFlowElement(const VisiblePosition &visiblePosition) noexcept
+  {
+    if (visiblePosition.IsNull())
+    {
+      return nullptr;
+    }
+
+    return DeprecatedEnclosingBlockFlowElement(visiblePosition.DeepEquivalent().DeprecatedNode());
+  }
+
+  bool IsFirstVisiblePositionInNode(const VisiblePosition &visiblePosition, const Node *node) noexcept
+  {
+    if (visiblePosition.IsNull())
+    {
+      return false;
+    }
+
+    if (!visiblePosition.DeepEquivalent().GetContainerNode()->IsDescendantOf(node))
+    {
+      return false;
+    }
+
+    VisiblePosition previous = visiblePosition.Previous();
+    return previous.IsNull() || !previous.DeepEquivalent().DeprecatedNode()->IsDescendantOf(node);
+  }
+
+  bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition, const Node *node) noexcept
+  {
+    if (visiblePosition.IsNull())
+    {
+      return false;
+    }
+
+    if (!visiblePosition.DeepEquivalent().GetContainerNode()->IsDescendantOf(node))
+    {
+      return false;
+    }
+
+    VisiblePosition next = visiblePosition.Next();
+    return next.IsNull() || !next.DeepEquivalent().DeprecatedNode()->IsDescendantOf(node);
+  }
+
+  bool AreVisiblePositionsInSameTreeScope(const VisiblePosition &a, const VisiblePosition &b) noexcept
+  {
+    auto *nodeA = a.DeepEquivalent().AnchorNode();
+    auto *nodeB = b.DeepEquivalent().AnchorNode();
+    return nodeA && nodeB && nodeA->IsConnected() && nodeB->IsConnected()
+           && &dom::TreeQueries::Root(*nodeA) == &dom::TreeQueries::Root(*nodeB);
+  }
+
+  bool VisiblePosition::Equals(const VisiblePosition &other) const noexcept
+  {
+    return _affinity == other._affinity && _deepPosition.Equals(other._deepPosition);
+  }
+
+  Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const VisiblePosition &position) noexcept
+  {
+    return CreateBoundaryPoint(position.DeepEquivalent());
+  }
+
+  Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept
+  {
+    return CommonInclusiveAncestor(a.DeepEquivalent(), b.DeepEquivalent());
+  }
+
+  Maybe<dom::SimpleRange> CreateSimpleRange(const VisiblePositionRange &range) noexcept
+  {
+    return dom::CreateSimpleRange(range.Start, range.End);
+  }
+
+  VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept
+  {
+    if (!range)
+    {
+      return {};
+    }
+    return {CreateContainerOffsetPosition(range->Start), CreateContainerOffsetPosition(range->End)};
+  }
+
+  std::partial_ordering operator<=>(const VisiblePosition &a, const VisiblePosition &b) noexcept
+  {
+    // FIXME: Should two positions with different affinity be considered equivalent or not?
+    return TreeOrder<dom::TreeType::ComposedTree>(a.DeepEquivalent(), b.DeepEquivalent());
+  }
+
+  bool Intersects(const VisiblePositionRange &a, const VisiblePositionRange &b) noexcept
+  {
+    return a.Start <= b.End && b.Start <= a.End;
+  }
+
+  bool Contains(const VisiblePositionRange &range, const VisiblePosition &point) noexcept
+  {
+    return point >= range.Start && point <= range.End;
+  }
+
+  VisiblePositionRange Intersection(const VisiblePositionRange &a, const VisiblePositionRange &b) noexcept
+  {
+    return {std::max(a.Start, b.Start), std::min(a.End, b.End)};
+  }
+
+  Node *CommonInclusiveAncestor(const VisiblePositionRange &range) noexcept
+  {
+    return CommonInclusiveAncestor(range.Start, range.End);
+  }
+
+  VisiblePosition Midpoint(const VisiblePositionRange &range) noexcept
+  {
+    auto *rootNode = CommonInclusiveAncestor(range);
+    if (!rootNode)
+    {
+      return {};
+    }
+    auto *rootContainerNode = DynamicDowncast<ContainerNode>(rootNode);
+    if (!rootContainerNode)
+    {
+      rootContainerNode = rootNode->ParentNode();
+    }
+    if (!rootContainerNode)
+    {
+      return {};
+    }
+    auto scope = dom::CreateRangeSelectingNodeContents(*rootContainerNode);
+    auto characterRange = GetCharacterRange(scope, *dom::CreateSimpleRange(range.Start, range.End));
+    return CreateContainerOffsetPosition(
+      ResolveCharacterLocation(scope, characterRange.Location + characterRange.Length / 2));
+  }
+}

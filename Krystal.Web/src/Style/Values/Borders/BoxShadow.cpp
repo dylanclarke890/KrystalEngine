@@ -1,0 +1,177 @@
+﻿/*
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Borders/BoxShadow.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Values/BoxShadowPropertyValue.hpp"
+#include "Krystal.Web/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Web/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Style/Values/Borders/ShadowInterpolation.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+#include <ranges>
+
+namespace krys::web::style
+{
+  // MARK: - Conversion
+
+  css::BoxShadow ToCSS<BoxShadow>::operator()(const BoxShadow &value, const RenderStyle &style) noexcept
+  {
+    return {
+      .Color = ConvertToCSS(value.Color, style),
+      .Location = ConvertToCSS(value.Location, style),
+      .Blur = ConvertToCSS(value.Blur, style),
+      .Spread = ConvertToCSS(value.Spread, style),
+      .Inset = ConvertToCSS(value.Inset, style),
+    };
+  }
+
+  BoxShadow ToStyle<css::BoxShadow>::operator()(const css::BoxShadow &value,
+                                                const BuilderState &state) noexcept
+  {
+    return {
+      .Color = value.Color ? ConvertToStyle(*value.Color, state) : Color::GetCurrentColor(),
+      .Location = ConvertToStyle(value.Location, state),
+      .Blur = value.Blur ? ConvertToStyle(*value.Blur, state) : 0_css_px,
+      .Spread = value.Spread ? ConvertToStyle(*value.Spread, state) : 0_css_px,
+      .Inset = ConvertToStyle(value.Inset, state),
+    };
+  }
+
+  Ref<css::Value> CSSValueCreation<BoxShadowList>::operator()(css::ValuePool &, const RenderStyle &style,
+                                                              const BoxShadowList &value) noexcept
+  {
+    css::BoxShadowProperty::List list;
+
+    for (const auto &shadow : value | std::views::reverse)
+    {
+      list.Value.push_back(ConvertToCSS(shadow, style));
+    }
+
+    return css::BoxShadowPropertyValue::Create(css::BoxShadowProperty {krys::move(list)});
+  }
+
+  BoxShadows CSSValueConversion<BoxShadows>::operator()(BuilderState &state, const css::Value &value) noexcept
+  {
+    if (value.ValueId() == css::ValueId::None)
+    {
+      return css::keywords::None {};
+    }
+
+    auto *shadow = RequiredDowncast<css::BoxShadowPropertyValue>(state, value);
+    if (!shadow)
+    {
+      return css::keywords::None {};
+    }
+
+    return krys::SwitchOn(
+      shadow->Shadow(), [&](const css::keywords::None &) -> BoxShadows { return css::keywords::None {}; },
+      [&](const typename css::BoxShadowProperty::List &list) -> BoxShadows
+      {
+        return BoxShadows::List(std::from_range,
+                                (list | std::views::reverse)
+                                  | std::views::transform([&](const css::BoxShadow &element)
+                                                          { return ConvertToStyle(element, state); }));
+      });
+  }
+
+  // MARK: - Serialization
+
+  void Serialiser<BoxShadowList>::operator()(StringBuilder &builder, const css::SerialisationContext &context,
+                                             const RenderStyle &style, const BoxShadowList &value) noexcept
+  {
+    SerialisationForCSSOnRangeLike(builder, context, style, value | std::views::reverse,
+                                   css::SerialisationSeparatorString<BoxShadowList>);
+  }
+
+  // MARK: - Blending
+
+  KRYS_NODISCARD static inline Maybe<css::keywords::Inset> BlendInset(Maybe<css::keywords::Inset> a,
+                                                                      Maybe<css::keywords::Inset> b,
+                                                                      const BlendingContext &context) noexcept
+  {
+    if (a == b)
+    {
+      return b;
+    }
+
+    auto aVal = !a ? 1.0 : 0.0;
+    auto bVal = !b ? 1.0 : 0.0;
+
+    auto result = web::Blend(aVal, bVal, context);
+    return result > 0 ? null : Maybe(css::keywords::Inset {});
+  }
+
+  BoxShadow Blending<BoxShadow>::Blend(const BoxShadow &a, const BoxShadow &b, const RenderStyle &aStyle,
+                                       const RenderStyle &bStyle, const BlendingContext &context) noexcept
+  {
+    return {.Color = web::Blend(aStyle.ColorResolvingCurrentColor(a.Color),
+                                bStyle.ColorResolvingCurrentColor(b.Color), context),
+            .Location = krys::web::style::Blend(a.Location, b.Location, context),
+            .Blur = krys::web::style::Blend(a.Blur, b.Blur, context),
+            .Spread = krys::web::style::Blend(a.Spread, b.Spread, context),
+            .Inset = BlendInset(a.Inset, b.Inset, context)};
+  }
+
+  struct MatchingBoxShadows
+  {
+    static const BoxShadow &ShadowForInterpolation(const BoxShadow &shadowToMatch)
+    {
+      static NeverDestroyed<const BoxShadow> defaultShadowData {
+        BoxShadow {.Color = {web::Color::transparentBlack},
+                   .Location = {{0}, {0}},
+                   .Blur = {0},
+                   .Spread = {0},
+                   .Inset = null}};
+      static NeverDestroyed<const BoxShadow> defaultInsetShadowData {
+        BoxShadow {.Color = {web::Color::transparentBlack},
+                   .Location = {{0}, {0}},
+                   .Blur = {0},
+                   .Spread = {0},
+                   .Inset = css::keywords::Inset {}}};
+
+      return IsInset(shadowToMatch) ? *defaultInsetShadowData : *defaultShadowData;
+    }
+  };
+
+  bool Blending<BoxShadows>::CanBlend(const BoxShadows &from, const BoxShadows &to,
+                                      CompositeOperation compositeOperation) noexcept
+  {
+    return ShadowInterpolation<BoxShadows, MatchingBoxShadows>::CanInterpolate(from, to, compositeOperation);
+  }
+
+  BoxShadows Blending<BoxShadows>::Blend(const BoxShadows &from, const BoxShadows &to,
+                                         const RenderStyle &fromStyle, const RenderStyle &toStyle,
+                                         const BlendingContext &context) noexcept
+  {
+    return ShadowInterpolation<BoxShadows, MatchingBoxShadows>::Interpolate(from, to, fromStyle, toStyle,
+                                                                            context);
+  }
+}

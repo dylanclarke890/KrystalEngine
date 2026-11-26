@@ -1,0 +1,199 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/CustomProperty.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Parser/InputStream.hpp"
+#include "Krystal.Web/Css/Parser/Tokenizer.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/SerialisationContext.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValueListBuilder.hpp"
+#include "Krystal.Web/Css/Values/ValuePool.hpp"
+#include "Krystal.Web/Css/Values/VariableReferenceValue.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
+#include "Krystal.Web/Style/Values/Primitives/KeywordSerialisation.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+
+namespace krys::web::style
+{
+  bool CustomProperty::operator==(const CustomProperty &other) const noexcept
+  {
+    if (_name != other._name || _value.index() != other._value.index())
+    {
+      return false;
+    }
+
+    return krys::SwitchOn(
+      _value, [&](const GuaranteedInvalid &) { return true; }, [&](const Ref<css::VariableData> &value)
+      { return ArePointingToEqualData(value, std::get<Ref<css::VariableData>>(other._value)); },
+      [&](const Value &value) { return value == std::get<Value>(other._value); },
+      [&](const ValueList &value) { return value == std::get<ValueList>(other._value); });
+  }
+
+  Ref<css::Value> CustomProperty::PropertyValue(css::ValuePool &pool, const RenderStyle &style) const noexcept
+  {
+    auto convertValue = [&](const Value &value)
+    {
+      return krys::SwitchOn(value, [&](const auto &alternative) -> Ref<css::Value>
+                            { return CreateCSSValue(pool, style, alternative); });
+    };
+
+    return krys::SwitchOn(
+      _value, [&](const GuaranteedInvalid &) -> Ref<css::Value>
+      { return css::PrimitiveValue::Create(CSSOMString {}); },
+      [&](const Ref<css::VariableData> &variableData) -> Ref<css::Value>
+      { return css::VariableReferenceValue::Create(Ref<css::VariableData> {variableData}); },
+      [&](const Value &value) -> Ref<css::Value> { return convertValue(value); },
+      [&](const ValueList &valueList) -> Ref<css::Value>
+      {
+        css::ValueListBuilder builder;
+        for (const auto &value : valueList.Values)
+        {
+          builder.push_back(convertValue(value));
+        }
+        switch (valueList.Separator)
+        {
+          case css::ValueSeparator::Space: return css::ValueList::CreateSpaceSeparated(krys::move(builder));
+          case css::ValueSeparator::Comma: return css::ValueList::CreateCommaSeparated(krys::move(builder));
+          case css::ValueSeparator::Slash: return css::ValueList::CreateSlashSeparated(krys::move(builder));
+        }
+        krys_unreachable();
+      });
+  }
+
+  CSSOMString CustomProperty::PropertyValueSerialisation(const css::SerialisationContext &context,
+                                                         const RenderStyle &style) const noexcept
+  {
+    StringBuilder builder;
+    PropertyValueSerialisation(builder, context, style);
+    return krys::move(builder).ToString();
+  }
+
+  void CustomProperty::PropertyValueSerialisation(StringBuilder &builder,
+                                                  const css::SerialisationContext &context,
+                                                  const RenderStyle &style) const noexcept
+  {
+    auto serialiseValue = [&](const Value &value)
+    {
+      krys::SwitchOn(value, [&](const auto &alternative)
+                     { style::Serialise(builder, context, style, alternative); });
+    };
+
+    krys::SwitchOn(
+      _value,
+      [&](const GuaranteedInvalid &)
+      {
+        // "The guaranteed-invalid value serializes as the empty string".
+        // https://drafts.csswg.org/css-variables-2/#guaranteed-invalid
+      },
+      [&](const Ref<css::VariableData> &value) { builder.Append(value->Serialise()); },
+      [&](const Value &value) { serialiseValue(value); },
+      [&](const ValueList &valueList)
+      {
+        auto separator = css::ToCssText(valueList.Separator);
+        for (size_t i = 0; i < valueList.Values.size(); ++i)
+        {
+          if (i)
+          {
+            builder.Append(separator);
+          }
+          serialiseValue(valueList.Values[i]);
+        }
+      });
+  }
+
+  CSSOMString
+    CustomProperty::PropertyValueSerialisationForTokenization(const css::SerialisationContext &context,
+                                                              const RenderStyle &style) const noexcept
+  {
+    StringBuilder builder;
+    PropertyValueSerialisationForTokenization(builder, context, style);
+    return krys::move(builder).ToString();
+  }
+
+  void CustomProperty::PropertyValueSerialisationForTokenization(StringBuilder &builder,
+                                                                 const css::SerialisationContext &context,
+                                                                 const RenderStyle &style) const noexcept
+  {
+    // `PropertyValueSerialisationForTokenization` differs from `PropertyValueSerialisation` only in how it
+    // handles custom `color` values:
+    //
+    //   `PropertyValueSerialisation`: serializes the used/resolved value of `color` values (needed for
+    //   getComputedStyle)
+    //   `PropertyValueSerialisationForTokenization`: serializes the computed value of `color` values (needed
+    //   for style building)
+
+    auto serialiseValue = [&](const Value &value)
+    {
+      krys::SwitchOn(
+        value, [&](const Color &color) { style::SerialisationForCSSTokenization(builder, context, color); },
+        [&](const auto &alternative) { style::Serialise(builder, context, style, alternative); });
+    };
+
+    krys::SwitchOn(
+      _value,
+      [&](const GuaranteedInvalid &)
+      {
+        // "The guaranteed-invalid value serializes as the empty string".
+        // https://drafts.csswg.org/css-variables-2/#guaranteed-invalid
+      },
+      [&](const Ref<css::VariableData> &value) { builder.Append(value->Serialise()); },
+      [&](const Value &value) { serialiseValue(value); },
+      [&](const ValueList &valueList)
+      {
+        auto separator = css::ToCssText(valueList.Separator);
+        for (size_t i = 0; i < valueList.Values.size(); ++i)
+        {
+          if (i)
+          {
+            builder.Append(separator);
+          }
+          serialiseValue(valueList.Values[i]);
+        }
+      });
+  }
+
+  const List<css::Token> &CustomProperty::Tokens() const noexcept
+  {
+    return krys::SwitchOn(
+      _value,
+      [&](const Ref<css::VariableData> &value) -> const List<css::Token> & { return value->Tokens(); },
+      [&](const auto &) -> const List<css::Token> &
+      {
+        if (!_cachedTokens)
+        {
+          css::InputStream input {PropertyValueSerialisationForTokenization(
+            css::DefaultSerialisationContext(), RenderStyle::DefaultStyleSingleton())};
+          css::Tokenizer tokenizer {input};
+          std::ignore = tokenizer.PumpTokenizer();
+          _cachedTokens = css::VariableData::Create(tokenizer.Tokens());
+        }
+        return _cachedTokens->Tokens();
+      });
+  }
+}

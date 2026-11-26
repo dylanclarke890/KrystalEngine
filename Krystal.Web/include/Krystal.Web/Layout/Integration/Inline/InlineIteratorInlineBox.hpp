@@ -1,0 +1,119 @@
+﻿/*
+ * Copyright (C) 2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Graphics/Geometry/RectEdges.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorBox.hpp"
+
+namespace krys::web
+{
+  class RenderBoxModelObject;
+  class RenderInline;
+}
+
+namespace krys::web::inline_iterator
+{
+  class InlineBoxIterator;
+
+  /// @brief An inline box (or the root inline box) on a line: the part of an inline renderer on that line.
+  class InlineBox : public Box
+  {
+  public:
+    explicit InlineBox(InlineContentBoxPath path) noexcept : Box(krys::move(path))
+    {
+    }
+
+    KRYS_NODISCARD const RenderBoxModelObject &Renderer() const noexcept;
+
+    /// @brief Whether each edge closes the inline box (rather than continuing on another line).
+    KRYS_NODISCARD RectEdges<bool> ClosedEdges() const noexcept;
+
+    KRYS_NODISCARD InlineBoxIterator NextInlineBoxLineRightward() const noexcept;
+
+    KRYS_NODISCARD InlineBoxIterator NextInlineBoxLineLeftward() const noexcept;
+
+    KRYS_NODISCARD InlineBoxIterator Iterator() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator FirstLeafBox() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator LastLeafBox() const noexcept;
+
+    KRYS_NODISCARD LeafBoxIterator EndLeafBox() const noexcept;
+
+    KRYS_NODISCARD bool IsSplit() const noexcept;
+
+    /// @brief The boxes in this inline box, as [begin, end) iterators.
+    KRYS_NODISCARD Pair<BoxIterator, BoxIterator> Descendants() const noexcept;
+  };
+
+  /// @brief Iterates the inline boxes generated for the same inline renderer.
+  class InlineBoxIterator : public BoxIterator
+  {
+  public:
+    InlineBoxIterator() noexcept = default;
+
+    explicit InlineBoxIterator(InlineContentBoxPath path) noexcept : BoxIterator(krys::move(path))
+    {
+    }
+
+    explicit InlineBoxIterator(const Box &box) noexcept : BoxIterator(box)
+    {
+    }
+
+    KRYS_NODISCARD const InlineBox &operator*() const noexcept
+    {
+      return static_cast<const InlineBox &>(_box);
+    }
+
+    KRYS_NODISCARD const InlineBox *operator->() const noexcept
+    {
+      return &**this;
+    }
+
+    InlineBoxIterator &TraverseInlineBoxLineRightward() noexcept;
+
+    InlineBoxIterator &TraverseInlineBoxLineLeftward() noexcept;
+  };
+
+  KRYS_NODISCARD InlineBoxIterator LineLeftmostInlineBoxFor(const RenderInline &renderInline) noexcept;
+
+  KRYS_NODISCARD InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept;
+
+  KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
+                                                const inline_display::Box &box) noexcept;
+
+  KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
+                                                size_t boxIndex) noexcept;
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::inline_iterator::InlineBox)
+  KRYS_NODISCARD static bool IsType(const krys::web::inline_iterator::Box &box) noexcept
+  {
+    return box.IsInlineBox();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

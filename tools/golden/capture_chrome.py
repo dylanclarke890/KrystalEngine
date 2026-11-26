@@ -1,8 +1,8 @@
-﻿"""Captures Chrome's rendering of golden scenes: Render2D's fidelity goldens, or Krystal.UI's page goldens.
+﻿"""Captures Chrome's rendering of golden scenes: Render2D's fidelity goldens, or Krystal.Booey's page goldens.
 
 Each scene in <golden>/scenes/<name>.html is rendered by headless Chrome at a device pixel ratio of 1, in sRGB,
 with software rasterisation, into <golden>/<name>.chrome.png. The golden directory is tests/Krystal.Gfx.Tests/golden
-unless --golden names another (tests/Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
+unless --golden names another (tests/Krystal.Booey.Tests/golden for the page goldens). The viewport's size comes from
 the scene's <html data-width="..." data-height="...">, in CSS pixels; a scene with data-device-scale="..." is
 rendered at that device pixel ratio instead, into an image that many times the size.
 

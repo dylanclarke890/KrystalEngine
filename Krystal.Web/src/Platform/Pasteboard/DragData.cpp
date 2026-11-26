@@ -1,0 +1,124 @@
+﻿/*
+ * Copyright (C) 2007-2020 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Platform/Pasteboard/DragData.hpp"
+#include "Krystal.Web/Platform/Pasteboard/SelectionData.hpp"
+
+namespace krys::web
+{
+  DragData::DragData(const SelectionData *data, const PointI &clientPosition, const PointI &globalPosition,
+                     EnumSet<DragOperation> sourceOperationMask, EnumSet<DragApplicationFlags> flags,
+                     EnumSet<PlatformEventModifier> modifiers,
+                     EnumSet<DragDestinationAction> destinationActionMask) noexcept
+      : _clientPosition(clientPosition), _globalPosition(globalPosition), _platformDragData(data),
+        _draggingSourceOperationMask(sourceOperationMask), _applicationFlags(flags), _modifiers(modifiers),
+        _dragDestinationActionMask(destinationActionMask)
+  {
+  }
+
+  void DragData::DisallowFileAccess() noexcept
+  {
+    _fileNames = {};
+    _disallowFileAccess = true;
+  }
+
+  bool DragData::CanSmartReplace() noexcept
+  {
+    return false;
+  }
+
+  bool DragData::ContainsColor() noexcept
+  {
+    return false;
+  }
+
+  bool DragData::ContainsFiles() const noexcept
+  {
+    return !_disallowFileAccess && _platformDragData->HasFilenames();
+  }
+
+  uint32 DragData::NumberOfFiles() const noexcept
+  {
+    return !_disallowFileAccess ? static_cast<uint32>(_platformDragData->Filenames().size()) : 0;
+  }
+
+  List<utf8_string> DragData::AsFilenames() const noexcept
+  {
+    if (_disallowFileAccess)
+    {
+      return {};
+    }
+
+    return _platformDragData->Filenames();
+  }
+
+  bool DragData::ContainsPlainText() const noexcept
+  {
+    return _platformDragData->HasText();
+  }
+
+  utf8_string DragData::AsPlainText() const noexcept
+  {
+    return _platformDragData->Text();
+  }
+
+  bool DragData::ContainsCompatibleContent(DraggingPurpose) const noexcept
+  {
+    return ContainsPlainText() || ContainsUrl() || _platformDragData->HasMarkup() || ContainsColor()
+           || ContainsFiles();
+  }
+
+  bool DragData::ContainsUrl(FilenameConversionPolicy filenamePolicy) const noexcept
+  {
+    return !AsUrl(filenamePolicy).empty();
+  }
+
+  utf8_string DragData::AsUrl(FilenameConversionPolicy filenamePolicy, utf8_string *title) const noexcept
+  {
+    if (!_platformDragData->HasUrl())
+    {
+      return {};
+    }
+
+    if (filenamePolicy != ConvertFilenames)
+    {
+      if (_platformDragData->GetUrl().ProtocolIsFile())
+      {
+        return {};
+      }
+    }
+
+    if (title)
+    {
+      *title = _platformDragData->UrlLabel();
+    }
+    return utf8_string(_platformDragData->GetUrl().String());
+  }
+
+  bool DragData::ShouldMatchStyleOnDrop() noexcept
+  {
+    return false;
+  }
+}

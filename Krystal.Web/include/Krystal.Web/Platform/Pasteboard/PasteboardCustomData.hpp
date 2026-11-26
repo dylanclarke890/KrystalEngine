@@ -1,0 +1,143 @@
+﻿/*
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/SharedBuffer.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+
+namespace krys::web
+{
+  /// @brief The data a page put on a pasteboard: strings and buffers by type, in the order written, the
+  /// strings only pages of the same origin may read back, and that origin.
+  class PasteboardCustomData
+  {
+  public:
+    using PlatformData = Variant<Maybe<utf8_string>, Ref<SharedBuffer>>;
+
+    struct Entry
+    {
+      utf8_string Type;
+      /// @brief The string only pages of the same origin may read, or none.
+      Maybe<utf8_string> CustomData;
+      /// @brief The string or buffer written to the platform pasteboard; no string if none.
+      PlatformData Data;
+
+      Entry() noexcept = default;
+
+      explicit Entry(utf8_stringview type) noexcept : Type(type)
+      {
+      }
+
+      Entry(utf8_stringview type, Maybe<utf8_string> customData, PlatformData data) noexcept
+          : Type(type), CustomData(krys::move(customData)), Data(krys::move(data))
+      {
+      }
+    };
+
+  private:
+    utf8_string _origin;
+    List<Entry> _data;
+
+  public:
+    PasteboardCustomData() noexcept = default;
+
+    PasteboardCustomData(utf8_string origin, List<Entry> &&data) noexcept
+        : _origin(krys::move(origin)), _data(krys::move(data))
+    {
+    }
+
+    KRYS_NODISCARD const utf8_string &Origin() const noexcept
+    {
+      return _origin;
+    }
+
+    void SetOrigin(utf8_stringview origin) noexcept
+    {
+      _origin = utf8_string(origin);
+    }
+
+    /// @brief The origin, the same-origin strings and the types, serialised for a platform pasteboard.
+    KRYS_NODISCARD Ref<SharedBuffer> CreateSharedBuffer() const noexcept;
+
+    /// @brief The data serialised in @p buffer, or empty data if it isn't valid.
+    KRYS_NODISCARD static PasteboardCustomData FromSharedBuffer(const SharedBuffer &buffer) noexcept;
+
+    /// @brief The type of the private platform pasteboard format the serialised data is kept in.
+    KRYS_NODISCARD static constexpr utf8_stringview WebType() noexcept
+    {
+      return u8"org.krystalengine.web.custom-pasteboard-data";
+    }
+
+    /// @brief The platform string of @p type, or empty.
+    KRYS_NODISCARD utf8_string ReadString(utf8_stringview type) const noexcept;
+
+    KRYS_NODISCARD RefPtr<SharedBuffer> ReadBuffer(utf8_stringview type) const noexcept;
+
+    /// @brief The same-origin string of @p type, or none.
+    KRYS_NODISCARD Maybe<utf8_string> ReadStringInCustomData(utf8_stringview type) const noexcept;
+
+    void WriteString(utf8_stringview type, utf8_stringview value) noexcept;
+
+    void WriteData(utf8_stringview type, Ref<SharedBuffer> &&data) noexcept;
+
+    void WriteStringInCustomData(utf8_stringview type, utf8_stringview value) noexcept;
+
+    void Clear() noexcept;
+
+    void Clear(utf8_stringview type) noexcept;
+
+    void ForEachType(const Func<void(const utf8_string &)> &function) const noexcept;
+
+    void ForEachPlatformString(
+      const Func<void(const utf8_string &type, const utf8_string &data)> &function) const noexcept;
+
+    void ForEachPlatformStringOrBuffer(
+      const Func<void(const utf8_string &type, const PlatformData &data)> &function) const noexcept;
+
+    void ForEachCustomString(
+      const Func<void(const utf8_string &type, const utf8_string &data)> &function) const noexcept;
+
+    KRYS_NODISCARD bool HasData() const noexcept;
+
+    KRYS_NODISCARD bool HasSameOriginCustomData() const noexcept;
+
+    KRYS_NODISCARD List<utf8_string> OrderedTypes() const noexcept;
+
+    KRYS_NODISCARD const List<Entry> &Data() const noexcept
+    {
+      return _data;
+    }
+
+  private:
+    Entry &AddOrMoveEntryToEnd(utf8_stringview type) noexcept;
+  };
+}

@@ -1,17 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Css/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/Dom/Events/EventNames.hpp"
-#include "Krystal.Booey/Dom/Nodes/Document.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
-#include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
-#include "Krystal.Booey/Events/Touch/TouchList.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Web/Css/Geometry/DOMRect.hpp"
+#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Web/Events/Touch/TouchEvent.hpp"
+#include "Krystal.Web/Events/Touch/TouchList.hpp"
 #include <algorithm>
 #include <format>
 #include <string>
@@ -29,8 +29,8 @@ namespace krys::editor
     KRYS_NON_COPY_MOVABLE(PagePointers);
 
   private:
-    WeakPtr<boo::Document> _document;
-    List<boo::EventListenerHandle> _listeners;
+    WeakPtr<web::Document> _document;
+    List<web::EventListenerHandle> _listeners;
     /// @brief Each pointer over the pad, by its id (in order), as the readout shows it.
     List<std::pair<int32, std::string>> _pointers;
     uint32 _touches {0};
@@ -43,7 +43,7 @@ namespace krys::editor
     double _lockedY {0};
 
   public:
-    explicit PagePointers(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PagePointers(web::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       if (!document.GetElementById(u8"pointer-pad"))
       {
@@ -51,27 +51,27 @@ namespace krys::editor
       }
 
       auto listen =
-        [&](const RefPtr<boo::EventTarget> &target, utf8_stringview type, Func<void(boo::Event &)> &&callback)
+        [&](const RefPtr<web::EventTarget> &target, utf8_stringview type, Func<void(web::Event &)> &&callback)
       {
         if (target)
         {
-          _listeners.push_back(target->AddEventListener(boo::DOMStringAtom(type), krys::move(callback)));
+          _listeners.push_back(target->AddEventListener(web::DOMStringAtom(type), krys::move(callback)));
         }
       };
 
       // The pad: every pointer over it, and the touches it holds.
-      RefPtr<boo::EventTarget> pad = document.GetElementById(u8"pointer-pad");
+      RefPtr<web::EventTarget> pad = document.GetElementById(u8"pointer-pad");
       for (auto type : {u8"pointerover", u8"pointermove", u8"pointerdown", u8"pointerup"})
       {
         listen(pad, type,
-               [this](boo::Event &event) { ShowPointer(static_cast<boo::PointerEvent &>(event)); });
+               [this](web::Event &event) { ShowPointer(static_cast<web::PointerEvent &>(event)); });
       }
       for (auto type : {u8"pointerleave", u8"pointercancel"})
       {
         listen(pad, type,
-               [this](boo::Event &event)
+               [this](web::Event &event)
                {
-                 auto id = static_cast<int32>(static_cast<boo::PointerEvent &>(event).PointerId());
+                 auto id = static_cast<int32>(static_cast<web::PointerEvent &>(event).PointerId());
                  std::erase_if(_pointers, [&](const auto &pointer) { return pointer.first == id; });
                  ShowPad();
                });
@@ -79,20 +79,20 @@ namespace krys::editor
       for (auto type : {u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel"})
       {
         listen(pad, type,
-               [this](boo::Event &event)
+               [this](web::Event &event)
                {
-                 auto *touches = static_cast<boo::TouchEvent &>(event).TargetTouches();
+                 auto *touches = static_cast<web::TouchEvent &>(event).TargetTouches();
                  _touches = touches ? touches->Length() : 0;
                  ShowPad();
                });
       }
 
       // The chip: the pointer that presses it captures itself to it, and drags it until it lets go.
-      RefPtr<boo::EventTarget> chip = document.GetElementById(u8"drag-chip");
+      RefPtr<web::EventTarget> chip = document.GetElementById(u8"drag-chip");
       listen(chip, u8"pointerdown",
-             [this](boo::Event &event)
+             [this](web::Event &event)
              {
-               auto &pointer = static_cast<boo::PointerEvent &>(event);
+               auto &pointer = static_cast<web::PointerEvent &>(event);
                if (auto element = ById(u8"drag-chip"))
                {
                  _grabX = pointer.OffsetX();
@@ -101,24 +101,24 @@ namespace krys::editor
                }
              });
       listen(chip, u8"gotpointercapture",
-             [this](boo::Event &event)
+             [this](web::Event &event)
              {
-               _dragPointer = static_cast<int32>(static_cast<boo::PointerEvent &>(event).PointerId());
+               _dragPointer = static_cast<int32>(static_cast<web::PointerEvent &>(event).PointerId());
                SetText(u8"drag-chip", std::format("Dragging (pointer {})", _dragPointer));
              });
       listen(chip, u8"lostpointercapture",
-             [this](boo::Event &)
+             [this](web::Event &)
              {
                _dragPointer = -1;
                SetText(u8"drag-chip", "Drag me");
              });
       listen(chip, u8"pointermove",
-             [this](boo::Event &event) { DragChip(static_cast<boo::PointerEvent &>(event)); });
+             [this](web::Event &event) { DragChip(static_cast<web::PointerEvent &>(event)); });
 
       // The lock box: a click locks the pointer to it, and the mouse's movement comes to it.
-      RefPtr<boo::EventTarget> box = document.GetElementById(u8"lock-box");
+      RefPtr<web::EventTarget> box = document.GetElementById(u8"lock-box");
       listen(box, u8"click",
-             [this](boo::Event &)
+             [this](web::Event &)
              {
                if (auto element = ById(u8"lock-box"))
                {
@@ -126,9 +126,9 @@ namespace krys::editor
                }
              });
       listen(box, u8"mousemove",
-             [this](boo::Event &event)
+             [this](web::Event &event)
              {
-               auto &mouse = static_cast<boo::MouseEvent &>(event);
+               auto &mouse = static_cast<web::MouseEvent &>(event);
                if (!IsLocked())
                {
                  return;
@@ -139,16 +139,16 @@ namespace krys::editor
                        std::format("Locked: moved {:.0f}, {:.0f}; {:.0f}, {:.0f} in all. Escape unlocks it.",
                                    mouse.MovementX(), mouse.MovementY(), _lockedX, _lockedY));
              });
-      RefPtr<boo::EventTarget> target = ShareRefPtr(&document);
-      listen(target, u8"pointerlockchange", [this](boo::Event &) { ShowLock(); });
+      RefPtr<web::EventTarget> target = ShareRefPtr(&document);
+      listen(target, u8"pointerlockchange", [this](web::Event &) { ShowLock(); });
       listen(target, u8"pointerlockerror",
-             [this](boo::Event &) { SetText(u8"lock-readout", "The pointer can't be locked here."); });
+             [this](web::Event &) { SetText(u8"lock-readout", "The pointer can't be locked here."); });
 
       // The pan area: what taps, double taps and long presses do there.
-      RefPtr<boo::EventTarget> area = document.GetElementById(u8"pan-area");
+      RefPtr<web::EventTarget> area = document.GetElementById(u8"pan-area");
       for (auto type : {u8"click", u8"dblclick", u8"contextmenu"})
       {
-        listen(area, type, [this](boo::Event &event) { ShowGesture(static_cast<boo::MouseEvent &>(event)); });
+        listen(area, type, [this](web::Event &event) { ShowGesture(static_cast<web::MouseEvent &>(event)); });
       }
 
       ShowPad();
@@ -156,7 +156,7 @@ namespace krys::editor
     }
 
   private:
-    KRYS_NODISCARD RefPtr<boo::Element> ById(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<web::Element> ById(utf8_stringview id) const noexcept
     {
       return _document ? _document->GetElementById(id) : nullptr;
     }
@@ -166,11 +166,11 @@ namespace krys::editor
       if (auto element = ById(id))
       {
         (void)element->TextContent(
-          boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+          web::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
 
-    KRYS_NODISCARD static std::string Narrow(boo::DOMStringView text) noexcept
+    KRYS_NODISCARD static std::string Narrow(web::DOMStringView text) noexcept
     {
       return std::string(text.begin(), text.end());
     }
@@ -181,7 +181,7 @@ namespace krys::editor
       return box && _document->PointerLockElement() == box;
     }
 
-    void ShowPointer(const boo::PointerEvent &pointer) noexcept
+    void ShowPointer(const web::PointerEvent &pointer) noexcept
     {
       auto id = static_cast<int32>(pointer.PointerId());
       auto line = std::format("{} {} at {:.0f}, {:.0f}: pressure {:.2f}, tilt {} {}, buttons {}",
@@ -214,7 +214,7 @@ namespace krys::editor
       SetText(u8"pointer-readout", text);
     }
 
-    void DragChip(const boo::PointerEvent &pointer) noexcept
+    void DragChip(const web::PointerEvent &pointer) noexcept
     {
       auto chip = ById(u8"drag-chip");
       auto area = ById(u8"drag-area");
@@ -231,7 +231,7 @@ namespace krys::editor
                               std::max(0.0, areaRect->Height() - chipRect->Height()));
       auto style = std::format("left: {:.0f}px; top: {:.0f}px", left, top);
       (void)chip->SetAttribute(u8"style",
-                               boo::DOMString(reinterpret_cast<const char8_t *>(style.data()), style.size()));
+                               web::DOMString(reinterpret_cast<const char8_t *>(style.data()), style.size()));
     }
 
     void ShowLock() noexcept
@@ -247,9 +247,9 @@ namespace krys::editor
       }
     }
 
-    void ShowGesture(const boo::MouseEvent &event) noexcept
+    void ShowGesture(const web::MouseEvent &event) noexcept
     {
-      auto *pointer = DynamicDowncast<boo::PointerEvent>(event);
+      auto *pointer = DynamicDowncast<web::PointerEvent>(event);
       auto from = pointer ? " from " + Narrow(pointer->PointerType()) : std::string();
       SetText(u8"gesture-log", std::format("{}{} at {:.0f}, {:.0f}", Narrow(event.Type().View()), from,
                                            event.OffsetX(), event.OffsetY()));

@@ -1,0 +1,450 @@
+﻿/*
+ * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Web/Css/Values/Primitives/Concepts.hpp"
+#include "Krystal.Web/Css/Values/Primitives/NumericRaw.hpp"
+#include "Krystal.Web/Css/Values/Primitives/PrimitiveData.hpp"
+#include "Krystal.Web/Css/Values/Primitives/PrimitiveKeywordList.hpp"
+#include "Krystal.Web/Css/Values/Primitives/Range.hpp"
+
+namespace krys::web::css
+{
+  template <NumericRaw>
+  struct PrimitiveNumeric;
+
+  template <Numeric, PrimitiveKeyword...>
+  struct PrimitiveNumericOrKeyword;
+
+#pragma region Primitive Numeric(Raw + UnevaluatedCalc)
+
+  // NOTE: As is the case for `PrimitiveNumericRaw`, `ResolvedValueType` here only affects the type
+  // the CSS value gets resolved to. Unresolved CSS primitive numeric types always use a `double` as
+  // its internal representation.
+
+  template <NumericRaw RawType>
+  struct PrimitiveNumeric
+  {
+    template <typename>
+    friend struct PrimitiveDataMarkableTraits;
+
+    template <Numeric, PrimitiveKeyword...>
+    friend struct PrimitiveNumericOrKeyword;
+
+    using Raw = RawType;
+    using Calc = UnevaluatedCalc<Raw>;
+    using UnitType = typename Raw::UnitType;
+    using UnitTraits = typename Raw::UnitTraits;
+    using ResolvedValueType = typename Raw::ResolvedValueType;
+    using Data = PrimitiveData<PrimitiveNumeric<RawType>>;
+    using Index = typename Data::Index;
+
+    constexpr static auto Range = Raw::Range;
+    constexpr static auto Category = Raw::Category;
+
+  private:
+    Data _data;
+
+    constexpr explicit PrimitiveNumeric(PrimitiveDataEmptyToken token) noexcept : _data {token}
+    {
+    }
+
+  public:
+    constexpr PrimitiveNumeric(Raw raw) noexcept : _data {raw}
+    {
+    }
+
+    constexpr PrimitiveNumeric(Calc calc) noexcept : _data {krys::move(calc)}
+    {
+    }
+
+    template <typename T>
+    requires(Integral<T> || FloatingPoint<T>)
+    constexpr PrimitiveNumeric(T value) noexcept
+    requires(requires {
+      { Raw(value) };
+    })
+        : _data {Raw {value}}
+    {
+    }
+
+    template <typename T>
+    requires(Integral<T> || FloatingPoint<T>)
+    constexpr PrimitiveNumeric(UnitEnum auto unit, T value) noexcept
+    requires(requires {
+      { Raw(unit, value) };
+    })
+        : _data {Raw {unit, value}}
+    {
+    }
+
+    template <UnitEnum E, E UnitValue>
+    constexpr PrimitiveNumeric(ValueLiteral<UnitValue> value) noexcept
+    requires(requires {
+      { Raw(value) };
+    })
+        : _data {Raw {value}}
+    {
+    }
+
+    // MARK: Copy/Move Construction/Assignment
+
+    constexpr PrimitiveNumeric(const PrimitiveNumeric &other) noexcept = default;
+
+    constexpr PrimitiveNumeric(PrimitiveNumeric &&other) noexcept : _data {krys::move(other._data)}
+    {
+    }
+
+    constexpr PrimitiveNumeric &operator=(const PrimitiveNumeric &other) noexcept = default;
+
+    constexpr PrimitiveNumeric &operator=(PrimitiveNumeric &&other) noexcept
+    {
+      _data = krys::move(other._data);
+      return *this;
+    }
+
+    // MARK: Equality
+
+    constexpr bool operator==(const PrimitiveNumeric &other) const noexcept
+    {
+      return _data == other._data;
+    }
+
+    constexpr bool operator==(const Raw &other) const noexcept
+    {
+      return _data == other;
+    }
+
+    template <typename T>
+    requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
+    constexpr bool operator==(const T &other) const noexcept
+    {
+      return _data == other;
+    }
+
+    template <UnitType UnitValue>
+    constexpr bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
+    {
+      return _data == other;
+    }
+
+    template <NestedUnitEnumOf<UnitType> E, E UnitValue>
+    constexpr bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
+    {
+      return _data == other;
+    }
+
+    // MARK: Conditional Accessors
+
+    KRYS_NODISCARD Maybe<Raw> GetRaw() const noexcept
+    {
+      return _data.GetRaw();
+    }
+
+    KRYS_NODISCARD Maybe<Calc> GetCalc() const noexcept
+    {
+      return _data.GetCalc();
+    }
+
+    // MARK: Variant-Like Conformance
+
+    template <typename T>
+    KRYS_NODISCARD constexpr bool HoldsAlternative() const noexcept
+    {
+      if constexpr (SameType<T, Calc>)
+      {
+        return IsCalc();
+      }
+      else if constexpr (SameType<T, Raw>)
+      {
+        return IsRaw();
+      }
+    }
+
+    template <typename... F>
+    KRYS_NODISCARD constexpr decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      if (IsCalc())
+      {
+        return visitor(AsCalc());
+      }
+
+      return visitor(AsRaw());
+    }
+
+    KRYS_NODISCARD constexpr bool IsKnownZero() const noexcept
+    {
+      return IsRaw() && _data._payload.Number == 0;
+    }
+
+    KRYS_NODISCARD constexpr bool IsKnownNotZero() const noexcept
+    {
+      return IsRaw() && _data._payload.Number != 0;
+    }
+
+    KRYS_NODISCARD constexpr bool IsRaw() const noexcept
+    {
+      return _data.IsRaw();
+    }
+
+    KRYS_NODISCARD constexpr bool IsCalc() const noexcept
+    {
+      return _data.IsCalc();
+    }
+
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
+    {
+      return _data.IsEmpty();
+    }
+
+  private:
+    KRYS_NODISCARD constexpr Raw AsRaw() const noexcept
+    {
+      return _data.AsRaw();
+    }
+
+    KRYS_NODISCARD constexpr Calc AsCalc() const noexcept
+    {
+      return _data.AsCalc();
+    }
+  };
+
+#pragma endregion
+
+#pragma region Integer Primitive
+
+  template <Range R = All, typename V = int>
+  struct Integer : PrimitiveNumeric<IntegerRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<IntegerRaw<R, V>>;
+    using Base::Base;
+  };
+
+#pragma endregion
+
+#pragma region Number Primitive
+
+  template <Range R = All, typename V = double>
+  struct Number : PrimitiveNumeric<NumberRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<NumberRaw<R, V>>;
+    using Base::Base;
+  };
+
+#pragma endregion
+
+#pragma region Percentage Primitive
+
+  template <Range R = All, typename V = double>
+  struct Percentage : PrimitiveNumeric<PercentageRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<PercentageRaw<R, V>>;
+    using Base::Base;
+  };
+
+#pragma endregion
+
+#pragma region Dimension Primitive
+
+  template <Range R = All, typename V = double>
+  struct Angle : PrimitiveNumeric<AngleRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<AngleRaw<R, V>>;
+    using Base::Base;
+  };
+
+  template <Range R = All, typename V = float>
+  struct Length : PrimitiveNumeric<LengthRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<LengthRaw<R, V>>;
+    using Base::Base;
+  };
+
+  template <Range R = All, typename V = double>
+  struct Time : PrimitiveNumeric<TimeRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<TimeRaw<R, V>>;
+    using Base::Base;
+  };
+
+  template <Range R = All, typename V = double>
+  struct Frequency : PrimitiveNumeric<FrequencyRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<FrequencyRaw<R, V>>;
+    using Base::Base;
+  };
+
+  template <Range R = NonNegative, typename V = double>
+  struct Resolution : PrimitiveNumeric<ResolutionRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<ResolutionRaw<R, V>>;
+    using Base::Base;
+  };
+
+  template <Range R = All, typename V = double>
+  struct Flex : PrimitiveNumeric<FlexRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<FlexRaw<R, V>>;
+    using Base::Base;
+  };
+
+#pragma endregion
+
+#pragma region Dimension + Percentage Primitives
+
+  template <Range R = All, typename V = float>
+  struct AnglePercentage : PrimitiveNumeric<AnglePercentageRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<AnglePercentageRaw<R, V>>;
+    using Base::Base;
+    using MarkableTraits = PrimitiveDataMarkableTraits<AnglePercentage<R, V>>;
+  };
+
+  template <Range R = All, typename V = float>
+  struct LengthPercentage : PrimitiveNumeric<LengthPercentageRaw<R, V>>
+  {
+    using Base = PrimitiveNumeric<LengthPercentageRaw<R, V>>;
+    using Base::Base;
+    using MarkableTraits = PrimitiveDataMarkableTraits<LengthPercentage<R, V>>;
+  };
+
+#pragma endregion
+
+#pragma region TreatAsVariantLike Specializations
+
+  template <typename Raw>
+  constexpr inline auto TreatAsVariantLike<PrimitiveNumeric<Raw>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Integer<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Number<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Percentage<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Angle<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Length<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Time<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Frequency<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Resolution<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<Flex<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<AnglePercentage<R, V>> = true;
+
+  template <auto R, typename V>
+  constexpr inline auto TreatAsVariantLike<LengthPercentage<R, V>> = true;
+
+#pragma endregion
+}
+
+#pragma region MarkableTraits Specializations
+
+namespace krys
+{
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Integer<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Integer<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Number<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Number<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Percentage<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Percentage<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Angle<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Angle<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Length<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Length<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Time<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Time<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Frequency<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Frequency<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Resolution<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Resolution<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::Flex<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::Flex<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::AnglePercentage<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::AnglePercentage<R, V>>
+  {
+  };
+
+  template <krys::web::css::Range R, typename V>
+  struct MarkableTraits<krys::web::css::LengthPercentage<R, V>>
+      : public krys::web::css::PrimitiveDataMarkableTraits<krys::web::css::LengthPercentage<R, V>>
+  {
+  };
+}
+
+#pragma endregion

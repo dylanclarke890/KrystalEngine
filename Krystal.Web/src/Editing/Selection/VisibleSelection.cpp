@@ -1,0 +1,861 @@
+﻿/*
+ * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+#include "Krystal.Core/Move.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Editing/Editing.hpp"
+#include "Krystal.Web/Editing/Selection/VisibleUnits.hpp"
+#include "Krystal.Web/Editing/TextIterator.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include <utility>
+
+namespace krys::web
+{
+  namespace
+  {
+    KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(Node &node) noexcept
+    {
+      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+      if (!shadowRoot)
+      {
+        return false;
+      }
+
+      if (shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
+      {
+        return true;
+      }
+
+      for (Node *currentNode = &node; currentNode; currentNode = currentNode->ParentOrShadowHostNode())
+      {
+        if (currentNode->HasEditableStyle())
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
+  VisibleSelection::VisibleSelection(Position anchor, Position focus, Affinity affinity,
+                                     web::Directionality directionality) noexcept
+      : _anchor(krys::move(anchor)), _focus(krys::move(focus)), _affinity(affinity),
+        _directionality(directionality)
+  {
+    Validate();
+  }
+
+  VisibleSelection::VisibleSelection(const Position &position, Affinity affinity,
+                                     web::Directionality directionality) noexcept
+      : VisibleSelection(position, position, affinity, directionality)
+  {
+  }
+
+  VisibleSelection::VisibleSelection(const VisiblePosition &position,
+                                     web::Directionality directionality) noexcept
+      : VisibleSelection(position.DeepEquivalent(), position.GetAffinity(), directionality)
+  {
+    // FIXME: Wasteful that this re-canonicalizes, but risky to change since the VisiblePosition object could
+    // be from before a mutation and its position may no longer be canonical.
+  }
+
+  VisibleSelection::VisibleSelection(const VisiblePosition &anchor, const VisiblePosition &focus,
+                                     web::Directionality directionality) noexcept
+      : VisibleSelection(anchor.DeepEquivalent(), focus.DeepEquivalent(), anchor.GetAffinity(),
+                         directionality)
+  {
+    // FIXME: Wasteful that this re-canonicalizes, but risky to change since the VisiblePosition objects could
+    // be from before a mutation and their positions may no longer be canonical.
+  }
+
+  VisibleSelection::VisibleSelection(const dom::SimpleRange &range, Affinity affinity,
+                                     web::Directionality directionality) noexcept
+      : VisibleSelection(CreateDeprecatedLegacyPosition(range.Start),
+                         CreateDeprecatedLegacyPosition(range.End), affinity, directionality)
+  {
+  }
+
+  const VisibleSelection &VisibleSelection::EmptySelection() noexcept
+  {
+    static NeverDestroyed<VisibleSelection> selection;
+    return *selection;
+  }
+
+  VisibleSelection VisibleSelection::SelectionFromContentsOfNode(Node *node) noexcept
+  {
+    krys_debug_assert(!EditingIgnoresContent(*node));
+    return VisibleSelection(VisiblePosition {FirstPositionInNode(node)},
+                            VisiblePosition {LastPositionInNode(node)});
+  }
+
+  const Position &VisibleSelection::UncanonicalizedStart() const noexcept
+  {
+    return _anchorIsBeforeFocus ? _anchor : _focus;
+  }
+
+  const Position &VisibleSelection::UncanonicalizedEnd() const noexcept
+  {
+    return _anchorIsBeforeFocus ? _focus : _anchor;
+  }
+
+  Maybe<dom::SimpleRange> VisibleSelection::Range() const noexcept
+  {
+    const auto &start = UncanonicalizedStart();
+    const auto &end = UncanonicalizedEnd();
+    if (start.GetDocument())
+    {
+      return CreateSimpleRange(PositionRange {start, end});
+    }
+    return CreateSimpleRange(
+      PositionRange {start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
+  }
+
+  void VisibleSelection::SetAnchor(const Position &position) noexcept
+  {
+    _anchor = position;
+    Validate();
+  }
+
+  void VisibleSelection::SetAnchor(const VisiblePosition &visiblePosition) noexcept
+  {
+    SetAnchor(visiblePosition.DeepEquivalent());
+  }
+
+  void VisibleSelection::SetFocus(const Position &position) noexcept
+  {
+    _focus = position;
+    Validate();
+  }
+
+  void VisibleSelection::SetFocus(const VisiblePosition &visiblePosition) noexcept
+  {
+    SetFocus(visiblePosition.DeepEquivalent());
+  }
+
+  bool VisibleSelection::IsOrphan() const noexcept
+  {
+    if (_canonicalAnchor.IsOrphan() || _canonicalFocus.IsOrphan() || _start.IsOrphan() || _end.IsOrphan())
+    {
+      return true;
+    }
+    if (_anchor.IsOrphan())
+    {
+      return true;
+    }
+    if (_focus.IsOrphan())
+    {
+      return true;
+    }
+    return false;
+  }
+
+  RefPtr<Document> VisibleSelection::GetDocument() const noexcept
+  {
+    auto *document = _canonicalAnchor.GetDocument();
+    if (!document)
+    {
+      document = _anchor.GetDocument();
+      if (!document)
+      {
+        return nullptr;
+      }
+    }
+
+    if (_canonicalFocus.GetDocument() != document || _start.GetDocument() != document
+        || _end.GetDocument() != document)
+    {
+      return nullptr;
+    }
+
+    if (_anchor.GetDocument() != document || _focus.GetDocument() != document)
+    {
+      return nullptr;
+    }
+
+    return ShareRefPtr(document);
+  }
+
+  Maybe<dom::SimpleRange> VisibleSelection::FirstRange() const noexcept
+  {
+    if (IsNoneOrOrphaned())
+    {
+      return {};
+    }
+    // FIXME: Seems likely we don't need to call ParentAnchoredEquivalent here.
+    return CreateSimpleRange(
+      PositionRange {_start.ParentAnchoredEquivalent(), _end.ParentAnchoredEquivalent()});
+  }
+
+  Maybe<dom::SimpleRange> VisibleSelection::ToNormalizedRange() const noexcept
+  {
+    if (IsNoneOrOrphaned())
+    {
+      return {};
+    }
+
+    // Make sure we have an updated layout since this function is called
+    // in the course of running edit commands which modify the DOM.
+    // Failing to call this can result in equivalentXXXPosition calls returning
+    // incorrect results.
+    _start.AnchorNode()->NodeDocument().UpdateLayout();
+
+    // Check again, because updating layout can clear the selection.
+    if (IsNoneOrOrphaned())
+    {
+      return {};
+    }
+
+    Position s;
+    Position e;
+    if (IsCaret())
+    {
+      // If the selection is a caret, move the range start upstream. This helps us match
+      // the conventions of text editors tested, which make style determinations based
+      // on the character before the caret, if any.
+      s = _start.Upstream().ParentAnchoredEquivalent();
+      e = s;
+    }
+    else
+    {
+      // If the selection is a range, select the minimum range that encompasses the selection.
+      // Again, this is to match the conventions of text editors tested, which make style
+      // determinations based on the first character of the selection.
+      // For instance, this operation helps to make sure that the "X" selected below is the
+      // only thing selected. The range should not be allowed to "leak" out to the end of the
+      // previous text node, or to the beginning of the next text node, each of which has a
+      // different style.
+      //
+      // On a treasure map, <b>X</b> marks the spot.
+      //                       ^ selected
+      //
+      krys_debug_assert(IsRange());
+      s = _start.Downstream().ParentAnchoredEquivalent();
+      e = _end.Upstream().ParentAnchoredEquivalent();
+      // Make sure the start is before the end.
+      // The end can wind up before the start if collapsed whitespace is the only thing selected.
+      if (s > e)
+      {
+        std::swap(s, e);
+      }
+    }
+
+    return CreateSimpleRange(PositionRange {s, e});
+  }
+
+  bool VisibleSelection::ExpandUsingGranularity(TextGranularity granularity) noexcept
+  {
+    if (IsNone())
+    {
+      return false;
+    }
+
+    Validate(granularity);
+    return true;
+  }
+
+  bool VisibleSelection::IsAll(EditingBoundaryCrossingRule rule) const noexcept
+  {
+    return !NonBoundaryShadowTreeRootNode() && VisibleStart().Previous(rule).IsNull()
+           && VisibleEnd().Next(rule).IsNull();
+  }
+
+  void VisibleSelection::AppendTrailingWhitespace() noexcept
+  {
+    auto *scope = DeprecatedEnclosingBlockFlowElement(_end.DeprecatedNode());
+    if (!scope)
+    {
+      return;
+    }
+
+    auto start = CreateBoundaryPoint(_end);
+    if (!start)
+    {
+      return;
+    }
+    CharacterIterator charIt(dom::SimpleRange {*start, dom::CreateBoundaryPointAfterNodeContents(*scope)},
+                             TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
+    for (; !charIt.AtEnd() && !charIt.Text().empty(); charIt.Advance(1))
+    {
+      char32 c = text::CodePointAt(charIt.Text(), 0);
+      if ((!DeprecatedIsSpaceOrNewline(c) && c != 0xA0 /* noBreakSpace */) || c == '\n')
+      {
+        break;
+      }
+      _end = CreateDeprecatedLegacyPosition(charIt.Range().End);
+      if (_anchorIsBeforeFocus)
+      {
+        _focus = _end;
+      }
+      else
+      {
+        _anchor = _end;
+      }
+    }
+  }
+
+  void VisibleSelection::SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept
+  {
+    // If only one of anchor and focus is null, convert to a caret selection.
+    // FIXME: Seems like a better rule would be to convert to no selection.
+    if (_anchor.IsNull())
+    {
+      _anchor = _focus;
+    }
+    if (_focus.IsNull())
+    {
+      _focus = _anchor;
+    }
+
+    _anchorIsBeforeFocus = std::is_lteq(TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+
+    _canonicalAnchor = VisiblePosition(_anchor, _affinity).DeepEquivalent();
+    if (_anchor == _focus)
+    {
+      _canonicalFocus = _canonicalAnchor;
+    }
+    else
+    {
+      _canonicalFocus = VisiblePosition(_focus, _affinity).DeepEquivalent();
+    }
+    if (_canonicalAnchor.IsNull() != _canonicalFocus.IsNull())
+    {
+      if (_canonicalAnchor.IsNull())
+      {
+        _canonicalAnchor = _canonicalFocus;
+      }
+      else
+      {
+        _canonicalFocus = _canonicalAnchor;
+      }
+    }
+  }
+
+  void VisibleSelection::AdjustSelectionRespectingGranularity(TextGranularity granularity) noexcept
+  {
+    switch (granularity)
+    {
+      case TextGranularity::CharacterGranularity:
+        // Don't do any expansion.
+        break;
+      case TextGranularity::WordGranularity:
+      {
+        // General case: Select the word the caret is positioned inside of, or at the start of
+        // (RightWordIfOnBoundary).
+        // Edge case: If the caret is after the last word in a soft-wrapped line or the last word in
+        // the document, select that last word (LeftWordIfOnBoundary).
+        // Edge case: If the caret is after the last word in a paragraph, select from the end of the
+        // last word to the line break (also RightWordIfOnBoundary);
+        VisiblePosition start = VisiblePosition(_start, _affinity);
+        VisiblePosition originalEnd(_end, _affinity);
+        WordSide side = WordSide::RightWordIfOnBoundary;
+        if (IsEndOfEditableOrNonEditableContent(start)
+            || (IsEndOfLine(start) && !IsStartOfLine(start) && !IsEndOfParagraph(start)))
+        {
+          side = WordSide::LeftWordIfOnBoundary;
+        }
+        _start = StartOfWord(start, side).DeepEquivalent();
+        side = WordSide::RightWordIfOnBoundary;
+        if (IsEndOfEditableOrNonEditableContent(originalEnd)
+            || (IsEndOfLine(originalEnd) && !IsStartOfLine(originalEnd) && !IsEndOfParagraph(originalEnd)))
+        {
+          side = WordSide::LeftWordIfOnBoundary;
+        }
+
+        VisiblePosition wordEnd(EndOfWord(originalEnd, side));
+        VisiblePosition end(wordEnd);
+
+        if (IsEndOfParagraph(originalEnd) && !IsEmptyTableCell(_start.DeprecatedNode()))
+        {
+          // Select the paragraph break (the space from the end of a paragraph to the start of
+          // the next one) to match TextEdit.
+          end = wordEnd.Next();
+
+          if (RefPtr table = IsFirstPositionAfterTable(end))
+          {
+            // The paragraph break after the last paragraph in the last cell of a block table ends
+            // at the start of the paragraph after the table.
+            if (IsBlock(*table))
+            {
+              end = end.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
+            }
+            else
+            {
+              end = wordEnd;
+            }
+          }
+
+          if (end.IsNull())
+          {
+            end = wordEnd;
+          }
+        }
+
+        _end = end.DeepEquivalent();
+
+        // End must not be before start.
+        if (_start.DeprecatedNode() == _end.DeprecatedNode()
+            && _start.DeprecatedEditingOffset() > _end.DeprecatedEditingOffset())
+        {
+          std::swap(_start, _end);
+        }
+        break;
+      }
+      case TextGranularity::SentenceGranularity:
+        _start = StartOfSentence(VisiblePosition(_start, _affinity)).DeepEquivalent();
+        _end = EndOfSentence(VisiblePosition(_end, _affinity)).DeepEquivalent();
+        break;
+      case TextGranularity::LineGranularity:
+      {
+        _start = StartOfLine(VisiblePosition(_start, _affinity)).DeepEquivalent();
+        VisiblePosition end = EndOfLine(VisiblePosition(_end, _affinity));
+        // If the end of this line is at the end of a paragraph, include the space
+        // after the end of the line in the selection.
+        if (IsEndOfParagraph(end))
+        {
+          VisiblePosition next = end.Next();
+          if (next.IsNotNull())
+          {
+            end = next;
+          }
+        }
+        _end = end.DeepEquivalent();
+        break;
+      }
+      case TextGranularity::LineBoundary:
+        _start = StartOfLine(VisiblePosition(_start, _affinity)).DeepEquivalent();
+        _end = EndOfLine(VisiblePosition(_end, _affinity)).DeepEquivalent();
+        break;
+      case TextGranularity::ParagraphGranularity:
+      {
+        VisiblePosition position(_start, _affinity);
+        if (IsStartOfLine(position) && IsEndOfEditableOrNonEditableContent(position))
+        {
+          position = position.Previous();
+        }
+        _start = StartOfParagraph(position).DeepEquivalent();
+        VisiblePosition visibleParagraphEnd = EndOfParagraph(VisiblePosition(_end, _affinity));
+
+        // Include the "paragraph break" (the space from the end of this paragraph to the start
+        // of the next one) in the selection.
+        VisiblePosition end(visibleParagraphEnd.Next());
+
+        if (RefPtr table = IsFirstPositionAfterTable(end))
+        {
+          // The paragraph break after the last paragraph in the last cell of a block table ends
+          // at the start of the paragraph after the table, not at the position just after the table.
+          if (IsBlock(*table))
+          {
+            end = end.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
+          }
+          // There is no parargraph break after the last paragraph in the last cell of an inline table.
+          else
+          {
+            end = visibleParagraphEnd;
+          }
+        }
+
+        if (end.IsNull())
+        {
+          end = visibleParagraphEnd;
+        }
+
+        _end = end.DeepEquivalent();
+        break;
+      }
+      case TextGranularity::DocumentBoundary:
+        _start = StartOfDocument(_start.GetDocument()).DeepEquivalent();
+        _end = EndOfDocument(_end.GetDocument()).DeepEquivalent();
+        break;
+      case TextGranularity::ParagraphBoundary:
+        _start = StartOfParagraph(VisiblePosition(_start, _affinity)).DeepEquivalent();
+        _end = EndOfParagraph(VisiblePosition(_end, _affinity)).DeepEquivalent();
+        break;
+      case TextGranularity::SentenceBoundary:
+        _start = StartOfSentence(VisiblePosition(_start, _affinity)).DeepEquivalent();
+        _end = EndOfSentence(VisiblePosition(_end, _affinity)).DeepEquivalent();
+        break;
+      case TextGranularity::DocumentGranularity: krys_debug_assert(false); break;
+    }
+
+    // Make sure we do not have a dangling start or end.
+    if (_start.IsNull())
+    {
+      _start = _end;
+    }
+    if (_end.IsNull())
+    {
+      _end = _start;
+    }
+  }
+
+  void VisibleSelection::UpdateSelectionType() noexcept
+  {
+    if (_start.IsNull())
+    {
+      krys_debug_assert(_end.IsNull());
+      _type = Type::None;
+      _affinity = Affinity::Downstream;
+    }
+    else if (_start == _end || _start.Upstream() == _end.Upstream())
+    {
+      _type = Type::Caret;
+    }
+    else
+    {
+      _type = Type::Range;
+      _affinity = Affinity::Downstream;
+    }
+  }
+
+  void VisibleSelection::Validate(TextGranularity granularity) noexcept
+  {
+    SetCanonicalAnchorAndFocusToDeepEquivalents();
+
+    _start = _anchorIsBeforeFocus ? _canonicalAnchor : _canonicalFocus;
+    _end = _anchorIsBeforeFocus ? _canonicalFocus : _canonicalAnchor;
+
+    auto startBeforeAdjustments = _start;
+    auto endBeforeAdjustments = _end;
+
+    AdjustSelectionRespectingGranularity(granularity);
+    AdjustSelectionToAvoidCrossingShadowBoundaries();
+    AdjustSelectionToAvoidCrossingEditingBoundaries();
+    UpdateSelectionType();
+
+    bool shouldUpdateAnchor = _start != startBeforeAdjustments;
+    bool shouldUpdateFocus = _end != endBeforeAdjustments;
+
+    if (IsRange())
+    {
+      // "Constrain" the selection to be the smallest equivalent range of nodes.
+      // This is a somewhat arbitrary choice, but experience shows that it is
+      // useful to make to make the selection "canonical" (if only for
+      // purposes of comparing selections). This is an ideal point of the code
+      // to do this operation, since all selection changes that result in a RANGE
+      // come through here before anyone uses it.
+      // FIXME: Canonicalizing is good, but haven't we already done it (when we
+      // set these two positions to VisiblePosition DeepEquivalent()s above)?
+      _start = _start.Downstream();
+      _end = _end.Upstream();
+
+      // Position::Downstream() or Position::Upstream() might violate editing boundaries
+      // if an anchor node has a Shadow DOM even though they should not. But because this
+      // happens in practice, adjust selection to avoid crossing editing boundaries again.
+      AdjustSelectionToAvoidCrossingEditingBoundaries();
+    }
+
+    if (shouldUpdateAnchor)
+    {
+      _anchor = _anchorIsBeforeFocus ? _start : _end;
+      _canonicalAnchor = _anchor;
+    }
+    if (shouldUpdateFocus)
+    {
+      _focus = _anchorIsBeforeFocus ? _end : _start;
+      _canonicalFocus = _focus;
+    }
+  }
+
+  // Because we use VisibleSelection to store values in editing commands for use when
+  // undoing the command, we need to be able to create a selection that, while currently
+  // invalid, will be valid once the changes are undone. This is a design problem.
+  // The best fix is likely to get rid of canonicalization from VisibleSelection entirely,
+  // and then remove this function.
+  void VisibleSelection::SetWithoutValidation(const Position &anchor, const Position &focus) noexcept
+  {
+    krys_debug_assert(anchor.IsNull() == focus.IsNull());
+    krys_debug_assert(_affinity == Affinity::Downstream);
+    _anchor = anchor;
+    _focus = focus;
+    _anchorIsBeforeFocus = std::is_lteq(TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+    _canonicalAnchor = anchor;
+    _canonicalFocus = focus;
+    _start = _anchorIsBeforeFocus ? anchor : focus;
+    _end = _anchorIsBeforeFocus ? focus : anchor;
+    _type = anchor == focus ? Type::Caret : Type::Range;
+  }
+
+  Position VisibleSelection::AdjustPositionForEnd(const Position &currentPosition,
+                                                  Node *startContainerNode) noexcept
+  {
+    auto &scopeRoot = dom::TreeQueries::Root(*startContainerNode);
+
+    krys_debug_assert(&dom::TreeQueries::Root(*currentPosition.GetContainerNode()) != &scopeRoot);
+
+    if (auto *ancestor = AncestorNodeInThisScope(scopeRoot, currentPosition.GetContainerNode()))
+    {
+      if (ancestor->Contains(startContainerNode))
+      {
+        return PositionAfterNode(ancestor);
+      }
+      return PositionBeforeNode(ancestor);
+    }
+
+    if (auto *lastChild = scopeRoot.LastChild())
+    {
+      return PositionAfterNode(lastChild);
+    }
+
+    return {};
+  }
+
+  Position VisibleSelection::AdjustPositionForStart(const Position &currentPosition,
+                                                    Node *endContainerNode) noexcept
+  {
+    auto &scopeRoot = dom::TreeQueries::Root(*endContainerNode);
+
+    krys_debug_assert(&dom::TreeQueries::Root(*currentPosition.GetContainerNode()) != &scopeRoot);
+
+    if (auto *ancestor = AncestorNodeInThisScope(scopeRoot, currentPosition.GetContainerNode()))
+    {
+      if (ancestor->Contains(endContainerNode))
+      {
+        return PositionBeforeNode(ancestor);
+      }
+      return PositionAfterNode(ancestor);
+    }
+
+    if (auto *firstChild = scopeRoot.FirstChild())
+    {
+      return PositionBeforeNode(firstChild);
+    }
+
+    return {};
+  }
+
+  void VisibleSelection::AdjustSelectionToAvoidCrossingShadowBoundaries() noexcept
+  {
+    if (_start.IsNull() || _end.IsNull())
+    {
+      return;
+    }
+
+    auto &startNode = *_start.AnchorNode();
+    auto &endNode = *_end.AnchorNode();
+    if (&dom::TreeQueries::Root(startNode) == &dom::TreeQueries::Root(endNode))
+    {
+      return;
+    }
+
+    if (!IsInUserAgentShadowRootOrHasEditableShadowAncestor(startNode)
+        && !IsInUserAgentShadowRootOrHasEditableShadowAncestor(endNode))
+    {
+      return;
+    }
+
+    // Correct the focus if necessary.
+    if (_anchorIsBeforeFocus)
+    {
+      _canonicalFocus = AdjustPositionForEnd(_end, _start.GetContainerNode());
+      _end = _canonicalFocus;
+    }
+    else
+    {
+      _canonicalFocus = AdjustPositionForStart(_start, _end.GetContainerNode());
+      _start = _canonicalFocus;
+    }
+    _focus = _canonicalFocus;
+  }
+
+  void VisibleSelection::AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept
+  {
+    if (_start.IsNull() || _end.IsNull())
+    {
+      return;
+    }
+
+    // Early return in the caret case (the state hasn't actually been set yet, so we can't use IsCaret()) to
+    // avoid the expense of computing HighestEditableRoot.
+    if (_canonicalAnchor == _start && _canonicalAnchor == _end)
+    {
+      return;
+    }
+
+    auto baseRoot = HighestEditableRoot(_canonicalAnchor);
+    auto startRoot = HighestEditableRoot(_start);
+    auto endRoot = HighestEditableRoot(_end);
+
+    auto *baseEditableAncestor = LowestEditableAncestor(_canonicalAnchor.GetContainerNode());
+
+    // The base, start and end are all in the same region.  No adjustment necessary.
+    if (baseRoot == startRoot && baseRoot == endRoot)
+    {
+      return;
+    }
+
+    // The selection is based in editable content.
+    if (baseRoot)
+    {
+      // If the start is outside the base's editable root, cap it at the start of that root.
+      // If the start is in non-editable content that is inside the base's editable root, put it
+      // at the first editable position after start inside the base's editable root.
+      if (startRoot != baseRoot)
+      {
+        VisiblePosition first {FirstEditablePositionAfterPositionInRoot(_start, baseRoot.get())};
+        _start = first.DeepEquivalent();
+        if (_start.IsNull())
+        {
+          krys_debug_assert(false);
+          _start = _end;
+        }
+      }
+      // If the end is outside the base's editable root, cap it at the end of that root.
+      // If the end is in non-editable content that is inside the base's root, put it
+      // at the last editable position before the end inside the base's root.
+      if (endRoot != baseRoot)
+      {
+        VisiblePosition last {LastEditablePositionBeforePositionInRoot(_end, baseRoot.get())};
+        _end = last.DeepEquivalent();
+        if (_end.IsNull())
+        {
+          _end = _start;
+        }
+      }
+    }
+    // The selection is based in non-editable content.
+    else
+    {
+      // FIXME: Non-editable pieces inside editable content should be atomic, in the same way that editable
+      // pieces in non-editable content are atomic.
+
+      // The selection ends in editable content or non-editable content inside a different editable ancestor,
+      // move backward until non-editable content inside the same lowest editable ancestor is reached.
+      auto *endEditableAncestor = LowestEditableAncestor(_end.GetContainerNode());
+      if (endRoot || endEditableAncestor != baseEditableAncestor)
+      {
+        Position p = PreviousVisuallyDistinctCandidate(_end);
+        Element *shadowAncestor = endRoot ? dom::TreeQueries::ShadowHost(*endRoot) : nullptr;
+        if (p.IsNull() && shadowAncestor)
+        {
+          p = PositionAfterNode(shadowAncestor);
+        }
+        while (p.IsNotNull()
+               && !(LowestEditableAncestor(p.GetContainerNode()) == baseEditableAncestor
+                    && !IsEditablePosition(p)))
+        {
+          auto *root = EditableRootForPosition(p);
+          shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
+          p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentBeforeNode(p.GetContainerNode())
+                                                 : PreviousVisuallyDistinctCandidate(p);
+          if (p.IsNull() && shadowAncestor)
+          {
+            p = PositionAfterNode(shadowAncestor);
+          }
+        }
+        VisiblePosition previous(p);
+
+        if (previous.IsNull())
+        {
+          *this = {};
+          return;
+        }
+        _end = previous.DeepEquivalent();
+      }
+
+      // The selection starts in editable content or non-editable content inside a different editable
+      // ancestor, move forward until non-editable content inside the same lowest editable ancestor is
+      // reached.
+      auto *startEditableAncestor = LowestEditableAncestor(_start.GetContainerNode());
+      if (startRoot || startEditableAncestor != baseEditableAncestor)
+      {
+        Position p = NextVisuallyDistinctCandidate(_start);
+        Element *shadowAncestor = startRoot ? dom::TreeQueries::ShadowHost(*startRoot) : nullptr;
+        if (p.IsNull() && shadowAncestor)
+        {
+          p = PositionBeforeNode(shadowAncestor);
+        }
+        while (p.IsNotNull()
+               && !(LowestEditableAncestor(p.GetContainerNode()) == baseEditableAncestor
+                    && !IsEditablePosition(p)))
+        {
+          auto *root = EditableRootForPosition(p);
+          shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
+          p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentAfterNode(p.GetContainerNode())
+                                                 : NextVisuallyDistinctCandidate(p);
+          if (p.IsNull() && shadowAncestor)
+          {
+            p = PositionBeforeNode(shadowAncestor);
+          }
+        }
+        VisiblePosition next(p);
+
+        if (next.IsNull())
+        {
+          *this = {};
+          return;
+        }
+        _start = next.DeepEquivalent();
+      }
+    }
+
+    // Correct the focus if necessary.
+    if (baseEditableAncestor != LowestEditableAncestor(_canonicalFocus.GetContainerNode()))
+    {
+      _canonicalFocus = _anchorIsBeforeFocus ? _end : _start;
+      _focus = _canonicalFocus;
+    }
+  }
+
+  bool VisibleSelection::IsContentEditable() const noexcept
+  {
+    return IsEditablePosition(Start());
+  }
+
+  bool VisibleSelection::HasEditableStyle() const noexcept
+  {
+    if (auto *containerNode = Start().GetContainerNode())
+    {
+      return containerNode->HasEditableStyle();
+    }
+    return false;
+  }
+
+  bool VisibleSelection::IsContentRichlyEditable() const noexcept
+  {
+    return IsRichlyEditablePosition(Start());
+  }
+
+  Element *VisibleSelection::RootEditableElement() const noexcept
+  {
+    return EditableRootForPosition(Start());
+  }
+
+  bool VisibleSelection::IsInPasswordField() const noexcept
+  {
+    auto *textControl = DynamicDowncast<HTMLInputElement>(html::EnclosingTextFormControl(Start()));
+    return textControl && textControl->IsPasswordField();
+  }
+
+  Node *VisibleSelection::NonBoundaryShadowTreeRootNode() const noexcept
+  {
+    auto *node = Start().DeprecatedNode();
+    return node && !Is<ShadowRoot>(*node) ? node->NonBoundaryShadowTreeRootNode() : nullptr;
+  }
+}

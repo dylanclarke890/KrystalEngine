@@ -1,0 +1,574 @@
+﻿/*
+ * Copyright (C) 2017-2018 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Animation/AnimationEffect.hpp"
+#include "Krystal.Web/Animation/AnimationPromise.hpp"
+#include "Krystal.Web/Animation/Timelines/AnimationTimeline.hpp"
+#include "Krystal.Web/Animation/Timelines/TimelineRangeValue.hpp"
+#include "Krystal.Web/Animation/Timing/WebAnimationTime.hpp"
+#include "Krystal.Web/Animation/WebAnimationTypes.hpp"
+#include "Krystal.Web/Dom/Events/EventTarget.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Web/Style/Styleable.hpp"
+#include "Krystal.Web/Style/Values/Animations/SingleAnimationRange.hpp"
+
+namespace krys::web::style
+{
+  struct ResolutionContext;
+  struct Styleable;
+}
+
+namespace krys::web
+{
+  class AnimationEffect;
+  class AnimationEventBase;
+  class AnimationTimeline;
+  class Document;
+  class KeyframeEffect;
+  class RenderStyle;
+
+  /// @brief An animation: it plays an animation effect, and gives it its time from a timeline.
+  /// @see https://drafts.csswg.org/web-animations-1/#animations
+  class WebAnimation : public EventTarget
+  {
+  public:
+    enum class PlayState : uint8
+    {
+      Idle,
+      Running,
+      Paused,
+      Finished,
+    };
+
+    enum class ReplaceState : uint8
+    {
+      Active,
+      Removed,
+      Persisted,
+    };
+
+    enum class Silently : bool
+    {
+      No,
+      Yes,
+    };
+
+  private:
+    enum class DidSeek : bool
+    {
+      No,
+      Yes,
+    };
+
+    enum class SynchronouslyNotify : bool
+    {
+      No,
+      Yes,
+    };
+
+    enum class RespectHoldTime : bool
+    {
+      No,
+      Yes,
+    };
+
+    enum class AutoRewind : bool
+    {
+      No,
+      Yes,
+    };
+
+    enum class TimeToRunPendingTask : uint8
+    {
+      NotScheduled,
+      ASAP,
+      WhenReady,
+    };
+
+    RefPtr<AnimationEffect> _effect;
+    RefPtr<AnimationTimeline> _timeline;
+    Ref<detail::AnimationPromise> _readyPromise;
+    Ref<detail::AnimationPromise> _finishedPromise;
+    Maybe<WebAnimationTime> _previousCurrentTime;
+    Maybe<WebAnimationTime> _startTime;
+    Maybe<WebAnimationTime> _pendingStartTime;
+    Maybe<WebAnimationTime> _holdTime;
+    Maybe<double> _pendingPlaybackRate;
+    RefPtr<css::Value> _specifiedRangeStart;
+    RefPtr<css::Value> _specifiedRangeEnd;
+    double _playbackRate {1};
+    DOMString _id;
+    int32 _suspendCount {0};
+    bool _isSuspended {false};
+    bool _finishNotificationStepsMicrotaskPending {false};
+    bool _isRelevant {false};
+    bool _shouldSkipUpdatingFinishedStateWhenResolving {false};
+    bool _hasScheduledEventsDuringTick {false};
+    bool _autoAlignStartTime {false};
+    TimeToRunPendingTask _timeToRunPendingPlayTask {TimeToRunPendingTask::NotScheduled};
+    TimeToRunPendingTask _timeToRunPendingPauseTask {TimeToRunPendingTask::NotScheduled};
+    ReplaceState _replaceState {ReplaceState::Active};
+    uint64 _globalPosition {0};
+    WeakPtr<Document> _document;
+    style::SingleAnimationRange _timelineRange {
+      .Start = {css::keywords::Normal {}},
+      .End = {css::keywords::Normal {}},
+    };
+
+  protected:
+    explicit WebAnimation(Document &document) noexcept;
+
+  public:
+    ~WebAnimation() noexcept override;
+
+    /// @brief An animation of @p effect on @p document's default timeline.
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect) noexcept;
+
+    KRYS_NODISCARD static Ref<WebAnimation> Create(Document &document, AnimationEffect *effect,
+                                                   AnimationTimeline *timeline) noexcept;
+
+    /// @brief Every animation that exists.
+    KRYS_NODISCARD static HashSet<WebAnimation *> &Instances() noexcept;
+
+    /// @brief Stops every animation of a document that's going away: they lose their listeners and effects,
+    /// and with them what those hold on to, even if something still holds the animation.
+    static void StopAnimationsOfDocument(const Document &document) noexcept;
+
+    KRYS_NODISCARD virtual bool IsStyleOriginatedAnimation() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCSSAnimation() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCSSTransition() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool IsSkippedContentAnimation() const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-id
+    KRYS_NODISCARD const DOMString &Id() const noexcept
+    {
+      return _id;
+    }
+
+    void SetId(DOMString id) noexcept;
+
+    KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
+    {
+      return Effect();
+    }
+
+    /// @brief Sets the effect, as `effect` does.
+    virtual void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
+
+    KRYS_NODISCARD AnimationEffect *Effect() const noexcept
+    {
+      return _effect.get();
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#setting-the-associated-effect
+    void SetEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
+
+    KRYS_NODISCARD KeyframeEffect *GetKeyframeEffect() const noexcept;
+
+    KRYS_NODISCARD virtual AnimationTimeline *BindingsTimeline() const noexcept
+    {
+      return Timeline();
+    }
+
+    /// @brief Sets the timeline, as `timeline` does.
+    virtual void SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept;
+
+    KRYS_NODISCARD AnimationTimeline *Timeline() const noexcept
+    {
+      return _timeline.get();
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#setting-the-timeline
+    virtual void SetTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#the-current-time-of-an-animation
+    KRYS_NODISCARD Maybe<WebAnimationTime>
+      CurrentTime(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#setting-the-current-time-of-an-animation
+    ExceptionOr<void> SetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
+
+    KRYS_NODISCARD double PlaybackRate() const noexcept
+    {
+      return _playbackRate + 0;
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#setting-the-playback-rate-of-an-animation
+    void SetPlaybackRate(double newPlaybackRate) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations/#play-states
+    KRYS_NODISCARD PlayState GetPlayState() const noexcept;
+
+    KRYS_NODISCARD ReplaceState GetReplaceState() const noexcept
+    {
+      return _replaceState;
+    }
+
+    void SetReplaceState(ReplaceState replaceState) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#pending-play-task
+    KRYS_NODISCARD bool Pending() const noexcept
+    {
+      return HasPendingPauseTask() || HasPendingPlayTask();
+    }
+
+    using ReadyCallback = detail::AnimationPromise::FulfilledCallback;
+    using ErrorCallback = detail::AnimationPromise::RejectedCallback;
+
+    /// @brief Calls @p onReady once the animation is ready, or @p onError (an `AbortError`) if it's
+    /// cancelled while a play or pause is pending. It waits on the current ready promise, so a later play or
+    /// pause doesn't move it to the next one. Either is called as a microtask.
+    /// @see https://drafts.csswg.org/web-animations-1/#current-ready-promise
+    void WhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept
+    {
+      _readyPromise->Then(krys::move(onReady), krys::move(onError));
+    }
+
+    /// @brief Calls @p onFinished once the animation finishes, or @p onError (an `AbortError`) if it's
+    /// cancelled first. It waits on the current finished promise: once the animation has finished, it's
+    /// called straight away until the animation leaves the finished state. Either is called as a microtask.
+    /// @see https://drafts.csswg.org/web-animations-1/#current-finished-promise
+    void WhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept
+    {
+      _finishedPromise->Then(krys::move(onFinished), krys::move(onError));
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#cancel-an-animation
+    virtual void Cancel(Silently silently = Silently::No) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#finish-an-animation
+    ExceptionOr<void> Finish() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#play-an-animation
+    ExceptionOr<void> Play() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations/#seamlessly-update-the-playback-rate
+    void UpdatePlaybackRate(double newPlaybackRate) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#pause-an-animation
+    ExceptionOr<void> Pause() noexcept;
+
+    /// @brief Reverses the animation, as `reverse()` does.
+    virtual ExceptionOr<void> BindingsReverse() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#reverse-an-animation
+    ExceptionOr<void> Reverse() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-persist
+    void Persist() noexcept;
+
+    /// @brief Writes the animation's current values into its target's `style` attribute.
+    /// @return A `NoModificationAllowedError` if the target can't have a style attribute (a pseudo-element),
+    /// or an `InvalidStateError` if it isn't rendered.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-commitstyles
+    ExceptionOr<void> CommitStyles() noexcept;
+
+    /// @brief The start time, as `startTime` gives it: the style of a style-originated animation is brought
+    /// up to date first.
+    KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsStartTime() const noexcept
+    {
+      return StartTime();
+    }
+
+    /// @return A `TypeError` if @p startTime isn't valid for the timeline: a percentage on a monotonic
+    /// timeline, or a time on a progress-based one.
+    virtual ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept;
+
+    KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept
+    {
+      return CurrentTime();
+    }
+
+    /// @return A `TypeError` if @p currentTime isn't valid for the timeline, or if it's unresolved while the
+    /// current time is resolved.
+    virtual ExceptionOr<void> SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept;
+
+    KRYS_NODISCARD virtual PlayState BindingsPlayState() const noexcept
+    {
+      return GetPlayState();
+    }
+
+    KRYS_NODISCARD virtual ReplaceState BindingsReplaceState() const noexcept
+    {
+      return GetReplaceState();
+    }
+
+    KRYS_NODISCARD virtual bool BindingsPending() const noexcept
+    {
+      return Pending();
+    }
+
+    /// @brief Waits on the ready promise, as `ready` does.
+    virtual void BindingsWhenReady(ReadyCallback onReady, ErrorCallback onError = nullptr) noexcept
+    {
+      WhenReady(krys::move(onReady), krys::move(onError));
+    }
+
+    /// @brief Waits on the finished promise, as `finished` does.
+    virtual void BindingsWhenFinished(ReadyCallback onFinished, ErrorCallback onError = nullptr) noexcept
+    {
+      WhenFinished(krys::move(onFinished), krys::move(onError));
+    }
+
+    /// @brief Plays the animation, as `play()` does.
+    virtual ExceptionOr<void> BindingsPlay() noexcept
+    {
+      return Play();
+    }
+
+    /// @brief Pauses the animation, as `pause()` does.
+    virtual ExceptionOr<void> BindingsPause() noexcept
+    {
+      return Pause();
+    }
+
+    KRYS_NODISCARD Maybe<WebAnimationTime> StartTime() const noexcept
+    {
+      return _startTime;
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-2/#setting-the-start-time-of-an-animation
+    void SetStartTime(Maybe<WebAnimationTime> newStartTime) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#the-overall-progress-of-an-animation
+    KRYS_NODISCARD Maybe<double> OverallProgress() const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangestart
+    KRYS_NODISCARD TimelineRangeValue BindingsRangeStart() const noexcept
+    {
+      return _timelineRange.Start.ToTimelineRangeValue();
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangeend
+    KRYS_NODISCARD TimelineRangeValue BindingsRangeEnd() const noexcept
+    {
+      return _timelineRange.End.ToTimelineRangeValue();
+    }
+
+    virtual void SetBindingsRangeStart(TimelineRangeValue &&rangeStartValue) noexcept;
+
+    virtual void SetBindingsRangeEnd(TimelineRangeValue &&rangeEndValue) noexcept;
+
+    void SetRangeStart(style::SingleAnimationRangeStart &&rangeStart) noexcept;
+
+    void SetRangeEnd(style::SingleAnimationRangeEnd &&rangeEnd) noexcept;
+
+    /// @brief The animation's attachment range, with the edges set from C++ computed for its target.
+    /// @see https://drafts.csswg.org/web-animations-2/#animation-attachment-range
+    KRYS_NODISCARD const style::SingleAnimationRange &Range() noexcept;
+
+    KRYS_NODISCARD Maybe<WebAnimationTime> HoldTime() const noexcept
+    {
+      return _holdTime;
+    }
+
+    void SetPendingStartTime(WebAnimationTime pendingStartTime) noexcept;
+
+    KRYS_NODISCARD bool NeedsTick() const noexcept;
+
+    virtual void Tick() noexcept;
+
+    /// @brief How long until the animation next needs updating.
+    KRYS_NODISCARD Seconds TimeToNextTick() const noexcept;
+
+    /// @brief Applies the animation's effect to @p targetStyle.
+    EnumSet<AnimationImpact> Resolve(RenderStyle &targetStyle,
+                                     const style::ResolutionContext &resolutionContext,
+                                     EndpointInclusiveActiveInterval endpointInclusiveActiveInterval =
+                                       EndpointInclusiveActiveInterval::No) noexcept;
+
+    void EffectTargetDidChange(const Maybe<style::Styleable> &previousTarget,
+                               const Maybe<style::Styleable> &newTarget) noexcept;
+
+    void WillChangeRenderer() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#relevant-animations-section
+    KRYS_NODISCARD bool IsRelevant() const noexcept
+    {
+      return _isRelevant;
+    }
+
+    KRYS_NODISCARD bool HasPendingFinishNotification() const noexcept
+    {
+      return _finishNotificationStepsMicrotaskPending;
+    }
+
+    void UpdateRelevance() noexcept;
+
+    void EffectTimingDidChange() noexcept;
+
+    /// @brief The scroll metrics of the source of the animation's progress-based timeline changed.
+    void ProgressBasedTimelineSourceDidChangeMetrics() noexcept;
+
+    /// @brief Stops changes to the animation from invalidating its effect's target's style, while it's being
+    /// created during style resolution.
+    void SuspendEffectInvalidation() noexcept;
+
+    void UnsuspendEffectInvalidation() noexcept;
+
+    KRYS_NODISCARD bool IsEffectInvalidationSuspended() const noexcept
+    {
+      return _suspendCount;
+    }
+
+    void SetSuspended(bool isSuspended) noexcept;
+
+    /// @brief Tells the timeline the effect's accelerated actions changed, to apply them at the rendering
+    /// update.
+    void AcceleratedStateDidChange() noexcept;
+
+    KRYS_NODISCARD bool IsSuspended() const noexcept
+    {
+      return _isSuspended;
+    }
+
+    /// @see https://drafts.csswg.org/web-animations/#removing-replaced-animations
+    KRYS_NODISCARD bool IsReplaceable() const noexcept;
+
+    /// @brief Disassociates the animation from its effect and timeline.
+    void Remove() noexcept;
+
+    void EnqueueAnimationPlaybackEvent(const DOMStringAtom &type, Maybe<WebAnimationTime> currentTime,
+                                       Maybe<WebAnimationTime> scheduledTime) noexcept;
+
+    /// @brief The animation's position in the global animation list, or zero if it has none.
+    /// @see https://drafts.csswg.org/web-animations-1/#animation-composite-order
+    KRYS_NODISCARD uint64 GlobalPosition() const noexcept
+    {
+      return _globalPosition;
+    }
+
+    void SetGlobalPosition(uint64 globalPosition) noexcept
+    {
+      _globalPosition = globalPosition;
+    }
+
+    KRYS_NODISCARD virtual bool CanHaveGlobalPosition() noexcept
+    {
+      return true;
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#animation-time-to-timeline-time
+    KRYS_NODISCARD Maybe<Seconds> ConvertAnimationTimeToTimelineTime(Seconds animationTime) const noexcept;
+
+  protected:
+    /// @brief Resolves the first ready promise.
+    void Initialize() noexcept;
+
+    void EnqueueAnimationEvent(Ref<AnimationEventBase> &&event) noexcept;
+
+    virtual void AnimationDidFinish() noexcept;
+
+    KRYS_NODISCARD WebAnimationTime ZeroTime() const noexcept;
+
+  private:
+    void TimingDidChange(DidSeek didSeek, SynchronouslyNotify synchronouslyNotify,
+                         Silently silently = Silently::No) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#updating-the-finished-state
+    void UpdateFinishedState(DidSeek didSeek, SynchronouslyNotify synchronouslyNotify) noexcept;
+
+    KRYS_NODISCARD WebAnimationTime EffectEndTime() const noexcept;
+
+    KRYS_NODISCARD Maybe<WebAnimationTime>
+      CurrentTime(RespectHoldTime respectHoldTime,
+                  UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#silently-set-the-current-time
+    ExceptionOr<void> SilentlySetCurrentTime(Maybe<WebAnimationTime> seekTime) noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#finish-notification-steps
+    void FinishNotificationSteps() noexcept;
+
+    KRYS_NODISCARD bool HasPendingPauseTask() const noexcept
+    {
+      return _timeToRunPendingPauseTask != TimeToRunPendingTask::NotScheduled;
+    }
+
+    KRYS_NODISCARD bool HasPendingPlayTask() const noexcept
+    {
+      return _timeToRunPendingPlayTask != TimeToRunPendingTask::NotScheduled;
+    }
+
+    ExceptionOr<void> Play(AutoRewind autoRewind) noexcept;
+
+    void RunPendingPauseTask() noexcept;
+
+    void RunPendingPlayTask() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#reset-an-animations-pending-tasks
+    void ResetPendingTasks() noexcept;
+
+    void SetEffectInternal(RefPtr<AnimationEffect> &&newEffect,
+                           bool doNotRemoveFromTimeline = false) noexcept;
+
+    void SetTimelineInternal(RefPtr<AnimationTimeline> &&timeline) noexcept;
+
+    KRYS_NODISCARD bool ComputeRelevance() noexcept;
+
+    void InvalidateEffect() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations/#effective-playback-rate
+    KRYS_NODISCARD double EffectivePlaybackRate() const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations/#apply-any-pending-playback-rate
+    void ApplyPendingPlaybackRate() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#ready
+    void MaybeMarkAsReady() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#auto-aligning-start-time
+    void AutoAlignStartTime() noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-2/#validating-a-css-numberish-time
+    KRYS_NODISCARD bool IsTimeValid(const Maybe<WebAnimationTime> &time) const noexcept;
+  };
+}
+
+#define KRYS_SPECIALIZE_TYPE_TRAITS_WEB_ANIMATION(ToValueTypeName, predicate)                                \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(ToValueTypeName)                                                    \
+    KRYS_NODISCARD static bool IsType(const krys::web::WebAnimation &value) noexcept                         \
+    {                                                                                                        \
+      return value.predicate;                                                                                \
+    }                                                                                                        \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

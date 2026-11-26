@@ -1,0 +1,548 @@
+﻿/*
+ * Copyright (C) 2009 Dirk Schulze <krit@webkit.org>
+ * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ * Copyright (C) 2021-2023 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Graphics/Filters/SVGFilterRenderer.hpp"
+#include "Krystal.Core/Geometry/GeometryUtilities.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Web/Graphics/Filters/FilterEffect.hpp"
+#include "Krystal.Web/Graphics/Filters/FilterImage.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Web/Svg/Graphics/Filters/SVGFilterEffectGraph.hpp"
+#include "Krystal.Web/Svg/Graphics/Filters/SVGFilterPrimitiveGraph.hpp"
+#include "Krystal.Web/Svg/SVGFilterPrimitiveStandardAttributes.hpp"
+#include "Krystal.Web/Svg/SVGLengthContext.hpp"
+#include <numbers>
+
+namespace krys::web
+{
+  namespace
+  {
+    constexpr uint32 MaxCountChildNodes = 200;
+
+    using FilterEffectGeometryMap = HashMap<Ref<FilterEffect>, FilterEffectGeometry>;
+
+    struct BuiltFilterEffectGraph
+    {
+      SVGFilterEffectGraph Graph;
+      FilterEffectGeometryMap EffectGeometryMap;
+    };
+
+    template <typename TCallback>
+    void ForEachFilterPrimitive(web::SVGFilterElement &filterElement, const TCallback &callback) noexcept
+    {
+      for (auto *child = filterElement.FirstChild(); child; child = child->NextSibling())
+      {
+        if (auto *effectElement = DynamicDowncast<SVGFilterPrimitiveStandardAttributes>(*child))
+        {
+          if (!callback(*effectElement))
+          {
+            return;
+          }
+        }
+      }
+    }
+
+    KRYS_NODISCARD Maybe<BuiltFilterEffectGraph>
+      BuildFilterEffectGraph(web::SVGElement *contextElement, web::SVGFilterElement &filterElement,
+                             const SVGFilterRenderer &filter,
+                             const GraphicsContext &destinationContext) noexcept
+    {
+      if (filterElement.CountChildNodes() > MaxCountChildNodes)
+      {
+        return null;
+      }
+
+      BuiltFilterEffectGraph result {SVGFilterEffectGraph(SourceGraphic::Create(), SourceAlpha::Create()),
+                                     {}};
+      auto &graph = result.Graph;
+      bool failed = false;
+
+      ForEachFilterPrimitive(
+        filterElement,
+        [&](SVGFilterPrimitiveStandardAttributes &effectElement)
+        {
+          auto inputNames = effectElement.FilterEffectInputsNames();
+          auto inputs = graph.GetNamedNodes(inputNames);
+          if (!inputs)
+          {
+            failed = true;
+            return false;
+          }
+
+          auto effect = effectElement.GetFilterEffect(*inputs, destinationContext);
+          if (!effect)
+          {
+            failed = true;
+            return false;
+          }
+
+          if (auto flags = effectElement.EffectGeometryFlags(); !flags.empty())
+          {
+            auto effectBoundaries = SVGLengthContext::ResolveRectangle(
+              contextElement, effectElement, filter.PrimitiveUnits(), filter.ReferenceBox());
+            result.EffectGeometryMap.insert_or_assign(effect, FilterEffectGeometry(effectBoundaries, flags));
+          }
+
+          if (effectElement.GetColorInterpolation() == ColorInterpolation::LinearRGB)
+          {
+            effect->SetOperatingColorSpace(DestinationColorSpace::LinearSRGB());
+          }
+
+          graph.AddNamedNode(DOMStringAtom(effectElement.Result()), Ref<FilterEffect>(effect));
+          graph.SetNodeInputs(*effect, krys::move(*inputs));
+          return true;
+        });
+
+      if (failed)
+      {
+        return null;
+      }
+
+      return result;
+    }
+
+    KRYS_NODISCARD Maybe<SVGFilterPrimitiveGraph>
+      BuildFilterPrimitiveGraph(web::SVGFilterElement &filterElement) noexcept
+    {
+      auto countChildNodes = filterElement.CountChildNodes();
+      if (!countChildNodes || countChildNodes > MaxCountChildNodes)
+      {
+        return null;
+      }
+
+      SVGFilterPrimitiveGraph graph;
+
+      ForEachFilterPrimitive(
+        filterElement,
+        [&](SVGFilterPrimitiveStandardAttributes &effectElement)
+        {
+          // We should not be strict about not finding the input primitives here because SourceGraphic and
+          // SourceAlpha do not have primitives.
+          auto inputNames = effectElement.FilterEffectInputsNames();
+          auto inputs = graph.GetNamedNodes(inputNames).value_or(SVGFilterPrimitiveGraph::NodeVector());
+          graph.AddNamedNode(DOMStringAtom(effectElement.Result()), ShareRef(effectElement));
+          graph.SetNodeInputs(effectElement, krys::move(inputs));
+          return true;
+        });
+
+      return graph;
+    }
+  }
+
+  RefPtr<SVGFilterRenderer> SVGFilterRenderer::Create(web::SVGElement *contextElement,
+                                                      web::SVGFilterElement &filterElement,
+                                                      const FilterGeometry &geometry,
+                                                      EnumSet<FilterRenderingMode> preferredRenderingModes,
+                                                      const GraphicsContext &destinationContext) noexcept
+  {
+    auto filter = AdoptRef(*new SVGFilterRenderer(geometry, filterElement.PrimitiveUnits()));
+
+    auto result = BuildExpression(contextElement, filterElement, *filter, destinationContext);
+    if (!result)
+    {
+      return nullptr;
+    }
+
+    krys_debug_assert(!result->Expression.empty());
+    krys_debug_assert(!result->Effects.empty());
+    filter->SetExpression(krys::move(result->Expression));
+    filter->SetEffects(krys::move(result->Effects));
+
+    filter->SetFilterRenderingModes(preferredRenderingModes);
+    return filter;
+  }
+
+  Ref<SVGFilterRenderer>
+    SVGFilterRenderer::Create(SVGUnitTypes::SVGUnitType primitiveUnits, SVGFilterExpression &&expression,
+                              FilterEffectVector &&effects, const FilterGeometry &geometry,
+                              EnumSet<FilterRenderingMode> preferredRenderingModes) noexcept
+  {
+    auto filter =
+      AdoptRef(*new SVGFilterRenderer(geometry, primitiveUnits, krys::move(expression), krys::move(effects)));
+    // Setting filter rendering modes cannot be moved to the constructor because it ends up
+    // calling supportedFilterRenderingModes() which is a virtual function.
+    filter->SetFilterRenderingModes(preferredRenderingModes);
+    return filter;
+  }
+
+  SVGFilterRenderer::SVGFilterRenderer(const FilterGeometry &geometry,
+                                       SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
+      : Filter(Type::SVGFilterRenderer, geometry), _primitiveUnits(primitiveUnits)
+  {
+  }
+
+  SVGFilterRenderer::SVGFilterRenderer(const FilterGeometry &geometry,
+                                       SVGUnitTypes::SVGUnitType primitiveUnits,
+                                       SVGFilterExpression &&expression,
+                                       FilterEffectVector &&effects) noexcept
+      : Filter(Type::SVGFilterRenderer, geometry), _primitiveUnits(primitiveUnits),
+        _expression(krys::move(expression)), _effects(krys::move(effects))
+  {
+  }
+
+  auto SVGFilterRenderer::BuildExpression(web::SVGElement *contextElement,
+                                          web::SVGFilterElement &filterElement,
+                                          const SVGFilterRenderer &filter,
+                                          const GraphicsContext &destinationContext) noexcept
+    -> Maybe<BuiltExpression>
+  {
+    auto result = BuildFilterEffectGraph(contextElement, filterElement, filter, destinationContext);
+    if (!result)
+    {
+      return null;
+    }
+
+    auto &graph = result->Graph;
+    auto &effectGeometryMap = result->EffectGeometryMap;
+
+    auto effectGeometry = [&](FilterEffect &effect) -> Maybe<FilterEffectGeometry>
+    {
+      auto it = effectGeometryMap.find(ShareRef(effect));
+      if (it != effectGeometryMap.end())
+      {
+        return it->second;
+      }
+      return null;
+    };
+
+    SVGFilterExpression expression;
+    auto effects = graph.Nodes();
+
+    bool success = graph.Visit(
+      [&](FilterEffect &effect, uint32 level)
+      {
+        auto it = std::ranges::find_if(effects, [&](const auto &item) { return item.get() == &effect; });
+        krys_debug_assert(it != effects.end());
+        expression.push_back({static_cast<uint32>(it - effects.begin()), level, effectGeometry(effect)});
+      });
+
+    if (!success)
+    {
+      return null;
+    }
+
+    std::ranges::reverse(expression);
+    expression.shrink_to_fit();
+    return BuiltExpression {krys::move(expression), krys::move(effects)};
+  }
+
+  bool SVGFilterRenderer::IsIdentity(web::SVGFilterElement &filterElement) noexcept
+  {
+    auto graph = BuildFilterPrimitiveGraph(filterElement);
+    if (!graph)
+    {
+      return false;
+    }
+
+    bool isIdentity = true;
+    graph->Visit(
+      [&](SVGFilterPrimitiveStandardAttributes &primitive, uint32)
+      {
+        if (!primitive.IsIdentity())
+        {
+          isIdentity = false;
+        }
+      });
+
+    return isIdentity;
+  }
+
+  IntOutsets SVGFilterRenderer::CalculateOutsets(web::SVGFilterElement &filterElement,
+                                                 const RectF &targetBoundingBox) noexcept
+  {
+    auto graph = BuildFilterPrimitiveGraph(filterElement);
+    if (!graph)
+    {
+      return {};
+    }
+
+    List<std::pair<IntOutsets, uint32>> outsetsStack;
+
+    // Remove the outsets of the last level and return their maximum.
+    auto lastLevelOutsets = [](auto &outsetsStack) -> IntOutsets
+    {
+      IntOutsets lastLevelOutsets;
+      for (uint32 lastLevel = outsetsStack.back().second; lastLevel == outsetsStack.back().second;
+           outsetsStack.pop_back())
+      {
+        lastLevelOutsets = max(lastLevelOutsets, outsetsStack.back().first);
+      }
+      return lastLevelOutsets;
+    };
+
+    bool result = graph->Visit(
+      [&](SVGFilterPrimitiveStandardAttributes &primitive, uint32 level)
+      {
+        auto primitiveOutsets = primitive.Outsets(targetBoundingBox, filterElement.PrimitiveUnits());
+        uint32 lastLevel = outsetsStack.empty() ? 0 : outsetsStack.back().second;
+
+        // Expand the last outsets of this level with the maximum of the outsets of its children.
+        if (level < lastLevel)
+        {
+          auto childrenOutsets = lastLevelOutsets(outsetsStack);
+          outsetsStack.back().first += childrenOutsets;
+        }
+
+        outsetsStack.emplace_back(primitiveOutsets, level);
+      });
+
+    if (!result)
+    {
+      return IntOutsets();
+    }
+
+    krys_debug_assert(!outsetsStack.empty());
+
+    // Calculate the whole filter outsets by going back to the lastNode of the graph.
+    while (outsetsStack.size() > 1)
+    {
+      auto childrenOutsets = lastLevelOutsets(outsetsStack);
+      outsetsStack.back().first += childrenOutsets;
+    }
+
+    return outsetsStack.back().first;
+  }
+
+  SizeF SVGFilterRenderer::CalculateResolvedSize(const SizeF &size, const RectF &targetBoundingBox,
+                                                 SVGUnitTypes::SVGUnitType primitiveUnits) noexcept
+  {
+    return primitiveUnits == SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX ? size * targetBoundingBox.Size()
+                                                                           : size;
+  }
+
+  SizeF SVGFilterRenderer::ResolvedSize(const SizeF &size) const noexcept
+  {
+    return CalculateResolvedSize(size, ReferenceBox(), _primitiveUnits);
+  }
+
+  Point3F SVGFilterRenderer::ResolvedPoint3D(const Point3F &point) const noexcept
+  {
+    if (_primitiveUnits != SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)
+    {
+      return point;
+    }
+
+    auto referenceBox = ReferenceBox();
+    Point3F resolvedPoint;
+    resolvedPoint.SetX(referenceBox.X() + point.X() * referenceBox.Width());
+    resolvedPoint.SetY(referenceBox.Y() + point.Y() * referenceBox.Height());
+
+    // https://www.w3.org/TR/SVG/filters.html#fePointLightZAttribute and
+    // https://www.w3.org/TR/SVG/coords.html#Units_viewport_percentage
+    resolvedPoint.SetZ(point.Z()
+                       * EuclidianDistance(referenceBox.MinXMinYCorner(), referenceBox.MaxXMaxYCorner())
+                       / std::numbers::sqrt2_v<float>);
+
+    return resolvedPoint;
+  }
+
+  EnumSet<FilterRenderingMode> SVGFilterRenderer::SupportedFilterRenderingModes(
+    EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
+  {
+    EnumSet<FilterRenderingMode> modes = AllFilterRenderingModes;
+
+    for (const auto &effect : _effects)
+    {
+      modes = modes & effect->SupportedFilterRenderingModes(preferredFilterRenderingModes);
+    }
+
+    krys_debug_assert(!modes.empty());
+    return modes;
+  }
+
+  FilterEffectVector SVGFilterRenderer::EffectsOfType(FilterFunction::Type filterType) const noexcept
+  {
+    FilterEffectVector effects;
+
+    for (const auto &effect : _effects)
+    {
+      if (effect->FilterType() == filterType)
+      {
+        effects.push_back(effect);
+      }
+    }
+
+    return effects;
+  }
+
+  FilterResults &SVGFilterRenderer::EnsureResults(const FilterResultsCreator &resultsCreator) noexcept
+  {
+    if (!_results)
+    {
+      _results = resultsCreator();
+    }
+    return *_results;
+  }
+
+  void SVGFilterRenderer::ClearEffectResult(FilterEffect &effect) noexcept
+  {
+    if (_results)
+    {
+      _results->ClearEffectResult(effect);
+    }
+  }
+
+  void SVGFilterRenderer::MergeEffects(const FilterEffectVector &effects) noexcept
+  {
+    krys_debug_assert(_effects.size() == effects.size());
+
+    for (size_t index = 0; index < _effects.size(); ++index)
+    {
+      if (ArePointingToEqualData(_effects[index], effects[index]))
+      {
+        continue;
+      }
+
+      ClearEffectResult(*_effects[index]);
+      _effects[index] = effects[index];
+    }
+  }
+
+  RefPtr<FilterImage> SVGFilterRenderer::Apply(const Filter &, FilterImage &sourceImage,
+                                               FilterResults &results) noexcept
+  {
+    return Apply(&sourceImage, results);
+  }
+
+  RefPtr<FilterImage> SVGFilterRenderer::Apply(FilterImage *sourceImage, FilterResults &results) noexcept
+  {
+    krys_debug_assert(!_expression.empty());
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::Accelerated));
+    krys_debug_assert(IsValidSVGFilterExpression(_expression, _effects));
+
+    FilterImageVector stack;
+
+    for (const auto &term : _expression)
+    {
+      auto &effect = _effects[term.Index];
+      const auto &geometry = term.Geometry;
+
+      if (effect->FilterType() == FilterEffect::Type::SourceGraphic)
+      {
+        if (auto *result = results.EffectResult(*effect))
+        {
+          stack.push_back(ShareRef(*result));
+          continue;
+        }
+
+        if (!sourceImage)
+        {
+          return nullptr;
+        }
+
+        // Add sourceImage as an input to the SourceGraphic.
+        stack.push_back(ShareRef(*sourceImage));
+      }
+
+      // Need to remove the inputs here in case the effect already has a result.
+      auto inputs = effect->TakeImageInputs(stack);
+
+      auto result = effect->Apply(*this, inputs, results, geometry);
+      if (!result)
+      {
+        return nullptr;
+      }
+
+      stack.emplace_back(result);
+    }
+
+    krys_debug_assert(stack.size() == 1);
+    return stack.back();
+  }
+
+  bool SVGFilterRenderer::IsValidSVGFilterExpression(const SVGFilterExpression &expression,
+                                                     const FilterEffectVector &effects) noexcept
+  {
+    if (expression.empty() || effects.empty())
+    {
+      return false;
+    }
+
+    for (const auto &term : expression)
+    {
+      if (term.Index >= effects.size())
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  FilterStyleVector SVGFilterRenderer::CreateFilterStyles(GraphicsContext &context, const Filter &,
+                                                          const FilterStyle &sourceStyle) const noexcept
+  {
+    return CreateFilterStyles(context, sourceStyle);
+  }
+
+  FilterStyleVector SVGFilterRenderer::CreateFilterStyles(GraphicsContext &context,
+                                                          const FilterStyle &sourceStyle) const noexcept
+  {
+    krys_debug_assert(!_expression.empty());
+    krys_debug_assert(FilterRenderingModes().contains(FilterRenderingMode::GraphicsContext));
+
+    FilterStyleVector styles;
+    FilterStyle lastStyle = sourceStyle;
+
+    for (const auto &term : _expression)
+    {
+      const auto &effect = _effects[term.Index];
+      const auto &geometry = term.Geometry;
+
+      if (effect->FilterType() == FilterEffect::Type::SourceGraphic)
+      {
+        continue;
+      }
+
+      krys_debug_assert(effect->NumberOfImageInputs() == 1);
+      auto style = effect->CreateFilterStyle(context, *this, lastStyle, geometry);
+
+      lastStyle = style;
+      styles.push_back(style);
+    }
+
+    return styles;
+  }
+
+  TextStream &SVGFilterRenderer::ExternalRepresentation(TextStream &ts,
+                                                        FilterRepresentation representation) const noexcept
+  {
+    for (auto it = _expression.rbegin(), end = _expression.rend(); it != end; ++it)
+    {
+      const auto &term = *it;
+      const auto &effect = _effects[term.Index];
+
+      // SourceAlpha is a built-in effect. No need to say SourceGraphic is its input.
+      if (effect->FilterType() == FilterEffect::Type::SourceAlpha)
+      {
+        ++it;
+      }
+
+      TextStream::IndentScope indentScope(ts, static_cast<int32>(term.Level));
+      effect->ExternalRepresentation(ts, representation);
+    }
+
+    return ts;
+  }
+}

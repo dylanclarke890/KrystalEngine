@@ -1,0 +1,82 @@
+﻿#include "Krystal.Web/Html/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Web/Infra/Namespaces.hpp"
+
+namespace krys::web::html
+{
+  bool CustomElementAlgorithms::IsGlobalCustomElementRegistry(const CustomElementRegistry *registry) noexcept
+  {
+    return registry != nullptr && !registry->IsScoped();
+  }
+
+  CustomElementRegistry *
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(CustomElementRegistry *registry) noexcept
+  {
+    // 1. If registry is a global custom element registry, then return registry.
+    if (IsGlobalCustomElementRegistry(registry))
+    {
+      return registry;
+    }
+
+    // 2. Return null.
+    return nullptr;
+  }
+
+  CustomElementRegistry *
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(Document &document) noexcept
+  {
+    return EffectiveGlobalCustomElementRegistry(document._customElementRegistry.get());
+  }
+
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-definition
+  CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
+    CustomElementRegistry *registry, const DOMStringAtom &namespaceURI, DOMStringAtom localName) noexcept
+  {
+    // 1. If registry is null, then return null.
+    if (registry == nullptr)
+    {
+      return nullptr;
+    }
+
+    // 2. If namespace is not the HTML namespace, then return null.
+    if (namespaceURI != infra::namespaces::HTML)
+    {
+      return nullptr;
+    }
+
+    // 3. If registry's custom element definition set contains an item with name and local name both equal to
+    //    localName, then return that item.
+    // 4. If registry's custom element definition set contains an item with name equal to is and local name
+    //    equal to localName, then return that item. (Skipped: there are no customized built-in elements.)
+    // 5. Return null.
+    return registry->FindInterface(krys::move(localName));
+  }
+
+  // https://html.spec.whatwg.org/multipage/custom-elements.html#look-up-a-custom-element-registry
+  CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(Node &node) noexcept
+  {
+    // 1. If node is an Element object, then return node's custom element registry.
+    // 2. If node is a ShadowRoot object, then return node's custom element registry.
+    // 3. If node is a Document object, then return node's custom element registry.
+    // 4. Return null.
+    if (auto *element = DynamicDowncast<Element>(node))
+    {
+      return element->CustomElementRegistry();
+    }
+
+    if (auto *document = DynamicDowncast<Document>(node))
+    {
+      return document->CustomElementRegistry();
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node))
+    {
+      return shadowRoot->CustomElementRegistry();
+    }
+
+    return nullptr;
+  }
+}

@@ -1,0 +1,197 @@
+﻿/*
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Color/ColorMix.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Values/Color/ColorMixResolver.hpp"
+#include "Krystal.Web/Css/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Web/Style/Values/Color/ColorResolutionState.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesConversions.hpp"
+
+namespace krys::web::style
+{
+  using namespace css::literals;
+
+  // MARK: - Conversion
+
+  Color ToStyleColor(const css::ColorMix &unresolved, ColorResolutionState &state) noexcept
+  {
+    ColorResolutionStateNester nester {state};
+
+    auto component1Color = ToStyleColor(unresolved.MixComponents1.Color, state);
+    auto component2Color = ToStyleColor(unresolved.MixComponents2.Color, state);
+
+    auto percentage1 = ConvertToStyle(unresolved.MixComponents1.Percentage, state.ConversionData);
+    auto percentage2 = ConvertToStyle(unresolved.MixComponents2.Percentage, state.ConversionData);
+
+    if (!component1Color.IsResolvedColor() || !component2Color.IsResolvedColor())
+    {
+      // If the either component is not resolved, we cannot fully resolve the color
+      // yet. Instead, we resolve the calc values using the conversion data, and return
+      // a style::ColorMix to be resolved at use time.
+      return Color {ColorMix {
+        unresolved.ColourInterpolationMethod,
+        ColorMix::Component {krys::move(component1Color), krys::move(percentage1)},
+        ColorMix::Component {krys::move(component2Color), krys::move(percentage2)},
+      }};
+    }
+
+    return css::Mix(css::ColorMixResolver {
+      unresolved.ColourInterpolationMethod,
+      css::ColorMixResolver::Component {component1Color.GetResolvedColor(), krys::move(percentage1)},
+      css::ColorMixResolver::Component {component2Color.GetResolvedColor(), krys::move(percentage2)},
+    });
+  }
+
+  // MARK: - Resolve
+
+  web::Color ResolveColor(const ColorMix &colorMix, const web::Color &currentColor) noexcept
+  {
+    return css::Mix(css::ColorMixResolver {
+      colorMix.ColourInterpolationMethod,
+      css::ColorMixResolver::Component {colorMix.MixComponents1.Color.ResolveColor(currentColor),
+                                        colorMix.MixComponents1.Percentage},
+      css::ColorMixResolver::Component {colorMix.MixComponents2.Color.ResolveColor(currentColor),
+                                        colorMix.MixComponents2.Percentage},
+    });
+  }
+
+  // MARK: - Current Color
+
+  bool ContainsCurrentColor(const ColorMix &colorMix) noexcept
+  {
+    return style::ContainsCurrentColor(colorMix.MixComponents1.Color)
+           || style::ContainsCurrentColor(colorMix.MixComponents2.Color);
+  }
+
+  // MARK: - Serialisation
+
+  namespace
+  {
+    KRYS_NODISCARD bool SumTo100Percent(const ColorMix::Component::PercentageType &a,
+                                        const ColorMix::Component::PercentageType &b) noexcept
+    {
+      return a.Value + b.Value == 100.0;
+    }
+
+    KRYS_NODISCARD Maybe<ColorMix::Component::PercentageType>
+      SubtractFrom100Percent(const ColorMix::Component::PercentageType &percentage) noexcept
+    {
+      return ColorMix::Component::PercentageType {100.0 - percentage.Value};
+    }
+
+    void SerialiseColorMixPercentage(StringBuilder &builder, const css::SerialisationContext &context,
+                                     const ColorMix::Component::PercentageType &percentage) noexcept
+    {
+      css::Serialise(builder, context, css::PercentageRaw<> {percentage.Value});
+    }
+
+    void SerialisationForColorMixPercentage1(StringBuilder &builder, const css::SerialisationContext &context,
+                                             const ColorMix &value) noexcept
+    {
+      if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
+      {
+        if (*value.MixComponents1.Percentage == 50_css_percentage
+            && *value.MixComponents2.Percentage == 50_css_percentage)
+        {
+          return;
+        }
+        builder.Append(u8' ');
+        SerialiseColorMixPercentage(builder, context, *value.MixComponents1.Percentage);
+      }
+      else if (value.MixComponents1.Percentage)
+      {
+        if (*value.MixComponents1.Percentage == 50_css_percentage)
+        {
+          return;
+        }
+        builder.Append(u8' ');
+        SerialiseColorMixPercentage(builder, context, *value.MixComponents1.Percentage);
+      }
+      else if (value.MixComponents2.Percentage)
+      {
+        if (*value.MixComponents2.Percentage == 50_css_percentage)
+        {
+          return;
+        }
+
+        auto subtractedPercent = SubtractFrom100Percent(*value.MixComponents2.Percentage);
+        if (!subtractedPercent)
+        {
+          return;
+        }
+
+        builder.Append(u8' ');
+        SerialiseColorMixPercentage(builder, context, *subtractedPercent);
+      }
+    }
+
+    void SerialisationForColorMixPercentage2(StringBuilder &builder, const css::SerialisationContext &context,
+                                             const ColorMix &value) noexcept
+    {
+      if (value.MixComponents1.Percentage && value.MixComponents2.Percentage)
+      {
+        if (SumTo100Percent(*value.MixComponents1.Percentage, *value.MixComponents2.Percentage))
+        {
+          return;
+        }
+
+        builder.Append(u8' ');
+        SerialiseColorMixPercentage(builder, context, *value.MixComponents2.Percentage);
+      }
+    }
+  }
+
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
+                                       const ColorMix &colorMix) noexcept
+  {
+    builder.Append(u8"color-mix(");
+
+    if (colorMix.ColourInterpolationMethod != css::DefaultInterpolationMethodForColorMix)
+    {
+      builder.Append(u8"in ");
+      web::SerialisationForCSS(builder, colorMix.ColourInterpolationMethod);
+      builder.Append(u8", ");
+    }
+
+    SerialisationForCSSTokenization(builder, context, colorMix.MixComponents1.Color);
+    SerialisationForColorMixPercentage1(builder, context, colorMix);
+    builder.Append(u8", ");
+    SerialisationForCSSTokenization(builder, context, colorMix.MixComponents2.Color);
+    SerialisationForColorMixPercentage2(builder, context, colorMix);
+    builder.Append(u8')');
+  }
+
+  CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                              const ColorMix &colorMix) noexcept
+  {
+    StringBuilder builder;
+    SerialisationForCSSTokenization(builder, context, colorMix);
+    return krys::move(builder).ToString();
+  }
+}

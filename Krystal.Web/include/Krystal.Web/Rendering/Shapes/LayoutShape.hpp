@@ -1,0 +1,119 @@
+﻿/*
+ * Copyright (C) 2012 Adobe Systems Incorporated. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Web/Style/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Web/Text/WritingMode.hpp"
+
+namespace krys::web
+{
+  class LayoutRoundedRect;
+
+  /// @brief A horizontal (logical) segment of a line.
+  struct LineSegment
+  {
+    float LogicalLeft {0.f};
+    float LogicalRight {0.f};
+    bool IsValid {false};
+
+    constexpr LineSegment() noexcept = default;
+
+    constexpr LineSegment(float logicalLeft, float logicalRight) noexcept
+        : LogicalLeft(logicalLeft), LogicalRight(logicalRight), IsValid(true)
+    {
+    }
+  };
+
+  /// @brief A representation of a BasicShape that enables layout code to determine how to break a line up
+  /// into segments that will fit within or around a shape. The line is defined by a pair of logical Y
+  /// coordinates and the computed segments are returned as pairs of logical X coordinates. The BasicShape
+  /// itself is defined in physical coordinates.
+  // FIXME: The shapes' display paths (buildDisplayPaths), for highlighting them, and raster shapes
+  // (createRasterShape).
+  class LayoutShape : public RefCounted<LayoutShape>
+  {
+  private:
+    WritingMode _writingMode;
+    float _margin {0.f};
+
+  public:
+    KRYS_NODISCARD static Ref<const LayoutShape>
+      CreateShape(const style::BasicShape &basicShape, const LayoutPoint &borderBoxOffset,
+                  const LayoutSize &logicalBoxSize, WritingMode writingMode, float logicalMargin) noexcept;
+
+    KRYS_NODISCARD static Ref<const LayoutShape> CreateBoxShape(const LayoutRoundedRect &roundedRect,
+                                                                WritingMode writingMode,
+                                                                float logicalMargin) noexcept;
+
+    virtual ~LayoutShape() noexcept = default;
+
+    KRYS_NODISCARD virtual LayoutRect ShapeMarginLogicalBoundingBox() const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool IsEmpty() const noexcept = 0;
+
+    KRYS_NODISCARD virtual LineSegment GetExcludedInterval(LayoutUnit logicalTop,
+                                                           LayoutUnit logicalHeight) const noexcept = 0;
+
+    KRYS_NODISCARD bool LineOverlapsShapeMarginBounds(LayoutUnit lineTop,
+                                                      LayoutUnit lineHeight) const noexcept
+    {
+      return LineOverlapsBoundingBox(lineTop, lineHeight, ShapeMarginLogicalBoundingBox());
+    }
+
+  protected:
+    KRYS_NODISCARD float ShapeMargin() const noexcept
+    {
+      return _margin;
+    }
+
+    KRYS_NODISCARD WritingMode GetWritingMode() const noexcept
+    {
+      return _writingMode;
+    }
+
+    KRYS_NODISCARD static bool ShouldFlipStartAndEndPoints(WritingMode writingMode) noexcept;
+
+  private:
+    KRYS_NODISCARD static bool LineOverlapsBoundingBox(LayoutUnit lineTop, LayoutUnit lineHeight,
+                                                       const LayoutRect &rect) noexcept
+    {
+      if (rect.IsEmpty())
+      {
+        return false;
+      }
+      return (lineTop < rect.MaxY() && lineTop + lineHeight > rect.Y())
+             || (!lineHeight && lineTop == rect.Y());
+    }
+  };
+}

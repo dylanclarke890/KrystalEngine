@@ -1,0 +1,237 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2006, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2006, 2007 Rob Buis <buis@kde.org>
+ * Copyright (C) 2018-2024 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Elements/SVGPathElement.hpp"
+#include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Web/Css/Values/PathValue.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
+#include "Krystal.Web/Style/Values/Shapes/PathComputation.hpp"
+#include "Krystal.Web/Svg/Elements/SVGMPathElement.hpp"
+#include "Krystal.Web/Svg/Internals/SVGPathUtilities.hpp"
+#include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Web/Svg/SVGNames.hpp"
+#include "Krystal.Web/Svg/SVGPoint.hpp"
+
+namespace krys::web
+{
+  namespace
+  {
+    constexpr EnumSet<layout::LayoutOptions> PathQueryLayoutOptions {
+      layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+      layout::LayoutOptions::TreatContentVisibilityAutoAsVisible};
+  }
+
+  SVGPathElement::SVGPathElement(Document &document) noexcept
+      : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Path),
+        _pathSegList(SVGAnimatedPathSegList::Create(this))
+  {
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGPathElement::_pathSegList>(SVGNames::DAttr());
+    }
+  }
+
+  void SVGPathElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
+  {
+    if (name == SVGNames::DAttr())
+    {
+      auto string = value.value_or(DOMStringView {});
+      if (string.empty())
+      {
+        _pathSegList->BaseVal()->ClearByteStreamData();
+      }
+      else
+      {
+        _pathSegList->BaseVal()->Parse(string);
+      }
+    }
+
+    SVGGeometryElement::AttributeChanged(name, oldValue, value);
+  }
+
+  void SVGPathElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
+  {
+    if (PropertyRegistry::IsKnownAttribute(attributeName))
+    {
+      krys_debug_assert(attributeName == SVGNames::DAttr());
+      InstanceInvalidationGuard guard(*this);
+      InvalidateMPathDependencies();
+
+      if (auto *path = DynamicDowncast<LegacyRenderSVGPath>(Renderer()))
+      {
+        path->SetNeedsShapeUpdate();
+      }
+
+      UpdateSVGRendererForElementChange();
+      SetPresentationalHintStyleIsDirty();
+      return;
+    }
+
+    SVGGeometryElement::SVGAttributeChanged(attributeName);
+  }
+
+  float SVGPathElement::GetTotalLength() const noexcept
+  {
+    (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
+
+    return svg::GetTotalLengthOfSVGPathByteStream(PathByteStream());
+  }
+
+  ExceptionOr<Ref<SVGPoint>> SVGPathElement::GetPointAtLength(float distance) const noexcept
+  {
+    (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
+
+    // Spec: If it is not able to compute the total length of path, then throw.
+    if (PathByteStream().IsEmpty())
+    {
+      return Exception {ExceptionCode::InvalidStateError, u8"The element's path is empty."};
+    }
+
+    // Spec: Clamp distance to [0, length].
+    distance = std::clamp<float>(distance, 0, GetTotalLength());
+
+    // Spec: Return a newly created, detached SVGPoint object.
+    return SVGPoint::Create(svg::GetPointAtLengthOfSVGPathByteStream(PathByteStream(), distance));
+  }
+
+  RectF SVGPathElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
+  {
+    if (styleUpdateStrategy == AllowStyleUpdate)
+    {
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(PathQueryLayoutOptions, this);
+    }
+
+    // FIXME: Eventually we should support getBBox for detached elements.
+    // FIXME: If the path is null it means we're calling getBBox() before laying out this element,
+    // which is an error.
+
+    if (auto *path = DynamicDowncast<LegacyRenderSVGPath>(Renderer()); path && path->HasPath())
+    {
+      return path->GetPath().BoundingRect();
+    }
+
+    return {};
+  }
+
+  RenderPtr<RenderElement> SVGPathElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<LegacyRenderSVGPath>(*this, krys::move(style));
+  }
+
+  const SVGPathByteStream &SVGPathElement::PathByteStream() const noexcept
+  {
+    if (auto *renderer = Renderer())
+    {
+      if (const auto &pathFunction = renderer->Style().D().TryPath())
+      {
+        return pathFunction->Parameters.Data.ByteStream;
+      }
+      return SVGPathByteStream::Empty();
+    }
+
+    return _pathSegList->CurrentPathByteStream();
+  }
+
+  Path SVGPathElement::GetPath() const noexcept
+  {
+    if (auto *renderer = Renderer())
+    {
+      if (const auto &pathFunction = renderer->Style().D().TryPath())
+      {
+        return style::ComputePath(pathFunction->Parameters, RectF {});
+      }
+      return {};
+    }
+
+    return _pathSegList->CurrentPath();
+  }
+
+  void SVGPathElement::CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                              const DOMStringAtom &namespaceURI,
+                                                              DOMStringView value,
+                                                              css::MutableStyleProperties &style) noexcept
+  {
+    if (localName == SVGNames::DAttr().LocalName() && namespaceURI == null)
+    {
+      CollectDPresentationalHint(style);
+    }
+    else
+    {
+      SVGGeometryElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+    }
+  }
+
+  void SVGPathElement::CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept
+  {
+    if (!style.FindPropertyIndex(css::PropertyId::D))
+    {
+      CollectDPresentationalHint(style);
+    }
+  }
+
+  void SVGPathElement::CollectDPresentationalHint(css::MutableStyleProperties &style) noexcept
+  {
+    // In the case of the `d` property, we want to avoid providing a string value since it will require
+    // the path data to be parsed again and path data can be unwieldy.
+    auto property = CssPropertyIdForSVGAttributeName(SVGNames::DAttr().LocalName(), null);
+    // The fill rule value passed here is not relevant for the `d` property.
+    auto cssPathValue = css::PathValue::Create(css::PathFunction {
+      .Parameters =
+        css::Path {.FillRule = css::FillRule {css::keywords::Nonzero {}},
+                   .Data = css::Path::PathData {.ByteStream = _pathSegList->CurrentPathByteStream()}}});
+    AddPropertyToPresentationalHintStyle(style, property, krys::move(cssPathValue));
+  }
+
+  void SVGPathElement::InvalidateMPathDependencies() noexcept
+  {
+    // <mpath> can only reference <path> but this dependency is not handled in
+    // markForLayoutAndParentResourceInvalidation so we update any mpath dependencies manually.
+    for (auto &element : ReferencingElements())
+    {
+      if (auto *mpathElement = DynamicDowncast<SVGMPathElement>(element.get()))
+      {
+        mpathElement->TargetPathChanged();
+      }
+    }
+  }
+
+  void SVGPathElement::OnInsert() noexcept
+  {
+    SVGGeometryElement::OnInsert();
+    InvalidateMPathDependencies();
+  }
+
+  void SVGPathElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    SVGGeometryElement::OnRemove(isSubtreeRoot, oldAncestor);
+    InvalidateMPathDependencies();
+  }
+
+  void SVGPathElement::PathDidChange() noexcept
+  {
+    InvalidateMPathDependencies();
+  }
+}

@@ -1,0 +1,126 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Web/Css/CSSOM/CSSStyleDeclaration.hpp"
+#include "Krystal.Web/Css/Properties/PropertyId.hpp"
+#include "Krystal.Web/Css/Properties/Types/IsImportant.hpp"
+#include "Krystal.Web/Css/Rules/RuleType.hpp"
+
+namespace krys::web::css
+{
+  class MutableStyleProperties;
+  struct ParserContext;
+}
+
+namespace krys::web
+{
+  /// @brief The base of the descriptor blocks exposed to scripts (`@font-face`, `@page`, `@position-try` and
+  /// `@function` declarations).
+  class PropertySetCSSDescriptors : public CSSStyleDeclaration, public RefCounted<PropertySetCSSDescriptors>
+  {
+  protected:
+    enum class MutationType : uint8
+    {
+      NoChanges,
+      StyleAttributeChanged,
+      PropertyChanged,
+    };
+
+    WeakPtr<CSSRule> _parentRule;
+    // FIXME: Replaced this with a more descriptor specific property map that doesn't have all the complexity
+    // of the Style one.
+    Ref<css::MutableStyleProperties> _propertySet;
+
+    PropertySetCSSDescriptors(css::MutableStyleProperties &propertySet, CSSRule &parentRule) noexcept;
+
+  public:
+    ~PropertySetCSSDescriptors() noexcept override;
+
+    void AddRef() const noexcept final
+    {
+      RefCounted::AddRef();
+    }
+
+    void SubRef() const noexcept final
+    {
+      RefCounted::SubRef();
+    }
+
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return RefCounted::GetRefCount();
+    }
+
+    void ClearParentRule() noexcept
+    {
+      _parentRule = nullptr;
+    }
+
+    void Reattach(css::MutableStyleProperties &propertySet) noexcept;
+
+    KRYS_NODISCARD virtual css::RuleType GetRuleType() const noexcept = 0;
+
+  protected:
+    KRYS_NODISCARD CSSStyleSheet *ParentStyleSheet() const noexcept final;
+
+    KRYS_NODISCARD CSSRule *ParentRule() const noexcept final;
+
+    KRYS_NODISCARD uint32 Length() const noexcept final;
+
+    KRYS_NODISCARD CSSOMString Item(uint32 index) const noexcept final;
+
+    KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept final;
+
+    KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept final;
+
+    ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                  const CSSOMString &priority) noexcept final;
+
+    ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept final;
+
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
+    ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept final;
+
+    KRYS_NODISCARD bool IsExposed(css::PropertyId property) const noexcept;
+
+    KRYS_NODISCARD bool WillMutate() noexcept;
+
+    void DidMutate(MutationType type) noexcept;
+
+    // PropertyId versions of the CSSOM functions to support bindings.
+    KRYS_NODISCARD CSSOMString GetPropertyValueInternal(css::PropertyId property) const noexcept;
+
+    virtual ExceptionOr<void> SetPropertyInternal(css::PropertyId property, const CSSOMString &value,
+                                                  css::IsImportant important) noexcept;
+
+    KRYS_NODISCARD css::ParserContext CssParserContext() const noexcept;
+  };
+}

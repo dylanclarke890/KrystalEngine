@@ -1,0 +1,390 @@
+﻿/*
+ * Copyright (C) 2003, 2009, 2012, 2015 Apple Inc. All rights reserved.
+ * Copyright (C) 2020 Igalia S.L.
+ *
+ * Portions are Copyright (C) 1998 Netscape Communications Corporation.
+ *
+ * Other contributors:
+ *   Robert O'Callahan <roc+@cs.cmu.edu>
+ *   David Baron <dbaron@fas.harvard.edu>
+ *   Christian Biesinger <cbiesinger@web.de>
+ *   Randall Jesup <rjesup@wgate.com>
+ *   Roland Mainz <roland.mainz@informatik.med.uni-giessen.de>
+ *   Josh Soref <timeless@mac.com>
+ *   Boris Zbarsky <bzbarsky@mit.edu>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Alternatively, the contents of this file may be used under the terms
+ * of either the Mozilla Public License Version 1.1, found at
+ * http://www.mozilla.org/MPL/ (the "MPL") or the GNU General Public
+ * License Version 2.0, found at http://www.fsf.org/copyleft/gpl.html
+ * (the "GPL"), in which case the provisions of the MPL or the GPL are
+ * applicable instead of those above.  If you wish to allow use of your
+ * version of this file only under the terms of one of those two
+ * licenses (the MPL or the GPL) and not to allow others to use your
+ * version of this file under the LGPL, indicate your decision by
+ * deletingthe provisions above and replace them with the notice and
+ * other provisions required by the MPL or the GPL, as the case may be.
+ * If you do not delete the provisions above, a recipient may use your
+ * version of this file under any of the LGPL, the MPL or the GPL.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Platform/Scrolling/ScrollableArea.hpp"
+#include "Krystal.Web/Rendering/Layers/RenderLayer.hpp"
+
+namespace krys::web
+{
+  class RenderStyle;
+
+  /// @brief The scrollable area of a layer whose box can scroll its overflow: its scroll position and
+  /// extents, and its scrollbars.
+  // FIXME: Marquees, touch, wheel and keyboard scrolling,
+  // composited scrolling, painting and hit testing of the overflow
+  // controls, scroll events and scrolling into view come with input, animations, compositing and painting.
+  class RenderLayerScrollableArea final : public ScrollableArea
+  {
+    KRYS_NON_COPY_MOVABLE(RenderLayerScrollableArea);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderLayerScrollableArea);
+
+  private:
+    bool _scrollDimensionsDirty {true};
+    bool _inOverflowRelayout {false};
+    bool _hasCompositedScrollableOverflow {false};
+    bool _requiresScrollPositionReconciliation {false};
+    /// @brief Whether the overlay scrollbars of this layer's descendants (painting into it) wait for the
+    /// second pass.
+    bool _containsDirtyOverlayScrollbars {false};
+    /// @brief Where the overlay scrollbars paint in the second pass: their paint offset in the first.
+    PointI _cachedOverlayScrollbarOffset;
+
+    // The width/height of our scrolled area.
+    int32 _scrollWidth {0};
+    int32 _scrollHeight {0};
+
+    RenderLayer &_layer;
+    /// @brief Whether the area is in the frame view's scrollable areas.
+    bool _registeredScrollableArea {false};
+    ScrollPosition _scrollPosition;
+    Maybe<ScrollPosition> _postLayoutScrollPosition;
+
+    // For layers with overflow, we have a pair of scrollbars.
+    RefPtr<Scrollbar> _hBar;
+    RefPtr<Scrollbar> _vBar;
+
+    UniquePtr<ScrollAnchoringController> _scrollAnchoringController;
+
+  public:
+    explicit RenderLayerScrollableArea(RenderLayer &layer) noexcept;
+
+    ~RenderLayerScrollableArea() noexcept override;
+
+    KRYS_NODISCARD RenderLayer &Layer() noexcept
+    {
+      return _layer;
+    }
+
+    void Clear() noexcept;
+
+    void RestoreScrollPosition() noexcept;
+
+    void SetPostLayoutScrollPosition(Maybe<ScrollPosition> position) noexcept;
+
+    void ApplyPostLayoutScrollPositionIfNeeded() noexcept;
+
+    KRYS_NODISCARD bool HasPostLayoutScrollPosition() const noexcept
+    {
+      return static_cast<bool>(_postLayoutScrollPosition);
+    }
+
+    KRYS_NODISCARD int32 ScrollWidth() const noexcept;
+
+    KRYS_NODISCARD int32 ScrollHeight() const noexcept;
+
+    // Attempt to scroll the given ScrollOffset, returning the real target offset after it has
+    // been adjusted by scroll snapping.
+    ScrollOffset ScrollToOffset(const ScrollOffset &offset,
+                                const ScrollPositionChangeOptions &options =
+                                  ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+
+    /// @brief Scrolls by @p delta, passing what this box can't scroll on to the enclosing scrollable layer
+    /// (or the view, if the layer has no overflow clip), setting @p scrolledArea to the last area scrolled.
+    void ScrollByRecursively(const SizeI &delta, ScrollableArea **scrolledArea = nullptr) noexcept;
+
+    /// @brief Scrolls towards @p mousePosition, the further from @p sourcePoint the faster.
+    void PanScrollFromPoint(const PointI &sourcePoint, const PointI &mousePosition) noexcept;
+
+    /// @brief Scrolls so the absolute rect is aligned as asked.
+    /// @return The rect in absolute coordinates after scrolling.
+    LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,
+                                   const ScrollRectToVisibleOptions &options) noexcept;
+
+    Maybe<LayoutRect> UpdateScrollPositionForScrollIntoView(const ScrollPositionChangeOptions &options,
+                                                            const LayoutRect &revealRect,
+                                                            const LayoutRect &localExposeRect) noexcept;
+
+    void ScrollToXPosition(int32 x, const ScrollPositionChangeOptions &options) noexcept;
+
+    void ScrollToYPosition(int32 y, const ScrollPositionChangeOptions &options) noexcept;
+
+    void SetScrollPosition(const ScrollPosition &position,
+                           const ScrollPositionChangeOptions &options) noexcept;
+
+    KRYS_NODISCARD bool ScrollsOverflow() const noexcept;
+
+    KRYS_NODISCARD bool HasScrollableHorizontalOverflow() const noexcept;
+
+    /// @brief Adds the area to the frame view's scrollable areas while it can scroll (@p hasOverflow), has
+    /// scrollbars or scrolls smoothly, and removes it otherwise.
+    void UpdateScrollableAreaSet(bool hasOverflow) noexcept;
+
+    KRYS_NODISCARD bool HasScrollableVerticalOverflow() const noexcept;
+
+    KRYS_NODISCARD bool HasScrollbars() const noexcept
+    {
+      return HorizontalScrollbar() || VerticalScrollbar();
+    }
+
+    KRYS_NODISCARD bool HasHorizontalScrollbar() const noexcept
+    {
+      return HorizontalScrollbar();
+    }
+
+    KRYS_NODISCARD bool HasVerticalScrollbar() const noexcept
+    {
+      return VerticalScrollbar();
+    }
+
+    void SetHasHorizontalScrollbar(bool hasScrollbar) noexcept;
+
+    void SetHasVerticalScrollbar(bool hasScrollbar) noexcept;
+
+    KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept final;
+
+    KRYS_NODISCARD Maybe<ScrollbarColor> ScrollbarColorStyle() const noexcept final;
+
+    /// @brief Whether the scrollbars are dark: their box's `color-scheme`.
+    KRYS_NODISCARD bool UseDarkAppearanceForScrollbars() const noexcept final;
+
+    KRYS_NODISCARD bool RequiresScrollPositionReconciliation() const noexcept
+    {
+      return _requiresScrollPositionReconciliation;
+    }
+
+    void SetRequiresScrollPositionReconciliation(bool requiresReconciliation = true) noexcept
+    {
+      _requiresScrollPositionReconciliation = requiresReconciliation;
+    }
+
+    // Returns true when the layer could do touch scrolling, but doesn't look at whether there is actually
+    // scrollable overflow.
+    KRYS_NODISCARD bool CanUseCompositedScrolling() const noexcept;
+
+    KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
+
+    // Returns true when there is actually scrollable overflow (requires layout to be up-to-date).
+    KRYS_NODISCARD bool HasCompositedScrollableOverflow() const noexcept
+    {
+      return _hasCompositedScrollableOverflow;
+    }
+
+    KRYS_NODISCARD int32 VerticalScrollbarWidth(
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      bool isHorizontalWritingMode = true) const noexcept;
+
+    KRYS_NODISCARD int32 HorizontalScrollbarHeight(
+      OverlayScrollbarSizeRelevancy relevancy = OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+      bool isHorizontalWritingMode = true) const noexcept;
+
+    KRYS_NODISCARD bool HasOverflowControls() const noexcept;
+
+    void UpdateScrollInfoAfterLayout() noexcept;
+
+    void UpdateScrollbarSteps() noexcept;
+
+    void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept final;
+
+    KRYS_NODISCARD bool CanShowNonOverlayScrollbars() const noexcept final;
+
+    KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept final
+    {
+      return _scrollPosition;
+    }
+
+    KRYS_NODISCARD Scrollbar *HorizontalScrollbar() const noexcept final
+    {
+      return _hBar.get();
+    }
+
+    KRYS_NODISCARD Scrollbar *VerticalScrollbar() const noexcept final
+    {
+      return _vBar.get();
+    }
+
+    KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept final;
+
+    KRYS_NODISCARD bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept final;
+
+    KRYS_NODISCARD bool IsRenderLayer() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD ScrollAnchoringController *GetScrollAnchoringController() const noexcept final
+    {
+      return _scrollAnchoringController.get();
+    }
+
+    KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept final;
+
+    KRYS_NODISCARD RectI ScrollCornerRect() const noexcept final;
+
+    void SetScrollOffset(const ScrollOffset &offset) noexcept final;
+
+    KRYS_NODISCARD SizeI VisibleSize() const noexcept final;
+
+    KRYS_NODISCARD SizeI ContentsSize() const noexcept final;
+
+    KRYS_NODISCARD SizeI ReachableTotalContentsSize() const noexcept final;
+
+    void UpdateScrollbarsAfterStyleChange(const RenderStyle *oldStyle) noexcept;
+
+    void UpdateScrollbarsAfterLayout() noexcept;
+
+    bool PositionOverflowControls(const SizeI &offsetFromRoot) noexcept;
+
+    void UpdateAllScrollbarRelatedStyle() noexcept;
+
+    KRYS_NODISCARD RenderLayer::OverflowControlRects OverflowControlsRects() const noexcept;
+
+    KRYS_NODISCARD bool OverflowControlsIntersectRect(const RectI &localRect) const noexcept;
+
+    void ComputeHasCompositedScrollableOverflow(LayoutUpToDate layoutUpToDate) noexcept;
+
+    // NOTE: This should only be called by the overridden setScrollOffset from ScrollableArea.
+    void ScrollTo(const ScrollPosition &position) noexcept;
+
+    void RegisterForAnimatedScroll() noexcept override;
+
+    /// @brief Finds the snap positions of the boxes that snap in this one.
+    void UpdateSnapOffsets() noexcept;
+
+    /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
+    void ScrollDidEnd() noexcept override;
+
+    void UpdateAnchorPositionedAfterScroll() noexcept final;
+
+    /// @brief Updates the compositing layers a scroll moved, from the enclosing compositing layer of the
+    /// stacking context.
+    void UpdateCompositingLayersAfterScroll() noexcept;
+
+    /// @brief The backing's layers the scrollbars and scroll corner paint into, if they have their own.
+    KRYS_NODISCARD GraphicsLayer *LayerForHorizontalScrollbar() const noexcept;
+
+    KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept;
+
+    KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
+
+    void InvalidateScrollbar(Scrollbar &scrollbar, const RectI &rect) noexcept override;
+
+    KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
+
+    KRYS_NODISCARD bool ScrollAnimatorEnabled() const noexcept override;
+
+    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset. Overlay scrollbars paint over
+    /// everything else, in a second pass through the layer tree (@p paintingOverlayControls): the first pass
+    /// only marks the painting root as having them to paint.
+    void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
+                               const PointI &paintOffset, const RectI &damageRect,
+                               bool paintingOverlayControls = false) noexcept;
+
+    /// @brief The second pass: paints the overlay scrollbars the first pass found, if there were any.
+    void PaintOverlayScrollbars(GraphicsContext &context, const LayoutRect &damageRect,
+                                EnumSet<PaintBehavior> paintBehavior,
+                                RenderObject *subtreePaintRoot = nullptr) noexcept;
+
+    KRYS_NODISCARD bool ContainsDirtyOverlayScrollbars() const noexcept
+    {
+      return _containsDirtyOverlayScrollbars;
+    }
+
+    void SetContainsDirtyOverlayScrollbars(bool dirtyScrollbars) noexcept
+    {
+      _containsDirtyOverlayScrollbars = dirtyScrollbars;
+    }
+
+    void PaintScrollCorner(GraphicsContext &context, const PointI &paintOffset,
+                           const RectI &damageRect) noexcept;
+
+    /// @brief Paints the grip of a box the user can resize, in its bottom corner.
+    void PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
+                      const LayoutRect &damageRect) noexcept;
+
+    /// @brief Whether @p hitTestLocation is over the resizer in one of @p layerFragments; sets
+    /// @p pointInFragment to where.
+    KRYS_NODISCARD bool HitTestResizerInFragments(const LayerFragments &layerFragments,
+                                                  const HitTestLocation &hitTestLocation,
+                                                  LayoutPoint &pointInFragment) const noexcept;
+
+    /// @brief Whether @p localPoint (in the box's coordinates) is over a scrollbar, which @p result then
+    /// names.
+    bool HitTestOverflowControls(HitTestResult &result, const PointI &localPoint) noexcept;
+
+    KRYS_NODISCARD PointI ConvertFromContainingViewToScrollbar(
+      const Scrollbar &scrollbar, const PointI &parentPoint) const noexcept override;
+
+    KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
+
+    KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
+
+    KRYS_NODISCARD SizeI ScrollbarOffset(const Scrollbar &scrollbar) const noexcept;
+
+  private:
+    KRYS_NODISCARD bool HasHorizontalOverflow() const noexcept;
+
+    KRYS_NODISCARD bool HasVerticalOverflow() const noexcept;
+
+    KRYS_NODISCARD static bool ShowsOverflowControls() noexcept;
+
+    KRYS_NODISCARD ScrollOffset ClampScrollOffset(const ScrollOffset &offset) const noexcept;
+
+    void ComputeScrollDimensions() noexcept;
+
+    void ComputeScrollOrigin() noexcept;
+
+    KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
+
+    void DestroyScrollbar(ScrollbarOrientation orientation) noexcept;
+
+    void UpdateScrollbarPresenceAndState(Maybe<bool> hasHorizontalOverflow = null,
+                                         Maybe<bool> hasVerticalOverflow = null) noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderLayerScrollableArea)
+  KRYS_NODISCARD static bool IsType(const krys::web::ScrollableArea &area) noexcept
+  {
+    return area.IsRenderLayer();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -1,0 +1,271 @@
+﻿/*
+ * Copyright (C) 2023-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2024-2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/PropertyInitialValues.hpp"
+#include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Web/Css/Properties/InitialValues.hpp"
+#include "Krystal.Web/Css/Values/BorderImageSliceValue.hpp"
+#include "Krystal.Web/Css/Values/BorderImageWidthValue.hpp"
+#include "Krystal.Web/Css/Values/OffsetRotateValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/QuadValue.hpp"
+#include "Krystal.Web/Css/Values/SideValues.hpp"
+#include "Krystal.Web/Css/Values/ValuePair.hpp"
+
+namespace krys::web::css
+{
+  namespace
+  {
+    KRYS_NODISCARD bool IsValueIdPair(const Value &value, ValueId valueId) noexcept
+    {
+      return Is<ValuePair>(value) && value.First().ValueId() == valueId
+             && value.Second().ValueId() == valueId;
+    }
+
+    KRYS_NODISCARD bool IsNumber(const PrimitiveValue &value, double number, UnitType type) noexcept
+    {
+      return value.Unit() == type && !value.IsCalc()
+             && value.ResolveWithoutConversionData<double>() == number;
+    }
+
+    KRYS_NODISCARD bool IsNumber(const PrimitiveValue *value, double number, UnitType type) noexcept
+    {
+      return value && IsNumber(*value, number, type);
+    }
+
+    KRYS_NODISCARD bool IsNumber(const Value &value, double number, UnitType type) noexcept
+    {
+      return IsNumber(DynamicDowncast<PrimitiveValue>(value), number, type);
+    }
+
+    KRYS_NODISCARD bool IsNumber(const SideValues &quad, double number, UnitType type) noexcept
+    {
+      return IsNumber(*quad.Top, number, type) && IsNumber(*quad.Right, number, type)
+             && IsNumber(*quad.Bottom, number, type) && IsNumber(*quad.Left, number, type);
+    }
+
+    KRYS_NODISCARD bool IsValueId(const SideValues &quad, ValueId valueId) noexcept
+    {
+      return quad.Top->ValueId() == valueId && quad.Right->ValueId() == valueId
+             && quad.Bottom->ValueId() == valueId && quad.Left->ValueId() == valueId;
+    }
+
+    KRYS_NODISCARD bool IsNumericQuad(const Value &value, double number, UnitType type) noexcept
+    {
+      return Is<QuadValue>(value) && IsNumber(Downcast<QuadValue>(value).Sides(), number, type);
+    }
+  }
+
+  bool IsInitialValueForLonghand(PropertyId longhand, const Value &value) noexcept
+  {
+    if (value.IsImplicitInitialValue())
+    {
+      return true;
+    }
+
+    switch (longhand)
+    {
+      case PropertyId::BackgroundSize:
+      case PropertyId::MaskSize:
+      {
+        if (IsValueIdPair(value, ValueId::Auto))
+        {
+          return true;
+        }
+        break;
+      }
+      case PropertyId::BorderImageOutset:
+      case PropertyId::MaskBorderOutset:
+      {
+        if (IsNumericQuad(value, 0, UnitType::Number))
+        {
+          return true;
+        }
+        break;
+      }
+      case PropertyId::BorderImageRepeat:
+      case PropertyId::MaskBorderRepeat:
+      {
+        if (IsValueIdPair(value, ValueId::Stretch))
+        {
+          return true;
+        }
+        break;
+      }
+      case PropertyId::BorderImageSlice:
+      {
+        if (auto *sliceValue = DynamicDowncast<BorderImageSliceValue>(value))
+        {
+          if (!sliceValue->Fill() && IsNumber(sliceValue->Slices(), 100, UnitType::Percentage))
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      case PropertyId::BorderImageWidth:
+      {
+        if (auto *widthValue = DynamicDowncast<BorderImageWidthValue>(value))
+        {
+          if (!widthValue->OverridesBorderWidths() && IsNumber(widthValue->Widths(), 1, UnitType::Number))
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      case PropertyId::OffsetRotate:
+      {
+        if (auto *rotateValue = DynamicDowncast<OffsetRotateValue>(value))
+        {
+          if (rotateValue->IsInitialValue())
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      case PropertyId::MaskBorderSlice:
+      {
+        if (auto *sliceValue = DynamicDowncast<BorderImageSliceValue>(value))
+        {
+          if (!sliceValue->Fill() && IsNumber(sliceValue->Slices(), 0, UnitType::Number))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+      case PropertyId::MaskBorderWidth:
+      {
+        if (auto *widthValue = DynamicDowncast<BorderImageWidthValue>(value))
+        {
+          if (!widthValue->OverridesBorderWidths() && IsValueId(widthValue->Widths(), ValueId::Auto))
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      default: break;
+    }
+
+    return SwitchOn(
+      InitialValueForLonghand(longhand), [&](ValueId initialValue)
+      { return value.ValueId() == initialValue; }, [&](InitialNumericValue initialValue)
+      { return IsNumber(value, initialValue.Number, initialValue.Type); });
+  }
+
+  CSSOMStringView InitialValueTextForLonghand(PropertyId longhand) noexcept
+  {
+    return SwitchOn(
+      InitialValueForLonghand(longhand), [](ValueId value) { return ToString(value); },
+      [](InitialNumericValue initialValue) -> CSSOMStringView
+      {
+        switch (initialValue.Type)
+        {
+          case UnitType::Number:
+          {
+            if (initialValue.Number == 0.0)
+            {
+              return u8"0";
+            }
+            if (initialValue.Number == 1.0)
+            {
+              return u8"1";
+            }
+            if (initialValue.Number == 2.0)
+            {
+              return u8"2";
+            }
+            if (initialValue.Number == 4.0)
+            {
+              return u8"4";
+            }
+            if (initialValue.Number == 8.0)
+            {
+              return u8"8";
+            }
+            break;
+          }
+          case UnitType::Percentage:
+          {
+            if (initialValue.Number == 0.0)
+            {
+              return u8"0%";
+            }
+            if (initialValue.Number == 50.0)
+            {
+              return u8"50%";
+            }
+            if (initialValue.Number == 100.0)
+            {
+              return u8"100%";
+            }
+            break;
+          }
+          case UnitType::px:
+          {
+            if (initialValue.Number == 0.0)
+            {
+              return u8"0px";
+            }
+            if (initialValue.Number == 1.0)
+            {
+              return u8"1px";
+            }
+            break;
+          }
+          case UnitType::s:
+          {
+            if (initialValue.Number == 0.0)
+            {
+              return u8"0s";
+            }
+            break;
+          }
+          case UnitType::deg:
+          {
+            if (initialValue.Number == 0.0)
+            {
+              return u8"0deg";
+            }
+            break;
+          }
+          default: break;
+        }
+
+        krys_debug_assert_msg(false, "unexpected initial value");
+        return u8"";
+      });
+  }
+
+  ValueId InitialValueIdForLonghand(PropertyId longhand) noexcept
+  {
+    return SwitchOn(
+      InitialValueForLonghand(longhand), [](ValueId value) { return value; },
+      [](InitialNumericValue) { return ValueId::Invalid; });
+  }
+}

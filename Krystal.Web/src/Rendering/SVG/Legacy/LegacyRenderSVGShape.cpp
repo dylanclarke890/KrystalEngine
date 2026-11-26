@@ -1,0 +1,594 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2007 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2008 Rob Buis <buis@kde.org>
+ * Copyright (C) 2005, 2007 Eric Seidel <eric@webkit.org>
+ * Copyright (C) 2009 Google, Inc.
+ * Copyright (C) 2009 Dirk Schulze <krit@webkit.org>
+ * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ * Copyright (C) 2009 Jeff Schiller <codedread@gmail.com>
+ * Copyright (C) 2011 Renata Hodovan <reni@webkit.org>
+ * Copyright (C) 2011 University of Szeged
+ * Copyright (C) 2018 Adobe Systems Incorporated. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Web/Graphics/GraphicsContext.hpp"
+#include "Krystal.Web/Graphics/GraphicsContextStateSaver.hpp"
+#include "Krystal.Web/Rendering/HitTesting/HitTestRequest.hpp"
+#include "Krystal.Web/Rendering/HitTesting/HitTestResult.hpp"
+#include "Krystal.Web/Rendering/HitTesting/PointerEventsHitRules.hpp"
+#include "Krystal.Web/Rendering/LayoutRepainter.hpp"
+#include "Krystal.Web/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGPathData.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGRenderingContext.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGVisitedRendererTracking.hpp"
+#include "Krystal.Web/Svg/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Web/Svg/SVGLengthContext.hpp"
+
+namespace krys::web
+{
+  LegacyRenderSVGShape::LegacyRenderSVGShape(Type type, SVGGraphicsElement &element,
+                                             RenderStyle &&style) noexcept
+      : LegacyRenderSVGModelObject(type, element, krys::move(style),
+                                   {SVGModelObjectFlag::IsShape, SVGModelObjectFlag::UsesBoundaryCaching})
+  {
+  }
+
+  LegacyRenderSVGShape::~LegacyRenderSVGShape() noexcept = default;
+
+  SVGGraphicsElement &LegacyRenderSVGShape::GraphicsElement() const noexcept
+  {
+    return Downcast<SVGGraphicsElement>(LegacyRenderSVGModelObject::GetElement());
+  }
+
+  bool LegacyRenderSVGShape::HasNonScalingStroke() const noexcept
+  {
+    return Style().VectorEffect() == VectorEffect::NonScalingStroke;
+  }
+
+  bool LegacyRenderSVGShape::IsEmpty() const noexcept
+  {
+    // This function should never be called before assigning a new Path to m_path.
+    // But this bug can happen if this renderer was created and its layout was not
+    // done before painting. Assert this did not happen but do not crash.
+    krys_debug_assert(HasPath());
+    return !HasPath() || GetPath().IsEmpty();
+  }
+
+  void LegacyRenderSVGShape::FillShape(GraphicsContext &context) const noexcept
+  {
+    context.FillPath(GetPath());
+  }
+
+  void LegacyRenderSVGShape::StrokeShape(GraphicsContext &context) const noexcept
+  {
+    krys_debug_assert(_path);
+    Path *usePath = _path.get();
+
+    if (HasNonScalingStroke())
+    {
+      usePath = NonScalingStrokePath(usePath, NonScalingStrokeTransform());
+    }
+
+    context.StrokePath(*usePath);
+  }
+
+  bool LegacyRenderSVGShape::ShapeDependentStrokeContains(const PointF &point,
+                                                          PointCoordinateSpace pointCoordinateSpace) noexcept
+  {
+    krys_debug_assert(_path);
+
+    if (HasNonScalingStroke() && pointCoordinateSpace != LocalCoordinateSpace)
+    {
+      AffineTransform nonScalingTransform = NonScalingStrokeTransform();
+      Path *usePath = NonScalingStrokePath(_path.get(), nonScalingTransform);
+      return usePath->StrokeContains(
+        nonScalingTransform.MapPoint(point), [this](GraphicsContext &context)
+        { SVGRenderSupport::ApplyStrokeStyleToContext(context, Style(), *this); });
+    }
+
+    return _path->StrokeContains(point, [this](GraphicsContext &context)
+                                 { SVGRenderSupport::ApplyStrokeStyleToContext(context, Style(), *this); });
+  }
+
+  bool LegacyRenderSVGShape::ShapeDependentFillContains(const PointF &point,
+                                                        const WindRule fillRule) const noexcept
+  {
+    return const_cast<LegacyRenderSVGShape &>(*this).EnsurePath().Contains(point, fillRule);
+  }
+
+  bool LegacyRenderSVGShape::FillContains(const PointF &point, bool requiresFill,
+                                          const WindRule fillRule) noexcept
+  {
+    if (_fillBoundingBox.IsEmpty() || !_fillBoundingBox.Contains(point))
+    {
+      return false;
+    }
+
+    Color fallbackColor;
+    if (requiresFill && !LegacyRenderSVGResource::FillPaintingResource(*this, Style(), fallbackColor))
+    {
+      return false;
+    }
+
+    return ShapeDependentFillContains(point, fillRule);
+  }
+
+  bool LegacyRenderSVGShape::StrokeContains(const PointF &point, bool requiresStroke) noexcept
+  {
+    // "A zero value causes no stroke to be painted."
+    if (!StrokeWidth())
+    {
+      return false;
+    }
+
+    auto approximateStrokeBoundingBox = ApproximateStrokeBoundingBox();
+    if (approximateStrokeBoundingBox.IsEmpty() || !approximateStrokeBoundingBox.Contains(point))
+    {
+      return false;
+    }
+
+    Color fallbackColor;
+    if (requiresStroke && !LegacyRenderSVGResource::StrokePaintingResource(*this, Style(), fallbackColor))
+    {
+      return false;
+    }
+
+    return ShapeDependentStrokeContains(point);
+  }
+
+  void LegacyRenderSVGShape::Layout() noexcept
+  {
+    auto checkForRepaintOverride = !SelfNeedsLayout()
+                                     ? LayoutRepainter::CheckForRepaint::No
+                                     : SVGRenderSupport::CheckForSVGRepaintDuringLayout(*this);
+    LayoutRepainter repainter(*this, checkForRepaintOverride, {}, RepaintOutlineBounds::No);
+
+    bool updateCachedBoundariesInParents = false;
+
+    if (_needsShapeUpdate || _needsBoundariesUpdate)
+    {
+      UpdateShapeFromElement();
+      _needsShapeUpdate = false;
+      UpdateRepaintBoundingBox();
+      _needsBoundariesUpdate = false;
+      updateCachedBoundariesInParents = true;
+    }
+
+    if (_needsTransformUpdate)
+    {
+      _localTransform = GraphicsElement().AnimatedLocalTransform();
+      _needsTransformUpdate = false;
+      updateCachedBoundariesInParents = true;
+    }
+
+    // Invalidate all resources of this client if our layout changed.
+    SVGResourcesCache::ClientLayoutChanged(*this);
+
+    // If our bounds changed, notify the parents.
+    if (updateCachedBoundariesInParents)
+    {
+      if (auto *parent = Parent())
+      {
+        parent->InvalidateCachedBoundaries();
+      }
+    }
+
+    repainter.RepaintAfterLayout();
+    ClearNeedsLayout();
+  }
+
+  Path *LegacyRenderSVGShape::NonScalingStrokePath(const Path *path,
+                                                   const AffineTransform &strokeTransform) noexcept
+  {
+    static Path tempPath;
+
+    tempPath = *path;
+    tempPath.Transform(strokeTransform);
+
+    return &tempPath;
+  }
+
+  bool LegacyRenderSVGShape::SetupNonScalingStrokeContext(AffineTransform &strokeTransform,
+                                                          GraphicsContextStateSaver &stateSaver) noexcept
+  {
+    Maybe<AffineTransform> inverse = strokeTransform.Inverse();
+    if (!inverse)
+    {
+      return false;
+    }
+
+    stateSaver.Save();
+    stateSaver.Context()->ConcatCTM(inverse.value());
+    return true;
+  }
+
+  AffineTransform LegacyRenderSVGShape::NonScalingStrokeTransform() const noexcept
+  {
+    return GraphicsElement().GetScreenCTM(SVGLocatable::DisallowStyleUpdate);
+  }
+
+  void LegacyRenderSVGShape::FillShape(const RenderStyle &style, GraphicsContext &originalContext) noexcept
+  {
+    GraphicsContext *context = &originalContext;
+    Color fallbackColor;
+    if (auto *fillPaintingResource =
+          LegacyRenderSVGResource::FillPaintingResource(*this, style, fallbackColor))
+    {
+      if (ResourceWasApplied(
+            fillPaintingResource->ApplyResource(*this, style, context, RenderSVGResourceMode::ApplyToFill)))
+      {
+        fillPaintingResource->PostApplyResource(*this, context, RenderSVGResourceMode::ApplyToFill, nullptr,
+                                                this);
+      }
+      else if (fallbackColor.IsValid())
+      {
+        auto *fallbackResource = LegacyRenderSVGResource::SharedSolidPaintingResource();
+        fallbackResource->SetColor(fallbackColor);
+        if (ResourceWasApplied(
+              fallbackResource->ApplyResource(*this, style, context, RenderSVGResourceMode::ApplyToFill)))
+        {
+          fallbackResource->PostApplyResource(*this, context, RenderSVGResourceMode::ApplyToFill, nullptr,
+                                              this);
+        }
+      }
+    }
+  }
+
+  void LegacyRenderSVGShape::StrokeShapeInternal(const RenderStyle &style,
+                                                 GraphicsContext &originalContext) noexcept
+  {
+    GraphicsContext *context = &originalContext;
+    Color fallbackColor;
+    if (auto *strokePaintingResource =
+          LegacyRenderSVGResource::StrokePaintingResource(*this, style, fallbackColor))
+    {
+      if (ResourceWasApplied(strokePaintingResource->ApplyResource(*this, style, context,
+                                                                   RenderSVGResourceMode::ApplyToStroke)))
+      {
+        strokePaintingResource->PostApplyResource(*this, context, RenderSVGResourceMode::ApplyToStroke,
+                                                  nullptr, this);
+      }
+      else if (fallbackColor.IsValid())
+      {
+        auto *fallbackResource = LegacyRenderSVGResource::SharedSolidPaintingResource();
+        fallbackResource->SetColor(fallbackColor);
+        if (ResourceWasApplied(
+              fallbackResource->ApplyResource(*this, style, context, RenderSVGResourceMode::ApplyToStroke)))
+        {
+          fallbackResource->PostApplyResource(*this, context, RenderSVGResourceMode::ApplyToStroke, nullptr,
+                                              this);
+        }
+      }
+    }
+  }
+
+  void LegacyRenderSVGShape::StrokeShape(const RenderStyle &style, GraphicsContext &context) noexcept
+  {
+    if (!style.HasStroke() || !style.StrokeWidth().IsPossiblyPositive())
+    {
+      return;
+    }
+
+    GraphicsContextStateSaver stateSaver(context, false);
+    if (HasNonScalingStroke())
+    {
+      AffineTransform nonScalingTransform = NonScalingStrokeTransform();
+      if (!SetupNonScalingStrokeContext(nonScalingTransform, stateSaver))
+      {
+        return;
+      }
+    }
+    StrokeShapeInternal(style, context);
+  }
+
+  void LegacyRenderSVGShape::FillStrokeMarkers(PaintInfo &childPaintInfo) noexcept
+  {
+    for (auto type : Style().PaintOrder())
+    {
+      switch (type)
+      {
+        case style::PaintType::Fill:    FillShape(Style(), childPaintInfo.Context()); break;
+        case style::PaintType::Stroke:  StrokeShape(Style(), childPaintInfo.Context()); break;
+        case style::PaintType::Markers: DrawMarkers(childPaintInfo); break;
+      }
+    }
+  }
+
+  void LegacyRenderSVGShape::Paint(PaintInfo &paintInfo, const LayoutPoint &) noexcept
+  {
+    if (Style().UsedVisibility() == Visibility::Hidden || IsEmpty())
+    {
+      return;
+    }
+
+    if (paintInfo.Phase == PaintPhase::EventRegion)
+    {
+      // FIXME: Unite the fill bounding box into the event region context, once there's one.
+      return;
+    }
+
+    if (paintInfo.Context().PaintingDisabled() || paintInfo.Phase != PaintPhase::Foreground)
+    {
+      return;
+    }
+
+    RectF boundingBox = RepaintRectInLocalCoordinates();
+    if (!SVGRenderSupport::PaintInfoIntersectsRepaintRect(boundingBox, _localTransform, paintInfo))
+    {
+      return;
+    }
+
+    PaintInfo childPaintInfo(paintInfo);
+    GraphicsContextStateSaver stateSaver(childPaintInfo.Context());
+    childPaintInfo.ApplyTransform(_localTransform);
+
+    if (childPaintInfo.Phase == PaintPhase::Foreground)
+    {
+      SVGRenderingContext renderingContext(*this, childPaintInfo);
+
+      if (renderingContext.IsRenderingPrepared())
+      {
+        if (Style().ShapeRendering() == ShapeRendering::CrispEdges)
+        {
+          childPaintInfo.Context().SetShouldAntialias(false);
+        }
+
+        _fillRequiresClip = !renderingContext.PathClippingIsEntirelyWithinRendererContents();
+        FillStrokeMarkers(childPaintInfo);
+        _fillRequiresClip = true;
+      }
+    }
+
+    if (style::Evaluate<float>(Style().OutlineWidth(), style::ZoomNeeded {}))
+    {
+      PaintOutline(childPaintInfo, LayoutRect(RectI(boundingBox)));
+    }
+  }
+
+  // This method is called from inside paintOutline() since we call paintOutline()
+  // while transformed to our coord system, return local coords
+  void LegacyRenderSVGShape::AddFocusRingRects(List<LayoutRect> &rects, const LayoutPoint &,
+                                               const RenderLayerModelObject *) const noexcept
+  {
+    LayoutRect rect = LayoutRect(RepaintRectInLocalCoordinates());
+    if (!rect.IsEmpty())
+    {
+      rects.push_back(rect);
+    }
+  }
+
+  bool LegacyRenderSVGShape::IsPointInFill(const PointF &point) noexcept
+  {
+    return ShapeDependentFillContains(point, Style().FillRule());
+  }
+
+  bool LegacyRenderSVGShape::IsPointInStroke(const PointF &point) noexcept
+  {
+    if (!Style().HasStroke())
+    {
+      return false;
+    }
+
+    return ShapeDependentStrokeContains(point, LocalCoordinateSpace);
+  }
+
+  float LegacyRenderSVGShape::GetTotalLength() const noexcept
+  {
+    return HasPath() ? GetPath().Length() : CreatePath()->Length();
+  }
+
+  PointF LegacyRenderSVGShape::GetPointAtLength(float distance) const noexcept
+  {
+    return HasPath() ? GetPath().PointAtLength(distance) : CreatePath()->PointAtLength(distance);
+  }
+
+  bool LegacyRenderSVGShape::NodeAtPointF(const HitTestRequest &request, HitTestResult &result,
+                                          const PointF &pointInParent, HitTestAction hitTestAction) noexcept
+  {
+    // We only draw in the forground phase, so we only hit-test then.
+    if (hitTestAction != HitTestForeground)
+    {
+      return false;
+    }
+
+    static SVGVisitedRendererTracking::VisitedSet visitedSet;
+
+    SVGVisitedRendererTracking recursionTracking(visitedSet);
+    if (recursionTracking.IsVisiting(*this))
+    {
+      return false;
+    }
+
+    PointF localPoint = _localTransform.Inverse().value_or(AffineTransform {}).MapPoint(pointInParent);
+
+    if (!SVGRenderSupport::PointInClippingArea(*this, localPoint))
+    {
+      return false;
+    }
+
+    SVGVisitedRendererTracking::Scope recursionScope(recursionTracking, *this);
+
+    PointerEventsHitRules hitRules(PointerEventsHitRules::HitTestingTargetType::SVGPath, request,
+                                   Style().UsedPointerEvents());
+    if (VisibleToHitTesting(&request) || !hitRules.RequireVisible)
+    {
+      WindRule fillRule = Style().FillRule();
+      if (request.SVGClipContent())
+      {
+        fillRule = Style().ClipRule();
+      }
+      if ((hitRules.CanHitStroke && (Style().HasStroke() || !hitRules.RequireStroke)
+           && StrokeContains(localPoint, hitRules.RequireStroke))
+          || (hitRules.CanHitFill && (Style().HasFill() || !hitRules.RequireFill)
+              && FillContains(localPoint, hitRules.RequireFill, fillRule))
+          || (hitRules.CanHitBoundingBox && ObjectBoundingBox().Contains(localPoint)))
+      {
+        UpdateHitTestResult(result, LayoutPoint(localPoint));
+        if (result.AddNodeToListBasedTestResult(NodeForHitTest(), request,
+                                                HitTestLocation(FlooredLayoutPoint(localPoint)))
+            == HitTestProgress::Stop)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  RectF LegacyRenderSVGShape::StrokeBoundingBox() const noexcept
+  {
+    if (_shapeType == ShapeType::Empty)
+    {
+      return {};
+    }
+    if (!_strokeBoundingBox)
+    {
+      // Initialize m_strokeBoundingBox before calling calculateStrokeBoundingBox, since recursively
+      // referenced markers can cause us to re-enter here.
+      _strokeBoundingBox = RectF {};
+      _strokeBoundingBox = CalculateStrokeBoundingBox();
+    }
+    return *_strokeBoundingBox;
+  }
+
+  RectF LegacyRenderSVGShape::CalculateStrokeBoundingBox() const noexcept
+  {
+    krys_debug_assert(_path);
+    RectF strokeBoundingBox = _fillBoundingBox;
+
+    if (Style().HasStroke())
+    {
+      auto strokeStyleApplier = [this](GraphicsContext &context)
+      {
+        SVGRenderSupport::ApplyStrokeStyleToContext(context, Style(), *this);
+      };
+
+      if (HasNonScalingStroke())
+      {
+        AffineTransform nonScalingTransform = NonScalingStrokeTransform();
+        if (Maybe<AffineTransform> inverse = nonScalingTransform.Inverse())
+        {
+          Path *usePath = NonScalingStrokePath(_path.get(), nonScalingTransform);
+          RectF strokeBoundingRect = usePath->StrokeBoundingRect(strokeStyleApplier);
+          strokeBoundingRect = inverse.value().MapRect(strokeBoundingRect);
+          if (!strokeBoundingRect.IsNaN())
+          {
+            strokeBoundingBox.Unite(strokeBoundingRect);
+          }
+        }
+      }
+      else
+      {
+        auto strokeBoundingRect = GetPath().StrokeBoundingRect(strokeStyleApplier);
+        if (!strokeBoundingRect.IsNaN())
+        {
+          strokeBoundingBox.Unite(strokeBoundingRect);
+        }
+      }
+    }
+
+    return AdjustStrokeBoundingBoxForMarkersAndZeroLengthLinecaps(RepaintRectCalculation::Accurate,
+                                                                  strokeBoundingBox);
+  }
+
+  RectF LegacyRenderSVGShape::ApproximateStrokeBoundingBox() const noexcept
+  {
+    if (_shapeType == ShapeType::Empty)
+    {
+      return {};
+    }
+    if (!_approximateStrokeBoundingBox)
+    {
+      // Initialize m_approximateStrokeBoundingBox before calling calculateApproximateStrokeBoundingBox, since
+      // recursively referenced markers can cause us to re-enter here.
+      _approximateStrokeBoundingBox = RectF {};
+      _approximateStrokeBoundingBox = CalculateApproximateStrokeBoundingBox();
+    }
+    return *_approximateStrokeBoundingBox;
+  }
+
+  RectF LegacyRenderSVGShape::CalculateApproximateStrokeBoundingBox() const noexcept
+  {
+    if (_shapeType == ShapeType::Empty)
+    {
+      return {};
+    }
+
+    if (_strokeBoundingBox)
+    {
+      return *_strokeBoundingBox;
+    }
+
+    return SVGRenderSupport::CalculateApproximateStrokeBoundingBox(*this);
+  }
+
+  void LegacyRenderSVGShape::UpdateRepaintBoundingBox() noexcept
+  {
+    _repaintBoundingBox = ApproximateStrokeBoundingBox();
+    SVGRenderSupport::IntersectRepaintRectWithResources(*this, _repaintBoundingBox);
+  }
+
+  RectF LegacyRenderSVGShape::RepaintRectInLocalCoordinates(
+    RepaintRectCalculation repaintRectCalculation) const noexcept
+  {
+    if (repaintRectCalculation == RepaintRectCalculation::Fast)
+    {
+      return _repaintBoundingBox;
+    }
+
+    RectF strokeBoundingBox = StrokeBoundingBox();
+    SVGRenderSupport::IntersectRepaintRectWithResources(*this, strokeBoundingBox,
+                                                        RepaintRectCalculation::Accurate);
+    return strokeBoundingBox;
+  }
+
+  RectF LegacyRenderSVGShape::DecoratedBoundingBox() const noexcept
+  {
+    // The area it may paint, as a mask's buffer must cover it: its fill, stroke and markers with its filter's
+    // region, within its clip and mask.
+    return RepaintRectInLocalCoordinates(RepaintRectCalculation::Accurate);
+  }
+
+  float LegacyRenderSVGShape::StrokeWidth() const noexcept
+  {
+    SVGLengthContext lengthContext(&GraphicsElement());
+    auto strokeWidth = lengthContext.ValueForLength(Style().StrokeWidth(), style::ZoomNeeded {});
+    return std::isnan(strokeWidth) ? 0 : strokeWidth;
+  }
+
+  Path &LegacyRenderSVGShape::EnsurePath() noexcept
+  {
+    if (!HasPath())
+    {
+      _path = CreatePath();
+    }
+    return GetPath();
+  }
+
+  UniquePtr<Path> LegacyRenderSVGShape::CreatePath() const noexcept
+  {
+    return CreateUnique<Path>(PathFromGraphicsElement(GraphicsElement()));
+  }
+}

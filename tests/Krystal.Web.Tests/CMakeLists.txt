@@ -1,0 +1,991 @@
+﻿add_executable(Krystal.Web.Tests)
+
+target_link_libraries(Krystal.Web.Tests
+  PRIVATE
+	 	Krystal.Core
+		Krystal.Web
+   	Catch2::Catch2WithMain
+)
+
+set_target_properties(Krystal.Web.Tests
+	PROPERTIES
+  	CXX_STANDARD_REQUIRED ON
+		CXX_EXTENSIONS OFF
+		COMPILE_WARNING_AS_ERROR ON
+		# Compiling the tests in batches loads the precompiled header and instantiates the shared templates once per
+		# batch rather than once per file. Batched files share their file-local helpers' names, so those must be
+		# unique or shared (as in Krystal.Web).
+		UNITY_BUILD ON
+		UNITY_BUILD_BATCH_SIZE 16
+		# The batched sources stay in the project, excluded from the build, and MSBuild warns that those sharing a
+		# name would write the same object file, which they never do.
+		VS_GLOBAL_MSBuildWarningsAsMessages MSB8027
+)
+
+target_compile_features(Krystal.Web.Tests
+	PUBLIC
+  	cxx_std_23
+)
+
+target_compile_options(Krystal.Web.Tests
+	PRIVATE
+		$<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
+)
+
+# The test images Krystal.Image.Tests keeps.
+target_include_directories(Krystal.Web.Tests PRIVATE "${CMAKE_SOURCE_DIR}/tests/Krystal.Image.Tests/include")
+
+target_compile_definitions(Krystal.Web.Tests PRIVATE
+    KRYS_WEB_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
+
+catch_discover_tests(Krystal.Web.Tests)
+
+target_precompile_headers(Krystal.Web.Tests
+  PRIVATE
+    <algorithm>
+    <chrono>
+    <concepts>
+    <format>
+    <functional>
+    <memory>
+    <optional>
+    <span>
+    <ranges>
+    <string>
+    <string_view>
+    <tuple>
+    <type_traits>
+    <variant>
+    <vector>
+
+    <catch2/catch_test_macros.hpp>
+    <catch2/matchers/catch_matchers_floating_point.hpp>
+
+    <Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp>
+    <Krystal.Web/Dom/Nodes/Attr.hpp>
+    <Krystal.Web/Dom/Nodes/Document.hpp>
+    <Krystal.Web/Dom/Events/EventTarget.hpp>
+    <Krystal.Web/Dom/Nodes/Node.hpp>
+    <Krystal.Web/Dom/Nodes/ShadowRoot.hpp>
+    <Krystal.Web/Dom/Types/DOMString.hpp>
+    <Krystal.Web/Dom/Types/ExceptionOr.hpp>
+    <Krystal.Web/Dom/Types/USVString.hpp>
+
+    <Krystal.Web/Html/Elements/HTMLSlotElement.hpp>
+    <Krystal.Web/Html/Parser/DocumentParser.hpp>
+    <Krystal.Web/Html/Parser/CharacterReference.hpp>
+    <Krystal.Web/Html/Parser/Tokenizer.hpp>
+    <Krystal.Web/Css/Values/ValuePool.hpp>
+	<Krystal.Web/Graphics/DisplayLists/DisplayList.hpp>
+	<Krystal.Web/Layout/Integration/Inline/InlineIteratorBox.hpp>
+
+    <Krystal.Web.Tests/Style/ResolverTestUtils.hpp>
+)
+
+# Every header and source is listed here; a file that isn't listed isn't built. Each area's files are in
+# the order of its folders.
+set(KRYSTAL_WEB_TESTS_SHARED_HEADERS
+  include/Krystal.Web.Tests/StringTestUtils.hpp
+  include/Krystal.Web.Tests/TestParserUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_ACCESSIBILITY_HEADERS
+  include/Krystal.Web.Tests/Accessibility/AXTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_ACCESSIBILITY_SOURCES
+  tests/Accessibility/ARIAMixin.cpp
+  tests/Accessibility/AXActions.cpp
+  tests/Accessibility/AXImageMap.cpp
+  tests/Accessibility/AXListBoxOption.cpp
+  tests/Accessibility/AXLiveRegions.cpp
+  tests/Accessibility/AXLogger.cpp
+  tests/Accessibility/AXMathMLElement.cpp
+  tests/Accessibility/AXMenuList.cpp
+  tests/Accessibility/AXModal.cpp
+  tests/Accessibility/AXNodeObject.cpp
+  tests/Accessibility/AXObject.cpp
+  tests/Accessibility/AXObjectCache.cpp
+  tests/Accessibility/AXObjectCacheChanges.cpp
+  tests/Accessibility/AXProgressIndicator.cpp
+  tests/Accessibility/AXRelations.cpp
+  tests/Accessibility/AXRenderObject.cpp
+  tests/Accessibility/AXScrollView.cpp
+  tests/Accessibility/AXSlider.cpp
+  tests/Accessibility/AXSpinButton.cpp
+  tests/Accessibility/AXSVGObject.cpp
+  tests/Accessibility/AXTable.cpp
+  tests/Accessibility/AXTextRanges.cpp
+  tests/Accessibility/AXTextStateChanges.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_ANIMATION_HEADERS
+  include/Krystal.Web.Tests/Animation/AnimationTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_ANIMATION_SOURCES
+  tests/Animation/Keyframes/BlendingKeyframes.cpp
+  tests/Animation/Keyframes/KeyframeInterpolation.cpp
+  tests/Animation/Timelines/ScrollTimeline.cpp
+  tests/Animation/Timelines/StyleOriginatedTimelinesController.cpp
+  tests/Animation/Timelines/ViewTimeline.cpp
+  tests/Animation/Timing/AnimationEffectTiming.cpp
+  tests/Animation/Animatable.cpp
+  tests/Animation/AnimationEffect.cpp
+  tests/Animation/CSSAnimation.cpp
+  tests/Animation/CSSTransition.cpp
+  tests/Animation/KeyframeEffect.cpp
+  tests/Animation/WebAnimation.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_CSS_HEADERS
+  include/Krystal.Web.Tests/Css/CalcTestUtils.hpp
+  include/Krystal.Web.Tests/Css/ColorTestUtils.hpp
+  include/Krystal.Web.Tests/Css/ConsumerTestUtils.hpp
+  include/Krystal.Web.Tests/Css/CSSOMTestUtils.hpp
+  include/Krystal.Web.Tests/Css/MediaTestUtils.hpp
+  include/Krystal.Web.Tests/Css/PositionTestUtils.hpp
+  include/Krystal.Web.Tests/Css/RuleTestUtils.hpp
+  include/Krystal.Web.Tests/Css/SelectorTestUtils.hpp
+  include/Krystal.Web.Tests/Css/StylePropertiesTestUtils.hpp
+  include/Krystal.Web.Tests/Css/TypedOMTestUtils.hpp
+  include/Krystal.Web.Tests/Css/ValueTestUtils.hpp
+  include/Krystal.Web.Tests/Css/VariableTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_CSS_SOURCES
+  tests/Css/Calc/CalcType.cpp
+  tests/Css/Calc/Executor.cpp
+  tests/Css/Calc/SymbolTable.cpp
+  tests/Css/Calc/Tree.cpp
+  tests/Css/Calc/TreeEvaluation.cpp
+  tests/Css/Calc/TreeParser.cpp
+  tests/Css/Calc/TreeSerialisation.cpp
+  tests/Css/Calc/TreeSimplification.cpp
+  tests/Css/Calc/Value.cpp
+  tests/Css/Containment/ContentVisibilityDocumentState.cpp
+  tests/Css/Counter/CounterStyle.cpp
+  tests/Css/CSSOM/CSSComputedStyleDeclaration.cpp
+  tests/Css/CSSOM/CSSContainerRule.cpp
+  tests/Css/CSSOM/CSSCounterStyleRule.cpp
+  tests/Css/CSSOM/CSSFontFaceRule.cpp
+  tests/Css/CSSOM/CSSFontFeatureValuesRule.cpp
+  tests/Css/CSSOM/CSSFontPaletteValuesRule.cpp
+  tests/Css/CSSOM/CSSFunctionRule.cpp
+  tests/Css/CSSOM/CSSGroupingRule.cpp
+  tests/Css/CSSOM/CSSImportRule.cpp
+  tests/Css/CSSOM/CSSKeyframesRule.cpp
+  tests/Css/CSSOM/CSSLayerBlockRule.cpp
+  tests/Css/CSSOM/CSSLayerStatementRule.cpp
+  tests/Css/CSSOM/CSSMediaRule.cpp
+  tests/Css/CSSOM/CSSNamespaceRule.cpp
+  tests/Css/CSSOM/CSSNestedDeclarations.cpp
+  tests/Css/CSSOM/CSSPositionTryRule.cpp
+  tests/Css/CSSOM/CSSPropertyRule.cpp
+  tests/Css/CSSOM/CSSRule.cpp
+  tests/Css/CSSOM/CSSRuleList.cpp
+  tests/Css/CSSOM/CSSScopeRule.cpp
+  tests/Css/CSSOM/CSSStartingStyleRule.cpp
+  tests/Css/CSSOM/CSSStyleProperties.cpp
+  tests/Css/CSSOM/CSSStyleRule.cpp
+  tests/Css/CSSOM/CSSStyleSheet.cpp
+  tests/Css/CSSOM/CSSStyleSheetObservableArray.cpp
+  tests/Css/CSSOM/CSSSupportsRule.cpp
+  tests/Css/CSSOM/DOMCSSNamespace.cpp
+  tests/Css/CSSOM/Markup.cpp
+  tests/Css/CSSOM/MediaList.cpp
+  tests/Css/CSSOM/MediaQueryList.cpp
+  tests/Css/CSSOM/PropertySetCSSDescriptors.cpp
+  tests/Css/CSSOM/StyleSheetList.cpp
+  tests/Css/Font/CSSFontSelector.cpp
+  tests/Css/Font/FontFace.cpp
+  tests/Css/Geometry/DOMMatrix.cpp
+  tests/Css/Geometry/DOMPoint.cpp
+  tests/Css/Geometry/DOMQuad.cpp
+  tests/Css/Geometry/DOMRectList.cpp
+  tests/Css/Highlights/Highlight.cpp
+  tests/Css/ResizeObserver/ResizeObserver.cpp
+  tests/Css/Parser/AtRuleId.cpp
+  tests/Css/Parser/CustomPropertySyntax.cpp
+  tests/Css/Parser/KeywordLookup.cpp
+  tests/Css/Parser/Parser.cpp
+  tests/Css/Parser/ParserContext.cpp
+  tests/Css/Parser/ParserFastPaths.cpp
+  tests/Css/Parser/SizesAttributeParser.cpp
+  tests/Css/Parser/SupportsParser.cpp
+  tests/Css/Parser/Token.cpp
+  tests/Css/Parser/Tokenizer.cpp
+  tests/Css/Parser/VariableParser.cpp
+  tests/Css/Properties/Consumers/Align.cpp
+  tests/Css/Properties/Consumers/Anchor.cpp
+  tests/Css/Properties/Consumers/Animations.cpp
+  tests/Css/Properties/Consumers/Attr.cpp
+  tests/Css/Properties/Consumers/Background.cpp
+  tests/Css/Properties/Consumers/Box.cpp
+  tests/Css/Properties/Consumers/Color.cpp
+  tests/Css/Properties/Consumers/ColorAdjust.cpp
+  tests/Css/Properties/Consumers/Content.cpp
+  tests/Css/Properties/Consumers/CounterStyles.cpp
+  tests/Css/Properties/Consumers/Definitions.cpp
+  tests/Css/Properties/Consumers/Display.cpp
+  tests/Css/Properties/Consumers/Easing.cpp
+  tests/Css/Properties/Consumers/Filter.cpp
+  tests/Css/Properties/Consumers/Font.cpp
+  tests/Css/Properties/Consumers/Grid.cpp
+  tests/Css/Properties/Consumers/Ident.cpp
+  tests/Css/Properties/Consumers/Image.cpp
+  tests/Css/Properties/Consumers/Inline.cpp
+  tests/Css/Properties/Consumers/List.cpp
+  tests/Css/Properties/Consumers/Lists.cpp
+  tests/Css/Properties/Consumers/Masking.cpp
+  tests/Css/Properties/Consumers/MetaConsumer.cpp
+  tests/Css/Properties/Consumers/Motion.cpp
+  tests/Css/Properties/Consumers/Percentage.cpp
+  tests/Css/Properties/Consumers/Position.cpp
+  tests/Css/Properties/Consumers/PositionTry.cpp
+  tests/Css/Properties/Consumers/Primitives.cpp
+  tests/Css/Properties/Consumers/PrimitiveValue.cpp
+  tests/Css/Properties/Consumers/Ratio.cpp
+  tests/Css/Properties/Consumers/Scrollbars.cpp
+  tests/Css/Properties/Consumers/ScrollSnap.cpp
+  tests/Css/Properties/Consumers/Shapes.cpp
+  tests/Css/Properties/Consumers/String.cpp
+  tests/Css/Properties/Consumers/SVG.cpp
+  tests/Css/Properties/Consumers/Syntax.cpp
+  tests/Css/Properties/Consumers/TextDecoration.cpp
+  tests/Css/Properties/Consumers/Timeline.cpp
+  tests/Css/Properties/Consumers/Transform.cpp
+  tests/Css/Properties/Consumers/Transitions.cpp
+  tests/Css/Properties/Consumers/UI.cpp
+  tests/Css/Properties/Consumers/UnicodeRange.cpp
+  tests/Css/Properties/Consumers/Url.cpp
+  tests/Css/Properties/Consumers/WillChange.cpp
+  tests/Css/Properties/Property.cpp
+  tests/Css/Properties/PropertyInitialValues.cpp
+  tests/Css/Properties/PropertyParser.cpp
+  tests/Css/Properties/PropertyParserCustom.cpp
+  tests/Css/Properties/PropertyParserResult.cpp
+  tests/Css/Properties/PropertyQueries.cpp
+  tests/Css/Properties/PropertyShorthand.cpp
+  tests/Css/Properties/ShorthandSerialiser.cpp
+  tests/Css/Properties/StyleProperties.cpp
+  tests/Css/Queries/ContainerQueryParser.cpp
+  tests/Css/Queries/MediaQueryEvaluator.cpp
+  tests/Css/Queries/MediaQueryParser.cpp
+  tests/Css/Rules/CounterStyleRule.cpp
+  tests/Css/Rules/DescriptorRules.cpp
+  tests/Css/Rules/KeyframesRule.cpp
+  tests/Css/Rules/Rule.cpp
+  tests/Css/Selectors/MutableSelector.cpp
+  tests/Css/Selectors/Selector.cpp
+  tests/Css/Selectors/SelectorChecker.cpp
+  tests/Css/Selectors/SelectorCheckerTestFunctions.cpp
+  tests/Css/Selectors/SelectorFilter.cpp
+  tests/Css/Selectors/SelectorList.cpp
+  tests/Css/Selectors/SelectorParser.cpp
+  tests/Css/Selectors/SelectorPseudoTypeMap.cpp
+  tests/Css/Selectors/UserAgentParts.cpp
+  tests/Css/StyleSheets/StyleSheetContents.cpp
+  tests/Css/TypedOM/Color/CSSColorValue.cpp
+  tests/Css/TypedOM/Transform/CSSTransformValue.cpp
+  tests/Css/TypedOM/CSSNumericValue.cpp
+  tests/Css/TypedOM/CSSStyleValue.cpp
+  tests/Css/TypedOM/CSSUnparsedValue.cpp
+  tests/Css/TypedOM/StylePropertyMap.cpp
+  tests/Css/Values/Borders/BorderRadius.cpp
+  tests/Css/Values/Borders/BoxShadow.cpp
+  tests/Css/Values/Color/Color.cpp
+  tests/Css/Values/Easing/EasingFunction.cpp
+  tests/Css/Values/FilterEffects/Filter.cpp
+  tests/Css/Values/Grid/GridTemplateAreas.cpp
+  tests/Css/Values/Images/Gradient.cpp
+  tests/Css/Values/Motion/RayFunction.cpp
+  tests/Css/Values/Primitives/NumericRaw.cpp
+  tests/Css/Values/Primitives/NumericTypesSerialisation.cpp
+  tests/Css/Values/Primitives/Position.cpp
+  tests/Css/Values/Primitives/PrimitiveNumeric.cpp
+  tests/Css/Values/Primitives/Ratio.cpp
+  tests/Css/Values/Primitives/Units.cpp
+  tests/Css/Values/Primitives/Url.cpp
+  tests/Css/Values/Shapes/BasicShape.cpp
+  tests/Css/Values/Shapes/PathFunction.cpp
+  tests/Css/Values/Shapes/ShapeFunction.cpp
+  tests/Css/Values/TextDecoration/TextShadow.cpp
+  tests/Css/Values/Aggregates.cpp
+  tests/Css/Values/AttrValue.cpp
+  tests/Css/Values/BackgroundRepeatValue.cpp
+  tests/Css/Values/BasicShapeValue.cpp
+  tests/Css/Values/BorderImageSliceValue.cpp
+  tests/Css/Values/BorderImageWidthValue.cpp
+  tests/Css/Values/BoxShadowPropertyValue.cpp
+  tests/Css/Values/ColorSchemeValue.cpp
+  tests/Css/Values/ColorValue.cpp
+  tests/Css/Values/CounterValue.cpp
+  tests/Css/Values/CrossFadeValue.cpp
+  tests/Css/Values/CursorImageValue.cpp
+  tests/Css/Values/CustomPropertyValue.cpp
+  tests/Css/Values/DynamicRangeLimitValue.cpp
+  tests/Css/Values/EasingFunctionValue.cpp
+  tests/Css/Values/FilterImageValue.cpp
+  tests/Css/Values/FilterValue.cpp
+  tests/Css/Values/FontFaceSrcValue.cpp
+  tests/Css/Values/FontFeatureValue.cpp
+  tests/Css/Values/FontStyleRangeValue.cpp
+  tests/Css/Values/FontStyleWithAngleValue.cpp
+  tests/Css/Values/FontVariationValue.cpp
+  tests/Css/Values/FunctionValue.cpp
+  tests/Css/Values/GradientValue.cpp
+  tests/Css/Values/GridAutoRepeatValue.cpp
+  tests/Css/Values/GridIntegerRepeatValue.cpp
+  tests/Css/Values/GridLineNamesValue.cpp
+  tests/Css/Values/GridLineValue.cpp
+  tests/Css/Values/GridTemplateAreasValue.cpp
+  tests/Css/Values/ImageSetOptionValue.cpp
+  tests/Css/Values/ImageSetValue.cpp
+  tests/Css/Values/ImageValue.cpp
+  tests/Css/Values/NumberFormatting.cpp
+  tests/Css/Values/OffsetRotateValue.cpp
+  tests/Css/Values/PaintImageValue.cpp
+  tests/Css/Values/PathValue.cpp
+  tests/Css/Values/PositionValue.cpp
+  tests/Css/Values/PrimitiveValue.cpp
+  tests/Css/Values/PrimitiveValueMappings.cpp
+  tests/Css/Values/QuadValue.cpp
+  tests/Css/Values/RatioValue.cpp
+  tests/Css/Values/RayValue.cpp
+  tests/Css/Values/RectValue.cpp
+  tests/Css/Values/ReflectValue.cpp
+  tests/Css/Values/ScrollValue.cpp
+  tests/Css/Values/SideValues.cpp
+  tests/Css/Values/SubgridValue.cpp
+  tests/Css/Values/TextShadowPropertyValue.cpp
+  tests/Css/Values/TransformListValue.cpp
+  tests/Css/Values/Types.cpp
+  tests/Css/Values/UnicodeRangeValue.cpp
+  tests/Css/Values/Units.cpp
+  tests/Css/Values/UrlValue.cpp
+  tests/Css/Values/ValueList.cpp
+  tests/Css/Values/ValuePair.cpp
+  tests/Css/Values/VariableData.cpp
+  tests/Css/Values/VariableReferenceValue.cpp
+  tests/Css/Values/ViewValue.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_DOM_HEADERS
+  include/Krystal.Web.Tests/Dom/DOMTestUtils.hpp
+  include/Krystal.Web.Tests/Dom/TestElement.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_DOM_SOURCES
+  tests/Dom/Abort/AbortController.cpp
+  tests/Dom/Abort/AbortSignal.cpp
+  tests/Dom/Algorithms/AbortAlgorithms.cpp
+  tests/Dom/Algorithms/DocumentAlgorithms.cpp
+  tests/Dom/Algorithms/ElementAlgorithms.cpp
+  tests/Dom/Algorithms/ElementTextDirection.cpp
+  tests/Dom/Algorithms/EventDispatcher.cpp
+  tests/Dom/Algorithms/EventTargetAlgorithms.cpp
+  tests/Dom/Algorithms/IteratorAlgorithms.cpp
+  tests/Dom/Algorithms/Iterators/ComposedTreeIterator.cpp
+  tests/Dom/Algorithms/Iterators/HTMLElementRanges.cpp
+  tests/Dom/Algorithms/LiveRangeUpdater.cpp
+  tests/Dom/Algorithms/Mixins.cpp
+  tests/Dom/Algorithms/MutationAlgorithms.cpp
+  tests/Dom/Algorithms/MutationObserverAlgorithms.cpp
+  tests/Dom/Algorithms/NameValidation.cpp
+  tests/Dom/Algorithms/NodeAlgorithms.cpp
+  tests/Dom/Algorithms/OrderedSet.cpp
+  tests/Dom/Algorithms/SelectorQuery.cpp
+  tests/Dom/Algorithms/SlotAlgorithms.cpp
+  tests/Dom/Algorithms/TextAlgorithms.cpp
+  tests/Dom/Algorithms/TreeQueries.cpp
+  tests/Dom/Collections/DOMStringMap.cpp
+  tests/Dom/Collections/DOMTokenList.cpp
+  tests/Dom/Collections/HTMLCollection.cpp
+  tests/Dom/Collections/LiveCollection.cpp
+  tests/Dom/Collections/NodeList.cpp
+  tests/Dom/Events/CustomEvent.cpp
+  tests/Dom/Events/Event.cpp
+  tests/Dom/Events/EventListenerHandle.cpp
+  tests/Dom/Events/EventTarget.cpp
+  tests/Dom/Internals/ElementFactory.cpp
+  tests/Dom/Internals/EventFactory.cpp
+  tests/Dom/Internals/QualifiedNameCache.cpp
+  tests/Dom/Internals/TreeScopeOrderedMap.cpp
+  tests/Dom/Mixins/ChildNode.cpp
+  tests/Dom/Mixins/DocumentOrShadowRoot.cpp
+  tests/Dom/Mixins/NonDocumentTypeChildNode.cpp
+  tests/Dom/Mixins/NonElementParentNode.cpp
+  tests/Dom/Mixins/ParentNode.cpp
+  tests/Dom/Mixins/Slottable.cpp
+  tests/Dom/Nodes/Attr.cpp
+  tests/Dom/Nodes/CDATASection.cpp
+  tests/Dom/Nodes/CharacterData.cpp
+  tests/Dom/Nodes/Comment.cpp
+  tests/Dom/Nodes/ContainerNode.cpp
+  tests/Dom/Nodes/Document.cpp
+  tests/Dom/Nodes/DocumentFragment.cpp
+  tests/Dom/Nodes/DocumentType.cpp
+  tests/Dom/Nodes/DOMImplementation.cpp
+  tests/Dom/Nodes/Element.cpp
+  tests/Dom/Nodes/NamedNodeMap.cpp
+  tests/Dom/Nodes/Node.cpp
+  tests/Dom/Nodes/ProcessingInstruction.cpp
+  tests/Dom/Nodes/PseudoElement.cpp
+  tests/Dom/Nodes/ShadowRoot.cpp
+  tests/Dom/Nodes/StyledElement.cpp
+  tests/Dom/Nodes/Text.cpp
+  tests/Dom/MutationObserver/MutationObserver.cpp
+  tests/Dom/MutationObserver/MutationRecord.cpp
+  tests/Dom/Ranges/AbstractRange.cpp
+  tests/Dom/Ranges/BoundaryPoint.cpp
+  tests/Dom/Ranges/Range.cpp
+  tests/Dom/Ranges/SimpleRange.cpp
+  tests/Dom/Ranges/StaticRange.cpp
+  tests/Dom/Traversal/NodeFilter.cpp
+  tests/Dom/Traversal/NodeIterator.cpp
+  tests/Dom/Traversal/TreeWalker.cpp
+  tests/Dom/DocumentColorScheme.cpp
+  tests/Dom/DocumentSuspension.cpp
+  tests/Dom/DOMParsing.cpp
+  tests/Dom/ElementCSSOMView.cpp
+  tests/Dom/HTMLInsertionMethods.cpp
+  tests/Dom/NodeLifetime.cpp
+  tests/Dom/TopLayer.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_EDITING_HEADERS
+  include/Krystal.Web.Tests/Editing/EditorTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_EDITING_SOURCES
+  tests/Editing/Commands/ApplyStyleCommand.cpp
+  tests/Editing/Commands/TypingCommand.cpp
+  tests/Editing/Markup/Markup.cpp
+  tests/Editing/Selection/FrameSelection.cpp
+  tests/Editing/Selection/VisiblePosition.cpp
+  tests/Editing/Selection/VisibleSelection.cpp
+  tests/Editing/Selection/VisibleUnits.cpp
+  tests/Editing/Composition.cpp
+  tests/Editing/Editor.cpp
+  tests/Editing/Position.cpp
+  tests/Editing/TextIterator.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_EVENTS_SOURCES
+  tests/Events/Pointer/MouseEvent.cpp
+  tests/Events/Pointer/PointerEvent.cpp
+  tests/Events/Pointer/WheelEvent.cpp
+  tests/Events/UI/KeyboardEvent.cpp
+  tests/Events/UI/UIEvent.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_FILEAPI_SOURCES
+  tests/FileApi/Blob.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_GRAPHICS_HEADERS
+  include/Krystal.Web.Tests/Graphics/TestAcceleratedImageBuffers.hpp
+  include/Krystal.Web.Tests/Graphics/TestPathStrokeStrategy.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_GRAPHICS_SOURCES
+  tests/Graphics/Animation/TimingFunction.cpp
+  tests/Graphics/Color/Color.cpp
+  tests/Graphics/Color/ColorBlending.cpp
+  tests/Graphics/Color/ColorInterpolation.cpp
+  tests/Graphics/Color/ColorSerialisation.cpp
+  tests/Graphics/Color/NamedColors.cpp
+  tests/Graphics/DisplayLists/DisplayListRecorder.cpp
+  tests/Graphics/Filters/FilterEffect.cpp
+  tests/Graphics/Filters/FilterOperations.cpp
+  tests/Graphics/Fonts/Font.cpp
+  tests/Graphics/Fonts/FontCache.cpp
+  tests/Graphics/Fonts/FontCascade.cpp
+  tests/Graphics/Fonts/FontCustomPlatformData.cpp
+  tests/Graphics/Fonts/FontDatabase.cpp
+  tests/Graphics/Fonts/FontDescription.cpp
+  tests/Graphics/Fonts/FontFeatureValues.cpp
+  tests/Graphics/Fonts/FontGenericFamilies.cpp
+  tests/Graphics/Fonts/FontPaletteValues.cpp
+  tests/Graphics/Fonts/FontSelectionAlgorithm.cpp
+  tests/Graphics/Fonts/FontTaggedSettings.cpp
+  tests/Graphics/Fonts/OpenTypeMathData.cpp
+  tests/Graphics/Fonts/WOFFFileFormat.cpp
+  tests/Graphics/Geometry/BoxExtents.cpp
+  tests/Graphics/Geometry/LayoutPoint.cpp
+  tests/Graphics/Geometry/LayoutRect.cpp
+  tests/Graphics/Geometry/LayoutSize.cpp
+  tests/Graphics/Geometry/LayoutUnit.cpp
+  tests/Graphics/Geometry/RayIntersection.cpp
+  tests/Graphics/Geometry/RoundedRect.cpp
+  tests/Graphics/ImageBuffers/ImageBuffer.cpp
+  tests/Graphics/ImageBuffers/ImageBufferUtilities.cpp
+  tests/Graphics/ImageBuffers/PixelBuffer.cpp
+  tests/Graphics/Images/BitmapImage.cpp
+  tests/Graphics/Layers/GraphicsLayer.cpp
+  tests/Graphics/Paths/Path.cpp
+  tests/Graphics/TextRuns/ComplexTextController.cpp
+  tests/Graphics/TextRuns/StringTruncator.cpp
+  tests/Graphics/TextRuns/WidthIterator.cpp
+  tests/Graphics/Transforms/TransformExtras.cpp
+  tests/Graphics/Transforms/TransformOperations.cpp
+  tests/Graphics/Gradient.cpp
+  tests/Graphics/GraphicsContext.cpp
+  tests/Graphics/Pattern.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_HTML_HEADERS
+  include/Krystal.Web.Tests/Html/CustomElementTestUtils.hpp
+  include/Krystal.Web.Tests/Html/FakeEngineTexture.hpp
+  include/Krystal.Web.Tests/Html/FormTestUtils.hpp
+  include/Krystal.Web.Tests/Html/InputTypeTestUtils.hpp
+  include/Krystal.Web.Tests/Html/TableTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_HTML_SOURCES
+  tests/Html/Algorithms/FocusAlgorithms.cpp
+  tests/Html/Algorithms/HyperlinkAlgorithms.cpp
+  tests/Html/Algorithms/RenderBlocking.cpp
+  tests/Html/Attributes/EnumeratedAttributes.cpp
+  tests/Html/Attributes/ReflectAttribute.cpp
+  tests/Html/Attributes/ReflectUrl.cpp
+  tests/Html/Canvas/CanvasRenderingContext2D.cpp
+  tests/Html/Canvas/Path2D.cpp
+  tests/Html/CloseWatcher/CloseWatcher.cpp
+  tests/Html/Collections/RadioNodeList.cpp
+  tests/Html/CustomElement/CustomElementRegistry.cpp
+  tests/Html/CustomElement/ElementInternals.cpp
+  tests/Html/DragAndDrop/DataTransfer.cpp
+  tests/Html/Events/SimulatedClick.cpp
+  tests/Html/Events/ToggleEvent.cpp
+  tests/Html/Elements/HTMLAnchorElement.cpp
+  tests/Html/Elements/HTMLBaseElement.cpp
+  tests/Html/Elements/HTMLButtonElement.cpp
+  tests/Html/Elements/HTMLCanvasElement.cpp
+  tests/Html/Elements/HTMLDataListElement.cpp
+  tests/Html/Elements/HTMLDetailsElement.cpp
+  tests/Html/Elements/HTMLDialogElement.cpp
+  tests/Html/Elements/HTMLElement.cpp
+  tests/Html/Elements/HTMLFieldSetElement.cpp
+  tests/Html/Elements/HTMLFormElement.cpp
+  tests/Html/Elements/HTMLHeadingElement.cpp
+  tests/Html/Elements/HTMLIFrameElement.cpp
+  tests/Html/Elements/HTMLImageElement.cpp
+  tests/Html/Elements/HTMLInputElement.cpp
+  tests/Html/Elements/HTMLLabelElement.cpp
+  tests/Html/Elements/HTMLLinkElement.cpp
+  tests/Html/Elements/HTMLMapElement.cpp
+  tests/Html/Elements/HTMLMarqueeElement.cpp
+  tests/Html/Elements/HTMLMeterElement.cpp
+  tests/Html/Elements/HTMLModElement.cpp
+  tests/Html/Elements/HTMLOptGroupElement.cpp
+  tests/Html/Elements/HTMLOptionElement.cpp
+  tests/Html/Elements/HTMLOutputElement.cpp
+  tests/Html/Elements/HTMLProgressElement.cpp
+  tests/Html/Elements/HTMLQuoteElement.cpp
+  tests/Html/Elements/HTMLScriptElement.cpp
+  tests/Html/Elements/HTMLSelectedContentElement.cpp
+  tests/Html/Elements/HTMLSelectElement.cpp
+  tests/Html/Elements/HTMLSlotElement.cpp
+  tests/Html/Elements/HTMLStyleElement.cpp
+  tests/Html/Elements/HTMLTableCellElement.cpp
+  tests/Html/Elements/HTMLTableElement.cpp
+  tests/Html/Elements/HTMLTableRowElement.cpp
+  tests/Html/Elements/HTMLTableSectionElement.cpp
+  tests/Html/Elements/HTMLTemplateElement.cpp
+  tests/Html/Elements/HTMLTextAreaElement.cpp
+  tests/Html/Elements/HTMLTextFormControlElement.cpp
+  tests/Html/Elements/HTMLTrackElement.cpp
+  tests/Html/EventLoop/EventLoop.cpp
+  tests/Html/Forms/Autofill.cpp
+  tests/Html/Forms/FormListedElement.cpp
+  tests/Html/Forms/ValidatedFormListedElement.cpp
+  tests/Html/ImageData/ImageData.cpp
+  tests/Html/Images/ImageDocument.cpp
+  tests/Html/Images/LazyLoadImageObserver.cpp
+  tests/Html/InputTypes/BaseDateAndTimeInputType.cpp
+  tests/Html/InputTypes/ColorInputType.cpp
+  tests/Html/InputTypes/FileInputType.cpp
+  tests/Html/InputTypes/ImageInputType.cpp
+  tests/Html/InputTypes/NumberInputType.cpp
+  tests/Html/InputTypes/RadioInputType.cpp
+  tests/Html/Internals/ScopedEventQueue.cpp
+  tests/Html/Internals/PresentationalHints.cpp
+  tests/Html/Internals/UserActionElementSet.cpp
+  tests/Html/MicroParsers/Dimensions.cpp
+  tests/Html/MicroParsers/Numbers.cpp
+  tests/Html/Mixins/UrlDecomposition.cpp
+  tests/Html/Parser/CharacterReference.cpp
+  tests/Html/Parser/DocumentParser.cpp
+  tests/Html/Parser/InputStream.cpp
+  tests/Html/Parser/OpenElementStack.cpp
+  tests/Html/Parser/SrcsetParser.cpp
+  tests/Html/Parser/Tokenizer.cpp
+  tests/Html/Sanitizer/Sanitizer.cpp
+  tests/Html/Shadow/SliderThumbElement.cpp
+  tests/Html/Shadow/SpinButtonElement.cpp
+  tests/Html/Popover.cpp
+  tests/Html/Timers/DocumentTimer.cpp
+  tests/Html/Window.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_INFRA_SOURCES
+  tests/Infra/ForgivingBase64.cpp
+  tests/Infra/StringAlgorithms.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_INPUT_HEADERS
+  include/Krystal.Web.Tests/Input/InputTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_INPUT_SOURCES
+  tests/Input/AccessKeys.cpp
+  tests/Input/EventHandler.cpp
+  tests/Input/MouseSelection.cpp
+  tests/Input/PenAndTouch.cpp
+  tests/Input/PointerCaptureController.cpp
+  tests/Input/PointerLockController.cpp
+  tests/Input/SpatialNavigation.cpp
+  tests/Input/WheelEventDeltaFilter.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_INTERSECTIONOBSERVER_SOURCES
+  tests/IntersectionObserver/IntersectionObserver.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_LAYOUT_HEADERS
+  include/Krystal.Web.Tests/Layout/LayoutTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_LAYOUT_SOURCES
+  tests/Layout/Floats/FloatingContext.cpp
+  tests/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.cpp
+  tests/Layout/FormattingContexts/Inline/Ruby/RubyFormattingContext.cpp
+  tests/Layout/FormattingContexts/Inline/Text/TextUtil.cpp
+  tests/Layout/FormattingContexts/Inline/InlineContentAligner.cpp
+  tests/Layout/FormattingContexts/Inline/InlineContentConstrainer.cpp
+  tests/Layout/FormattingContexts/Inline/InlineFormattingContext.cpp
+  tests/Layout/FormattingContexts/Inline/InlineItemsBuilder.cpp
+  tests/Layout/Integration/Inline/LayoutIntegrationLineLayout.cpp
+  tests/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.cpp
+  tests/Layout/Integration/LayoutIntegrationBoxTreeUpdater.cpp
+  tests/Layout/Integration/LayoutIntegrationUtils.cpp
+  tests/Layout/LayoutTree/LayoutBoxGeometry.cpp
+  tests/Layout/LayoutState.cpp
+  tests/Layout/LayoutTestUtils.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_LOADER_HEADERS
+  include/Krystal.Web.Tests/Loader/LoadTestUtils.hpp
+  include/Krystal.Web.Tests/Loader/NavigationTestUtils.hpp
+  include/Krystal.Web.Tests/Loader/PageInFrameFixture.hpp
+  include/Krystal.Web.Tests/Loader/TestLoader.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_LOADER_SOURCES
+  tests/Loader/Cache/CachedFont.cpp
+  tests/Loader/Cache/CachedResourceLoader.cpp
+  tests/Loader/Icons/IconLoader.cpp
+  tests/Loader/DocumentLoader.cpp
+  tests/Loader/FragmentNavigation.cpp
+  tests/Loader/FrameLoader.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_MATHML_SOURCES
+  tests/MathML/Elements/MathMLElement.cpp
+  tests/MathML/Elements/MathMLOperatorElement.cpp
+  tests/MathML/Elements/MathMLPresentationElement.cpp
+  tests/MathML/Internals/MathMLElementFactory.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_PAGE_SOURCES
+  tests/Page/Drag/DragController.cpp
+  tests/Page/Scrolling/ScrollAnchoringController.cpp
+  tests/Page/Scrolling/ScrollLatchingController.cpp
+  tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
+  tests/Page/DOMSelection.cpp
+  tests/Page/Frame.cpp
+  tests/Page/FrameView.cpp
+  tests/Page/FrameViewScrolling.cpp
+  tests/Page/Settings.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_PLATFORM_SOURCES
+  tests/Platform/Pasteboard/DragImage.cpp
+  tests/Platform/Scrolling/ScrollAlignment.cpp
+  tests/Platform/Scrolling/ScrollAnimator.cpp
+  tests/Platform/DateComponents.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_RENDERING_HEADERS
+  include/Krystal.Web.Tests/Rendering/MathML/MathMLTestUtils.hpp
+  include/Krystal.Web.Tests/Rendering/SVG/LegacySVGTestUtils.hpp
+  include/Krystal.Web.Tests/Rendering/PaintTestUtils.hpp
+  include/Krystal.Web.Tests/Rendering/RenderTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_RENDERING_SOURCES
+  tests/Rendering/FormControls/RenderButton.cpp
+  tests/Rendering/FormControls/RenderFileUploadControl.cpp
+  tests/Rendering/FormControls/RenderListBox.cpp
+  tests/Rendering/FormControls/RenderMenuList.cpp
+  tests/Rendering/FormControls/RenderProgress.cpp
+  tests/Rendering/FormControls/RenderSlider.cpp
+  tests/Rendering/FormControls/RenderTextControl.cpp
+  tests/Rendering/GeneratedContent/RenderCounter.cpp
+  tests/Rendering/GeneratedContent/RenderListItem.cpp
+  tests/Rendering/GeneratedContent/RenderListMarker.cpp
+  tests/Rendering/Grid/RenderGrid.cpp
+  tests/Rendering/HitTesting/HitTestResult.cpp
+  tests/Rendering/Iterators/RenderIterator.cpp
+  tests/Rendering/Layers/LayerOverlapMap.cpp
+  tests/Rendering/Layers/RenderLayer.cpp
+  tests/Rendering/Layers/RenderLayerCompositor.cpp
+  tests/Rendering/Layers/RenderLayerScrollableArea.cpp
+  tests/Rendering/Line/BreakablePositions.cpp
+  tests/Rendering/MathML/MathVariant.cpp
+  tests/Rendering/MathML/RenderMathMLBlock.cpp
+  tests/Rendering/MathML/RenderMathMLFraction.cpp
+  tests/Rendering/MathML/RenderMathMLMenclose.cpp
+  tests/Rendering/MathML/RenderMathMLOperator.cpp
+  tests/Rendering/MathML/RenderMathMLPadded.cpp
+  tests/Rendering/MathML/RenderMathMLRoot.cpp
+  tests/Rendering/MathML/RenderMathMLRow.cpp
+  tests/Rendering/MathML/RenderMathMLScripts.cpp
+  tests/Rendering/MathML/RenderMathMLSpace.cpp
+  tests/Rendering/MathML/RenderMathMLToken.cpp
+  tests/Rendering/MathML/RenderMathMLUnderOver.cpp
+  tests/Rendering/MultiColumn/RenderMultiColumnFlow.cpp
+  tests/Rendering/Painting/BackgroundPainter.cpp
+  tests/Rendering/Painting/BorderPainter.cpp
+  tests/Rendering/Painting/CSSFilterRenderer.cpp
+  tests/Rendering/Painting/EllipsisBoxPainter.cpp
+  tests/Rendering/Painting/ImageQualityController.cpp
+  tests/Rendering/Painting/InlineBoxPainter.cpp
+  tests/Rendering/Painting/MarkedText.cpp
+  tests/Rendering/Painting/OutlinePainter.cpp
+  tests/Rendering/Painting/TextBoxPainter.cpp
+  tests/Rendering/Painting/TextDecorationPainter.cpp
+  tests/Rendering/Replaced/RenderHTMLCanvas.cpp
+  tests/Rendering/Replaced/RenderImage.cpp
+  tests/Rendering/Selection/RenderSelection.cpp
+  tests/Rendering/Shapes/ShapeOutsideInfo.cpp
+  tests/Rendering/Style/BorderValues.cpp
+  tests/Rendering/Style/GridSpan.cpp
+  tests/Rendering/Style/RenderStyle.cpp
+  tests/Rendering/Style/RenderStyleConstants.cpp
+  tests/Rendering/Style/StyleCrossfadeImage.cpp
+  tests/Rendering/Style/StyleDataGroups.cpp
+  tests/Rendering/Style/StyleFilterImage.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGContainer.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
+  tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
+  tests/Rendering/SVG/RenderSVGText.cpp
+  tests/Rendering/SVG/SVGRenderingContext.cpp
+  tests/Rendering/Tables/RenderTable.cpp
+  tests/Rendering/Updating/RenderTreeBuilder.cpp
+  tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
+  tests/Rendering/Updating/RenderTreeBuilderMultiColumn.cpp
+  tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
+  tests/Rendering/FloatingObjects.cpp
+  tests/Rendering/LineClampUpdater.cpp
+  tests/Rendering/PaintTestUtils.cpp
+  tests/Rendering/PositionedLayoutConstraints.cpp
+  tests/Rendering/RenderBlockFlow.cpp
+  tests/Rendering/RenderBox.cpp
+  tests/Rendering/RenderCombineText.cpp
+  tests/Rendering/RenderElement.cpp
+  tests/Rendering/RenderFieldset.cpp
+  tests/Rendering/RenderFlexibleBox.cpp
+  tests/Rendering/RenderInlineBlockChildren.cpp
+  tests/Rendering/RenderLayoutState.cpp
+  tests/Rendering/RenderObject.cpp
+  tests/Rendering/RenderText.cpp
+  tests/Rendering/RenderTheme.cpp
+  tests/Rendering/RenderTreeAsText.cpp
+  tests/Rendering/RenderView.cpp
+  tests/Rendering/TextBoxTrimmer.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_STYLE_HEADERS
+  include/Krystal.Web.Tests/Style/BuilderTestUtils.hpp
+  include/Krystal.Web.Tests/Style/ResolverTestUtils.hpp
+  include/Krystal.Web.Tests/Style/StyleTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_STYLE_SOURCES
+  tests/Style/Builder/Builder.cpp
+  tests/Style/Builder/BuilderCustom.cpp
+  tests/Style/Builder/BuilderGenerated.cpp
+  tests/Style/Builder/BuilderState.cpp
+  tests/Style/Builder/FontSizeFunctions.cpp
+  tests/Style/Calc/Tree.cpp
+  tests/Style/Computed/ComputedStyleInitial.cpp
+  tests/Style/Extractor/Extractor.cpp
+  tests/Style/Interpolation/Interpolation.cpp
+  tests/Style/Invalidation/AttributeChangeInvalidation.cpp
+  tests/Style/Invalidation/ChildChangeInvalidation.cpp
+  tests/Style/Invalidation/Invalidator.cpp
+  tests/Style/Invalidation/PseudoClassChangeInvalidation.cpp
+  tests/Style/Rules/ElementRuleCollector.cpp
+  tests/Style/Rules/MatchedDeclarationsCache.cpp
+  tests/Style/Rules/MatchResultCache.cpp
+  tests/Style/Rules/RuleSet.cpp
+  tests/Style/Rules/StyleSheetContentsCache.cpp
+  tests/Style/Rules/UserAgentStyle.cpp
+  tests/Style/Scope/NameScope.cpp
+  tests/Style/Scope/Scope.cpp
+  tests/Style/Scope/ScopedName.cpp
+  tests/Style/Values/AnchorPosition/AnchorPosition.cpp
+  tests/Style/Values/Animations/AnimationGroups.cpp
+  tests/Style/Values/Backgrounds/Backgrounds.cpp
+  tests/Style/Values/Borders/Borders.cpp
+  tests/Style/Values/Box/Box.cpp
+  tests/Style/Values/Color/Color.cpp
+  tests/Style/Values/Color/ColorConversion.cpp
+  tests/Style/Values/Color/DynamicRangeLimit.cpp
+  tests/Style/Values/Content/Content.cpp
+  tests/Style/Values/CSS2/BorderSpacing.cpp
+  tests/Style/Values/FilterEffects/Filters.cpp
+  tests/Style/Values/Fonts/Fonts.cpp
+  tests/Style/Values/Grid/GridPosition.cpp
+  tests/Style/Values/Grid/GridTemplate.cpp
+  tests/Style/Values/Images/Images.cpp
+  tests/Style/Values/Masking/Masking.cpp
+  tests/Style/Values/Motion/Motion.cpp
+  tests/Style/Values/Primitives/CoordinatedValueList.cpp
+  tests/Style/Values/Primitives/LengthResolution.cpp
+  tests/Style/Values/Primitives/LengthWrapper.cpp
+  tests/Style/Values/Primitives/NumericTypesConversions.cpp
+  tests/Style/Values/Primitives/NumericTypesEvaluation.cpp
+  tests/Style/Values/Primitives/Position.cpp
+  tests/Style/Values/Primitives/PrimitiveNumeric.cpp
+  tests/Style/Values/Primitives/Url.cpp
+  tests/Style/Values/Shapes/Shapes.cpp
+  tests/Style/Values/Sizing/Sizing.cpp
+  tests/Style/Values/SVG/SVG.cpp
+  tests/Style/Values/TextDecoration/TextDecoration.cpp
+  tests/Style/Values/Transforms/Transforms.cpp
+  tests/Style/Values/AlignInlineTextGroups.cpp
+  tests/Style/Values/CSSValueConversion.cpp
+  tests/Style/Values/KeywordAndLengthGroups.cpp
+  tests/Style/Values/Types.cpp
+  tests/Style/Adjuster.cpp
+  tests/Style/AnchorPositionEvaluator.cpp
+  tests/Style/ContainerQueryEvaluator.cpp
+  tests/Style/CustomProperty.cpp
+  tests/Style/CustomPropertyRegistry.cpp
+  tests/Style/Difference.cpp
+  tests/Style/PropertyCascade.cpp
+  tests/Style/ResolveForDocument.cpp
+  tests/Style/Resolver.cpp
+  tests/Style/TreeResolver.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_SVG_HEADERS
+  include/Krystal.Web.Tests/Svg/AnimationTestUtils.hpp
+  include/Krystal.Web.Tests/Svg/PropertyTestUtils.hpp
+  include/Krystal.Web.Tests/Svg/SVGTestUtils.hpp
+  include/Krystal.Web.Tests/Svg/TestSVGElement.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_SVG_SOURCES
+  tests/Svg/Animation/SVGSMILElement.cpp
+  tests/Svg/Elements/SVGAElement.cpp
+  tests/Svg/Elements/SVGAnimateMotionElement.cpp
+  tests/Svg/Elements/SVGAnimateTransformElement.cpp
+  tests/Svg/Elements/SVGAnimationElement.cpp
+  tests/Svg/Elements/SVGElement.cpp
+  tests/Svg/Elements/SVGForeignObjectElement.cpp
+  tests/Svg/Elements/SVGGeometryElement.cpp
+  tests/Svg/Elements/SVGGradientElement.cpp
+  tests/Svg/Elements/SVGImageElement.cpp
+  tests/Svg/Elements/SVGMarkerElement.cpp
+  tests/Svg/Elements/SVGPathElement.cpp
+  tests/Svg/Elements/SVGStyleElement.cpp
+  tests/Svg/Elements/SVGSvgElement.cpp
+  tests/Svg/Elements/SVGTextContentElement.cpp
+  tests/Svg/Elements/SVGUseElement.cpp
+  tests/Svg/Elements/SVGViewElement.cpp
+  tests/Svg/Graphics/Filters/SVGFilterRenderer.cpp
+  tests/Svg/Graphics/SVGImage.cpp
+  tests/Svg/Internals/SVGElementFactory.cpp
+  tests/Svg/Internals/SVGPath.cpp
+  tests/Svg/Properties/SVGAnimatedProperty.cpp
+  tests/Svg/Properties/SVGPropertyOwnerRegistry.cpp
+  tests/Svg/Properties/SVGPropertyTraits.cpp
+  tests/Svg/SVGAngleValue.cpp
+  tests/Svg/SVGFilterPrimitiveStandardAttributes.cpp
+  tests/Svg/SVGLength.cpp
+  tests/Svg/SVGLengthList.cpp
+  tests/Svg/SVGLengthValue.cpp
+  tests/Svg/SVGNumberList.cpp
+  tests/Svg/SVGPointList.cpp
+  tests/Svg/SVGPreserveAspectRatioValue.cpp
+  tests/Svg/SVGStringList.cpp
+  tests/Svg/SVGTests.cpp
+  tests/Svg/SVGTransformList.cpp
+  tests/Svg/SVGURIReference.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_TEXT_SOURCES
+  tests/Text/TextFlags.cpp
+  tests/Text/TextSpacing.cpp
+)
+
+set(KRYSTAL_WEB_TESTS_XML_SOURCES
+  tests/Xml/PseudoAttributes.cpp
+  tests/Xml/XMLDocumentParser.cpp
+)
+
+target_sources(Krystal.Web.Tests
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+      include
+    FILES
+      ${KRYSTAL_WEB_TESTS_SHARED_HEADERS}
+      ${KRYSTAL_WEB_TESTS_ACCESSIBILITY_HEADERS}
+      ${KRYSTAL_WEB_TESTS_ANIMATION_HEADERS}
+      ${KRYSTAL_WEB_TESTS_CSS_HEADERS}
+      ${KRYSTAL_WEB_TESTS_DOM_HEADERS}
+      ${KRYSTAL_WEB_TESTS_EDITING_HEADERS}
+      ${KRYSTAL_WEB_TESTS_GRAPHICS_HEADERS}
+      ${KRYSTAL_WEB_TESTS_HTML_HEADERS}
+      ${KRYSTAL_WEB_TESTS_INPUT_HEADERS}
+      ${KRYSTAL_WEB_TESTS_LAYOUT_HEADERS}
+      ${KRYSTAL_WEB_TESTS_LOADER_HEADERS}
+      ${KRYSTAL_WEB_TESTS_RENDERING_HEADERS}
+      ${KRYSTAL_WEB_TESTS_STYLE_HEADERS}
+      ${KRYSTAL_WEB_TESTS_SVG_HEADERS}
+  PRIVATE
+    ${KRYSTAL_WEB_TESTS_ACCESSIBILITY_SOURCES}
+    ${KRYSTAL_WEB_TESTS_ANIMATION_SOURCES}
+    ${KRYSTAL_WEB_TESTS_CSS_SOURCES}
+    ${KRYSTAL_WEB_TESTS_DOM_SOURCES}
+    ${KRYSTAL_WEB_TESTS_EDITING_SOURCES}
+    ${KRYSTAL_WEB_TESTS_EVENTS_SOURCES}
+    ${KRYSTAL_WEB_TESTS_FILEAPI_SOURCES}
+    ${KRYSTAL_WEB_TESTS_GRAPHICS_SOURCES}
+    ${KRYSTAL_WEB_TESTS_HTML_SOURCES}
+    ${KRYSTAL_WEB_TESTS_INFRA_SOURCES}
+    ${KRYSTAL_WEB_TESTS_INPUT_SOURCES}
+    ${KRYSTAL_WEB_TESTS_INTERSECTIONOBSERVER_SOURCES}
+    ${KRYSTAL_WEB_TESTS_LAYOUT_SOURCES}
+    ${KRYSTAL_WEB_TESTS_LOADER_SOURCES}
+    ${KRYSTAL_WEB_TESTS_MATHML_SOURCES}
+    ${KRYSTAL_WEB_TESTS_PAGE_SOURCES}
+    ${KRYSTAL_WEB_TESTS_PLATFORM_SOURCES}
+    ${KRYSTAL_WEB_TESTS_RENDERING_SOURCES}
+    ${KRYSTAL_WEB_TESTS_STYLE_SOURCES}
+    ${KRYSTAL_WEB_TESTS_SVG_SOURCES}
+    ${KRYSTAL_WEB_TESTS_TEXT_SOURCES}
+    ${KRYSTAL_WEB_TESTS_XML_SOURCES}
+)

@@ -1,0 +1,63 @@
+﻿/*
+ * Copyright (C) 2011 Research In Motion Limited. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Geometry/Size.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Net/Url.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutGeometryForward.hpp"
+#include "Krystal.Web/Graphics/Images/Image.hpp"
+
+namespace krys::web
+{
+  class CachedImageClient;
+  class RenderObject;
+  class SVGImage;
+  class SVGImageForContainer;
+
+  /// @brief The images a cached SVG image is drawn as, one per client, each at its client's container size.
+  class SVGImageCache
+  {
+  private:
+    using ImageForContainerMap = HashMap<const CachedImageClient *, RefPtr<SVGImageForContainer>>;
+
+    WeakPtr<SVGImage> _svgImage;
+    ImageForContainerMap _imageForContainerMap;
+
+  public:
+    explicit SVGImageCache(SVGImage *) noexcept;
+
+    ~SVGImageCache() noexcept;
+
+    void RemoveClientFromCache(const CachedImageClient *) noexcept;
+
+    void SetContainerContextForClient(const CachedImageClient &, const LayoutSize &, float,
+                                      const net::Url &) noexcept;
+
+    KRYS_NODISCARD SizeF ImageSizeForRenderer(const RenderObject *) const noexcept;
+
+    KRYS_NODISCARD Image *ImageForRenderer(const RenderObject *) const noexcept;
+
+  private:
+    KRYS_NODISCARD Image *FindImageForRenderer(const RenderObject *) const noexcept;
+  };
+}

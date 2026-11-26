@@ -1,0 +1,244 @@
+﻿/*
+ * Copyright (C) 2006-2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2008 Nokia Corporation and/or its subsidiary(-ies)
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Editing/Selection/TextAffinity.hpp"
+
+namespace krys::web
+{
+  class Document;
+  class Element;
+  class Frame;
+  class KeyboardEvent;
+  class UndoStep;
+
+  /// @brief What a page's editor asks of its host: the commands keys run, input methods, and whether
+  /// selections and clipboard access are allowed.
+  // FIXME: The rest of the editor client: editing delegates (shouldBeginEditing, shouldInsertText,
+  // shouldApplyStyle and their notifications). (There's no spelling and grammar or text checking; see
+  // DIFFERENCES.md.)
+  class EditorClient
+  {
+    KRYS_NON_COPY_MOVABLE(EditorClient);
+
+  public:
+    EditorClient() noexcept = default;
+
+    virtual ~EditorClient() noexcept = default;
+
+    KRYS_NODISCARD virtual bool ShouldChangeSelectedRange(const Maybe<dom::SimpleRange> &fromRange,
+                                                          const Maybe<dom::SimpleRange> &toRange,
+                                                          Affinity affinity,
+                                                          bool stillSelecting) noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanCopyCut(Frame *frame, bool defaultValue) const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanPaste(Frame *frame, bool defaultValue) const noexcept = 0;
+
+    /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
+    /// @return Whether the event was handled, so its default action is done.
+    virtual bool HandleKeyboardEvent(KeyboardEvent &event) noexcept = 0;
+
+    virtual void RespondToChangedContents() noexcept = 0;
+
+    /// @brief Called after the selection changed (unless the change asked not to tell the editor's clients).
+    virtual void RespondToChangedSelection(Frame *frame) noexcept = 0;
+
+    /// @brief Called when the page dropped the input method's composition (confirming or cancelling it), so
+    /// the host can tell the input method.
+    virtual void DiscardedComposition(const Document &document) noexcept = 0;
+
+    /// @brief Called after the composition was set, confirmed or cancelled.
+    virtual void DidUpdateComposition() noexcept = 0;
+
+    /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
+    /// method handled the key, so it goes out with key code 229 and no `keypress`.
+    virtual void HandleInputMethodKeydown(KeyboardEvent &event) noexcept = 0;
+
+    /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
+    /// key: the composition, or the text it confirmed.
+    virtual void DidDispatchInputMethodKeydown(KeyboardEvent &) noexcept
+    {
+    }
+
+    /// @brief Called as the focused element changes (@p element; null when nothing is), so the host can turn
+    /// its input method on for elements that use one (`Element::ShouldUseInputMethod()`) and off otherwise.
+    virtual void SetInputMethodState(Element *element) noexcept = 0;
+
+    /// @brief Whether deleting and pasting whole words adds and removes the spaces around them.
+    KRYS_NODISCARD virtual bool SmartInsertDeleteEnabled() noexcept = 0;
+
+    /// @brief Keeps an edit (or an undone edit that was redone) so it can be undone.
+    virtual void RegisterUndoStep(UndoStep &step) noexcept = 0;
+
+    /// @brief Keeps an undone edit so it can be redone.
+    virtual void RegisterRedoStep(UndoStep &step) noexcept = 0;
+
+    virtual void ClearUndoRedoOperations() noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanUndo() const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanRedo() const noexcept = 0;
+
+    virtual void Undo() noexcept = 0;
+
+    virtual void Redo() noexcept = 0;
+
+    /// @brief Called when a text field is focused, so the host can offer to fill it (autofill).
+    virtual void TextFieldDidBeginEditing(Element &element) noexcept = 0;
+
+    /// @brief Called when a text field loses the focus.
+    virtual void TextFieldDidEndEditing(Element &element) noexcept = 0;
+
+    /// @brief Called after the user changed the text of the focused text field.
+    virtual void TextDidChangeInTextField(Element &element) noexcept = 0;
+
+    /// @brief Lets the host handle a key in a focused text field (to move through its suggestions).
+    /// @return Whether the host handled it.
+    virtual bool DoTextFieldCommandFromEvent(Element &element, KeyboardEvent *event) noexcept = 0;
+
+    virtual void TextWillBeDeletedInTextField(Element &element) noexcept = 0;
+
+    /// @brief Called after the user changed the text of the focused text area.
+    virtual void TextDidChangeInTextArea(Element &element) noexcept = 0;
+  };
+
+  /// @brief The editor client of a page that has no host.
+  class EmptyEditorClient final : public EditorClient
+  {
+  public:
+    KRYS_NODISCARD bool ShouldChangeSelectedRange(const Maybe<dom::SimpleRange> &,
+                                                  const Maybe<dom::SimpleRange> &, Affinity,
+                                                  bool) noexcept final
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool CanCopyCut(Frame *, bool defaultValue) const noexcept final
+    {
+      return defaultValue;
+    }
+
+    KRYS_NODISCARD bool CanPaste(Frame *, bool defaultValue) const noexcept final
+    {
+      return defaultValue;
+    }
+
+    bool HandleKeyboardEvent(KeyboardEvent &) noexcept final
+    {
+      return false;
+    }
+
+    void RespondToChangedContents() noexcept final
+    {
+    }
+
+    void RespondToChangedSelection(Frame *) noexcept final
+    {
+    }
+
+    void DiscardedComposition(const Document &) noexcept final
+    {
+    }
+
+    void DidUpdateComposition() noexcept final
+    {
+    }
+
+    void HandleInputMethodKeydown(KeyboardEvent &) noexcept final
+    {
+    }
+
+    void SetInputMethodState(Element *) noexcept final
+    {
+    }
+
+    KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept final
+    {
+      return false;
+    }
+
+    void RegisterUndoStep(UndoStep &) noexcept final
+    {
+    }
+
+    void RegisterRedoStep(UndoStep &) noexcept final
+    {
+    }
+
+    void ClearUndoRedoOperations() noexcept final
+    {
+    }
+
+    KRYS_NODISCARD bool CanUndo() const noexcept final
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool CanRedo() const noexcept final
+    {
+      return false;
+    }
+
+    void Undo() noexcept final
+    {
+    }
+
+    void Redo() noexcept final
+    {
+    }
+
+    void TextFieldDidBeginEditing(Element &) noexcept final
+    {
+    }
+
+    void TextFieldDidEndEditing(Element &) noexcept final
+    {
+    }
+
+    void TextDidChangeInTextField(Element &) noexcept final
+    {
+    }
+
+    bool DoTextFieldCommandFromEvent(Element &, KeyboardEvent *) noexcept final
+    {
+      return false;
+    }
+
+    void TextWillBeDeletedInTextField(Element &) noexcept final
+    {
+    }
+
+    void TextDidChangeInTextArea(Element &) noexcept final
+    {
+    }
+  };
+}

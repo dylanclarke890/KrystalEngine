@@ -1,0 +1,291 @@
+﻿/*
+ * Copyright (C) 2016-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/CounterStyles.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/IntegerDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/List.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParsing.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValuePair.hpp"
+
+namespace krys::web::css::parse_property
+{
+  KRYS_NODISCARD static bool IsPredefinedCounterStyle(ValueId valueId) noexcept
+  {
+    // https://drafts.csswg.org/css-counter-styles-3/#predefined-counters
+
+    return valueId >= ValueId::Disc && valueId <= ValueId::EthiopicNumeric;
+  }
+
+  RefPtr<Value> ConsumeCounterStyle(TokenRange &tokens, PropertyParserState &) noexcept
+  {
+    // <counter-style> = <counter-style-name excluding=none> | <symbols()>
+    // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style
+
+    // FIXME: Implement support for `symbols()`.
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return nullptr;
+    }
+
+    if (auto predefinedValues = ConsumeIdent(tokens, IsPredefinedCounterStyle))
+    {
+      return predefinedValues;
+    }
+
+    return ConsumeCustomIdent(tokens);
+  }
+
+  CSSOMStringAtom ConsumeCounterStyleNameInPrelude(TokenRange &prelude, ParserMode mode) noexcept
+  {
+    // In the context of the prelude of an @counter-style rule, a <counter-style-name> must not be an
+    // ASCII case-insensitive match for "decimal", "disc", "square", "circle", "disclosure-open" and
+    // "disclosure-closed". No <counter-style-name>, prelude or not, may be an ASCII case-insensitive
+    // match for "none".
+    // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style-name
+
+    auto &nameToken = prelude.ConsumeIncludingWhitespace();
+    if (!prelude.IsAtEnd())
+    {
+      return null;
+    }
+
+    // Ensure this token is a valid <custom-ident>.
+    if (nameToken.Type() != TokenType::Ident || !IsValidCustomIdentifier(nameToken.ValueId()))
+    {
+      return null;
+    }
+
+    auto id = nameToken.ValueId();
+    if (IdentMatches<ValueId::None>(id)
+        || (!IsUASheetBehavior(mode)
+            && IdentMatches<ValueId::Decimal, ValueId::Disc, ValueId::Circle, ValueId::Square,
+                            ValueId::DisclosureOpen, ValueId::DisclosureClosed>(id)))
+    {
+      return null;
+    }
+
+    auto name = nameToken.IdentCodePoints();
+    return IsPredefinedCounterStyle(nameToken.ValueId()) ? CSSOMStringAtom(krys::text::ToASCIILower(name))
+                                                         : CSSOMStringAtom(name);
+  }
+
+  RefPtr<Value> ConsumeCounterStyleName(TokenRange &tokens, PropertyParserState &) noexcept
+  {
+    // <counter-style-name> is a <custom-ident> that is not an ASCII case-insensitive match for "none".
+    // https://drafts.csswg.org/css-counter-styles-3/#typedef-counter-style-name
+
+    auto valueId = tokens.Peek().ValueId();
+    if (valueId == ValueId::None)
+    {
+      return nullptr;
+    }
+
+    // If the value is an ASCII case-insensitive match for any of the predefined counter styles, lowercase it.
+    if (auto name = ConsumeCustomIdent(tokens, IsPredefinedCounterStyle(valueId)))
+    {
+      return name;
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<Value> ConsumeCounterStyleSystem(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'system'> = cyclic | numeric | alphabetic | symbolic | additive | [fixed <integer>?] | [ extends
+    // <counter-style-name> ] https://drafts.csswg.org/css-counter-styles-3/#counter-style-system
+
+    if (auto ident = ConsumeIdent<ValueId::Cyclic, ValueId::Numeric, ValueId::Alphabetic, ValueId::Symbolic,
+                                  ValueId::Additive>(tokens))
+    {
+      return ident;
+    }
+
+    if (IsUASheetBehavior(state.Context.Mode))
+    {
+      auto internalKeyword =
+        ConsumeIdent<ValueId::InternalDisclosureClosed, ValueId::InternalDisclosureOpen,
+                     ValueId::InternalSimplifiedChineseInformal, ValueId::InternalSimplifiedChineseFormal,
+                     ValueId::InternalTraditionalChineseInformal, ValueId::InternalTraditionalChineseFormal,
+                     ValueId::InternalEthiopicNumeric>(tokens);
+      if (internalKeyword)
+      {
+        return internalKeyword;
+      }
+    }
+
+    if (auto ident = ConsumeIdent<ValueId::Fixed>(tokens))
+    {
+      if (tokens.IsAtEnd())
+      {
+        return ident;
+      }
+
+      // If we have the `fixed` keyword but the range is not at the end, the next token must be a integer.
+      // If it's not, this value is invalid.
+      auto firstSymbolValue = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state);
+      if (!firstSymbolValue)
+      {
+        return nullptr;
+      }
+
+      return ValuePair::Create(krys::move(ident), krys::move(firstSymbolValue));
+    }
+
+    if (auto ident = ConsumeIdent<ValueId::Extends>(tokens))
+    {
+      // There must be a `<counter-style-name>` following the `extends` keyword. If there isn't, this value is
+      // invalid.
+      auto parsedCounterStyleName = ConsumeCounterStyleName(tokens, state);
+      if (!parsedCounterStyleName)
+      {
+        return nullptr;
+      }
+
+      return ValuePair::Create(krys::move(ident), krys::move(parsedCounterStyleName));
+    }
+    return nullptr;
+  }
+
+  RefPtr<Value> ConsumeCounterStyleRange(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'range'> = [ [ <integer> | infinite ]{2} ]# | auto
+    // https://drafts.csswg.org/css-counter-styles-3/#counter-style-range
+
+    auto ConsumeCounterStyleRangeBound = [&](TokenRange &tokens) -> RefPtr<PrimitiveValue>
+    {
+      if (auto infinite = ConsumeIdent<ValueId::Infinite>(tokens))
+      {
+        return infinite;
+      }
+
+      if (auto integer = PrimitiveValueResolver<Integer<>>::ConsumeAndResolve(tokens, state))
+      {
+        return integer;
+      }
+
+      return nullptr;
+    };
+
+    if (auto autoValue = ConsumeIdent<ValueId::Auto>(tokens))
+    {
+      return autoValue;
+    }
+
+    auto rangeList = ConsumeListSeparatedBy<',', OneOrMore>(
+      tokens,
+      [&](auto &tokens) -> RefPtr<Value>
+      {
+        auto lowerBound = ConsumeCounterStyleRangeBound(tokens);
+        if (!lowerBound)
+        {
+          return nullptr;
+        }
+
+        auto upperBound = ConsumeCounterStyleRangeBound(tokens);
+        if (!upperBound)
+        {
+          return nullptr;
+        }
+
+        // If the lower bound of any range is higher than the upper bound, the entire descriptor is invalid
+        // and must be ignored.
+        if (lowerBound->IsInteger() && upperBound->IsInteger()
+            && lowerBound->ResolveAsInteger(css::ToLengthConversionData::WithoutElement())
+                 > upperBound->ResolveAsInteger(css::ToLengthConversionData::WithoutElement()))
+        {
+          return nullptr;
+        }
+
+        return ValuePair::CreateNonCoalescing(krys::move(lowerBound), krys::move(upperBound));
+      });
+
+    if (!tokens.IsAtEnd() || !rangeList || !rangeList->size())
+    {
+      return nullptr;
+    }
+
+    return rangeList;
+  }
+
+  RefPtr<Value> ConsumeCounterStyleAdditiveSymbols(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'additive-symbols'> = [ <integer [0,∞]> && <symbol> ]#
+    // https://drafts.csswg.org/css-counter-styles-3/#descdef-counter-style-additive-symbols
+
+    Maybe<int64> lastWeight;
+    auto values = ConsumeListSeparatedBy<',', OneOrMore>(
+      tokens,
+      [&lastWeight](auto &tokens, auto &state) -> RefPtr<Value>
+      {
+        auto integer = PrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
+        auto symbol = PropertyParsing::ConsumeSymbol(tokens, state);
+        if (!integer)
+        {
+          if (!symbol)
+          {
+            return nullptr;
+          }
+
+          integer = PrimitiveValueResolver<Integer<NonNegative>>::ConsumeAndResolve(tokens, state);
+          if (!integer)
+          {
+            return nullptr;
+          }
+        }
+
+        if (!symbol)
+        {
+          return nullptr;
+        }
+
+        // Additive tuples must be specified in order of strictly descending weight.
+        auto weight = integer->ResolveAsInteger(css::ToLengthConversionData::WithoutElement());
+        if (lastWeight && !(weight < lastWeight))
+        {
+          return nullptr;
+        }
+
+        lastWeight = weight;
+
+        return ValuePair::Create(krys::move(integer), krys::move(symbol));
+      },
+      state);
+
+    if (!tokens.IsAtEnd() || !values || !values->size())
+    {
+      return nullptr;
+    }
+
+    return values;
+  }
+}

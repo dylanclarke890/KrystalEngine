@@ -1,0 +1,452 @@
+﻿/*
+ * Copyright (C) 2014, 2020 Igalia S.L.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Rendering/Adwaita/RenderThemeAdwaita.hpp"
+#include "Krystal.Web/Css/UserAgentStyleSheets.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Graphics/Adwaita/Adwaita.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Rendering/FormControls/RenderProgress.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Web/Style/Computed/ComputedStyle.hpp"
+
+namespace krys::web
+{
+  using namespace adwaita;
+  using css::ValueId;
+
+  RenderTheme &RenderTheme::Singleton() noexcept
+  {
+    static RenderThemeAdwaita theme;
+    return theme;
+  }
+
+  RenderThemeAdwaita::~RenderThemeAdwaita() noexcept = default;
+
+  bool RenderThemeAdwaita::CanCreateControlPartForRenderer(const RenderElement &renderer) const noexcept
+  {
+    switch (renderer.Style().UsedAppearance())
+    {
+      case StyleAppearance::Button:
+      case StyleAppearance::Checkbox:
+      case StyleAppearance::ColorWell:
+      case StyleAppearance::DefaultButton:
+      case StyleAppearance::InnerSpinButton:
+      case StyleAppearance::Menulist:
+      case StyleAppearance::ProgressBar:
+      case StyleAppearance::PushButton:
+      case StyleAppearance::Radio:
+      case StyleAppearance::SearchField:
+      case StyleAppearance::SliderThumbHorizontal:
+      case StyleAppearance::SliderThumbVertical:
+      case StyleAppearance::SliderHorizontal:
+      case StyleAppearance::SliderVertical:
+      case StyleAppearance::SquareButton:          return true;
+      default:                                     break;
+    }
+    return false;
+  }
+
+  bool RenderThemeAdwaita::CanCreateControlPartForBorderOnly(const RenderElement &renderer) const noexcept
+  {
+    switch (renderer.Style().UsedAppearance())
+    {
+      case StyleAppearance::Listbox:
+      case StyleAppearance::TextArea:
+      case StyleAppearance::TextField: return true;
+      default:                         break;
+    }
+    return false;
+  }
+
+  bool RenderThemeAdwaita::CanCreateControlPartForDecorations(const RenderElement &renderer) const noexcept
+  {
+    return renderer.Style().UsedAppearance() == StyleAppearance::MenulistButton;
+  }
+
+  bool RenderThemeAdwaita::SupportsFocusRing(const RenderElement &, const RenderStyle &style) const noexcept
+  {
+    switch (style.UsedAppearance())
+    {
+      case StyleAppearance::PushButton:
+      case StyleAppearance::Button:
+      case StyleAppearance::TextField:
+      case StyleAppearance::TextArea:
+      case StyleAppearance::SearchField:
+      case StyleAppearance::Menulist:
+      case StyleAppearance::Radio:
+      case StyleAppearance::Checkbox:
+      case StyleAppearance::SliderHorizontal:
+      case StyleAppearance::SliderVertical:   return true;
+      default:                                break;
+    }
+    return false;
+  }
+
+  bool RenderThemeAdwaita::ShouldHaveCapsLockIndicator(const web::HTMLInputElement &element) const noexcept
+  {
+    return element.IsPasswordField();
+  }
+
+  Color RenderThemeAdwaita::PlatformActiveSelectionBackgroundColor(style::ColorOptions) const noexcept
+  {
+    return SystemAccentColor().ColorWithAlphaMultipliedBy(0.3f);
+  }
+
+  Color
+    RenderThemeAdwaita::PlatformInactiveSelectionBackgroundColor(style::ColorOptions options) const noexcept
+  {
+    if (options.contains(style::ColorOption::UseDarkAppearance))
+    {
+      return SRGBA<uint8> {255, 255, 255, 25};
+    }
+    return SRGBA<uint8> {0, 0, 0, 25};
+  }
+
+  Color RenderThemeAdwaita::PlatformActiveSelectionForegroundColor(style::ColorOptions) const noexcept
+  {
+    return {};
+  }
+
+  Color RenderThemeAdwaita::PlatformInactiveSelectionForegroundColor(style::ColorOptions) const noexcept
+  {
+    return {};
+  }
+
+  Color RenderThemeAdwaita::PlatformActiveListBoxSelectionBackgroundColor(
+    style::ColorOptions options) const noexcept
+  {
+    return PlatformActiveListBoxSelectionForegroundColor(options).ColorWithAlpha(0.15f);
+  }
+
+  Color RenderThemeAdwaita::PlatformInactiveListBoxSelectionBackgroundColor(
+    style::ColorOptions options) const noexcept
+  {
+    return PlatformInactiveListBoxSelectionForegroundColor(options).ColorWithAlpha(0.15f);
+  }
+
+  Color RenderThemeAdwaita::PlatformActiveListBoxSelectionForegroundColor(
+    style::ColorOptions options) const noexcept
+  {
+    return options.contains(style::ColorOption::UseDarkAppearance) ? Color::white : Color::black;
+  }
+
+  Color RenderThemeAdwaita::PlatformInactiveListBoxSelectionForegroundColor(
+    style::ColorOptions options) const noexcept
+  {
+    return PlatformActiveListBoxSelectionForegroundColor(options);
+  }
+
+  Color RenderThemeAdwaita::PlatformFocusRingColor(style::ColorOptions) const noexcept
+  {
+    return SystemFocusRingColor();
+  }
+
+  utf8_stringview RenderThemeAdwaita::ExtraDefaultStyleSheet() noexcept
+  {
+    return css::ThemeAdwaitaUserAgentStyleSheet;
+  }
+
+  Color RenderThemeAdwaita::SystemColor(ValueId cssValueID, style::ColorOptions options) const noexcept
+  {
+    const bool useDarkAppearance = options.contains(style::ColorOption::UseDarkAppearance);
+
+    switch (cssValueID)
+    {
+      case ValueId::Activebuttontext:
+      case ValueId::Buttontext:
+        if (useDarkAppearance)
+        {
+          return {ButtonTextColorDark, ColorFlag::Semantic};
+        }
+        return {ButtonTextColorLight, ColorFlag::Semantic};
+
+      case ValueId::Graytext:
+        if (useDarkAppearance)
+        {
+          return {ButtonTextDisabledColorDark, ColorFlag::Semantic};
+        }
+        return {ButtonTextDisabledColorLight, ColorFlag::Semantic};
+
+      case ValueId::Canvas:
+        if (useDarkAppearance)
+        {
+          return {SRGBA<uint8> {30, 30, 30}, ColorFlag::Semantic};
+        }
+        return {Color::white, ColorFlag::Semantic};
+
+      case ValueId::Field:
+        if (useDarkAppearance)
+        {
+          return {TextFieldBackgroundColorDark, ColorFlag::Semantic};
+        }
+        return {TextFieldBackgroundColorLight, ColorFlag::Semantic};
+
+      case ValueId::Canvastext:
+      case ValueId::Fieldtext:
+      case ValueId::Text:
+        if (useDarkAppearance)
+        {
+          return {Color::white, ColorFlag::Semantic};
+        }
+        return {Color::black, ColorFlag::Semantic};
+
+      case ValueId::Highlight:
+        // Hardcoded to avoid exposing a user appearance preference to the web for fingerprinting.
+        return {SRGBA<uint8> {52, 132, 228}, ColorFlag::Semantic};
+
+      case ValueId::Highlighttext: return {Color::white, ColorFlag::Semantic};
+
+      default:                     return RenderTheme::SystemColor(cssValueID, options);
+    }
+  }
+
+  bool RenderThemeAdwaita::IsControlStyled(const RenderStyle &style) const noexcept
+  {
+    auto appearance = style.UsedAppearance();
+    if (appearance == StyleAppearance::TextField || appearance == StyleAppearance::TextArea
+        || appearance == StyleAppearance::SearchField || appearance == StyleAppearance::Listbox)
+    {
+      return style.NativeAppearanceDisabled();
+    }
+    return RenderTheme::IsControlStyled(style);
+  }
+
+  void RenderThemeAdwaita::AdjustTextFieldStyle(RenderStyle &style, const web::Element *) const noexcept
+  {
+    if (!style.HasExplicitlySetBorderRadius())
+    {
+      style.SetBorderRadius(style::BorderRadiusValue {5_css_px, 5_css_px});
+    }
+  }
+
+  void RenderThemeAdwaita::AdjustTextAreaStyle(RenderStyle &style, const web::Element *element) const noexcept
+  {
+    AdjustTextFieldStyle(style, element);
+  }
+
+  void RenderThemeAdwaita::AdjustSearchFieldStyle(RenderStyle &style,
+                                                  const web::Element *element) const noexcept
+  {
+    AdjustTextFieldStyle(style, element);
+  }
+
+  void RenderThemeAdwaita::AdjustMenuListStyle(RenderStyle &style, const web::Element *element) const noexcept
+  {
+    RenderTheme::AdjustMenuListStyle(style, element);
+    style.SetLineHeight(style::ComputedStyle::InitialLineHeight());
+  }
+
+  void RenderThemeAdwaita::AdjustMenuListButtonStyle(RenderStyle &style,
+                                                     const web::Element *element) const noexcept
+  {
+    AdjustMenuListStyle(style, element);
+  }
+
+  style::PaddingBox RenderThemeAdwaita::PopupInternalPaddingBox(const RenderStyle &style) const noexcept
+  {
+    if (style.UsedAppearance() == StyleAppearance::None)
+    {
+      return style::PaddingBox {style::PaddingEdge::Fixed {0}};
+    }
+
+    auto zoomedArrowSize = MenuListButtonArrowSize * style.UsedZoom();
+    int32 leftPadding =
+      static_cast<int32>(MenuListButtonPadding + (style.GetWritingMode().IsBidiRTL() ? zoomedArrowSize : 0));
+    int32 rightPadding =
+      static_cast<int32>(MenuListButtonPadding + (style.GetWritingMode().IsBidiLTR() ? zoomedArrowSize : 0));
+
+    return {
+      style::PaddingEdge::Fixed {static_cast<float>(MenuListButtonPadding)},
+      style::PaddingEdge::Fixed {static_cast<float>(rightPadding)},
+      style::PaddingEdge::Fixed {static_cast<float>(MenuListButtonPadding)},
+      style::PaddingEdge::Fixed {static_cast<float>(leftPadding)},
+    };
+  }
+
+  MonotonicTime::duration RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar(
+    const RenderProgress &renderProgress) const noexcept
+  {
+    if (auto *frame = renderProgress.GetDocument().Frame())
+    {
+      return frame->PreferredRenderingUpdateInterval();
+    }
+    return std::chrono::duration_cast<MonotonicTime::duration>(
+      std::chrono::duration<double>(1.0 / Frame::FullSpeedFramesPerSecond));
+  }
+
+  RectI RenderThemeAdwaita::ProgressBarRectForBounds(const RenderProgress &,
+                                                     const RectI &bounds) const noexcept
+  {
+    // FIXME: Vertical progress bars (the renderer's isHorizontalWritingMode), with RenderProgress (G14d2).
+    bool isHorizontal = true;
+    return {bounds.X(), bounds.Y(), isHorizontal ? bounds.Width() : ProgressBarSize,
+            isHorizontal ? ProgressBarSize : bounds.Height()};
+  }
+
+  void RenderThemeAdwaita::AdjustSliderThumbSize(RenderStyle &style, const web::Element *) const noexcept
+  {
+    auto appearance = style.UsedAppearance();
+    if (appearance != StyleAppearance::SliderThumbHorizontal
+        && appearance != StyleAppearance::SliderThumbVertical)
+    {
+      return;
+    }
+
+    style.SetWidth(style::PreferredSize::Fixed {static_cast<float>(SliderThumbSize)});
+    style.SetHeight(style::PreferredSize::Fixed {static_cast<float>(SliderThumbSize)});
+  }
+
+  LayoutUnit RenderThemeAdwaita::SliderTickSnappingThreshold() const noexcept
+  {
+    // As in Chrome: a thumb dragged within 5 pixels of a tick snaps to it.
+    return LayoutUnit(5);
+  }
+
+  SizeI RenderThemeAdwaita::SliderTickSize() const noexcept
+  {
+    return {1, 7};
+  }
+
+  int32 RenderThemeAdwaita::SliderTickOffsetFromTrackCenter() const noexcept
+  {
+    return -16;
+  }
+
+  void RenderThemeAdwaita::AdjustListButtonStyle(RenderStyle &style, const web::Element *) const noexcept
+  {
+    // Add a margin to place the button at end of the input field.
+    if (style.IsLeftToRightDirection())
+    {
+      style.SetMarginRight(style::MarginEdge::Fixed {-2});
+    }
+    else
+    {
+      style.SetMarginLeft(style::MarginEdge::Fixed {-2});
+    }
+  }
+
+  style::PreferredSizePair RenderThemeAdwaita::ControlSize(StyleAppearance appearance,
+                                                           const FontCascade &fontCascade,
+                                                           const style::PreferredSizePair &zoomedSize,
+                                                           float zoomFactor) const noexcept
+  {
+    if (!zoomedSize.Width().IsIntrinsicOrAuto() && !zoomedSize.Height().IsIntrinsicOrAuto())
+    {
+      return RenderTheme::ControlSize(appearance, fontCascade, zoomedSize, zoomFactor);
+    }
+
+    switch (appearance)
+    {
+      case StyleAppearance::Checkbox:
+      case StyleAppearance::Radio:
+      {
+        auto buttonSizeWidth = zoomedSize.Width();
+        auto buttonSizeHeight = zoomedSize.Height();
+        if (buttonSizeWidth.IsIntrinsicOrAuto())
+        {
+          buttonSizeWidth = style::PreferredSize::Fixed {12 * zoomFactor};
+        }
+        if (buttonSizeHeight.IsIntrinsicOrAuto())
+        {
+          buttonSizeHeight = style::PreferredSize::Fixed {12 * zoomFactor};
+        }
+        return {krys::move(buttonSizeWidth), krys::move(buttonSizeHeight)};
+      }
+      case StyleAppearance::InnerSpinButton:
+      {
+        auto spinButtonSizeWidth = zoomedSize.Width();
+        auto spinButtonSizeHeight = zoomedSize.Height();
+        if (spinButtonSizeWidth.IsIntrinsicOrAuto())
+        {
+          spinButtonSizeWidth =
+            style::PreferredSize::Fixed {static_cast<float>(static_cast<int32>(ArrowSize * zoomFactor))};
+        }
+        if (spinButtonSizeHeight.IsIntrinsicOrAuto() || fontCascade.Size() > ArrowSize)
+        {
+          spinButtonSizeHeight = style::PreferredSize::Fixed {fontCascade.Size()};
+        }
+        return {krys::move(spinButtonSizeWidth), krys::move(spinButtonSizeHeight)};
+      }
+      default: break;
+    }
+
+    return RenderTheme::ControlSize(appearance, fontCascade, zoomedSize, zoomFactor);
+  }
+
+  style::MinimumSizePair RenderThemeAdwaita::MinimumControlSize(StyleAppearance, const FontCascade &,
+                                                                const style::MinimumSizePair &zoomedSize,
+                                                                float) const noexcept
+  {
+    if (!zoomedSize.Width().IsIntrinsicOrAuto() && !zoomedSize.Height().IsIntrinsicOrAuto())
+    {
+      return zoomedSize;
+    }
+
+    auto resultWidth = zoomedSize.Width();
+    auto resultHeight = zoomedSize.Height();
+    if (resultWidth.IsIntrinsicOrAuto())
+    {
+      resultWidth = style::MinimumSize::Fixed {0};
+    }
+    if (resultHeight.IsIntrinsicOrAuto())
+    {
+      resultHeight = style::MinimumSize::Fixed {0};
+    }
+    return {krys::move(resultWidth), krys::move(resultHeight)};
+  }
+
+  style::LineWidthBox RenderThemeAdwaita::ControlBorder(StyleAppearance appearance, const FontCascade &font,
+                                                        const style::LineWidthBox &zoomedBox,
+                                                        float zoomFactor,
+                                                        const web::Element *element) const noexcept
+  {
+    switch (appearance)
+    {
+      case StyleAppearance::PushButton:
+      case StyleAppearance::DefaultButton:
+      case StyleAppearance::Button:
+      case StyleAppearance::SquareButton:  return zoomedBox;
+      default:                             break;
+    }
+
+    return RenderTheme::ControlBorder(appearance, font, zoomedBox, zoomFactor, element);
+  }
+
+  void RenderThemeAdwaita::SetAccentColor(const Color &color) noexcept
+  {
+    if (SystemAccentColor() == color)
+    {
+      return;
+    }
+    SetSystemAccentColor(color);
+    PlatformColorsDidChange();
+  }
+}

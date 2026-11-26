@@ -1,0 +1,225 @@
+﻿/*
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Easing/EasingFunction.hpp"
+
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Values/Easing/EasingFunction.hpp"
+#include "Krystal.Web/Css/Values/EasingFunctionValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Style/Values/Easing/CubicBezierEasingFunction.hpp"
+#include "Krystal.Web/Style/Values/Easing/LinearEasingFunction.hpp"
+#include "Krystal.Web/Style/Values/Easing/SpringEasingFunction.hpp"
+#include "Krystal.Web/Style/Values/Easing/StepsEasingFunction.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesSerialisation.hpp"
+
+namespace krys::web::style
+{
+  KRYS_NODISCARD static css::EasingFunction ToCSSEasingFunction(const TimingFunction &function,
+                                                                const RenderStyle &style) noexcept
+  {
+    switch (function.GetType())
+    {
+      case TimingFunction::Type::CubicBezierFunction:
+      {
+        const auto &cubicBezierFunction = Downcast<CubicBezierTimingFunction>(function);
+        switch (cubicBezierFunction.GetTimingFunctionPreset())
+        {
+          case CubicBezierTimingFunction::TimingFunctionPreset::Ease:    return {css::keywords::Ease {}};
+          case CubicBezierTimingFunction::TimingFunctionPreset::EaseIn:  return {css::keywords::EaseIn {}};
+          case CubicBezierTimingFunction::TimingFunctionPreset::EaseOut: return {css::keywords::EaseOut {}};
+          case CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut:
+            return {css::keywords::EaseInOut {}};
+          case CubicBezierTimingFunction::TimingFunctionPreset::Custom: break;
+        }
+        return {ToCSSCubicBezierEasingFunction(cubicBezierFunction, style)};
+      }
+
+      case TimingFunction::Type::LinearFunction:
+      {
+        const auto &linearFunction = Downcast<LinearTimingFunction>(function);
+        if (linearFunction.Points().empty())
+        {
+          return {css::keywords::Linear {}};
+        }
+        return {ToCSSLinearEasingFunction(linearFunction, style)};
+      }
+
+      case TimingFunction::Type::StepsFunction:
+        return {ToCSSStepsEasingFunction(Downcast<StepsTimingFunction>(function), style)};
+
+      case TimingFunction::Type::SpringFunction:
+        return {ToCSSSpringEasingFunction(Downcast<SpringTimingFunction>(function), style)};
+    }
+
+    krys_unreachable();
+  }
+
+  KRYS_NODISCARD static Ref<TimingFunction> CreateTimingFunction(BuilderState &state,
+                                                                 const css::EasingFunction &function) noexcept
+  {
+    return krys::SwitchOn(
+      function.Value,
+      [&](const css::keywords::Linear &) -> Ref<TimingFunction> { return LinearTimingFunction::Create(); },
+      [&](const css::LinearEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunction(state, function); },
+      [&](const css::keywords::Ease &) -> Ref<TimingFunction> { return CubicBezierTimingFunction::Create(); },
+      [&](const css::keywords::EaseIn &) -> Ref<TimingFunction>
+      { return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseIn); },
+      [&](const css::keywords::EaseOut &) -> Ref<TimingFunction>
+      { return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseOut); },
+      [&](const css::keywords::EaseInOut &) -> Ref<TimingFunction>
+      {
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut);
+      },
+      [&](const css::CubicBezierEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunction(state, function); },
+      [&](const css::keywords::StepStart &) -> Ref<TimingFunction>
+      { return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::Start); },
+      [&](const css::keywords::StepEnd &) -> Ref<TimingFunction>
+      { return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::End); },
+      [&](const css::StepsEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunction(state, function); },
+      [&](const css::SpringEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunction(state, function); });
+  }
+
+  Ref<TimingFunction> CreateTimingFunctionDeprecated(const css::EasingFunction &function) noexcept
+  {
+    return krys::SwitchOn(
+      function.Value,
+      [&](const css::keywords::Linear &) -> Ref<TimingFunction> { return LinearTimingFunction::Create(); },
+      [&](const css::LinearEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunctionDeprecated(function); },
+      [&](const css::keywords::Ease &) -> Ref<TimingFunction> { return CubicBezierTimingFunction::Create(); },
+      [&](const css::keywords::EaseIn &) -> Ref<TimingFunction>
+      { return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseIn); },
+      [&](const css::keywords::EaseOut &) -> Ref<TimingFunction>
+      { return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseOut); },
+      [&](const css::keywords::EaseInOut &) -> Ref<TimingFunction>
+      {
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut);
+      },
+      [&](const css::CubicBezierEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunctionDeprecated(function); },
+      [&](const css::keywords::StepStart &) -> Ref<TimingFunction>
+      { return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::Start); },
+      [&](const css::keywords::StepEnd &) -> Ref<TimingFunction>
+      { return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::End); },
+      [&](const css::StepsEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunctionDeprecated(function); },
+      [&](const css::SpringEasingFunction &function) -> Ref<TimingFunction>
+      { return CreateTimingFunctionDeprecated(function); });
+  }
+
+  KRYS_NODISCARD static Ref<TimingFunction> CreateTimingFunctionFromValueID(BuilderState &state,
+                                                                            css::ValueId valueID) noexcept
+  {
+    switch (valueID)
+    {
+      case css::ValueId::Linear: return LinearTimingFunction::Create();
+      case css::ValueId::Ease:   return CubicBezierTimingFunction::Create();
+      case css::ValueId::EaseIn:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseIn);
+      case css::ValueId::EaseOut:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseOut);
+      case css::ValueId::EaseInOut:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut);
+      case css::ValueId::StepStart:
+        return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::Start);
+      case css::ValueId::StepEnd:
+        return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::End);
+      default: state.SetCurrentPropertyInvalidAtComputedValueTime(); return LinearTimingFunction::Create();
+    }
+  }
+
+  KRYS_NODISCARD static RefPtr<TimingFunction>
+    CreateTimingFunctionFromValueIDDeprecated(css::ValueId valueID) noexcept
+  {
+    switch (valueID)
+    {
+      case css::ValueId::Linear: return LinearTimingFunction::Create();
+      case css::ValueId::Ease:   return CubicBezierTimingFunction::Create();
+      case css::ValueId::EaseIn:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseIn);
+      case css::ValueId::EaseOut:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseOut);
+      case css::ValueId::EaseInOut:
+        return CubicBezierTimingFunction::Create(CubicBezierTimingFunction::TimingFunctionPreset::EaseInOut);
+      case css::ValueId::StepStart:
+        return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::Start);
+      case css::ValueId::StepEnd:
+        return StepsTimingFunction::Create(1, StepsTimingFunction::StepPosition::End);
+      default: return nullptr;
+    }
+  }
+
+  RefPtr<TimingFunction> CreateTimingFunctionDeprecated(const css::Value &value) noexcept
+  {
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      return CreateTimingFunctionFromValueIDDeprecated(primitiveValue->ValueId());
+    }
+    if (const auto *easingFunctionValue = DynamicDowncast<css::EasingFunctionValue>(value))
+    {
+      return CreateTimingFunctionDeprecated(easingFunctionValue->GetEasingFunction());
+    }
+    return {};
+  }
+
+  // MARK: - Conversion
+
+  EasingFunction CSSValueConversion<EasingFunction>::operator()(BuilderState &state,
+                                                                const css::Value &value) noexcept
+  {
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      return {CreateTimingFunctionFromValueID(state, primitiveValue->ValueId())};
+    }
+    if (const auto *easingFunctionValue = DynamicDowncast<css::EasingFunctionValue>(value))
+    {
+      return {CreateTimingFunction(state, easingFunctionValue->GetEasingFunction())};
+    }
+
+    state.SetCurrentPropertyInvalidAtComputedValueTime();
+    return {LinearTimingFunction::Create()};
+  }
+
+  Ref<css::Value> CSSValueCreation<EasingFunction>::operator()(css::ValuePool &, const RenderStyle &style,
+                                                               const EasingFunction &value) noexcept
+  {
+    return css::EasingFunctionValue::Create(ToCSSEasingFunction(*value.Value, style));
+  }
+
+  // MARK: - Serialization
+
+  void Serialiser<EasingFunction>::operator()(StringBuilder &builder,
+                                              const css::SerialisationContext &context,
+                                              const RenderStyle &style, const EasingFunction &value) noexcept
+  {
+    // FIXME: Optimize by avoiding CSSEasingFunction conversion.
+    css::Serialise(builder, context, ToCSSEasingFunction(*value.Value, style));
+  }
+}

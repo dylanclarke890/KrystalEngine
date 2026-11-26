@@ -1,0 +1,214 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Style/Values/CounterStyles/CounterStyle.hpp"
+#include "Krystal.Web/Style/Values/Images/ImageWrapper.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style
+{
+  // <leader()>            = leader( <leader-type> )
+  // <target>              = <target-counter()> | <target-counters()> | <target-text()>
+  // <counter>             = <counter()> | <counters()>
+  // <quote>               = open-quote | close-quote | no-open-quote | no-close-quote
+  // <content-replacement> = <image>
+  // <content-list>        = [ <string> | contents | <image> | <counter> | <quote> | <target> | <leader()> ]+
+  // <alt-content>         = [ <string> | <counter> ]+
+
+  // <'content'>           = normal | none | [ <content-replacement> | <content-list> ] [/ <alt-content> ]?
+  // https://www.w3.org/TR/css-content-3/#propdef-content
+
+  // MISSING from <content-list>:
+  //    contents
+  //    <leader()>
+  //    <target>
+
+  // MISSING from <alt-content>:
+  //   <counter>
+
+  struct Content
+  {
+    struct Text
+    {
+      CSSOMString Value;
+
+      KRYS_NODISCARD bool operator==(const Text &) const noexcept = default;
+    };
+
+    struct Image
+    {
+      ImageWrapper Value;
+
+      KRYS_NODISCARD bool operator==(const Image &) const noexcept = default;
+    };
+
+    struct Counter
+    {
+      CSSOMStringAtom Identifier;
+      CSSOMStringAtom Separator;
+      CounterStyle Style;
+
+      template <typename... F>
+      decltype(auto) SwitchOn(F &&...) const noexcept;
+
+      KRYS_NODISCARD bool operator==(const Counter &) const noexcept = default;
+    };
+
+    struct Quote
+    {
+      QuoteType Value;
+
+      KRYS_NODISCARD bool operator==(const Quote &) const noexcept = default;
+    };
+
+    using ListItem = Variant<Text, Image, Counter, Quote>;
+    using ListType = css::SpaceSeparatedFixedList<ListItem>;
+
+    // FIXME: This struct could be optimized down to a pointer when unused by using TrailingArray.
+    struct Data
+    {
+      ListType List;
+      Maybe<CSSOMString> AltText;
+
+      KRYS_NODISCARD bool operator==(const Data &) const noexcept = default;
+    };
+
+    Content(css::keywords::None keyword) noexcept : _value {keyword}
+    {
+    }
+
+    Content(css::keywords::Normal keyword) noexcept : _value {keyword}
+    {
+    }
+
+    Content(Data &&data) noexcept : _value {krys::move(data)}
+    {
+    }
+
+    KRYS_NODISCARD bool IsNone() const noexcept
+    {
+      return krys::HoldsAlternative<css::keywords::None>(_value);
+    }
+
+    KRYS_NODISCARD bool IsNormal() const noexcept
+    {
+      return krys::HoldsAlternative<css::keywords::Normal>(_value);
+    }
+
+    KRYS_NODISCARD bool IsData() const noexcept
+    {
+      return krys::HoldsAlternative<Data>(_value);
+    }
+
+    KRYS_NODISCARD const Data *TryData() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return std::get_if<Data>(&_value);
+    }
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      return krys::SwitchOn(_value, std::forward<F>(f)...);
+    }
+
+    KRYS_NODISCARD bool operator==(const Content &) const noexcept = default;
+
+  private:
+    // FIXME: If Data is converted to be pointer sized when unused using TrailingArray (see above), this can
+    // be converted to use a CompactVariant.
+    Variant<css::keywords::None, css::keywords::Normal, Data> _value;
+  };
+
+  template <size_t I>
+  KRYS_NODISCARD const auto &get(const Content::Data &value) noexcept
+  {
+    if constexpr (!I)
+    {
+      return value.List;
+    }
+    else if constexpr (I == 1)
+    {
+      return value.AltText;
+    }
+  }
+
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Text, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Image, Value);
+  KRYS_DEFINE_TYPE_WRAPPER_GET(Content::Quote, Value);
+
+  template <typename... F>
+  decltype(auto) Content::Counter::SwitchOn(F &&...f) const noexcept
+  {
+    auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+    using CounterFunction =
+      css::FunctionNotation<css::ValueId::Counter,
+                            css::CommaSeparatedTuple<css::CustomIdentifier, Maybe<CounterStyle>>>;
+    using CountersFunction = css::FunctionNotation<
+      css::ValueId::Counters,
+      css::CommaSeparatedTuple<css::CustomIdentifier, CSSOMStringAtom, Maybe<CounterStyle>>>;
+
+    if (Separator.View().empty())
+    {
+      return visitor(CounterFunction {
+        .Parameters = {css::CustomIdentifier {Identifier},
+                       Style != css::CustomIdentifier {CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
+                         ? Maybe<CounterStyle> {Style}
+                         : std::nullopt}});
+    }
+
+    return visitor(CountersFunction {
+      .Parameters = {css::CustomIdentifier {Identifier}, Separator,
+                     Style != css::CustomIdentifier {CSSOMStringAtom {css::ToString(css::ValueId::Decimal)}}
+                       ? Maybe<CounterStyle> {Style}
+                       : std::nullopt}});
+  }
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<Content>
+  {
+    KRYS_NODISCARD Content operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  // `Content::Counter` is special-cased to return a `css::CounterValue`.
+  template <>
+  struct CSSValueCreation<Content::Counter>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
+                                              const Content::Counter &) noexcept;
+  };
+}
+
+KRYS_DEFINE_SLASH_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::web::style::Content::Data, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::web::style::Content::Text)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::web::style::Content::Image)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::web::style::Content::Quote)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::Content::Counter)
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::Content)

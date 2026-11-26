@@ -1,0 +1,147 @@
+﻿/*
+ * Copyright (C) 2006 Oliver Hunt <oliver@nerget.com>
+ * Copyright (C) 2018-2022 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Elements/SVGFEDisplacementMapElement.hpp"
+#include "Krystal.Web/Svg/Graphics/Filters/SVGFilterRenderer.hpp"
+#include "Krystal.Web/Svg/Internals/SVGParserUtilities.hpp"
+#include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Web/Svg/SVGNames.hpp"
+#include <cmath>
+
+namespace krys::web
+{
+  SVGFEDisplacementMapElement::SVGFEDisplacementMapElement(Document &document) noexcept
+      : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
+                                             SVGElementInterface::FEDisplacementMap),
+        _in1(SVGAnimatedString::Create(this)), _in2(SVGAnimatedString::Create(this)),
+        _xChannelSelector(SVGAnimatedEnumeration::Create(this, ChannelSelectorType::CHANNEL_A)),
+        _yChannelSelector(SVGAnimatedEnumeration::Create(this, ChannelSelectorType::CHANNEL_A)),
+        _scale(SVGAnimatedNumber::Create(this))
+  {
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGFEDisplacementMapElement::_in1>(SVGNames::InAttr());
+      PropertyRegistry::RegisterProperty<&SVGFEDisplacementMapElement::_in2>(SVGNames::In2Attr());
+      PropertyRegistry::RegisterProperty<ChannelSelectorType,
+                                         &SVGFEDisplacementMapElement::_xChannelSelector>(
+        SVGNames::XChannelSelectorAttr());
+      PropertyRegistry::RegisterProperty<ChannelSelectorType,
+                                         &SVGFEDisplacementMapElement::_yChannelSelector>(
+        SVGNames::YChannelSelectorAttr());
+      PropertyRegistry::RegisterProperty<&SVGFEDisplacementMapElement::_scale>(SVGNames::ScaleAttr());
+    }
+  }
+
+  void SVGFEDisplacementMapElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                     Maybe<DOMStringView> value) noexcept
+  {
+    auto string = value.value_or(DOMStringView {});
+
+    if (name == SVGNames::XChannelSelectorAttr())
+    {
+      auto propertyValue = SVGPropertyTraits<ChannelSelectorType>::FromString(*this, string);
+      if (propertyValue != ChannelSelectorType::CHANNEL_UNKNOWN)
+      {
+        _xChannelSelector->SetBaseValInternal<ChannelSelectorType>(propertyValue);
+      }
+    }
+    else if (name == SVGNames::YChannelSelectorAttr())
+    {
+      auto propertyValue = SVGPropertyTraits<ChannelSelectorType>::FromString(*this, string);
+      if (propertyValue != ChannelSelectorType::CHANNEL_UNKNOWN)
+      {
+        _yChannelSelector->SetBaseValInternal<ChannelSelectorType>(propertyValue);
+      }
+    }
+    else if (name == SVGNames::InAttr())
+    {
+      _in1->SetBaseValInternal(DOMString(string));
+    }
+    else if (name == SVGNames::In2Attr())
+    {
+      _in2->SetBaseValInternal(DOMString(string));
+    }
+    else if (name == SVGNames::ScaleAttr())
+    {
+      _scale->SetBaseValInternal(svg::ToFloatOrZero(string));
+    }
+
+    SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
+  }
+
+  bool SVGFEDisplacementMapElement::SetFilterEffectAttribute(FilterEffect &filterEffect,
+                                                             const QualifiedName &attributeName) noexcept
+  {
+    auto &effect = Downcast<FEDisplacementMap>(filterEffect);
+    if (attributeName == SVGNames::XChannelSelectorAttr())
+    {
+      return effect.SetXChannelSelector(XChannelSelector());
+    }
+    if (attributeName == SVGNames::YChannelSelectorAttr())
+    {
+      return effect.SetYChannelSelector(YChannelSelector());
+    }
+    if (attributeName == SVGNames::ScaleAttr())
+    {
+      return effect.SetScale(Scale());
+    }
+
+    krys_debug_assert_msg(false, "Not reached");
+    return false;
+  }
+
+  void SVGFEDisplacementMapElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
+  {
+    if (attributeName == SVGNames::InAttr() || attributeName == SVGNames::In2Attr())
+    {
+      InstanceInvalidationGuard guard(*this);
+      UpdateSVGRendererForElementChange();
+      return;
+    }
+
+    if (attributeName == SVGNames::XChannelSelectorAttr() || attributeName == SVGNames::YChannelSelectorAttr()
+        || attributeName == SVGNames::ScaleAttr())
+    {
+      InstanceInvalidationGuard guard(*this);
+      PrimitiveAttributeChanged(attributeName);
+      return;
+    }
+
+    SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(attributeName);
+  }
+
+  IntOutsets SVGFEDisplacementMapElement::Outsets(const RectF &targetBoundingBox,
+                                                  SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
+  {
+    auto halfScale = std::abs(Scale() / 2);
+    auto maxDisplacement = SizeF {halfScale, halfScale};
+    auto adjustedDisplacement =
+      SVGFilterRenderer::CalculateResolvedSize(maxDisplacement, targetBoundingBox, primitiveUnits);
+    return FEDisplacementMap::CalculateOutsets(adjustedDisplacement);
+  }
+
+  RefPtr<FilterEffect> SVGFEDisplacementMapElement::CreateFilterEffect(const FilterEffectVector &,
+                                                                       const GraphicsContext &) const noexcept
+  {
+    return FEDisplacementMap::Create(XChannelSelector(), YChannelSelector(), Scale());
+  }
+}

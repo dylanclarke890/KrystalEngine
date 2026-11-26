@@ -1,0 +1,126 @@
+﻿/*
+ * Copyright (C) 2021 Tyler Wilcock <twilco.o@protonmail.com>.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Css/CSSOM/CSSRule.hpp"
+#include "Krystal.Web/Css/Properties/PropertyId.hpp"
+
+namespace krys::web::css
+{
+  struct CounterStyleDescriptors;
+  class CounterStyleRule;
+  class Value;
+}
+
+namespace krys::web
+{
+  /// @brief An `@counter-style` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-counter-styles/#the-csscounterstylerule-interface
+  class CSSCounterStyleRule final : public CSSRule
+  {
+  private:
+    Ref<css::CounterStyleRule> _counterStyleRule;
+
+    CSSCounterStyleRule(css::CounterStyleRule &counterStyleRule, CSSStyleSheet *parent) noexcept;
+
+  public:
+    ~CSSCounterStyleRule() noexcept override;
+
+    KRYS_NODISCARD static Ref<CSSCounterStyleRule> Create(css::CounterStyleRule &rule,
+                                                          CSSStyleSheet *sheet) noexcept;
+
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+
+    void Reattach(css::Rule &rule) noexcept final;
+
+    KRYS_NODISCARD css::RuleType StyleRuleType() const noexcept final
+    {
+      return css::RuleType::CounterStyle;
+    }
+
+    KRYS_NODISCARD CSSOMString Name() const noexcept;
+
+    KRYS_NODISCARD CSSOMString System() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Negative() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Prefix() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Suffix() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Range() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Pad() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Fallback() const noexcept;
+
+    KRYS_NODISCARD CSSOMString Symbols() const noexcept;
+
+    KRYS_NODISCARD CSSOMString AdditiveSymbols() const noexcept;
+
+    KRYS_NODISCARD CSSOMString SpeakAs() const noexcept;
+
+    void SetName(const CSSOMString &text) noexcept;
+
+    void SetSystem(const CSSOMString &text) noexcept;
+
+    void SetNegative(const CSSOMString &text) noexcept;
+
+    void SetPrefix(const CSSOMString &text) noexcept;
+
+    void SetSuffix(const CSSOMString &text) noexcept;
+
+    void SetRange(const CSSOMString &text) noexcept;
+
+    void SetPad(const CSSOMString &text) noexcept;
+
+    void SetFallback(const CSSOMString &text) noexcept;
+
+    void SetSymbols(const CSSOMString &text) noexcept;
+
+    void SetAdditiveSymbols(const CSSOMString &text) noexcept;
+
+    void SetSpeakAs(const CSSOMString &text) noexcept;
+
+  private:
+    KRYS_NODISCARD RefPtr<css::Value> CSSValueFromText(css::PropertyId property,
+                                                       const CSSOMString &text) const noexcept;
+
+    KRYS_NODISCARD const css::CounterStyleDescriptors &Descriptors() const noexcept;
+
+    KRYS_NODISCARD css::CounterStyleDescriptors &MutableDescriptors() noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::CSSCounterStyleRule)
+  KRYS_NODISCARD static bool IsType(const krys::web::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::web::css::RuleType::CounterStyle;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

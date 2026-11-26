@@ -1,0 +1,264 @@
+﻿/*
+ * Copyright (C) 2017-2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Rendering/Painting/MarkedText.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Css/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
+#include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Web/Rendering/RenderText.hpp"
+#include "Krystal.Web/Rendering/Selection/RenderHighlight.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Style/PseudoElementRequest.hpp"
+#include <algorithm>
+#include <limits>
+
+namespace krys::web
+{
+  List<MarkedText> MarkedText::Subdivide(const List<MarkedText> &markedTexts, OverlapStrategy overlapStrategy)
+  {
+    if (markedTexts.empty())
+    {
+      return {};
+    }
+
+    struct Offset
+    {
+      enum Kind
+      {
+        Begin,
+        End,
+      };
+
+      Kind OffsetKind;
+      uint32 Value; // Copy of markedText.startOffset/endOffset to avoid the need to branch based on kind.
+      const MarkedText *Text;
+    };
+
+    // 1. Build table of all offsets.
+    List<Offset> offsets;
+    krys_debug_assert(markedTexts.size() < std::numeric_limits<uint32>::max() / 2);
+    uint32 numberOfMarkedTexts = static_cast<uint32>(markedTexts.size());
+    uint32 numberOfOffsets = 2 * numberOfMarkedTexts;
+    offsets.reserve(numberOfOffsets);
+    for (auto &markedText : markedTexts)
+    {
+      offsets.push_back({Offset::Begin, markedText.StartOffset, &markedText});
+      offsets.push_back({Offset::End, markedText.EndOffset, &markedText});
+    }
+
+    // 2. Sort offsets such that begin offsets are in paint order and end offsets are in reverse paint order.
+    std::ranges::stable_sort(
+      offsets,
+      [](const Offset &a, const Offset &b)
+      {
+        return a.Value < b.Value
+               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind && a.OffsetKind == Offset::Begin
+                   && a.Text->MarkedType < b.Text->MarkedType)
+               || (a.Value == b.Value && a.OffsetKind == b.OffsetKind && a.OffsetKind == Offset::End
+                   && a.Text->MarkedType > b.Text->MarkedType);
+      });
+
+    // 3. Compute intersection.
+    List<MarkedText> result;
+    result.reserve(numberOfMarkedTexts);
+    HashSet<const MarkedText *> processedMarkedTexts;
+    uint32 offsetSoFar = offsets[0].Value;
+    for (uint32 i = 1; i < numberOfOffsets; ++i)
+    {
+      if (offsets[i].Value > offsets[i - 1].Value)
+      {
+        if (overlapStrategy == OverlapStrategy::Frontmost)
+        {
+          Maybe<uint32> frontmost;
+          for (uint32 j = 0; j < i; ++j)
+          {
+            if (!processedMarkedTexts.contains(offsets[j].Text)
+                && (!frontmost || offsets[j].Text->MarkedType > offsets[*frontmost].Text->MarkedType))
+            {
+              frontmost = j;
+            }
+          }
+          if (frontmost)
+          {
+            result.emplace_back(offsetSoFar, offsets[i].Value, offsets[*frontmost].Text->MarkedType,
+                                offsets[*frontmost].Text->HighlightName);
+          }
+        }
+        else
+        {
+          // The appended marked texts may not be in paint order. We will fix this up at the end of this
+          // function.
+          for (uint32 j = 0; j < i; ++j)
+          {
+            if (!processedMarkedTexts.contains(offsets[j].Text))
+            {
+              result.emplace_back(offsetSoFar, offsets[i].Value, offsets[j].Text->MarkedType,
+                                  offsets[j].Text->HighlightName, offsets[j].Text->Priority);
+            }
+          }
+        }
+        offsetSoFar = offsets[i].Value;
+      }
+      if (offsets[i].OffsetKind == Offset::End)
+      {
+        processedMarkedTexts.insert(offsets[i].Text);
+      }
+    }
+    // Fix up; sort the marked texts so that they are in paint order.
+    if (overlapStrategy == OverlapStrategy::None)
+    {
+      // Stable, so that highlights of equal priority keep the order they were registered in.
+      std::ranges::stable_sort(result,
+                               [](const MarkedText &a, const MarkedText &b)
+                               {
+                                 if (a.StartOffset != b.StartOffset)
+                                 {
+                                   return a.StartOffset < b.StartOffset;
+                                 }
+                                 if (a.MarkedType != b.MarkedType)
+                                 {
+                                   return a.MarkedType < b.MarkedType;
+                                 }
+                                 return a.Priority < b.Priority;
+                               });
+    }
+    return result;
+  }
+
+  List<MarkedText> MarkedText::CollectForHighlights(const RenderText &renderer,
+                                                    const TextBoxSelectableRange &selectableRange,
+                                                    PaintPhase phase) noexcept
+  {
+    List<MarkedText> markedTexts;
+    RenderHighlight renderHighlight;
+    auto &parentRenderer = *renderer.Parent();
+    auto &parentStyle = parentRenderer.Style();
+    auto &document = renderer.GetDocument();
+    if (auto *highlightRegistry = document.HighlightRegistryIfExists())
+    {
+      for (auto &highlightName : highlightRegistry->HighlightNames())
+      {
+        auto renderStyle = parentRenderer.GetUncachedPseudoStyle(
+          style::PseudoElementRequest(PseudoElementType::Highlight, highlightName), &parentStyle);
+        if (!renderStyle)
+        {
+          continue;
+        }
+        if (renderStyle->TextDecorationLineInEffect().IsNone() && phase == PaintPhase::Decoration)
+        {
+          continue;
+        }
+        auto *highlight = highlightRegistry->Get(highlightName);
+        for (auto &highlightRange : highlight->HighlightRanges())
+        {
+          if (!renderHighlight.SetRenderRange(*highlightRange))
+          {
+            continue;
+          }
+          // A collapsed range highlights nothing, live or static.
+          if (highlightRange->Range().Collapsed())
+          {
+            continue;
+          }
+          // A range in another tree, or an invalid static range, is ignored.
+          // https://drafts.csswg.org/css-highlight-api-1/#range-invalidation
+          auto &range = highlightRange->Range();
+          if (&dom::TreeQueries::ShadowIncludingRoot(*range.StartContainer()) != &document
+              || &dom::TreeQueries::ShadowIncludingRoot(*range.EndContainer()) != &document)
+          {
+            continue;
+          }
+          if (auto *staticRange = DynamicDowncast<dom::StaticRange>(range);
+              staticRange && !staticRange->IsValid())
+          {
+            continue;
+          }
+          // FIXME: Potentially move this check elsewhere, to where we collect this range information.
+          auto hasRenderer = [&]
+          {
+            for (auto &node : dom::IntersectingNodes(dom::CreateSimpleRange(highlightRange->Range())))
+            {
+              if (node.Renderer())
+              {
+                return true;
+              }
+            }
+            return false;
+          }();
+          if (!hasRenderer)
+          {
+            continue;
+          }
+
+          auto [highlightStart, highlightEnd] = renderHighlight.RangeForTextBox(renderer, selectableRange);
+
+          if (highlightStart < highlightEnd)
+          {
+            // Kept in paint order: by priority, then by registration, so the most recently registered of
+            // equal priority is on top. https://drafts.csswg.org/css-highlight-api-1/#priorities
+            int32 currentPriority = highlight->Priority();
+            auto it = std::ranges::upper_bound(markedTexts, currentPriority, {}, &MarkedText::Priority);
+            markedTexts.insert(
+              it, MarkedText(highlightStart, highlightEnd, Type::Highlight, highlightName, currentPriority));
+          }
+        }
+      }
+    }
+
+    auto appendMarkedTextHighlights = [&](const HighlightRegistry &registry, Type markedTextType)
+    {
+      for (auto &[name, highlight] : registry.Map())
+      {
+        for (auto &highlightRange : highlight->HighlightRanges())
+        {
+          if (!renderHighlight.SetRenderRange(*highlightRange))
+          {
+            continue;
+          }
+
+          auto [highlightStart, highlightEnd] = renderHighlight.RangeForTextBox(renderer, selectableRange);
+          if (highlightStart < highlightEnd)
+          {
+            markedTexts.emplace_back(highlightStart, highlightEnd, markedTextType);
+          }
+        }
+      }
+    };
+
+    if (auto *registry = document.FragmentHighlightRegistryIfExists())
+    {
+      appendMarkedTextHighlights(*registry, Type::FragmentHighlight);
+    }
+
+    // (There are no text extraction or app highlights; see DIFFERENCES.md.)
+    return markedTexts;
+  }
+}

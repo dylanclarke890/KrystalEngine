@@ -1,0 +1,141 @@
+﻿/*
+ * Copyright (C) 2009 Dirk Schulze <krit@webkit.org>
+ * Copyright (C) 2018-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2015 Google Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Elements/SVGFEMorphologyElement.hpp"
+#include "Krystal.Web/Svg/Graphics/Filters/SVGFilterRenderer.hpp"
+#include "Krystal.Web/Svg/Internals/SVGParserUtilities.hpp"
+#include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Web/Svg/SVGNames.hpp"
+#include <algorithm>
+
+namespace krys::web
+{
+  SVGFEMorphologyElement::SVGFEMorphologyElement(Document &document) noexcept
+      : SVGFilterPrimitiveStandardAttributes(document, CreateUnique<PropertyRegistry>(*this),
+                                             SVGElementInterface::FEMorphology),
+        _in1(SVGAnimatedString::Create(this)),
+        _svgOperator(SVGAnimatedEnumeration::Create(this, MorphologyOperatorType::Erode)),
+        _radiusX(SVGAnimatedNumber::Create(this)), _radiusY(SVGAnimatedNumber::Create(this))
+  {
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGFEMorphologyElement::_in1>(SVGNames::InAttr());
+      PropertyRegistry::RegisterProperty<MorphologyOperatorType, &SVGFEMorphologyElement::_svgOperator>(
+        SVGNames::OperatorAttr());
+      PropertyRegistry::RegisterProperty<&SVGFEMorphologyElement::_radiusX,
+                                         &SVGFEMorphologyElement::_radiusY>(SVGNames::RadiusAttr());
+    }
+  }
+
+  void SVGFEMorphologyElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                                Maybe<DOMStringView> value) noexcept
+  {
+    auto string = value.value_or(DOMStringView {});
+
+    if (name == SVGNames::OperatorAttr())
+    {
+      auto propertyValue = SVGPropertyTraits<MorphologyOperatorType>::FromString(*this, string);
+      if (propertyValue != MorphologyOperatorType::Unknown)
+      {
+        _svgOperator->SetBaseValInternal<MorphologyOperatorType>(propertyValue);
+      }
+    }
+    else if (name == SVGNames::InAttr())
+    {
+      _in1->SetBaseValInternal(DOMString(string));
+    }
+    else if (name == SVGNames::RadiusAttr())
+    {
+      if (auto result = svg::ParseNumberOptionalNumber(string))
+      {
+        _radiusX->SetBaseValInternal(result->first);
+        _radiusY->SetBaseValInternal(result->second);
+      }
+    }
+
+    SVGFilterPrimitiveStandardAttributes::AttributeChanged(name, oldValue, value);
+  }
+
+  bool SVGFEMorphologyElement::SetFilterEffectAttribute(FilterEffect &effect,
+                                                        const QualifiedName &attributeName) noexcept
+  {
+    auto &feMorphology = Downcast<FEMorphology>(effect);
+    if (attributeName == SVGNames::OperatorAttr())
+    {
+      return feMorphology.SetMorphologyOperator(SVGOperator());
+    }
+    if (attributeName == SVGNames::RadiusAttr())
+    {
+      // Both setRadius functions should be evaluated separately.
+      bool isRadiusXChanged = feMorphology.SetRadiusX(RadiusX());
+      bool isRadiusYChanged = feMorphology.SetRadiusY(RadiusY());
+      return isRadiusXChanged || isRadiusYChanged;
+    }
+
+    krys_debug_assert_msg(false, "Not reached");
+    return false;
+  }
+
+  void SVGFEMorphologyElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
+  {
+    if (attributeName == SVGNames::InAttr())
+    {
+      InstanceInvalidationGuard guard(*this);
+      UpdateSVGRendererForElementChange();
+      return;
+    }
+
+    if (attributeName == SVGNames::OperatorAttr() || attributeName == SVGNames::RadiusAttr())
+    {
+      InstanceInvalidationGuard guard(*this);
+      PrimitiveAttributeChanged(attributeName);
+      return;
+    }
+
+    SVGFilterPrimitiveStandardAttributes::SVGAttributeChanged(attributeName);
+  }
+
+  bool SVGFEMorphologyElement::IsIdentity() const noexcept
+  {
+    return !std::max(0.0f, RadiusX()) && !std::max(0.0f, RadiusY());
+  }
+
+  IntOutsets SVGFEMorphologyElement::Outsets(const RectF &targetBoundingBox,
+                                             SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept
+  {
+    auto radius =
+      SVGFilterRenderer::CalculateResolvedSize({RadiusX(), RadiusY()}, targetBoundingBox, primitiveUnits);
+    return {static_cast<int>(radius.Height()), static_cast<int>(radius.Width()),
+            static_cast<int>(radius.Height()), static_cast<int>(radius.Width())};
+  }
+
+  RefPtr<FilterEffect> SVGFEMorphologyElement::CreateFilterEffect(const FilterEffectVector &,
+                                                                  const GraphicsContext &) const noexcept
+  {
+    // "A negative or zero value disables the effect of the given filter
+    // primitive (i.e., the result is the filter input image)."
+    // https://drafts.fxtf.org/filters/#element-attrdef-femorphology-radius
+    // This is handled by FEMorphology.
+    return FEMorphology::Create(SVGOperator(), RadiusX(), RadiusY());
+  }
+}

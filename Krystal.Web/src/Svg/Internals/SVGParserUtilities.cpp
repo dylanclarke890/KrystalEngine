@@ -1,0 +1,383 @@
+﻿/*
+ * Copyright (C) 2002, 2003 The Karbon Developers
+ * Copyright (C) 2006 Alexander Kellett <lypanov@kde.org>
+ * Copyright (C) 2006, 2007 Rob Buis <buis@kde.org>
+ * Copyright (C) 2007-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2016-2018 Google Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Internals/SVGParserUtilities.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
+#include <charconv>
+#include <cmath>
+
+namespace krys::web::svg
+{
+  namespace
+  {
+    template <typename TFloat>
+    KRYS_NODISCARD bool IsValidRange(const TFloat x) noexcept
+    {
+      constexpr TFloat max = Limits<TFloat>::max();
+      return x >= -max && x <= max;
+    }
+
+    KRYS_NODISCARD bool StartsWithDigit(const DOMStringView &buffer) noexcept
+    {
+      return !buffer.empty() && text::IsASCIIDigit(buffer.front());
+    }
+
+    // We use this generic parseNumber function to allow the Path parsing code to work
+    // at a higher precision internally, without any unnecessary runtime cost or code
+    // complexity.
+    // FIXME: Can this be shared/replaced with number parsing in WTF?
+    template <typename TFloat = float>
+    KRYS_NODISCARD Maybe<TFloat>
+      GenericParseNumber(DOMStringView &buffer,
+                         SuffixSkippingPolicy skip = SuffixSkippingPolicy::Skip) noexcept
+    {
+      // read the sign
+      int sign = 1;
+      if (!buffer.empty() && buffer.front() == '+')
+      {
+        buffer.remove_prefix(1);
+      }
+      else if (!buffer.empty() && buffer.front() == '-')
+      {
+        buffer.remove_prefix(1);
+        sign = -1;
+      }
+
+      if (buffer.empty() || (!text::IsASCIIDigit(buffer.front()) && buffer.front() != '.'))
+      {
+        return {};
+      }
+
+      // read the integer part, build right-to-left
+      auto spanDigitsStart = buffer;
+
+      // Advance to first non-digit.
+      while (StartsWithDigit(buffer))
+      {
+        buffer.remove_prefix(1);
+      }
+
+      TFloat integer = 0;
+      size_t indexScanIntPart = spanDigitsStart.size() - buffer.size();
+      if (indexScanIntPart > 0)
+      {
+        TFloat multiplier = 1;
+        for (size_t i = indexScanIntPart; i > 0; --i)
+        {
+          integer += multiplier * static_cast<TFloat>(spanDigitsStart[i - 1] - '0');
+          multiplier *= 10;
+        }
+        // Bail out early if this overflows.
+        if (!IsValidRange(integer))
+        {
+          return {};
+        }
+      }
+
+      // read the decimals
+      TFloat decimal = 0;
+      if (!buffer.empty() && buffer.front() == '.')
+      {
+        buffer.remove_prefix(1);
+
+        // There must be a least one digit following the .
+        if (!StartsWithDigit(buffer))
+        {
+          return {};
+        }
+
+        TFloat frac = 1;
+        while (StartsWithDigit(buffer))
+        {
+          frac *= static_cast<TFloat>(0.1);
+          decimal += (buffer.front() - '0') * frac;
+          buffer.remove_prefix(1);
+        }
+      }
+
+      // When we get here we should have consumed either a digit for the integer
+      // part or a fractional part (with at least one digit after the '.'.)
+      krys_debug_assert(spanDigitsStart.size() != buffer.size());
+
+      TFloat number = 0;
+      number = integer + decimal;
+      number *= sign;
+
+      // read the exponent part
+      if (buffer.size() > 1 && (buffer[0] == 'e' || buffer[0] == 'E')
+          && (buffer[1] != 'x' && buffer[1] != 'm'))
+      {
+        buffer.remove_prefix(1);
+
+        // read the sign of the exponent
+        bool exponentIsNegative = false;
+        if (buffer.front() == '+')
+        {
+          buffer.remove_prefix(1);
+        }
+        else if (buffer.front() == '-')
+        {
+          buffer.remove_prefix(1);
+          exponentIsNegative = true;
+        }
+
+        // There must be an exponent
+        if (!StartsWithDigit(buffer))
+        {
+          return {};
+        }
+
+        TFloat exponent = 0;
+        while (StartsWithDigit(buffer))
+        {
+          exponent *= static_cast<TFloat>(10);
+          exponent += buffer.front() - '0';
+          buffer.remove_prefix(1);
+        }
+
+        // FIXME: This is unnecessairly strict - the position of the decimal point
+        // is not taken into account when limiting 'exponent'.
+        if (exponentIsNegative)
+        {
+          exponent = -exponent;
+        }
+
+        // Fail if the exponent is greater than the largest positive power of ten
+        // (that would yield a representable float).
+        if (exponent > Limits<TFloat>::max_exponent10)
+        {
+          return {};
+        }
+
+        // If the exponent is smaller than smallest negative power of 10 (that
+        // would yield a representable float), then rely on the pow()+rounding to
+        // produce a reasonable result (likely zero.)
+        if (exponent)
+        {
+          number *= static_cast<TFloat>(std::pow(10.0, exponent));
+        }
+      }
+
+      // Don't return Infinity() or NaN().
+      if (!IsValidRange(number))
+      {
+        return {};
+      }
+
+      if (skip == SuffixSkippingPolicy::Skip)
+      {
+        SkipOptionalSVGSpacesOrDelimiter(buffer);
+      }
+
+      return number;
+    }
+  }
+
+  Maybe<float> ParseNumber(DOMStringView &buffer, SuffixSkippingPolicy skip) noexcept
+  {
+    return GenericParseNumber(buffer, skip);
+  }
+
+  Maybe<float> ParseNumberFromString(DOMStringView string, SuffixSkippingPolicy skip) noexcept
+  {
+    auto result = GenericParseNumber(string, skip);
+    if (!string.empty())
+    {
+      return {};
+    }
+    return result;
+  }
+
+  // only used to parse largeArcFlag and sweepFlag which must be a "0" or "1"
+  // and might not have any whitespace/comma after it
+  Maybe<bool> ParseArcFlag(DOMStringView &buffer) noexcept
+  {
+    if (buffer.empty())
+    {
+      return {};
+    }
+
+    const auto flagChar = buffer.front();
+    buffer.remove_prefix(1);
+
+    bool flag;
+    if (flagChar == '0')
+    {
+      flag = false;
+    }
+    else if (flagChar == '1')
+    {
+      flag = true;
+    }
+    else
+    {
+      return {};
+    }
+
+    SkipOptionalSVGSpacesOrDelimiter(buffer);
+
+    return flag;
+  }
+
+  float ToFloatOrZero(DOMStringView string) noexcept
+  {
+    while (!string.empty() && text::IsASCIIWhitespace(string.front()))
+    {
+      string.remove_prefix(1);
+    }
+    if (!string.empty() && string.front() == u8'+')
+    {
+      string.remove_prefix(1);
+    }
+
+    float value = 0;
+    auto first = reinterpret_cast<const char *>(string.data());
+    auto last = first + string.size();
+    auto result = std::from_chars(first, last, value);
+    return result.ec == std::errc {} && result.ptr == last ? value : 0;
+  }
+
+  Maybe<double> ToDouble(DOMStringView string) noexcept
+  {
+    while (!string.empty() && text::IsASCIIWhitespace(string.front()))
+    {
+      string.remove_prefix(1);
+    }
+    if (!string.empty() && string.front() == u8'+')
+    {
+      string.remove_prefix(1);
+    }
+
+    double value = 0;
+    auto first = reinterpret_cast<const char *>(string.data());
+    auto last = first + string.size();
+    auto result = std::from_chars(first, last, value);
+    if (result.ec != std::errc {} || result.ptr != last)
+    {
+      return {};
+    }
+    return value;
+  }
+
+  Maybe<std::pair<float, float>> ParseNumberOptionalNumber(DOMStringView string) noexcept
+  {
+    if (string.empty())
+    {
+      return {};
+    }
+
+    auto x = ParseNumber(string);
+    if (!x)
+    {
+      return {};
+    }
+
+    if (string.empty())
+    {
+      return std::make_pair(*x, *x);
+    }
+
+    auto y = ParseNumber(string, SuffixSkippingPolicy::DontSkip);
+    if (!y)
+    {
+      return {};
+    }
+
+    if (!string.empty())
+    {
+      return {};
+    }
+
+    return std::make_pair(*x, *y);
+  }
+
+  Maybe<PointF> ParsePoint(DOMStringView string) noexcept
+  {
+    if (string.empty())
+    {
+      return {};
+    }
+
+    if (!SkipOptionalSVGSpaces(string))
+    {
+      return {};
+    }
+
+    auto point = ParsePointF(string);
+    if (!point)
+    {
+      return {};
+    }
+
+    // Disallow anything except spaces at the end.
+    SkipOptionalSVGSpaces(string);
+
+    return point;
+  }
+
+  Maybe<RectF> ParseRect(DOMStringView string) noexcept
+  {
+    SkipOptionalSVGSpaces(string);
+
+    auto x = ParseNumber(string);
+    if (!x)
+    {
+      return {};
+    }
+    auto y = ParseNumber(string);
+    if (!y)
+    {
+      return {};
+    }
+    auto width = ParseNumber(string);
+    if (!width)
+    {
+      return {};
+    }
+    auto height = ParseNumber(string, SuffixSkippingPolicy::DontSkip);
+    if (!height)
+    {
+      return {};
+    }
+
+    return RectF {*x, *y, *width, *height};
+  }
+
+  Maybe<PointF> ParsePointF(DOMStringView &buffer) noexcept
+  {
+    auto x = ParseNumber(buffer);
+    if (!x)
+    {
+      return {};
+    }
+
+    auto y = ParseNumber(buffer);
+    if (!y)
+    {
+      return {};
+    }
+
+    return PointF {*x, *y};
+  }
+}

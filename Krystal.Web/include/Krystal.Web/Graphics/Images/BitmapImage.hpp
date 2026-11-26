@@ -1,0 +1,261 @@
+﻿/*
+ * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
+ * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2008-2009 Torch Mobile, Inc.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Graphics/Images/Image.hpp"
+#include "Krystal.Web/Graphics/Images/ImageSource.hpp"
+
+namespace krys::web
+{
+  class NativeImage;
+
+  /// @brief An image decoded from encoded data (PNG, JPEG, WebP, GIF, BMP or ICO), or made from a native
+  /// image.
+  class BitmapImage final : public Image
+  {
+  private:
+    Ref<ImageSource> _source;
+
+  public:
+    KRYS_NODISCARD static Ref<BitmapImage>
+      Create(ImageObserver * = nullptr, img::AlphaOption = img::AlphaOption::Premultiplied,
+             img::GammaAndColorProfileOption = img::GammaAndColorProfileOption::Applied) noexcept;
+
+    KRYS_NODISCARD static Ref<BitmapImage> Create(Ref<NativeImage> &&) noexcept;
+
+    KRYS_NODISCARD static RefPtr<BitmapImage> Create(RefPtr<NativeImage> &&) noexcept;
+
+    KRYS_NODISCARD static RefPtr<BitmapImage> Create(PlatformImagePtr &&) noexcept;
+
+    // Animation
+    void StartAnimation() noexcept final
+    {
+      _source->StartAnimation();
+    }
+
+    void StopAnimation() noexcept final
+    {
+      _source->StopAnimation();
+    }
+
+    void ResetAnimation() noexcept final
+    {
+      _source->ResetAnimation();
+    }
+
+    KRYS_NODISCARD bool IsAnimated() const noexcept final
+    {
+      return _source->IsAnimated();
+    }
+
+    KRYS_NODISCARD bool HasEverAnimated() const noexcept
+    {
+      return _source->HasEverAnimated();
+    }
+
+    // Decoding
+    KRYS_NODISCARD bool IsLargeForDecoding() const noexcept
+    {
+      return _source->IsLargeForDecoding();
+    }
+
+    void StopDecodingWorkQueue() noexcept
+    {
+      _source->StopDecodingWorkQueue();
+    }
+
+    void Decode(Func<void(img::DecodingStatus)> &&decodeCallback) noexcept
+    {
+      _source->Decode(krys::move(decodeCallback));
+    }
+
+    // Current ImageFrame
+    KRYS_NODISCARD uint32 CurrentFrameIndex() const noexcept
+    {
+      return _source->CurrentFrameIndex();
+    }
+
+    KRYS_NODISCARD bool CurrentFrameHasAlpha() const noexcept
+    {
+      return _source->CurrentImageFrame().HasAlpha();
+    }
+
+    KRYS_NODISCARD img::ImageOrientation CurrentFrameOrientation() const noexcept
+    {
+      return _source->CurrentImageFrame().Orientation();
+    }
+
+    KRYS_NODISCARD DecodingOptions CurrentFrameDecodingOptions() const noexcept
+    {
+      return _source->CurrentImageFrame().GetDecodingOptions();
+    }
+
+    // Primary & current NativeImage
+    KRYS_NODISCARD RefPtr<NativeImage> PrimaryNativeImage() noexcept
+    {
+      return _source->PrimaryNativeImage();
+    }
+
+    KRYS_NODISCARD RefPtr<NativeImage> GetNativeImage() noexcept final
+    {
+      return PrimaryNativeImage();
+    }
+
+    KRYS_NODISCARD RefPtr<NativeImage> CurrentNativeImage() noexcept final
+    {
+      return _source->CurrentNativeImage();
+    }
+
+    // Image Metadata
+    KRYS_NODISCARD SizeF Size(
+      img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
+    {
+      return SizeF(_source->Size(orientation));
+    }
+
+    KRYS_NODISCARD SizeF SourceSize(
+      img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage) const noexcept final
+    {
+      return SizeF(_source->SourceSize(orientation));
+    }
+
+    KRYS_NODISCARD img::ImageOrientation Orientation() const noexcept final
+    {
+      return _source->Orientation();
+    }
+
+    KRYS_NODISCARD uint32 FrameCount() const noexcept final
+    {
+      return _source->FrameCount();
+    }
+
+    // ImageFrame
+    KRYS_NODISCARD seconds FrameDurationAtIndex(uint32 index) const noexcept
+    {
+      return _source->FrameDurationAtIndex(index);
+    }
+
+    // NativeImage
+    KRYS_NODISCARD RefPtr<NativeImage> NativeImageAtIndex(uint32 index) noexcept final
+    {
+      return _source->NativeImageAtIndex(index);
+    }
+
+    // Encoded and decoded data
+    img::EncodedDataStatus DataChanged(bool allDataReceived) noexcept final;
+
+    void DestroyDecodedData(bool destroyAll = true) noexcept final;
+
+    // Image Metadata
+    KRYS_NODISCARD bool HasDensityCorrectedSize() const noexcept final
+    {
+      return _source->HasDensityCorrectedSize();
+    }
+
+    KRYS_NODISCARD utf8_string FilenameExtension() const noexcept final
+    {
+      return _source->FilenameExtension();
+    }
+
+    KRYS_NODISCARD utf8_string AccessibilityDescription() const noexcept final
+    {
+      return _source->AccessibilityDescription();
+    }
+
+    KRYS_NODISCARD Maybe<PointI> HotSpot() const noexcept final
+    {
+      return _source->HotSpot();
+    }
+
+    // Image methods
+    KRYS_NODISCARD bool IsBitmapImage() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsAnimating() const noexcept final
+    {
+      return _source->IsAnimating();
+    }
+
+    // Current ImageFrame
+    KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept final
+    {
+      return !CurrentFrameHasAlpha();
+    }
+
+    KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept final
+    {
+      return _source->CurrentImageFrame().IsComplete();
+    }
+
+    void DrawDensityCorrectedPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                     const AffineTransform &, const PointF &phase, const SizeF &spacing,
+                                     ImagePaintingOptions) noexcept;
+
+    void DrawPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                     const AffineTransform &patternTransform, const PointF &phase, const SizeF &spacing,
+                     ImagePaintingOptions = {}) noexcept final;
+
+    void Dump(TextStream &) const noexcept final;
+
+  private:
+    BitmapImage(ImageObserver *, img::AlphaOption, img::GammaAndColorProfileOption) noexcept;
+
+    /// @brief Draws the pattern of the tile turned into a luminance mask.
+    void DrawLuminanceMaskPattern(GraphicsContext &, const RectF &destinationRect, const RectF &tileRect,
+                                  const AffineTransform &, const PointF &phase, const SizeF &spacing,
+                                  ImagePaintingOptions) noexcept;
+
+    explicit BitmapImage(Ref<NativeImage> &&) noexcept;
+
+    // Current NativeImage
+    KRYS_NODISCARD RefPtr<NativeImage>
+      CurrentPreTransformedNativeImage(img::ImageOrientation orientation) noexcept final
+    {
+      return _source->CurrentPreTransformedNativeImage(orientation);
+    }
+
+    // Image Metadata
+    KRYS_NODISCARD Maybe<Color> SinglePixelSolidColor() const noexcept final
+    {
+      return _source->SinglePixelSolidColor();
+    }
+
+    ImageDrawResult Draw(GraphicsContext &, const RectF &destinationRect, const RectF &sourceRect,
+                         ImagePaintingOptions = {}) noexcept final;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::BitmapImage)
+  KRYS_NODISCARD static bool IsType(const krys::web::Image &image) noexcept
+  {
+    return image.IsBitmapImage();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

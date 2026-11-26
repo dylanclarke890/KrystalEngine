@@ -1,0 +1,352 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style
+{
+  // Specialization for `CSSOMString`.
+  template <>
+  struct CSSValueConversion<CSSOMString>
+  {
+    KRYS_NODISCARD CSSOMString operator()(BuilderState &state, const css::PrimitiveValue &value) noexcept
+    {
+      if (!value.IsString()) KRYS_UNLIKELY
+      {
+        state.SetCurrentPropertyInvalidAtComputedValueTime();
+        return {};
+      }
+      return value.StringValue();
+    }
+
+    KRYS_NODISCARD CSSOMString operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
+      if (!primitiveValue) KRYS_UNLIKELY
+      {
+        return {};
+      }
+      return (*this)(state, *primitiveValue);
+    }
+  };
+
+  // Specialization for `CSSOMStringAtom`.
+  template <>
+  struct CSSValueConversion<CSSOMStringAtom>
+  {
+    KRYS_NODISCARD CSSOMStringAtom operator()(BuilderState &state, const css::PrimitiveValue &value) noexcept
+    {
+      if (!value.IsString()) KRYS_UNLIKELY
+      {
+        state.SetCurrentPropertyInvalidAtComputedValueTime();
+        return CSSOMStringAtom::Empty();
+      }
+      return CSSOMStringAtom {value.StringValue()};
+    }
+
+    KRYS_NODISCARD CSSOMStringAtom operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
+      if (!primitiveValue) KRYS_UNLIKELY
+      {
+        return CSSOMStringAtom::Empty();
+      }
+      return (*this)(state, *primitiveValue);
+    }
+  };
+
+  // Specialization for `css::CustomIdentifier`.
+  template <>
+  struct CSSValueConversion<css::CustomIdentifier>
+  {
+    KRYS_NODISCARD css::CustomIdentifier operator()(BuilderState &state,
+                                                    const css::PrimitiveValue &value) noexcept
+    {
+      if (!value.IsCustomIdent()) KRYS_UNLIKELY
+      {
+        state.SetCurrentPropertyInvalidAtComputedValueTime();
+        return {.Value = CSSOMStringAtom::Empty()};
+      }
+      return {.Value = CSSOMStringAtom {value.StringValue()}};
+    }
+
+    KRYS_NODISCARD css::CustomIdentifier operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
+      if (!primitiveValue) KRYS_UNLIKELY
+      {
+        return {.Value = CSSOMStringAtom::Empty()};
+      }
+      return (*this)(state, *primitiveValue);
+    }
+  };
+
+  // Specialization for `css::PropertyIdentifier`.
+  template <>
+  struct CSSValueConversion<css::PropertyIdentifier>
+  {
+    KRYS_NODISCARD css::PropertyIdentifier operator()(BuilderState &state,
+                                                      const css::PrimitiveValue &value) noexcept
+    {
+      if (!value.IsPropertyId()) KRYS_UNLIKELY
+      {
+        state.SetCurrentPropertyInvalidAtComputedValueTime();
+        return {.Value = css::PropertyId::Invalid};
+      }
+      return {.Value = value.PropertyId()};
+    }
+
+    KRYS_NODISCARD css::PropertyIdentifier operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      auto *primitiveValue = RequiredDowncast<css::PrimitiveValue>(state, value);
+      if (!primitiveValue) KRYS_UNLIKELY
+      {
+        return {.Value = css::PropertyId::Invalid};
+      }
+      return (*this)(state, *primitiveValue);
+    }
+  };
+
+  // Specialization for `TupleLike` (wrapper).
+  template <css::TupleLike StyleType>
+  requires(std::tuple_size_v<StyleType> == 1)
+  struct CSSValueConversion<StyleType>
+  {
+    KRYS_NODISCARD StyleType operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      return {ConvertCSSValueToStyle<remove_cvref_t<std::tuple_element_t<0, StyleType>>>(state, value)};
+    }
+  };
+
+  // Specialization for `css::SpaceSeparatedEnumSet`.
+  template <typename T>
+  struct CSSValueConversion<css::SpaceSeparatedEnumSet<T>>
+  {
+    KRYS_NODISCARD css::SpaceSeparatedEnumSet<T> operator()(BuilderState &state,
+                                                            const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value);
+          list && list->Separator() == css::ValueSeparator::Space)
+      {
+        return css::SpaceSeparatedEnumSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<T>(state, value)};
+    }
+  };
+
+  // Specialization for `css::CommaSeparatedEnumSet`.
+  template <typename T>
+  struct CSSValueConversion<css::CommaSeparatedEnumSet<T>>
+  {
+    KRYS_NODISCARD css::CommaSeparatedEnumSet<T> operator()(BuilderState &state,
+                                                            const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value);
+          list && list->Separator() == css::ValueSeparator::Comma)
+      {
+        return css::CommaSeparatedEnumSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<T>(state, value)};
+    }
+  };
+
+  // Specialization for `css::SpaceSeparatedListHashSet`.
+  template <typename T>
+  struct CSSValueConversion<css::SpaceSeparatedListHashSet<T>>
+  {
+    KRYS_NODISCARD css::SpaceSeparatedListHashSet<T> operator()(BuilderState &state,
+                                                                const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value))
+      {
+        return css::SpaceSeparatedListHashSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<T>(state, value)};
+    }
+  };
+
+  // Specialization for `css::CommaSeparatedListHashSet`.
+  template <typename T>
+  struct CSSValueConversion<css::CommaSeparatedListHashSet<T>>
+  {
+    KRYS_NODISCARD css::CommaSeparatedListHashSet<T> operator()(BuilderState &state,
+                                                                const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value))
+      {
+        return css::CommaSeparatedListHashSet<T>(
+          std::from_range, *list
+                             | std::views::transform([&](const css::Value &element)
+                                                     { return ConvertCSSValueToStyle<T>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<T>(state, value)};
+    }
+  };
+
+  // Specialization for `css::SpaceSeparatedFixedList`.
+  template <typename StyleType>
+  struct CSSValueConversion<css::SpaceSeparatedFixedList<StyleType>>
+  {
+    KRYS_NODISCARD css::SpaceSeparatedFixedList<StyleType> operator()(BuilderState &state,
+                                                                      const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value);
+          list && list->Separator() == css::ValueSeparator::Space)
+      {
+        return css::SpaceSeparatedFixedList<StyleType>(
+          std::from_range,
+          *list
+            | std::views::transform([&](const css::Value &element)
+                                    { return ConvertCSSValueToStyle<StyleType>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<StyleType>(state, value)};
+    }
+  };
+
+  // Specialization for `css::CommaSeparatedFixedList`.
+  template <typename StyleType>
+  struct CSSValueConversion<css::CommaSeparatedFixedList<StyleType>>
+  {
+    KRYS_NODISCARD css::CommaSeparatedFixedList<StyleType> operator()(BuilderState &state,
+                                                                      const css::Value &value) noexcept
+    {
+      if (auto *list = DynamicDowncast<css::ValueList>(value);
+          list && list->Separator() == css::ValueSeparator::Comma)
+      {
+        return css::CommaSeparatedFixedList<StyleType>(
+          std::from_range,
+          *list
+            | std::views::transform([&](const css::Value &element)
+                                    { return ConvertCSSValueToStyle<StyleType>(state, element); }));
+      }
+      return {ConvertCSSValueToStyle<StyleType>(state, value)};
+    }
+  };
+
+  // Specialization for `css::ValueOrKeyword`.
+  template <typename StyleType, typename Keyword, typename StyleTypeMarkableTraits>
+  struct CSSValueConversion<css::ValueOrKeyword<StyleType, Keyword, StyleTypeMarkableTraits>>
+  {
+    KRYS_NODISCARD css::ValueOrKeyword<StyleType, Keyword, StyleTypeMarkableTraits>
+      operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      if (value.ValueId() == Keyword::Value)
+      {
+        return Keyword {};
+      }
+      return ConvertCSSValueToStyle<StyleType>(state, value);
+    }
+  };
+
+  // Specialization for types derived from `css::ValueOrKeyword`.
+  template <css::ValueOrKeywordDerived T>
+  struct CSSValueConversion<T>
+  {
+    KRYS_NODISCARD T operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      if (value.ValueId() == T::Keyword::Value)
+      {
+        return typename T::Keyword {};
+      }
+      return ConvertCSSValueToStyle<typename T::Value>(state, value);
+    }
+  };
+
+  // Specialization for `css::ListOrNone`.
+  template <typename ListType>
+  struct CSSValueConversion<css::ListOrNone<ListType>>
+  {
+    KRYS_NODISCARD css::ListOrNone<ListType> operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      if (value.ValueId() == css::ValueId::None)
+      {
+        return css::keywords::None {};
+      }
+      return ConvertCSSValueToStyle<ListType>(state, value);
+    }
+  };
+
+  // Specialization for types derived from `css::ListOrNone`.
+  template <css::ListOrNoneDerived T>
+  struct CSSValueConversion<T>
+  {
+    KRYS_NODISCARD T operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      if (value.ValueId() == css::ValueId::None)
+      {
+        return css::keywords::None {};
+      }
+      return ConvertCSSValueToStyle<typename T::List>(state, value);
+    }
+  };
+
+  // Specialization for `css::ListOrDefault`.
+  template <typename ListType, typename Defaulter>
+  struct CSSValueConversion<css::ListOrDefault<ListType, Defaulter>>
+  {
+    KRYS_NODISCARD css::ListOrDefault<ListType, Defaulter> operator()(BuilderState &state,
+                                                                      const css::Value &value) noexcept
+    {
+      return ConvertCSSValueToStyle<ListType>(state, value);
+    }
+  };
+
+  // Specialization for types derived from `css::ListOrDefault`.
+  template <css::ListOrDefaultDerived T>
+  struct CSSValueConversion<T>
+  {
+    KRYS_NODISCARD T operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      return ConvertCSSValueToStyle<typename T::List>(state, value);
+    }
+  };
+
+  // Specialization for types derived from `css::EnumSetOrKeywordBase`.
+  template <css::EnumSetOrKeywordBaseDerived T>
+  struct CSSValueConversion<T>
+  {
+    KRYS_NODISCARD T operator()(BuilderState &state, const css::Value &value) noexcept
+    {
+      if (value.ValueId() == T::Keyword::Value)
+      {
+        return typename T::Keyword {};
+      }
+      return ConvertCSSValueToStyle<typename T::EnumSet>(state, value);
+    }
+  };
+}

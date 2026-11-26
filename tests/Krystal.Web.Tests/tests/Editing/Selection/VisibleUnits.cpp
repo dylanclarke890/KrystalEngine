@@ -1,0 +1,166 @@
+﻿#include "Krystal.Web/Editing/Selection/VisibleUnits.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+
+namespace krys::web::tests
+{
+  namespace
+  {
+    struct UnitsFixture : PaintFixture
+    {
+      explicit UnitsFixture(utf8_stringview markup) noexcept
+          : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
+                           + utf8_string(markup),
+                         {400, 300})
+      {
+        (void)Document->UpdateLayout();
+      }
+
+      KRYS_NODISCARD Text &TextIn(DOMStringView id) noexcept
+      {
+        return Downcast<Text>(*ById(id).FirstChild());
+      }
+    };
+
+    KRYS_NODISCARD VisiblePosition VisibleAt(Node &node, uint32 offset) noexcept
+    {
+      return VisiblePosition(CreateContainerOffsetPosition(ShareRefPtr(&node), offset));
+    }
+
+    KRYS_NODISCARD int32 UnitOffsetOf(const VisiblePosition &position) noexcept
+    {
+      return position.DeepEquivalent().DeprecatedEditingOffset();
+    }
+  }
+
+  TEST_CASE("VisibleUnits: words", "[Editing][VisibleUnits]")
+  {
+    UnitsFixture fixture(u8"<p id=p>The quick, brown fox.</p>");
+    auto &text = fixture.TextIn(u8"p");
+
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 6))) == 4);
+    CHECK(UnitOffsetOf(EndOfWord(VisibleAt(text, 6))) == 9);
+    // On a boundary, the right word by default, the left word if asked.
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 4))) == 4);
+    CHECK(UnitOffsetOf(EndOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 9);
+    CHECK(UnitOffsetOf(StartOfWord(VisibleAt(text, 9), WordSide::LeftWordIfOnBoundary)) == 4);
+    CHECK(IsStartOfWord(VisibleAt(text, 11)));
+    CHECK(!IsStartOfWord(VisibleAt(text, 12)));
+
+    CHECK(UnitOffsetOf(NextWordPosition(VisibleAt(text, 0))) == 3);
+    CHECK(UnitOffsetOf(NextWordPosition(VisibleAt(text, 3))) == 9);
+    CHECK(UnitOffsetOf(PreviousWordPosition(VisibleAt(text, 9))) == 4);
+    CHECK(UnitOffsetOf(PreviousWordPosition(VisibleAt(text, 4))) == 0);
+
+    // Windows moves right to the start of the next word.
+    CHECK(UnitOffsetOf(RightWordPosition(VisibleAt(text, 0), true)) == 4);
+    CHECK(UnitOffsetOf(RightWordPosition(VisibleAt(text, 0), false)) == 3);
+    CHECK(UnitOffsetOf(LeftWordPosition(VisibleAt(text, 9), true)) == 4);
+  }
+
+  TEST_CASE("VisibleUnits: words across elements", "[Editing][VisibleUnits]")
+  {
+    UnitsFixture fixture(u8"<p id=p>wo<b id=b>rd</b> next</p>");
+    auto &b = *fixture.ById(u8"b").FirstChild();
+    auto start = StartOfWord(VisibleAt(b, 1));
+    CHECK(start.DeepEquivalent().DeprecatedNode() == &fixture.TextIn(u8"p"));
+    CHECK(UnitOffsetOf(start) == 0);
+    auto end = EndOfWord(VisibleAt(fixture.TextIn(u8"p"), 1));
+    CHECK(end.DeepEquivalent().DeprecatedNode() == &b);
+    CHECK(UnitOffsetOf(end) == 2);
+  }
+
+  TEST_CASE("VisibleUnits: lines", "[Editing][VisibleUnits]")
+  {
+    // 60 pixels fits about ten characters, so the text wraps after "aaaa bbbb ".
+    UnitsFixture fixture(
+      u8"<p id=p style=width:60px;margin:0>aaaa bbbb cccc</p><p id=q style=margin:0>dd<br>ee</p>");
+    auto &text = fixture.TextIn(u8"p");
+
+    CHECK(UnitOffsetOf(StartOfLine(VisibleAt(text, 2))) == 0);
+    auto endOfFirstLine = EndOfLine(VisibleAt(text, 2));
+    CHECK(UnitOffsetOf(endOfFirstLine) == 9);
+    CHECK(UnitOffsetOf(StartOfLine(VisibleAt(text, 12))) == 10);
+    CHECK(UnitOffsetOf(EndOfLine(VisibleAt(text, 12))) == 14);
+    CHECK(InSameLine(VisibleAt(text, 1), VisibleAt(text, 3)));
+    CHECK(!InSameLine(VisibleAt(text, 1), VisibleAt(text, 12)));
+    CHECK(IsStartOfLine(VisibleAt(text, 0)));
+    CHECK(IsEndOfLine(VisibleAt(text, 14)));
+    CHECK(UnitOffsetOf(LogicalStartOfLine(VisibleAt(text, 12))) == 10);
+
+    // The positions on the lines above and below, at the same horizontal position.
+    auto below = NextLinePosition(VisibleAt(text, 2),
+                                  VisibleAt(text, 2).LineDirectionPointForBlockDirectionNavigation());
+    CHECK(below.DeepEquivalent().DeprecatedNode() == &text);
+    CHECK(UnitOffsetOf(below) == 12);
+    auto above = PreviousLinePosition(VisibleAt(text, 12),
+                                      VisibleAt(text, 12).LineDirectionPointForBlockDirectionNavigation());
+    CHECK(UnitOffsetOf(above) == 2);
+
+    // A line break ends a line: the position before it is the end of the text.
+    auto &q = fixture.TextIn(u8"q");
+    CHECK(EndOfLine(VisibleAt(q, 1)) == VisibleAt(q, 2));
+    auto &ee = *q.NextSibling()->NextSibling();
+    CHECK(StartOfLine(VisibleAt(ee, 1)).DeepEquivalent().DeprecatedNode() == &ee);
+  }
+
+  TEST_CASE("VisibleUnits: paragraphs, blocks and documents", "[Editing][VisibleUnits]")
+  {
+    UnitsFixture fixture(u8"<div id=d>one <b>two</b><br>three</div><p id=p>four</p>");
+    auto &one = *fixture.ById(u8"d").FirstChild();
+    auto &three = *fixture.ById(u8"d").LastChild();
+
+    CHECK(StartOfParagraph(VisibleAt(one, 2)).DeepEquivalent().DeprecatedNode() == &one);
+    CHECK(UnitOffsetOf(StartOfParagraph(VisibleAt(one, 2))) == 0);
+    auto paragraphEnd = EndOfParagraph(VisibleAt(one, 2));
+    CHECK(paragraphEnd.DeepEquivalent().DeprecatedNode()
+          == fixture.ById(u8"d").FirstChild()->NextSibling()->FirstChild());
+    CHECK(UnitOffsetOf(paragraphEnd) == 3);
+    CHECK(UnitOffsetOf(StartOfParagraph(VisibleAt(three, 2))) == 0);
+    CHECK(IsStartOfParagraph(VisibleAt(three, 0)));
+    CHECK(IsEndOfParagraph(VisibleAt(three, 5)));
+    CHECK(!InSameParagraph(VisibleAt(one, 1), VisibleAt(three, 1)));
+
+    // Blocks don't end at line breaks.
+    CHECK(InSameBlock(VisibleAt(one, 1), VisibleAt(three, 1)));
+    CHECK(!InSameBlock(VisibleAt(one, 1), VisibleAt(fixture.TextIn(u8"p"), 1)));
+
+    auto documentStart = StartOfDocument(&one);
+    CHECK(documentStart.DeepEquivalent().DeprecatedNode() == &one);
+    CHECK(IsStartOfDocument(documentStart));
+    auto documentEnd = EndOfDocument(&one);
+    CHECK(documentEnd.DeepEquivalent().DeprecatedNode() == &fixture.TextIn(u8"p"));
+    CHECK(UnitOffsetOf(documentEnd) == 4);
+    CHECK(IsEndOfDocument(documentEnd));
+  }
+
+  TEST_CASE("VisibleUnits: sentences", "[Editing][VisibleUnits]")
+  {
+    UnitsFixture fixture(u8"<p id=p>One two. Three four. Five.</p>");
+    auto &text = fixture.TextIn(u8"p");
+    CHECK(UnitOffsetOf(StartOfSentence(VisibleAt(text, 12))) == 9);
+    CHECK(UnitOffsetOf(EndOfSentence(VisibleAt(text, 12))) == 21);
+    CHECK(UnitOffsetOf(StartOfSentence(VisibleAt(text, 3))) == 0);
+  }
+
+  TEST_CASE("VisibleUnits: editable content", "[Editing][VisibleUnits]")
+  {
+    UnitsFixture fixture(u8"<p>x</p><div id=e contenteditable>ab <i>cd</i></div><p>y</p>");
+    auto &ab = *fixture.ById(u8"e").FirstChild();
+    auto start = StartOfEditableContent(VisibleAt(ab, 2));
+    CHECK(start.DeepEquivalent().DeprecatedNode() == &ab);
+    CHECK(UnitOffsetOf(start) == 0);
+    auto end = EndOfEditableContent(VisibleAt(ab, 2));
+    CHECK(end.DeepEquivalent().DeprecatedNode() == fixture.ById(u8"e").LastChild()->FirstChild());
+    CHECK(UnitOffsetOf(end) == 2);
+    CHECK(IsEndOfEditableOrNonEditableContent(end) == false);
+
+    // The next paragraph's start, skipping over editing boundaries (which needs an editable root).
+    UnitsFixture paragraphs(u8"<div id=e contenteditable>one<br>two</div>");
+    auto &one = *paragraphs.ById(u8"e").FirstChild();
+    CHECK(StartOfNextParagraph(VisibleAt(one, 1)).DeepEquivalent().DeprecatedNode()
+          == paragraphs.ById(u8"e").LastChild());
+  }
+}

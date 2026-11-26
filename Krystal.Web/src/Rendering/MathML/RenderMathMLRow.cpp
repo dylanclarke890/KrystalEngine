@@ -1,0 +1,206 @@
+﻿/*
+ * Copyright (C) 2010 Alex Milowski (alex@milowski.com). All rights reserved.
+ * Copyright (C) 2016 Igalia S.L.
+ * Copyright (C) 2023 Apple Inc. All right reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Rendering/MathML/RenderMathMLRow.hpp"
+#include "Krystal.Web/MathML/Elements/MathMLRowElement.hpp"
+#include "Krystal.Web/Rendering/MathML/RenderMathMLOperator.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include <algorithm>
+#include <cmath>
+
+namespace krys::web
+{
+  RenderMathMLRow::RenderMathMLRow(Type type, web::MathMLRowElement &element, RenderStyle &&style) noexcept
+      : RenderMathMLBlock(type, element, krys::move(style))
+  {
+    krys_debug_assert(IsRenderMathMLRow());
+  }
+
+  RenderMathMLRow::~RenderMathMLRow() noexcept = default;
+
+  web::MathMLRowElement &RenderMathMLRow::GetElement() const noexcept
+  {
+    return static_cast<web::MathMLRowElement &>(NodeForNonAnonymous());
+  }
+
+  Maybe<LayoutUnit> RenderMathMLRow::FirstLineBaseline() const noexcept
+  {
+    auto *baselineChild = FirstInFlowChildBox();
+    if (!baselineChild)
+    {
+      return null;
+    }
+
+    return LayoutUnit(std::round(
+      (baselineChild->MarginBefore() + baselineChild->LogicalTop() + AscentForChild(*baselineChild))
+        .ToFloat()));
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD RenderMathMLOperator *ToVerticalStretchyOperator(RenderBox *box) noexcept
+    {
+      if (auto *mathMLBlock = DynamicDowncast<RenderMathMLBlock>(box))
+      {
+        auto *renderOperator = mathMLBlock->UnembellishedOperator();
+        if (renderOperator && renderOperator->IsStretchy() && renderOperator->IsVertical())
+        {
+          return renderOperator;
+        }
+      }
+      return nullptr;
+    }
+  }
+
+  void RenderMathMLRow::StretchVerticalOperatorsAndLayoutChildren() noexcept
+  {
+    // First calculate stretch ascent and descent.
+    LayoutUnit stretchAscent, stretchDescent;
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      if (ToVerticalStretchyOperator(child))
+      {
+        continue;
+      }
+      child->LayoutIfNeeded();
+      LayoutUnit childAscent = AscentForChild(*child) + child->MarginBefore();
+      LayoutUnit childDescent = child->LogicalHeight() + child->MarginLogicalHeight() - childAscent;
+      stretchAscent = std::max(stretchAscent, childAscent);
+      stretchDescent = std::max(stretchDescent, childDescent);
+    }
+    if (stretchAscent + stretchDescent <= 0)
+    {
+      // We ensure a minimal stretch size.
+      stretchAscent = LayoutUnit(Style().ComputedFontSize());
+      stretchDescent = 0;
+    }
+
+    // Next, we stretch the vertical operators.
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      if (auto *renderOperator = ToVerticalStretchyOperator(child))
+      {
+        renderOperator->StretchTo(stretchAscent, stretchDescent);
+        renderOperator->LayoutIfNeeded();
+        child->LayoutIfNeeded();
+      }
+    }
+  }
+
+  void RenderMathMLRow::GetContentBoundingBox(LayoutUnit &width, LayoutUnit &ascent,
+                                              LayoutUnit &descent) const noexcept
+  {
+    ascent = 0;
+    descent = 0;
+    width = 0;
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      width += child->MarginStart() + child->LogicalWidth() + child->MarginEnd();
+      LayoutUnit childAscent = AscentForChild(*child) + child->MarginBefore();
+      LayoutUnit childDescent = child->LogicalHeight() + child->MarginLogicalHeight() - childAscent;
+      ascent = std::max(ascent, childAscent);
+      descent = std::max(descent, childDescent);
+    }
+  }
+
+  LayoutUnit RenderMathMLRow::PreferredLogicalWidthOfRowItems() noexcept
+  {
+    LayoutUnit preferredWidth = 0;
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      preferredWidth += child->MaxPreferredLogicalWidth() + MarginIntrinsicLogicalWidthForChild(*child);
+    }
+    return preferredWidth;
+  }
+
+  void RenderMathMLRow::ComputePreferredLogicalWidths() noexcept
+  {
+    krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
+
+    _minPreferredLogicalWidth = _maxPreferredLogicalWidth = PreferredLogicalWidthOfRowItems();
+
+    auto sizes = SizeAppliedToMathContentFor(LayoutPhase::CalculatePreferredLogicalWidth);
+    ApplySizeToMathContent(LayoutPhase::CalculatePreferredLogicalWidth, sizes);
+
+    AdjustPreferredLogicalWidthsForBorderAndPadding();
+
+    ClearNeedsPreferredWidthsUpdate();
+  }
+
+  void RenderMathMLRow::LayoutRowItems(LayoutUnit width, LayoutUnit ascent) noexcept
+  {
+    LayoutUnit horizontalOffset = 0;
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      horizontalOffset += child->MarginStart();
+      LayoutUnit childVerticalOffset = ascent - AscentForChild(*child);
+      LayoutUnit childWidth = child->LogicalWidth();
+      LayoutUnit childHorizontalOffset =
+        GetWritingMode().IsBidiLTR() ? horizontalOffset : width - horizontalOffset - childWidth;
+      auto repaintRect = child->CheckForRepaintDuringLayout() ? Maybe<LayoutRect> {child->FrameRect()} : null;
+      child->SetLocation(LayoutPoint(childHorizontalOffset, childVerticalOffset));
+      if (repaintRect)
+      {
+        repaintRect->UniteEvenIfEmpty(child->FrameRect());
+        RepaintRectangle(*repaintRect);
+      }
+      horizontalOffset += childWidth + child->MarginEnd();
+    }
+  }
+
+  void RenderMathMLRow::LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit) noexcept
+  {
+    krys_debug_assert(NeedsLayout());
+
+    InsertPositionedChildrenIntoContainingBlock();
+
+    if (relayoutChildren == RelayoutChildren::No && SimplifiedLayout())
+    {
+      return;
+    }
+
+    LayoutFloatingChildren();
+
+    RecomputeLogicalWidth();
+    ComputeAndSetBlockDirectionMarginsOfChildren();
+
+    LayoutUnit width, ascent, descent;
+    StretchVerticalOperatorsAndLayoutChildren();
+    GetContentBoundingBox(width, ascent, descent);
+    LayoutRowItems(width, ascent);
+    SetLogicalWidth(width);
+    SetLogicalHeight(ascent + descent);
+
+    auto sizes = SizeAppliedToMathContentFor(LayoutPhase::Layout);
+    auto shift = ApplySizeToMathContent(LayoutPhase::Layout, sizes);
+    ShiftInFlowChildren(shift, 0);
+
+    AdjustLayoutForBorderAndPadding();
+
+    LayoutOutOfFlowBoxes(relayoutChildren);
+  }
+}

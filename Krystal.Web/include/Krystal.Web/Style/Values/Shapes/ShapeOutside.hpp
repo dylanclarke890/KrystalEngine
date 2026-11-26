@@ -1,0 +1,225 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Style/Values/Images/ImageWrapper.hpp"
+#include "Krystal.Web/Style/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style
+{
+  // <'shape-outside'> = none | [ <basic-shape> || <shape-box> ] | <image>
+  // https://www.w3.org/TR/css-shapes/#propdef-shape-outside
+  struct ShapeOutside
+  {
+    using Shape = BasicShape;
+    using ShapeBox = CSSBoxType;
+
+    struct ShapeAndShapeBox
+    {
+      BasicShape Shape;
+      ShapeBox Box;
+
+      KRYS_NODISCARD bool operator==(const ShapeAndShapeBox &) const noexcept = default;
+    };
+
+    struct Image
+    {
+      ImageWrapper Value;
+
+      KRYS_NODISCARD bool IsValid() const noexcept;
+
+      KRYS_NODISCARD bool operator==(const Image &) const noexcept = default;
+    };
+
+    ShapeOutside(css::keywords::None) noexcept
+    {
+    }
+
+    ShapeOutside(Shape &&value) noexcept : _value {Value::Create(krys::move(value))}
+    {
+    }
+
+    ShapeOutside(ShapeBox &&value) noexcept : _value {Value::Create(krys::move(value))}
+    {
+    }
+
+    ShapeOutside(ShapeAndShapeBox &&value) noexcept : _value {Value::Create(krys::move(value))}
+    {
+    }
+
+    ShapeOutside(Image &&value) noexcept : _value {Value::Create(krys::move(value))}
+    {
+    }
+
+    KRYS_NODISCARD bool IsNone() const noexcept
+    {
+      return !_value;
+    }
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      if (IsNone())
+      {
+        return visitor(css::keywords::None {});
+      }
+
+      return krys::SwitchOn(
+        _value->Contents, [&](const Shape &shape) { return visitor(shape); },
+        [&](const ShapeBox &box) { return visitor(box); }, [&](const ShapeAndShapeBox &shapeAndShapeBox)
+        { return visitor(shapeAndShapeBox); }, [&](const Image &image) { return visitor(image); });
+    }
+
+    const BasicShape *GetShape() const
+    {
+      RefPtr value = _value;
+      return value ? value->GetShape() : nullptr;
+    }
+
+    KRYS_NODISCARD CSSBoxType EffectiveCSSBox() const noexcept
+    {
+      RefPtr value = _value;
+      return value ? value->EffectiveCSSBox() : CSSBoxType::BoxMissing;
+    }
+
+    KRYS_NODISCARD RefPtr<StyleImage> GetImage() const noexcept
+    {
+      RefPtr value = _value;
+      return value ? value->GetImage() : nullptr;
+    }
+
+    bool operator==(const ShapeOutside &other) const noexcept
+    {
+      return ArePointingToEqualData(_value, other._value);
+    }
+
+  private:
+    friend struct Blending<ShapeOutside>;
+
+    class Value : public RefCounted<Value>
+    {
+    public:
+      using Kind = Variant<Shape, ShapeBox, ShapeAndShapeBox, Image>;
+
+      KRYS_NODISCARD static Ref<Value> Create(Kind &&value) noexcept
+      {
+        return AdoptRef(*new Value(krys::move(value)));
+      }
+
+      explicit Value(Kind &&value) noexcept : Contents {krys::move(value)}
+      {
+      }
+
+      inline const BasicShape *GetShape() const;
+
+      KRYS_NODISCARD inline CSSBoxType EffectiveCSSBox() const noexcept;
+
+      KRYS_NODISCARD inline RefPtr<StyleImage> GetImage() const noexcept;
+
+      bool operator==(const Value &other) const noexcept
+      {
+        return Contents == other.Contents;
+      }
+
+      Kind Contents;
+    };
+
+    RefPtr<Value> _value;
+  };
+
+  KRYS_DEFINE_TYPE_WRAPPER_GET(ShapeOutside::Image, Value);
+
+  template <size_t I>
+  const auto &get(const ShapeOutside::ShapeAndShapeBox &value)
+  {
+    if constexpr (!I)
+    {
+      return value.Shape;
+    }
+    else if constexpr (I == 1)
+    {
+      return value.Box;
+    }
+  }
+
+  inline const BasicShape *ShapeOutside::Value::GetShape() const
+  {
+    return krys::SwitchOn(
+      Contents, [](const ShapeOutside::Shape &shape) -> const BasicShape * { return &shape; },
+      [](const ShapeOutside::ShapeBox &) -> const BasicShape * { return nullptr; },
+      [](const ShapeOutside::ShapeAndShapeBox &shapeAndShapeBox) -> const BasicShape *
+      { return &shapeAndShapeBox.Shape; },
+      [](const ShapeOutside::Image &) -> const BasicShape * { return nullptr; });
+  }
+
+  inline RefPtr<StyleImage> ShapeOutside::Value::GetImage() const noexcept
+  {
+    return krys::SwitchOn(
+      Contents, [](const ShapeOutside::Shape &) -> RefPtr<StyleImage> { return nullptr; },
+      [](const ShapeOutside::ShapeBox &) -> RefPtr<StyleImage> { return nullptr; },
+      [](const ShapeOutside::ShapeAndShapeBox &) -> RefPtr<StyleImage> { return nullptr; },
+      [](const ShapeOutside::Image &image) -> RefPtr<StyleImage> { return image.Value.Value; });
+  }
+
+  CSSBoxType ShapeOutside::Value::EffectiveCSSBox() const noexcept
+  {
+    return krys::SwitchOn(
+      Contents, [](const ShapeOutside::Shape &) { return CSSBoxType::MarginBox; },
+      [](const ShapeOutside::ShapeBox &box)
+      { return box == CSSBoxType::BoxMissing ? CSSBoxType::MarginBox : box; },
+      [](const ShapeOutside::ShapeAndShapeBox &shapeAndShapeBox)
+      {
+        return shapeAndShapeBox.Box == CSSBoxType::BoxMissing ? CSSBoxType::MarginBox : shapeAndShapeBox.Box;
+      },
+      [](const ShapeOutside::Image &) { return CSSBoxType::ContentBox; });
+  }
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<ShapeOutside>
+  {
+    KRYS_NODISCARD ShapeOutside operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  // MARK: - Blending
+
+  template <>
+  struct Blending<ShapeOutside>
+  {
+    KRYS_NODISCARD static bool CanBlend(const ShapeOutside &, const ShapeOutside &) noexcept;
+
+    KRYS_NODISCARD ShapeOutside Blend(const ShapeOutside &, const ShapeOutside &,
+                                      const BlendingContext &) noexcept;
+  };
+}
+
+KRYS_DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::web::style::ShapeOutside::ShapeAndShapeBox, 2)
+KRYS_DEFINE_TUPLE_LIKE_CONFORMANCE_FOR_TYPE_WRAPPER(krys::web::style::ShapeOutside::Image);
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::ShapeOutside)

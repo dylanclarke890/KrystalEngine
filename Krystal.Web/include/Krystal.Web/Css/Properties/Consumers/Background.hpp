@@ -1,0 +1,161 @@
+﻿/*
+ * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::web::css
+{
+  struct BorderImageComponents;
+  struct BorderRadius;
+  struct PropertyParserState;
+  class TokenRange;
+  class Value;
+
+  namespace parse_property
+  {
+    // Default value of the `fill` parameter for `border-image-slice`.
+    enum class BorderImageSliceFillDefault : bool
+    {
+      No,
+      Yes,
+    };
+
+    // Legacy behavior needed by -webkit-border-image that makes fixed border slices also set the border
+    // widths.
+    enum class BorderImageWidthOverridesWidthForLength : bool
+    {
+      No,
+      Yes,
+    };
+
+    // MARK: - Border Radius
+
+    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
+    KRYS_NODISCARD Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens,
+                                                                     PropertyParserState &state) noexcept;
+
+    // MARK: - Border Image
+
+    // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
+    KRYS_NODISCARD RefPtr<Value> ConsumeBorderImageSlice(
+      TokenRange &tokens, PropertyParserState &state,
+      BorderImageSliceFillDefault defaultFill = BorderImageSliceFillDefault::No) noexcept;
+
+    // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
+    KRYS_NODISCARD RefPtr<Value>
+      ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
+                              BorderImageWidthOverridesWidthForLength overridesWidth =
+                                BorderImageWidthOverridesWidthForLength::No) noexcept;
+
+    // https://drafts.csswg.org/css-backgrounds/#border-image
+    KRYS_NODISCARD Maybe<BorderImageComponents>
+      ConsumeBorderImageComponents(TokenRange &tokens, PropertyParserState &state,
+                                   BorderImageSliceFillDefault defaultFill = BorderImageSliceFillDefault::No,
+                                   BorderImageWidthOverridesWidthForLength overridesWidth =
+                                     BorderImageWidthOverridesWidthForLength::No) noexcept;
+
+    // MARK: - Background Size
+
+    // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
+    // https://drafts.csswg.org/css-backgrounds/#background-size
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens,
+                                                             PropertyParserState &state) noexcept;
+
+    // <single-mask-size> = <bg-size>
+    // https://drafts.fxtf.org/css-masking/#the-mask-size
+    KRYS_NODISCARD RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens,
+                                                       PropertyParserState &state) noexcept;
+
+    // MARK: - Background Repeat
+
+    // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
+    // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
+    KRYS_NODISCARD RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    // MARK: - Shadows
+
+    // <'box-shadow'> = none | <shadow>#
+    // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
+    KRYS_NODISCARD RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept;
+
+    // MARK: Utilities for filling in rects / quads in the "margin" form.
+
+    // - if only 1 value, `a`, is provided, set top, bottom, right & left to `a`.
+    // - if only 2 values, `a` and `b` are provided, set top & bottom to `a`, right & left to `b`.
+    // - if only 3 values, `a`, `b`, and `c` are provided, set top to `a`, right to `b`, bottom to `c`, & left
+    // to `b`.
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(const T &a) noexcept
+    {
+      return Container {a, a, a, a};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(const T &a, const T &b) noexcept
+    {
+      return Container {a, b, a, b};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuad(T a, const T &b, T c) noexcept
+    {
+      return Container {krys::move(a), b, krys::move(c), b};
+    }
+
+    template <typename Container, typename T>
+    KRYS_NODISCARD Container CompleteQuadFromArray(Array<Maybe<T>, 4uz> optionals) noexcept
+    {
+      krys_debug_assert(optionals[0].has_value());
+
+      if (!optionals[1])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]));
+      }
+
+      if (!optionals[2])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]), krys::move(*optionals[1]));
+      }
+
+      if (!optionals[3])
+      {
+        return CompleteQuad<Container>(krys::move(*optionals[0]), krys::move(*optionals[1]),
+                                       krys::move(*optionals[2]));
+      }
+
+      return Container {krys::move(*optionals[0]), krys::move(*optionals[1]), krys::move(*optionals[2]),
+                        krys::move(*optionals[3])};
+    }
+  }
+}

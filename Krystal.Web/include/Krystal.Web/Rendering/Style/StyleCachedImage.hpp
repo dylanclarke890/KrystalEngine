@@ -1,0 +1,130 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Css/Values/ImageValue.hpp"
+#include "Krystal.Web/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Web/Rendering/Style/StyleImage.hpp"
+
+namespace krys::web
+{
+  class DocumentOrShadowRoot;
+
+  class LegacyRenderSVGResourceContainer;
+
+  /// @brief A `url()` image, or an SVG resource it refers to by its fragment (a `<mask>`).
+  class StyleCachedImage final : public StyleImage
+  {
+  private:
+    style::Url _url;
+    const Ref<css::ImageValue> _cssValue;
+    bool _isPending {true};
+    mutable float _scaleFactor {1};
+    CachedResourceHandle<CachedImage> _cachedImage;
+    mutable Maybe<bool> _isRenderSVGResource;
+    SizeF _containerSize;
+
+  public:
+    KRYS_NODISCARD static Ref<StyleCachedImage> Create(style::Url &&, Ref<css::ImageValue> &&,
+                                                       float scaleFactor = 1) noexcept;
+
+    KRYS_NODISCARD static Ref<StyleCachedImage> Create(const style::Url &, const Ref<css::ImageValue> &,
+                                                       float scaleFactor = 1) noexcept;
+
+    KRYS_NODISCARD static Ref<StyleCachedImage> CopyOverridingScaleFactor(StyleCachedImage &,
+                                                                          float scaleFactor) noexcept;
+
+    ~StyleCachedImage() noexcept override;
+
+    KRYS_NODISCARD bool Equals(const StyleImage &) const noexcept final;
+
+    KRYS_NODISCARD bool Equals(const StyleCachedImage &) const noexcept;
+
+    KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept final;
+
+    KRYS_NODISCARD WrappedImagePtr Data() const noexcept final;
+
+    KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
+
+    KRYS_NODISCARD bool CanRender(const RenderElement *, float multiplier) const noexcept final;
+
+    KRYS_NODISCARD bool IsPending() const noexcept final;
+
+    void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+
+    KRYS_NODISCARD bool IsLoaded(const RenderElement *) const noexcept final;
+
+    KRYS_NODISCARD bool ErrorOccurred() const noexcept final;
+
+    KRYS_NODISCARD SizeF ImageSize(const RenderElement *, float multiplier) const noexcept final;
+
+    KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept final;
+
+    KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept final;
+
+    void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
+                                    SizeF &intrinsicRatio) noexcept final;
+
+    KRYS_NODISCARD bool UsesImageContainerSize() const noexcept final;
+
+    void SetContainerContextForRenderer(const RenderElement &, const SizeF &, float) noexcept final;
+
+    void AddClient(RenderElement &) noexcept final;
+
+    void RemoveClient(RenderElement &) noexcept final;
+
+    KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
+
+    KRYS_NODISCARD bool HasImage() const noexcept final;
+
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const SizeF &, const GraphicsContext &,
+                                          bool isForFirstLine) const noexcept final;
+
+    KRYS_NODISCARD float ImageScaleFactor() const noexcept final;
+
+    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
+
+    KRYS_NODISCARD bool UsesDataProtocol() const noexcept final;
+
+    KRYS_NODISCARD style::Url Url() const noexcept final;
+
+  private:
+    StyleCachedImage(style::Url &&, Ref<css::ImageValue> &&, float) noexcept;
+
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      UncheckedRenderSVGResource(DocumentOrShadowRoot &, const DOMStringAtom &fragment) const noexcept;
+
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      UncheckedRenderSVGResource(const RenderElement *) const noexcept;
+
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      LegacyRenderSVGResource(const RenderElement *) const noexcept;
+
+    KRYS_NODISCARD bool IsRenderSVGResource(const RenderElement *) const noexcept;
+
+    StyleCachedImage(const style::Url &, const Ref<css::ImageValue> &, float) noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_TRAITS_STYLE_IMAGE(StyleCachedImage, IsCachedImage)

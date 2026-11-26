@@ -1,0 +1,66 @@
+﻿#include "Krystal.Web/Css/Values/ImageSetValue.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Web/Css/Parser/ParserContext.hpp"
+#include "Krystal.Web/Css/Values/ImageSetOptionValue.hpp"
+#include "Krystal.Web/Css/Values/ImageValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+
+namespace krys::web::css::tests
+{
+  namespace
+  {
+    Ref<Value> Option(utf8_stringview url, double resolution)
+    {
+      return ImageSetOptionValue::Create(
+        ImageValue::Create(*CompleteUrl(
+          CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}})),
+        PrimitiveValue::Create(resolution, UnitType::x));
+    }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetValue::Create", "[CSS][Values][ImageSetValue]")
+  {
+    auto set = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
+    CHECK(Is<ImageSetValue>(*set));
+    CHECK(set->IsImage());
+    CHECK_FALSE(set->IsImageGeneratorValue());
+    CHECK(set->ContainsValueList());
+    CHECK(set->size() == 2u);
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetValue serialisation", "[CSS][Values][ImageSetValue]")
+  {
+    // Options are written in the authored order, not sorted by resolution.
+    CHECK(CssText(*ImageSetValue::Create({Option(u8"b.png", 2.0), Option(u8"a.png", 1.0)}))
+          == "image-set(url(\"b.png\") 2x, url(\"a.png\") 1x)");
+    CHECK(CssText(*ImageSetValue::Create({Option(u8"a.png", 1.0)})) == "image-set(url(\"a.png\") 1x)");
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetValue equality", "[CSS][Values][ImageSetValue]")
+  {
+    auto a = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
+    CHECK(*a == *ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)}));
+    CHECK_FALSE(*a == *ImageSetValue::Create({Option(u8"b.png", 2.0), Option(u8"a.png", 1.0)}));
+    CHECK_FALSE(*a == *ImageSetValue::Create({Option(u8"a.png", 1.0)}));
+    CHECK_FALSE(*a == *ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 3.0)}));
+
+    // Options aren't hashable, so neither is the set.
+    size_t seed = 0uz;
+    CHECK_FALSE(a->AddHash(seed));
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetValue children and dependencies", "[CSS][Values][ImageSetValue]")
+  {
+    auto set = ImageSetValue::Create({Option(u8"a.png", 1.0), Option(u8"b.png", 2.0)});
+    auto children = Children(*set);
+    REQUIRE(children.size() == 2uz);
+    CHECK(children[0uz] == &(*set)[0u]);
+    CHECK(children[1uz] == &(*set)[1u]);
+
+    CHECK(set->ComputedStyleDependencies().IsComputationallyIndependent());
+    // Only the values themselves are asked, not their children.
+    CHECK_FALSE(set->MayDependOnBaseUrl());
+    CHECK_FALSE(set->TraverseSubresources([](const CachedResource &) { return true; }));
+  }
+}

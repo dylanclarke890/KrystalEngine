@@ -4,16 +4,8 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
-#include "Krystal.Booey/Dom/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/Dom/Events/Event.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLDialogElement.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLFormElement.hpp"
-#include "Krystal.Booey/Html/Events/CommandEvent.hpp"
-#include "Krystal.Booey/Html/Window.hpp"
-#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
-#include "Krystal.Booey/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
+#include "Krystal.Booey/FileLoaderStrategy.hpp"
+#include "Krystal.Booey/View.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Move.hpp"
@@ -35,8 +27,16 @@
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Input/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
-#include "Krystal.UI/FileLoaderStrategy.hpp"
-#include "Krystal.UI/View.hpp"
+#include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
+#include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
+#include "Krystal.Web/Html/Events/CommandEvent.hpp"
+#include "Krystal.Web/Html/Window.hpp"
+#include "Krystal.Web/Platform/PlatformStrategies.hpp"
+#include "Krystal.Web/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
@@ -47,7 +47,7 @@
 
 namespace krys
 {
-  /// @brief The editor: an HTML page from `Krystal.Editor/pages`, painted by Booey below a header.
+  /// @brief The editor: an HTML page from `Krystal.Editor/pages`, painted by Krystal.Web below a header.
   class Editor : public Application
   {
   private:
@@ -59,14 +59,14 @@ namespace krys
     UniquePtr<gfx::Renderer2D> _renderer;
     UniquePtr<gfx::FontFace2D> _font;
     UniquePtr<gfx::FontFace2D> _boldFont;
-    /// @brief Booey's loader, which reads files on the application's workers.
-    UniquePtr<ui::FileLoaderStrategy> _fileLoader;
-    UniquePtr<ui::View> _pageView;
+    /// @brief Krystal.Web's loader, which reads files on the application's workers.
+    UniquePtr<boo::FileLoaderStrategy> _fileLoader;
+    UniquePtr<boo::View> _pageView;
     /// @brief The page's listeners, which go when the page is loaded again.
-    boo::EventListenerHandle _cardPicker;
-    boo::EventListenerHandle _keyLogger;
-    boo::EventListenerHandle _commandHandler;
-    boo::EventListenerHandle _dialogLogger;
+    web::EventListenerHandle _cardPicker;
+    web::EventListenerHandle _keyLogger;
+    web::EventListenerHandle _commandHandler;
+    web::EventListenerHandle _dialogLogger;
     /// @brief The page's observers, made once it has loaded: the header shows the chapter most in view.
     UniquePtr<editor::PageObservers> _observers;
     /// @brief The page's animation from C++, made once it has loaded.
@@ -83,7 +83,7 @@ namespace krys
     UniquePtr<editor::PageCanvas2D> _canvas2D;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
-    /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
+    /// @brief The page's time, which only moves while the editor runs (Krystal.Web's timers follow it).
     MonotonicTime::duration _pageTime {};
     /// @brief Counts the seconds the page has been open in its `#clock` element.
     Timer _clockTimer {[this] { TickClock(); }};
@@ -120,8 +120,8 @@ namespace krys
 
     void OnShutdown() noexcept override
     {
-      boo::PlatformStrategies::Singleton().SetWorkQueue(nullptr);
-      boo::PlatformStrategies::Singleton().SetLoaderStrategy(nullptr);
+      web::PlatformStrategies::Singleton().SetWorkQueue(nullptr);
+      web::PlatformStrategies::Singleton().SetLoaderStrategy(nullptr);
       _observers = nullptr;
       _animations = nullptr;
       _pointers = nullptr;
@@ -435,7 +435,7 @@ namespace krys
 
     void OnUpdate(seconds dt) noexcept override
     {
-      // Booey's event loop runs on the page's time: timers, then tasks and microtasks.
+      // Krystal.Web's event loop runs on the page's time: timers, then tasks and microtasks.
       _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
       if (_pageView)
       {
@@ -546,13 +546,13 @@ namespace krys
 
     /// @brief Hears the page view's loads: a page is set up as it commits (on a later frame than the load
     /// starts) and once it has loaded, and each page shows the last load's events.
-    void HandleLoad(const ui::LoadEvent &event) noexcept
+    void HandleLoad(const boo::LoadEvent &event) noexcept
     {
       auto &document = _pageView->Document();
       switch (event.Type)
       {
-        case ui::LoadEventType::Started: _loadEvents = u8"started"; break;
-        case ui::LoadEventType::Committed:
+        case boo::LoadEventType::Started: _loadEvents = u8"started"; break;
+        case boo::LoadEventType::Committed:
           _loadEvents += u8", committed";
           AttachPage();
           _observers = nullptr;
@@ -564,7 +564,7 @@ namespace krys
           _cube = nullptr;
           _canvas2D = nullptr;
           break;
-        case ui::LoadEventType::Finished:
+        case boo::LoadEventType::Finished:
           _loadEvents += u8", finished";
           _observers = CreateUnique<editor::PageObservers>(document);
           _animations = CreateUnique<editor::PageAnimations>(document);
@@ -578,7 +578,7 @@ namespace krys
           _context->Logger->Info("Loaded {}", Narrow(document.GetUrl().String()));
           ShowGuide(document.GetUrl());
           break;
-        case ui::LoadEventType::Failed:
+        case boo::LoadEventType::Failed:
           _loadEvents += u8", failed";
           _context->Logger->Error("Couldn't load: {}", Narrow(event.Error.LocalizedDescription()));
           break;
@@ -602,10 +602,10 @@ namespace krys
       // Toggles `picked` on the card a click lands in.
       _cardPicker =
         document.AddEventListener(u8"click",
-                                  [](boo::Event &event)
+                                  [](web::Event &event)
                                   {
-                                    auto *node = DynamicDowncast<boo::Node>(event.Target().get());
-                                    auto *target = node ? DynamicDowncast<boo::Element>(*node) : nullptr;
+                                    auto *node = DynamicDowncast<web::Node>(event.Target().get());
+                                    auto *target = node ? DynamicDowncast<web::Element>(*node) : nullptr;
                                     if (!target)
                                     {
                                       return;
@@ -613,28 +613,28 @@ namespace krys
                                     auto card = target->Closest(u8".card");
                                     if (card.HasValue() && card.Value())
                                     {
-                                      (void)card.Value()->ClassList().Toggle(boo::DOMString(u8"picked"));
+                                      (void)card.Value()->ClassList().Toggle(web::DOMString(u8"picked"));
                                     }
                                   });
       // Shows the `key` of each key pressed on the page in its `#last-key` element.
-      _keyLogger = document.AddEventListener<boo::KeyboardEvent>(
+      _keyLogger = document.AddEventListener<web::KeyboardEvent>(
         u8"keydown",
-        [this](boo::KeyboardEvent &event)
+        [this](web::KeyboardEvent &event)
         {
           if (auto label = _pageView->Document().GetElementById(u8"last-key"))
           {
-            auto key = event.Key() == u8" " ? boo::DOMString(u8"Space") : event.Key();
+            auto key = event.Key() == u8" " ? web::DOMString(u8"Space") : event.Key();
             (void)label->TextContent(krys::move(key));
           }
         });
       // Carries out the page's custom `--show` command, which shows a dialog without making it modal (there's
       // no built-in command for that). `command` doesn't bubble, so this listens as it's captured.
-      _commandHandler = document.AddEventListener<boo::CommandEvent>(
+      _commandHandler = document.AddEventListener<web::CommandEvent>(
         u8"command",
-        [](boo::CommandEvent &event)
+        [](web::CommandEvent &event)
         {
-          auto *node = DynamicDowncast<boo::Node>(event.Target().get());
-          auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;
+          auto *node = DynamicDowncast<web::Node>(event.Target().get());
+          auto *dialog = node ? DynamicDowncast<web::HTMLDialogElement>(*node) : nullptr;
           if (dialog && event.Command() == u8"--show")
           {
             (void)dialog->Show();
@@ -646,10 +646,10 @@ namespace krys
       // listens as it's captured).
       _dialogLogger = document.AddEventListener(
         u8"close",
-        [this](boo::Event &event)
+        [this](web::Event &event)
         {
-          auto *node = DynamicDowncast<boo::Node>(event.Target().get());
-          auto *dialog = node ? DynamicDowncast<boo::HTMLDialogElement>(*node) : nullptr;
+          auto *node = DynamicDowncast<web::Node>(event.Target().get());
+          auto *dialog = node ? DynamicDowncast<web::HTMLDialogElement>(*node) : nullptr;
           if (!dialog)
           {
             return;
@@ -658,7 +658,7 @@ namespace krys
           if (dialog->Id() == u8"confirm-save")
           {
             auto *form =
-              DynamicDowncast<boo::HTMLFormElement>(_pageView->Document().GetElementById(u8"settings").get());
+              DynamicDowncast<web::HTMLFormElement>(_pageView->Document().GetElementById(u8"settings").get());
             if (form && result == u8"save")
             {
               (void)form->RequestSubmit();
@@ -672,7 +672,7 @@ namespace krys
           {
             return;
           }
-          (void)label->TextContent(result.empty() ? boo::DOMString(u8"Closed without an answer.")
+          (void)label->TextContent(result.empty() ? web::DOMString(u8"Closed without an answer.")
                                                   : u8"Closed with \u201c" + result + u8"\u201d.");
         },
         true);
@@ -685,7 +685,7 @@ namespace krys
       if (auto clock = _pageView ? _pageView->Document().GetElementById(u8"clock") : nullptr)
       {
         auto text = std::format("Open for {}:{:02}", _secondsOpen / 60, _secondsOpen % 60);
-        (void)clock->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)clock->TextContent(web::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
 
@@ -733,7 +733,7 @@ namespace krys
       {
         if (auto link = document.GetElementById(u8"topic-" + utf8_string(name)))
         {
-          (void)link->ClassList().Toggle(boo::DOMString(u8"current"), name == topic);
+          (void)link->ClassList().Toggle(web::DOMString(u8"current"), name == topic);
         }
       }
     }
@@ -758,15 +758,15 @@ namespace krys
     /// @brief The page view and the page it shows.
     void CreatePage() noexcept
     {
-      // Booey's work that can leave the main thread runs on the application's workers, its file reads as
+      // Krystal.Web's work that can leave the main thread runs on the application's workers, its file reads as
       // jobs that may block.
-      boo::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
-      _fileLoader = CreateUnique<ui::FileLoaderStrategy>(_context->Jobs.get());
-      boo::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
+      web::PlatformStrategies::Singleton().SetWorkQueue(_context->Jobs.get());
+      _fileLoader = CreateUnique<boo::FileLoaderStrategy>(_context->Jobs.get());
+      web::PlatformStrategies::Singleton().SetLoaderStrategy(_fileLoader.get());
       // Overlay scrollbars, which fade in while the mouse is over a scroller or it scrolls.
-      boo::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
-      (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
-      _pageView = CreateUnique<ui::View>(PageSize());
+      web::ScrollbarThemeAdwaita::SetUsesOverlayScrollbars(true);
+      (void)boo::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
+      _pageView = CreateUnique<boo::View>(PageSize());
       // The page is laid out and painted at the window's DPI, which `WindowDPIChangeEvent` follows.
       _pageView->SetDeviceScaleFactor(
         static_cast<float>(pal::GetDPIForWindow(_context->Window->GetWindowHandle())) / 96.f);
@@ -783,12 +783,12 @@ namespace krys
         });
       // The page dropping its composition drops the input method's.
       _pageView->SetCompositionDiscardedHandler([&] { _context->Window->CancelComposition(); });
-      _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
+      _pageView->SetNavigationHandler([this](const boo::NavigationRequest &request)
                                       { HandleNavigation(request); });
-      _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });
+      _pageView->SetLoadHandler([this](const boo::LoadEvent &event) { HandleLoad(event); });
       // The page's custom elements, which its parser creates.
       std::ignore = _pageView->DefineCustomElement(
-        u8"bean-rating", [](boo::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
+        u8"bean-rating", [](web::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
         BeanRating::Options());
       LoadPage();
     }
@@ -802,7 +802,7 @@ namespace krys
     /// @brief Shows the guide's topics in place and loads links to the editor's other pages; logs any other
     /// navigation (a link or a form submission), which the editor doesn't follow, and shows where it leads in
     /// the page's `#last-submission` element.
-    void HandleNavigation(const ui::NavigationRequest &request) noexcept
+    void HandleNavigation(const boo::NavigationRequest &request) noexcept
     {
       net::Url url(request.Url);
       if (!request.IsFormSubmission && !request.Download && !request.OpensNewWindow
@@ -824,8 +824,8 @@ namespace krys
       {
         for (auto &item : request.Entries->Items())
         {
-          auto *value = std::get_if<boo::DOMString>(&item.Data);
-          auto *file = std::get_if<RefPtr<boo::File>>(&item.Data);
+          auto *value = std::get_if<web::DOMString>(&item.Data);
+          auto *file = std::get_if<RefPtr<web::File>>(&item.Data);
           entries += (entries.empty() ? u8"" : u8"&") + item.Name + u8"="
                      + (value   ? *value
                         : *file ? utf8_string((*file)->Name())
@@ -847,7 +847,7 @@ namespace krys
       }
     }
 
-    /// @brief The page view: the page laid out and painted by Booey, below the header.
+    /// @brief The page view: the page laid out and painted by Krystal.Web, below the header.
     void DrawPage() noexcept
     {
       if (!_pageView)
@@ -878,7 +878,7 @@ namespace krys
               static_cast<uint8>(rgb & 255u), alpha};
     }
 
-    /// @brief A line of text on a baseline, left to right, placed by advances (Booey shapes text; this is
+    /// @brief A line of text on a baseline, left to right, placed by advances (Krystal.Web shapes text; this is
     /// just for labels until it draws the editor).
     void DrawText(const char32_t *text, float x, float baseline, float size, const gfx::Paint2D &paint,
                   bool bold = false) noexcept

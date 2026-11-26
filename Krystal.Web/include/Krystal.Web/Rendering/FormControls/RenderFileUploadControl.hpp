@@ -1,0 +1,83 @@
+﻿/*
+ * Copyright (C) 2006, 2007, 2009, 2012 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Rendering/RenderBlockFlow.hpp"
+
+namespace krys::web
+{
+  class HTMLInputElement;
+
+  /// @brief The renderer of `<input type=file>`. Each RenderFileUploadControl contains a RenderButton (for
+  /// opening the file chooser), and sufficient space to draw the files' names; there's no file icon, as in
+  /// Chrome. The RenderButton has a shadow node associated with it to receive click/hover events.
+  class RenderFileUploadControl final : public RenderBlockFlow
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderFileUploadControl);
+
+  private:
+    bool _canReceiveDroppedFiles;
+
+  public:
+    RenderFileUploadControl(HTMLInputElement &, RenderStyle &&) noexcept;
+
+    ~RenderFileUploadControl() noexcept override;
+
+    KRYS_NODISCARD DOMString ButtonValue() const noexcept;
+
+    /// @brief The text drawn after the button: the files' names (or how many there are), or that none is
+    /// chosen, truncated to fit.
+    KRYS_NODISCARD utf8_string FileTextValue() const noexcept;
+
+    KRYS_NODISCARD HTMLInputElement &InputElement() const noexcept;
+
+  private:
+    KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
+    {
+      return u8"RenderFileUploadControl";
+    }
+
+    void UpdateFromElement() noexcept override;
+
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
+                                       LayoutUnit &maxLogicalWidth) const noexcept override;
+
+    void ComputePreferredLogicalWidths() noexcept override;
+
+    void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    void PaintControl(PaintInfo &, const LayoutPoint &) noexcept;
+
+    KRYS_NODISCARD int32 MaxFilenameLogicalWidth() const noexcept;
+
+    KRYS_NODISCARD PositionWithAffinity PositionForPoint(
+      const LayoutPoint &, HitTestSource, const RenderFragmentContainer * = nullptr) noexcept override;
+
+    KRYS_NODISCARD HTMLInputElement *UploadButton() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderFileUploadControl)
+  KRYS_NODISCARD static bool IsType(const krys::web::RenderObject &renderer) noexcept
+  {
+    return renderer.IsRenderFileUploadControl();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

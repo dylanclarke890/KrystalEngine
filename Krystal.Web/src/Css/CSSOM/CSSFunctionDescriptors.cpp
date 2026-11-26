@@ -1,0 +1,65 @@
+﻿/*
+ * Copyright (C) 2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/CSSOM/CSSFunctionDescriptors.hpp"
+#include "Krystal.Web/Css/CSSOM/CSSFunctionDeclarations.hpp"
+#include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
+
+namespace krys::web
+{
+  CSSFunctionDescriptors::CSSFunctionDescriptors(css::MutableStyleProperties &propertySet,
+                                                 CSSFunctionDeclarations &parentRule) noexcept
+      : PropertySetCSSDescriptors(propertySet, parentRule)
+  {
+  }
+
+  CSSFunctionDescriptors::~CSSFunctionDescriptors() noexcept = default;
+
+  Ref<CSSFunctionDescriptors> CSSFunctionDescriptors::Create(css::MutableStyleProperties &propertySet,
+                                                             CSSFunctionDeclarations &parentRule) noexcept
+  {
+    return AdoptRef(*new CSSFunctionDescriptors(propertySet, parentRule));
+  }
+
+  css::RuleType CSSFunctionDescriptors::GetRuleType() const noexcept
+  {
+    return css::RuleType::FunctionDeclarations;
+  }
+
+#pragma region Descriptors
+
+  // @function 'result'
+  CSSOMString CSSFunctionDescriptors::Result() const noexcept
+  {
+    return GetPropertyValueInternal(css::PropertyId::Result);
+  }
+
+  ExceptionOr<void> CSSFunctionDescriptors::SetResult(const CSSOMString &value) noexcept
+  {
+    return SetPropertyInternal(css::PropertyId::Result, value, css::IsImportant::No);
+  }
+
+#pragma endregion
+}

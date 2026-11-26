@@ -1,0 +1,116 @@
+﻿/*
+ * Copyright (C) 2018 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Web/Animation/StyleOriginatedAnimation.hpp"
+#include "Krystal.Web/Style/Values/Transitions/Transition.hpp"
+
+namespace krys::web
+{
+  /// @brief A transition created by an element's `transition` properties when a property's value changes.
+  /// @see https://drafts.csswg.org/css-transitions-2/#csstransition
+  class CSSTransition final : public StyleOriginatedAnimation
+  {
+  private:
+    AnimatableCSSProperty _property;
+    Seconds _generationTime;
+    UniquePtr<RenderStyle> _targetStyle;
+    UniquePtr<RenderStyle> _reversingAdjustedStartStyle;
+    double _reversingShorteningFactor;
+    style::Transition _backingStyleTransition;
+
+    CSSTransition(const style::Styleable &styleable, AnimatableCSSProperty property, Seconds generationTime,
+                  style::Transition backingStyleTransition, const RenderStyle &targetStyle,
+                  const RenderStyle &reversingAdjustedStartStyle, double reversingShorteningFactor) noexcept;
+
+  public:
+    ~CSSTransition() noexcept override;
+
+    KRYS_NODISCARD static Ref<CSSTransition>
+      Create(const style::Styleable &owningElement, const AnimatableCSSProperty &property,
+             Seconds generationTime, const style::Transition &backingStyleTransition,
+             const RenderStyle &oldStyle, const RenderStyle &newStyle, Seconds delay, Seconds duration,
+             const RenderStyle &reversingAdjustedStartStyle, double reversingShorteningFactor) noexcept;
+
+    /// @see https://drafts.csswg.org/css-transitions-2/#dom-csstransition-transitionproperty
+    KRYS_NODISCARD CSSOMStringAtom TransitionProperty() const noexcept;
+
+    KRYS_NODISCARD AnimatableCSSProperty Property() const noexcept
+    {
+      return _property;
+    }
+
+    /// @brief When the transition was generated, in the host's time.
+    /// @see https://drafts.csswg.org/css-transitions-2/#transition-generation
+    KRYS_NODISCARD Seconds GenerationTime() const noexcept
+    {
+      return _generationTime;
+    }
+
+    KRYS_NODISCARD const RenderStyle &TargetStyle() const noexcept
+    {
+      return *_targetStyle;
+    }
+
+    /// @see https://drafts.csswg.org/css-transitions-1/#reversing-adjusted-start-value
+    KRYS_NODISCARD const RenderStyle &ReversingAdjustedStartStyle() const noexcept
+    {
+      return *_reversingAdjustedStartStyle;
+    }
+
+    /// @see https://drafts.csswg.org/css-transitions-1/#reversing-shortening-factor
+    KRYS_NODISCARD double ReversingShorteningFactor() const noexcept
+    {
+      return _reversingShorteningFactor;
+    }
+
+    KRYS_NODISCARD const style::Transition &BackingStyleTransition() const noexcept
+    {
+      return _backingStyleTransition;
+    }
+
+  private:
+    void SetTimingProperties(Seconds delay, Seconds duration) noexcept;
+
+    KRYS_NODISCARD Ref<StyleOriginatedAnimationEvent>
+      CreateEvent(DOMStringAtom eventType, Maybe<Seconds> scheduledTime, double elapsedTime,
+                  const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
+
+    void AnimationDidFinish() noexcept final;
+
+    KRYS_NODISCARD bool IsCSSTransition() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD AnimationPlayState BackingAnimationPlayState() const noexcept final;
+
+    KRYS_NODISCARD web::TimingFunction *BackingAnimationTimingFunction() const noexcept final;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_TRAITS_WEB_ANIMATION(krys::web::CSSTransition, IsCSSTransition())

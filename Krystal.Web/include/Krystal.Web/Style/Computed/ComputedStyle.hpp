@@ -1,0 +1,143 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2021 Google Inc. All rights reserved.
+ * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Style/Computed/ComputedStyleProperties.hpp"
+
+namespace krys::web::style
+{
+  class ComputedStyle final : public ComputedStyleProperties
+  {
+  public:
+    void InheritFrom(const ComputedStyle &) noexcept;
+
+    void InheritIgnoringCustomPropertiesFrom(const ComputedStyle &) noexcept;
+
+    void InheritUnicodeBidiFrom(const ComputedStyle &) noexcept;
+
+    inline void InheritColumnPropertiesFrom(const ComputedStyle &) noexcept;
+
+    void FastPathInheritFrom(const ComputedStyle &) noexcept;
+
+    void CopyNonInheritedFrom(const ComputedStyle &) noexcept;
+
+    void CopyContentFrom(const ComputedStyle &) noexcept;
+
+    void CopyPseudoElementBitsFrom(const ComputedStyle &) noexcept;
+
+    // MARK: - Comparisons
+
+    bool operator==(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool InheritedEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool NonInheritedEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool FastPathInheritedEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool NonFastPathInheritedEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool DescendantAffectingNonInheritedPropertiesEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool BorderAndBackgroundEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD inline bool ContainerTypeAndNamesEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD inline bool ColumnSpanEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD inline bool ScrollPaddingEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD inline bool FontCascadeEqual(const ComputedStyle &) const noexcept;
+
+    KRYS_NODISCARD bool ScrollSnapDataEquivalent(const ComputedStyle &) const noexcept;
+
+    // MARK: - Style adjustment utilities
+
+    void SetPageScaleTransform(float) noexcept;
+
+    inline void AddToTextDecorationLineInEffect(style::TextDecorationLine) noexcept;
+
+    inline void ContainIntrinsicWidthAddAuto() noexcept;
+
+    inline void ContainIntrinsicHeightAddAuto() noexcept;
+
+    inline void SetGridAutoFlowDirection(GridAutoFlow::Direction) noexcept;
+
+    void AdjustAnimations() noexcept;
+
+    void AdjustTransitions() noexcept;
+
+    void AdjustBackgroundLayers() noexcept;
+
+    void AdjustMaskLayers() noexcept;
+
+    void AdjustScrollTimelines() noexcept;
+
+    void AdjustViewTimelines() noexcept;
+
+    inline void ResetBorder() noexcept;
+
+    inline void ResetBorderExceptRadius() noexcept;
+
+    inline void ResetBorderTop() noexcept;
+
+    inline void ResetBorderRight() noexcept;
+
+    inline void ResetBorderBottom() noexcept;
+
+    inline void ResetBorderLeft() noexcept;
+
+    inline void ResetBorderRadius() noexcept;
+
+    inline void ResetMargin() noexcept;
+
+    inline void ResetPadding() noexcept;
+
+    // MARK: - Derived Values
+
+    KRYS_NODISCARD float ComputedLineHeight() const noexcept;
+
+    KRYS_NODISCARD float ComputeLineHeight(const style::LineHeight &) const noexcept;
+
+    // MARK: - Non-property initial values.
+
+    KRYS_NODISCARD constexpr static ZIndex InitialUsedZIndex() noexcept;
+
+  private:
+    friend class web::RenderStyleBase;
+
+    ComputedStyle(ComputedStyle &&) noexcept;
+
+    ComputedStyle &operator=(ComputedStyle &&) noexcept;
+
+    ComputedStyle(CreateDefaultStyleTag) noexcept;
+
+    ComputedStyle(const ComputedStyle &, CloneTag) noexcept;
+
+    ComputedStyle(ComputedStyle &, ComputedStyle &&) noexcept;
+  };
+}
