@@ -34,7 +34,6 @@
 #include "Krystal.Web/Css/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -75,24 +74,7 @@ namespace krys::web
     }
   }
 
-#pragma region DocumentOrShadowRoot Mixin (CSSOM)
-
-  StyleSheetList &ShadowRoot::StyleSheets() noexcept
-  {
-    if (!_styleSheetList)
-    {
-      _styleSheetList = StyleSheetList::Create(*this);
-    }
-    return *_styleSheetList;
-  }
-
-  List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
-  {
-    return NodeDocument().MatchingAnimations(
-      [&](Element &target) -> bool { return dom::TreeTraversal::ContainingShadowRoot(target) == this; });
-  }
-
-#pragma endregion
+#pragma region ShadowRoot
 
   void ShadowRoot::SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept
   {
@@ -114,19 +96,6 @@ namespace krys::web
     }
   }
 
-  void ShadowRoot::NotifyHostIdTargetObservers() noexcept
-  {
-    auto *host = Host();
-    if (!host)
-    {
-      return;
-    }
-    if (auto id = host->GetAttribute(u8"id"); id && !id->empty())
-    {
-      host->TreeScope().NotifyIdTargetObservers(*host, DOMStringAtom(*id));
-    }
-  }
-
   Element *ShadowRoot::Host() const noexcept
   {
     if (auto host = _host.lock())
@@ -137,12 +106,9 @@ namespace krys::web
     return nullptr;
   }
 
-#pragma region ShadowRoot (DOM Parsing)
+#pragma endregion
 
-  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html) noexcept
-  {
-    return SetHTML(html, {});
-  }
+#pragma region ShadowRoot (HTML extensions)
 
   ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
   {
@@ -152,9 +118,9 @@ namespace krys::web
                                                            html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html) noexcept
   {
-    return AppendHTML(html, {});
+    return SetHTML(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -165,9 +131,9 @@ namespace krys::web
                                                                  html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html) noexcept
+  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html) noexcept
   {
-    return PrependHTML(html, {});
+    return AppendHTML(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept
@@ -178,9 +144,9 @@ namespace krys::web
       *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
   }
 
-  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html) noexcept
+  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html) noexcept
   {
-    return SetHTMLUnsafe(html, {});
+    return PrependHTML(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
@@ -195,9 +161,9 @@ namespace krys::web
       *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
-  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html) noexcept
   {
-    return AppendHTMLUnsafe(html, {});
+    return SetHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
@@ -213,9 +179,9 @@ namespace krys::web
       html::FragmentParserMode::Unsafe);
   }
 
-  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html) noexcept
+  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html) noexcept
   {
-    return PrependHTMLUnsafe(html, {});
+    return AppendHTMLUnsafe(html, {});
   }
 
   ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
@@ -231,9 +197,9 @@ namespace krys::web
       html::FragmentParserMode::Unsafe);
   }
 
-  DOMString ShadowRoot::GetHTML() const noexcept
+  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html) noexcept
   {
-    return GetHTML(html::GetHTMLOptions {});
+    return PrependHTMLUnsafe(html, {});
   }
 
   DOMString ShadowRoot::GetHTML(html::GetHTMLOptions options) const noexcept
@@ -243,6 +209,11 @@ namespace krys::web
                              options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
                                                              : SerializeShadowRoots::Explicit,
                              krys::move(options.ShadowRoots));
+  }
+
+  DOMString ShadowRoot::GetHTML() const noexcept
+  {
+    return GetHTML(html::GetHTMLOptions {});
   }
 
   ExceptionOr<DOMString> ShadowRoot::InnerHTML() const noexcept
@@ -260,56 +231,134 @@ namespace krys::web
 
 #pragma endregion
 
-  ExceptionOr<void> ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup) noexcept
+#pragma region DocumentOrShadowRoot Mixin (CSSOM)
+
+  StyleSheetList &ShadowRoot::StyleSheets() noexcept
   {
-    if (markup.empty())
+    if (!_styleSheetList)
     {
-      return dom::MutationAlgorithms::ReplaceAll(nullptr, *this);
+      _styleSheetList = StyleSheetList::Create(*this);
     }
-
-    RefPtr<Element> host = ShareRefPtr(Host());
-    krys_assert(host);
-    auto fragment = CreateFragmentForInnerOuterHTML(*host, markup);
-    if (fragment.HasException())
-    {
-      return fragment.ReleaseException();
-    }
-    return ReplaceChildrenWithFragment(*this, fragment.ReleaseValue());
-  }
-
-#pragma region Extension Hooks
-
-  void ShadowRoot::OnInsert() noexcept
-  {
-    DocumentFragment::OnInsert();
-    if (IsConnected())
-    {
-      NodeDocument().DidInsertInDocumentShadowRoot(*this);
-    }
-    if (!GetAdoptedStyleSheets().empty())
-    {
-      StyleScope().DidChangeActiveStyleSheetCandidates();
-    }
-  }
-
-  void ShadowRoot::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
-  {
-    DocumentFragment::OnRemove(isSubtreeRoot, oldAncestor);
-    NodeDocument().DidRemoveInDocumentShadowRoot(*this);
-  }
-
-  void ShadowRoot::OnAdopt(Document &oldDocument) noexcept
-  {
-    DocumentFragment::OnAdopt(oldDocument);
-
-    // Adopted sheets were constructed for the old document.
-    (void)SetAdoptedStyleSheets({});
-
-    // Style scopes are document specific.
-    _styleScope = CreateUnique<style::Scope>(*this);
+    return *_styleSheetList;
   }
 
 #pragma endregion
+
+#pragma region DocumentOrShadowRoot Mixin (Web Animations)
+
+  List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
+  {
+    return NodeDocument().MatchingAnimations(
+      [&](Element &target) -> bool { return dom::TreeTraversal::ContainingShadowRoot(target) == this; });
+  }
+
+#pragma endregion
+
+  void ShadowRoot::NotifyHostIdTargetObservers() noexcept
+  {
+    auto *host = Host();
+    if (!host)
+    {
+      return;
+    }
+
+    if (auto id = host->GetAttribute(u8"id"); id && !id->empty())
+    {
+      host->TreeScope().NotifyIdTargetObservers(*host, DOMStringAtom(*id));
+    }
+  }
+
+  namespace
+  {
+    /// @brief One mapping of an `exportparts` list: `name` or `name : exported`.
+    KRYS_NODISCARD Maybe<Pair<DOMStringAtom, DOMStringAtom>> ParsePartMapping(DOMStringView mapping) noexcept
+    {
+      auto skipWhitespace = [&](size_t position)
+      {
+        while (position < mapping.size() && krys::text::IsASCIIWhitespace(mapping[position]))
+        {
+          ++position;
+        }
+
+        return position;
+      };
+
+      auto collectValue = [&](size_t position)
+      {
+        while (position < mapping.size() && !krys::text::IsASCIIWhitespace(mapping[position])
+               && mapping[position] != u8':')
+        {
+          ++position;
+        }
+
+        return position;
+      };
+
+      auto begin = skipWhitespace(0uz);
+      auto firstPartEnd = collectValue(begin);
+      if (firstPartEnd == begin)
+      {
+        return null;
+      }
+
+      auto firstPart = DOMStringAtom(mapping.substr(begin, firstPartEnd - begin));
+      begin = skipWhitespace(firstPartEnd);
+      if (begin == mapping.size())
+      {
+        return Pair {firstPart, firstPart};
+      }
+
+      if (mapping[begin] != u8':')
+      {
+        return null;
+      }
+
+      begin = skipWhitespace(begin + 1uz);
+      auto secondPartEnd = collectValue(begin);
+      if (secondPartEnd == begin)
+      {
+        return null;
+      }
+
+      auto secondPart = DOMStringAtom(mapping.substr(begin, secondPartEnd - begin));
+      if (skipWhitespace(secondPartEnd) != mapping.size())
+      {
+        return null;
+      }
+
+      return Pair {firstPart, secondPart};
+    }
+  }
+
+  const ShadowRoot::PartMappings &ShadowRoot::GetPartMappings() const noexcept
+  {
+    if (!_partMappings)
+    {
+      PartMappings mappings;
+      if (auto exportParts = Host()->GetAttribute(u8"exportparts"))
+      {
+        DOMStringView remaining = *exportParts;
+        while (true)
+        {
+          auto comma = remaining.find(u8',');
+          if (auto mapping = ParsePartMapping(remaining.substr(0uz, comma)))
+          {
+            mappings[mapping->first].push_back(mapping->second);
+          }
+
+          if (comma == DOMStringView::npos)
+          {
+            break;
+          }
+
+          remaining.remove_prefix(comma + 1uz);
+        }
+      }
+      _partMappings = krys::move(mappings);
+    }
+
+    return *_partMappings;
+  }
 
   EventTarget *ShadowRoot::GetParent(Event &event) const noexcept
   {
@@ -336,88 +385,58 @@ namespace krys::web
     return nullptr;
   }
 
-  namespace
+#pragma region Extension Hooks
+
+  void ShadowRoot::OnInsert() noexcept
   {
-    /// @brief One mapping of an `exportparts` list: `name` or `name : exported`.
-    KRYS_NODISCARD Maybe<Pair<DOMStringAtom, DOMStringAtom>> ParsePartMapping(DOMStringView mapping) noexcept
+    DocumentFragment::OnInsert();
+    if (IsConnected())
     {
-      auto skipWhitespace = [&](size_t position)
-      {
-        while (position < mapping.size() && krys::text::IsASCIIWhitespace(mapping[position]))
-        {
-          ++position;
-        }
-        return position;
-      };
-      auto collectValue = [&](size_t position)
-      {
-        while (position < mapping.size() && !krys::text::IsASCIIWhitespace(mapping[position])
-               && mapping[position] != u8':')
-        {
-          ++position;
-        }
-        return position;
-      };
+      NodeDocument().DidInsertInDocumentShadowRoot(*this);
+    }
 
-      auto begin = skipWhitespace(0uz);
-      auto firstPartEnd = collectValue(begin);
-      if (firstPartEnd == begin)
-      {
-        return null;
-      }
-      auto firstPart = DOMStringAtom(mapping.substr(begin, firstPartEnd - begin));
-
-      begin = skipWhitespace(firstPartEnd);
-      if (begin == mapping.size())
-      {
-        return Pair {firstPart, firstPart};
-      }
-      if (mapping[begin] != u8':')
-      {
-        return null;
-      }
-
-      begin = skipWhitespace(begin + 1uz);
-      auto secondPartEnd = collectValue(begin);
-      if (secondPartEnd == begin)
-      {
-        return null;
-      }
-      auto secondPart = DOMStringAtom(mapping.substr(begin, secondPartEnd - begin));
-
-      if (skipWhitespace(secondPartEnd) != mapping.size())
-      {
-        return null;
-      }
-      return Pair {firstPart, secondPart};
+    if (!GetAdoptedStyleSheets().empty())
+    {
+      StyleScope().DidChangeActiveStyleSheetCandidates();
     }
   }
 
-  const ShadowRoot::PartMappings &ShadowRoot::GetPartMappings() const noexcept
+  void ShadowRoot::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
-    if (!_partMappings)
+    DocumentFragment::OnRemove(isSubtreeRoot, oldAncestor);
+    NodeDocument().DidRemoveInDocumentShadowRoot(*this);
+  }
+
+  void ShadowRoot::OnAdopt(Document &oldDocument) noexcept
+  {
+    DocumentFragment::OnAdopt(oldDocument);
+
+    // Adopted sheets were constructed for the old document.
+    (void)SetAdoptedStyleSheets({});
+
+    // Style scopes are document specific.
+    _styleScope = CreateUnique<style::Scope>(*this);
+  }
+
+#pragma endregion
+
+  ExceptionOr<void> ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup) noexcept
+  {
+    if (markup.empty())
     {
-      PartMappings mappings;
-      if (auto exportParts = Host()->GetAttribute(u8"exportparts"))
-      {
-        DOMStringView remaining = *exportParts;
-        while (true)
-        {
-          auto comma = remaining.find(u8',');
-          if (auto mapping = ParsePartMapping(remaining.substr(0uz, comma)))
-          {
-            mappings[mapping->first].push_back(mapping->second);
-          }
-          if (comma == DOMStringView::npos)
-          {
-            break;
-          }
-          remaining.remove_prefix(comma + 1uz);
-        }
-      }
-      _partMappings = krys::move(mappings);
+      return dom::MutationAlgorithms::ReplaceAll(nullptr, *this);
     }
-    return *_partMappings;
+
+    RefPtr<Element> host = ShareRefPtr(Host());
+    krys_assert(host);
+    
+    auto fragment = CreateFragmentForInnerOuterHTML(*host, markup);
+    if (fragment.HasException())
+    {
+      return fragment.ReleaseException();
+    }
+
+    return ReplaceChildrenWithFragment(*this, fragment.ReleaseValue());
   }
 
   List<Ref<ShadowRoot>> dom::AssignedShadowRootsIfSlotted(const Node &node) noexcept
@@ -430,6 +449,7 @@ namespace krys::web
       krys_debug_assert(shadowRoot);
       result.push_back(ShareRef(*shadowRoot));
     }
+
     return result;
   }
 }

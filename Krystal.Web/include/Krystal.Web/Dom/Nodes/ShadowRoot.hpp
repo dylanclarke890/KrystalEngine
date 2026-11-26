@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -179,22 +178,6 @@ namespace krys::web
       return _delegatesFocus;
     }
 
-    /// @brief Sets whether a user agent shadow root delegates focus: its control's parts (a date input's
-    /// fields) are focused instead of the control, and sequential navigation moves between them.
-    void SetUserAgentDelegatesFocus(bool delegatesFocus) noexcept
-    {
-      krys_debug_assert(_mode == dom::ShadowRootMode::UserAgent);
-      _delegatesFocus = delegatesFocus;
-    }
-
-    /// @brief Whether the shadow root was attached while its host was a custom element, so that the host's
-    /// internals expose it.
-    /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
-    KRYS_NODISCARD bool IsAvailableToElementInternals() const noexcept
-    {
-      return _availableToElementInternals;
-    }
-
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment
     KRYS_NODISCARD dom::SlotAssignmentMode SlotAssignment() const noexcept
     {
@@ -224,10 +207,6 @@ namespace krys::web
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-referencetarget
     void SetReferenceTarget(Maybe<DOMString> referenceTarget) noexcept;
 
-    /// @brief Tells the observers of the host's ID (form controls whose `form` names it) that what a
-    /// reference to the host resolves to may have changed.
-    void NotifyHostIdTargetObservers() noexcept;
-
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD Element *Host() const noexcept;
 
@@ -237,7 +216,7 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region ShadowRoot (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
+#pragma region ShadowRoot (HTML extensions) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
 
     /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
     /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
@@ -323,6 +302,26 @@ namespace krys::web
 
 #pragma endregion
 
+    /// @brief Whether the shadow root was attached while its host was a custom element, so that the host's
+    /// internals expose it.
+    /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
+    KRYS_NODISCARD bool IsAvailableToElementInternals() const noexcept
+    {
+      return _availableToElementInternals;
+    }
+
+    /// @brief Sets whether a user agent shadow root delegates focus: its control's parts (a date input's
+    /// fields) are focused instead of the control, and sequential navigation moves between them.
+    void SetUserAgentDelegatesFocus(bool delegatesFocus) noexcept
+    {
+      krys_debug_assert(_mode == dom::ShadowRootMode::UserAgent);
+      _delegatesFocus = delegatesFocus;
+    }
+
+    /// @brief Tells the observers of the host's ID (form controls whose `form` names it) that what a
+    /// reference to the host resolves to may have changed.
+    void NotifyHostIdTargetObservers() noexcept;
+
     /// @brief Whether the focused element is in this shadow tree (the host matches `:focus`).
     KRYS_NODISCARD bool ContainsFocusedElement() const noexcept
     {
@@ -344,10 +343,6 @@ namespace krys::web
       _partMappings = null;
     }
 
-  private:
-    /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
-    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup) noexcept;
-
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
@@ -361,6 +356,10 @@ namespace krys::web
     void OnAdopt(Document &oldDocument) noexcept override;
 
 #pragma endregion
+
+  private:
+    /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
+    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup) noexcept;
   };
 }
 
