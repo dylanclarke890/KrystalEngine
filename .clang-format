@@ -32,6 +32,8 @@ ContinuationIndentWidth: 2
 NamespaceIndentation: All
 FixNamespaceComments: false
 ReflowComments: true
+# Never break a comment line holding a link (it would split the URL from its @see).
+CommentPragmas: '^/ @see |https?://'
 CompactNamespaces: false
 WrapNamespaceBodyWithEmptyLines: Never
 IndentExternBlock: AfterExternBlock

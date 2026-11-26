@@ -37,8 +37,7 @@ namespace krys::web
                                                     bool isCancelable, bool isComposed,
                                                     Ref<html::DOMFormData> &&formData) noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-formdataevent-formdata
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-formdataevent-formdata
     KRYS_NODISCARD html::DOMFormData &FormData() const noexcept
     {
       return *_formData;

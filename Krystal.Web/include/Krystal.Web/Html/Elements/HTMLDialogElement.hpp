@@ -56,8 +56,7 @@ namespace krys::web
     DOMString _returnValue;
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#is-modal
     bool _isModal {false};
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#enable-close-watcher-for-requestclose()
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#enable-close-watcher-for-requestclose()
     bool _enableCloseWatcherForRequestClose {false};
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#request-close-return-value
     Maybe<DOMString> _requestCloseReturnValue;

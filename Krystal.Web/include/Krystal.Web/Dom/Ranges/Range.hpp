@@ -134,8 +134,7 @@ namespace krys::web::dom
 #pragma region Range (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
 
     /// @brief @p markup parsed as the children of the start node (or its parent element, or a `body`).
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-range-createcontextualfragment
     KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
       CreateContextualFragment(DOMStringView markup) const noexcept;
 

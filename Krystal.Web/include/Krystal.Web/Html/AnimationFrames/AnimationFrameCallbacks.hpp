@@ -81,8 +81,7 @@ namespace krys::web::html
 
     /// @brief Runs the callbacks registered before this frame, with @p timestamp (milliseconds since the
     /// window's time origin).
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     void Run(DOMHighResTimeStamp timestamp) noexcept;
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.

@@ -56,8 +56,7 @@ namespace krys::web
     /// summary if it has none.
     KRYS_NODISCARD bool IsActiveSummary(const HTMLSummaryElement &summary) const noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
     void QueueDetailsToggleEventTask(html::ToggleState oldState, html::ToggleState newState) noexcept;
 
     /// @brief The slot of the element's shadow tree that takes @p child: the summary slot for the first
@@ -90,8 +89,7 @@ namespace krys::web
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#details-name-group
     KRYS_NODISCARD List<Ref<HTMLDetailsElement>> OtherElementsInNameGroup() noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
+    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
     void EnsureDetailsExclusivityAfterMutation() noexcept;
   };
 }

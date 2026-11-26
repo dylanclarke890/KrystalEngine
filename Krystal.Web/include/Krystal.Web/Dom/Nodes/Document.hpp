@@ -1213,13 +1213,11 @@ namespace krys::web
     /// @brief Sets the sequential focus navigation starting point to @p node (as when the user clicks it), or
     /// unsets it if @p node is null, the document or its document element (navigation then starts from the
     /// start of the document).
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     void SetSequentialFocusNavigationStartingPoint(Node *node) noexcept;
 
     /// @brief The sequential focus navigation starting point, if it's set.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#sequential-focus-navigation-starting-point
     KRYS_NODISCARD Node *SequentialFocusNavigationStartingPoint() const noexcept
     {
       return _sequentialFocusNavigationStartingPoint.get();
@@ -1660,8 +1658,7 @@ namespace krys::web
     /// @brief Drops @p timer, which stopped.
     void RemoveTimer(html::DocumentTimer &timer) noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
 
     /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
@@ -1670,13 +1667,11 @@ namespace krys::web
     /// @brief Resumes them.
     void ResumeAnimationFrameCallbacks() noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 id) noexcept;
 
     /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
+    /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     void RunAnimationFrameCallbacks() noexcept;
 
     /// @brief Stops the document's timers and drops its animation frame callbacks and its tasks:

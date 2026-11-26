@@ -130,8 +130,7 @@ namespace krys::web
 
     /// @brief Loads the sheet an `xml-stylesheet` processing instruction (a child of the document) links to,
     /// when it's connected or its data changes.
-    /// @see
-    /// https://drafts.csswg.org/cssom/#requirements-on-user-agents-implementing-the-xml-stylesheet-processing-instruction
+    /// @see https://drafts.csswg.org/cssom/#requirements-on-user-agents-implementing-the-xml-stylesheet-processing-instruction
     void CheckStyleSheet() noexcept;
 
   protected:

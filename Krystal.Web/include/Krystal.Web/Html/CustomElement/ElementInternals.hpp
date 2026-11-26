@@ -109,24 +109,19 @@ namespace krys::web::html
     ExceptionOr<void> SetValidity(ValidityStateFlags flags = {}, DOMString message = {},
                                   HTMLElement *validationAnchor = nullptr) noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-willvalidate
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-willvalidate
     KRYS_NODISCARD ExceptionOr<bool> WillValidate() const noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-validity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-validity
     KRYS_NODISCARD ExceptionOr<ValidityState> Validity() noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
+    /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#dom-elementinternals-validationmessage
     KRYS_NODISCARD ExceptionOr<DOMString> ValidationMessage() const noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-reportvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-reportvalidity
     ExceptionOr<bool> ReportValidity() noexcept;
 
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-checkvalidity
+    /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-elementinternals-checkvalidity
     ExceptionOr<bool> CheckValidity() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-elementinternals-labels

@@ -342,8 +342,7 @@ namespace krys::web
 #pragma endregion
 
     /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(DOMStringView string) noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
@@ -434,8 +433,7 @@ namespace krys::web
 
     /// @brief Maps `width` and `height` attributes to `aspect-ratio: auto w / h`, if both are numbers of
     /// pixels.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property-(using-dimension-rules)
+    /// @see https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property-(using-dimension-rules)
     void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(DOMStringView widthAttribute,
                                                              DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
@@ -462,8 +460,7 @@ namespace krys::web
                               DOMStringView value) noexcept;
 
     /// @brief Maps a legacy color attribute to @p property, if it parses.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                     DOMStringView attributeValue) noexcept;
 

@@ -44,8 +44,7 @@ namespace krys::web
 
   public:
     /// @return A `TypeError` if @p variable isn't a custom property name.
-    /// @see
-    /// https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-cssvariablereferencevalue
+    /// @see https://drafts.css-houdini.org/css-typed-om/#dom-cssvariablereferencevalue-cssvariablereferencevalue
     KRYS_NODISCARD static ExceptionOr<Ref<CSSVariableReferenceValue>>
       Create(CSSOMString variable, RefPtr<CSSUnparsedValue> fallback = {}) noexcept;
 

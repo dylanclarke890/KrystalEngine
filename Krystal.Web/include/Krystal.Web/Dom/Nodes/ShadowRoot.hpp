@@ -273,8 +273,7 @@ namespace krys::web
 
     /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-appendhtmlunsafe
     ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
                                        const html::SetHTMLUnsafeOptions &options) noexcept;
 
@@ -283,8 +282,7 @@ namespace krys::web
 
     /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
     /// sanitizer.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe
+    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-prependhtmlunsafe
     ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
                                         const html::SetHTMLUnsafeOptions &options) noexcept;
 

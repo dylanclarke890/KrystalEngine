@@ -42,8 +42,7 @@ namespace krys::web
 {
   namespace
   {
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-non-negative-numbers-greater-than-zero
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-non-negative-numbers-greater-than-zero
     KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<DOMStringView> value,
                                                                            uint32 defaultValue) noexcept
     {

@@ -119,8 +119,7 @@ namespace krys::web::ax::mixins
     }
 
     /// @brief The `DOMString?` getter of a reflected attribute.
-    /// @see
-    /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
+    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-domstring-2
     KRYS_NODISCARD Maybe<DOMString> ReflectedString(DOMStringAtom name) const noexcept;
 
     /// @brief The `DOMString?` setter of a reflected attribute.

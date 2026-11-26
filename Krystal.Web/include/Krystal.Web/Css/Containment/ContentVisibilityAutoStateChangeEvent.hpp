@@ -24,8 +24,7 @@ namespace krys::web
     /// @brief The dictionary its constructor takes.
     using dictionary_type = ContentVisibilityAutoStateChangeEventInit;
 
-    /// @see
-    /// https://drafts.csswg.org/css-contain/#dom-contentvisibilityautostatechangeevent-contentvisibilityautostatechangeevent
+    /// @see https://drafts.csswg.org/css-contain/#dom-contentvisibilityautostatechangeevent-contentvisibilityautostatechangeevent
     ContentVisibilityAutoStateChangeEvent(
       DOMStringAtom type, const ContentVisibilityAutoStateChangeEventInit &eventInitDict = {}) noexcept;
 
