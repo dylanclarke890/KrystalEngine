@@ -15,7 +15,6 @@
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/XMLDocument.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/ExtensibilityHooks.hpp"
@@ -197,10 +196,6 @@ namespace krys::web::dom
       if (Is<HTMLDocument>(doc))
       {
         copy = CreateRef<HTMLDocument>();
-      }
-      else if (Is<XHTMLDocument>(doc))
-      {
-        copy = CreateRef<XHTMLDocument>();
       }
       else if (Is<SVGDocument>(doc))
       {

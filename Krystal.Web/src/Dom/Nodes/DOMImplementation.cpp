@@ -9,7 +9,6 @@
 #include "Krystal.Web/Dom/Nodes/ElementFactory.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/XMLDocument.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Images/ImageDocument.hpp"
@@ -58,7 +57,7 @@ namespace krys::web::dom
       RefPtr<XMLDocument> doc = nullptr;
       if (namespaceUri == infra::namespaces::HTML)
       {
-        doc = CreateRefPtr<XHTMLDocument>();
+        doc = CreateRefPtr<XMLDocument>();
         doc->_contentType = u8"application/xhtml+xml";
       }
       else if (namespaceUri == infra::namespaces::SVG)
@@ -196,7 +195,7 @@ namespace krys::web::dom
       }
       if (text::IsASCIICaselessEqual(contentType, u8"application/xhtml+xml"))
       {
-        auto document = CreateRef<XHTMLDocument>();
+        auto document = CreateRef<XMLDocument>();
         document->_contentType = u8"application/xhtml+xml";
         return document;
       }

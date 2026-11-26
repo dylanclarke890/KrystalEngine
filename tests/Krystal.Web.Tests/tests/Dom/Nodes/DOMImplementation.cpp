@@ -7,7 +7,6 @@
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/XMLDocument.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
@@ -79,7 +78,7 @@ namespace krys::web::dom::tests
     {
       auto xhtml = implementation.CreateDocument(infra::namespaces::HTML, u8"html").ReleaseValue();
       CHECK(xhtml->ContentType() == u8"application/xhtml+xml");
-      CHECK(Is<XHTMLDocument>(static_cast<Document &>(*xhtml)));
+      CHECK(Is<XMLDocument>(static_cast<Document &>(*xhtml)));
       CHECK(Is<HTMLElement>(*xhtml->DocumentElement()));
 
       auto svg = implementation.CreateDocument(infra::namespaces::SVG, u8"svg").ReleaseValue();

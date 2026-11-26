@@ -11,7 +11,6 @@
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/XHTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/XMLDocument.hpp"
 #include "Krystal.Web/Editing/Markup/Markup.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
@@ -183,7 +182,7 @@ namespace krys::web::tests
       u8"application/xhtml+xml");
 
     auto &document = fixture.Document();
-    REQUIRE(Is<XHTMLDocument>(document));
+    REQUIRE(document.ContentType() == u8"application/xhtml+xml");
     auto paragraph = document.GetElementById(u8"p");
     REQUIRE(paragraph);
     CHECK(Is<HTMLElement>(*paragraph));

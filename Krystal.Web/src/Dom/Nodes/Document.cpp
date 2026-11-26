@@ -489,7 +489,7 @@ namespace krys::web
     // 4. Let namespace be the HTML namespace, if this is an HTML document or this's content type is
     //    "application/xhtml+xml"; otherwise null.
     DOMStringAtom namespaceURI = null;
-    if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
+    if (Is<HTMLDocument>(*this) || IsXHTMLDocument())
     {
       namespaceURI = infra::namespaces::HTML;
     }

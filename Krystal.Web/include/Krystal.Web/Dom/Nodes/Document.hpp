@@ -122,9 +122,6 @@ namespace krys::web::dom
     /// @see https://dom.spec.whatwg.org/#concept-document-type
     IsHTMLDocument,
 
-    /// @brief Indicates the type of the document is 'xhtml'.
-    IsXHTMLDocument,
-
     /// @brief Indicates the type of the document is 'svg'.
     IsSVGDocument,
 
@@ -2341,9 +2338,10 @@ namespace krys::web
       return _documentFlags.contains(dom::DocumentFlag::IsXMLDocument);
     }
 
+    /// @brief Whether the document is an XML document with the XHTML content type.
     KRYS_NODISCARD bool IsXHTMLDocument() const noexcept
     {
-      return _documentFlags.contains(dom::DocumentFlag::IsXHTMLDocument);
+      return _contentType == u8"application/xhtml+xml";
     }
 
     KRYS_NODISCARD bool IsSVGDocument() const noexcept

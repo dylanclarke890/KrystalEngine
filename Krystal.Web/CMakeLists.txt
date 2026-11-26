@@ -1145,7 +1145,6 @@ set(KRYSTAL_WEB_DOM_HEADERS
   include/Krystal.Web/Dom/Nodes/ShadowRoot.hpp
   include/Krystal.Web/Dom/Nodes/StyledElement.hpp
   include/Krystal.Web/Dom/Nodes/Text.hpp
-  include/Krystal.Web/Dom/Nodes/XHTMLDocument.hpp
   include/Krystal.Web/Dom/Nodes/XMLDocument.hpp
   include/Krystal.Web/Dom/MutationObserver/AttributesMutationRecord.hpp
   include/Krystal.Web/Dom/MutationObserver/CharacterDataMutationRecord.hpp
