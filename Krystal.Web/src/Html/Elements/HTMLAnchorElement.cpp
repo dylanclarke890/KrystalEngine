@@ -6,10 +6,10 @@
 #include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
 
 #include "Krystal.Core/Strings/ASCII.hpp"

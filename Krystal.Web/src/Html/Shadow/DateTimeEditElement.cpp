@@ -31,11 +31,11 @@
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Events/UI/FocusEvent.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/InputTypes/DateTimeFieldsState.hpp"
 #include "Krystal.Web/Html/Shadow/DateTimeFieldElements.hpp"
+#include "Krystal.Web/Input/UIEvents/FocusEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include <algorithm>
 #include <limits>

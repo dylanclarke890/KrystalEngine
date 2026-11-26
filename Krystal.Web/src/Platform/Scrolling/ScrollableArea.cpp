@@ -30,8 +30,8 @@
  */
 
 #include "Krystal.Web/Platform/Scrolling/ScrollableArea.hpp"
-#include "Krystal.Web/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Web/Page/Scrolling/ScrollAnchoringController.hpp"
+#include "Krystal.Web/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollAnimator.hpp"
 #include "Krystal.Web/Platform/Scrolling/Scrollbar.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollbarsController.hpp"

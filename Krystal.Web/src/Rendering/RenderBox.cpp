@@ -41,7 +41,7 @@
 #include "Krystal.Web/Html/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/FrameViewLayoutContext.hpp"

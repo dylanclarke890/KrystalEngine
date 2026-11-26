@@ -43,7 +43,7 @@
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Window.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Web/Loader/DocumentLoader.hpp"
 #include "Krystal.Web/Loader/FormSubmission.hpp"

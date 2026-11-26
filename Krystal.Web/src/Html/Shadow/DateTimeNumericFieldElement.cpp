@@ -29,7 +29,7 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.I18n/Locale.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Rendering/RenderBlock.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"

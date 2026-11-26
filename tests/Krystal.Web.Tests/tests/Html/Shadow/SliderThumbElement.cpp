@@ -5,8 +5,8 @@
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 
 namespace krys::web::tests
 {

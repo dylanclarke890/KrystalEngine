@@ -9,11 +9,11 @@
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
-#include "Krystal.Web/Input/PlatformWheelEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformWheelEvent.hpp"
 #include "Krystal.Web/Platform/Scrolling/Scrollbar.hpp"
 
 namespace krys::web::layout::tests

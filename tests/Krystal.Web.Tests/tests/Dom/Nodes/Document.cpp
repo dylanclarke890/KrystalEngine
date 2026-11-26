@@ -23,13 +23,6 @@
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Web/Dom/Traversal/NodeIterator.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeWalker.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Web/Events/Touch/TouchEvent.hpp"
-#include "Krystal.Web/Events/UI/CompositionEvent.hpp"
-#include "Krystal.Web/Events/UI/FocusEvent.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
-#include "Krystal.Web/Events/UI/TextEvent.hpp"
-#include "Krystal.Web/Events/UI/UIEvent.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DragEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
@@ -39,6 +32,13 @@
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Web/Html/Window.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
+#include "Krystal.Web/Input/TouchEvents/TouchEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/CompositionEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/FocusEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/TextEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/UIEvent.hpp"
 
 namespace krys::web::dom::tests
 {

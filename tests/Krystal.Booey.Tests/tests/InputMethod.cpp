@@ -7,10 +7,10 @@
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Web/Events/UI/CompositionEvent.hpp"
-#include "Krystal.Web/Events/UI/InputEvent.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Input/UIEvents/CompositionEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/InputEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Loader/Cache/MemoryCache.hpp"
 #include <string>
 

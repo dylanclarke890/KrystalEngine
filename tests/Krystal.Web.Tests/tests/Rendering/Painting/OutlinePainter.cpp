@@ -2,10 +2,10 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/LegacyKeyCodes.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::web::tests
 {

@@ -2,7 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Html/FormTestUtils.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Collections/HTMLFormControlsCollection.hpp"
 #include "Krystal.Web/Html/Collections/RadioNodeList.hpp"
 #include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Web/Html/Events/FormDataEvent.hpp"
 #include "Krystal.Web/Html/Events/SubmitEvent.hpp"
 #include "Krystal.Web/Html/Forms/DOMFormData.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
 
 namespace krys::web::html::tests

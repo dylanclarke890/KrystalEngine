@@ -3,8 +3,8 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Text/Bidi.hpp"
 #include "Krystal.Text/CaseMapping.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 
 namespace krys::web::html
 {

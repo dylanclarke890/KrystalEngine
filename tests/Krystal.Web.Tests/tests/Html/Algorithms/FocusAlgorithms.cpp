@@ -4,9 +4,9 @@
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
-#include "Krystal.Web/Events/UI/FocusEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Web/Input/UIEvents/FocusEvent.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <string>
 

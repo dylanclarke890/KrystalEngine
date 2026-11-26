@@ -8,11 +8,11 @@
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Web/Events/UI/FocusEvent.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/FocusEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include <string>
 

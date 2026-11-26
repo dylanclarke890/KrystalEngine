@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLSummaryElement.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Svg/Elements/SVGAElement.hpp"
 
 namespace krys::web

@@ -4,7 +4,7 @@
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 #include "Krystal.Web/Page/Clients/WebClient.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 

@@ -2,12 +2,12 @@
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Web.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"
-#include "Krystal.Web/Events/UI/CompositionEvent.hpp"
-#include "Krystal.Web/Events/UI/InputEvent.hpp"
-#include "Krystal.Web/Events/UI/TextEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Input/UIEvents/CompositionEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/InputEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/TextEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::web::tests
 {

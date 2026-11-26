@@ -30,10 +30,10 @@
 #include "Krystal.Web/Dom/Nodes/Node.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
-#include "Krystal.Web/Input/LegacyKeyCodes.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 #include <array>
 
 namespace krys::boo

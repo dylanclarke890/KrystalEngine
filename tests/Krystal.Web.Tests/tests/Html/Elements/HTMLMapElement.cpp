@@ -10,7 +10,7 @@
 #include "Krystal.Web/Html/Elements/HTMLAreaElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLImageElement.hpp"
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Web/Rendering/HitTesting/HitTestResult.hpp"

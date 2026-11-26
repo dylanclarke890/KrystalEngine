@@ -4,9 +4,9 @@
 #include "Krystal.Web.Tests/Loader/NavigationTestUtils.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 
 namespace krys::web::svg::tests

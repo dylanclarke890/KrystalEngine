@@ -472,11 +472,6 @@ set(KRYSTAL_WEB_TESTS_EDITING_SOURCES
 )
 
 set(KRYSTAL_WEB_TESTS_EVENTS_SOURCES
-  tests/Events/Pointer/MouseEvent.cpp
-  tests/Events/Pointer/PointerEvent.cpp
-  tests/Events/Pointer/WheelEvent.cpp
-  tests/Events/UI/KeyboardEvent.cpp
-  tests/Events/UI/UIEvent.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_FILEAPI_SOURCES
@@ -640,17 +635,23 @@ set(KRYSTAL_WEB_TESTS_INPUT_HEADERS
 )
 
 set(KRYSTAL_WEB_TESTS_INPUT_SOURCES
-  tests/Input/AccessKeys.cpp
-  tests/Input/EventHandler.cpp
-  tests/Input/MouseSelection.cpp
-  tests/Input/PenAndTouch.cpp
-  tests/Input/PointerCaptureController.cpp
-  tests/Input/PointerLockController.cpp
-  tests/Input/SpatialNavigation.cpp
-  tests/Input/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_INTERSECTIONOBSERVER_SOURCES
+  tests/Input/Internals/AccessKeys.cpp
+  tests/Input/Internals/EventHandler.cpp
+  tests/Input/Internals/MouseSelection.cpp
+  tests/Input/Internals/PenAndTouch.cpp
+  tests/Input/Internals/ScrollLatchingController.cpp
+  tests/Input/Internals/WheelEventDeltaFilter.cpp
+  tests/Input/PointerEvents/MouseEvent.cpp
+  tests/Input/PointerEvents/PointerCaptureController.cpp
+  tests/Input/PointerEvents/PointerEvent.cpp
+  tests/Input/PointerEvents/WheelEvent.cpp
+  tests/Input/PointerLock/PointerLockController.cpp
+  tests/Input/SpatialNavigation/SpatialNavigation.cpp
+  tests/Input/UIEvents/KeyboardEvent.cpp
+  tests/Input/UIEvents/UIEvent.cpp
   tests/IntersectionObserver/IntersectionObserver.cpp
 )
 
@@ -702,7 +703,6 @@ set(KRYSTAL_WEB_TESTS_MATHML_SOURCES
 set(KRYSTAL_WEB_TESTS_PAGE_SOURCES
   tests/Page/Drag/DragController.cpp
   tests/Page/Scrolling/ScrollAnchoringController.cpp
-  tests/Page/Scrolling/ScrollLatchingController.cpp
   tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   tests/Page/DOMSelection.cpp
   tests/Page/Frame.cpp

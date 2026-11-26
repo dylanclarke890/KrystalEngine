@@ -5,11 +5,11 @@
 #include "Krystal.Web.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Platform/Choosers/PopupMenu.hpp"
 #include "Krystal.Web/Platform/Choosers/PopupMenuClient.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 
 namespace krys::web::layout::tests
 {

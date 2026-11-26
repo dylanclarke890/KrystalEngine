@@ -30,8 +30,8 @@
  */
 
 #include "Krystal.Web/Html/InputTypes/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 
 namespace krys::web::html
 {

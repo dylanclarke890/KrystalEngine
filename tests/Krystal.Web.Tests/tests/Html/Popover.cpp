@@ -14,10 +14,10 @@
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Events/ToggleEvent.hpp"
 #include "Krystal.Web/Html/Internals/PopoverData.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 

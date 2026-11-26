@@ -8,8 +8,8 @@
 #include "Krystal.Web/Dom/Nodes/DOMImplementation.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 

@@ -3,11 +3,11 @@
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
 #include "Krystal.Web/Html/Forms/ValidatedFormListedElement.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 
 namespace krys::web
 {

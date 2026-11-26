@@ -51,7 +51,7 @@
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLHtmlElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/FrameViewLayoutContext.hpp"

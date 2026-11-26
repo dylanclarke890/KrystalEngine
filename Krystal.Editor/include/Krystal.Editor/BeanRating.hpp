@@ -7,13 +7,13 @@
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElement.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Web/Html/CustomElement/ElementInternals.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include <algorithm>
 #include <charconv>
 

@@ -29,7 +29,7 @@
 #include "Krystal.Web/Loader/NavigationAction.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 
 namespace krys::web
 {

@@ -12,7 +12,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Web/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Web/Html/Types/DocumentVisibilityState.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Layout/LayoutOptions.hpp"
 #include "Krystal.Web/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Web/Loader/FrameLoader.hpp"

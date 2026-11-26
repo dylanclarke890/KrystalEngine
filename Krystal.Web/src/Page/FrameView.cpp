@@ -26,7 +26,7 @@
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Images/ImageDocument.hpp"
 #include "Krystal.Web/Html/Window.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Clients/WebClient.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/Scrolling/ScrollAnchoringController.hpp"

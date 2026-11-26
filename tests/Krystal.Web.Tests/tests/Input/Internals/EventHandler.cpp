@@ -1,0 +1,919 @@
+﻿#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
+#include "Krystal.Web.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Web/Dom/Events/EventListener.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Web/Html/Window.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/FocusEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Web/Rendering/RenderView.hpp"
+#include <string>
+
+namespace krys::web::tests
+{
+  namespace
+  {
+    KRYS_NODISCARD std::string ElementName(const EventTarget *target)
+    {
+      auto *node = DynamicDowncast<Node>(target);
+      auto *element = node ? DynamicDowncast<Element>(*node) : nullptr;
+      if (!element)
+      {
+        return "null";
+      }
+      auto id = element->GetAttribute(u8"id").value_or(DOMString());
+      auto name = id.empty() ? element->LocalName().View() : DOMStringView(id);
+      return std::string(name.begin(), name.end());
+    }
+
+    /// @brief Records the mouse and focus events it handles as `type:target`, with the related target of
+    /// `mouseover`, `mouseout` and the focus events and the detail of presses, releases and clicks.
+    struct MouseRecorder : public EventListenerCallback
+    {
+      List<std::string> &Records;
+
+      explicit MouseRecorder(List<std::string> &records) noexcept : Records(records)
+      {
+      }
+
+      void HandleEvent(Event &event) noexcept override
+      {
+        auto type = std::string(event.Type().View().begin(), event.Type().View().end());
+        auto record = type + ":" + ElementName(event.Target().get());
+        if (!event.IsMouseEvent() || type == "mouseover" || type == "mouseout")
+        {
+          auto related = event.IsMouseEvent() ? static_cast<MouseEvent &>(event).RelatedTarget()
+                                              : static_cast<FocusEvent &>(event).RelatedTarget();
+          record += "(" + ElementName(related.get()) + ")";
+        }
+        if (event.IsMouseEvent() && type != "mousemove" && type != "mouseover" && type != "mouseout"
+            && type != "mouseenter" && type != "mouseleave")
+        {
+          record += "/" + std::to_string(static_cast<MouseEvent &>(event).Detail());
+        }
+        Records.push_back(record);
+      }
+    };
+
+    /// @brief A 200x100 view of @p markup with no body margin, which records the mouse events at its
+    /// document unless @p recordAtDocument is false.
+    struct MouseFixture : PaintFixture
+    {
+      List<std::string> Records;
+
+      explicit MouseFixture(utf8_stringview markup, bool recordAtDocument = true) noexcept
+          : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:16px sans-serif}</style>"
+                         + utf8_string(markup))
+      {
+        (void)Document->UpdateLayout();
+        if (!recordAtDocument)
+        {
+          return;
+        }
+        // Capturing at the document sees the events that don't bubble too.
+        Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(Records);
+        for (auto type : {u8"mousemove", u8"mouseover", u8"mouseout", u8"mouseenter", u8"mouseleave",
+                          u8"mousedown", u8"mouseup", u8"click", u8"auxclick", u8"dblclick"})
+        {
+          Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
+        }
+      }
+
+      KRYS_NODISCARD EventHandler &Handler() noexcept
+      {
+        return Frame->GetEventHandler();
+      }
+
+      KRYS_NODISCARD static PlatformMouseEvent Event(PlatformEvent::Type type, double x, double y,
+                                                     MouseButton button = MouseButton::None,
+                                                     int32 clickCount = 0) noexcept
+      {
+        return PlatformMouseEvent(PointD(x, y), PointD(x, y), button, type, clickCount, {},
+                                  MonotonicTime::Now());
+      }
+
+      bool Move(double x, double y) noexcept
+      {
+        return Handler().MouseMoved(Event(PlatformEvent::Type::MouseMoved, x, y));
+      }
+
+      bool Press(double x, double y, MouseButton button = MouseButton::Left, int32 clickCount = 1) noexcept
+      {
+        return Handler().HandleMousePressEvent(
+          Event(PlatformEvent::Type::MousePressed, x, y, button, clickCount));
+      }
+
+      bool Release(double x, double y, MouseButton button = MouseButton::Left, int32 clickCount = 1) noexcept
+      {
+        return Handler().HandleMouseReleaseEvent(
+          Event(PlatformEvent::Type::MouseReleased, x, y, button, clickCount));
+      }
+
+      /// @brief The records since the last call.
+      KRYS_NODISCARD List<std::string> Take() noexcept
+      {
+        return std::exchange(Records, {});
+      }
+
+      KRYS_NODISCARD Cursor::Type CursorAt(double x, double y) noexcept
+      {
+        (void)Move(x, y);
+        return Handler().CurrentMouseCursor().GetType();
+      }
+    };
+
+    template <typename TAction>
+    void Listen(EventTarget &target, utf8_stringview type, TAction action)
+    {
+      Ref<EventListenerCallback> listener = CreateRef<FunctionListener>(krys::move(action));
+      target.AddEventListener(DOMStringAtom(type), krys::move(listener), false);
+    }
+
+    using Strings = List<std::string>;
+
+    /// @brief Records the keyboard events it handles as `type:target/key/keyCode/charCode`.
+    struct KeyRecorder : public EventListenerCallback
+    {
+      List<std::string> &Records;
+
+      explicit KeyRecorder(List<std::string> &records) noexcept : Records(records)
+      {
+      }
+
+      void HandleEvent(Event &event) noexcept override
+      {
+        auto &key = static_cast<KeyboardEvent &>(event);
+        auto type = std::string(key.Type().View().begin(), key.Type().View().end());
+        Records.push_back(type + ":" + ElementName(event.Target().get()) + "/"
+                          + std::string(key.Key().begin(), key.Key().end()) + "/"
+                          + std::to_string(key.KeyCode()) + "/" + std::to_string(key.CharCode()));
+      }
+    };
+
+    /// @brief A key event of @p type for a key with the value @p key that types @p text.
+    KRYS_NODISCARD PlatformKeyboardEvent KeyEvent(PlatformEvent::Type type, utf8_string key,
+                                                  const utf8_string &text, int32 keyCode,
+                                                  EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+    {
+      return PlatformKeyboardEvent(type, text, text, krys::move(key), u8"", keyCode, false, false, false,
+                                   modifiers, MonotonicTime::Now());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: moves fire over, out, enter and leave",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=inner style=height:20px></div></div>"
+                          u8"<div id=other style=height:20px></div>"};
+
+    fixture.Move(15, 15);
+    CHECK(fixture.Take()
+          == Strings {"mouseover:inner(null)", "mouseenter:html", "mouseenter:body", "mouseenter:outer",
+                      "mouseenter:inner", "mousemove:inner"});
+    CHECK(fixture.Handler().ElementUnderMouse() == &fixture.ById(u8"inner"));
+    CHECK(fixture.ById(u8"inner").Hovered());
+
+    // Moving within the element only moves.
+    fixture.Move(16, 16);
+    CHECK(fixture.Take() == Strings {"mousemove:inner"});
+
+    // Out to its parent: only the inner element is left.
+    fixture.Move(5, 5);
+    CHECK(
+      fixture.Take()
+      == Strings {"mouseout:inner(outer)", "mouseleave:inner", "mouseover:outer(inner)", "mousemove:outer"});
+    CHECK_FALSE(fixture.ById(u8"inner").Hovered());
+
+    // Across to a sibling.
+    fixture.Move(5, 45);
+    CHECK(fixture.Take()
+          == Strings {"mouseout:outer(other)", "mouseleave:outer", "mouseover:other(outer)",
+                      "mouseenter:other", "mousemove:other"});
+
+    // Out of the view: everything is left, and there's nothing to move over.
+    fixture.Move(-1, -1);
+    CHECK(fixture.Take()
+          == Strings {"mouseout:other(null)", "mouseleave:other", "mouseleave:body", "mouseleave:html"});
+    CHECK(fixture.Handler().ElementUnderMouse() == nullptr);
+    CHECK_FALSE(fixture.ById(u8"other").Hovered());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "EventHandler: enter and leave reach the element's listeners and capturing ancestors'",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=middle><div id=inner style=height:20px>"
+                          u8"</div></div></div>",
+                          false};
+    Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    // Enter and leave don't bubble: inner's own listeners see only its events, and outer's capturing one sees
+    // those of the elements inside it too. Nothing listens on the others, so nothing is sent to them.
+    fixture.ById(u8"inner").AddEventListener(u8"mouseenter", Ref {recorder}, false);
+    fixture.ById(u8"inner").AddEventListener(u8"pointerenter", Ref {recorder}, false);
+    fixture.ById(u8"outer").AddEventListener(u8"mouseleave", Ref {recorder}, true);
+
+    fixture.Move(15, 15);
+    CHECK(fixture.Take() == Strings {"pointerenter:inner/0", "mouseenter:inner"});
+
+    fixture.Move(-1, -1);
+    CHECK(fixture.Take() == Strings {"mouseleave:inner", "mouseleave:middle", "mouseleave:outer"});
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: presses, releases and clicks",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {
+      u8"<div id=outer><div id=a style=height:20px></div><div id=b style=height:20px></div>"
+      u8"</div>"};
+    fixture.Move(5, 5);
+    (void)fixture.Take();
+
+    SECTION("a click")
+    {
+      // The press places a caret, so it's handled.
+      CHECK(fixture.Press(5, 5));
+      CHECK(fixture.ById(u8"a").Active());
+      CHECK_FALSE(fixture.Release(5, 5));
+      CHECK_FALSE(fixture.ById(u8"a").Active());
+      CHECK(fixture.Take() == Strings {"mousedown:a/1", "mouseup:a/1", "click:a/1"});
+    }
+
+    SECTION("a double click")
+    {
+      (void)fixture.Press(5, 5, MouseButton::Left, 1);
+      (void)fixture.Release(5, 5, MouseButton::Left, 1);
+      (void)fixture.Press(5, 5, MouseButton::Left, 2);
+      (void)fixture.Release(5, 5, MouseButton::Left, 2);
+      CHECK(fixture.Take()
+            == Strings {"mousedown:a/1", "mouseup:a/1", "click:a/1", "mousedown:a/2", "mouseup:a/2",
+                        "click:a/2", "dblclick:a/2"});
+    }
+
+    SECTION("a release elsewhere clicks the common ancestor")
+    {
+      (void)fixture.Press(5, 5);
+      (void)fixture.Move(5, 25);
+      (void)fixture.Release(5, 25);
+      CHECK(fixture.Take()
+            == Strings {"mousedown:a/1", "mouseout:a(b)", "mouseleave:a", "mouseover:b(a)", "mouseenter:b",
+                        "mousemove:b", "mouseup:b/1", "click:outer/1"});
+    }
+
+    SECTION("other buttons fire auxclick")
+    {
+      (void)fixture.Press(5, 5, MouseButton::Right);
+      (void)fixture.Release(5, 5, MouseButton::Right);
+      (void)fixture.Press(5, 5, MouseButton::Middle);
+      (void)fixture.Release(5, 5, MouseButton::Middle);
+      CHECK(fixture.Take()
+            == Strings {"mousedown:a/1", "mouseup:a/1", "auxclick:a/1", "mousedown:a/1", "mouseup:a/1",
+                        "auxclick:a/1"});
+    }
+
+    SECTION("cancelling swallows the event")
+    {
+      Listen(fixture.ById(u8"a"), u8"mousedown", [](Event &event) { event.PreventDefault(); });
+      CHECK(fixture.Press(5, 5));
+      CHECK_FALSE(fixture.Release(5, 5));
+      CHECK(fixture.Take() == Strings {"mousedown:a/1", "mouseup:a/1", "click:a/1"});
+    }
+
+    SECTION("a press outside the document isn't a click")
+    {
+      (void)fixture.Press(-1, -1);
+      (void)fixture.Release(5, 5);
+      auto records = fixture.Take();
+      CHECK(std::ranges::find(records, std::string("click:a/1")) == records.end());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: a press focuses", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {
+      u8"<style>#outer:focus{margin-right:100px}</style>"
+      u8"<div id=outer tabindex=0 style=padding:10px><div id=inner style=height:20px></div></div>"
+      u8"<div id=other tabindex=-1 style=height:20px></div><div id=plain style=height:20px></div>"};
+    Ref<EventListenerCallback> recorder = CreateRef<MouseRecorder>(fixture.Records);
+    for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
+    {
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
+    }
+    auto &outer = fixture.ById(u8"outer");
+    auto &other = fixture.ById(u8"other");
+    auto pressAt = [&](double x, double y)
+    {
+      (void)fixture.Move(x, y);
+      (void)fixture.Take();
+      (void)fixture.Press(x, y);
+      (void)fixture.Release(x, y);
+      return fixture.Take();
+    };
+
+    // The nearest focusable ancestor of the element pressed takes the focus, between the press and the
+    // release; a click focus isn't focus visible.
+    CHECK(pressAt(15, 15)
+          == Strings {"mousedown:inner/1", "focus:outer(null)", "focusin:outer(null)", "mouseup:inner/1",
+                      "click:inner/1"});
+    CHECK(fixture.Document->FocusedElement() == &outer);
+    CHECK(outer.Focused());
+    CHECK_FALSE(outer.HasFocusVisible());
+    CHECK(outer.HasFocusWithin());
+    // `:focus` restyles.
+    (void)fixture.Document->UpdateLayout();
+    CHECK(outer.OffsetWidth() == 100);
+
+    SECTION("pressing another focusable element moves the focus")
+    {
+      CHECK(pressAt(5, 45)
+            == Strings {"mousedown:other/1", "blur:outer(other)", "focusout:outer(other)",
+                        "focus:other(outer)", "focusin:other(outer)", "mouseup:other/1", "click:other/1"});
+      CHECK(fixture.Document->FocusedElement() == &other);
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 200);
+    }
+
+    SECTION("pressing nothing focusable focuses the viewport")
+    {
+      CHECK(pressAt(5, 65)
+            == Strings {"mousedown:plain/1", "blur:outer(null)", "focusout:outer(null)", "mouseup:plain/1",
+                        "click:plain/1"});
+      CHECK(fixture.Document->FocusedElement() == nullptr);
+      CHECK_FALSE(outer.Focused());
+    }
+
+    SECTION("a cancelled press keeps the focus")
+    {
+      Listen(other, u8"mousedown", [](Event &event) { event.PreventDefault(); });
+      CHECK(pressAt(5, 45) == Strings {"mousedown:other/1", "mouseup:other/1", "click:other/1"});
+      CHECK(fixture.Document->FocusedElement() == &outer);
+    }
+
+    SECTION("the window losing and regaining focus")
+    {
+      struct WindowRecorder : EventListenerCallback
+      {
+        List<std::string> &Records;
+        web::Window *Window;
+
+        WindowRecorder(List<std::string> &records, web::Window *window) noexcept
+            : Records(records), Window(window)
+        {
+        }
+
+        void HandleEvent(Event &event) noexcept override
+        {
+          // Not what bubbles from the focused element.
+          if (event.Target().get() != Window)
+          {
+            return;
+          }
+          auto *focusEvent = DynamicDowncast<FocusEvent>(event);
+          bool isRight = focusEvent && focusEvent->View() == Window && !event.Bubbles() && event.Composed();
+          auto type = std::string(event.Type().View().begin(), event.Type().View().end());
+          Records.push_back("window:" + type + (isRight ? "" : "(wrong)"));
+        }
+      };
+
+      auto *window = fixture.Document->Window();
+      Ref<EventListenerCallback> windowRecorder = CreateRef<WindowRecorder>(fixture.Records, window);
+      for (auto type : {u8"focus", u8"blur", u8"focusin", u8"focusout"})
+      {
+        window->AddEventListener(DOMStringAtom(type), Ref {windowRecorder}, false);
+      }
+
+      // The focused element gets blur and focusout before the window, stays focused and stops matching
+      // `:focus`.
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, false);
+      CHECK(fixture.Take() == Strings {"blur:outer(null)", "focusout:outer(null)", "window:blur"});
+      CHECK(fixture.Document->FocusedElement() == &outer);
+      CHECK_FALSE(fixture.Document->HasFocus());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 200);
+
+      // Losing it again changes nothing.
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, false);
+      CHECK(fixture.Take().empty());
+
+      html::FocusAlgorithms::SystemFocusChanged(*fixture.Document, true);
+      CHECK(fixture.Take() == Strings {"window:focus", "focus:outer(null)", "focusin:outer(null)"});
+      (void)fixture.Document->UpdateLayout();
+      CHECK(outer.OffsetWidth() == 100);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: a press in design mode focuses the body",
+                   "[Page][EventHandler][html:designMode]")
+  {
+    MouseFixture fixture {u8"<div id=plain style=height:20px>text</div><input id=field>"};
+    fixture.Document->DesignMode(u8"on");
+    (void)fixture.Move(5, 15);
+    (void)fixture.Press(5, 15);
+    CHECK(fixture.Document->FocusedElement() == fixture.Document->Body().get());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: keys",
+                   "[Page][EventHandler][html:focus-processing-model][html:fire-a-focus-event]")
+  {
+    MouseFixture fixture {u8"<div id=box tabindex=0 style=height:20px></div><div id=other tabindex=0></div>"};
+    Ref<EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
+    for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
+    {
+      fixture.Document->AddEventListener(DOMStringAtom(type), Ref {recorder}, true);
+    }
+    auto &handler = fixture.Handler();
+    auto &box = fixture.ById(u8"box");
+    using Type = PlatformEvent::Type;
+
+    SECTION("a key that types text goes to the body when nothing is focused")
+    {
+      CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
+      CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyUp, u8"a", u8"", 'A')));
+      CHECK(fixture.Take() == Strings {"keydown:body/a/65/0", "keypress:body/a/97/97", "keyup:body/a/65/0"});
+    }
+
+    SECTION("without a body, keys go to the document element")
+    {
+      REQUIRE_FALSE(fixture.Document->Body()->Remove().HasException());
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"ArrowLeft", u8"", 0x25));
+      CHECK(fixture.Take() == Strings {"keydown:html/ArrowLeft/37/0"});
+    }
+
+    SECTION("a key that types nothing has no keypress")
+    {
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"ArrowLeft", u8"", 0x25));
+      CHECK(fixture.Take() == Strings {"keydown:body/ArrowLeft/37/0"});
+    }
+
+    SECTION("raw key downs and chars are dispatched as they are")
+    {
+      (void)handler.KeyEvent(KeyEvent(Type::RawKeyDown, u8"b", u8"b", 'B'));
+      (void)handler.KeyEvent(KeyEvent(Type::Char, u8"b", u8"b", 'B'));
+      CHECK(fixture.Take() == Strings {"keydown:body/b/66/0", "keypress:body/b/98/98"});
+    }
+
+    SECTION("a cancelled keydown has no keypress")
+    {
+      Listen(*fixture.Document, u8"keydown", [](Event &event) { event.PreventDefault(); });
+      CHECK(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
+      CHECK(fixture.Take() == Strings {"keydown:body/a/65/0"});
+    }
+
+    SECTION("the focused element gets the keys and becomes focus visible")
+    {
+      (void)fixture.Move(5, 5);
+      (void)fixture.Press(5, 5);
+      (void)fixture.Release(5, 5);
+      REQUIRE(box.Focused());
+      CHECK_FALSE(box.HasFocusVisible());
+      (void)fixture.Take();
+
+      // Only a modifier isn't an interaction.
+      (void)handler.KeyEvent(
+        KeyEvent(Type::KeyDown, u8"Shift", u8"", vk::LShift, {PlatformEvent::Modifier::ShiftKey}));
+      CHECK_FALSE(box.HasFocusVisible());
+      // Shift and a key that types text is.
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"A", u8"A", 'A', {PlatformEvent::Modifier::ShiftKey}));
+      CHECK(box.HasFocusVisible());
+      CHECK(fixture.Take()
+            == Strings {"keydown:box/Shift/16/0", "keydown:box/A/65/0", "keypress:box/A/65/65"});
+    }
+
+    SECTION("Tab and Shift+Tab move the focus")
+    {
+      auto tab = [&](EnumSet<PlatformEvent::Modifier> modifiers = {})
+      {
+        return handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                      false, false, false, modifiers, MonotonicTime::Now()));
+      };
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &box);
+      CHECK(box.HasFocusVisible());
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"other"));
+      CHECK(tab({PlatformEvent::Modifier::ShiftKey}));
+      CHECK(fixture.Document->FocusedElement() == &box);
+
+      // Not with Ctrl or Meta, nor when the keydown is cancelled.
+      CHECK_FALSE(tab({PlatformEvent::Modifier::ControlKey}));
+      CHECK(fixture.Document->FocusedElement() == &box);
+      Listen(*fixture.Document, u8"keydown", [](Event &event) { event.PreventDefault(); });
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &box);
+    }
+
+    SECTION("Tab and the arrows don't move the focus in design mode")
+    {
+      fixture.Document->GetSettings().SpatialNavigationEnabled = true;
+      fixture.Document->DesignMode(u8"on");
+      CHECK_FALSE(handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                         false, false, false, {}, MonotonicTime::Now())));
+      CHECK_FALSE(
+        handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"ArrowDown", u8"ArrowDown",
+                                               vk::Down, false, false, false, {}, MonotonicTime::Now())));
+      CHECK(fixture.Document->FocusedElement() == fixture.Document->DocumentElement());
+      fixture.Document->GetSettings().SpatialNavigationEnabled = false;
+    }
+
+    SECTION("a press sets where Tab moves on from")
+    {
+      MouseFixture clicks {u8"<style>button{display:block;height:20px}</style><button id=one></button><div "
+                           u8"id=plain style=height:20px></div>"
+                           u8"<button id=two></button>"};
+      // Pressing the plain element focuses the viewport, and Tab moves on from the press.
+      (void)clicks.Move(100, 30);
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      REQUIRE(ElementName(clicks.Handler().ElementUnderMouse()) == "plain");
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"plain"));
+      CHECK(
+        clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", vk::Tab,
+                                                        false, false, false, {}, MonotonicTime::Now())));
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"two"));
+    }
+
+    SECTION("a press inside the focused element, and a focus change after it")
+    {
+      MouseFixture clicks {
+        u8"<style>button{display:block;height:20px}p{margin:0;height:20px}</style>"
+        u8"<div id=card tabindex=0><button id=one></button><p id=text></p><button id=two></button>"
+        u8"</div><button id=other></button>"};
+      auto pressTab = [&]
+      {
+        return clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
+                                                               vk::Tab, false, false, false, {},
+                                                               MonotonicTime::Now()));
+      };
+      auto &card = clicks.ById(u8"card");
+      // Pressing the paragraph focuses the card, and Tab moves on from the paragraph.
+      (void)clicks.Move(100, 30);
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      REQUIRE(clicks.Document->FocusedElement() == &card);
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"text"));
+      CHECK(pressTab());
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"two"));
+
+      // Focus moved away and back starts from the card again.
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      html::FocusAlgorithms::FocusingSteps(clicks.ById(u8"other"));
+      html::FocusAlgorithms::FocusingSteps(card);
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &card);
+      CHECK(pressTab());
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"one"));
+    }
+
+    SECTION("a keydown that moves the focus sends the keypress to the new focused element")
+    {
+      auto &other = fixture.ById(u8"other");
+      Listen(*fixture.Document, u8"keydown", [&](Event &) { html::FocusAlgorithms::FocusingSteps(other); });
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"x", u8"x", 'X'));
+      CHECK(fixture.Take() == Strings {"keydown:body/x/88/0", "keypress:other/x/120/120"});
+      CHECK(other.HasFocusVisible());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: removing the element under the mouse",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=inner style=height:20px></div></div>"};
+    auto &outer = fixture.ById(u8"outer");
+    Ref<Element> inner = ShareRef(fixture.ById(u8"inner"));
+
+    // The mousemove after a mouseover that removes its target goes to the target's parent.
+    Listen(*inner, u8"mouseover", [&](Event &) { (void)outer.RemoveChild(*inner); });
+    fixture.Move(15, 15);
+    auto records = fixture.Take();
+    REQUIRE_FALSE(records.empty());
+    CHECK(records.back() == "mousemove:outer");
+
+    // The removed element was still the one under the mouse, so it's left (out of the document's sight) and
+    // is the related target of the next mouseover.
+    (void)fixture.Document->UpdateLayout();
+    fixture.Move(5, 5);
+    CHECK(fixture.Take() == Strings {"mouseover:outer(inner)", "mousemove:outer"});
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "EventHandler: removing the hovered element updates the hover state under a still mouse",
+                   "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=outer style=padding:10px><div id=inner style=height:20px></div>"
+                          u8"<div id=next style=height:20px></div></div>",
+                          false};
+    auto &outer = fixture.ById(u8"outer");
+    auto &next = fixture.ById(u8"next");
+    fixture.Move(15, 15);
+    REQUIRE(fixture.ById(u8"inner").Hovered());
+
+    // Removing the hovered element hovers its parent, and schedules a hover update for the mouse's position,
+    // where the next element now is.
+    REQUIRE_FALSE(outer.RemoveChild(fixture.ById(u8"inner")).HasException());
+    (void)fixture.Document->UpdateLayout();
+    CHECK(outer.Hovered());
+    CHECK_FALSE(next.Hovered());
+
+    // The update is due straight away, ahead of any fake mouse move.
+    auto &loop = html::EventLoop::Current();
+    loop.Run(loop.Now());
+    CHECK(next.Hovered());
+    CHECK(outer.Hovered());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: chooses the cursor", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {
+      u8"<style>div{height:20px}</style>"
+      u8"<div id=box></div><div>text</div><div><a href=x>link</a></div>"
+      u8"<div style=cursor:pointer></div><div style=cursor:crosshair><span>child</span></div>"
+      u8"<div style=cursor:default>text</div>"};
+    // Auto: the arrow over boxes, the I-beam over text and the hand over links.
+    CHECK(fixture.CursorAt(100, 10) == Cursor::Type::Pointer);
+    CHECK(fixture.CursorAt(3, 30) == Cursor::Type::IBeam);
+    CHECK(fixture.CursorAt(3, 50) == Cursor::Type::Hand);
+    // The style's cursor, inherited.
+    CHECK(fixture.CursorAt(100, 70) == Cursor::Type::Hand);
+    CHECK(fixture.CursorAt(3, 90) == Cursor::Type::Cross);
+
+    SECTION("default is the arrow, even over text")
+    {
+      MouseFixture text {u8"<div style=cursor:default>text</div><div style=cursor:none>text</div>"};
+      CHECK(text.CursorAt(3, 10) == Cursor::Type::Pointer);
+      CHECK(text.CursorAt(3, 28) == Cursor::Type::None);
+    }
+
+    SECTION("an update chooses again for a still mouse")
+    {
+      (void)fixture.Move(100, 10);
+      (void)fixture.ById(u8"box").SetAttribute(u8"style", DOMString(u8"cursor:wait"));
+      (void)fixture.Document->UpdateLayout();
+      CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
+      fixture.Handler().UpdateCursor();
+      CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Wait);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: contextmenu", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=a style=height:20px>hello world</div>"};
+    List<std::string> records;
+    Listen(*fixture.Document, u8"contextmenu",
+           [&](Event &event) { records.push_back("contextmenu:" + ElementName(event.Target().get())); });
+    auto event = MouseFixture::Event(PlatformEvent::Type::MousePressed, 5, 5, MouseButton::Right, 1);
+
+    SECTION("after a press of the right button, which no longer holds the mouse")
+    {
+      (void)fixture.Handler().HandleMousePressEvent(event);
+      CHECK(fixture.Handler().MousePressed());
+      CHECK_FALSE(fixture.Handler().SendContextMenuEvent(event));
+      CHECK(records == Strings {"contextmenu:a"});
+      CHECK_FALSE(fixture.Handler().MousePressed());
+      // The selection isn't touched.
+      CHECK_FALSE(fixture.Document->Selection().Selection().IsRange());
+    }
+
+    SECTION("cancelling it")
+    {
+      Listen(fixture.ById(u8"a"), u8"contextmenu", [](Event &event) { event.PreventDefault(); });
+      CHECK(fixture.Handler().SendContextMenuEvent(event));
+      CHECK(records == Strings {"contextmenu:a"});
+    }
+
+    SECTION("with the Mac's editing behaviour, the word under it is selected first")
+    {
+      auto &settings = fixture.Document->GetSettings();
+      settings.EditingBehaviorType = EditingBehaviorType::Mac;
+      CHECK_FALSE(fixture.Handler().SendContextMenuEvent(event));
+      settings.EditingBehaviorType = EditingBehaviorType::Windows;
+      CHECK(records == Strings {"contextmenu:a"});
+      auto &selection = fixture.Document->Selection().Selection();
+      REQUIRE(selection.IsRange());
+      CHECK(selection.Start().DeprecatedEditingOffset() == 0);
+      CHECK(selection.End().DeprecatedEditingOffset() == 5);
+    }
+  }
+
+  TEST_CASE("EventHandler: pan scrolling", "[Page][EventHandler][PanScroll]")
+  {
+    auto wait = []
+    {
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + std::chrono::milliseconds(120));
+    };
+
+    SECTION("a snap container snaps when it ends")
+    {
+      MouseFixture fixture(u8"<style>html { scroll-snap-type: y mandatory } div { height: 100px; "
+                           u8"scroll-snap-align: start }</style><div></div><div></div><div></div><div></div>"
+                           u8"<div></div><div></div><div></div><div></div>");
+      auto *view = fixture.Frame->View();
+      (void)fixture.Move(100, 20);
+      (void)fixture.Press(100, 20, MouseButton::Middle);
+      (void)fixture.Move(100, 80);
+      wait();
+      wait();
+      REQUIRE(view->ScrollY() > 0);
+      CHECK(view->ScrollY() % 100 != 0);
+
+      // Stopped, it moves smoothly to the closest snap position.
+      CHECK(fixture.Press(100, 80));
+      CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      CHECK(view->GetScrollAnimationStatus() == ScrollAnimationStatus::Animating);
+      auto &loop = html::EventLoop::Current();
+      for (int32 frame = 0; frame < 120; ++frame)
+      {
+        loop.Run(loop.Now() + std::chrono::milliseconds(16));
+        if (fixture.Frame->IsRenderingUpdateScheduled())
+        {
+          fixture.Frame->UpdateRendering();
+        }
+      }
+      CHECK(view->ScrollY() % 100 == 0);
+    }
+
+    SECTION("the page")
+    {
+      MouseFixture fixture(u8"<div id=a style=height:1000px></div>");
+      auto *view = fixture.Frame->View();
+      REQUIRE(view->ScrollY() == 0);
+
+      (void)fixture.Move(100, 20);
+      (void)fixture.Press(100, 20, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+
+      SECTION("the icon is drawn where the pan started, until it ends")
+      {
+        // The view's whole paint, as a host's: the icon is drawn over the contents and scrollbars.
+        auto paintView = [&]
+        {
+          (void)fixture.Document->UpdateLayout();
+          display_list::RecorderImpl recorder(SizeF(200, 100));
+          view->Paint(recorder, RectI(0, 0, 200, 100));
+          return recorder.TakeDisplayList()->AsText({});
+        };
+        // Three discs centred on the mouse: an outline, a white fill, and a dot.
+        auto painted = paintView();
+        INFO(reinterpret_cast<const char *>(painted.c_str()));
+        CHECK(painted.contains(u8"fill-ellipse"));
+        CHECK(painted.contains(u8"(92,12) size 16x16"));
+        CHECK(fixture.Press(100, 20));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+        CHECK_FALSE(paintView().contains(u8"fill-ellipse"));
+      }
+
+      SECTION("doesn't scroll over the icon, and goes on after the release")
+      {
+        (void)fixture.Release(100, 20, MouseButton::Middle);
+        wait();
+        CHECK(view->ScrollY() == 0);
+        CHECK(fixture.Handler().PanScrollInProgress());
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::MiddlePanning);
+      }
+
+      SECTION("scrolls towards the mouse")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        CHECK(view->ScrollY() > 0);
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::SouthPanning);
+      }
+
+      SECTION("the icon is painted again as the contents move under it")
+      {
+        (void)fixture.Document->UpdateLayout();
+        (void)view->TakeDamage();
+        (void)fixture.Move(100, 80);
+        wait();
+        REQUIRE(view->ScrollY() > 0);
+        // The moved pixels include the icon's, so the square around it is damaged.
+        auto damage = view->TakeDamage();
+        CHECK(damage.Contains(Region(RectI(92, 12, 16, 16))));
+      }
+
+      SECTION("a press stops it, and is swallowed")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        (void)fixture.Take();
+        CHECK(fixture.Press(100, 80));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+        CHECK(fixture.Take().empty());
+        CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
+
+        auto scrollY = view->ScrollY();
+        wait();
+        CHECK(view->ScrollY() == scrollY);
+      }
+
+      SECTION("releasing the button after moving away stops it")
+      {
+        (void)fixture.Move(100, 80);
+        wait();
+        (void)fixture.Release(100, 80, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("a key stops it, and is swallowed")
+      {
+        CHECK(fixture.Handler().KeyEvent(PlatformKeyboardEvent(
+          PlatformEvent::Type::RawKeyDown, u8"", u8"", u8"a", u8"KeyA", 65, false, false, false, {}, {})));
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("the icon is painted until it stops")
+      {
+        auto painted = [&]
+        {
+          (void)fixture.Document->UpdateLayout();
+          display_list::RecorderImpl recorder(SizeF(200, 100));
+          view->Paint(recorder, RectI(0, 0, 200, 100));
+          return recorder.TakeDisplayList()->AsText({});
+        };
+        CHECK(painted().contains(u8"ellipse"));
+        (void)fixture.Press(100, 20);
+        CHECK_FALSE(painted().contains(u8"ellipse"));
+      }
+    }
+
+    SECTION("a box inside the page")
+    {
+      MouseFixture fixture(
+        u8"<div id=a style=height:50px;overflow:auto><div style=height:500px></div></div>");
+      auto &box = fixture.ById(u8"a");
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      (void)fixture.Move(50, 45);
+      wait();
+      CHECK(box.ScrollTop() > 0);
+    }
+
+    SECTION("a box at its end passes the pan on, then pans what's under the start")
+    {
+      MouseFixture fixture(u8"<div id=a style=height:50px;overflow:auto><div style=height:60px></div></div>"
+                           u8"<div style=height:1000px></div>");
+      auto &box = fixture.ById(u8"a");
+      auto *view = fixture.Frame->View();
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      CHECK(fixture.Handler().AutoscrollRenderer() == box.Renderer());
+      (void)fixture.Move(50, 95);
+      for (int32 i = 0; i < 10 && view->ScrollY() < 60; ++i)
+      {
+        wait();
+      }
+      CHECK(box.ScrollTop() == 10);
+      REQUIRE(view->ScrollY() >= 60);
+      // The box has moved away from under the start, so the view pans.
+      CHECK(fixture.Handler().AutoscrollRenderer() == fixture.Document->GetRenderView());
+    }
+
+    SECTION("a list box")
+    {
+      utf8_string options;
+      for (int32 i = 0; i < 20; ++i)
+      {
+        options += u8"<option>o</option>";
+      }
+      MouseFixture fixture(u8"<select id=a size=3 style=display:block;width:100px>" + options
+                           + u8"</select>");
+      auto &box = fixture.ById(u8"a");
+      (void)fixture.Move(50, 10);
+      (void)fixture.Press(50, 10, MouseButton::Middle);
+      REQUIRE(fixture.Handler().PanScrollInProgress());
+      (void)fixture.Move(50, 60);
+      wait();
+      CHECK(box.ScrollTop() > 0);
+    }
+
+    SECTION("not from a link, or with nothing to scroll")
+    {
+      SECTION("a link")
+      {
+        MouseFixture fixture(u8"<a href=x style=display:block;height:1000px>x</a>");
+        (void)fixture.Move(10, 10);
+        (void)fixture.Press(10, 10, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+
+      SECTION("nothing to scroll")
+      {
+        MouseFixture fixture(u8"<div style=height:10px></div>");
+        (void)fixture.Move(10, 5);
+        (void)fixture.Press(10, 5, MouseButton::Middle);
+        CHECK_FALSE(fixture.Handler().PanScrollInProgress());
+      }
+    }
+  }
+}

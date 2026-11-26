@@ -30,11 +30,11 @@
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
 #include "Krystal.Web/Html/Events/CommandEvent.hpp"
 #include "Krystal.Web/Html/Window.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Platform/PlatformStrategies.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 #include <algorithm>

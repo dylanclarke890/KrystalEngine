@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Platform/Scrolling/ScrollbarTheme.hpp"
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollbarThemeAdwaita.hpp"
 
 namespace krys::web

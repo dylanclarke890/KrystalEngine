@@ -9,9 +9,9 @@
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Html/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Web/Html/Window.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::web::html::tests
 {

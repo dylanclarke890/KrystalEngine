@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Input.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
-#include "Krystal.Web/Input/LegacyKeyCodes.hpp"
+#include "Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp"
 #include <format>
 
 namespace krys::boo::input

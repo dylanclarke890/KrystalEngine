@@ -30,7 +30,7 @@
 
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Input/MouseEventTypes.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEventTypes.hpp"
 #include "Krystal.Web/Loader/FrameLoadRequest.hpp"
 
 namespace krys::web

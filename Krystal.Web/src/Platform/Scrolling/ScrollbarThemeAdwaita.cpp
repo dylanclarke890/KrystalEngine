@@ -29,9 +29,9 @@
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
 #include "Krystal.Web/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Web/Graphics/Paths/Path.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollableArea.hpp"
 #include "Krystal.Web/Platform/Scrolling/Scrollbar.hpp"
 

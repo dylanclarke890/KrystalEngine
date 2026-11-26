@@ -1,0 +1,146 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Input/UIEvents/UIEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/UIEventWithKeyState.hpp"
+
+namespace krys::web
+{
+  class PlatformKeyboardEvent;
+  class Window;
+
+  /// @see https://w3c.github.io/uievents/#dictdef-keyboardeventinit
+  struct KeyboardEventInit : EventModifierInit
+  {
+    DOMString Key;
+    DOMString Code;
+    uint32 Location {0};
+    bool Repeat {false};
+    bool IsComposing {false};
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-charcode
+    uint32 CharCode {0};
+    /// @see https://w3c.github.io/uievents/#dom-keyboardeventinit-keycode
+    uint32 KeyCode {0};
+    /// @see https://w3c.github.io/uievents/#dom-uieventinit-which
+    uint32 Which {0};
+  };
+
+  /// @brief An event from a keyboard: `keydown`, `keypress` and `keyup`.
+  /// @see https://w3c.github.io/uievents/#interface-keyboardevent
+  // FIXME: Key commands.
+  class KeyboardEvent final : public UIEventWithKeyState
+  {
+  public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = KeyboardEventInit;
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-dom_key_location_standard
+    enum KeyLocationCode : uint32
+    {
+      DOM_KEY_LOCATION_STANDARD = 0x00,
+      DOM_KEY_LOCATION_LEFT = 0x01,
+      DOM_KEY_LOCATION_RIGHT = 0x02,
+      DOM_KEY_LOCATION_NUMPAD = 0x03,
+    };
+
+  private:
+    UniquePtr<PlatformKeyboardEvent> _underlyingPlatformEvent;
+    DOMString _key;
+    DOMString _code;
+    uint32 _location {DOM_KEY_LOCATION_STANDARD};
+    bool _repeat {false};
+    bool _isComposing {false};
+    Maybe<uint32> _charCode;
+    Maybe<uint32> _keyCode;
+    Maybe<uint32> _which;
+
+  public:
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-keyboardevent
+    KeyboardEvent(DOMStringAtom type, const KeyboardEventInit &initializer = {}) noexcept;
+
+    /// @brief A trusted event from @p key, which must be a raw key down, a char or a key up (a combined key
+    /// down is disambiguated first); it's composing if @p view's editor has a composition.
+    KRYS_NODISCARD static Ref<KeyboardEvent> Create(const PlatformKeyboardEvent &key,
+                                                    Window *view = nullptr) noexcept;
+
+    /// @note Legacy.
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent
+    void InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable, Window *view,
+                           DOMStringView key, uint32 location, bool ctrlKey, bool altKey, bool shiftKey,
+                           bool metaKey) noexcept;
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-key
+    KRYS_NODISCARD const DOMString &Key() const noexcept
+    {
+      return _key;
+    }
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-code
+    KRYS_NODISCARD const DOMString &Code() const noexcept
+    {
+      return _code;
+    }
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-location
+    KRYS_NODISCARD uint32 Location() const noexcept
+    {
+      return _location;
+    }
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-repeat
+    KRYS_NODISCARD bool Repeat() const noexcept
+    {
+      return _repeat;
+    }
+
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-iscomposing
+    KRYS_NODISCARD bool IsComposing() const noexcept
+    {
+      return _isComposing;
+    }
+
+    /// @brief The host's event a trusted event came from; null for one made by the page or the dictionary.
+    KRYS_NODISCARD const PlatformKeyboardEvent *UnderlyingPlatformEvent() const noexcept
+    {
+      return _underlyingPlatformEvent.get();
+    }
+
+    /// @brief The key code for `keydown` and `keyup`, the character for `keypress`.
+    /// @note Legacy.
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-keycode
+    KRYS_NODISCARD int32 KeyCode() const noexcept;
+
+    /// @brief For a `keypress`, the `keyCode` its `keydown` had: the key's code rather than its character.
+    KRYS_NODISCARD int32 KeyCodeForKeyDown() const noexcept;
+
+    /// @brief The character code for `keypress`, 0 for `keydown` and `keyup`.
+    /// @note Legacy.
+    /// @see https://w3c.github.io/uievents/#dom-keyboardevent-charcode
+    KRYS_NODISCARD int32 CharCode() const noexcept;
+
+    /// @note Legacy: the same as `KeyCode()`.
+    /// @see https://w3c.github.io/uievents/#dom-uievent-which
+    KRYS_NODISCARD uint32 Which() const noexcept;
+
+    KRYS_NODISCARD bool IsKeyboardEvent() const noexcept final
+    {
+      return true;
+    }
+
+  private:
+    KeyboardEvent(DOMStringAtom type, const UIEventInit &eventInitDict,
+                  const PlatformKeyboardEvent &key) noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::KeyboardEvent)
+  KRYS_NODISCARD static bool IsType(const krys::web::Event &event) noexcept
+  {
+    return event.IsKeyboardEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

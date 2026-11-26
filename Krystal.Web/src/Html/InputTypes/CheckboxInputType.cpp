@@ -31,8 +31,8 @@
 
 #include "Krystal.Web/Html/InputTypes/CheckboxInputType.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Platform/LocalizedStrings.hpp"
 
 namespace krys::web::html

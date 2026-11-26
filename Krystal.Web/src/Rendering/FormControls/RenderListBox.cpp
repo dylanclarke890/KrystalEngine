@@ -37,7 +37,7 @@
 #include "Krystal.Web/Html/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollAnimator.hpp"

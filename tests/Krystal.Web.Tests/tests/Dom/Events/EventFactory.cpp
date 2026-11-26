@@ -3,8 +3,8 @@
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 
 namespace krys::web::dom::tests
 {

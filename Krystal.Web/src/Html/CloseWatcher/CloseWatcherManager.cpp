@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Html/CloseWatcher/CloseWatcherManager.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include <ranges>
 
 namespace krys::web::html

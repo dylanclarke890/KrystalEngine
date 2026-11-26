@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
 
 namespace krys::web
 {

@@ -42,7 +42,7 @@
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLMapElement.hpp"
 #include "Krystal.Web/Html/Forms/RadioButtonGroups.hpp"
-#include "Krystal.Web/Input/PointerLockController.hpp"
+#include "Krystal.Web/Input/PointerLock/PointerLockController.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Rendering/HitTesting/HitTestResult.hpp"

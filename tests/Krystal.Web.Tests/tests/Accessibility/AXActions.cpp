@@ -4,9 +4,9 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 
 namespace krys::web::ax::tests
 {

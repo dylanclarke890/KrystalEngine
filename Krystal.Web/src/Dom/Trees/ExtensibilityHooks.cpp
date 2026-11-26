@@ -12,10 +12,10 @@
 #include "Krystal.Web/Html/Elements/HTMLMapElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Html/Internals/UserActionElementSet.hpp"
-#include "Krystal.Web/Input/PointerCaptureController.hpp"
-#include "Krystal.Web/Input/PointerLockController.hpp"
+#include "Krystal.Web/Input/Internals/ScrollLatchingController.hpp"
+#include "Krystal.Web/Input/PointerEvents/PointerCaptureController.hpp"
+#include "Krystal.Web/Input/PointerLock/PointerLockController.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
-#include "Krystal.Web/Page/Scrolling/ScrollLatchingController.hpp"
 #include "Krystal.Web/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Web/Style/Styleable.hpp"
 

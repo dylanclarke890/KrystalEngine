@@ -12,9 +12,9 @@
 #include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Web/Html/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Web/Html/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Web/Input/PointerEvents/PointerEvent.hpp"
 #include <cmath>
 #include <format>
 #include <numbers>

@@ -1368,37 +1368,9 @@ set(KRYSTAL_WEB_EDITING_SOURCES
 )
 
 set(KRYSTAL_WEB_EVENTS_HEADERS
-  include/Krystal.Web/Events/Pointer/MouseEvent.hpp
-  include/Krystal.Web/Events/Pointer/MouseRelatedEvent.hpp
-  include/Krystal.Web/Events/Pointer/PointerEvent.hpp
-  include/Krystal.Web/Events/Pointer/PointerEventTypeNames.hpp
-  include/Krystal.Web/Events/Pointer/WheelEvent.hpp
-  include/Krystal.Web/Events/Touch/Touch.hpp
-  include/Krystal.Web/Events/Touch/TouchEvent.hpp
-  include/Krystal.Web/Events/Touch/TouchList.hpp
-  include/Krystal.Web/Events/UI/CompositionEvent.hpp
-  include/Krystal.Web/Events/UI/FocusEvent.hpp
-  include/Krystal.Web/Events/UI/InputEvent.hpp
-  include/Krystal.Web/Events/UI/KeyboardEvent.hpp
-  include/Krystal.Web/Events/UI/TextEvent.hpp
-  include/Krystal.Web/Events/UI/UIEvent.hpp
-  include/Krystal.Web/Events/UI/UIEventWithKeyState.hpp
 )
 
 set(KRYSTAL_WEB_EVENTS_SOURCES
-  src/Events/Pointer/MouseEvent.cpp
-  src/Events/Pointer/MouseRelatedEvent.cpp
-  src/Events/Pointer/PointerEvent.cpp
-  src/Events/Pointer/PointerEventTypeNames.cpp
-  src/Events/Pointer/WheelEvent.cpp
-  src/Events/Touch/Touch.cpp
-  src/Events/Touch/TouchEvent.cpp
-  src/Events/Touch/TouchList.cpp
-  src/Events/UI/CompositionEvent.cpp
-  src/Events/UI/InputEvent.cpp
-  src/Events/UI/KeyboardEvent.cpp
-  src/Events/UI/TextEvent.cpp
-  src/Events/UI/UIEvent.cpp
 )
 
 set(KRYSTAL_WEB_FILEAPI_HEADERS
@@ -2251,36 +2223,40 @@ set(KRYSTAL_WEB_INFRA_HEADERS
 )
 
 set(KRYSTAL_WEB_INPUT_HEADERS
-  include/Krystal.Web/Input/AutoscrollController.hpp
-  include/Krystal.Web/Input/EventHandler.hpp
-  include/Krystal.Web/Input/LegacyKeyCodes.hpp
-  include/Krystal.Web/Input/MouseEventTypes.hpp
-  include/Krystal.Web/Input/MouseEventWithHitTestResults.hpp
-  include/Krystal.Web/Input/PlatformEvent.hpp
-  include/Krystal.Web/Input/PlatformKeyboardEvent.hpp
-  include/Krystal.Web/Input/PlatformMouseEvent.hpp
-  include/Krystal.Web/Input/PlatformTouchEvent.hpp
-  include/Krystal.Web/Input/PlatformTouchPoint.hpp
-  include/Krystal.Web/Input/PlatformWheelEvent.hpp
-  include/Krystal.Web/Input/PointerCaptureController.hpp
-  include/Krystal.Web/Input/PointerCharacteristics.hpp
-  include/Krystal.Web/Input/PointerId.hpp
-  include/Krystal.Web/Input/PointerLockController.hpp
-  include/Krystal.Web/Input/PointerLockOptions.hpp
-  include/Krystal.Web/Input/SpatialNavigation.hpp
-  include/Krystal.Web/Input/WheelEventDeltaFilter.hpp
 )
 
 set(KRYSTAL_WEB_INPUT_SOURCES
-  src/Input/AutoscrollController.cpp
-  src/Input/EventHandler.cpp
-  src/Input/PointerCaptureController.cpp
-  src/Input/PointerLockController.cpp
-  src/Input/SpatialNavigation.cpp
-  src/Input/WheelEventDeltaFilter.cpp
 )
 
 set(KRYSTAL_WEB_INTERSECTIONOBSERVER_HEADERS
+  include/Krystal.Web/Input/Internals/AutoscrollController.hpp
+  include/Krystal.Web/Input/Internals/EventHandler.hpp
+  include/Krystal.Web/Input/Internals/MouseEventWithHitTestResults.hpp
+  include/Krystal.Web/Input/Internals/ScrollLatchingController.hpp
+  include/Krystal.Web/Input/Internals/WheelEventDeltaFilter.hpp
+  include/Krystal.Web/Input/PointerEvents/MouseEvent.hpp
+  include/Krystal.Web/Input/PointerEvents/MouseEventTypes.hpp
+  include/Krystal.Web/Input/PointerEvents/MouseRelatedEvent.hpp
+  include/Krystal.Web/Input/PointerEvents/PointerCaptureController.hpp
+  include/Krystal.Web/Input/PointerEvents/PointerCharacteristics.hpp
+  include/Krystal.Web/Input/PointerEvents/PointerEvent.hpp
+  include/Krystal.Web/Input/PointerEvents/PointerEventTypeNames.hpp
+  include/Krystal.Web/Input/PointerEvents/PointerId.hpp
+  include/Krystal.Web/Input/PointerEvents/WheelEvent.hpp
+  include/Krystal.Web/Input/PointerLock/PointerLockController.hpp
+  include/Krystal.Web/Input/PointerLock/PointerLockOptions.hpp
+  include/Krystal.Web/Input/SpatialNavigation/SpatialNavigation.hpp
+  include/Krystal.Web/Input/TouchEvents/Touch.hpp
+  include/Krystal.Web/Input/TouchEvents/TouchEvent.hpp
+  include/Krystal.Web/Input/TouchEvents/TouchList.hpp
+  include/Krystal.Web/Input/UIEvents/CompositionEvent.hpp
+  include/Krystal.Web/Input/UIEvents/FocusEvent.hpp
+  include/Krystal.Web/Input/UIEvents/InputEvent.hpp
+  include/Krystal.Web/Input/UIEvents/KeyboardEvent.hpp
+  include/Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp
+  include/Krystal.Web/Input/UIEvents/TextEvent.hpp
+  include/Krystal.Web/Input/UIEvents/UIEvent.hpp
+  include/Krystal.Web/Input/UIEvents/UIEventWithKeyState.hpp
   include/Krystal.Web/IntersectionObserver/IntersectionObserver.hpp
   include/Krystal.Web/IntersectionObserver/IntersectionObserverCallback.hpp
   include/Krystal.Web/IntersectionObserver/IntersectionObserverEntry.hpp
@@ -2288,6 +2264,26 @@ set(KRYSTAL_WEB_INTERSECTIONOBSERVER_HEADERS
 )
 
 set(KRYSTAL_WEB_INTERSECTIONOBSERVER_SOURCES
+  src/Input/Internals/AutoscrollController.cpp
+  src/Input/Internals/EventHandler.cpp
+  src/Input/Internals/ScrollLatchingController.cpp
+  src/Input/Internals/WheelEventDeltaFilter.cpp
+  src/Input/PointerEvents/MouseEvent.cpp
+  src/Input/PointerEvents/MouseRelatedEvent.cpp
+  src/Input/PointerEvents/PointerCaptureController.cpp
+  src/Input/PointerEvents/PointerEvent.cpp
+  src/Input/PointerEvents/PointerEventTypeNames.cpp
+  src/Input/PointerEvents/WheelEvent.cpp
+  src/Input/PointerLock/PointerLockController.cpp
+  src/Input/SpatialNavigation/SpatialNavigation.cpp
+  src/Input/TouchEvents/Touch.cpp
+  src/Input/TouchEvents/TouchEvent.cpp
+  src/Input/TouchEvents/TouchList.cpp
+  src/Input/UIEvents/CompositionEvent.cpp
+  src/Input/UIEvents/InputEvent.cpp
+  src/Input/UIEvents/KeyboardEvent.cpp
+  src/Input/UIEvents/TextEvent.cpp
+  src/Input/UIEvents/UIEvent.cpp
   src/IntersectionObserver/IntersectionObserver.cpp
   src/IntersectionObserver/IntersectionObserverEntry.cpp
 )
@@ -2571,7 +2567,6 @@ set(KRYSTAL_WEB_PAGE_HEADERS
   include/Krystal.Web/Page/Scrolling/ScrollAnchoringController.hpp
   include/Krystal.Web/Page/Scrolling/ScrollBehavior.hpp
   include/Krystal.Web/Page/Scrolling/ScrollingConstraints.hpp
-  include/Krystal.Web/Page/Scrolling/ScrollLatchingController.hpp
   include/Krystal.Web/Page/Scrolling/ScrollOptions.hpp
   include/Krystal.Web/Page/Scrolling/ScrollSnapOffsetsInfo.hpp
   include/Krystal.Web/Page/Settings.hpp
@@ -2588,7 +2583,6 @@ set(KRYSTAL_WEB_PAGE_SOURCES
   src/Page/Scrolling/ScrollAnchoringController.cpp
   src/Page/Scrolling/ScrollBehavior.cpp
   src/Page/Scrolling/ScrollingConstraints.cpp
-  src/Page/Scrolling/ScrollLatchingController.cpp
   src/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   src/Page/Settings.cpp
   src/Page/VisualViewport.cpp
@@ -2608,6 +2602,12 @@ set(KRYSTAL_WEB_PLATFORM_HEADERS
   include/Krystal.Web/Platform/Choosers/PopupMenuClient.hpp
   include/Krystal.Web/Platform/Choosers/PopupMenuStyle.hpp
   include/Krystal.Web/Platform/Cursor.hpp
+  include/Krystal.Web/Platform/Events/PlatformEvent.hpp
+  include/Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp
+  include/Krystal.Web/Platform/Events/PlatformMouseEvent.hpp
+  include/Krystal.Web/Platform/Events/PlatformTouchEvent.hpp
+  include/Krystal.Web/Platform/Events/PlatformTouchPoint.hpp
+  include/Krystal.Web/Platform/Events/PlatformWheelEvent.hpp
   include/Krystal.Web/Platform/GraphicsClient.hpp
   include/Krystal.Web/Platform/DateComponents.hpp
   include/Krystal.Web/Platform/LocalizedStrings.hpp

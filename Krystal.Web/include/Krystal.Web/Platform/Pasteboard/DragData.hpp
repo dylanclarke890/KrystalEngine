@@ -32,8 +32,8 @@
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/String.hpp"
-#include "Krystal.Web/Input/PlatformEvent.hpp"
 #include "Krystal.Web/Page/Drag/DragActions.hpp"
+#include "Krystal.Web/Platform/Events/PlatformEvent.hpp"
 
 namespace krys::web
 {

@@ -32,7 +32,7 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollTypes.hpp"
 #include <algorithm>
 #include <cmath>

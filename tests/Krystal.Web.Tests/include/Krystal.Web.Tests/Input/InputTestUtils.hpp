@@ -3,10 +3,10 @@
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 #include <string>
 
 namespace krys::web::tests

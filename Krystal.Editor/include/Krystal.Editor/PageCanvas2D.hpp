@@ -6,13 +6,13 @@
 #include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Web/Html/Canvas/CanvasGradient.hpp"
 #include "Krystal.Web/Html/Canvas/CanvasPattern.hpp"
 #include "Krystal.Web/Html/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Web/Html/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLImageElement.hpp"
 #include "Krystal.Web/Html/ImageData/ImageData.hpp"
+#include "Krystal.Web/Input/PointerEvents/PointerEvent.hpp"
 #include "Krystal.Web/Svg/Elements/SVGImageElement.hpp"
 #include <algorithm>
 #include <format>

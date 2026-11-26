@@ -8,10 +8,10 @@
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
-#include "Krystal.Web/Events/Touch/TouchEvent.hpp"
-#include "Krystal.Web/Events/Touch/TouchList.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEvent.hpp"
+#include "Krystal.Web/Input/PointerEvents/PointerEvent.hpp"
+#include "Krystal.Web/Input/TouchEvents/TouchEvent.hpp"
+#include "Krystal.Web/Input/TouchEvents/TouchList.hpp"
 #include <algorithm>
 #include <format>
 #include <string>

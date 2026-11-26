@@ -13,11 +13,11 @@
 #include "Krystal.PAL/Input/TouchpadPan.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.Web/Editing/CompositionUnderline.hpp"
-#include "Krystal.Web/Input/MouseEventTypes.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
-#include "Krystal.Web/Input/PlatformWheelEvent.hpp"
+#include "Krystal.Web/Input/PointerEvents/MouseEventTypes.hpp"
 #include "Krystal.Web/Page/Drag/DragActions.hpp"
 #include "Krystal.Web/Platform/Cursor.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Platform/Events/PlatformWheelEvent.hpp"
 
 /// @brief Conversions between the platform layer's input and cursors and Krystal.Web's.
 namespace krys::boo::input

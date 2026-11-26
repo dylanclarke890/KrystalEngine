@@ -6,8 +6,8 @@
 #include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Events/UI/CompositionEvent.hpp"
-#include "Krystal.Web/Events/UI/InputEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/CompositionEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/InputEvent.hpp"
 #include <format>
 #include <string>
 

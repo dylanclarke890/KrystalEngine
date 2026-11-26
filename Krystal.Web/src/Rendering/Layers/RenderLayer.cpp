@@ -59,7 +59,7 @@
 #include "Krystal.Web/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Web/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormControlElement.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Web/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Web/Page/Frame.hpp"

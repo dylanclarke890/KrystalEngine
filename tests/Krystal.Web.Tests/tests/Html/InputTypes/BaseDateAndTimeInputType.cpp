@@ -8,14 +8,14 @@
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Shadow/DateTimeEditElement.hpp"
 #include "Krystal.Web/Html/Window.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/LegacyKeyCodes.hpp"
-#include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Input/UIEvents/LegacyKeyCodes.hpp"
 #include "Krystal.Web/Page/Clients/WebClient.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
 #include "Krystal.Web/Platform/Choosers/DateTimeChooser.hpp"
 #include "Krystal.Web/Platform/Choosers/DateTimeChooserClient.hpp"
 #include "Krystal.Web/Platform/Choosers/DateTimeChooserParameters.hpp"
+#include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 
 namespace krys::web::tests
 {

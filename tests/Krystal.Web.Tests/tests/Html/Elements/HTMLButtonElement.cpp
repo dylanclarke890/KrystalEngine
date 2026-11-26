@@ -12,9 +12,9 @@
 #include "Krystal.Web/Html/Events/CommandEvent.hpp"
 #include "Krystal.Web/Html/Events/ToggleEvent.hpp"
 #include "Krystal.Web/Html/Internals/PopoverData.hpp"
-#include "Krystal.Web/Input/EventHandler.hpp"
-#include "Krystal.Web/Input/PlatformMouseEvent.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
 
 namespace krys::web::html::tests
 {

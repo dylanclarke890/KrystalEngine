@@ -32,10 +32,10 @@
 #include "Krystal.Web/Html/InputTypes/SearchInputType.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
-#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
 #include "Krystal.Web/Html/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Web/Input/UIEvents/KeyboardEvent.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::web::html

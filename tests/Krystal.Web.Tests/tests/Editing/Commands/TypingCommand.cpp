@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Web/Events/UI/InputEvent.hpp"
+#include "Krystal.Web/Input/UIEvents/InputEvent.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Platform/Scrolling/Scrollbar.hpp"
 

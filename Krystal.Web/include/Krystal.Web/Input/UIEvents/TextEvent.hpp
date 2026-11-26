@@ -1,0 +1,174 @@
+﻿/*
+ * Copyright (C) 2007, 2008 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Input/UIEvents/UIEvent.hpp"
+
+namespace krys::web::ui_events
+{
+  enum class TextEventInputType : uint8
+  {
+    Keyboard, // any newline characters in the text are line breaks only, not paragraph separators.
+    Autocompletion,
+    LineBreak, // any tab characters in the text are backtabs.
+    Composition,
+    BackTab,
+    Paste,
+    Drop,
+    Dictation,
+    RemoveBackground,
+    Other,
+  };
+}
+
+namespace krys::web
+{
+  class DocumentFragment;
+
+  /// @brief The text an edit inserts (`textInput`): typed, pasted or dropped, which listeners can cancel
+  /// before the editor inserts it.
+  /// @note Legacy.
+  /// @see https://w3c.github.io/uievents/#legacy-textevent-events
+  // (There are no dictation alternatives; see DIFFERENCES.md.)
+  class TextEvent final : public UIEvent
+  {
+  private:
+    ui_events::TextEventInputType _inputType {ui_events::TextEventInputType::Keyboard};
+    DOMString _data;
+    RefPtr<DocumentFragment> _pastingFragment;
+    bool _shouldSmartReplace {false};
+    bool _shouldMatchStyle {false};
+
+  public:
+    TextEvent() noexcept;
+
+    TextEvent(DOMStringView data, ui_events::TextEventInputType inputType) noexcept;
+
+    TextEvent(DOMStringView data, RefPtr<DocumentFragment> &&pastingFragment,
+              ui_events::TextEventInputType inputType, bool shouldSmartReplace,
+              bool shouldMatchStyle) noexcept;
+
+    ~TextEvent() noexcept override;
+
+    /// @brief A trusted `textInput` event, which bubbles, can be cancelled and crosses shadow boundaries.
+    KRYS_NODISCARD static Ref<TextEvent>
+      Create(Window *view, DOMStringView data,
+             ui_events::TextEventInputType inputType = ui_events::TextEventInputType::Keyboard) noexcept;
+
+    KRYS_NODISCARD static Ref<TextEvent> CreateForPlainTextPaste(Window *view, DOMStringView data,
+                                                                 bool shouldSmartReplace) noexcept;
+
+    KRYS_NODISCARD static Ref<TextEvent> CreateForFragmentPaste(Window *view, RefPtr<DocumentFragment> &&data,
+                                                                ui_events::TextEventInputType inputType,
+                                                                bool shouldSmartReplace,
+                                                                bool shouldMatchStyle) noexcept;
+
+    KRYS_NODISCARD static Ref<TextEvent> CreateForDrop(Window *view, DOMStringView data) noexcept;
+
+    /// @see https://w3c.github.io/uievents/#dom-textevent-inittextevent
+    void InitTextEvent(DOMStringAtom type, bool bubbles, bool cancelable, Window *view,
+                       DOMStringView data) noexcept;
+
+    KRYS_NODISCARD bool IsTextEvent() const noexcept final
+    {
+      return true;
+    }
+
+    /// @see https://w3c.github.io/uievents/#dom-textevent-data
+    KRYS_NODISCARD const DOMString &Data() const noexcept
+    {
+      return _data;
+    }
+
+    KRYS_NODISCARD bool IsLineBreak() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::LineBreak;
+    }
+
+    KRYS_NODISCARD bool IsComposition() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Composition;
+    }
+
+    KRYS_NODISCARD bool IsBackTab() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::BackTab;
+    }
+
+    KRYS_NODISCARD bool IsPaste() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Paste;
+    }
+
+    KRYS_NODISCARD bool IsDrop() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Drop;
+    }
+
+    KRYS_NODISCARD bool IsDictation() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Dictation;
+    }
+
+    KRYS_NODISCARD bool IsAutocompletion() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Autocompletion;
+    }
+
+    KRYS_NODISCARD bool IsKeyboard() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::Keyboard;
+    }
+
+    KRYS_NODISCARD bool IsRemoveBackground() const noexcept
+    {
+      return _inputType == ui_events::TextEventInputType::RemoveBackground;
+    }
+
+    KRYS_NODISCARD bool ShouldSmartReplace() const noexcept
+    {
+      return _shouldSmartReplace;
+    }
+
+    KRYS_NODISCARD bool ShouldMatchStyle() const noexcept
+    {
+      return _shouldMatchStyle;
+    }
+
+    KRYS_NODISCARD DocumentFragment *PastingFragment() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::TextEvent)
+  KRYS_NODISCARD static bool IsType(const krys::web::Event &event) noexcept
+  {
+    return event.IsTextEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
