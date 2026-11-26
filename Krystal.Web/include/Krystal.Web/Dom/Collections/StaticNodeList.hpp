@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
-#include "Krystal.Web/Dom/Internals/SmallNodeList.hpp"
+#include "Krystal.Web/Dom/Types/SmallNodeList.hpp"
 
 namespace krys::web
 {

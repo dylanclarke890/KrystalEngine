@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Web/Dom/Mixins/NonDocumentTypeChildNode.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 
 namespace krys::web::dom::mixins
 {

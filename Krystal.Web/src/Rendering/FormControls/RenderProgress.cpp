@@ -19,7 +19,7 @@
  */
 
 #include "Krystal.Web/Rendering/FormControls/RenderProgress.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Web/Rendering/RenderTheme.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"

@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Web/Css/Geometry/DOMRect.hpp"
-#include "Krystal.Web/Dom/Internals/SmallNodeList.hpp"
 #include "Krystal.Web/Dom/Ranges/AbstractRange.hpp"
 #include "Krystal.Web/Dom/Ranges/BoundaryPoint.hpp"
+#include "Krystal.Web/Dom/Types/SmallNodeList.hpp"
 #include <compare>
 
 namespace krys::web::dom

@@ -21,11 +21,11 @@
 
 #include "Krystal.Web/Svg/SVGURIReference.hpp"
 #include "Krystal.Net/Url.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Style/Values/Primitives/Url.hpp"
 #include "Krystal.Web/Style/Values/SVG/SVGMarkerResource.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"

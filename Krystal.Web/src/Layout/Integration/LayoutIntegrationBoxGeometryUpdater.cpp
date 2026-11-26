@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Web/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Web/Layout/LayoutState.hpp"

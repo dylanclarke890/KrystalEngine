@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+﻿#include "Krystal.Web/Dom/Nodes/ElementFactory.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"

@@ -27,9 +27,9 @@
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorChecker.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Style/Invalidation/InvalidationFunctions.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 
 namespace krys::web::style
 {

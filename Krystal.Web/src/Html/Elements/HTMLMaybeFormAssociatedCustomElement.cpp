@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Html/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"
-#include "Krystal.Web/Dom/Types/NameValidation.hpp"
+#include "Krystal.Web/Dom/Internals/NameValidation.hpp"
 #include "Krystal.Web/Html/CustomElement/FormAssociatedCustomElement.hpp"
 
 namespace krys::web

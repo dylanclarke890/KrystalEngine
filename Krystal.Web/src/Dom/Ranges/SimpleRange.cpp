@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include <algorithm>
 #include <limits>

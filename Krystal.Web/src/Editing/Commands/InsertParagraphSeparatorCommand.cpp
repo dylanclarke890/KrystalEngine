@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Web/Editing/Commands/InsertParagraphSeparatorCommand.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Commands/InsertLineBreakCommand.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"

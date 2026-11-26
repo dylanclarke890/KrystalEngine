@@ -25,11 +25,11 @@
 
 #include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBDIElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"

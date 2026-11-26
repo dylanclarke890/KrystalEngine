@@ -22,8 +22,8 @@
  */
 
 #include "Krystal.Web/Rendering/GeneratedContent/RenderListItem.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOListElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLUListElement.hpp"
 #include "Krystal.Web/Rendering/GeneratedContent/RenderListMarker.hpp"

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Html/Parser/DocumentParser.hpp"
-#include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Nodes/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/ElementFactory.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"

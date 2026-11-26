@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Html/Shadow/DataListButtonElement.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"

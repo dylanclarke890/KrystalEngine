@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Xml/PseudoAttributes.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Text/Encodings/UTF.hpp"
-#include "Krystal.Web/Dom/Types/NameValidation.hpp"
+#include "Krystal.Web/Dom/Internals/NameValidation.hpp"
 #include <algorithm>
 
 namespace krys::web::xml

@@ -388,18 +388,17 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Events/CustomEvent.cpp
   tests/Dom/Events/Event.cpp
   tests/Dom/Events/EventDispatcher.cpp
+  tests/Dom/Events/EventFactory.cpp
   tests/Dom/Events/EventListenerHandle.cpp
   tests/Dom/Events/EventTarget.cpp
   tests/Dom/Events/EventTargetAlgorithms.cpp
-  tests/Dom/Internals/ElementFactory.cpp
-  tests/Dom/Internals/EventFactory.cpp
   tests/Dom/Internals/Iterators/ComposedTreeIterator.cpp
   tests/Dom/Internals/Iterators/HTMLElementRanges.cpp
-  tests/Dom/Internals/LiveRangeUpdater.cpp
+  tests/Dom/Internals/NameValidation.cpp
+  tests/Dom/Internals/OrderedSet.cpp
   tests/Dom/Internals/QualifiedNameCache.cpp
   tests/Dom/Internals/SelectorQuery.cpp
   tests/Dom/Internals/TreeScopeOrderedMap.cpp
-  tests/Dom/Internals/TreeTraversal.cpp
   tests/Dom/Mixins/ChildNode.cpp
   tests/Dom/Mixins/DocumentOrShadowRoot.cpp
   tests/Dom/Mixins/NonDocumentTypeChildNode.cpp
@@ -420,6 +419,7 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Nodes/DocumentType.cpp
   tests/Dom/Nodes/DOMImplementation.cpp
   tests/Dom/Nodes/Element.cpp
+  tests/Dom/Nodes/ElementFactory.cpp
   tests/Dom/Nodes/NamedNodeMap.cpp
   tests/Dom/Nodes/Node.cpp
   tests/Dom/Nodes/ProcessingInstruction.cpp
@@ -432,12 +432,14 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/MutationObserver/MutationRecord.cpp
   tests/Dom/Ranges/AbstractRange.cpp
   tests/Dom/Ranges/BoundaryPoint.cpp
+  tests/Dom/Ranges/LiveRangeUpdater.cpp
   tests/Dom/Ranges/Range.cpp
   tests/Dom/Ranges/SimpleRange.cpp
   tests/Dom/Ranges/StaticRange.cpp
   tests/Dom/Traversal/IteratorAlgorithms.cpp
   tests/Dom/Traversal/NodeFilter.cpp
   tests/Dom/Traversal/NodeIterator.cpp
+  tests/Dom/Traversal/TreeTraversal.cpp
   tests/Dom/Traversal/TreeWalker.cpp
   tests/Dom/DocumentColorScheme.cpp
   tests/Dom/DocumentSuspension.cpp
@@ -449,8 +451,6 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Trees/MutationAlgorithms.cpp
   tests/Dom/Trees/SlotAlgorithms.cpp
   tests/Dom/Trees/TreeQueries.cpp
-  tests/Dom/Types/NameValidation.cpp
-  tests/Dom/Types/OrderedSet.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_EDITING_HEADERS

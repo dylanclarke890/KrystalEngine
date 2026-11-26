@@ -21,8 +21,8 @@
  */
 
 #include "Krystal.Web/Svg/SVGLocatable.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"
 #include "Krystal.Web/Svg/Elements/SVGForeignObjectElement.hpp"

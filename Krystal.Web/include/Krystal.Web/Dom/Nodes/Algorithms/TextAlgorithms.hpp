@@ -2,9 +2,9 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
-#include "Krystal.Web/Dom/Internals/SmallNodeList.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Web/Dom/Types/SmallNodeList.hpp"
 
 namespace krys::web
 {

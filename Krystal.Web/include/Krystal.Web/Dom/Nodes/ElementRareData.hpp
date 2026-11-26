@@ -10,7 +10,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Web/Css/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Web/Css/Containment/ContentRelevancy.hpp"
-#include "Krystal.Web/Dom/Internals/NodeRareData.hpp"
+#include "Krystal.Web/Dom/Nodes/NodeRareData.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomStateSet.hpp"

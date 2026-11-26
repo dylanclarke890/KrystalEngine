@@ -27,8 +27,8 @@
 
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/ElementAndTextDescendantIterator.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"

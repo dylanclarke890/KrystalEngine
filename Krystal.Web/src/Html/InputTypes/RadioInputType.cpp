@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/InputTypes/RadioInputType.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"

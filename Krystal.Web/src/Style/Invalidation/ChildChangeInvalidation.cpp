@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Style/Invalidation/ChildChangeInvalidation.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorChecker.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"

@@ -9,7 +9,7 @@
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Collections/HTMLOptionsCollection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOptGroupElement.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"

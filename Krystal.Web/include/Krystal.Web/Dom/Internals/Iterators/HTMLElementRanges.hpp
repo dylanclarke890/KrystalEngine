@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 
 namespace krys::web::dom::detail
 {

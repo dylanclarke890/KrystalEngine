@@ -26,8 +26,8 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Web/Css/Selectors/Selector.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorFilter.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Style/Rules/RuleFeature.hpp"
 

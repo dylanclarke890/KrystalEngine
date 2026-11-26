@@ -26,11 +26,11 @@
 #include "Krystal.Web/Css/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Web/Css/Geometry/DOMRectList.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include <algorithm>
 
 namespace krys::web

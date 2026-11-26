@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLHeadingElement.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
 #include <algorithm>

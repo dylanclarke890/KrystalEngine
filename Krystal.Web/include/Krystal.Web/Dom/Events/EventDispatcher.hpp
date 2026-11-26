@@ -4,7 +4,7 @@
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
-#include "Krystal.Web/Dom/Internals/EventFactory.hpp"
+#include "Krystal.Web/Dom/Events/EventFactory.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 
 namespace krys::web

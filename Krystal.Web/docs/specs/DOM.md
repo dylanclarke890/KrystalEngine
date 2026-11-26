@@ -26,7 +26,7 @@ Status: reviewed (2026-10-30)
 ### [1.2. Ordered sets](https://dom.spec.whatwg.org/#ordered-sets)
 
 Status: reviewed (2026-10-30)
-> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/Dom/Types/OrderedSet.cpp`.
+> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/Dom/Internals/OrderedSet.cpp`.
 
 - [x] [ordered set parser](https://dom.spec.whatwg.org/#concept-ordered-set-parser) — The ordered set parser takes a string input and then runs these steps:
   - 1. Let inputTokens be the result of splitting input on ASCII whitespace.
@@ -50,7 +50,7 @@ Status: reviewed (2026-10-30)
 ### [1.4. Name validation](https://dom.spec.whatwg.org/#namespaces)
 
 Status: reviewed (2026-10-30)
-> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/Dom/Types/NameValidation.cpp`.
+> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/Dom/Internals/NameValidation.cpp`.
 <!-- definitions: valid-doctype-name -->
 
 - [x] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
@@ -209,7 +209,7 @@ Status: reviewed (2026-10-30)
 ### [2.5. Constructing events](https://dom.spec.whatwg.org/#constructing-events)
 
 Status: reviewed (2026-10-30)
-> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/Dom/Events/Event.cpp`, `tests/Dom/Internals/EventFactory.cpp`.
+> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/Dom/Events/Event.cpp`, `tests/Dom/Events/EventFactory.cpp`.
 <!-- definitions: concept-event-constructor-ext -->
 
 - [x] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:

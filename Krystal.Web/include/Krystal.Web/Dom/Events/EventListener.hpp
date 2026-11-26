@@ -33,8 +33,6 @@ namespace krys::web
   {
     bool Once = false;
     Maybe<bool> Passive;
-    /// @note A plain pointer: the options are only read while the listener is added, which takes its own
-    /// reference, so code that passes them around doesn't need the signal's definition.
     AbortSignal *Signal {nullptr};
   };
 

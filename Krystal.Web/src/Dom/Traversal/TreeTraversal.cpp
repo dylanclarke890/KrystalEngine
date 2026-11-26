@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+﻿#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"

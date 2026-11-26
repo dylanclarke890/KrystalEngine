@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Style/Resolver.hpp"
 #include "Krystal.Web/Style/Rules/ScopeRuleSets.hpp"
 #include "Krystal.Web/Style/Scope/Scope.hpp"

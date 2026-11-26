@@ -25,10 +25,10 @@
 
 #include "Krystal.Web/Editing/Commands/DeleteSelectionCommand.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Editing/EditingStyle.hpp"

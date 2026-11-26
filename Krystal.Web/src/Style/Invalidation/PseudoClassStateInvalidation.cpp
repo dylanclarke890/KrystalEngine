@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Web/Style/Invalidation/PseudoClassStateInvalidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include <initializer_list>

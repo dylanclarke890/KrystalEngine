@@ -3,8 +3,8 @@
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Internals/SmallNodeList.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Dom/Types/SmallNodeList.hpp"
 
 namespace krys::web
 {

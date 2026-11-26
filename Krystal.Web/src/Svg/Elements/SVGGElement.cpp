@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Svg/Elements/SVGGElement.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGHiddenContainer.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"

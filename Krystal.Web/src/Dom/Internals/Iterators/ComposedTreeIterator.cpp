@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include <format>
 
 namespace krys::web::dom

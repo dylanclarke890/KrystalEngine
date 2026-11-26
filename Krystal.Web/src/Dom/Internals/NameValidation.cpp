@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Types/NameValidation.hpp"
+﻿#include "Krystal.Web/Dom/Internals/NameValidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"

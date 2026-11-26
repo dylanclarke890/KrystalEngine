@@ -26,8 +26,8 @@
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Style/Invalidation/InvalidationFunctions.hpp"
 
 namespace krys::web::style

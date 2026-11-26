@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/ElementRareData.hpp"
+﻿#include "Krystal.Web/Dom/Nodes/ElementRareData.hpp"
 #include "Krystal.Web/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Web/Css/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Web/Css/TypedOM/StylePropertyMap.hpp"

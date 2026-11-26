@@ -26,8 +26,8 @@
 #include "Krystal.Web/Style/Invalidation/ClassChangeInvalidation.hpp"
 #include "Krystal.Core/Containers/SmallList.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Style/Invalidation/InvalidationFunctions.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 
 namespace krys::web::style
 {

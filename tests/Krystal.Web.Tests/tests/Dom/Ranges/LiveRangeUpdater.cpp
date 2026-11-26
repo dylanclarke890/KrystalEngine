@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
+﻿#include "Krystal.Web/Dom/Ranges/LiveRangeUpdater.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"

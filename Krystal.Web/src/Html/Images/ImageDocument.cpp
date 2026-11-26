@@ -31,7 +31,7 @@
 #include "Krystal.Web/Css/Properties/PropertyId.hpp"
 #include "Krystal.Web/Css/Values/ValueId.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
-#include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Nodes/ElementFactory.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLHeadElement.hpp"

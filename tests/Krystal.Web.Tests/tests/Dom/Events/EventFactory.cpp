@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/EventFactory.hpp"
+﻿#include "Krystal.Web/Dom/Events/EventFactory.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Types/OrderedSet.hpp"
+﻿#include "Krystal.Web/Dom/Internals/OrderedSet.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 #include <ranges>

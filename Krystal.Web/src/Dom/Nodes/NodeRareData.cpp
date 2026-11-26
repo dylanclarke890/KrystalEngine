@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Internals/NodeRareData.hpp"
+#include "Krystal.Web/Dom/Nodes/NodeRareData.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Web/Dom/Collections/LiveNodeList.hpp"

@@ -19,7 +19,7 @@
  */
 
 #include "Krystal.Web/Rendering/FormControls/RenderMeter.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Web/Rendering/RenderTheme.hpp"
 

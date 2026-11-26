@@ -9,7 +9,7 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
-#include "Krystal.Web/Dom/Internals/NodeRareData.hpp"
+#include "Krystal.Web/Dom/Nodes/NodeRareData.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Web/Style/Validity.hpp"

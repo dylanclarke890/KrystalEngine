@@ -29,8 +29,8 @@
 
 #include "Krystal.Web/Style/Adjuster.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"

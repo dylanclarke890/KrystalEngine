@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Net/Url.hpp"
-#include "Krystal.Web/Dom/Types/NameValidation.hpp"
+#include "Krystal.Web/Dom/Internals/NameValidation.hpp"
 #include "Krystal.Web/Html/Sanitizer/Sanitizer.hpp"
 #include "Krystal.Web/Html/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"

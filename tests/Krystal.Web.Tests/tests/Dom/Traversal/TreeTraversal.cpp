@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
+﻿#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Web.Tests/Dom/TestElement.hpp"
