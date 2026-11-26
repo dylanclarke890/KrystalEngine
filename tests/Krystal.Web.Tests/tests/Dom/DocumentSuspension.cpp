@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Loader/LoadTestUtils.hpp"
+#include "Krystal.Web.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Web/Dom/Abort/AbortSignal.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
@@ -164,6 +165,48 @@ namespace krys::web::tests
     html::EventLoop::Current().RunUntilIdle();
     RunNetworkingTasks();
     CHECK(linkElement.Sheet());
+  }
+
+  TEST_CASE("A suspended document's load events wait until it resumes, and stopping drops them",
+            "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+    auto &eventLoop = html::EventLoop::Current();
+    fixture.Strategy.AddText(u8"https://example.com/sheet.css", u8"p { color: green }", u8"text/css");
+
+    auto link = document.CreateElement(u8"link").ReleaseValue();
+    auto events = LoadEvents::ListenTo(*link);
+    (void)link->SetAttribute(u8"rel", u8"stylesheet");
+    (void)link->SetAttribute(u8"href", u8"sheet.css");
+    (void)document.Body()->AppendChild(*link);
+
+    // Run tasks until the sheet has loaded, which queues the load event.
+    auto &linkElement = Downcast<HTMLLinkElement>(*link);
+    while (!linkElement.Sheet() && eventLoop.RunNextTask())
+    {
+    }
+    REQUIRE(linkElement.Sheet());
+    REQUIRE(events->Loads == 0);
+
+    document.Suspend(Reason);
+    eventLoop.RunUntilIdle();
+    CHECK(events->Loads == 0);
+
+    SECTION("resuming fires it")
+    {
+      document.Resume(Reason);
+      eventLoop.RunUntilIdle();
+      CHECK(events->Loads == 1);
+    }
+
+    SECTION("stopping drops it")
+    {
+      document.StopActiveDOMObjects();
+      document.Resume(Reason);
+      eventLoop.RunUntilIdle();
+      CHECK(events->Loads == 0);
+    }
   }
 
   TEST_CASE("A suspended document's AbortSignal.timeout() waits for it", "[DOM][Document][Suspension]")

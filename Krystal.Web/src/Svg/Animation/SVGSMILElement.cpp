@@ -35,6 +35,7 @@
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Types/NameValidation.hpp"
+#include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 #include "Krystal.Web/Svg/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Web/Svg/Elements/SVGSvgElement.hpp"
@@ -50,12 +51,6 @@ namespace krys::web
 {
   namespace
   {
-    KRYS_NODISCARD svg::SMILEventSender &SmilEventSender() noexcept
-    {
-      static NeverDestroyed<svg::SMILEventSender> sender;
-      return sender;
-    }
-
     constexpr utf8_stringview IndefiniteValue = u8"indefinite";
 
     // This is used for duration type time values that can't be negative.
@@ -144,7 +139,6 @@ namespace krys::web
   SVGSMILElement::~SVGSMILElement() noexcept
   {
     ClearResourceReferences();
-    SmilEventSender().CancelEvent(*this);
     DisconnectConditions();
     if (RefPtr timeContainer = _timeContainer; timeContainer && _targetElement && HasValidAttributeName())
     {
@@ -1483,7 +1477,7 @@ namespace krys::web
       // When seekToTime is true, all repeat events are handled in the seekToTime block below.
       if (!seekToTime && repeat && repeat != _lastRepeat)
       {
-        SmilEventSender().DispatchEventSoon(*this, repeatEvent);
+        QueueTimingEventTask(repeatEvent);
       }
 
       UpdateAnimation(percent, repeat);
@@ -1493,7 +1487,7 @@ namespace krys::web
 
     if (oldActiveState == Active && _activeState != Active)
     {
-      SmilEventSender().DispatchEventSoon(*this, endEvent);
+      QueueTimingEventTask(endEvent);
       EndedActiveInterval();
       if (_activeState != Frozen)
       {
@@ -1502,7 +1496,7 @@ namespace krys::web
     }
     else if (oldActiveState != Active && _activeState == Active)
     {
-      SmilEventSender().DispatchEventSoon(*this, beginEvent);
+      QueueTimingEventTask(beginEvent);
     }
 
     // Triggering all the pending events if the animation timeline is changed.
@@ -1511,7 +1505,7 @@ namespace krys::web
     {
       if (_activeState == Inactive || _activeState == Frozen)
       {
-        SmilEventSender().DispatchEventSoon(*this, endEvent);
+        QueueTimingEventTask(endEvent);
       }
 
       if (repeat)
@@ -1521,12 +1515,12 @@ namespace krys::web
         // If repeat == 1, no events are dispatched here.
         for (uint32 i = 0; i < repeat - 1; ++i)
         {
-          SmilEventSender().DispatchEventSoon(*this, repeatEvent);
+          QueueTimingEventTask(repeatEvent);
         }
 
         if (_activeState == Inactive)
         {
-          SmilEventSender().DispatchEventSoon(*this, repeatEvent);
+          QueueTimingEventTask(repeatEvent);
         }
       }
     }
@@ -1620,11 +1614,15 @@ namespace krys::web
     ClearTimesWithDynamicOrigins(_endTimes);
   }
 
-  void SVGSMILElement::DispatchPendingEvent(KRYS_MAYBE_UNUSED svg::SMILEventSender *eventSender,
-                                            const StringAtom &eventType) noexcept
+  void SVGSMILElement::QueueTimingEventTask(const StringAtom &eventType) noexcept
   {
-    krys_debug_assert(eventSender == &SmilEventSender());
-    auto event = Event::Create(eventType, false, false);
-    (void)DispatchEvent(*event);
+    // SVG doesn't say how timing events are fired; asynchronously, as Chrome does, on the DOM manipulation
+    // task source.
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, NodeDocument(),
+                                         [element = ShareRef(*this), eventType]
+                                         {
+                                           auto event = Event::Create(eventType, false, false);
+                                           (void)element->DispatchEvent(*event);
+                                         });
   }
 }

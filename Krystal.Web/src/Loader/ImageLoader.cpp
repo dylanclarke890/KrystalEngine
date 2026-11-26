@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Web/Loader/ImageLoader.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
@@ -20,24 +19,6 @@ namespace krys::web
 {
   namespace
   {
-    KRYS_NODISCARD ImageEventSender &LoadEventSender() noexcept
-    {
-      static MainThreadNeverDestroyed<ImageEventSender> sender;
-      return sender;
-    }
-
-    KRYS_NODISCARD const StringAtom &LoadEventName() noexcept
-    {
-      static const StringAtom name {event_names::Load};
-      return name;
-    }
-
-    KRYS_NODISCARD const StringAtom &ErrorEventName() noexcept
-    {
-      static const StringAtom name {event_names::Error};
-      return name;
-    }
-
     KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace(DOMStringView string) noexcept
     {
       return std::ranges::all_of(string, [](char8 c) { return text::IsASCIIWhitespace(c); });
@@ -91,13 +72,6 @@ namespace krys::web
     {
       image->RemoveClient(*this);
     }
-
-    krys_debug_assert(_hasPendingLoadEvent || _hasPendingErrorEvent
-                      || !LoadEventSender().HasPendingEvents(*this));
-    if (_hasPendingLoadEvent || _hasPendingErrorEvent)
-    {
-      LoadEventSender().CancelEvent(*this);
-    }
   }
 
   web::Document &ImageLoader::GetDocument() noexcept
@@ -121,7 +95,8 @@ namespace krys::web
       _image = nullptr;
       if (_hasPendingLoadEvent || _hasPendingErrorEvent)
       {
-        LoadEventSender().CancelEvent(*this);
+        ++_loadEventTask;
+        ++_errorEventTask;
         _hasPendingLoadEvent = _hasPendingErrorEvent = false;
       }
       _imageComplete = true;
@@ -216,7 +191,7 @@ namespace krys::web
       {
         _failedLoadUrl = *attr;
         _hasPendingErrorEvent = true;
-        LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
+        QueueErrorEventTask();
       }
       else
       {
@@ -230,7 +205,7 @@ namespace krys::web
     {
       _failedLoadUrl = attr.value_or(DOMString());
       _hasPendingErrorEvent = true;
-      LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
+      QueueErrorEventTask();
     }
 
     DidUpdateCachedImage(relevantMutation, krys::move(newImage));
@@ -244,7 +219,7 @@ namespace krys::web
     {
       if (_hasPendingLoadEvent)
       {
-        LoadEventSender().CancelEvent(*this, LoadEventName());
+        ++_loadEventTask;
         _hasPendingLoadEvent = false;
       }
 
@@ -252,7 +227,7 @@ namespace krys::web
       // the one pending error stands for both: only the last of several updates fires.
       if (_hasPendingErrorEvent && newImage)
       {
-        LoadEventSender().CancelEvent(*this, ErrorEventName());
+        ++_errorEventTask;
         _hasPendingErrorEvent = false;
       }
 
@@ -356,7 +331,7 @@ namespace krys::web
       ClearImageWithoutConsideringPendingLoadEvent();
 
       _hasPendingErrorEvent = true;
-      LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
+      QueueErrorEventTask();
 
       if (!_decodingPromises.empty())
       {
@@ -390,7 +365,7 @@ namespace krys::web
     {
       DecodeImage();
     }
-    LoadEventSender().DispatchEventSoon(*this, LoadEventName());
+    QueueLoadEventTask();
   }
 
   void ImageLoader::Decode(DecodePromise promise) noexcept
@@ -556,18 +531,31 @@ namespace krys::web
     return (_hasPendingLoadEvent && !imageWillBeLoadedLater) || _hasPendingErrorEvent;
   }
 
-  void ImageLoader::DispatchPendingEvent(ImageEventSender *eventSender, const StringAtom &eventType) noexcept
+  // The tasks keep the element alive, and with it the loader, which it owns for its whole life.
+  void ImageLoader::QueueLoadEventTask() noexcept
   {
-    krys_debug_assert(eventSender == &LoadEventSender());
-    (void)eventSender;
-    if (eventType == LoadEventName())
-    {
-      DispatchPendingLoadEvent();
-    }
-    if (eventType == ErrorEventName())
-    {
-      DispatchPendingErrorEvent();
-    }
+    const uint32 task = ++_loadEventTask;
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, GetDocument(),
+                                         [element = ShareRef(_element), loader = ShareCheckedPtr(this), task]
+                                         {
+                                           if (loader->_loadEventTask == task)
+                                           {
+                                             loader->DispatchPendingLoadEvent();
+                                           }
+                                         });
+  }
+
+  void ImageLoader::QueueErrorEventTask() noexcept
+  {
+    const uint32 task = ++_errorEventTask;
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, GetDocument(),
+                                         [element = ShareRef(_element), loader = ShareCheckedPtr(this), task]
+                                         {
+                                           if (loader->_errorEventTask == task)
+                                           {
+                                             loader->DispatchPendingErrorEvent();
+                                           }
+                                         });
   }
 
   void ImageLoader::DispatchPendingLoadEvent() noexcept
@@ -597,7 +585,7 @@ namespace krys::web
       return;
     }
     _hasPendingErrorEvent = false;
-    LoadEventSender().CancelEvent(*this, ErrorEventName());
+    ++_errorEventTask;
     if (GetDocument().HasLivingRenderTree())
     {
       (void)dom::EventDispatcher::FireEvent(event_names::Error, _element);
@@ -605,11 +593,6 @@ namespace krys::web
 
     // Last, as letting the element go may destroy this loader.
     UpdatedHasPendingEvent();
-  }
-
-  void ImageLoader::DispatchPendingLoadEvents() noexcept
-  {
-    LoadEventSender().DispatchPendingEvents();
   }
 
   void ImageLoader::ElementDidMoveToNewDocument(web::Document &oldDocument) noexcept

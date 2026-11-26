@@ -3,10 +3,10 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Func.hpp"
-#include "Krystal.Web/Dom/Events/EventSender.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Web/Loader/Cache/CachedImage.hpp"
@@ -18,9 +18,6 @@ namespace krys::web
   class Document;
   class Element;
   class RenderImageResource;
-
-  class ImageLoader;
-  using ImageEventSender = dom::EventSender<ImageLoader>;
 
   /// @brief Whether the update comes from a relevant mutation, which restarts the image's events even for
   /// the same image.
@@ -43,9 +40,10 @@ namespace krys::web
   /// @brief Loads the image of an element (`<img>`, `<input type=image>`, and later video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
   // FIXME: Archives.
-  class ImageLoader : public CachedImageClient
+  class ImageLoader : public CachedImageClient, public CanMakeCheckedPtr<ImageLoader>
   {
     KRYS_NON_COPY_MOVABLE(ImageLoader);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ImageLoader);
 
   public:
     /// @brief Settles a `decode()` promise: with nothing once the image is decoded, or with an
@@ -59,6 +57,10 @@ namespace krys::web
     RefPtr<web::Element> _protectedElement;
     DOMString _failedLoadUrl;
     DOMString _pendingUrl;
+    /// @brief The tasks that fire the pending `load` and `error` events: a task fires its event only if no
+    /// other was queued, nor the event canceled, since.
+    uint32 _loadEventTask {0};
+    uint32 _errorEventTask {0};
     bool _hasPendingLoadEvent : 1 {false};
     bool _hasPendingErrorEvent : 1 {false};
     bool _imageComplete : 1 {true};
@@ -128,12 +130,6 @@ namespace krys::web
     /// which keeps the element alive.
     KRYS_NODISCARD bool HasPendingActivity() const noexcept;
 
-    /// @brief Fires the pending `load` or `error` event, for the event sender.
-    void DispatchPendingEvent(ImageEventSender *eventSender, const StringAtom &eventType) noexcept;
-
-    /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every element.
-    static void DispatchPendingLoadEvents() noexcept;
-
     /// @brief The element's document.
     KRYS_NODISCARD web::Document &GetDocument() noexcept;
 
@@ -165,6 +161,14 @@ namespace krys::web
     /// promises, gives the renderer the new one, and becomes its client.
     void DidUpdateCachedImage(RelevantMutation relevantMutation,
                               const CachedResourceHandle<CachedImage> &newImage) noexcept;
+
+    /// @brief Queues an element task on the DOM manipulation task source that fires the pending `load`
+    /// event.
+    void QueueLoadEventTask() noexcept;
+
+    /// @brief Queues an element task on the DOM manipulation task source that fires the pending `error`
+    /// event.
+    void QueueErrorEventTask() noexcept;
 
     /// @brief Fires the pending `load` or `error` event, if the document renders.
     void DispatchPendingLoadEvent() noexcept;

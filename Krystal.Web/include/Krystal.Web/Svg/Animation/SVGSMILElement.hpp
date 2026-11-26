@@ -29,7 +29,6 @@
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Web/Dom/Events/EventSender.hpp"
 #include "Krystal.Web/Svg/Animation/SMILTime.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"
 
@@ -42,8 +41,6 @@ namespace krys::web::svg
 {
   class ConditionEventListener;
   class SMILTimeContainer;
-
-  using SMILEventSender = dom::EventSender<SVGSMILElement>;
 }
 
 namespace krys::web
@@ -242,8 +239,6 @@ namespace krys::web
       return _conditionsConnected;
     }
 
-    void DispatchPendingEvent(svg::SMILEventSender *, const StringAtom &eventType) noexcept;
-
   protected:
     KRYS_NODISCARD ActiveState GetActiveState() const noexcept
     {
@@ -290,6 +285,10 @@ namespace krys::web
     virtual void StartedActiveInterval() noexcept = 0;
 
     void EndedActiveInterval() noexcept;
+
+    /// @brief Queues a task that fires the timing event @p eventType (`beginEvent`, `endEvent` or
+    /// `repeatEvent`) at the element.
+    void QueueTimingEventTask(const StringAtom &eventType) noexcept;
 
     virtual void UpdateAnimation(float percent, uint32 repeat) noexcept = 0;
 

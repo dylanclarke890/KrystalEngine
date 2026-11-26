@@ -29,6 +29,8 @@ namespace krys::web
   /// required resources have loaded.
   class SVGImageLoader final : public ImageLoader
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGImageLoader);
+
   public:
     explicit SVGImageLoader(SVGImageElement &element) noexcept;
 

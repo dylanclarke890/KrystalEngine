@@ -15,6 +15,7 @@
 #include "Krystal.Web/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Web/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Web/Html/Elements/HTMLMapElement.hpp"
+#include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
@@ -382,6 +383,59 @@ namespace krys::web::tests
     image.Decoding(u8"later");
     CHECK(css::tests::ToNarrow(image.Decoding()) == "auto");
     CHECK(element->GetAttribute(u8"decoding") == u8"later");
+  }
+
+  TEST_CASE("HTMLImageElement: a new source cancels the old image's load event, even once it's queued",
+            "[HTML][HTMLImageElement][html:update-the-image-data]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+    loader.Strategy.Resources[u8"file:///b.jpg"] = img::tests::images::JPEG;
+    loader.Strategy.Defer = true;
+
+    ImageFixture fixture(u8"<img id=img src='file:///a.png'>");
+    auto &image = fixture.Image(u8"img");
+    auto events = LoadEvents::ListenTo(image);
+    auto &eventLoop = html::EventLoop::Current();
+    RunNetworkingTasks();
+    REQUIRE(loader.Strategy.Deferred.size() == 1);
+
+    // Run tasks until the first image is complete, which queues its load event.
+    loader.Strategy.CompleteDeferred();
+    while (!image.Complete() && eventLoop.RunNextTask())
+    {
+    }
+    REQUIRE(image.Complete());
+    REQUIRE(events->Loads == 0);
+
+    // The new source's request starts once the stable state is reached, before the queued task runs.
+    REQUIRE_FALSE(image.SetAttribute(u8"src", u8"file:///b.jpg").HasException());
+    eventLoop.PerformMicrotaskCheckpoint();
+    RunNetworkingTasks();
+    CHECK(events->Loads == 0);
+
+    loader.Strategy.CompleteDeferred();
+    RunNetworkingTasks();
+    CHECK(events->Loads == 1);
+    CHECK(image.CurrentUrl().String() == u8"file:///b.jpg");
+  }
+
+  TEST_CASE("HTMLImageElement: an image nothing else holds still fires its load event",
+            "[HTML][HTMLImageElement][html:update-the-image-data]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.png"] = img::tests::images::PNG;
+
+    ImageFixture fixture(u8"");
+    Ref<LoadEvents> events = CreateRef<LoadEvents>();
+    {
+      auto image = fixture.Document->CreateElement(u8"img").ReleaseValue();
+      image->AddEventListener(u8"load", events, false);
+      REQUIRE_FALSE(image->SetAttribute(u8"src", u8"file:///a.png").HasException());
+    }
+    RunNetworkingTasks();
+    CHECK(events->Loads == 1);
+    CHECK(events->Errors == 0);
   }
 
   TEST_CASE("HTMLImageElement: changing the source loads it", "[HTML][HTMLImageElement]")

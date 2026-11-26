@@ -1099,7 +1099,6 @@ set(KRYSTAL_WEB_DOM_HEADERS
   include/Krystal.Web/Dom/Events/EventListenerHandle.hpp
   include/Krystal.Web/Dom/Events/EventNames.hpp
   include/Krystal.Web/Dom/Events/EventPathItem.hpp
-  include/Krystal.Web/Dom/Events/EventSender.hpp
   include/Krystal.Web/Dom/Events/EventTarget.hpp
   include/Krystal.Web/Dom/Events/EventTargetAlgorithms.hpp
   include/Krystal.Web/Dom/Internals/ElementFactory.hpp

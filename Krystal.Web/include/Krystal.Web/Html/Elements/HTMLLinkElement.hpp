@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Web/Dom/Events/EventSender.hpp"
 #include "Krystal.Web/Dom/Types/USVString.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Loader/Cache/CachedCSSStyleSheet.hpp"
@@ -24,11 +23,6 @@ namespace krys::web::css
 namespace krys::web::style
 {
   class Scope;
-}
-
-namespace krys::web::html
-{
-  using LinkEventSender = dom::EventSender<HTMLLinkElement>;
 }
 
 namespace krys::web
@@ -70,7 +64,6 @@ namespace krys::web
     PendingSheetType _pendingSheetType {PendingSheetType::Unknown};
     bool _loading {false};
     bool _createdByParser {false};
-    bool _loadedResource {false};
     bool _isRenderBlocking {false};
 
   public:
@@ -230,12 +223,6 @@ namespace krys::web
     {
       return _relIsIcon;
     }
-
-    /// @brief Fires the `load` or `error` event that was waiting to be dispatched.
-    void DispatchPendingEvent(html::LinkEventSender *eventSender, const StringAtom &eventType) noexcept;
-
-    /// @brief Dispatches the `load` and `error` events waiting to be dispatched soon, of every link.
-    static void DispatchPendingLoadEvents() noexcept;
 
     void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
                             Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;

@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Web.Tests/Svg/AnimationTestUtils.hpp"
+#include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Svg/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Web/Svg/Elements/SVGAnimationElement.hpp"
@@ -103,6 +104,37 @@ namespace krys::web::svg::tests
     // An empty callback deactivates it.
     animate.SetOnBegin({});
     CHECK_FALSE(animate.OnBegin());
+  }
+
+  TEST_CASE("SVGSMILElement: seeking fires the timing events it passes, in a task", "[SVG][SVGSMILElement]")
+  {
+    AnimationFixture fixture(
+      u8R"html(<svg id=s><rect id=r x=7><animate id=a attributeName=x from=0 to=100 )html"
+      u8R"html(begin=0s dur=1s repeatCount=3 /></rect></svg>)html");
+    auto &svg = fixture.Svg();
+    auto &animate = fixture.ById<SVGAnimationElement>(u8"a");
+
+    List<std::string> records;
+    auto listener = animate.AddEventListener(u8"beginEvent", [&](Event &) { records.push_back("begin"); });
+    auto repeatListener =
+      animate.AddEventListener(u8"repeatEvent", [&](Event &) { records.push_back("repeat"); });
+    auto endListener = animate.AddEventListener(u8"endEvent", [&](Event &) { records.push_back("end"); });
+
+    // The events of starting at 0s go first.
+    html::EventLoop::Current().RunUntilIdle();
+    records.clear();
+
+    // Into the third iteration: it begins, and the second iteration's repeat is the one seeking passes.
+    svg.SetCurrentTime(2.5f);
+    CHECK(records.empty());
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(records == List<std::string> {"begin", "repeat"});
+
+    // Past the end: it ends.
+    records.clear();
+    svg.SetCurrentTime(5);
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(std::ranges::count(records, "end") == 1);
   }
 
   TEST_CASE("SVGSMILElement: intervals", "[SVG][SVGSMILElement]")

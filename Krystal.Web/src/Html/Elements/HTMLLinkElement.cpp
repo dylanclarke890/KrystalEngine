@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLLinkElement.hpp"
-#include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Css/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Web/Css/Parser/ParserContext.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Web/Html/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 #include "Krystal.Web/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Web/Loader/Cache/CachedResourceRequest.hpp"
@@ -59,27 +59,6 @@ namespace krys::web
     };
   };
 
-  namespace
-  {
-    KRYS_NODISCARD html::LinkEventSender &LinkLoadEventSenderSingleton() noexcept
-    {
-      static MainThreadNeverDestroyed<html::LinkEventSender> sharedLoadEventSender;
-      return sharedLoadEventSender;
-    }
-
-    KRYS_NODISCARD const StringAtom &LoadEventName() noexcept
-    {
-      static const StringAtom name {event_names::Load};
-      return name;
-    }
-
-    KRYS_NODISCARD const StringAtom &ErrorEventName() noexcept
-    {
-      static const StringAtom name {event_names::Error};
-      return name;
-    }
-  }
-
   HTMLLinkElement::HTMLLinkElement(Document &document) noexcept
       : HTMLElement(document, html::HTMLElementInterface::Link)
   {
@@ -101,8 +80,6 @@ namespace krys::web
     {
       styleScope->RemoveStyleSheetCandidateNode(*this);
     }
-
-    LinkLoadEventSenderSingleton().CancelEvent(*this);
   }
 
 #pragma region Style sheet loading
@@ -649,24 +626,15 @@ namespace krys::web
     return false;
   }
 
-  void HTMLLinkElement::DispatchPendingLoadEvents() noexcept
-  {
-    LinkLoadEventSenderSingleton().DispatchPendingEvents();
-  }
-
-  void HTMLLinkElement::DispatchPendingEvent(html::LinkEventSender *eventSender,
-                                             const StringAtom &eventType) noexcept
-  {
-    krys_debug_assert(eventSender == &LinkLoadEventSenderSingleton());
-    (void)eventSender;
-    (void)dom::EventDispatcher::FireEvent(eventType, *this);
-  }
-
   void HTMLLinkElement::NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept
   {
-    _loadedResource = !errorOccurred;
-    LinkLoadEventSenderSingleton().DispatchEventSoon(*this,
-                                                     _loadedResource ? LoadEventName() : ErrorEventName());
+    // https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet:process-the-linked-resource
+    // 4b. Fire an event named load at el.
+    // 5. Otherwise, fire an event named error at el.
+    // (In an element task on the networking task source, which the fetch processes its response in.)
+    html::EventLoop::Current().QueueTask(
+      html::TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), success = !errorOccurred]
+      { dom::EventDispatcher::FireEvent(success ? event_names::Load : event_names::Error, *element); });
   }
 
   void HTMLLinkElement::StartLoadingDynamicSheet() noexcept
