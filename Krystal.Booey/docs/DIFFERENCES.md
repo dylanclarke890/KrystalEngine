@@ -363,7 +363,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - DOM timestamps are the host's time since the window's time origin, so they pause and scale with the engine.
 - There's no `requestIdleCallback()`: the host runs its own idle work between frames.
 - There are no text fragments: a URL's `:~:` is part of its fragment like any other text, so `#:~:text=` links don't find, highlight or scroll to text. `::target-text` styles the text the host marks in `Document::FragmentHighlightRegistry()`.
-- `net::Url` has no encoding override, so queries are always UTF-8 percent-encoded. URL lives in Krystal.Net, whose IDNA (`text::DomainToASCII`) uses vcpkg's ICU (Unicode 17), so `Krystal.Net.Tests/tests/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.
+- `net::Url` has no encoding override, so queries are always UTF-8 percent-encoded. URL lives in Krystal.Net, whose IDNA (`text::DomainToASCII`) uses vcpkg's ICU (Unicode 17), so `tests/Krystal.Net.Tests/tests/WPT.cpp` expects the `IdnaTestV2.json` cases with U+32931 and U+32B9A to be valid where the data expects a V7 failure, because Unicode 17 assigned those code points.
 
 ### From Chrome
 

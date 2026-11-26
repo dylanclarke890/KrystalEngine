@@ -33,7 +33,7 @@ target_compile_options(Krystal.Booey.Tests
 )
 
 # The test images Krystal.Image.Tests keeps.
-target_include_directories(Krystal.Booey.Tests PRIVATE "${CMAKE_SOURCE_DIR}/Krystal.Image.Tests/include")
+target_include_directories(Krystal.Booey.Tests PRIVATE "${CMAKE_SOURCE_DIR}/tests/Krystal.Image.Tests/include")
 
 target_compile_definitions(Krystal.Booey.Tests PRIVATE
     KRYS_BOOEY_TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")

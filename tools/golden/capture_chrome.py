@@ -1,8 +1,8 @@
 ﻿"""Captures Chrome's rendering of golden scenes: Render2D's fidelity goldens, or Krystal.UI's page goldens.
 
 Each scene in <golden>/scenes/<name>.html is rendered by headless Chrome at a device pixel ratio of 1, in sRGB,
-with software rasterisation, into <golden>/<name>.chrome.png. The golden directory is Krystal.Gfx.Tests/golden
-unless --golden names another (Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
+with software rasterisation, into <golden>/<name>.chrome.png. The golden directory is tests/Krystal.Gfx.Tests/golden
+unless --golden names another (tests/Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
 the scene's <html data-width="..." data-height="...">, in CSS pixels; a scene with data-device-scale="..." is
 rendered at that device pixel ratio instead, into an image that many times the size.
 
@@ -28,7 +28,7 @@ import sys
 import cdp
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-DEFAULT_GOLDEN = ROOT / "Krystal.Gfx.Tests" / "golden"
+DEFAULT_GOLDEN = ROOT / "tests" / "Krystal.Gfx.Tests" / "golden"
 CHROME_CANDIDATES = [
     pathlib.Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
     pathlib.Path(r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"),
@@ -105,7 +105,7 @@ def capture_input(chrome, golden, scene):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("scenes", nargs="*", help="scene names (default: all)")
-    parser.add_argument("--golden", help="the golden directory (default: Krystal.Gfx.Tests/golden)")
+    parser.add_argument("--golden", help="the golden directory (default: tests/Krystal.Gfx.Tests/golden)")
     parser.add_argument("--chrome", help="the Chrome executable")
     args = parser.parse_args()
 

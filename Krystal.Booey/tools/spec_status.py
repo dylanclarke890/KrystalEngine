@@ -31,7 +31,7 @@ import spec_checklist  # noqa: E402
 
 REPO_ROOT = spec_checklist.REPO_ROOT
 SOURCE_DIRS = ("Krystal.Booey/include", "Krystal.Booey/src", "Krystal.UI/include", "Krystal.UI/src")
-TEST_DIRS = ("Krystal.Booey.Tests", "Krystal.UI.Tests")
+TEST_DIRS = ("tests/Krystal.Booey.Tests", "tests/Krystal.UI.Tests")
 CODE_SUFFIXES = {".hpp", ".cpp", ".h", ".inl"}
 # Anchors can hold parentheses (`hidden-state-(type=hidden)`); Unbalanced() drops a closing one that isn't theirs.
 URL = re.compile(r"https?://[^\s\"'<>()]+#([A-Za-z0-9_.:%=,()-]+)")

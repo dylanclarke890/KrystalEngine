@@ -28,7 +28,7 @@ target_compile_options(Krystal.UI.Tests
 target_include_directories(Krystal.UI.Tests
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/include
+    ${CMAKE_SOURCE_DIR}/tests/Krystal.Gfx.Tests/include
 )
 
 target_compile_definitions(Krystal.UI.Tests
@@ -44,7 +44,7 @@ catch_discover_tests(Krystal.UI.Tests)
 
 target_sources(Krystal.UI.Tests
   PRIVATE
-    ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
+    ${CMAKE_SOURCE_DIR}/tests/Krystal.Gfx.Tests/src/Golden.cpp
 
     tests/Accessibility.cpp
     tests/Benchmark.cpp

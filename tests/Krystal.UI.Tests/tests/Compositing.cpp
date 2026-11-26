@@ -258,7 +258,7 @@ namespace krys::ui::tests
     if (!chrome)
     {
       WARN(
-        "No Chrome golden; run tools/golden/capture_chrome.py compositing --golden Krystal.UI.Tests/golden.");
+        "No Chrome golden; run tools/golden/capture_chrome.py compositing --golden tests/Krystal.UI.Tests/golden.");
       return;
     }
     const auto comparison = CompareImages(actual, *chrome, 24u);
