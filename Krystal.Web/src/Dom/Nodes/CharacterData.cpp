@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Core/Move.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Dom/Mixins/ChildNode.hpp"
 #include "Krystal.Web/Dom/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationObserverAlgorithms.hpp"
@@ -9,6 +10,7 @@
 #include "Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Html/Sanitizer/SetHTMLOptions.hpp"
+#include <algorithm>
 
 namespace krys::web
 {
@@ -180,4 +182,9 @@ namespace krys::web
   }
 
 #pragma endregion
+
+  bool CharacterData::ContainsOnlyASCIIWhitespace() const noexcept
+  {
+    return std::ranges::all_of(_data, [](char8_t c) { return text::IsASCIIWhitespace(c); });
+  }
 }

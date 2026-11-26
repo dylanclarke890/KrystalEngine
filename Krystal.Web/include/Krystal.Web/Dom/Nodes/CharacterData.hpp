@@ -1,11 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Dom/Nodes/Node.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Web/Dom/Types/NodeOrString.hpp"
-#include <algorithm>
 
 namespace krys::web::html
 {
@@ -50,12 +48,6 @@ namespace krys::web
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
     ExceptionOr<void> Data(DOMString data) noexcept;
 
-    /// @brief Whether the data is empty or only ASCII whitespace.
-    KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace() const noexcept
-    {
-      return std::ranges::all_of(_data, [](char8_t c) { return text::IsASCIIWhitespace(c); });
-    }
-
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-length
     KRYS_NODISCARD size_t Length() const noexcept
     {
@@ -79,7 +71,7 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region Node
+#pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     KRYS_NODISCARD Maybe<DOMString> NodeValue() const noexcept final
@@ -205,6 +197,9 @@ namespace krys::web
     KRYS_NODISCARD RefPtr<Element> NextElementSibling() noexcept;
 
 #pragma endregion
+
+    /// @brief Whether the data is empty or only ASCII whitespace.
+    KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace() const noexcept;
   };
 }
 
