@@ -36,9 +36,9 @@ namespace krys::boo
 {
   namespace
   {
-    constexpr EnumSet<dom::LayoutOptions> PathQueryLayoutOptions {
-      dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-      dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
+    constexpr EnumSet<layout::LayoutOptions> PathQueryLayoutOptions {
+      layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+      layout::LayoutOptions::TreatContentVisibilityAutoAsVisible};
   }
 
   SVGPathElement::SVGPathElement(Document &document) noexcept

@@ -42,7 +42,7 @@ namespace krys::boo
 
   class CachedFont;
 
-  namespace dom
+  namespace css
   {
     /// @brief Requests a document's web fonts, and begins loading them soon after something first needs them.
     /// @note Owned by its document.

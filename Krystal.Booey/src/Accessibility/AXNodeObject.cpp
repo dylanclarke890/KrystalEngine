@@ -34,11 +34,10 @@
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
@@ -63,6 +62,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -2018,7 +2018,7 @@ namespace krys::boo
             case dom::CommandType::ShowPopover:
             case dom::CommandType::HidePopover:
             case dom::CommandType::TogglePopover:
-              if (target->GetPopoverState() != dom::PopoverState::None)
+              if (target->GetPopoverState() != html::PopoverState::None)
               {
                 return target;
               }
@@ -3297,8 +3297,8 @@ namespace krys::boo
       }
     };
 
-    // The forming a table algorithm (https://html.spec.whatwg.org/multipage/tables.html#forming-a-table), working out where each
-    // cell is and how far it spans.
+    // The forming a table algorithm (https://html.spec.whatwg.org/multipage/tables.html#forming-a-table),
+    // working out where each cell is and how far it spans.
 
     // Step 1.
     uint32 xWidth = 0;

@@ -37,14 +37,14 @@ namespace krys::boo
   class HTMLElement;
 }
 
-namespace krys::boo::html
-{
-  class CloseWatcher;
-}
-
 namespace krys::boo::dom
 {
   class ToggleEventTask;
+}
+
+namespace krys::boo::html
+{
+  class CloseWatcher;
 
   /// @brief The state of an element's `popover` attribute.
   /// @see https://html.spec.whatwg.org/multipage/popover.html#attr-popover
@@ -93,7 +93,7 @@ namespace krys::boo::dom
     PopoverVisibilityState _visibilityState {PopoverVisibilityState::Hidden};
     PopoverState _openedInPopoverMode {PopoverState::None};
     WeakPtr<Element> _previouslyFocusedElement;
-    RefPtr<ToggleEventTask> _toggleEventTask;
+    RefPtr<dom::ToggleEventTask> _toggleEventTask;
     WeakPtr<HTMLElement> _invoker;
     RefPtr<html::CloseWatcher> _closeWatcher;
     bool _isHidingPopover {false};
@@ -139,7 +139,7 @@ namespace krys::boo::dom
 
     void SetPreviouslyFocusedElement(Element *element) noexcept;
 
-    KRYS_NODISCARD Ref<ToggleEventTask> EnsureToggleEventTask(Element &element) noexcept;
+    KRYS_NODISCARD Ref<dom::ToggleEventTask> EnsureToggleEventTask(Element &element) noexcept;
 
     /// @brief The element that showed the popover (its popover trigger).
     /// @see https://html.spec.whatwg.org/multipage/popover.html#popover-trigger

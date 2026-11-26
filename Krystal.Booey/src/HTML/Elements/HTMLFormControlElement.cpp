@@ -3,12 +3,12 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
 #include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
@@ -231,7 +231,7 @@ namespace krys::boo
     // 7. Return popoverElement.
     RefPtr<boo::Element> element = ResolvedElementForAttribute(u8"popovertarget");
     auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
-    if (popover && popover->GetPopoverState() != dom::PopoverState::None)
+    if (popover && popover->GetPopoverState() != html::PopoverState::None)
     {
       return ShareRefPtr(popover);
     }
@@ -305,7 +305,7 @@ namespace krys::boo
     //    true, true, false, and node.
     if (popover->IsPopoverShowing())
     {
-      (void)popover->HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, this);
+      (void)popover->HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes, false, this);
     }
     // 7. Otherwise:
     // 7a. Let validity be the result of running check popover validity given popover, false, and null. If

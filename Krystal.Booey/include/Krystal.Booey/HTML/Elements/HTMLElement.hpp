@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
@@ -342,7 +342,8 @@ namespace krys::boo
 #pragma endregion
 
     /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
-    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(DOMStringView string) noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
@@ -433,7 +434,8 @@ namespace krys::boo
 
     /// @brief Maps `width` and `height` attributes to `aspect-ratio: auto w / h`, if both are numbers of
     /// pixels.
-    /// @see https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property-(using-dimension-rules)
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/rendering.html#map-to-the-aspect-ratio-property-(using-dimension-rules)
     void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(DOMStringView widthAttribute,
                                                              DOMStringView heightAttribute,
                                                              css::MutableStyleProperties &style) noexcept;
@@ -460,7 +462,8 @@ namespace krys::boo
                               DOMStringView value) noexcept;
 
     /// @brief Maps a legacy color attribute to @p property, if it parses.
-    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
     static void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
                                     DOMStringView attributeValue) noexcept;
 
@@ -485,8 +488,8 @@ namespace krys::boo
     /// returned only if @p throwExceptions.
     /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
     /// @see https://html.spec.whatwg.org/multipage/popover.html#hide-popover-algorithm
-    ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
-                                          dom::FireEvents fireEvents, bool throwExceptions,
+    ExceptionOr<void> HidePopoverInternal(html::FocusPreviousElement focusPreviousElement,
+                                          html::FireEvents fireEvents, bool throwExceptions,
                                           HTMLElement *source) noexcept;
 
     /// @brief The popover commands, for a popover.
@@ -547,7 +550,7 @@ namespace krys::boo
       //    algorithm given removedNode, false, false, false, and null.
       if (GetPopoverData())
       {
-        (void)HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false, nullptr);
+        (void)HidePopoverInternal(html::FocusPreviousElement::No, html::FireEvents::No, false, nullptr);
       }
     }
 

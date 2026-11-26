@@ -3,7 +3,6 @@
 #include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveCollection.hpp"
-#include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
@@ -22,6 +21,7 @@
 #include "Krystal.Booey/HTML/Timers/DocumentTimer.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/Layout/LayoutOptions.hpp"
 #include "Krystal.Booey/Page/RenderingUpdateStep.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
@@ -60,6 +60,7 @@ namespace krys::boo::css
 {
   class CSSFontSelector;
   class ContentVisibilityDocumentState;
+  class DocumentFontLoader;
   class MediaQueryMatcher;
   struct ParserContext;
 
@@ -89,10 +90,14 @@ namespace krys::boo::html
   class LazyLoadImageObserver;
   class RenderBlocking;
   class TreeBuilder;
+  class UserActionElementSet;
 
   struct ParseHTMLUnsafeOptions;
   struct SetHTMLOptions;
 
+  enum class FireEvents : bool;
+  enum class FocusPreviousElement : bool;
+  enum class PopoverState : uint8;
   enum class TaskSource : uint8;
 }
 
@@ -100,16 +105,10 @@ namespace krys::boo::dom
 {
   class DOMImplementation;
   class DocumentAlgorithms;
-  class DocumentFontLoader;
   class LiveRangeUpdater;
   class MutationAlgorithms;
   class NodeAlgorithms;
   class SelectorQuery;
-  class UserActionElementSet;
-
-  enum class FireEvents : bool;
-  enum class FocusPreviousElement : bool;
-  enum class PopoverState : uint8;
 
   /// @brief Various flags used for optimizations in the Document class.
   enum class DocumentFlag : uint16
@@ -331,7 +330,7 @@ namespace krys::boo
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
     Ref<Settings> _settings;
 
-    UniquePtr<dom::UserActionElementSet> _userActionElements;
+    UniquePtr<html::UserActionElementSet> _userActionElements;
     RefPtr<Element> _hoveredElement;
     // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
     RefPtr<Element> _activeElement;
@@ -397,7 +396,7 @@ namespace krys::boo
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
     mutable RefPtr<FontSelector> _fontSelector;
     mutable RefPtr<CachedResourceLoader> _cachedResourceLoader;
-    mutable UniquePtr<dom::DocumentFontLoader> _fontLoader;
+    mutable UniquePtr<css::DocumentFontLoader> _fontLoader;
     UniquePtr<AnimationTimelinesController> _timelinesController;
     UniquePtr<StyleOriginatedTimelinesController> _styleOriginatedTimelinesController;
     RefPtr<DocumentTimeline> _timeline;
@@ -978,7 +977,7 @@ namespace krys::boo
 #pragma region User Action State
 
     /// @brief The elements of the document with user action state: hovered, active or focused.
-    KRYS_NODISCARD dom::UserActionElementSet &UserActionElements() const noexcept
+    KRYS_NODISCARD html::UserActionElementSet &UserActionElements() const noexcept
     {
       return *_userActionElements;
     }
@@ -1316,15 +1315,15 @@ namespace krys::boo
     /// @brief Hides the showing hint popovers above @p endpoint (all of them if it isn't one), then the
     /// showing auto popovers above it (or above the hint stack parent if it's a hint popover).
     /// @see https://html.spec.whatwg.org/#hide-all-popovers-until
-    void HideAllPopoversUntil(HTMLElement *endpoint, dom::FocusPreviousElement focusPreviousElement,
-                              dom::FireEvents fireEvents) noexcept;
+    void HideAllPopoversUntil(HTMLElement *endpoint, html::FocusPreviousElement focusPreviousElement,
+                              html::FireEvents fireEvents) noexcept;
 
     /// @brief Hides the showing popovers of @p stackType (`Auto` or `Hint`) above @p endpoint, newest first,
     /// or all of them if it isn't one.
     /// @see https://html.spec.whatwg.org/multipage/popover.html#hide-popover-stack-until
-    void HidePopoverStackUntil(HTMLElement *endpoint, dom::PopoverState stackType,
-                               dom::FocusPreviousElement focusPreviousElement,
-                               dom::FireEvents fireEvents) noexcept;
+    void HidePopoverStackUntil(HTMLElement *endpoint, html::PopoverState stackType,
+                               html::FocusPreviousElement focusPreviousElement,
+                               html::FireEvents fireEvents) noexcept;
 
     /// @brief The popover a press on @p node is in, or on an invoker of, if it's a showing auto or hint
     /// popover; the higher in the stacks of the two.
@@ -1872,11 +1871,11 @@ namespace krys::boo
 
     /// @brief Updates style, then lays the document out if it needs it; with the options that treat skipped
     /// content as visible, lays out the skipped subtree holding @p context (or every skipped subtree).
-    UpdateLayoutResult UpdateLayout(EnumSet<dom::LayoutOptions> layoutOptions = {},
+    UpdateLayoutResult UpdateLayout(EnumSet<layout::LayoutOptions> layoutOptions = {},
                                     const Element *context = nullptr) noexcept;
 
     /// @brief The same, without waiting for the pending style sheets.
-    UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets(EnumSet<dom::LayoutOptions> layoutOptions = {},
+    UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets(EnumSet<layout::LayoutOptions> layoutOptions = {},
                                                             const Element *context = nullptr) noexcept;
 
     /// @brief The element that scrolls the viewport: the root element, or in quirks mode the body unless it's
@@ -1908,7 +1907,7 @@ namespace krys::boo
     KRYS_NODISCARD css::CSSFontSelector *FontSelectorIfExists() const noexcept;
 
     /// @brief The loader of the document's web fonts, made on first use.
-    KRYS_NODISCARD dom::DocumentFontLoader &GetFontLoader() const noexcept;
+    KRYS_NODISCARD css::DocumentFontLoader &GetFontLoader() const noexcept;
 
     /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
     /// be requested. The file doesn't load until `BeginLoadingFontSoon`.

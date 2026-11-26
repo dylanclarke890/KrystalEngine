@@ -358,6 +358,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/CSSOM/DOMCSSNamespace.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSComputedStyleDeclaration.hpp
   include/Krystal.Booey/CSS/Font/CSSFontSelector.hpp
+  include/Krystal.Booey/CSS/Font/DocumentFontLoader.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSConditionRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSContainerRule.hpp
   include/Krystal.Booey/CSS/CSSOM/CSSCounterStyleRule.hpp
@@ -783,6 +784,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/CSSOM/DOMCSSNamespace.cpp
   src/CSS/CSSOM/CSSComputedStyleDeclaration.cpp
   src/CSS/Font/CSSFontSelector.cpp
+  src/CSS/Font/DocumentFontLoader.cpp
   src/CSS/CSSOM/CSSConditionRule.cpp
   src/CSS/CSSOM/CSSContainerRule.cpp
   src/CSS/CSSOM/CSSCounterStyleRule.cpp
@@ -1136,19 +1138,15 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/UIEvent.hpp
   include/Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp
   include/Krystal.Booey/DOM/Events/WheelEvent.hpp
-  include/Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp
   include/Krystal.Booey/DOM/Internals/ElementFactory.hpp
   include/Krystal.Booey/DOM/Internals/ElementRareData.hpp
   include/Krystal.Booey/DOM/Internals/EventFactory.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserver.hpp
   include/Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp
   include/Krystal.Booey/DOM/Internals/TreeScopeOrderedMap.hpp
-  include/Krystal.Booey/DOM/Internals/LayoutOptions.hpp
   include/Krystal.Booey/DOM/Internals/NodeRareData.hpp
-  include/Krystal.Booey/DOM/Internals/PopoverData.hpp
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
   include/Krystal.Booey/DOM/Internals/SmallNodeList.hpp
-  include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/DOM/Mixins/ChildNode.hpp
   include/Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp
   include/Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp
@@ -1262,16 +1260,13 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Events/TouchEvent.cpp
   src/DOM/Events/TouchList.cpp
   src/DOM/Events/WheelEvent.cpp
-  src/DOM/Internals/DocumentFontLoader.cpp
   src/DOM/Internals/ElementFactory.cpp
   src/DOM/Internals/ElementRareData.cpp
   src/DOM/Internals/IdTargetObserver.cpp
   src/DOM/Internals/IdTargetObserverRegistry.cpp
   src/DOM/Internals/TreeScopeOrderedMap.cpp
   src/DOM/Internals/NodeRareData.cpp
-  src/DOM/Internals/PopoverData.cpp
   src/DOM/Internals/QualifiedNameCache.cpp
-  src/DOM/Internals/UserActionElementSet.cpp
   src/DOM/Mixins/ChildNode.cpp
   src/DOM/Mixins/DocumentOrShadowRoot.cpp
   src/DOM/Mixins/NonDocumentTypeChildNode.cpp
@@ -2005,7 +2000,9 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/InputTypes/WeekInputType.hpp
   include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
   include/Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp
+  include/Krystal.Booey/HTML/Internals/PopoverData.hpp
   include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
+  include/Krystal.Booey/HTML/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/HTML/MicroParsers/Dimensions.hpp
   include/Krystal.Booey/HTML/MicroParsers/MicroParserError.hpp
   include/Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp
@@ -2209,6 +2206,8 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/InputTypes/WeekInputType.cpp
   src/HTML/Internals/HTMLElementFactory.cpp
   src/HTML/Internals/InlineStyleSheetOwner.cpp
+  src/HTML/Internals/PopoverData.cpp
+  src/HTML/Internals/UserActionElementSet.cpp
   src/HTML/MicroParsers/Numbers.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
   src/HTML/Mixins/UrlDecomposition.cpp
@@ -2339,6 +2338,7 @@ set(KRYSTAL_BOOEY_LAYOUT_HEADERS
   include/Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp
   include/Krystal.Booey/Layout/FormattingContexts/Inline/TextOnlySimpleLineBuilder.hpp
   include/Krystal.Booey/Layout/FormattingState.hpp
+  include/Krystal.Booey/Layout/LayoutOptions.hpp
   include/Krystal.Booey/Layout/Integration/Flex/LayoutIntegrationFlexLayout.hpp
   include/Krystal.Booey/Layout/Integration/Grid/LayoutIntegrationGridLayout.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp

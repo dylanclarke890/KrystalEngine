@@ -11,6 +11,7 @@
 #include "Krystal.Booey/CSS/CSSOM/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/CSSOM/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/Font/DocumentFontLoader.hpp"
 #include "Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
@@ -48,10 +49,7 @@
 #include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Events/UIEvent.hpp"
-#include "Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
@@ -103,6 +101,8 @@
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Internals/UserActionElementSet.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
@@ -244,7 +244,7 @@ namespace krys::boo
       : ContainerNode(*this, dom::NodeType::DOCUMENT_NODE, dom::NodeFlag::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _url(net::AboutBlankUrl()), _baseUrl(_url),
         _settings(ShareRef(Settings::Default())),
-        _userActionElements(CreateUnique<dom::UserActionElementSet>()),
+        _userActionElements(CreateUnique<html::UserActionElementSet>()),
         _styleRecalcTimer([this] { std::ignore = ShareRef(*this)->UpdateStyleIfNeeded(); }),
         _intersectionObserversInitialUpdateTimer(
           [this] { ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations}); })
@@ -2720,7 +2720,7 @@ namespace krys::boo
         // 6e. Run hide popovers until given document, ancestor, false, and true.
         if (sameTarget)
         {
-          HideAllPopoversUntil(ancestor.get(), dom::FocusPreviousElement::No, dom::FireEvents::Yes);
+          HideAllPopoversUntil(ancestor.get(), html::FocusPreviousElement::No, html::FireEvents::Yes);
         }
       }
     }
@@ -2828,7 +2828,7 @@ namespace krys::boo
     {
       if (auto *popover = DynamicDowncast<HTMLElement>(element.get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Auto)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Auto)
       {
         popovers.push_back(ShareRef(*popover));
       }
@@ -2843,7 +2843,7 @@ namespace krys::boo
     {
       if (auto *popover = DynamicDowncast<HTMLElement>(element.get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Hint)
       {
         popovers.push_back(ShareRef(*popover));
       }
@@ -2863,7 +2863,7 @@ namespace krys::boo
     {
       if (auto *popover = DynamicDowncast<HTMLElement>(element->get());
           popover && popover->IsPopoverShowing()
-          && popover->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint)
+          && popover->GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Hint)
       {
         return popover;
       }
@@ -2873,8 +2873,8 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/multipage/popover.html#hide-popovers-until
-  void Document::HideAllPopoversUntil(HTMLElement *endpoint, dom::FocusPreviousElement focusPreviousElement,
-                                      dom::FireEvents fireEvents) noexcept
+  void Document::HideAllPopoversUntil(HTMLElement *endpoint, html::FocusPreviousElement focusPreviousElement,
+                                      html::FireEvents fireEvents) noexcept
   {
     // 1. Let endpointIsHint be true if document's showing hint popover list contains endpoint; otherwise
     //    false.
@@ -2885,7 +2885,7 @@ namespace krys::boo
            != hintPopovers.end();
 
     // 2. Run hide popover stack until given document, endpoint, Hint, focusPreviousElement, and fireEvents.
-    HidePopoverStackUntil(endpoint, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
+    HidePopoverStackUntil(endpoint, html::PopoverState::Hint, focusPreviousElement, fireEvents);
 
     // 3. Let autoEndpoint be endpoint.
     RefPtr<HTMLElement> autoEndpoint = ShareRefPtr(endpoint);
@@ -2896,19 +2896,19 @@ namespace krys::boo
     }
     // 5. Run hide popover stack until given document, autoEndpoint, Auto, focusPreviousElement, and
     //    fireEvents.
-    HidePopoverStackUntil(autoEndpoint.get(), dom::PopoverState::Auto, focusPreviousElement, fireEvents);
+    HidePopoverStackUntil(autoEndpoint.get(), html::PopoverState::Auto, focusPreviousElement, fireEvents);
   }
 
   // https://html.spec.whatwg.org/multipage/popover.html#hide-popover-stack-until
-  void Document::HidePopoverStackUntil(HTMLElement *endpoint, dom::PopoverState stackType,
-                                       dom::FocusPreviousElement focusPreviousElement,
-                                       dom::FireEvents fireEvents) noexcept
+  void Document::HidePopoverStackUntil(HTMLElement *endpoint, html::PopoverState stackType,
+                                       html::FocusPreviousElement focusPreviousElement,
+                                       html::FireEvents fireEvents) noexcept
   {
-    krys_debug_assert(stackType == dom::PopoverState::Auto || stackType == dom::PopoverState::Hint);
+    krys_debug_assert(stackType == html::PopoverState::Auto || stackType == html::PopoverState::Hint);
     // 1. Let popoverList be document's showing auto popover list if stackType is Auto; otherwise document's
     //    showing hint popover list.
     auto popoverList =
-      stackType == dom::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
+      stackType == html::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
 
     // 2. Let lastHideIndex be 0 if popoverList does not contain endpoint; otherwise the index of endpoint in
     //    popoverList plus 1.
@@ -2931,7 +2931,7 @@ namespace krys::boo
     //    document's showing hint popover list.
     // 7. Let toCheck be newPopoverList in reverse order.
     auto newPopoverList =
-      stackType == dom::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
+      stackType == html::PopoverState::Auto ? ShowingAutoPopoverList() : ShowingHintPopoverList();
     // 8. For each popover of toCheck:
     for (auto popover = newPopoverList.rbegin(); popover != newPopoverList.rend(); ++popover)
     {
@@ -2941,7 +2941,7 @@ namespace krys::boo
         continue;
       }
       // 8b. Run the hide popover algorithm given popover, focusPreviousElement, false, false, and null.
-      (void)(*popover)->HidePopoverInternal(focusPreviousElement, dom::FireEvents::No, false, nullptr);
+      (void)(*popover)->HidePopoverInternal(focusPreviousElement, html::FireEvents::No, false, nullptr);
     }
   }
 
@@ -3004,7 +3004,7 @@ namespace krys::boo
       }
       // 8. If target's popover attribute is in the No Popover state, then return null.
       auto *popover = DynamicDowncast<HTMLElement>(*target);
-      if (!popover || popover->GetPopoverState() == dom::PopoverState::None)
+      if (!popover || popover->GetPopoverState() == html::PopoverState::None)
       {
         return nullptr;
       }
@@ -3040,7 +3040,7 @@ namespace krys::boo
       // If currentNode's opened in popover mode is "auto" or "hint", and currentNode's popover visibility
       // state is showing, then return currentNode.
       if (!clickedPopover && htmlElement->IsPopoverShowing()
-          && htmlElement->GetPopoverData()->OpenedInPopoverMode() != dom::PopoverState::None)
+          && htmlElement->GetPopoverData()->OpenedInPopoverMode() != html::PopoverState::None)
       {
         clickedPopover = htmlElement;
       }
@@ -3057,8 +3057,8 @@ namespace krys::boo
       {
         auto popover = TargetPopover(*htmlElement);
         if (popover && popover->IsPopoverShowing()
-            && (popover->GetPopoverState() == dom::PopoverState::Auto
-                || popover->GetPopoverState() == dom::PopoverState::Hint))
+            && (popover->GetPopoverState() == html::PopoverState::Auto
+                || popover->GetPopoverState() == html::PopoverState::Hint))
         {
           targetPopover = krys::move(popover);
         }
@@ -4327,10 +4327,10 @@ namespace krys::boo
   }
 
   Document::UpdateLayoutResult
-    Document::UpdateLayoutIgnorePendingStylesheets(EnumSet<dom::LayoutOptions> layoutOptions,
+    Document::UpdateLayoutIgnorePendingStylesheets(EnumSet<layout::LayoutOptions> layoutOptions,
                                                    const Element *context) noexcept
   {
-    layoutOptions.Add(dom::LayoutOptions::IgnorePendingStylesheets);
+    layoutOptions.Add(layout::LayoutOptions::IgnorePendingStylesheets);
     return UpdateLayout(layoutOptions, context);
   }
 
@@ -4359,13 +4359,13 @@ namespace krys::boo
     }
   }
 
-  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<dom::LayoutOptions> layoutOptions,
+  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<layout::LayoutOptions> layoutOptions,
                                                       const Element *context) noexcept
   {
     bool oldIgnore = _ignorePendingStylesheets;
     auto restoreIgnorePendingStylesheets = MakeScopeExit([&] { _ignorePendingStylesheets = oldIgnore; });
 
-    if (layoutOptions.contains(dom::LayoutOptions::IgnorePendingStylesheets))
+    if (layoutOptions.contains(layout::LayoutOptions::IgnorePendingStylesheets))
     {
       if (!HaveStylesheetsLoaded())
       {
@@ -4407,9 +4407,9 @@ namespace krys::boo
       auto &layoutContext = frameView->LayoutContext();
       auto runForcedLayoutOnSkippedContentIfNeeded = [&]
       {
-        if (!layoutOptions.ContainsAny({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                        dom::LayoutOptions::TreatContentVisibilityAutoAsVisible,
-                                        dom::LayoutOptions::TreatRevealedWhenFoundAsVisible}))
+        if (!layoutOptions.ContainsAny({layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                        layout::LayoutOptions::TreatContentVisibilityAutoAsVisible,
+                                        layout::LayoutOptions::TreatRevealedWhenFoundAsVisible}))
         {
           return false;
         }
@@ -4442,22 +4442,22 @@ namespace krys::boo
         };
 
         auto isSkippedContentStale = markRendererDirtyIfNeeded(*rootForLayout);
-        if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+        if (layoutOptions.contains(layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
           }
         }
-        else if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
-                 || layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+        else if (layoutOptions.contains(layout::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+                 || layoutOptions.contains(layout::LayoutOptions::TreatRevealedWhenFoundAsVisible))
         {
           for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
           {
             auto shouldLayoutSkippedContent =
-              (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible)
+              (layoutOptions.contains(layout::LayoutOptions::TreatContentVisibilityAutoAsVisible)
                && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
-              || (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible)
+              || (layoutOptions.contains(layout::LayoutOptions::TreatRevealedWhenFoundAsVisible)
                   && descendant.Style().AutoRevealsWhenFound());
 
             if (shouldLayoutSkippedContent)
@@ -4476,15 +4476,15 @@ namespace krys::boo
         {
           auto types = EnumSet<ContentVisibilityOverrideScope::OverrideType> {};
 
-          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+          if (layoutOptions.contains(layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Hidden);
           }
-          if (layoutOptions.contains(dom::LayoutOptions::TreatContentVisibilityAutoAsVisible))
+          if (layoutOptions.contains(layout::LayoutOptions::TreatContentVisibilityAutoAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::Auto);
           }
-          if (layoutOptions.contains(dom::LayoutOptions::TreatRevealedWhenFoundAsVisible))
+          if (layoutOptions.contains(layout::LayoutOptions::TreatRevealedWhenFoundAsVisible))
           {
             types.Add(ContentVisibilityOverrideScope::OverrideType::RevealedWhenFound);
           }
@@ -4504,7 +4504,7 @@ namespace krys::boo
 
       result = didRunLayout ? UpdateLayoutResult::ChangesDone : result;
 
-      if (layoutOptions.contains(dom::LayoutOptions::UpdateCompositingLayers)
+      if (layoutOptions.contains(layout::LayoutOptions::UpdateCompositingLayers)
           && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
       {
         result = UpdateLayoutResult::ChangesDone;
@@ -4519,12 +4519,12 @@ namespace krys::boo
     return static_cast<css::CSSFontSelector *>(_fontSelector.get());
   }
 
-  dom::DocumentFontLoader &Document::GetFontLoader() const noexcept
+  css::DocumentFontLoader &Document::GetFontLoader() const noexcept
   {
     if (!_fontLoader)
     {
       _fontLoader =
-        UniquePtr<dom::DocumentFontLoader>(new dom::DocumentFontLoader(const_cast<Document &>(*this)));
+        UniquePtr<css::DocumentFontLoader>(new css::DocumentFontLoader(const_cast<Document &>(*this)));
       // A loader made while the document is suspended waits for it to resume too.
       if (_isSuspended)
       {

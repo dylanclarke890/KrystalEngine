@@ -47,9 +47,9 @@ namespace krys::boo
              || Is<SVGForeignObjectElement>(*element) || Is<SVGImageElement>(*element);
     }
 
-    constexpr EnumSet<dom::LayoutOptions> LayoutOptionsForQueries {
-      dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-      dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
+    constexpr EnumSet<layout::LayoutOptions> LayoutOptionsForQueries {
+      layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+      layout::LayoutOptions::TreatContentVisibilityAutoAsVisible};
   }
 
   SVGElement *SVGLocatable::NearestViewportElement(const SVGElement *element) noexcept

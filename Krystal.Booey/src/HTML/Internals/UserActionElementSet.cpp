@@ -25,10 +25,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+#include "Krystal.Booey/HTML/Internals/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
   void UserActionElementSet::Clear() noexcept
   {

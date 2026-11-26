@@ -680,6 +680,7 @@ namespace krys::boo
   {
     // Hide the popovers above the topmost popover the dialog is in, or all of them.
     RefPtr<HTMLElement> hideUntil = TopmostPopoverAncestor(nullptr, false);
-    NodeDocument().HideAllPopoversUntil(hideUntil.get(), dom::FocusPreviousElement::No, dom::FireEvents::Yes);
+    NodeDocument().HideAllPopoversUntil(hideUntil.get(), html::FocusPreviousElement::No,
+                                        html::FireEvents::Yes);
   }
 }

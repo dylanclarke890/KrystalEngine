@@ -1288,7 +1288,7 @@ namespace krys::boo
       return a && b && DeprecatedEnclosingBlockFlowElement(a) == DeprecatedEnclosingBlockFlowElement(b);
     }
 
-    KRYS_NODISCARD bool IsHTMLBRElement(const Node &node) noexcept
+    KRYS_NODISCARD bool IsBRNode(const Node &node) noexcept
     {
       auto *element = DynamicDowncast<HTMLElement>(node);
       return element && Is<HTMLBRElement>(*element);
@@ -1324,7 +1324,7 @@ namespace krys::boo
 
     if (node == positionNode)
     {
-      if (IsHTMLBRElement(*node))
+      if (IsBRNode(*node))
       {
         return false;
       }
@@ -1340,12 +1340,12 @@ namespace krys::boo
       }
     }
 
-    if (IsHTMLBRElement(*node) && position.IsCandidate())
+    if (IsBRNode(*node) && position.IsCandidate())
     {
       return true;
     }
 
-    if (IsHTMLBRElement(*positionNode) && IsCandidate())
+    if (IsBRNode(*positionNode) && IsCandidate())
     {
       return true;
     }
@@ -1417,7 +1417,7 @@ namespace krys::boo
       return {};
     }
 
-    if (IsHTMLBRElement(*Upstream().DeprecatedNode()))
+    if (IsBRNode(*Upstream().DeprecatedNode()))
     {
       return {};
     }

@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Booey/CSS/TypedOM/StylePropertyMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMStringMap.hpp"
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
-#include "Krystal.Booey/CSS/ResizeObserver/ResizeObserver.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomStateSet.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
+#include "Krystal.Booey/IntersectionObserver/IntersectionObserver.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 namespace krys::boo::dom
@@ -68,7 +68,7 @@ namespace krys::boo::dom
     _customStateSet = krys::move(customStateSet);
   }
 
-  void ElementRareData::SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept
+  void ElementRareData::SetPopoverData(UniquePtr<html::PopoverData> &&popoverData) noexcept
   {
     _popoverData = krys::move(popoverData);
   }

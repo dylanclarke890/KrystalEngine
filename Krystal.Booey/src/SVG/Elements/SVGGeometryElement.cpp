@@ -33,9 +33,9 @@ namespace krys::boo
 {
   namespace
   {
-    constexpr EnumSet<dom::LayoutOptions> GeometryQueryLayoutOptions {
-      dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-      dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
+    constexpr EnumSet<layout::LayoutOptions> GeometryQueryLayoutOptions {
+      layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+      layout::LayoutOptions::TreatContentVisibilityAutoAsVisible};
 
     // The number at the start of the string, after any whitespace, or 0 if there isn't one.
     KRYS_NODISCARD float ToFloat(DOMStringView string) noexcept

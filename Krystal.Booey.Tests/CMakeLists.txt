@@ -420,7 +420,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Internals/EventFactory.cpp
   tests/DOM/Internals/QualifiedNameCache.cpp
   tests/DOM/Internals/TreeScopeOrderedMap.cpp
-  tests/DOM/Internals/UserActionElementSet.cpp
   tests/DOM/Mixins/ChildNode.cpp
   tests/DOM/Mixins/DocumentOrShadowRoot.cpp
   tests/DOM/Mixins/NonDocumentTypeChildNode.cpp
@@ -610,6 +609,7 @@ set(KRYSTAL_BOOEY_TESTS_HTML_SOURCES
   tests/HTML/InputTypes/NumberInputType.cpp
   tests/HTML/InputTypes/RadioInputType.cpp
   tests/HTML/Internals/PresentationalHints.cpp
+  tests/HTML/Internals/UserActionElementSet.cpp
   tests/HTML/MicroParsers/Dimensions.cpp
   tests/HTML/MicroParsers/Numbers.cpp
   tests/HTML/Mixins/UrlDecomposition.cpp

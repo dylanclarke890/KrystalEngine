@@ -24,10 +24,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
   PopoverData::~PopoverData() noexcept = default;
 
@@ -36,11 +36,11 @@ namespace krys::boo::dom
     _closeWatcher = krys::move(closeWatcher);
   }
 
-  Ref<ToggleEventTask> PopoverData::EnsureToggleEventTask(Element &element) noexcept
+  Ref<dom::ToggleEventTask> PopoverData::EnsureToggleEventTask(Element &element) noexcept
   {
     if (!_toggleEventTask)
     {
-      _toggleEventTask = ToggleEventTask::Create(element);
+      _toggleEventTask = dom::ToggleEventTask::Create(element);
     }
     return ShareRef(*_toggleEventTask);
   }

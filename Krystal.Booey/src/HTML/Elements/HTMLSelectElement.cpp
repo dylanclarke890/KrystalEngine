@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
@@ -7,8 +8,6 @@
 #include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -26,6 +25,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Forms/Autofill.hpp"
 #include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
@@ -139,7 +139,7 @@ namespace krys::boo
     auto selectPopover = CreateRef<SelectPopoverElement>(document);
     selectPopover->SetUserAgentPart(css::user_agent_parts::InternalSelectPicker());
     // As an auto popover but without the attribute, whose styles would reach the options of a native select.
-    selectPopover->EnsurePopoverData().SetPopoverState(dom::PopoverState::Auto);
+    selectPopover->EnsurePopoverData().SetPopoverState(html::PopoverState::Auto);
     _selectPopover = CreateWeakPtr<HTMLElement>(selectPopover.get());
     auto selectPopoverSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     _selectPopoverSlot = CreateWeakPtr(selectPopoverSlot.get());
@@ -194,7 +194,7 @@ namespace krys::boo
     _contentsUseBaseAppearance = value;
     if (!value && IsPickerOpen())
     {
-      (void)_selectPopover->HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false,
+      (void)_selectPopover->HidePopoverInternal(html::FocusPreviousElement::No, html::FireEvents::No, false,
                                                 nullptr);
     }
     return true;
@@ -267,7 +267,7 @@ namespace krys::boo
     {
       return;
     }
-    (void)_selectPopover->HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::Yes, false,
+    (void)_selectPopover->HidePopoverInternal(html::FocusPreviousElement::No, html::FireEvents::Yes, false,
                                               nullptr);
     // The options are this element's children, so the popover doesn't see that the focus was inside it.
     auto *focused = NodeDocument().FocusedElement();

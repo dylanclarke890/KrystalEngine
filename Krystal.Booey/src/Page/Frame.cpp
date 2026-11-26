@@ -302,7 +302,8 @@ namespace krys::boo
     {
       if (frameView && frameView->GetScrollPosition() != origin)
       {
-        (void)document->UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::UpdateCompositingLayers});
+        (void)document->UpdateLayoutIgnorePendingStylesheets(
+          {layout::LayoutOptions::UpdateCompositingLayers});
       }
     }
     else
@@ -436,7 +437,7 @@ namespace krys::boo
     // An update asked for during one (from an animation frame callback, say) only brings layout up to date.
     if (_renderingUpdateDepth)
     {
-      LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
+      LayoutIfNeeded({layout::LayoutOptions::UpdateCompositingLayers});
       return;
     }
 
@@ -544,7 +545,7 @@ namespace krys::boo
                         }
                       });
 
-    LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
+    LayoutIfNeeded({layout::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();
 
     RunProcessingStep(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
@@ -623,7 +624,7 @@ namespace krys::boo
     }
   }
 
-  void Frame::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
+  void Frame::LayoutIfNeeded(EnumSet<layout::LayoutOptions> layoutOptions) noexcept
   {
     if (RefPtr<boo::Document> document = _document; document && _view)
     {

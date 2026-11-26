@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Layout/LayoutOptions.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
@@ -393,7 +393,7 @@ namespace krys::boo
     void UpdateRendering() noexcept;
 
     /// @brief Brings the style and layout of the frame's document up to date.
-    void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
+    void LayoutIfNeeded(EnumSet<layout::LayoutOptions> layoutOptions = {}) noexcept;
 
     /// @brief Restyles every frame's document (UpdateStyleAfterChangeInEnvironment), after a change in the
     /// environment they all share, such as the theme's colours.

@@ -18,7 +18,6 @@
 #include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
@@ -42,6 +41,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -821,7 +821,7 @@ namespace krys::boo
   // null.
   ExceptionOr<void> HTMLElement::HidePopover() noexcept
   {
-    return HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
+    return HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes, true, nullptr);
   }
 
   // https://html.spec.whatwg.org/multipage/popover.html#dom-togglepopover
@@ -849,7 +849,7 @@ namespace krys::boo
     if (IsPopoverShowing() && !force.value_or(false))
     {
       if (auto result =
-            HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
+            HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes, true, nullptr);
           result.HasException())
       {
         return result.ReleaseException();
@@ -1024,7 +1024,7 @@ namespace krys::boo
     auto effectiveType = originalType;
     RefPtr<HTMLElement> ancestor;
     // 15. If originalType is Auto or Hint:
-    if (originalType == dom::PopoverState::Auto || originalType == dom::PopoverState::Hint)
+    if (originalType == html::PopoverState::Auto || originalType == html::PopoverState::Hint)
     {
       // 15a. Let ancestor be the result of running the topmost popover ancestor algorithm given element,
       //      source, and true.
@@ -1032,21 +1032,21 @@ namespace krys::boo
 
       // 15b. If all of the following are true: ancestor is not null; ancestor's opened in popover mode is
       //      "hint"; and effectiveType is the Auto state, then set effectiveType to the Hint state.
-      if (ancestor && ancestor->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint
-          && effectiveType == dom::PopoverState::Auto)
+      if (ancestor && ancestor->GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Hint
+          && effectiveType == html::PopoverState::Auto)
       {
-        effectiveType = dom::PopoverState::Hint;
+        effectiveType = html::PopoverState::Hint;
       }
 
       // 15c. Run hide popover stack until given document, ancestor, Hint, shouldRestoreFocus, and true.
-      document->HidePopoverStackUntil(ancestor.get(), dom::PopoverState::Hint, dom::FocusPreviousElement::No,
-                                      dom::FireEvents::Yes);
+      document->HidePopoverStackUntil(ancestor.get(), html::PopoverState::Hint,
+                                      html::FocusPreviousElement::No, html::FireEvents::Yes);
       // 15d. If effectiveType is the Auto state, then run hide popover stack until given document, ancestor,
       //      Auto, shouldRestoreFocus, and true.
-      if (effectiveType == dom::PopoverState::Auto)
+      if (effectiveType == html::PopoverState::Auto)
       {
-        document->HidePopoverStackUntil(ancestor.get(), dom::PopoverState::Auto,
-                                        dom::FocusPreviousElement::No, dom::FireEvents::Yes);
+        document->HidePopoverStackUntil(ancestor.get(), html::PopoverState::Auto,
+                                        html::FocusPreviousElement::No, html::FireEvents::Yes);
       }
 
       // 15e. If originalType is not equal to the value of element's popover attribute: run
@@ -1096,8 +1096,8 @@ namespace krys::boo
           {
             if (RefPtr<HTMLElement> popover = weakThis.lock())
             {
-              (void)popover->HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false,
-                                                 nullptr);
+              (void)popover->HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes,
+                                                 false, nullptr);
             }
           },
           [] { return true; }));
@@ -1114,8 +1114,8 @@ namespace krys::boo
 
     // 19. If effectiveType is Hint and ancestor's opened in popover mode is "auto", then set document's hint
     //     stack parent to ancestor.
-    if (effectiveType == dom::PopoverState::Hint && ancestor
-        && ancestor->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Auto)
+    if (effectiveType == html::PopoverState::Hint && ancestor
+        && ancestor->GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Auto)
     {
       document->SetHintStackParent(ancestor.get());
     }
@@ -1124,7 +1124,7 @@ namespace krys::boo
     {
       style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::PopoverOpen,
                                                              true);
-      GetPopoverData()->SetVisibilityState(dom::PopoverVisibilityState::Showing);
+      GetPopoverData()->SetVisibilityState(html::PopoverVisibilityState::Showing);
     }
 
     // 21. Set element's popover trigger to source.
@@ -1158,8 +1158,8 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/multipage/popover.html#hide-popover-algorithm
-  ExceptionOr<void> HTMLElement::HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
-                                                     dom::FireEvents fireEvents, bool throwExceptions,
+  ExceptionOr<void> HTMLElement::HidePopoverInternal(html::FocusPreviousElement focusPreviousElement,
+                                                     html::FireEvents fireEvents, bool throwExceptions,
                                                      HTMLElement *source) noexcept
   {
     // 1. Let validityResult be the result of running check popover validity given element, true, and null.
@@ -1182,7 +1182,7 @@ namespace krys::boo
     // 6. If nestedHide is true, then set fireEvents to false.
     if (nestedHide)
     {
-      fireEvents = dom::FireEvents::No;
+      fireEvents = html::FireEvents::No;
     }
     // 7. Increment document's hiding popover nesting count.
     document->IncrementHidingPopoverNestingCount();
@@ -1207,25 +1207,25 @@ namespace krys::boo
 
     // 11. If element's opened in popover mode is "auto" or "hint":
     if (auto mode = GetPopoverData()->OpenedInPopoverMode();
-        mode == dom::PopoverState::Auto || mode == dom::PopoverState::Hint)
+        mode == html::PopoverState::Auto || mode == html::PopoverState::Hint)
     {
       // 11a. If hintPopoverListContainsElement is true, then run hide popover stack until given document,
       //      element, Hint, focusPreviousElement, and fireEvents.
       if (hintPopoverListContainsElement)
       {
-        document->HidePopoverStackUntil(this, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
+        document->HidePopoverStackUntil(this, html::PopoverState::Hint, focusPreviousElement, fireEvents);
       }
       // 11b. If element is document's hint stack parent, then run hide popover stack until given document,
       //      null, Hint, focusPreviousElement, and fireEvents.
       if (this == document->HintStackParent())
       {
-        document->HidePopoverStackUntil(nullptr, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
+        document->HidePopoverStackUntil(nullptr, html::PopoverState::Hint, focusPreviousElement, fireEvents);
       }
       // 11c. If autoPopoverListContainsElement is true, then run hide popover stack until given document,
       //      element, Auto, focusPreviousElement, and fireEvents.
       if (autoPopoverListContainsElement)
       {
-        document->HidePopoverStackUntil(this, dom::PopoverState::Auto, focusPreviousElement, fireEvents);
+        document->HidePopoverStackUntil(this, html::PopoverState::Auto, focusPreviousElement, fireEvents);
       }
 
       // 11d. Set validityResult to the result of running check popover validity given element, true, and
@@ -1241,7 +1241,7 @@ namespace krys::boo
     }
 
     // 12. If fireEvents is true:
-    if (fireEvents == dom::FireEvents::Yes)
+    if (fireEvents == html::FireEvents::Yes)
     {
       // 12a. Fire an event named beforetoggle, using ToggleEvent, with the oldState attribute initialized to
       //      "open", the newState attribute initialized to "closed", and the source attribute set to source
@@ -1273,7 +1273,7 @@ namespace krys::boo
     // 14. Set element's popover trigger to null.
     SetInvoker(nullptr);
     // 15. Set element's opened in popover mode to null.
-    GetPopoverData()->SetOpenedInPopoverMode(dom::PopoverState::None);
+    GetPopoverData()->SetOpenedInPopoverMode(html::PopoverState::None);
     // 16. Set element's popover visibility state to hidden.
     {
       Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
@@ -1281,7 +1281,7 @@ namespace krys::boo
       {
         styleInvalidation.emplace(*this, css::SelectorPseudoClass::PopoverOpen, false);
       }
-      GetPopoverData()->SetVisibilityState(dom::PopoverVisibilityState::Hidden);
+      GetPopoverData()->SetVisibilityState(html::PopoverVisibilityState::Hidden);
     }
 
     // 17. If element is document's hint stack parent, or document's showing hint popover list is empty, then
@@ -1293,7 +1293,7 @@ namespace krys::boo
 
     // 18. If fireEvents is true, then queue a popover toggle event task given element, "open", "closed", and
     //     source.
-    if (fireEvents == dom::FireEvents::Yes)
+    if (fireEvents == html::FireEvents::Yes)
     {
       QueuePopoverToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
     }
@@ -1308,7 +1308,7 @@ namespace krys::boo
       //      previouslyFocusedElement; the viewport should not be scrolled by doing this step.
       GetPopoverData()->SetPreviouslyFocusedElement(nullptr);
       auto *focusedElement = document->FocusedElement();
-      if (focusPreviousElement == dom::FocusPreviousElement::Yes && focusedElement
+      if (focusPreviousElement == html::FocusPreviousElement::Yes && focusedElement
           && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*focusedElement, *this))
       {
         html::FocusAlgorithms::FocusingSteps(*previouslyFocusedElement, nullptr, {.PreventScroll = true});
@@ -1344,7 +1344,7 @@ namespace krys::boo
   {
     // 1. If element's popover attribute is in the No Popover state, then throw a "NotSupportedError"
     //    DOMException.
-    if (GetPopoverState() == dom::PopoverState::None)
+    if (GetPopoverState() == html::PopoverState::None)
     {
       return Exception {ExceptionCode::NotSupportedError, u8"Element does not have the popover attribute."};
     }
@@ -1447,7 +1447,7 @@ namespace krys::boo
 
   bool HTMLElement::HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept
   {
-    if (GetPopoverState() == dom::PopoverState::None)
+    if (GetPopoverState() == html::PopoverState::None)
     {
       return false;
     }
@@ -1458,7 +1458,7 @@ namespace krys::boo
         command == dom::CommandType::TogglePopover || command == dom::CommandType::HidePopover;
       if (shouldHide)
       {
-        (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, &invoker);
+        (void)HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes, false, &invoker);
         return true;
       }
     }
@@ -1532,12 +1532,12 @@ namespace krys::boo
     // again.
     if (IsPopoverShowing())
     {
-      (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
+      (void)HidePopoverInternal(html::FocusPreviousElement::Yes, html::FireEvents::Yes, false, nullptr);
       newPopoverState =
         html::EnumeratedAttribute<"popover", HTMLElement>::ResolveState(GetAttribute(u8"popover"));
     }
 
-    if (newPopoverState == dom::PopoverState::None)
+    if (newPopoverState == html::PopoverState::None)
     {
       if (auto *popoverData = GetPopoverData())
       {

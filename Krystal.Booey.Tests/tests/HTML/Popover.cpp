@@ -5,7 +5,6 @@
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -14,6 +13,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
@@ -99,13 +99,13 @@ namespace krys::boo::html::tests
       CHECK(NarrowOrNull(popover.Popover()) == "auto");
       popover.Popover(u8"HINT");
       CHECK(NarrowOrNull(popover.Popover()) == "hint");
-      CHECK(popover.GetPopoverState() == dom::PopoverState::Hint);
+      CHECK(popover.GetPopoverState() == html::PopoverState::Hint);
       popover.Popover(u8"nope");
       CHECK(NarrowOrNull(popover.Popover()) == "manual");
-      CHECK(popover.GetPopoverState() == dom::PopoverState::Manual);
+      CHECK(popover.GetPopoverState() == html::PopoverState::Manual);
       popover.Popover(null);
       CHECK_FALSE(popover.HasAttribute(u8"popover"));
-      CHECK(popover.GetPopoverState() == dom::PopoverState::None);
+      CHECK(popover.GetPopoverState() == html::PopoverState::None);
       CHECK_FALSE(popover.GetPopoverData());
       popover.Popover(u8"auto");
     }
@@ -178,7 +178,7 @@ namespace krys::boo::html::tests
     {
       popover.Popover(u8"manual");
       CHECK_FALSE(popover.IsPopoverShowing());
-      CHECK(popover.GetPopoverState() == dom::PopoverState::Manual);
+      CHECK(popover.GetPopoverState() == html::PopoverState::Manual);
       CHECK(log.Take() == List<std::string> {"p:beforetoggle:open>closed", "p:toggle:open>closed"});
 
       REQUIRE_FALSE(popover.ShowPopover().HasException());
@@ -281,7 +281,7 @@ namespace krys::boo::html::tests
       CHECK(a.IsPopoverShowing());
       CHECK(b.IsPopoverShowing());
       CHECK(document.TopmostAutoOrHintPopover() == &h);
-      CHECK(h.GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint);
+      CHECK(h.GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Hint);
       CHECK_FALSE(document.HintStackParent());
 
       // A hint popover hides the other hint popovers.
@@ -301,7 +301,7 @@ namespace krys::boo::html::tests
 
       // An auto popover opened from a hint popover is downgraded to a hint popover.
       REQUIRE_FALSE(c.ShowPopover({.Source = ShareRefPtr(&h)}).HasException());
-      CHECK(c.GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint);
+      CHECK(c.GetPopoverData()->OpenedInPopoverMode() == html::PopoverState::Hint);
       CHECK(h.IsPopoverShowing());
       CHECK(b.IsPopoverShowing());
 

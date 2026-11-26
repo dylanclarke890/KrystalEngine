@@ -32,8 +32,8 @@ namespace krys::boo::html
       if (element.IsConnected())
       {
         (void)element.NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-          {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-           dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+          {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+           layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
           &element);
       }
 

@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Enum.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::layout
 {
   /// @brief What a document's layout update does besides laying it out.
   // FIXME: The other layout options (running post-layout tasks synchronously, not laying out ancestor

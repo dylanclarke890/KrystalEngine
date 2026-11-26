@@ -59,10 +59,13 @@ namespace krys::boo::html
   class CustomElementRegistry;
   class CustomStateSet;
   class OpenElementStack;
+  class PopoverData;
   class TreeBuilder;
 
   struct SetHTMLOptions;
   struct SetHTMLUnsafeOptions;
+
+  enum class PopoverState : uint8;
 }
 
 namespace krys::boo::xml
@@ -79,14 +82,11 @@ namespace krys::boo::dom
   class ExtensibilityHooks;
   class NamedNodeMap;
   class NodeAlgorithms;
-  class PopoverData;
   class SlotAlgorithms;
   class TreeQueries;
 
   struct GetHTMLOptions;
   struct ShadowRootInit;
-
-  enum class PopoverState : uint8;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
   enum class CustomElementState : uint8
@@ -1649,10 +1649,10 @@ namespace krys::boo
 #pragma region Popovers
 
     /// @brief The element's popover state, if it has a `popover` attribute.
-    KRYS_NODISCARD dom::PopoverData *GetPopoverData() const noexcept;
+    KRYS_NODISCARD html::PopoverData *GetPopoverData() const noexcept;
 
     /// @brief Creates or drops the popover state, as the `popover` attribute comes or goes.
-    dom::PopoverData &EnsurePopoverData() noexcept;
+    html::PopoverData &EnsurePopoverData() noexcept;
 
     void ClearPopoverData() noexcept;
 
@@ -1661,7 +1661,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsPopoverShowing() const noexcept;
 
     /// @brief The state of the element's `popover` attribute.
-    KRYS_NODISCARD dom::PopoverState GetPopoverState() const noexcept;
+    KRYS_NODISCARD html::PopoverState GetPopoverState() const noexcept;
 
     /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
+﻿#include "Krystal.Booey/HTML/Internals/UserActionElementSet.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-namespace krys::boo::dom::tests
+namespace krys::boo::html::tests
 {
   using style::tests::ResolverFixture;
   using Type = HitTestRequest::Type;
@@ -228,7 +228,7 @@ namespace krys::boo::dom::tests
       CHECK(width(d) == "auto");
 
       // Visible focus, and text fields always show focus.
-      b.SetFocus(true, FocusVisibility::Visible);
+      b.SetFocus(true, dom::FocusVisibility::Visible);
       CHECK(b.HasFocusVisible());
       b.SetFocus(false);
       i.SetFocus(true);

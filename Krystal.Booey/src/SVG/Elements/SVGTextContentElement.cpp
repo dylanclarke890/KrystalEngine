@@ -60,8 +60,8 @@ namespace krys::boo
   uint32 SVGTextContentElement::GetNumberOfChars() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     return SVGTextQuery(Renderer()).NumberOfCharacters();
   }
@@ -69,8 +69,8 @@ namespace krys::boo
   float SVGTextContentElement::GetComputedTextLength() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     return SVGTextQuery(Renderer()).TextLength();
   }
@@ -130,8 +130,8 @@ namespace krys::boo
   int32 SVGTextContentElement::GetCharNumAtPosition(DOMPointInit pointInit) noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     PointF transformPoint {static_cast<float>(pointInit.X), static_cast<float>(pointInit.Y)};
     return SVGTextQuery(Renderer()).CharacterNumberAtPosition(transformPoint);

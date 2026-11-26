@@ -37,7 +37,7 @@ namespace krys::boo
   class Element;
 }
 
-namespace krys::boo::dom
+namespace krys::boo::html
 {
   /// @brief The user action state of a document's elements: which are active, hovered or focused. Only the
   /// elements with some state are kept; they're flagged (`Element::IsUserActionElement`).

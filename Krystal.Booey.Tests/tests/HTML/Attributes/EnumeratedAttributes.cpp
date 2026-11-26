@@ -30,9 +30,9 @@ namespace krys::boo::html::tests
 
     // A missing value default can be a state without a keyword.
     using Popover = EnumeratedAttribute<"popover", HTMLElement>;
-    CHECK(Popover::ResolveState(null) == dom::PopoverState::None);
-    CHECK(Popover::ResolveState(u8"") == dom::PopoverState::Auto);
-    CHECK(Popover::ResolveState(u8"bogus") == dom::PopoverState::Manual);
+    CHECK(Popover::ResolveState(null) == html::PopoverState::None);
+    CHECK(Popover::ResolveState(u8"") == html::PopoverState::Auto);
+    CHECK(Popover::ResolveState(u8"bogus") == html::PopoverState::Manual);
 
     // The empty value default applies when the empty string isn't a keyword.
     using CrossOrigin = EnumeratedAttribute<"crossorigin", HTMLElement>;

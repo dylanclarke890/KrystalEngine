@@ -504,8 +504,8 @@ namespace krys::boo::style
       if (forcedLayout == ForcedLayout::Yes)
       {
         document->UpdateLayoutIgnorePendingStylesheets(
-          {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-           dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+          {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+           layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
           element.get());
       }
     }

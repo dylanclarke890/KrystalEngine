@@ -35,12 +35,11 @@ namespace krys::boo::html
   class CustomElement;
   class CustomElementReactionQueue;
   class CustomStateSet;
+  class PopoverData;
 }
 
 namespace krys::boo::dom
 {
-  class PopoverData;
-
   /// @brief The elements set through an element's element reflection attributes, by attribute name.
   /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#explicitly-set-attr-element
   using ExplicitlySetAttrElementsMap = HashMap<DOMStringAtom, WeakPtr<Element>>;
@@ -79,7 +78,7 @@ namespace krys::boo::dom
     UniquePtr<html::CustomElementReactionQueue> _customElementReactionQueue;
     UniquePtr<html::CustomElement> _customElement;
     RefPtr<html::CustomStateSet> _customStateSet;
-    UniquePtr<PopoverData> _popoverData;
+    UniquePtr<html::PopoverData> _popoverData;
     WeakPtr<Element> _invokedPopover;
     ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
     ExplicitlySetAttrElementListsMap _explicitlySetAttrElementListsMap;
@@ -124,12 +123,12 @@ namespace krys::boo::dom
     void SetCustomStateSet(RefPtr<html::CustomStateSet> customStateSet) noexcept;
 
     /// @brief The state of the element's `popover` attribute.
-    KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept
+    KRYS_NODISCARD html::PopoverData *GetPopoverData() const noexcept
     {
       return _popoverData.get();
     }
 
-    void SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept;
+    void SetPopoverData(UniquePtr<html::PopoverData> &&popoverData) noexcept;
 
     /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
     KRYS_NODISCARD Element *InvokedPopover() const noexcept;

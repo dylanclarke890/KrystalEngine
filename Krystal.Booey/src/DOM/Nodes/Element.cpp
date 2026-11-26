@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -32,9 +33,6 @@
 #include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Internals/UserActionElementSet.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -68,6 +66,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Internals/UserActionElementSet.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SetHTMLOptions.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -3276,17 +3276,17 @@ namespace krys::boo
 
 #pragma region Popovers
 
-  dom::PopoverData *Element::GetPopoverData() const noexcept
+  html::PopoverData *Element::GetPopoverData() const noexcept
   {
     return GetElementRareData() ? GetElementRareData()->GetPopoverData() : nullptr;
   }
 
-  dom::PopoverData &Element::EnsurePopoverData() noexcept
+  html::PopoverData &Element::EnsurePopoverData() noexcept
   {
     auto &rareData = EnsureElementRareData();
     if (!rareData.GetPopoverData())
     {
-      rareData.SetPopoverData(CreateUnique<dom::PopoverData>());
+      rareData.SetPopoverData(CreateUnique<html::PopoverData>());
     }
     return *rareData.GetPopoverData();
   }
@@ -3302,13 +3302,13 @@ namespace krys::boo
   bool Element::IsPopoverShowing() const noexcept
   {
     auto *popoverData = GetPopoverData();
-    return popoverData && popoverData->VisibilityState() == dom::PopoverVisibilityState::Showing;
+    return popoverData && popoverData->VisibilityState() == html::PopoverVisibilityState::Showing;
   }
 
-  dom::PopoverState Element::GetPopoverState() const noexcept
+  html::PopoverState Element::GetPopoverState() const noexcept
   {
     auto *popoverData = GetPopoverData();
-    return popoverData ? popoverData->GetPopoverState() : dom::PopoverState::None;
+    return popoverData ? popoverData->GetPopoverState() : html::PopoverState::None;
   }
 
   Element *Element::InvokedPopover() const noexcept
@@ -4054,8 +4054,8 @@ namespace krys::boo
   Ref<DOMRectList> Element::GetClientRects() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
 
     auto *renderer = Renderer();
@@ -4143,9 +4143,10 @@ namespace krys::boo
   RectF Element::BoundingClientRect() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
     auto pair = BoundingAbsoluteRectWithoutLayout();
     if (!pair)
     {
@@ -4378,8 +4379,8 @@ namespace krys::boo
   {
     auto offset = 0;
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
@@ -4409,8 +4410,8 @@ namespace krys::boo
   {
     auto offset = 0;
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
@@ -4439,8 +4440,8 @@ namespace krys::boo
   int32 Element::OffsetWidth() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
@@ -4454,8 +4455,8 @@ namespace krys::boo
   int32 Element::OffsetHeight() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
@@ -4483,8 +4484,8 @@ namespace krys::boo
   Element *Element::OffsetParentIgnoringShadowTrees() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
     auto *renderer = Renderer();
     if (!renderer)
@@ -4498,8 +4499,8 @@ namespace krys::boo
   int32 Element::ClientLeft() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
 
     if (auto *renderer = RenderBoxOf(*this))
@@ -4523,8 +4524,8 @@ namespace krys::boo
   int32 Element::ClientTop() noexcept
   {
     NodeDocument().UpdateLayoutIgnorePendingStylesheets(
-      {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-       dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
       this);
 
     if (auto *renderer = RenderBoxOf(*this))
@@ -4543,9 +4544,10 @@ namespace krys::boo
   int32 Element::ClientWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (!document.HasLivingRenderTree())
     {
@@ -4591,9 +4593,10 @@ namespace krys::boo
   int32 Element::ClientHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (!document.HasLivingRenderTree())
     {
@@ -4637,9 +4640,10 @@ namespace krys::boo
   int32 Element::ScrollLeft() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (document.ScrollingElement() == this)
     {
@@ -4660,9 +4664,10 @@ namespace krys::boo
   int32 Element::ScrollTop() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (document.ScrollingElement() == this)
     {
@@ -4683,9 +4688,10 @@ namespace krys::boo
   void Element::SetScrollLeft(int32 newLeft) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
       UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
@@ -4715,9 +4721,10 @@ namespace krys::boo
   void Element::SetScrollTop(int32 newTop) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     auto options = ScrollPositionChangeOptions::CreateProgrammaticWithOptions(
       UseSmoothScrolling(ScrollBehavior::Auto, this) ? ScrollIsAnimated::Yes : ScrollIsAnimated::No);
@@ -4747,9 +4754,10 @@ namespace krys::boo
   int32 Element::ScrollWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (document.ScrollingElement() == this)
     {
@@ -4770,9 +4778,10 @@ namespace krys::boo
   int32 Element::ScrollHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
-                                                   dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
-                                                  this);
+    document.UpdateLayoutIgnorePendingStylesheets(
+      {layout::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+       layout::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+      this);
 
     if (document.ScrollingElement() == this)
     {

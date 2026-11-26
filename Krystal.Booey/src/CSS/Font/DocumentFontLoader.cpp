@@ -25,14 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Booey/DOM/Internals/DocumentFontLoader.hpp"
+#include "Krystal.Booey/CSS/Font/DocumentFontLoader.hpp"
 #include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   DocumentFontLoader::DocumentFontLoader(Document &document) noexcept
       : _document(document), _fontLoadingTimer(*this, &DocumentFontLoader::FontLoadingTimerFired)

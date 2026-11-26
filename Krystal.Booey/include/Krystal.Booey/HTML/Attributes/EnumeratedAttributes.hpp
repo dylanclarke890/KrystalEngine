@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
 #include "Krystal.Booey/DOM/Nodes/TextDirectionState.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -618,7 +618,7 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"popover", HTMLElement>
   {
-    using State = dom::PopoverState;
+    using State = html::PopoverState;
     static inline const KeywordStateMapping<State> StateMappings[] = {
       {u8"auto", State::Auto},
       {u8"manual", State::Manual},
