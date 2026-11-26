@@ -925,19 +925,19 @@ namespace krys::web
     bool EnabledCopy(web::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
-      return editor.CanDHTMLCopy() || editor.CanCopy();
+      return editor.CanCopy();
     }
 
     bool EnabledCut(web::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
-      return editor.CanDHTMLCut() || editor.CanCut();
+      return editor.CanCut();
     }
 
     bool EnabledPaste(web::Frame &frame, Event *, EditorCommandSource) noexcept
     {
       auto &editor = frame.Document()->GetEditor();
-      return editor.CanDHTMLPaste() || editor.CanPaste();
+      return editor.CanPaste();
     }
 
     bool EnabledInEditableText(web::Frame &frame, Event *event, EditorCommandSource) noexcept

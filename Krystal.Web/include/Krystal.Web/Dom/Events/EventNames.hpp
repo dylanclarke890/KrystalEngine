@@ -58,11 +58,8 @@ namespace krys::web::event_names
   constexpr const char8 *Resize = u8"resize";
   constexpr const char8 *Scroll = u8"scroll";
   constexpr const char8 *ScrollEnd = u8"scrollend";
-  constexpr const char8 *BeforeCopy = u8"beforecopy";
   constexpr const char8 *Copy = u8"copy";
-  constexpr const char8 *BeforeCut = u8"beforecut";
   constexpr const char8 *Cut = u8"cut";
-  constexpr const char8 *BeforePaste = u8"beforepaste";
   constexpr const char8 *Paste = u8"paste";
   constexpr const char8 *DragStart = u8"dragstart";
   constexpr const char8 *Drag = u8"drag";

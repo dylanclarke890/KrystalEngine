@@ -30,7 +30,7 @@
 #include "Krystal.Core/Geometry/Rect.hpp"
 #include "Krystal.Web/Accessibility/AXObject.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/ClipboardApi/ClipboardEvent.hpp"
+#include "Krystal.Web/ClipboardApi/ClipboardAlgorithms.hpp"
 #include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
@@ -97,9 +97,6 @@ namespace krys::web
         case ClipboardEventKind::Paste:
         case ClipboardEventKind::PasteAsPlainText:
         case ClipboardEventKind::PasteFont:        return event_names::Paste;
-        case ClipboardEventKind::BeforeCopy:       return event_names::BeforeCopy;
-        case ClipboardEventKind::BeforeCut:        return event_names::BeforeCut;
-        case ClipboardEventKind::BeforePaste:      return event_names::BeforePaste;
       }
       krys_debug_assert(false);
       return {};
@@ -228,11 +225,6 @@ namespace krys::web
         case ClipboardEventKind::PasteFont:
           return DataTransfer::CreateForCopyAndPaste(document, StoreMode::Readonly,
                                                      Pasteboard::CreateForCopyAndPaste());
-        case ClipboardEventKind::BeforeCopy:
-        case ClipboardEventKind::BeforeCut:
-        case ClipboardEventKind::BeforePaste:
-          return DataTransfer::CreateForCopyAndPaste(document, StoreMode::Invalid,
-                                                     CreateUnique<StaticPasteboard>());
       }
       krys_debug_assert(false);
       return DataTransfer::CreateForCopyAndPaste(document, StoreMode::Invalid,
@@ -280,33 +272,6 @@ namespace krys::web
     }
   }
 
-  // Returns whether caller should continue with "the default processing", which is the same as
-  // the event handler NOT setting the return value to false
-  // https://w3c.github.io/clipboard-apis/#fire-a-clipboard-event
-  bool Editor::DispatchClipboardEvent(const RefPtr<Element> &target, ClipboardEventKind kind,
-                                      const Ref<DataTransfer> &dataTransfer) noexcept
-  {
-    // FIXME: Move the target selection code here.
-    if (!target)
-    {
-      return true;
-    }
-
-    auto event = ClipboardEvent::Create(DOMStringAtom(EventNameForClipboardEvent(kind)), Ref(dataTransfer));
-
-    (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
-    bool noDefaultProcessing = event->DefaultPrevented();
-    if (noDefaultProcessing && (kind == ClipboardEventKind::Copy || kind == ClipboardEventKind::Cut)
-        && dataTransfer->GetPasteboard().HasData())
-    {
-      dataTransfer->CommitToPasteboard(*Pasteboard::CreateForCopyAndPaste());
-    }
-
-    dataTransfer->MakeInvalidForSecurity();
-
-    return !noDefaultProcessing;
-  }
-
   bool Editor::DispatchClipboardEvent(RefPtr<Element> target, ClipboardEventKind kind) noexcept
   {
     if (!target)
@@ -314,38 +279,9 @@ namespace krys::web
       return true;
     }
 
-    auto &document = target->NodeDocument();
-    return DispatchClipboardEvent(krys::move(target), kind,
-                                  CreateDataTransferForClipboardEvent(document, kind));
-  }
-
-  // WinIE uses onbeforecut and onbeforepaste to enables the cut and paste menu items.  They
-  // also send onbeforecopy, apparently for symmetry, but it doesn't affect the menu items.
-  // We need to use onbeforecopy as a real menu enabler because we allow elements that are not
-  // normally selectable to implement copy/paste (like divs, or a document body).
-
-  bool Editor::CanDHTMLCut() noexcept
-  {
-    if (_document.Selection().Selection().IsInPasswordField())
-    {
-      return false;
-    }
-
-    return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::BeforeCut);
-  }
-
-  bool Editor::CanDHTMLCopy() noexcept
-  {
-    if (_document.Selection().Selection().IsInPasswordField())
-    {
-      return false;
-    }
-    return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::BeforeCopy);
-  }
-
-  bool Editor::CanDHTMLPaste() noexcept
-  {
-    return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::BeforePaste);
+    auto clipboardData = CreateDataTransferForClipboardEvent(target->NodeDocument(), kind);
+    return ClipboardAlgorithms::FireClipboardEvent(DOMStringAtom(EventNameForClipboardEvent(kind)), *target,
+                                                   *clipboardData);
   }
 
   bool Editor::CanCut() const noexcept

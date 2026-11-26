@@ -330,10 +330,12 @@ set(KRYSTAL_WEB_ANIMATION_SOURCES
 )
 
 set(KRYSTAL_WEB_CLIPBOARDAPI_HEADERS
+  include/Krystal.Web/ClipboardApi/ClipboardAlgorithms.hpp
   include/Krystal.Web/ClipboardApi/ClipboardEvent.hpp
 )
 
 set(KRYSTAL_WEB_CLIPBOARDAPI_SOURCES
+  src/ClipboardApi/ClipboardAlgorithms.cpp
   src/ClipboardApi/ClipboardEvent.cpp
 )
 

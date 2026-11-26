@@ -147,9 +147,6 @@ namespace krys::web
     Paste,
     PasteAsPlainText,
     PasteFont,
-    BeforeCopy,
-    BeforeCut,
-    BeforePaste,
   };
 
   /// @brief A document's editor: the commands that act on its selection (moving and extending it, selecting
@@ -253,12 +250,6 @@ namespace krys::web
     void DidDispatchInputMethodKeydown(KeyboardEvent &event) noexcept;
 
     using PasteOption = EditorPasteOption;
-
-    bool CanDHTMLCut() noexcept;
-
-    bool CanDHTMLCopy() noexcept;
-
-    bool CanDHTMLPaste() noexcept;
 
     bool TryDHTMLCopy() noexcept;
 
@@ -583,10 +574,10 @@ namespace krys::web
 
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 
+    /// @brief Fires the clipboard event for @p kind at @p target, with clipboard data for it; true (and
+    /// nothing fired) without a target.
+    /// @return Whether the action's default steps run.
     bool DispatchClipboardEvent(RefPtr<Element> target, ClipboardEventKind kind) noexcept;
-
-    static bool DispatchClipboardEvent(const RefPtr<Element> &target, ClipboardEventKind kind,
-                                       const Ref<DataTransfer> &dataTransfer) noexcept;
 
     KRYS_NODISCARD RefPtr<Element> FindEventTargetFromSelection() const noexcept;
 

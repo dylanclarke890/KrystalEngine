@@ -104,7 +104,6 @@ namespace krys::web::tests
     EditorFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &editor = fixture.GetEditor();
     auto &text = fixture.TextIn(u8"a");
-    auto beforeCopy = fixture.Listen(u8"beforecopy");
     auto copy = fixture.Listen(u8"copy");
 
     fixture.Select(text, 4, 15);
@@ -113,8 +112,8 @@ namespace krys::web::tests
     {
       auto command = editor.GetCommand(u8"Copy");
       CHECK(command.IsEnabled());
-      CHECK(beforeCopy->Count == 1);
-      CHECK(beforeCopy->LastWasTrustedClipboardEvent);
+      // Checking whether the command is enabled fires no events.
+      CHECK(copy->Count == 0);
 
       CHECK(command.Execute());
       CHECK(copy->Count == 1);
@@ -158,7 +157,6 @@ namespace krys::web::tests
     EditorFixture fixture(u8"<div id=e contenteditable>The quick brown fox</div><p id=p>Not editable</p>");
     auto &editor = fixture.GetEditor();
     auto &root = fixture.ById(u8"e");
-    auto beforeCut = fixture.Listen(event_names::BeforeCut);
     auto cut = fixture.Listen(event_names::Cut);
 
     SECTION("Cutting copies the selected text, then deletes it")
@@ -166,8 +164,6 @@ namespace krys::web::tests
       fixture.Select(fixture.TextIn(u8"e"), 4, 10);
       auto command = editor.GetCommand(u8"Cut");
       CHECK(command.IsEnabled());
-      CHECK(beforeCut->Count == 1);
-      CHECK(beforeCut->LastWasTrustedClipboardEvent);
 
       CHECK(command.Execute());
       CHECK(cut->Count == 1);
@@ -454,24 +450,6 @@ namespace krys::web::tests
       fixture.Select(fixture.TextIn(u8"p"), 4, 9);
       editor.Copy();
       CHECK(fixture.Pasteboard.Text == u8"quick");
-    }
-
-    SECTION("Listeners of the events before copying can't read or write")
-    {
-      int32 events = 0;
-      ListenWith(fixture, event_names::BeforeCopy,
-                 [&](Event &event)
-                 {
-                   ++events;
-                   auto *clipboardData = Downcast<ClipboardEvent>(event).ClipboardData();
-                   REQUIRE(clipboardData);
-                   CHECK_FALSE(clipboardData->CanReadTypes());
-                   clipboardData->SetData(document, u8"text", u8"x");
-                   CHECK(clipboardData->GetData(document, u8"text").empty());
-                 });
-      fixture.Select(fixture.TextIn(u8"p"), 4, 9);
-      (void)editor.GetCommand(u8"Copy").IsEnabled();
-      CHECK(events == 1);
     }
 
     SECTION("Paste listeners read the clipboard")

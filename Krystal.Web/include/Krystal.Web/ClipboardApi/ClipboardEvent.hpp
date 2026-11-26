@@ -13,8 +13,7 @@ namespace krys::web
     RefPtr<DataTransfer> ClipboardData;
   };
 
-  /// @brief A clipboard event: `copy`, `cut` and `paste`, and the legacy `beforecopy`, `beforecut` and
-  /// `beforepaste`.
+  /// @brief A clipboard event: `copy`, `cut` or `paste`.
   /// @see https://w3c.github.io/clipboard-apis/#clipboard-event-interfaces
   class ClipboardEvent final : public Event
   {

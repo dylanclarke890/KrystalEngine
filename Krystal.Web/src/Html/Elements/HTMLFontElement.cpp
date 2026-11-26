@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLFontElement.hpp"
 #include "charconv"
 #include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValuePool.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/Internals/PresentationalHints.hpp"
 

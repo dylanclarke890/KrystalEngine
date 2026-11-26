@@ -55,6 +55,7 @@
 #include "Krystal.Web/Html/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Parser/Token.hpp"
+#include "Krystal.Web/Html/Parser/Tokenizer.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 #include "Krystal.Web/Svg/Elements/SVGScriptElement.hpp"
 
