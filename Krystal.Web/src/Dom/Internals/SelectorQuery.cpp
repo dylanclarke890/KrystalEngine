@@ -370,7 +370,7 @@ namespace krys::web::dom
         auto &localNameToMatch = isHTML ? localNameLowercase : localName;
         for (auto &attribute : element.AttributeList())
         {
-          if (!NameMatchesFilter(attribute->GetQualifiedName(), prefix, localNameToMatch, namespaceURI))
+          if (!NameMatchesFilter(attribute->QualifiedName(), prefix, localNameToMatch, namespaceURI))
           {
             continue;
           }

@@ -320,7 +320,7 @@ namespace krys::web::css
       return std::ranges::any_of(element.AttributeList(),
                                  [&](const auto &attribute)
                                  {
-                                   return NameMatchesFilter(attribute->GetQualifiedName(),
+                                   return NameMatchesFilter(attribute->QualifiedName(),
                                                             selectorAttr.NamespacePrefix(), localName,
                                                             selectorAttr.NamespaceURI())
                                           && AttributeValueMatches(attribute->Value(), selector.Match(),

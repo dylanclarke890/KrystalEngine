@@ -56,8 +56,8 @@ namespace krys::web::css
     for (const auto &attribute : element.AttributeList())
     {
       // HTML elements' attribute names are already lowercase; selectors' are compared lowercased.
-      const auto &name = Is<HTMLElement>(element) ? attribute->GetQualifiedName().LocalName()
-                                                  : attribute->GetQualifiedName().LocalNameLower();
+      const auto &name = Is<HTMLElement>(element) ? attribute->QualifiedName().LocalName()
+                                                  : attribute->QualifiedName().LocalNameLower();
       if (!IsExcludedAttribute(name))
       {
         identifierHashes.push_back(IdentifierHash(name) * AttributeSalt);

@@ -34,7 +34,7 @@ namespace krys::web
     /// @see https://dom.spec.whatwg.org/#concept-attribute-namespace
     /// @see https://dom.spec.whatwg.org/#concept-attribute-namespace-prefix
     /// @see https://dom.spec.whatwg.org/#concept-attribute-local-name
-    QualifiedName _name;
+    web::QualifiedName _name;
     /// @see https://dom.spec.whatwg.org/#concept-attribute-element
     WeakPtr<Element> _ownerElement;
     /// @see https://dom.spec.whatwg.org/#concept-attribute-value
@@ -43,7 +43,7 @@ namespace krys::web
   protected:
     /// @brief Creates an attribute with the qualified name and value, and no element.
     /// @see https://dom.spec.whatwg.org/#create-an-attribute
-    Attr(Document &document, const QualifiedName &qualifiedName, DOMString value = {}) noexcept;
+    Attr(Document &document, const web::QualifiedName &qualifiedName, DOMString value = {}) noexcept;
 
   public:
 #pragma region Attr - https://dom.spec.whatwg.org/#attr
@@ -58,12 +58,6 @@ namespace krys::web
     KRYS_NODISCARD const DOMStringAtom &Prefix() const noexcept KRYS_LIFETIME_BOUND
     {
       return _name.NamespacePrefix();
-    }
-
-    /// @brief The attribute's namespace, namespace prefix and local name.
-    KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
-    {
-      return _name;
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-localname
@@ -96,7 +90,7 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region Node
+#pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
@@ -123,6 +117,12 @@ namespace krys::web
     ExceptionOr<void> TextContent(DOMString value) noexcept final;
 
 #pragma endregion
+
+    /// @brief The attribute's namespace, namespace prefix and local name.
+    KRYS_NODISCARD const web::QualifiedName &QualifiedName() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _name;
+    }
 
   private:
     /// @see https://dom.spec.whatwg.org/#set-an-existing-attribute-value

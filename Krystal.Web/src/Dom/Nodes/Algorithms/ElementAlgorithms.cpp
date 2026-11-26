@@ -46,7 +46,7 @@ namespace krys::web::dom
           return;
         }
 
-        auto &name = attribute.GetQualifiedName();
+        auto &name = attribute.QualifiedName();
         _attributeInvalidation.emplace(element, name, oldValue, newValue);
 
         if (name.NamespaceURI() == null)
@@ -173,7 +173,7 @@ namespace krys::web::dom
     if (element.IsDefinedCustomElement())
     {
       html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
-        element, attribute.GetQualifiedName(), oldValue ? DOMStringAtom(*oldValue) : null,
+        element, attribute.QualifiedName(), oldValue ? DOMStringAtom(*oldValue) : null,
         newValue ? DOMStringAtom(*newValue) : null);
     }
 

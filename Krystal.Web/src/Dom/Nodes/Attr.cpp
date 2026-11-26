@@ -5,7 +5,7 @@
 
 namespace krys::web
 {
-  Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString value) noexcept
+  Attr::Attr(Document &document, const web::QualifiedName &qualifiedName, DOMString value) noexcept
       : Node(document, dom::NodeType::ATTRIBUTE_NODE, {}), _name {qualifiedName}, _value {krys::move(value)}
   {
     // 1. Let attribute be the result of creating a node that implements Attr, given document.
