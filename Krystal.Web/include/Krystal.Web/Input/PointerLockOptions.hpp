@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace krys::web::dom
+namespace krys::web
 {
   /// @see https://w3c.github.io/pointerlock/#pointerlockoptions-dictionary
   struct PointerLockOptions

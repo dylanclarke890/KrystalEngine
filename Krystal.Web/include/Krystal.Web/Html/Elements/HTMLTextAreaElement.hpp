@@ -173,7 +173,7 @@ namespace krys::web
     /// @brief Focuses the text area, without clicking it.
     bool AccessKeyAction(bool sendMouseEvents) noexcept override;
 
-    void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+    void UpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
 
     void DefaultEventHandler(Event &event) noexcept final;

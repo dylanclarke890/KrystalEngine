@@ -2212,7 +2212,7 @@ namespace krys::boo
 
     using pal::GamepadAxis;
     using pal::GamepadButton;
-    using FocusDirection = web::dom::FocusDirection;
+    using FocusDirection = web::html::FocusDirection;
     auto pressed = [gamepads](GamepadButton button)
     {
       return std::ranges::any_of(gamepads, [button](const pal::Gamepad &gamepad)
@@ -2386,9 +2386,9 @@ namespace krys::boo
     return true;
   }
 
-  void View::GamepadMove(web::dom::FocusDirection direction) noexcept
+  void View::GamepadMove(web::html::FocusDirection direction) noexcept
   {
-    using FocusDirection = web::dom::FocusDirection;
+    using FocusDirection = web::html::FocusDirection;
     pal::Key key = pal::Key::DownArrow;
     switch (direction)
     {
@@ -2452,7 +2452,7 @@ namespace krys::boo
 
   void View::ResetGamepadState() noexcept
   {
-    _gamepadDirection = web::dom::FocusDirection::None;
+    _gamepadDirection = web::html::FocusDirection::None;
     _gamepadLastScroll = null;
     _gamepadScrollRemainder = {};
   }

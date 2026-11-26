@@ -29,11 +29,11 @@
 #include "Krystal.PAL/Input/TextInput.hpp"
 #include "Krystal.PAL/Input/TouchpadPan.hpp"
 #include "Krystal.PAL/Platform.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Editing/WritingDirection.hpp"
 #include "Krystal.Web/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Web/Graphics/Images/NativeImage.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Web/Html/Forms/DOMFormData.hpp"
 #include "Krystal.Web/Input/PlatformMouseEvent.hpp"
@@ -328,7 +328,7 @@ namespace krys::boo
     bool _gamepadNavigationEnabled {true};
     /// @brief The direction the pads hold (the D-pad or the left stick), which moves the focus again when its
     /// repeat is due.
-    web::dom::FocusDirection _gamepadDirection {web::dom::FocusDirection::None};
+    web::html::FocusDirection _gamepadDirection {web::html::FocusDirection::None};
     MonotonicTime::duration _gamepadNextRepeat {};
     /// @brief The host's time when the right stick last scrolled, while it's held.
     Maybe<MonotonicTime::duration> _gamepadLastScroll;
@@ -858,7 +858,7 @@ namespace krys::boo
     bool GamepadOverlayKey(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
 
     /// @brief The pad moves the focus in @p direction (or an overlay's highlight, as its arrow key does).
-    void GamepadMove(web::dom::FocusDirection direction) noexcept;
+    void GamepadMove(web::html::FocusDirection direction) noexcept;
 
     /// @brief Forgets the pads' held direction and scroll.
     void ResetGamepadState() noexcept;

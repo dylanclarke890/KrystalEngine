@@ -396,12 +396,12 @@ namespace krys::web::html::tests
     };
     auto next = [&]
     {
-      CHECK(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Forward));
+      CHECK(FocusAlgorithms::SequentialNavigation(document, html::FocusDirection::Forward));
       return focused();
     };
     auto previous = [&]
     {
-      CHECK(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Backward));
+      CHECK(FocusAlgorithms::SequentialNavigation(document, html::FocusDirection::Backward));
       return focused();
     };
 

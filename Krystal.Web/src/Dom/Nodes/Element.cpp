@@ -34,14 +34,12 @@
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/ElementRareData.hpp"
-#include "Krystal.Web/Dom/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/StyledElement.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
@@ -56,6 +54,7 @@
 #include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp"
+#include "Krystal.Web/Html/Algorithms/TextDirectionState.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElement.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"
@@ -73,6 +72,7 @@
 #include "Krystal.Web/Html/Internals/PopoverData.hpp"
 #include "Krystal.Web/Html/Internals/UserActionElementSet.hpp"
 #include "Krystal.Web/Html/Sanitizer/SetHTMLOptions.hpp"
+#include "Krystal.Web/Html/Types/GetHTMLOptions.hpp"
 #include "Krystal.Web/Html/Window.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
@@ -313,17 +313,17 @@ namespace krys::web
 
   bool Element::HasValidTextDirectionState() const noexcept
   {
-    return dom::ElementHasValidTextDirectionState(*this);
+    return html::ElementHasValidTextDirectionState(*this);
   }
 
   bool Element::HasAutoTextDirectionState() const noexcept
   {
-    return dom::ElementHasAutoTextDirectionState(*this);
+    return html::ElementHasAutoTextDirectionState(*this);
   }
 
   void Element::UpdateEffectiveTextDirection() noexcept
   {
-    auto textDirectionState = dom::ElementTextDirectionState(*this);
+    auto textDirectionState = html::ElementTextDirectionState(*this);
     html::UpdateEffectiveTextDirectionState(*this, textDirectionState);
   }
 
@@ -723,7 +723,7 @@ namespace krys::web
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
   }
 
-  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &) noexcept
+  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const html::FocusOptions &) noexcept
   {
     // While the document's window doesn't have system focus, the focus moves without events, as in Chrome:
     // the element gets them when the window gets system focus (FocusAlgorithms::SystemFocusChanged).
@@ -742,7 +742,7 @@ namespace krys::web
     }
   }
 
-  void Element::FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+  void Element::FindTargetAndUpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                                    SelectionRevealMode revealMode) noexcept
   {
     auto target = FocusAppearanceUpdateTarget();
@@ -759,7 +759,7 @@ namespace krys::web
     return ShareRefPtr(this);
   }
 
-  void Element::UpdateFocusAppearance(dom::SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
+  void Element::UpdateFocusAppearance(html::SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
   {
     if (IsRootEditableElement())
     {
@@ -1364,7 +1364,7 @@ namespace krys::web
     }
   }
 
-  void Element::SetFocus(bool value, dom::FocusVisibility visibility) noexcept
+  void Element::SetFocus(bool value, html::FocusVisibility visibility) noexcept
   {
     if (value == Focused())
     {
@@ -1390,8 +1390,8 @@ namespace krys::web
     }
 
     SetHasFocusVisible(value
-                       && (visibility == dom::FocusVisibility::Visible
-                           || (visibility == dom::FocusVisibility::Invisible
+                       && (visibility == html::FocusVisibility::Visible
+                           || (visibility == html::FocusVisibility::Invisible
                                && ShouldAlwaysHaveFocusVisibleWhenFocused(*this))));
   }
 
@@ -2694,10 +2694,10 @@ namespace krys::web
 
   DOMString Element::GetHTML() const noexcept
   {
-    return GetHTML(dom::GetHTMLOptions {});
+    return GetHTML(html::GetHTMLOptions {});
   }
 
-  DOMString Element::GetHTML(dom::GetHTMLOptions options) const noexcept
+  DOMString Element::GetHTML(html::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,
@@ -2840,12 +2840,12 @@ namespace krys::web
 
 #pragma region Element (Pointer Lock)
 
-  void Element::RequestPointerLock(dom::PointerLockOptions options,
+  void Element::RequestPointerLock(PointerLockOptions options,
                                    Func<void(ExceptionOr<void> &&)> &&promise) noexcept
   {
     if (auto *frame = NodeDocument().Frame())
     {
-      frame->GetPointerLockController().RequestPointerLock(this, Maybe<dom::PointerLockOptions>(options),
+      frame->GetPointerLockController().RequestPointerLock(this, Maybe<PointerLockOptions>(options),
                                                            krys::move(promise));
     }
   }
@@ -3150,7 +3150,7 @@ namespace krys::web
     }
     else if (localName == u8"dir")
     {
-      html::TextDirectionStateChanged(*this, dom::ParseTextDirectionState(value));
+      html::TextDirectionStateChanged(*this, html::ParseTextDirectionState(value));
     }
     else if (localName.View() == u8"part")
     {

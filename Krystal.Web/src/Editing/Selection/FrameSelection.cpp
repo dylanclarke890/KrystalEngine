@@ -2692,10 +2692,10 @@ namespace krys::web
       // Walk up the DOM tree to search for an element to focus.
       if (auto *focusable = html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*target))
       {
-        dom::FocusOptions focusOptions;
+        html::FocusOptions focusOptions;
         if (options.contains(SetSelectionOption::ForBindings))
         {
-          focusOptions.Trigger = dom::FocusTrigger::Bindings;
+          focusOptions.Trigger = html::FocusTrigger::Bindings;
         }
         html::FocusAlgorithms::FocusingSteps(*focusable, nullptr, focusOptions);
         return;

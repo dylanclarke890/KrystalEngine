@@ -9,7 +9,6 @@
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
@@ -18,6 +17,7 @@
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
+#include "Krystal.Web/Html/Algorithms/TextDirectionState.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBRElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
@@ -166,7 +166,7 @@ namespace krys::web
   }
 
   void HTMLTextFormControlElement::DispatchFocusEvent(EventTarget *relatedTarget,
-                                                      const dom::FocusOptions &options) noexcept
+                                                      const html::FocusOptions &options) noexcept
   {
     if (SupportsPlaceholder())
     {
@@ -1057,13 +1057,13 @@ namespace krys::web
         {
           continue;
         }
-        switch (dom::ElementTextDirectionState(*element))
+        switch (html::ElementTextDirectionState(*element))
         {
-          case dom::TextDirectionState::RTL: return text::TextDirection::RTL;
-          case dom::TextDirectionState::LTR: return text::TextDirection::LTR;
-          case dom::TextDirectionState::Auto:
+          case html::TextDirectionState::RTL: return text::TextDirection::RTL;
+          case html::TextDirectionState::LTR: return text::TextDirection::LTR;
+          case html::TextDirectionState::Auto:
             return html::ComputeAutoDirectionality(*element).value_or(text::TextDirection::LTR);
-          case dom::TextDirectionState::Undefined: break;
+          case html::TextDirectionState::Undefined: break;
         }
       }
       return text::TextDirection::LTR;

@@ -3104,7 +3104,7 @@ namespace krys::web
     {
       // 3f. Run the focusing steps for target, with the Document's viewport as the fallback target.
       // 3g. Move the sequential focus navigation starting point to target.
-      dom::FocusOptions options;
+      html::FocusOptions options;
       options.FocusVisible = true;
       html::FocusAlgorithms::FocusingSteps(*anchorElement, &document, options);
       document.SetSequentialFocusNavigationStartingPoint(anchorElement.get());

@@ -60,7 +60,7 @@ namespace krys::web
 
     /// @brief Repaints the image, which paints the area's focus ring.
     void SetFocus(bool value,
-                  dom::FocusVisibility visibility = dom::FocusVisibility::Invisible) noexcept override;
+                  html::FocusVisibility visibility = html::FocusVisibility::Invisible) noexcept override;
 
     /// @brief The image, which shows that the area is focused.
     KRYS_NODISCARD RefPtr<Element> FocusAppearanceUpdateTarget() noexcept override;

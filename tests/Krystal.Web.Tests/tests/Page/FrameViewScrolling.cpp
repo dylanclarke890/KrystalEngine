@@ -444,7 +444,7 @@ namespace krys::web::tests
     SECTION("focusing")
     {
       // Tab focuses the link, below the view, and scrolls it into view on a zero-delay timer.
-      REQUIRE(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, dom::FocusDirection::Forward));
+      REQUIRE(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, html::FocusDirection::Forward));
       auto &link = fixture.ById(u8"link");
       REQUIRE(fixture.Document->FocusedElement() == &link);
       CHECK(view.GetScrollPosition() == ScrollPosition());

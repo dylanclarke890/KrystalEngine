@@ -82,10 +82,10 @@ namespace krys::web
     return web::Element::AccessKeyAction(sendMouseEvents);
   }
 
-  void HTMLTextAreaElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+  void HTMLTextAreaElement::UpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                                   SelectionRevealMode revealMode) noexcept
   {
-    if (restorationMode == dom::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
+    if (restorationMode == html::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
     {
       RestoreCachedSelection(revealMode);
     }

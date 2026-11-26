@@ -146,7 +146,7 @@ namespace krys::web::tests
 
       /// @brief Asks to lock the pointer to @p element, then runs the tasks and microtasks that follow.
       /// @return How the request's promise settled: `ok`, or the exception's code.
-      static std::string Lock(Element &element, dom::PointerLockOptions options = {}) noexcept
+      static std::string Lock(Element &element, PointerLockOptions options = {}) noexcept
       {
         std::string settled = "pending";
         element.RequestPointerLock(

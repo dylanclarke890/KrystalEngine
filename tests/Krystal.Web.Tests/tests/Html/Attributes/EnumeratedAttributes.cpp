@@ -26,7 +26,7 @@ namespace krys::web::html::tests
     using Dir = EnumeratedAttribute<"dir", HTMLElement>;
     CHECK(Dir::ResolveState(null) == null);
     CHECK(Dir::ResolveState(u8"bogus") == null);
-    CHECK(Dir::ResolveState(u8"RTL") == dom::TextDirectionState::RTL);
+    CHECK(Dir::ResolveState(u8"RTL") == html::TextDirectionState::RTL);
 
     // A missing value default can be a state without a keyword.
     using Popover = EnumeratedAttribute<"popover", HTMLElement>;

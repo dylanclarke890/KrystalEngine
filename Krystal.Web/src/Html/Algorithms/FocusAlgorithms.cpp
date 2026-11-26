@@ -338,7 +338,7 @@ namespace krys::web::html
   }
 
   // https://html.spec.whatwg.org/multipage/interaction.html#get-the-focusable-area
-  Node *FocusAlgorithms::GetFocusableArea(Element &focusTarget, dom::FocusTrigger focusTrigger) noexcept
+  Node *FocusAlgorithms::GetFocusableArea(Element &focusTarget, html::FocusTrigger focusTrigger) noexcept
   {
     // If focus target is an area element with one or more shapes that are focusable areas: return the shape
     // corresponding to the first img element in tree order that uses the image map to which the area element
@@ -380,7 +380,7 @@ namespace krys::web::html
   }
 
   // https://html.spec.whatwg.org/multipage/interaction.html#focus-delegate
-  Node *FocusAlgorithms::FocusDelegate(Element &focusTarget, dom::FocusTrigger focusTrigger) noexcept
+  Node *FocusAlgorithms::FocusDelegate(Element &focusTarget, html::FocusTrigger focusTrigger) noexcept
   {
     // 1. If focusTarget is a shadow host and its shadow root's delegates focus is false, then return null.
     auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(focusTarget);
@@ -443,7 +443,7 @@ namespace krys::web::html
 
   // https://html.spec.whatwg.org/multipage/interaction.html#autofocus-delegate
   Node *FocusAlgorithms::AutofocusDelegate(ContainerNode &focusTarget,
-                                           dom::FocusTrigger focusTrigger) noexcept
+                                           html::FocusTrigger focusTrigger) noexcept
   {
     // 1. For each descendant descendant of focus target, in tree order:
     for (auto *node = dom::TreeQueries::Next(focusTarget, &focusTarget); node;
@@ -465,7 +465,7 @@ namespace krys::web::html
         continue;
       }
       // 1.4. If focusable area is not click focusable and focus trigger is "click", then continue.
-      if (!IsClickFocusable(*focusableArea) && focusTrigger == dom::FocusTrigger::Click)
+      if (!IsClickFocusable(*focusableArea) && focusTrigger == html::FocusTrigger::Click)
       {
         continue;
       }
@@ -525,7 +525,7 @@ namespace krys::web::html
 
   // https://html.spec.whatwg.org/multipage/interaction.html#focusing-steps
   void FocusAlgorithms::FocusingSteps(Node &newFocusTarget, Node *fallbackTarget,
-                                      const dom::FocusOptions &options) noexcept
+                                      const html::FocusOptions &options) noexcept
   {
     // 1. If new focus target is not a focusable area, then set new focus target to the result of getting the
     //    focusable area for new focus target, given focus trigger if it was passed.
@@ -640,7 +640,7 @@ namespace krys::web::html
 
   // https://html.spec.whatwg.org/multipage/interaction.html#focus-update-steps
   void FocusAlgorithms::FocusUpdateSteps(FocusChain oldChain, FocusChain newChain, Node *newFocusTarget,
-                                         const dom::FocusOptions &options) noexcept
+                                         const html::FocusOptions &options) noexcept
   {
     // 1. If the last entry in old chain and the last entry in new chain are the same, pop the last entry from
     //    old chain and the last entry from new chain and redo this step.
@@ -657,7 +657,7 @@ namespace krys::web::html
       if (auto *element = DynamicDowncast<Element>(*entry);
           element && element->NodeDocument().FocusedElement() == element)
       {
-        DesignateFocusedArea(element->NodeDocument(), nullptr, dom::FocusVisibility::Invisible);
+        DesignateFocusedArea(element->NodeDocument(), nullptr, html::FocusVisibility::Invisible);
       }
     }
 
@@ -756,7 +756,7 @@ namespace krys::web::html
       }
     }
 
-    if (options.Trigger != dom::FocusTrigger::Bindings && !newChain.empty())
+    if (options.Trigger != html::FocusTrigger::Bindings && !newChain.empty())
     {
       newChain.back()->NodeDocument()._latestFocusTrigger = options.Trigger;
     }
@@ -935,7 +935,7 @@ namespace krys::web::html
 
   void FocusAlgorithms::FocusForClick(Element &element) noexcept
   {
-    dom::FocusOptions options {.Trigger = dom::FocusTrigger::Click};
+    html::FocusOptions options {.Trigger = html::FocusTrigger::Click};
     if (auto *candidate = ClickFocusableInclusiveAncestor(element))
     {
       FocusingSteps(*candidate, nullptr, options);
@@ -955,7 +955,7 @@ namespace krys::web::html
       }
       // A shadow host that delegates focus is focused through its focus delegate, by the focusing steps.
       if (IsShadowHostThatDelegatesFocus(*candidate) && !candidate->IsInUserAgentShadowTree()
-          && GetFocusableArea(*candidate, dom::FocusTrigger::Click))
+          && GetFocusableArea(*candidate, html::FocusTrigger::Click))
       {
         return candidate;
       }
@@ -1117,13 +1117,13 @@ namespace krys::web::html
   }
 
   // https://html.spec.whatwg.org/multipage/interaction.html#selection-mechanism-sequential
-  bool FocusAlgorithms::SequentialNavigation(Document &document, dom::FocusDirection direction) noexcept
+  bool FocusAlgorithms::SequentialNavigation(Document &document, html::FocusDirection direction) noexcept
   {
-    krys_debug_assert(direction == dom::FocusDirection::Forward
-                      || direction == dom::FocusDirection::Backward);
+    krys_debug_assert(direction == html::FocusDirection::Forward
+                      || direction == html::FocusDirection::Backward);
     // 3. Let direction be "forward" if the user requested the next control, and "backward" if the user
     //    requested the previous control.
-    bool forward = direction == dom::FocusDirection::Forward;
+    bool forward = direction == html::FocusDirection::Forward;
 
     // Focusability depends on style.
     document.UpdateStyleIfNeeded();
@@ -1135,7 +1135,7 @@ namespace krys::web::html
     // 2. If there is a sequential focus navigation starting point defined and it is inside starting point,
     //    then let starting point be the sequential focus navigation starting point instead.
     // (The document stands for the traversable, and the focused area is its focused element or viewport.)
-    using Position = dom::SequentialFocusNavigationStartingPointPosition;
+    using Position = html::SequentialFocusNavigationStartingPointPosition;
     Node *startingPoint = document.FocusedElement();
     if (!startingPoint)
     {
@@ -1252,12 +1252,13 @@ namespace krys::web::html
     }
 
     // 6. If candidate is not null, then run the focusing steps for candidate and return.
-    FocusingSteps(*candidate, nullptr, {.Direction = direction, .Visibility = dom::FocusVisibility::Visible});
+    FocusingSteps(*candidate, nullptr,
+                  {.Direction = direction, .Visibility = html::FocusVisibility::Visible});
     // What navigation focuses is shown focused (scrolled into view, or with a caret in it), as `focus()`
     // shows it.
     if (RefPtr<Element> focused = ShareRefPtr(document.FocusedElement()))
     {
-      focused->FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll,
+      focused->FindTargetAndUpdateFocusAppearance(html::SelectionRestorationMode::SelectAll,
                                                   SelectionRevealMode::Reveal);
     }
     return true;
@@ -1265,7 +1266,7 @@ namespace krys::web::html
 
   namespace
   {
-    void UpdateFocusCandidateIfNeeded(dom::FocusDirection direction, const FocusCandidate &current,
+    void UpdateFocusCandidateIfNeeded(html::FocusDirection direction, const FocusCandidate &current,
                                       FocusCandidate &candidate, FocusCandidate &closest) noexcept
     {
       krys_debug_assert(candidate.VisibleNode->Renderer());
@@ -1335,7 +1336,7 @@ namespace krys::web::html
     }
 
     void FindFocusCandidateInContainer(const ContainerNode &container, const LayoutRect &startingRect,
-                                       dom::FocusDirection direction, FocusCandidate &closest) noexcept
+                                       html::FocusDirection direction, FocusCandidate &closest) noexcept
     {
       auto *focusedNode = container.NodeDocument().FocusedElement();
 
@@ -1389,7 +1390,7 @@ namespace krys::web::html
     }
 
     bool AdvanceFocusDirectionallyInContainer(const ContainerNode &container, const LayoutRect &startingRect,
-                                              dom::FocusDirection direction) noexcept
+                                              html::FocusDirection direction) noexcept
     {
       LayoutRect newStartingRect = startingRect;
 
@@ -1437,22 +1438,22 @@ namespace krys::web::html
       // We found a new focus node, navigate to it.
       RefPtr<Element> element = ShareRefPtr(focusCandidate.FocusableNode.get());
       FocusAlgorithms::FocusingSteps(*element, nullptr,
-                                     {.SelectionRestoration = dom::SelectionRestorationMode::SelectAll,
+                                     {.SelectionRestoration = html::SelectionRestorationMode::SelectAll,
                                       .Direction = direction,
-                                      .Visibility = dom::FocusVisibility::Visible});
+                                      .Visibility = html::FocusVisibility::Visible});
       if (element->NodeDocument().FocusedElement() == element.get())
       {
-        element->FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll,
+        element->FindTargetAndUpdateFocusAppearance(html::SelectionRestorationMode::SelectAll,
                                                     SelectionRevealMode::Reveal);
       }
       return true;
     }
   }
 
-  bool FocusAlgorithms::DirectionalNavigation(Document &document, dom::FocusDirection direction) noexcept
+  bool FocusAlgorithms::DirectionalNavigation(Document &document, html::FocusDirection direction) noexcept
   {
-    krys_debug_assert(direction == dom::FocusDirection::Up || direction == dom::FocusDirection::Down
-                      || direction == dom::FocusDirection::Left || direction == dom::FocusDirection::Right);
+    krys_debug_assert(direction == html::FocusDirection::Up || direction == html::FocusDirection::Down
+                      || direction == html::FocusDirection::Left || direction == html::FocusDirection::Right);
     if (!document.View())
     {
       return false;
@@ -1521,7 +1522,7 @@ namespace krys::web::html
   }
 
   void FocusAlgorithms::DesignateFocusedArea(Document &document, Element *element,
-                                             dom::FocusVisibility visibility) noexcept
+                                             html::FocusVisibility visibility) noexcept
   {
     // The sequential focus navigation starting point follows the focused element, so navigation continues
     // from it (as other engines do; the specification only uses the starting point inside the focused area).

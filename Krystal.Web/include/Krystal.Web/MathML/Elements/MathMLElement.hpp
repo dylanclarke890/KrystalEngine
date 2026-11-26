@@ -168,7 +168,7 @@ namespace krys::web
     }
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
-    void Focus(const dom::FocusOptions &options = {}) noexcept
+    void Focus(const html::FocusOptions &options = {}) noexcept
     {
       html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
     }

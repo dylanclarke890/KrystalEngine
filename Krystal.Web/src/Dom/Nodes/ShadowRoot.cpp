@@ -38,7 +38,6 @@
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Dom/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
@@ -48,6 +47,7 @@
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Html/Sanitizer/SetHTMLOptions.hpp"
+#include "Krystal.Web/Html/Types/GetHTMLOptions.hpp"
 #include "Krystal.Web/Style/Scope/Scope.hpp"
 
 namespace krys::web
@@ -233,10 +233,10 @@ namespace krys::web
 
   DOMString ShadowRoot::GetHTML() const noexcept
   {
-    return GetHTML(dom::GetHTMLOptions {});
+    return GetHTML(html::GetHTMLOptions {});
   }
 
-  DOMString ShadowRoot::GetHTML(dom::GetHTMLOptions options) const noexcept
+  DOMString ShadowRoot::GetHTML(html::GetHTMLOptions options) const noexcept
   {
     return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
                              ResolveUrls::NoExcludingUrlsForPrivacy, SerializationSyntax::HTML,

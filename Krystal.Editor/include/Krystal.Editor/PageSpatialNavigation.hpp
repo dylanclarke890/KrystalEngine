@@ -88,7 +88,7 @@ namespace krys::editor
 
     void MoveFocus(web::KeyboardEvent &event) noexcept
     {
-      using FocusDirection = web::dom::FocusDirection;
+      using FocusDirection = web::html::FocusDirection;
       if (!_document || event.CtrlKey() || event.AltKey() || event.MetaKey() || event.ShiftKey())
       {
         return;

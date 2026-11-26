@@ -24,7 +24,6 @@
 #include "Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include "Krystal.Web/Dom/Nodes/DOMImplementation.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Web/Dom/Traversal/NodeIterator.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
@@ -34,6 +33,7 @@
 #include "Krystal.Web/Graphics/Color/Color.hpp"
 #include "Krystal.Web/Graphics/Fonts/FontSelector.hpp"
 #include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include "Krystal.Web/Html/AnimationFrames/AnimationFrameCallbacks.hpp"
 #include "Krystal.Web/Html/Attributes/EventHandlerAttributes.hpp"
 #include "Krystal.Web/Html/Timers/DocumentTimer.hpp"
@@ -346,7 +346,7 @@ namespace krys::web
     RefPtr<DOMSelection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
-    dom::FocusTrigger _latestFocusTrigger {dom::FocusTrigger::Other};
+    html::FocusTrigger _latestFocusTrigger {html::FocusTrigger::Other};
     // The scroll events to fire at the next scroll steps, in the order they were queued.
     List<std::pair<Ref<ContainerNode>, dom::ScrollEventType>> _pendingScrollEventTargets;
     // Where sequential focus navigation starts from when it's inside the focused area: unset if null.
@@ -388,8 +388,8 @@ namespace krys::web
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
     RefPtr<HighlightRegistry> _highlightRegistry;
     RefPtr<HighlightRegistry> _fragmentHighlightRegistry;
-    dom::SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
-      dom::SequentialFocusNavigationStartingPointPosition::At};
+    html::SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
+      html::SequentialFocusNavigationStartingPointPosition::At};
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<StyleSheetList> _styleSheetList;
@@ -1411,7 +1411,7 @@ namespace krys::web
     /// @brief Whether the latest focus change the user made was by clicking.
     KRYS_NODISCARD bool WasLastFocusByClick() const noexcept
     {
-      return _latestFocusTrigger == dom::FocusTrigger::Click;
+      return _latestFocusTrigger == html::FocusTrigger::Click;
     }
 
     /// @brief The style of the initial containing block, which the document element inherits from.

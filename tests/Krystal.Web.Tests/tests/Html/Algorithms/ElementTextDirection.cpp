@@ -48,20 +48,20 @@ namespace krys::web::html::tests
   TEST_CASE("ElementTextDirection: the dir attribute's states",
             "[DOM][ElementTextDirection][html:attr-dir][html:attr-dir-undefined-state]")
   {
-    CHECK(dom::ParseTextDirectionState(u8"ltr") == dom::TextDirectionState::LTR);
-    CHECK(dom::ParseTextDirectionState(u8"RTL") == dom::TextDirectionState::RTL);
-    CHECK(dom::ParseTextDirectionState(u8"Auto") == dom::TextDirectionState::Auto);
-    CHECK(dom::ParseTextDirectionState(u8"") == dom::TextDirectionState::Undefined);
-    CHECK(dom::ParseTextDirectionState(u8"up") == dom::TextDirectionState::Undefined);
-    CHECK(dom::ParseTextDirectionState(null) == dom::TextDirectionState::Undefined);
+    CHECK(html::ParseTextDirectionState(u8"ltr") == html::TextDirectionState::LTR);
+    CHECK(html::ParseTextDirectionState(u8"RTL") == html::TextDirectionState::RTL);
+    CHECK(html::ParseTextDirectionState(u8"Auto") == html::TextDirectionState::Auto);
+    CHECK(html::ParseTextDirectionState(u8"") == html::TextDirectionState::Undefined);
+    CHECK(html::ParseTextDirectionState(u8"up") == html::TextDirectionState::Undefined);
+    CHECK(html::ParseTextDirectionState(null) == html::TextDirectionState::Undefined);
 
     auto document = Parse(u8"<!DOCTYPE html><p id=p dir=auto></p><bdi id=b></bdi><bdi id=c dir=ltr></bdi>");
     CHECK(Is<HTMLBDIElement>(ById(*document, u8"b")));
-    CHECK(dom::ElementHasAutoTextDirectionState(ById(*document, u8"p")));
-    CHECK(dom::ElementHasAutoTextDirectionState(ById(*document, u8"b")));
-    CHECK_FALSE(dom::ElementHasAutoTextDirectionState(ById(*document, u8"c")));
-    CHECK(dom::ElementHasValidTextDirectionState(ById(*document, u8"c")));
-    CHECK_FALSE(dom::ElementHasValidTextDirectionState(ById(*document, u8"b")));
+    CHECK(html::ElementHasAutoTextDirectionState(ById(*document, u8"p")));
+    CHECK(html::ElementHasAutoTextDirectionState(ById(*document, u8"b")));
+    CHECK_FALSE(html::ElementHasAutoTextDirectionState(ById(*document, u8"c")));
+    CHECK(html::ElementHasValidTextDirectionState(ById(*document, u8"c")));
+    CHECK_FALSE(html::ElementHasValidTextDirectionState(ById(*document, u8"b")));
   }
 
   TEST_CASE("ElementTextDirection: auto directionality from text",

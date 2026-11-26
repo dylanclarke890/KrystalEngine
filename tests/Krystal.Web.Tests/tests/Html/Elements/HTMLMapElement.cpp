@@ -232,7 +232,7 @@ namespace krys::web::html::tests
       List<Element *> order;
       for (int32 i = 0; i < 5; ++i)
       {
-        REQUIRE(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Forward));
+        REQUIRE(FocusAlgorithms::SequentialNavigation(document, html::FocusDirection::Forward));
         order.push_back(document.FocusedElement());
       }
       CHECK(order

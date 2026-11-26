@@ -3,8 +3,8 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPString.hpp"
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Html/Algorithms/TextDirectionState.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Internals/PopoverData.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
@@ -274,7 +274,7 @@ namespace krys::web::html
   /// to (or just for `HTMLElement` in the case of generic enumerated attributes).
   /// @code
   /// // Required: the attribute's states, and its keywords with the canonical keyword of each state first.
-  /// using State = dom::TextDirectionState;
+  /// using State = html::TextDirectionState;
   /// static inline const KeywordStateMapping<State> StateMappings[] = {
   ///   {u8"ltr", State::LTR}, {u8"rtl", State::RTL}, {u8"auto", State::Auto}};
   ///
@@ -407,7 +407,7 @@ namespace krys::web::html
   template <>
   struct EnumeratedAttributeTraits<"dir", HTMLElement>
   {
-    using State = dom::TextDirectionState;
+    using State = html::TextDirectionState;
     static inline const KeywordStateMapping<State> StateMappings[] = {
       {u8"ltr", State::LTR},
       {u8"rtl", State::RTL},

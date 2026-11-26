@@ -256,7 +256,7 @@ namespace krys::web
     if (option)
     {
       // As for any focus by the mouse, it isn't shown after a press.
-      dom::FocusOptions focusOptions;
+      html::FocusOptions focusOptions;
       focusOptions.FocusVisible = byKeyboard;
       option->Focus(focusOptions);
     }
@@ -1637,7 +1637,7 @@ namespace krys::web
   }
 
   void HTMLSelectElement::DispatchFocusEvent(EventTarget *relatedTarget,
-                                             const dom::FocusOptions &options) noexcept
+                                             const html::FocusOptions &options) noexcept
   {
     // Save the selection so it can be compared to the new selection when dispatching change events during
     // blur event dispatch.

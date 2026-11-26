@@ -78,7 +78,7 @@ namespace krys::web
 
   PointerLockController::~PointerLockController() noexcept = default;
 
-  void PointerLockController::RequestPointerLock(Element *target, Maybe<dom::PointerLockOptions> &&options,
+  void PointerLockController::RequestPointerLock(Element *target, Maybe<PointerLockOptions> &&options,
                                                  PointerLockCallback &&promise) noexcept
   {
     if (!target || !target->IsConnected() || _documentOfRemovedElementWhileWaitingForUnlock)

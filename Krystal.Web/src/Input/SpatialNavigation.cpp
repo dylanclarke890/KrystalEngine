@@ -58,24 +58,24 @@ namespace krys::web
       return LayoutRect(frame->View()->VisibleContentRect());
     }
 
-    bool AreRectsFullyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+    bool AreRectsFullyAligned(html::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
 
-    bool AreRectsPartiallyAligned(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+    bool AreRectsPartiallyAligned(html::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
 
-    bool AreRectsMoreThanFullScreenApart(dom::FocusDirection, const LayoutRect &curRect,
+    bool AreRectsMoreThanFullScreenApart(html::FocusDirection, const LayoutRect &curRect,
                                          const LayoutRect &targetRect, const LayoutSize &viewSize) noexcept;
 
-    bool IsRectInDirection(dom::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
+    bool IsRectInDirection(html::FocusDirection, const LayoutRect &, const LayoutRect &) noexcept;
 
     void DeflateIfOverlapped(LayoutRect &, LayoutRect &) noexcept;
 
-    void EntryAndExitPointsForDirection(dom::FocusDirection, const LayoutRect &startingRect,
+    void EntryAndExitPointsForDirection(html::FocusDirection, const LayoutRect &startingRect,
                                         const LayoutRect &potentialRect, LayoutPoint &exitPoint,
                                         LayoutPoint &entryPoint) noexcept;
 
     bool IsScrollableNode(const ContainerNode &) noexcept;
 
-    RectsAlignment AlignmentForRects(dom::FocusDirection direction, const LayoutRect &curRect,
+    RectsAlignment AlignmentForRects(html::FocusDirection direction, const LayoutRect &curRect,
                                      const LayoutRect &targetRect, const LayoutSize &viewSize) noexcept
     {
       // If we found a node in full alignment, but it is too far away, ignore it.
@@ -97,23 +97,23 @@ namespace krys::web
       return RectsAlignment::None;
     }
 
-    KRYS_NODISCARD inline bool IsHorizontalMove(dom::FocusDirection direction) noexcept
+    KRYS_NODISCARD inline bool IsHorizontalMove(html::FocusDirection direction) noexcept
     {
-      return direction == dom::FocusDirection::Left || direction == dom::FocusDirection::Right;
+      return direction == html::FocusDirection::Left || direction == html::FocusDirection::Right;
     }
 
-    KRYS_NODISCARD inline LayoutUnit Start(dom::FocusDirection direction, const LayoutRect &rect) noexcept
+    KRYS_NODISCARD inline LayoutUnit Start(html::FocusDirection direction, const LayoutRect &rect) noexcept
     {
       return IsHorizontalMove(direction) ? rect.Y() : rect.X();
     }
 
-    KRYS_NODISCARD inline LayoutUnit Middle(dom::FocusDirection direction, const LayoutRect &rect) noexcept
+    KRYS_NODISCARD inline LayoutUnit Middle(html::FocusDirection direction, const LayoutRect &rect) noexcept
     {
       LayoutPoint center(rect.Center());
       return IsHorizontalMove(direction) ? center.Y() : center.X();
     }
 
-    KRYS_NODISCARD inline LayoutUnit End(dom::FocusDirection direction, const LayoutRect &rect) noexcept
+    KRYS_NODISCARD inline LayoutUnit End(html::FocusDirection direction, const LayoutRect &rect) noexcept
     {
       return IsHorizontalMove(direction) ? rect.MaxY() : rect.MaxX();
     }
@@ -125,26 +125,26 @@ namespace krys::web
     // operations.
     // * a = Current focused node's rect.
     // * b = Focus candidate node's rect.
-    bool AreRectsFullyAligned(dom::FocusDirection direction, const LayoutRect &a,
+    bool AreRectsFullyAligned(html::FocusDirection direction, const LayoutRect &a,
                               const LayoutRect &b) noexcept
     {
       LayoutUnit aStart, bStart, aEnd, bEnd;
 
       switch (direction)
       {
-        case dom::FocusDirection::Left:
+        case html::FocusDirection::Left:
           aStart = a.X();
           bEnd = b.MaxX();
           break;
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Right:
           aStart = b.X();
           bEnd = a.MaxX();
           break;
-        case dom::FocusDirection::Up:
+        case html::FocusDirection::Up:
           aStart = a.Y();
           bEnd = b.Y();
           break;
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Down:
           aStart = b.Y();
           bEnd = a.Y();
           break;
@@ -199,7 +199,7 @@ namespace krys::web
     // horizontally or vertically.
     // * a = Current focused node's rect.
     // * b = Focus candidate node's rect.
-    bool AreRectsPartiallyAligned(dom::FocusDirection direction, const LayoutRect &a,
+    bool AreRectsPartiallyAligned(html::FocusDirection direction, const LayoutRect &a,
                                   const LayoutRect &b) noexcept
     {
       LayoutUnit aStart = Start(direction, a);
@@ -227,17 +227,17 @@ namespace krys::web
               || (bEnd >= aStart && bEnd <= aEnd));
     }
 
-    bool AreRectsMoreThanFullScreenApart(dom::FocusDirection direction, const LayoutRect &curRect,
+    bool AreRectsMoreThanFullScreenApart(html::FocusDirection direction, const LayoutRect &curRect,
                                          const LayoutRect &targetRect, const LayoutSize &viewSize) noexcept
     {
       krys_debug_assert(IsRectInDirection(direction, curRect, targetRect));
 
       switch (direction)
       {
-        case dom::FocusDirection::Left:  return curRect.X() - targetRect.MaxX() > viewSize.Width();
-        case dom::FocusDirection::Right: return targetRect.X() - curRect.MaxX() > viewSize.Width();
-        case dom::FocusDirection::Up:    return curRect.Y() - targetRect.MaxY() > viewSize.Height();
-        case dom::FocusDirection::Down:  return targetRect.Y() - curRect.MaxY() > viewSize.Height();
+        case html::FocusDirection::Left:  return curRect.X() - targetRect.MaxX() > viewSize.Width();
+        case html::FocusDirection::Right: return targetRect.X() - curRect.MaxX() > viewSize.Width();
+        case html::FocusDirection::Up:    return curRect.Y() - targetRect.MaxY() > viewSize.Height();
+        case html::FocusDirection::Down:  return targetRect.Y() - curRect.MaxY() > viewSize.Height();
         default:                         krys_debug_assert(false); return true;
       }
     }
@@ -254,15 +254,15 @@ namespace krys::web
       return a.X() > b.MaxX();
     }
 
-    bool IsRectInDirection(dom::FocusDirection direction, const LayoutRect &curRect,
+    bool IsRectInDirection(html::FocusDirection direction, const LayoutRect &curRect,
                            const LayoutRect &targetRect) noexcept
     {
       switch (direction)
       {
-        case dom::FocusDirection::Left:  return targetRect.MaxX() <= curRect.X();
-        case dom::FocusDirection::Right: return targetRect.X() >= curRect.MaxX();
-        case dom::FocusDirection::Up:    return targetRect.MaxY() <= curRect.Y();
-        case dom::FocusDirection::Down:  return targetRect.Y() >= curRect.MaxY();
+        case html::FocusDirection::Left:  return targetRect.MaxX() <= curRect.X();
+        case html::FocusDirection::Right: return targetRect.X() >= curRect.MaxX();
+        case html::FocusDirection::Up:    return targetRect.MaxY() <= curRect.Y();
+        case html::FocusDirection::Down:  return targetRect.Y() >= curRect.MaxY();
         default:                         krys_debug_assert(false); return false;
       }
     }
@@ -304,25 +304,25 @@ namespace krys::web
 
     // This method calculates the exitPoint from the startingRect and the entryPoint into the candidate rect.
     // The line between those 2 points is the closest distance between the 2 rects.
-    void EntryAndExitPointsForDirection(dom::FocusDirection direction, const LayoutRect &startingRect,
+    void EntryAndExitPointsForDirection(html::FocusDirection direction, const LayoutRect &startingRect,
                                         const LayoutRect &potentialRect, LayoutPoint &exitPoint,
                                         LayoutPoint &entryPoint) noexcept
     {
       switch (direction)
       {
-        case dom::FocusDirection::Left:
+        case html::FocusDirection::Left:
           exitPoint.SetX(startingRect.X());
           entryPoint.SetX(potentialRect.MaxX());
           break;
-        case dom::FocusDirection::Up:
+        case html::FocusDirection::Up:
           exitPoint.SetY(startingRect.Y());
           entryPoint.SetY(potentialRect.MaxY());
           break;
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Right:
           exitPoint.SetX(startingRect.MaxX());
           entryPoint.SetX(potentialRect.X());
           break;
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Down:
           exitPoint.SetY(startingRect.MaxY());
           entryPoint.SetY(potentialRect.Y());
           break;
@@ -331,8 +331,8 @@ namespace krys::web
 
       switch (direction)
       {
-        case dom::FocusDirection::Left:
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Left:
+        case html::FocusDirection::Right:
           if (Below(startingRect, potentialRect))
           {
             exitPoint.SetY(startingRect.Y());
@@ -349,8 +349,8 @@ namespace krys::web
             entryPoint.SetY(exitPoint.Y());
           }
           break;
-        case dom::FocusDirection::Up:
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Up:
+        case html::FocusDirection::Down:
           if (RightOf(startingRect, potentialRect))
           {
             exitPoint.SetX(startingRect.X());
@@ -372,7 +372,7 @@ namespace krys::web
     }
   }
 
-  FocusCandidate::FocusCandidate(Element *element, dom::FocusDirection direction) noexcept
+  FocusCandidate::FocusCandidate(Element *element, html::FocusDirection direction) noexcept
       : Distance(MaxDistance()), IsOffscreen(true)
 
   {
@@ -406,7 +406,7 @@ namespace krys::web
   // Checks if |node| is offscreen the visible area (viewport) of its container
   // document. In case it is, one can scroll in direction or take any different
   // desired action later on.
-  bool HasOffscreenRect(const Node &node, dom::FocusDirection direction) noexcept
+  bool HasOffscreenRect(const Node &node, html::FocusDirection direction) noexcept
   {
     // Get the FrameView in which |node| is (which means the current viewport if |node|
     // is not in an inner document), so we can check if its content rect is visible
@@ -426,18 +426,18 @@ namespace krys::web
     // and we do not adjust for scrolling.
     switch (direction)
     {
-      case dom::FocusDirection::Left:
+      case html::FocusDirection::Left:
         containerViewportRect.SetX(containerViewportRect.X() - Scrollbar::PixelsPerLineStep());
         containerViewportRect.SetWidth(containerViewportRect.Width() + Scrollbar::PixelsPerLineStep());
         break;
-      case dom::FocusDirection::Right:
+      case html::FocusDirection::Right:
         containerViewportRect.SetWidth(containerViewportRect.Width() + Scrollbar::PixelsPerLineStep());
         break;
-      case dom::FocusDirection::Up:
+      case html::FocusDirection::Up:
         containerViewportRect.SetY(containerViewportRect.Y() - Scrollbar::PixelsPerLineStep());
         containerViewportRect.SetHeight(containerViewportRect.Height() + Scrollbar::PixelsPerLineStep());
         break;
-      case dom::FocusDirection::Down:
+      case html::FocusDirection::Down:
         containerViewportRect.SetHeight(containerViewportRect.Height() + Scrollbar::PixelsPerLineStep());
         break;
       default: break;
@@ -458,7 +458,7 @@ namespace krys::web
     return !containerViewportRect.Intersects(rect);
   }
 
-  bool ScrollInDirection(Frame *frame, dom::FocusDirection direction) noexcept
+  bool ScrollInDirection(Frame *frame, html::FocusDirection direction) noexcept
   {
     krys_debug_assert(frame);
 
@@ -468,10 +468,10 @@ namespace krys::web
       LayoutUnit dy;
       switch (direction)
       {
-        case dom::FocusDirection::Left:  dx = -Scrollbar::PixelsPerLineStep(); break;
-        case dom::FocusDirection::Right: dx = Scrollbar::PixelsPerLineStep(); break;
-        case dom::FocusDirection::Up:    dy = -Scrollbar::PixelsPerLineStep(); break;
-        case dom::FocusDirection::Down:  dy = Scrollbar::PixelsPerLineStep(); break;
+        case html::FocusDirection::Left:  dx = -Scrollbar::PixelsPerLineStep(); break;
+        case html::FocusDirection::Right: dx = Scrollbar::PixelsPerLineStep(); break;
+        case html::FocusDirection::Up:    dy = -Scrollbar::PixelsPerLineStep(); break;
+        case html::FocusDirection::Down:  dy = Scrollbar::PixelsPerLineStep(); break;
         default:                         krys_debug_assert(false); return false;
       }
 
@@ -481,7 +481,7 @@ namespace krys::web
     return false;
   }
 
-  bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept
+  bool ScrollInDirection(const ContainerNode &container, html::FocusDirection direction) noexcept
   {
     if (auto *document = DynamicDowncast<web::Document>(container))
     {
@@ -499,19 +499,19 @@ namespace krys::web
       LayoutUnit dy;
       switch (direction)
       {
-        case dom::FocusDirection::Left:
+        case html::FocusDirection::Left:
           dx = -std::min<LayoutUnit>(Scrollbar::PixelsPerLineStep(), renderBox->ScrollLeft());
           break;
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Right:
           krys_debug_assert(renderBox->ScrollWidth() > (renderBox->ScrollLeft() + renderBox->ClientWidth()));
           dx = std::min<LayoutUnit>(Scrollbar::PixelsPerLineStep(),
                                     renderBox->ScrollWidth()
                                       - (renderBox->ScrollLeft() + renderBox->ClientWidth()));
           break;
-        case dom::FocusDirection::Up:
+        case html::FocusDirection::Up:
           dy = -std::min<LayoutUnit>(Scrollbar::PixelsPerLineStep(), renderBox->ScrollTop());
           break;
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Down:
           krys_debug_assert(renderBox->ScrollHeight() - (renderBox->ScrollTop() + renderBox->ClientHeight()));
           dy = std::min<LayoutUnit>(Scrollbar::PixelsPerLineStep(),
                                     renderBox->ScrollHeight()
@@ -530,7 +530,7 @@ namespace krys::web
     return false;
   }
 
-  ContainerNode *ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
+  ContainerNode *ScrollableEnclosingBoxOrParentFrameForNodeInDirection(html::FocusDirection direction,
                                                                        ContainerNode &container) noexcept
   {
     // A document has no parent frame to go on to: there's one frame.
@@ -543,7 +543,7 @@ namespace krys::web
     return parent;
   }
 
-  bool CanScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept
+  bool CanScrollInDirection(const ContainerNode &container, html::FocusDirection direction) noexcept
   {
     if (Is<HTMLSelectElement>(container))
     {
@@ -564,14 +564,14 @@ namespace krys::web
     {
       switch (direction)
       {
-        case dom::FocusDirection::Left:
+        case html::FocusDirection::Left:
           return renderBox->Style().OverflowX() != Overflow::Hidden && renderBox->ScrollLeft() > 0;
-        case dom::FocusDirection::Up:
+        case html::FocusDirection::Up:
           return renderBox->Style().OverflowY() != Overflow::Hidden && renderBox->ScrollTop() > 0;
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Right:
           return renderBox->Style().OverflowX() != Overflow::Hidden
                  && renderBox->ScrollLeft() + renderBox->ClientWidth() < renderBox->ScrollWidth();
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Down:
           return renderBox->Style().OverflowY() != Overflow::Hidden
                  && renderBox->ScrollTop() + renderBox->ClientHeight() < renderBox->ScrollHeight();
         default: krys_debug_assert(false); return false;
@@ -581,7 +581,7 @@ namespace krys::web
     return false;
   }
 
-  bool CanScrollInDirection(const Frame *frame, dom::FocusDirection direction) noexcept
+  bool CanScrollInDirection(const Frame *frame, html::FocusDirection direction) noexcept
   {
     if (!frame || !frame->View())
     {
@@ -590,12 +590,12 @@ namespace krys::web
     ScrollbarMode verticalMode;
     ScrollbarMode horizontalMode;
     frame->View()->CalculateScrollbarModesForLayout(horizontalMode, verticalMode);
-    if ((direction == dom::FocusDirection::Left || direction == dom::FocusDirection::Right)
+    if ((direction == html::FocusDirection::Left || direction == html::FocusDirection::Right)
         && ScrollbarMode::AlwaysOff == horizontalMode)
     {
       return false;
     }
-    if ((direction == dom::FocusDirection::Up || direction == dom::FocusDirection::Down)
+    if ((direction == html::FocusDirection::Up || direction == html::FocusDirection::Down)
         && ScrollbarMode::AlwaysOff == verticalMode)
     {
       return false;
@@ -608,10 +608,10 @@ namespace krys::web
     // FIXME: wrong in RTL documents.
     switch (direction)
     {
-      case dom::FocusDirection::Left:  return scrollPosition.X() > 0;
-      case dom::FocusDirection::Up:    return scrollPosition.Y() > 0;
-      case dom::FocusDirection::Right: return rect.Width() + scrollPosition.X() < size.Width();
-      case dom::FocusDirection::Down:  return rect.Height() + scrollPosition.Y() < size.Height();
+      case html::FocusDirection::Left:  return scrollPosition.X() > 0;
+      case html::FocusDirection::Up:    return scrollPosition.Y() > 0;
+      case html::FocusDirection::Right: return rect.Width() + scrollPosition.X() < size.Width();
+      case html::FocusDirection::Down:  return rect.Height() + scrollPosition.Y() < size.Height();
       default:                         krys_debug_assert(false); return false;
     }
   }
@@ -690,7 +690,7 @@ namespace krys::web
   // Consider only those nodes as candidate which are exactly in the focus-direction.
   // e.g. If we are moving down then the nodes that are above current focused node should be considered as
   // invalid.
-  bool IsValidCandidate(dom::FocusDirection direction, const FocusCandidate &current,
+  bool IsValidCandidate(html::FocusDirection direction, const FocusCandidate &current,
                         FocusCandidate &candidate) noexcept
   {
     LayoutRect currentRect = current.Rect;
@@ -698,22 +698,22 @@ namespace krys::web
 
     switch (direction)
     {
-      case dom::FocusDirection::Left:  return candidateRect.X() < currentRect.MaxX();
-      case dom::FocusDirection::Up:    return candidateRect.Y() < currentRect.MaxY();
-      case dom::FocusDirection::Right: return candidateRect.MaxX() > currentRect.X();
-      case dom::FocusDirection::Down:  return candidateRect.MaxY() > currentRect.Y();
+      case html::FocusDirection::Left:  return candidateRect.X() < currentRect.MaxX();
+      case html::FocusDirection::Up:    return candidateRect.Y() < currentRect.MaxY();
+      case html::FocusDirection::Right: return candidateRect.MaxX() > currentRect.X();
+      case html::FocusDirection::Down:  return candidateRect.MaxY() > currentRect.Y();
       default:                         krys_debug_assert(false);
     }
     return false;
   }
 
-  void DistanceDataForNode(dom::FocusDirection direction, const FocusCandidate &current,
+  void DistanceDataForNode(html::FocusDirection direction, const FocusCandidate &current,
                            FocusCandidate &candidate) noexcept
   {
     if (AreElementsOnSameLine(current, candidate))
     {
-      if ((direction == dom::FocusDirection::Up && current.Rect.Y() > candidate.Rect.Y())
-          || (direction == dom::FocusDirection::Down && candidate.Rect.Y() > current.Rect.Y()))
+      if ((direction == html::FocusDirection::Up && current.Rect.Y() > candidate.Rect.Y())
+          || (direction == html::FocusDirection::Down && candidate.Rect.Y() > current.Rect.Y()))
       {
         candidate.Distance = 0;
         candidate.Alignment = RectsAlignment::Full;
@@ -738,19 +738,19 @@ namespace krys::web
 
     switch (direction)
     {
-      case dom::FocusDirection::Left:
+      case html::FocusDirection::Left:
         sameAxisDistance = exitPoint.X() - entryPoint.X();
         otherAxisDistance = AbsoluteValue(exitPoint.Y() - entryPoint.Y());
         break;
-      case dom::FocusDirection::Up:
+      case html::FocusDirection::Up:
         sameAxisDistance = exitPoint.Y() - entryPoint.Y();
         otherAxisDistance = AbsoluteValue(exitPoint.X() - entryPoint.X());
         break;
-      case dom::FocusDirection::Right:
+      case html::FocusDirection::Right:
         sameAxisDistance = entryPoint.X() - exitPoint.X();
         otherAxisDistance = AbsoluteValue(entryPoint.Y() - exitPoint.Y());
         break;
-      case dom::FocusDirection::Down:
+      case html::FocusDirection::Down:
         sameAxisDistance = entryPoint.Y() - exitPoint.Y();
         otherAxisDistance = AbsoluteValue(entryPoint.X() - exitPoint.X());
         break;
@@ -777,7 +777,7 @@ namespace krys::web
     candidate.Alignment = AlignmentForRects(direction, currentRect, nodeRect, viewSize);
   }
 
-  bool CanBeScrolledIntoView(dom::FocusDirection direction, const FocusCandidate &candidate) noexcept
+  bool CanBeScrolledIntoView(html::FocusDirection direction, const FocusCandidate &candidate) noexcept
   {
     krys_debug_assert(candidate.VisibleNode && candidate.IsOffscreen);
     LayoutRect candidateRect = candidate.Rect;
@@ -791,9 +791,9 @@ namespace krys::web
       LayoutRect parentRect = NodeRectInAbsoluteCoordinates(*parentNode);
       if (!candidateRect.Intersects(parentRect))
       {
-        if (((direction == dom::FocusDirection::Left || direction == dom::FocusDirection::Right)
+        if (((direction == html::FocusDirection::Left || direction == html::FocusDirection::Right)
              && parentNode->Renderer()->Style().OverflowX() == Overflow::Hidden)
-            || ((direction == dom::FocusDirection::Up || direction == dom::FocusDirection::Down)
+            || ((direction == html::FocusDirection::Up || direction == html::FocusDirection::Down)
                 && parentNode->Renderer()->Style().OverflowY() == Overflow::Hidden))
         {
           return false;
@@ -811,22 +811,22 @@ namespace krys::web
   // Compose a virtual starting rect if there is no focused node or if it is off screen.
   // The virtual rect is the edge of the container or frame. We select which
   // edge depending on the direction of the navigation.
-  LayoutRect VirtualRectForDirection(dom::FocusDirection direction, const LayoutRect &startingRect,
+  LayoutRect VirtualRectForDirection(html::FocusDirection direction, const LayoutRect &startingRect,
                                      LayoutUnit width) noexcept
   {
     LayoutRect virtualStartingRect = startingRect;
     switch (direction)
     {
-      case dom::FocusDirection::Left:
+      case html::FocusDirection::Left:
         virtualStartingRect.SetX(virtualStartingRect.MaxX() - width);
         virtualStartingRect.SetWidth(width);
         break;
-      case dom::FocusDirection::Up:
+      case html::FocusDirection::Up:
         virtualStartingRect.SetY(virtualStartingRect.MaxY() - width);
         virtualStartingRect.SetHeight(width);
         break;
-      case dom::FocusDirection::Right: virtualStartingRect.SetWidth(width); break;
-      case dom::FocusDirection::Down:  virtualStartingRect.SetHeight(width); break;
+      case html::FocusDirection::Right: virtualStartingRect.SetWidth(width); break;
+      case html::FocusDirection::Down:  virtualStartingRect.SetHeight(width); break;
       default:                         krys_debug_assert(false);
     }
 
@@ -834,7 +834,7 @@ namespace krys::web
   }
 
   LayoutRect VirtualRectForAreaElementAndDirection(HTMLAreaElement *area,
-                                                   dom::FocusDirection direction) noexcept
+                                                   html::FocusDirection direction) noexcept
   {
     krys_debug_assert(area);
     krys_debug_assert(area->ImageElement());

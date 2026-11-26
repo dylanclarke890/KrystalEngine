@@ -225,7 +225,7 @@ namespace krys::web
       (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
       if (html::FocusAlgorithms::IsFocusableArea(*control))
       {
-        control->Focus({.Trigger = dom::FocusTrigger::Click});
+        control->Focus({.Trigger = html::FocusTrigger::Click});
       }
 
       event.SetDefaultHandled();

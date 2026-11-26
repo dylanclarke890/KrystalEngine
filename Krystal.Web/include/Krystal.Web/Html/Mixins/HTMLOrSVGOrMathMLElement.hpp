@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 
 namespace krys::web
 {
@@ -30,7 +30,7 @@ namespace krys::web::html::mixins
     static void Autofocus(Element &element, bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
-    static void Focus(Element &element, const dom::FocusOptions &options = {}) noexcept;
+    static void Focus(Element &element, const html::FocusOptions &options = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
     static void Blur(Element &element) noexcept;

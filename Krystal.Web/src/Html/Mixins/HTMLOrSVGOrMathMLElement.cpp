@@ -84,7 +84,7 @@ namespace krys::web::html::mixins
   }
 
   // https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
-  void HTMLOrSVGOrMathMLElement::Focus(Element &element, const dom::FocusOptions &options) noexcept
+  void HTMLOrSVGOrMathMLElement::Focus(Element &element, const html::FocusOptions &options) noexcept
   {
     // 1. If the allow focus steps given this's node document return false, then return.
     // https://html.spec.whatwg.org/multipage/interaction.html#allow-focus-steps
@@ -98,19 +98,19 @@ namespace krys::web::html::mixins
     //    agent determines it would be best to do so, then indicate focus.
     // (The heuristic indicates it unless the user's latest focus change was a click.)
     auto withVisibility = options;
-    withVisibility.Trigger = dom::FocusTrigger::Bindings;
+    withVisibility.Trigger = html::FocusTrigger::Bindings;
     if (options.FocusVisible)
     {
       withVisibility.Visibility =
-        *options.FocusVisible ? dom::FocusVisibility::Visible : dom::FocusVisibility::ForceInvisible;
+        *options.FocusVisible ? html::FocusVisibility::Visible : html::FocusVisibility::ForceInvisible;
     }
     else if (element.NodeDocument().WasLastFocusByClick())
     {
-      withVisibility.Visibility = dom::FocusVisibility::Invisible;
+      withVisibility.Visibility = html::FocusVisibility::Invisible;
     }
     else
     {
-      withVisibility.Visibility = dom::FocusVisibility::Visible;
+      withVisibility.Visibility = html::FocusVisibility::Visible;
     }
 
     // 2. Run the focusing steps for this.

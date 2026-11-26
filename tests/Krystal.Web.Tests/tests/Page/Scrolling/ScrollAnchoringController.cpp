@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Page/Scrolling/ScrollAnchoringController.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Animation/AnimationTestUtils.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Rendering/Layers/RenderLayerScrollableArea.hpp"
@@ -184,7 +184,7 @@ namespace krys::web::tests
             "[Page][Scrolling][ScrollAnchoringController][css-scroll-anchoring:priority-candidates]")
   {
     AnimationPageFixture fixture {AnchoringPage({}, u8"<textarea id=t></textarea>")};
-    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
+    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(html::FocusOptions {.PreventScroll = true});
     ScrollViewTo(fixture, 300);
     CHECK(View(fixture).GetScrollAnchoringController()->AnchorElement() == &fixture.ById(u8"t"));
 
@@ -198,7 +198,7 @@ namespace krys::web::tests
             "[Page][Scrolling][ScrollAnchoringController][css-scroll-anchoring:priority-candidates]")
   {
     AnimationPageFixture fixture {AnchoringPage({}, u8"<div id=t tabindex=0></div>")};
-    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(dom::FocusOptions {.PreventScroll = true});
+    Downcast<HTMLElement>(fixture.ById(u8"t")).Focus(html::FocusOptions {.PreventScroll = true});
     ScrollViewTo(fixture, 300);
     CHECK(View(fixture).GetScrollAnchoringController()->AnchorElement() == &fixture.ById(u8"d6"));
   }

@@ -41,6 +41,7 @@ namespace krys::web::html
   class CustomElementRegistry;
   class TreeBuilder;
 
+  struct GetHTMLOptions;
   struct SetHTMLOptions;
   struct SetHTMLUnsafeOptions;
 }
@@ -50,8 +51,6 @@ namespace krys::web::dom
   class DocumentAlgorithms;
   class ElementAlgorithms;
   class NodeAlgorithms;
-
-  struct GetHTMLOptions;
 
   /// @see https://dom.spec.whatwg.org/#enumdef-shadowrootmode
   enum class ShadowRootMode : uint8
@@ -294,7 +293,7 @@ namespace krys::web
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-shadowroot-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(html::GetHTMLOptions options) const noexcept;
 
     /// @brief The same, with no shadow roots.
     /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.

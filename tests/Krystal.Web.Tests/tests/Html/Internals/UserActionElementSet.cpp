@@ -228,7 +228,7 @@ namespace krys::web::html::tests
       CHECK(width(d) == "auto");
 
       // Visible focus, and text fields always show focus.
-      b.SetFocus(true, dom::FocusVisibility::Visible);
+      b.SetFocus(true, html::FocusVisibility::Visible);
       CHECK(b.HasFocusVisible());
       b.SetFocus(false);
       i.SetFocus(true);

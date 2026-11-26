@@ -579,7 +579,7 @@ namespace krys::web::tests
 
     SECTION("Sequential navigation places a caret in it")
     {
-      CHECK(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, dom::FocusDirection::Forward));
+      CHECK(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, html::FocusDirection::Forward));
       CHECK(fixture.Document->FocusedElement() == &host);
       CHECK(selection.IsCaret());
     }

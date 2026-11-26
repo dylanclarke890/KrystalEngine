@@ -1906,13 +1906,13 @@ namespace krys::web
       {
         _sequentialFocusNavigationStartingPoint = ShareRefPtr(previousSibling);
         _sequentialFocusNavigationStartingPointPosition =
-          dom::SequentialFocusNavigationStartingPointPosition::After;
+          html::SequentialFocusNavigationStartingPointPosition::After;
       }
       else if (auto *parent = node.ParentNode(); parent && parent != this)
       {
         _sequentialFocusNavigationStartingPoint = ShareRefPtr<Node>(parent);
         _sequentialFocusNavigationStartingPointPosition =
-          dom::SequentialFocusNavigationStartingPointPosition::Inside;
+          html::SequentialFocusNavigationStartingPointPosition::Inside;
       }
       else
       {
@@ -3848,7 +3848,8 @@ namespace krys::web
 
   void Document::SetSequentialFocusNavigationStartingPoint(Node *node) noexcept
   {
-    _sequentialFocusNavigationStartingPointPosition = dom::SequentialFocusNavigationStartingPointPosition::At;
+    _sequentialFocusNavigationStartingPointPosition =
+      html::SequentialFocusNavigationStartingPointPosition::At;
     // Setting the starting point to the document or its document element means navigation starts from the
     // start of the document.
     if (!node || node == this || node == dom::TreeQueries::DocumentElement(*this))

@@ -28,7 +28,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   /// @brief What focusing an element that has a selection of its own (a text control) does with it.
   enum class SelectionRestorationMode : uint8

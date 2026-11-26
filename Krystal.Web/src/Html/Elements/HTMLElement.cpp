@@ -18,13 +18,13 @@
 #include "Krystal.Web/Dom/Nodes/ElementFactory.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/TextIterator.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Web/Html/Algorithms/TextDirectionState.hpp"
 #include "Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/CloseWatcher/CloseWatcher.hpp"
@@ -1406,7 +1406,7 @@ namespace krys::web
     RefPtr<Node> control =
       HasAttribute(u8"autofocus")
         ? ShareRefPtr<Node>(this)
-        : ShareRefPtr(html::FocusAlgorithms::AutofocusDelegate(*this, dom::FocusTrigger::Other));
+        : ShareRefPtr(html::FocusAlgorithms::AutofocusDelegate(*this, html::FocusTrigger::Other));
     // 5. If control is null, then return.
     if (!control)
     {
@@ -1807,16 +1807,16 @@ namespace krys::web
     }
     else if (localName == u8"dir")
     {
-      switch (dom::ParseTextDirectionState(value))
+      switch (html::ParseTextDirectionState(value))
       {
-        case dom::TextDirectionState::Auto:
+        case html::TextDirectionState::Auto:
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi,
                                                UnicodeBidiAttributeForDirAuto(*this));
           break;
         }
-        case dom::TextDirectionState::LTR:
-        case dom::TextDirectionState::RTL:
+        case html::TextDirectionState::LTR:
+        case html::TextDirectionState::RTL:
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, CSSOMString(value));
           auto tagName = TagQualifiedName().TagName();
@@ -1827,7 +1827,7 @@ namespace krys::web
           }
           break;
         }
-        case dom::TextDirectionState::Undefined: break;
+        case html::TextDirectionState::Undefined: break;
       }
     }
     else if (localName == u8"lang")

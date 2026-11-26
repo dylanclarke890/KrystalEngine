@@ -20,7 +20,7 @@ namespace krys::web::tests
 {
   namespace
   {
-    using Direction = dom::FocusDirection;
+    using Direction = html::FocusDirection;
 
     /// @brief A laid out document in a 400x300 view.
     struct SpatialNavigationFixture : PaintFixture

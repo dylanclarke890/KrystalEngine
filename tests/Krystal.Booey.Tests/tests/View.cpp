@@ -895,7 +895,7 @@ namespace krys::boo::tests
     }
 
     // A press on `a` asks to lock the pointer to it (a press is a user gesture).
-    web::dom::PointerLockOptions options;
+    web::PointerLockOptions options;
     handles.push_back(a.AddEventListener(
       u8"mousedown", Func<void(web::Event &)>([&](web::Event &) { a.RequestPointerLock(options); })));
     auto click = [&]

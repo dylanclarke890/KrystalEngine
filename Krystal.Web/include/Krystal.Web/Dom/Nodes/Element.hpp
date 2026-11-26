@@ -15,13 +15,13 @@
 #include "Krystal.Web/Css/Containment/ContentRelevancy.hpp"
 #include "Krystal.Web/Css/Geometry/DOMRect.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Dom/Nodes/NamedNodeMap.hpp"
-#include "Krystal.Web/Dom/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Web/Dom/Types/NodeOrString.hpp"
 #include "Krystal.Web/Dom/Types/QualifiedName.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include "Krystal.Web/Html/Events/SimulatedClick.hpp"
 #include "Krystal.Web/Input/PlatformWheelEvent.hpp"
+#include "Krystal.Web/Input/PointerLockOptions.hpp"
 #include "Krystal.Web/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Web/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Web/Rendering/HitTesting/HitTestRequest.hpp"
@@ -62,6 +62,7 @@ namespace krys::web::html
   class PopoverData;
   class TreeBuilder;
 
+  struct GetHTMLOptions;
   struct SetHTMLOptions;
   struct SetHTMLUnsafeOptions;
 
@@ -86,7 +87,6 @@ namespace krys::web::dom
   class TreeQueries;
   class TreeTraversal;
 
-  struct GetHTMLOptions;
   struct ShadowRootInit;
 
   /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
@@ -522,7 +522,7 @@ namespace krys::web
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml
-    KRYS_NODISCARD DOMString GetHTML(dom::GetHTMLOptions options) const noexcept;
+    KRYS_NODISCARD DOMString GetHTML(html::GetHTMLOptions options) const noexcept;
 
     /// @brief The same, with no shadow roots.
     /// @note An overload rather than a default argument, which would need ShadowRoot's definition here.
@@ -570,7 +570,7 @@ namespace krys::web
     /// once it's locked, or `pointerlockerror` if it can't be.
     /// @param promise Called once, as a microtask, when the lock is applied or the request fails.
     /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
-    void RequestPointerLock(dom::PointerLockOptions options = {},
+    void RequestPointerLock(PointerLockOptions options = {},
                             Func<void(ExceptionOr<void> &&)> &&promise = {}) noexcept;
 
 #pragma endregion
@@ -1213,7 +1213,7 @@ namespace krys::web
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.
-    virtual void DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept;
+    virtual void DispatchFocusEvent(EventTarget *relatedTarget, const html::FocusOptions &options) noexcept;
 
     /// @brief Fires `blur` (then `focusout`) at the element as the focus update steps unfocus it; text
     /// controls update their placeholder and end editing first.
@@ -1226,12 +1226,12 @@ namespace krys::web
 
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
-    virtual void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+    virtual void UpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
     /// @brief Shows that the element is focused, through the element that shows it.
     void FindTargetAndUpdateFocusAppearance(
-      dom::SelectionRestorationMode restorationMode,
+      html::SelectionRestorationMode restorationMode,
       SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
     /// @brief The element that shows that this one is focused (the image of an image map's area), or null if
@@ -1856,7 +1856,7 @@ namespace krys::web
 
     /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
     virtual void SetFocus(bool value,
-                          dom::FocusVisibility visibility = dom::FocusVisibility::Invisible) noexcept;
+                          html::FocusVisibility visibility = html::FocusVisibility::Invisible) noexcept;
 
     void SetHasFocusVisible(bool value) noexcept;
 

@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include <limits>
 
 namespace krys::web
@@ -57,7 +57,7 @@ namespace krys::web
     FocusCandidate() noexcept = default;
 
     /// @brief @p element as a candidate for moving in @p direction; null if it isn't rendered.
-    FocusCandidate(Element *element, dom::FocusDirection direction) noexcept;
+    FocusCandidate(Element *element, html::FocusDirection direction) noexcept;
 
     KRYS_NODISCARD bool IsNull() const noexcept
     {
@@ -68,26 +68,26 @@ namespace krys::web
   /// @brief Whether @p node is outside the viewport of its document (after scrolling a line in @p direction,
   /// if there is one).
   KRYS_NODISCARD bool HasOffscreenRect(const Node &node,
-                                       dom::FocusDirection direction = dom::FocusDirection::None) noexcept;
+                                       html::FocusDirection direction = html::FocusDirection::None) noexcept;
 
   /// @brief Scrolls @p frame's view a line in @p direction.
   /// @return Whether it could scroll.
-  bool ScrollInDirection(Frame *frame, dom::FocusDirection direction) noexcept;
+  bool ScrollInDirection(Frame *frame, html::FocusDirection direction) noexcept;
 
   /// @brief Scrolls @p container (a document's view, or a scrollable box) a line in @p direction.
   /// @return Whether it could scroll.
-  bool ScrollInDirection(const ContainerNode &container, dom::FocusDirection direction) noexcept;
+  bool ScrollInDirection(const ContainerNode &container, html::FocusDirection direction) noexcept;
 
   /// @brief Whether @p container has more to scroll to in @p direction.
   KRYS_NODISCARD bool CanScrollInDirection(const ContainerNode &container,
-                                           dom::FocusDirection direction) noexcept;
+                                           html::FocusDirection direction) noexcept;
 
   /// @brief Whether @p frame's view has more to scroll to in @p direction.
-  KRYS_NODISCARD bool CanScrollInDirection(const Frame *frame, dom::FocusDirection direction) noexcept;
+  KRYS_NODISCARD bool CanScrollInDirection(const Frame *frame, html::FocusDirection direction) noexcept;
 
   /// @brief Whether an offscreen @p candidate could be scrolled into view in @p direction: no box up to its
   /// scrollable box clips it away in that direction, and that box can scroll.
-  KRYS_NODISCARD bool CanBeScrolledIntoView(dom::FocusDirection direction,
+  KRYS_NODISCARD bool CanBeScrolledIntoView(html::FocusDirection direction,
                                             const FocusCandidate &candidate) noexcept;
 
   /// @brief Whether both candidates are inline boxes (not areas) in the same containing block whose rects
@@ -96,17 +96,17 @@ namespace krys::web
                                             const FocusCandidate &secondCandidate) noexcept;
 
   /// @brief Whether @p candidate lies at least partly in @p direction from @p current.
-  KRYS_NODISCARD bool IsValidCandidate(dom::FocusDirection direction, const FocusCandidate &current,
+  KRYS_NODISCARD bool IsValidCandidate(html::FocusDirection direction, const FocusCandidate &current,
                                        FocusCandidate &candidate) noexcept;
 
   /// @brief Sets @p candidate's distance and alignment from @p current, if it lies in @p direction.
-  void DistanceDataForNode(dom::FocusDirection direction, const FocusCandidate &current,
+  void DistanceDataForNode(html::FocusDirection direction, const FocusCandidate &current,
                            FocusCandidate &candidate) noexcept;
 
   /// @brief The nearest ancestor of @p container that can scroll in @p direction, or its document; null for
   /// a document.
   KRYS_NODISCARD ContainerNode *
-    ScrollableEnclosingBoxOrParentFrameForNodeInDirection(dom::FocusDirection direction,
+    ScrollableEnclosingBoxOrParentFrameForNodeInDirection(html::FocusDirection direction,
                                                           ContainerNode &container) noexcept;
 
   /// @brief @p containerNode's rect in document coordinates (a document's is its visible content rect),
@@ -116,12 +116,12 @@ namespace krys::web
 
   /// @brief A strip @p width thick along the edge of @p startingRect that navigation in @p direction moves
   /// away from, to start from when nothing focused is on screen.
-  KRYS_NODISCARD LayoutRect VirtualRectForDirection(dom::FocusDirection direction,
+  KRYS_NODISCARD LayoutRect VirtualRectForDirection(html::FocusDirection direction,
                                                     const LayoutRect &startingRect,
                                                     LayoutUnit width = LayoutUnit()) noexcept;
 
   /// @brief An image map area's rect, flattened to a 1px strip along the edge that navigation in
   /// @p direction moves away from, so overlapping areas don't hide each other.
   KRYS_NODISCARD LayoutRect VirtualRectForAreaElementAndDirection(HTMLAreaElement *area,
-                                                                  dom::FocusDirection direction) noexcept;
+                                                                  html::FocusDirection direction) noexcept;
 }

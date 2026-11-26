@@ -1136,19 +1136,15 @@ set(KRYSTAL_WEB_DOM_HEADERS
   include/Krystal.Web/Dom/Nodes/Element.hpp
   include/Krystal.Web/Dom/Nodes/ElementFactory.hpp
   include/Krystal.Web/Dom/Nodes/ElementRareData.hpp
-  include/Krystal.Web/Dom/Nodes/FocusOptions.hpp
-  include/Krystal.Web/Dom/Nodes/GetHTMLOptions.hpp
   include/Krystal.Web/Dom/Nodes/HTMLDocument.hpp
   include/Krystal.Web/Dom/Nodes/NamedNodeMap.hpp
   include/Krystal.Web/Dom/Nodes/Node.hpp
   include/Krystal.Web/Dom/Nodes/NodeRareData.hpp
-  include/Krystal.Web/Dom/Nodes/PointerLockOptions.hpp
   include/Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp
   include/Krystal.Web/Dom/Nodes/PseudoElement.hpp
   include/Krystal.Web/Dom/Nodes/ShadowRoot.hpp
   include/Krystal.Web/Dom/Nodes/StyledElement.hpp
   include/Krystal.Web/Dom/Nodes/Text.hpp
-  include/Krystal.Web/Dom/Nodes/TextDirectionState.hpp
   include/Krystal.Web/Dom/Nodes/XHTMLDocument.hpp
   include/Krystal.Web/Dom/Nodes/XMLDocument.hpp
   include/Krystal.Web/Dom/MutationObserver/AttributesMutationRecord.hpp
@@ -1244,7 +1240,6 @@ set(KRYSTAL_WEB_DOM_SOURCES
   src/Dom/Nodes/ShadowRoot.cpp
   src/Dom/Nodes/StyledElement.cpp
   src/Dom/Nodes/Text.cpp
-  src/Dom/Nodes/TextDirectionState.cpp
   src/Dom/MutationObserver/AttributesMutationRecord.cpp
   src/Dom/MutationObserver/CharacterDataMutationRecord.cpp
   src/Dom/MutationObserver/ChildListMutationRecord.cpp
@@ -1810,10 +1805,12 @@ set(KRYSTAL_WEB_HTML_HEADERS
   include/Krystal.Web/Html/Algorithms/ElementTextDirection.hpp
   include/Krystal.Web/Html/Algorithms/FindRevealAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp
+  include/Krystal.Web/Html/Algorithms/FocusOptions.hpp
   include/Krystal.Web/Html/Algorithms/FormControlAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/HyperlinkAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/RenderBlocking.hpp
+  include/Krystal.Web/Html/Algorithms/TextDirectionState.hpp
   include/Krystal.Web/Html/AnimationFrames/AnimationFrameCallbacks.hpp
   include/Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp
   include/Krystal.Web/Html/Attributes/EventHandlerAttributes.hpp
@@ -2044,6 +2041,7 @@ set(KRYSTAL_WEB_HTML_HEADERS
   include/Krystal.Web/Html/Timers/DocumentTimer.hpp
   include/Krystal.Web/Html/Types/DocumentReadyState.hpp
   include/Krystal.Web/Html/Types/DocumentVisibilityState.hpp
+  include/Krystal.Web/Html/Types/GetHTMLOptions.hpp
   include/Krystal.Web/Html/Types/Namespace.hpp
   include/Krystal.Web/Html/Types/TagName.hpp
   include/Krystal.Web/Html/Window.hpp
@@ -2058,6 +2056,7 @@ set(KRYSTAL_WEB_HTML_SOURCES
   src/Html/Algorithms/HTMLInsertionAlgorithms.cpp
   src/Html/Algorithms/HyperlinkAlgorithms.cpp
   src/Html/Algorithms/RenderBlocking.cpp
+  src/Html/Algorithms/TextDirectionState.cpp
   src/Html/AnimationFrames/AnimationFrameCallbacks.cpp
   src/Html/Attributes/EventHandlerAttributes.cpp
   src/Html/Canvas/CanvasBase.cpp
@@ -2268,6 +2267,7 @@ set(KRYSTAL_WEB_INPUT_HEADERS
   include/Krystal.Web/Input/PointerCharacteristics.hpp
   include/Krystal.Web/Input/PointerId.hpp
   include/Krystal.Web/Input/PointerLockController.hpp
+  include/Krystal.Web/Input/PointerLockOptions.hpp
   include/Krystal.Web/Input/SpatialNavigation.hpp
   include/Krystal.Web/Input/WheelEventDeltaFilter.hpp
 )

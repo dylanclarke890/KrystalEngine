@@ -31,10 +31,10 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Dom/Types/Exception.hpp"
 #include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Web/Input/PointerLockOptions.hpp"
 
 namespace krys::web
 {
@@ -70,7 +70,7 @@ namespace krys::web
     WeakPtr<Frame> _frame;
     bool _lockPending {false};
     bool _unlockPending {false};
-    Maybe<dom::PointerLockOptions> _options;
+    Maybe<PointerLockOptions> _options;
     RefPtr<Element> _element;
     List<PointerLockCallback> _promises;
     WeakPtr<Document> _documentOfRemovedElementWhileWaitingForUnlock;
@@ -84,7 +84,7 @@ namespace krys::web
     /// @brief Asks to lock the pointer to @p target (or moves the lock there, if the pointer is locked to an
     /// element of its document); @p promise, if given, settles once the host has answered.
     /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
-    void RequestPointerLock(Element *target, Maybe<dom::PointerLockOptions> &&options = null,
+    void RequestPointerLock(Element *target, Maybe<PointerLockOptions> &&options = null,
                             PointerLockCallback &&promise = {}) noexcept;
 
     /// @brief Asks the host to unlock the pointer, if it's locked.

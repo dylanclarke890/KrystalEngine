@@ -8,7 +8,7 @@ namespace krys::web
   class ShadowRoot;
 }
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#gethtmloptions
   struct GetHTMLOptions

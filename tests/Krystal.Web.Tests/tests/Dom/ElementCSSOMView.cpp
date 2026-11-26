@@ -276,7 +276,7 @@ namespace krys::web::dom::tests
     SECTION("Focusing")
     {
       auto &html = Downcast<HTMLElement>(target);
-      FocusOptions options;
+      html::FocusOptions options;
       options.PreventScroll = true;
       html.Focus(options);
       CHECK(fixture.Document->FocusedElement() == &target);

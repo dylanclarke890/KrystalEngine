@@ -291,7 +291,7 @@ namespace krys::web
 
     KRYS_NODISCARD bool ChildShouldCreateRenderer(const Node &child) const noexcept override;
 
-    void DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept override;
+    void DispatchFocusEvent(EventTarget *relatedTarget, const html::FocusOptions &options) noexcept override;
 
     void DispatchBlurEvent(EventTarget *relatedTarget) noexcept override;
 

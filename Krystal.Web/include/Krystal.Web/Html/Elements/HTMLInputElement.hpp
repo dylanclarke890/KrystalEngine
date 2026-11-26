@@ -660,7 +660,7 @@ namespace krys::web
 
     void DidDetachRenderers() noexcept final;
 
-    void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+    void UpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
 
     void DidBlur() noexcept final;
@@ -808,7 +808,7 @@ namespace krys::web
     void RunPostTypeUpdateTasks() noexcept;
 
     /// @brief Puts the caret where focusing a text field puts it, without a kept selection to restore.
-    void SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
+    void SetDefaultSelectionAfterFocus(html::SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode) noexcept;
 
     /// @brief Restyles a text field with an ellipsis as it gains or loses the focus.

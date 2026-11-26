@@ -215,25 +215,25 @@ namespace krys::web
       return shadowRoot && shadowRoot->Host() && Is<HTMLInputElement>(*shadowRoot->Host());
     }
 
-    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const DOMString &key) noexcept
+    KRYS_NODISCARD html::FocusDirection FocusDirectionForKey(const DOMString &key) noexcept
     {
       if (key == u8"ArrowDown")
       {
-        return dom::FocusDirection::Down;
+        return html::FocusDirection::Down;
       }
       if (key == u8"ArrowUp")
       {
-        return dom::FocusDirection::Up;
+        return html::FocusDirection::Up;
       }
       if (key == u8"ArrowLeft")
       {
-        return dom::FocusDirection::Left;
+        return html::FocusDirection::Left;
       }
       if (key == u8"ArrowRight")
       {
-        return dom::FocusDirection::Right;
+        return html::FocusDirection::Right;
       }
-      return dom::FocusDirection::None;
+      return html::FocusDirection::None;
     }
 
     KRYS_NODISCARD Scrollbar *ScrollbarForMouseEvent(const MouseEventWithHitTestResults &mouseEvent,
@@ -1203,7 +1203,7 @@ namespace krys::web
       return false;
     }
 
-    dom::FocusOptions options {.Trigger = dom::FocusTrigger::Click};
+    html::FocusOptions options {.Trigger = html::FocusTrigger::Click};
     if (element)
     {
       html::FocusAlgorithms::FocusingSteps(*element, nullptr, options);
@@ -1482,8 +1482,8 @@ namespace krys::web
       {
         return DefaultHomeEndEventHandler(event);
       }
-      dom::FocusDirection direction = FocusDirectionForKey(event.Key());
-      if (direction != dom::FocusDirection::None)
+      html::FocusDirection direction = FocusDirectionForKey(event.Key());
+      if (direction != html::FocusDirection::None)
       {
         return DefaultArrowEventHandler(direction, event);
       }
@@ -1564,7 +1564,7 @@ namespace krys::web
     return view->LogicalScroll(direction, ScrollGranularity::Page, KeyboardScrollIsAnimated());
   }
 
-  bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
+  bool EventHandler::DefaultArrowEventHandler(html::FocusDirection focusDirection,
                                               KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == event_names::KeyDown);
@@ -1574,19 +1574,21 @@ namespace krys::web
       ScrollLogicalDirection direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
       switch (focusDirection)
       {
-        case dom::FocusDirection::Down:
+        case html::FocusDirection::Down:
           direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
           break;
-        case dom::FocusDirection::Right:
+        case html::FocusDirection::Right:
           direction = ScrollLogicalDirection::ScrollInlineDirectionForward;
           break;
-        case dom::FocusDirection::Up: direction = ScrollLogicalDirection::ScrollBlockDirectionBackward; break;
-        case dom::FocusDirection::Left:
+        case html::FocusDirection::Up:
+          direction = ScrollLogicalDirection::ScrollBlockDirectionBackward;
+          break;
+        case html::FocusDirection::Left:
           direction = ScrollLogicalDirection::ScrollInlineDirectionBackward;
           break;
-        case dom::FocusDirection::None:
-        case dom::FocusDirection::Backward:
-        case dom::FocusDirection::Forward:  krys_assert(false); break;
+        case html::FocusDirection::None:
+        case html::FocusDirection::Backward:
+        case html::FocusDirection::Forward:  krys_assert(false); break;
       }
       return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Line);
     }
@@ -1727,7 +1729,7 @@ namespace krys::web
     // FIXME: Whether the page lets Tab cycle through elements (tabKeyCyclesThroughElements), once the host
     // can say.
     return html::FocusAlgorithms::SequentialNavigation(
-      *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
+      *document, event.ShiftKey() ? html::FocusDirection::Backward : html::FocusDirection::Forward);
   }
 
   void EventHandler::ScheduleCursorUpdate() noexcept

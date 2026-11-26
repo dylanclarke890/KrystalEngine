@@ -253,7 +253,7 @@ namespace krys::web
     return nullptr;
   }
 
-  void HTMLAreaElement::SetFocus(bool value, dom::FocusVisibility visibility) noexcept
+  void HTMLAreaElement::SetFocus(bool value, html::FocusVisibility visibility) noexcept
   {
     if (Focused() == value)
     {

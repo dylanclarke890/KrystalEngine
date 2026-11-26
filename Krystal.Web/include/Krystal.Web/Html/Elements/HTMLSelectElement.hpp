@@ -350,7 +350,7 @@ namespace krys::web
 
     void DefaultEventHandler(Event &event) noexcept final;
 
-    void DispatchFocusEvent(EventTarget *relatedTarget, const dom::FocusOptions &options) noexcept final;
+    void DispatchFocusEvent(EventTarget *relatedTarget, const html::FocusOptions &options) noexcept final;
 
     void DispatchBlurEvent(EventTarget *relatedTarget) noexcept final;
 

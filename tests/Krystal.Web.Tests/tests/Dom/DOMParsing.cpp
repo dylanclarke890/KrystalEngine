@@ -6,7 +6,6 @@
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Dom/Nodes/GetHTMLOptions.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -15,6 +14,7 @@
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Web/Html/Types/GetHTMLOptions.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include <string>
 

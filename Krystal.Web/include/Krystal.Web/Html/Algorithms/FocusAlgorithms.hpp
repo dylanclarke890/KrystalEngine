@@ -30,8 +30,8 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 
 namespace krys::web
 {
@@ -68,15 +68,16 @@ namespace krys::web::html
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#get-the-focusable-area
     KRYS_NODISCARD static Node *
       GetFocusableArea(Element &focusTarget,
-                       dom::FocusTrigger focusTrigger = dom::FocusTrigger::Other) noexcept;
+                       html::FocusTrigger focusTrigger = html::FocusTrigger::Other) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-delegate
     KRYS_NODISCARD static Node *
-      FocusDelegate(Element &focusTarget, dom::FocusTrigger focusTrigger = dom::FocusTrigger::Other) noexcept;
+      FocusDelegate(Element &focusTarget,
+                    html::FocusTrigger focusTrigger = html::FocusTrigger::Other) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#autofocus-delegate
     KRYS_NODISCARD static Node *AutofocusDelegate(ContainerNode &focusTarget,
-                                                  dom::FocusTrigger focusTrigger) noexcept;
+                                                  html::FocusTrigger focusTrigger) noexcept;
 
     /// @brief The focused area of the document if its window has system focus, or null.
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#currently-focused-area-of-a-top-level-traversable
@@ -97,14 +98,14 @@ namespace krys::web::html
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#focusing-steps
     static void FocusingSteps(Node &newFocusTarget, Node *fallbackTarget = nullptr,
-                              const dom::FocusOptions &options = {}) noexcept;
+                              const html::FocusOptions &options = {}) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#unfocusing-steps
     static void UnfocusingSteps(Element &oldFocusTarget) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#focus-update-steps
     static void FocusUpdateSteps(FocusChain oldChain, FocusChain newChain, Node *newFocusTarget,
-                                 const dom::FocusOptions &options = {}) noexcept;
+                                 const html::FocusOptions &options = {}) noexcept;
 
     /// @brief Fires a focus event named @p e at @p target, and the `focusin`/`focusout` that goes with it.
     /// @see https://html.spec.whatwg.org/multipage/interaction.html#fire-a-focus-event
@@ -146,7 +147,7 @@ namespace krys::web::html
     /// @return Whether there was an area to move to.
     /// @see https://html.spec.whatwg.org/#sequential-navigation
     // FIXME: Navigables (frames), and moving the focus out to the host, once it can take it.
-    static bool SequentialNavigation(Document &document, dom::FocusDirection direction) noexcept;
+    static bool SequentialNavigation(Document &document, html::FocusDirection direction) noexcept;
 
     /// @brief Moves the focus to the nearest keyboard focusable element in @p direction (`Up`, `Down`, `Left`
     /// or `Right`) from the focused element (or the edge of the viewport), searching the scrollable box
@@ -154,7 +155,7 @@ namespace krys::web::html
     /// The new focused element is focus visible.
     /// @return Whether the focus moved or a box scrolled.
     // FIXME: Frames.
-    static bool DirectionalNavigation(Document &document, dom::FocusDirection direction) noexcept;
+    static bool DirectionalNavigation(Document &document, html::FocusDirection direction) noexcept;
 
     /// @brief Updates @p document when its window gains or loses system focus: its focused and active flag,
     /// and a `focus` or `blur` event at its focused element, which stays focused.
@@ -164,6 +165,6 @@ namespace krys::web::html
     /// @brief Designates @p element (or the viewport, if it's null) as the focused area of @p document,
     /// updating the elements' focus state.
     static void DesignateFocusedArea(Document &document, Element *element,
-                                     dom::FocusVisibility visibility) noexcept;
+                                     html::FocusVisibility visibility) noexcept;
   };
 }

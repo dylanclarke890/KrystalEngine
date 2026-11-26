@@ -27,7 +27,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
+#include "Krystal.Web/Html/Algorithms/TextDirectionState.hpp"
 
 namespace krys::text
 {
@@ -51,12 +51,12 @@ namespace krys::web::html
 
   /// @brief Updates the directionality of @p element and of what it decides after its `dir` attribute
   /// changed to @p textDirectionState.
-  void TextDirectionStateChanged(Element &element, dom::TextDirectionState textDirectionState) noexcept;
+  void TextDirectionStateChanged(Element &element, html::TextDirectionState textDirectionState) noexcept;
 
   /// @brief Updates the directionality of @p element, its descendants and, if it decides theirs, its
   /// ancestors whose directionality is auto.
   /// @param initiator The element whose change led here, which is left as it is.
-  void UpdateEffectiveTextDirectionState(Element &element, dom::TextDirectionState textDirectionState,
+  void UpdateEffectiveTextDirectionState(Element &element, html::TextDirectionState textDirectionState,
                                          Element *initiator = nullptr) noexcept;
 
   /// @brief Gives @p direction to @p element's descendants (and their shadow trees) that take their

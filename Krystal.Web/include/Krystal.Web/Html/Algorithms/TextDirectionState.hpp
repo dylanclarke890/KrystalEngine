@@ -23,33 +23,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Nodes/TextDirectionState.hpp"
-#include "Krystal.Web/Dom/Nodes/Element.hpp"
-#include "Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Web/Html/Elements/HTMLBDIElement.hpp"
+#pragma once
 
-namespace krys::web::dom
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+
+namespace krys::web
 {
-  TextDirectionState ParseTextDirectionState(Maybe<DOMStringView> value) noexcept
+  class Element;
+}
+
+namespace krys::web::html
+{
+  /// @brief The state of an element's `dir` attribute.
+  /// @see https://html.spec.whatwg.org/multipage/dom.html#attr-dir
+  enum class TextDirectionState : uint8
   {
-    return html::EnumeratedAttribute<"dir", HTMLElement>::ResolveState(value).value_or(
-      TextDirectionState::Undefined);
+    LTR,
+    RTL,
+    Auto,
+    Undefined,
+  };
+
+  consteval TextDirectionState MaxEnumValue(TextDirectionState) noexcept
+  {
+    return TextDirectionState::Undefined;
   }
 
-  TextDirectionState ElementTextDirectionState(const Element &element) noexcept
-  {
-    return ParseTextDirectionState(element.GetAttribute(u8"dir"));
-  }
+  /// @brief The state a `dir` attribute's @p value (null if the attribute is missing) puts it in.
+  KRYS_NODISCARD TextDirectionState ParseTextDirectionState(Maybe<DOMStringView> value) noexcept;
 
-  bool ElementHasValidTextDirectionState(const Element &element) noexcept
-  {
-    return ElementTextDirectionState(element) != TextDirectionState::Undefined;
-  }
+  /// @brief The state of @p element's `dir` attribute.
+  KRYS_NODISCARD TextDirectionState ElementTextDirectionState(const Element &element) noexcept;
 
-  bool ElementHasAutoTextDirectionState(const Element &element) noexcept
-  {
-    auto textDirectionState = ElementTextDirectionState(element);
-    return textDirectionState == TextDirectionState::Auto
-           || (Is<HTMLBDIElement>(element) && textDirectionState == TextDirectionState::Undefined);
-  }
+  /// @brief Whether @p element's `dir` attribute is `ltr`, `rtl` or `auto`.
+  KRYS_NODISCARD bool ElementHasValidTextDirectionState(const Element &element) noexcept;
+
+  /// @brief Whether @p element's directionality is its auto directionality: its `dir` attribute is `auto`, or
+  /// it's a `<bdi>` without a valid one.
+  KRYS_NODISCARD bool ElementHasAutoTextDirectionState(const Element &element) noexcept;
 }

@@ -38,12 +38,12 @@
 #include "Krystal.Core/Time/Timer.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Web/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 #include "Krystal.Web/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Web/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
 #include "Krystal.Web/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Web/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Web/Input/PlatformTouchEvent.hpp"
@@ -598,7 +598,7 @@ namespace krys::web
     /// @return Whether there was such an element.
     bool HandleAccessKey(const PlatformKeyboardEvent &event) noexcept;
 
-    bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, KeyboardEvent &event) noexcept;
+    bool DefaultArrowEventHandler(html::FocusDirection focusDirection, KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;

@@ -1063,12 +1063,12 @@ namespace krys::web
     return HTMLTextFormControlElement::AccessKeyAction(sendMouseEvents);
   }
 
-  void HTMLInputElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+  void HTMLInputElement::UpdateFocusAppearance(html::SelectionRestorationMode restorationMode,
                                                SelectionRevealMode revealMode) noexcept
   {
     if (IsTextField())
     {
-      if (restorationMode == dom::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
+      if (restorationMode == html::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
       {
         RestoreCachedSelection(revealMode);
       }
@@ -1083,7 +1083,7 @@ namespace krys::web
     }
   }
 
-  void HTMLInputElement::SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
+  void HTMLInputElement::SetDefaultSelectionAfterFocus(html::SelectionRestorationMode restorationMode,
                                                        SelectionRevealMode revealMode) noexcept
   {
     krys_debug_assert(IsTextField());
@@ -1095,7 +1095,7 @@ namespace krys::web
       start = std::numeric_limits<uint32>::max();
       direction = html::TextFieldSelectionDirection::SelectionHasForwardDirection;
     }
-    uint32 end = restorationMode == dom::SelectionRestorationMode::PlaceCaretAtStart
+    uint32 end = restorationMode == html::SelectionRestorationMode::PlaceCaretAtStart
                    ? start
                    : std::numeric_limits<uint32>::max();
     SetSelectionRange(start, end, direction, revealMode);
@@ -1195,7 +1195,7 @@ namespace krys::web
           {
             return;
           }
-          protectedThis->UpdateFocusAppearance(dom::SelectionRestorationMode::RestoreOrSelectAll,
+          protectedThis->UpdateFocusAppearance(html::SelectionRestorationMode::RestoreOrSelectAll,
                                                SelectionRevealMode::Reveal);
         });
     }
@@ -1827,7 +1827,7 @@ namespace krys::web
 
     if (NodeDocument().FocusedElement() == this)
     {
-      UpdateFocusAppearance(dom::SelectionRestorationMode::RestoreOrSelectAll, SelectionRevealMode::Reveal);
+      UpdateFocusAppearance(html::SelectionRestorationMode::RestoreOrSelectAll, SelectionRevealMode::Reveal);
     }
 
     SetChangedSinceLastFormControlChangeEvent(false);
