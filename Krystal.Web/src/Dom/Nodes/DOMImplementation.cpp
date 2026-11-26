@@ -185,7 +185,7 @@ namespace krys::web::dom
     return AdoptRef<Document>(*document.release());
   }
 
-  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const net::Url &url) noexcept
+  Ref<Document> DOMImplementation::CreateDocument(DOMStringView contentType, const net::Url &url) noexcept
   {
     auto create = [&]() -> Ref<Document>
     {
@@ -193,24 +193,28 @@ namespace krys::web::dom
       {
         return CreateRef<HTMLDocument>();
       }
+
       if (text::IsASCIICaselessEqual(contentType, u8"application/xhtml+xml"))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = u8"application/xhtml+xml";
         return document;
       }
+      
       if (text::IsASCIICaselessEqual(contentType, u8"image/svg+xml"))
       {
         auto document = CreateRef<SVGDocument>();
         document->_contentType = u8"image/svg+xml";
         return document;
       }
+      
       if (net::MimeTypeRegistry::IsXMLMimeType(contentType))
       {
         auto document = CreateRef<XMLDocument>();
         document->_contentType = DOMString(contentType);
         return document;
       }
+      
       // https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-media
       if (img::ImageDecoder::SupportsMimeType(contentType))
       {
@@ -226,6 +230,7 @@ namespace krys::web::dom
       {
         document->_contentType = DOMString(contentType);
       }
+      
       return document;
     };
 
@@ -234,6 +239,7 @@ namespace krys::web::dom
     {
       document->SetUrl(url);
     }
+
     return document;
   }
 }

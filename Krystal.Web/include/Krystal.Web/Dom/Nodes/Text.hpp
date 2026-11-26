@@ -45,12 +45,6 @@ namespace krys::web
     Text(Document &document, DOMString data, CDATAConstructorTag) noexcept;
 
   public:
-    /// @brief A range's boundary point can be in a text node, at an offset into its data.
-    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
-    {
-      return true;
-    }
-
 #pragma region Text - https://dom.spec.whatwg.org/#text
 
     /// @brief Creates a text node in @p document with the data.
@@ -82,6 +76,12 @@ namespace krys::web
     KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
+
+    /// @brief A range's boundary point can be in a text node, at an offset into its data.
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return true;
+    }
 
     /// @brief The node's text renderer, if it's rendered.
     KRYS_NODISCARD RenderText *Renderer() const noexcept;

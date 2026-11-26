@@ -26,18 +26,6 @@ namespace krys::web
     DocumentFragment(Document &document, dom::NodeFlags flags) noexcept;
 
   public:
-    /// @brief The host of a shadow root or a template's template contents; null otherwise.
-    /// @see https://dom.spec.whatwg.org/#concept-documentfragment-host
-    KRYS_NODISCARD Element *Host() const noexcept;
-
-    /// @brief Sets the host of a template's template contents.
-    void SetHost(Element &host) noexcept;
-
-    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
-    {
-      return true;
-    }
-
     /// @brief Creates a document fragment in @p document. There are no global objects, so new
     /// DocumentFragment() takes the document it would have had.
     /// @see https://dom.spec.whatwg.org/#create-a-document-fragment
@@ -132,6 +120,18 @@ namespace krys::web
     RefPtr<const Element> GetElementById(DOMStringView elementId) const noexcept;
 
 #pragma endregion
+
+    /// @brief The host of a shadow root or a template's template contents; null otherwise.
+    /// @see https://dom.spec.whatwg.org/#concept-documentfragment-host
+    KRYS_NODISCARD Element *Host() const noexcept;
+
+    /// @brief Sets the host of a template's template contents.
+    void SetHost(Element &host) noexcept;
+
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return true;
+    }
   };
 }
 

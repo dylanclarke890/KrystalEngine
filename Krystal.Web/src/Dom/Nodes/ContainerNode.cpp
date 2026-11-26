@@ -36,6 +36,7 @@ namespace krys::web
   void ContainerNode::RemoveDetachedChildren() noexcept
   {
     auto &queue = GetDetachedChildrenQueue();
+
     _lastChild = nullptr;
     while (auto *child = _firstChild.get())
     {
@@ -51,6 +52,7 @@ namespace krys::web
     {
       return;
     }
+
     queue.IsDraining = true;
     while (!queue.Nodes.empty())
     {

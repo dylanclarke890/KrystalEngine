@@ -82,6 +82,8 @@ namespace krys::web::dom
     /// @see https://dom.spec.whatwg.org/#dom-namednodemap-getnameditem
     KRYS_NODISCARD RefPtr<const Attr> operator[](DOMStringAtom qualifiedName) const noexcept;
 
+#pragma endregion
+
     /// @brief The attributes' qualified names, without duplicates, leaving out those with uppercase ASCII
     /// letters for an HTML element in an HTML document.
     /// @see https://dom.spec.whatwg.org/#dom-namednodemap-item
@@ -100,7 +102,5 @@ namespace krys::web::dom
       auto supportedNames = SupportedPropertyNames();
       return std::find(supportedNames.begin(), supportedNames.end(), name) != supportedNames.end();
     }
-
-#pragma endregion
   };
 }

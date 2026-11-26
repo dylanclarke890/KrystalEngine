@@ -22,7 +22,7 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region Node
+#pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final

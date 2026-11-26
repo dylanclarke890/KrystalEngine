@@ -15,21 +15,6 @@ namespace krys::web
   {
   }
 
-  Element *DocumentFragment::Host() const noexcept
-  {
-    if (auto host = _host.lock())
-    {
-      return host.get();
-    }
-
-    return nullptr;
-  }
-
-  void DocumentFragment::SetHost(Element &host) noexcept
-  {
-    _host = CreateWeakPtr(&host);
-  }
-
   DocumentFragment::DocumentFragment(Document &document) noexcept
       : ContainerNode(document, dom::NodeType::DOCUMENT_FRAGMENT_NODE, {})
   {
@@ -131,4 +116,19 @@ namespace krys::web
   }
 
 #pragma endregion
+
+  Element *DocumentFragment::Host() const noexcept
+  {
+    if (auto host = _host.lock())
+    {
+      return host.get();
+    }
+
+    return nullptr;
+  }
+
+  void DocumentFragment::SetHost(Element &host) noexcept
+  {
+    _host = CreateWeakPtr(&host);
+  }
 }

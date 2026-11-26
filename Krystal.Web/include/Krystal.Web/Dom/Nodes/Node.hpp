@@ -997,10 +997,6 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region Node Flags
-
-#pragma endregion
-
   private:
     /// @brief Lowers the node's style validity to @p validity if it's worse, and records whether its layer
     /// needs recompositing or its renderer rebuilding.

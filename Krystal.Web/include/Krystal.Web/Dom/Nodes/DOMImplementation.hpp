@@ -71,7 +71,7 @@ namespace krys::web::dom
     /// documents for their types, an image document for a supported image type, and an HTML document of the
     /// type for the rest (a text document's, whose parser the writer starts in plain text).
     // FIXME: Media documents, once there are media elements.
-    KRYS_NODISCARD static Ref<Document> CreateDocument(utf8_stringview contentType,
+    KRYS_NODISCARD static Ref<Document> CreateDocument(DOMStringView contentType,
                                                        const net::Url &url) noexcept;
   };
 }

@@ -82,12 +82,6 @@ namespace krys::web
   public:
     ~ContainerNode() noexcept override;
 
-  protected:
-    /// @brief Unlinks the children, without the removal steps (the container is going), and drops the tree
-    /// references they hold.
-    void RemoveDetachedChildren() noexcept;
-
-  public:
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild
@@ -105,16 +99,14 @@ namespace krys::web
 #pragma endregion
 
   protected:
-#pragma region Extension Hooks
-
     /// @brief Called after the container's children change, for containers that act on their contents.
     virtual void OnChildrenChanged() noexcept
     {
     }
 
-#pragma endregion
-
-#pragma region Relationships
+    /// @brief Unlinks the children, without the removal steps (the container is going), and drops the tree
+    /// references they hold.
+    void RemoveDetachedChildren() noexcept;
 
     /// @warning Nothing checks that the tree stays valid.
     void SetFirstChild(Node *child) noexcept
@@ -127,8 +119,6 @@ namespace krys::web
     {
       _lastChild = ShareCheckedPtr(child);
     }
-
-#pragma endregion
   };
 
   inline ContainerNode *Node::ParentNode() const noexcept
