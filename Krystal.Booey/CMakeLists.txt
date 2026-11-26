@@ -329,6 +329,14 @@ set(KRYSTAL_BOOEY_ANIMATION_SOURCES
   src/Animation/WebAnimationUtilities.cpp
 )
 
+set(KRYSTAL_BOOEY_CLIPBOARDAPI_HEADERS
+  include/Krystal.Booey/ClipboardApi/ClipboardEvent.hpp
+)
+
+set(KRYSTAL_BOOEY_CLIPBOARDAPI_SOURCES
+  src/ClipboardApi/ClipboardEvent.cpp
+)
+
 set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Calc/AllowedSymbols.hpp
   include/Krystal.Booey/CSS/Calc/CalcType.hpp
@@ -1107,10 +1115,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Collections/NodeList.hpp
   include/Krystal.Booey/DOM/Collections/StaticHTMLCollection.hpp
   include/Krystal.Booey/DOM/Collections/StaticNodeList.hpp
-  include/Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp
-  include/Krystal.Booey/DOM/Events/ClipboardEvent.hpp
-  include/Krystal.Booey/DOM/Events/CommandEvent.hpp
-  include/Krystal.Booey/DOM/Events/CompositionEvent.hpp
   include/Krystal.Booey/DOM/Events/CustomEvent.hpp
   include/Krystal.Booey/DOM/Events/Event.hpp
   include/Krystal.Booey/DOM/Events/EventListener.hpp
@@ -1119,25 +1123,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Events/EventPathItem.hpp
   include/Krystal.Booey/DOM/Events/EventSender.hpp
   include/Krystal.Booey/DOM/Events/EventTarget.hpp
-  include/Krystal.Booey/DOM/Events/FocusEvent.hpp
-  include/Krystal.Booey/DOM/Events/FormDataEvent.hpp
-  include/Krystal.Booey/DOM/Events/InputEvent.hpp
-  include/Krystal.Booey/DOM/Events/KeyboardEvent.hpp
-  include/Krystal.Booey/DOM/Events/MouseEvent.hpp
-  include/Krystal.Booey/DOM/Events/MouseRelatedEvent.hpp
-  include/Krystal.Booey/DOM/Events/PointerEvent.hpp
-  include/Krystal.Booey/DOM/Events/PointerEventTypeNames.hpp
-  include/Krystal.Booey/DOM/Events/ScopedEventQueue.hpp
-  include/Krystal.Booey/DOM/Events/SimulatedClick.hpp
-  include/Krystal.Booey/DOM/Events/TextEvent.hpp
-  include/Krystal.Booey/DOM/Events/ToggleEvent.hpp
-  include/Krystal.Booey/DOM/Events/ToggleEventTask.hpp
-  include/Krystal.Booey/DOM/Events/Touch.hpp
-  include/Krystal.Booey/DOM/Events/TouchEvent.hpp
-  include/Krystal.Booey/DOM/Events/TouchList.hpp
-  include/Krystal.Booey/DOM/Events/UIEvent.hpp
-  include/Krystal.Booey/DOM/Events/UIEventWithKeyState.hpp
-  include/Krystal.Booey/DOM/Events/WheelEvent.hpp
   include/Krystal.Booey/DOM/Internals/ElementFactory.hpp
   include/Krystal.Booey/DOM/Internals/ElementRareData.hpp
   include/Krystal.Booey/DOM/Internals/EventFactory.hpp
@@ -1234,32 +1219,11 @@ set(KRYSTAL_BOOEY_DOM_SOURCES
   src/DOM/Collections/LiveNodeList.cpp
   src/DOM/Collections/StaticHTMLCollection.cpp
   src/DOM/Collections/StaticNodeList.cpp
-  src/DOM/Events/BeforeTextInsertedEvent.cpp
-  src/DOM/Events/UIEvent.cpp
-  src/DOM/Events/ClipboardEvent.cpp
-  src/DOM/Events/CommandEvent.cpp
-  src/DOM/Events/CompositionEvent.cpp
   src/DOM/Events/Event.cpp
   src/DOM/Events/EventListener.cpp
   src/DOM/Events/EventListenerHandle.cpp
   src/DOM/Events/EventPathItem.cpp
   src/DOM/Events/EventTarget.cpp
-  src/DOM/Events/FormDataEvent.cpp
-  src/DOM/Events/InputEvent.cpp
-  src/DOM/Events/KeyboardEvent.cpp
-  src/DOM/Events/MouseEvent.cpp
-  src/DOM/Events/MouseRelatedEvent.cpp
-  src/DOM/Events/PointerEvent.cpp
-  src/DOM/Events/PointerEventTypeNames.cpp
-  src/DOM/Events/ScopedEventQueue.cpp
-  src/DOM/Events/SimulatedClick.cpp
-  src/DOM/Events/TextEvent.cpp
-  src/DOM/Events/ToggleEvent.cpp
-  src/DOM/Events/ToggleEventTask.cpp
-  src/DOM/Events/Touch.cpp
-  src/DOM/Events/TouchEvent.cpp
-  src/DOM/Events/TouchList.cpp
-  src/DOM/Events/WheelEvent.cpp
   src/DOM/Internals/ElementFactory.cpp
   src/DOM/Internals/ElementRareData.cpp
   src/DOM/Internals/IdTargetObserver.cpp
@@ -1412,17 +1376,51 @@ set(KRYSTAL_BOOEY_EDITING_SOURCES
   src/Editing/TextIterator.cpp
 )
 
+set(KRYSTAL_BOOEY_EVENTS_HEADERS
+  include/Krystal.Booey/Events/Pointer/MouseEvent.hpp
+  include/Krystal.Booey/Events/Pointer/MouseRelatedEvent.hpp
+  include/Krystal.Booey/Events/Pointer/PointerEvent.hpp
+  include/Krystal.Booey/Events/Pointer/PointerEventTypeNames.hpp
+  include/Krystal.Booey/Events/Pointer/WheelEvent.hpp
+  include/Krystal.Booey/Events/Touch/Touch.hpp
+  include/Krystal.Booey/Events/Touch/TouchEvent.hpp
+  include/Krystal.Booey/Events/Touch/TouchList.hpp
+  include/Krystal.Booey/Events/UI/CompositionEvent.hpp
+  include/Krystal.Booey/Events/UI/FocusEvent.hpp
+  include/Krystal.Booey/Events/UI/InputEvent.hpp
+  include/Krystal.Booey/Events/UI/KeyboardEvent.hpp
+  include/Krystal.Booey/Events/UI/TextEvent.hpp
+  include/Krystal.Booey/Events/UI/UIEvent.hpp
+  include/Krystal.Booey/Events/UI/UIEventWithKeyState.hpp
+)
+
+set(KRYSTAL_BOOEY_EVENTS_SOURCES
+  src/Events/Pointer/MouseEvent.cpp
+  src/Events/Pointer/MouseRelatedEvent.cpp
+  src/Events/Pointer/PointerEvent.cpp
+  src/Events/Pointer/PointerEventTypeNames.cpp
+  src/Events/Pointer/WheelEvent.cpp
+  src/Events/Touch/Touch.cpp
+  src/Events/Touch/TouchEvent.cpp
+  src/Events/Touch/TouchList.cpp
+  src/Events/UI/CompositionEvent.cpp
+  src/Events/UI/InputEvent.cpp
+  src/Events/UI/KeyboardEvent.cpp
+  src/Events/UI/TextEvent.cpp
+  src/Events/UI/UIEvent.cpp
+)
+
 set(KRYSTAL_BOOEY_FILEAPI_HEADERS
-  include/Krystal.Booey/FileAPI/Blob.hpp
-  include/Krystal.Booey/FileAPI/BlobPropertyBag.hpp
-  include/Krystal.Booey/FileAPI/File.hpp
-  include/Krystal.Booey/FileAPI/FileList.hpp
+  include/Krystal.Booey/FileApi/Blob.hpp
+  include/Krystal.Booey/FileApi/BlobPropertyBag.hpp
+  include/Krystal.Booey/FileApi/File.hpp
+  include/Krystal.Booey/FileApi/FileList.hpp
 )
 
 set(KRYSTAL_BOOEY_FILEAPI_SOURCES
-  src/FileAPI/Blob.cpp
-  src/FileAPI/File.cpp
-  src/FileAPI/FileList.cpp
+  src/FileApi/Blob.cpp
+  src/FileApi/File.cpp
+  src/FileApi/FileList.cpp
 )
 
 set(KRYSTAL_BOOEY_GRAPHICS_HEADERS
@@ -1869,6 +1867,13 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/DragAndDrop/DataTransferItem.hpp
   include/Krystal.Booey/HTML/DragAndDrop/DataTransferItemList.hpp
   include/Krystal.Booey/HTML/DragAndDrop/DragEvent.hpp
+  include/Krystal.Booey/HTML/Events/CommandEvent.hpp
+  include/Krystal.Booey/HTML/Events/FormDataEvent.hpp
+  include/Krystal.Booey/HTML/Events/PageTransitionEvent.hpp
+  include/Krystal.Booey/HTML/Events/SimulatedClick.hpp
+  include/Krystal.Booey/HTML/Events/SubmitEvent.hpp
+  include/Krystal.Booey/HTML/Events/ToggleEvent.hpp
+  include/Krystal.Booey/HTML/Events/ToggleEventTask.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLAudioElement.hpp
@@ -1949,8 +1954,6 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/Elements/HTMLVideoElement.hpp
   include/Krystal.Booey/HTML/Elements/HTMLWBRElement.hpp
   include/Krystal.Booey/HTML/EventLoop/EventLoop.hpp
-  include/Krystal.Booey/HTML/Events/PageTransitionEvent.hpp
-  include/Krystal.Booey/HTML/Events/SubmitEvent.hpp
   include/Krystal.Booey/HTML/Forms/Autofill.hpp
   include/Krystal.Booey/HTML/Forms/DOMFormData.hpp
   include/Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp
@@ -1998,6 +2001,8 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/InputTypes/TimeInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/UrlInputType.hpp
   include/Krystal.Booey/HTML/InputTypes/WeekInputType.hpp
+  include/Krystal.Booey/HTML/Internals/BeforeTextInsertedEvent.hpp
+  include/Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp
   include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
   include/Krystal.Booey/HTML/Internals/InlineStyleSheetOwner.hpp
   include/Krystal.Booey/HTML/Internals/PopoverData.hpp
@@ -2085,6 +2090,13 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/DragAndDrop/DataTransferItem.cpp
   src/HTML/DragAndDrop/DataTransferItemList.cpp
   src/HTML/DragAndDrop/DragEvent.cpp
+  src/HTML/Events/CommandEvent.cpp
+  src/HTML/Events/FormDataEvent.cpp
+  src/HTML/Events/PageTransitionEvent.cpp
+  src/HTML/Events/SimulatedClick.cpp
+  src/HTML/Events/SubmitEvent.cpp
+  src/HTML/Events/ToggleEvent.cpp
+  src/HTML/Events/ToggleEventTask.cpp
   src/HTML/Elements/HTMLAnchorElement.cpp
   src/HTML/Elements/HTMLAreaElement.cpp
   src/HTML/Elements/HTMLAudioElement.cpp
@@ -2165,8 +2177,6 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/Elements/HTMLVideoElement.cpp
   src/HTML/Elements/HTMLWBRElement.cpp
   src/HTML/EventLoop/EventLoop.cpp
-  src/HTML/Events/PageTransitionEvent.cpp
-  src/HTML/Events/SubmitEvent.cpp
   src/HTML/Forms/Autofill.cpp
   src/HTML/Forms/DOMFormData.cpp
   src/HTML/Forms/FormAssociatedElement.cpp
@@ -2204,6 +2214,8 @@ set(KRYSTAL_BOOEY_HTML_SOURCES
   src/HTML/InputTypes/TimeInputType.cpp
   src/HTML/InputTypes/UrlInputType.cpp
   src/HTML/InputTypes/WeekInputType.cpp
+  src/HTML/Internals/BeforeTextInsertedEvent.cpp
+  src/HTML/Internals/ScopedEventQueue.cpp
   src/HTML/Internals/HTMLElementFactory.cpp
   src/HTML/Internals/InlineStyleSheetOwner.cpp
   src/HTML/Internals/PopoverData.cpp
@@ -4218,9 +4230,11 @@ target_sources(Krystal.Booey
       ${KRYSTAL_BOOEY_BUNDLED_FONTS_HEADERS}
       ${KRYSTAL_BOOEY_ACCESSIBILITY_HEADERS}
       ${KRYSTAL_BOOEY_ANIMATION_HEADERS}
+      ${KRYSTAL_BOOEY_CLIPBOARDAPI_HEADERS}
       ${KRYSTAL_BOOEY_CSS_HEADERS}
       ${KRYSTAL_BOOEY_DOM_HEADERS}
       ${KRYSTAL_BOOEY_EDITING_HEADERS}
+      ${KRYSTAL_BOOEY_EVENTS_HEADERS}
       ${KRYSTAL_BOOEY_FILEAPI_HEADERS}
       ${KRYSTAL_BOOEY_GRAPHICS_HEADERS}
       ${KRYSTAL_BOOEY_HISTORY_HEADERS}
@@ -4243,9 +4257,11 @@ target_sources(Krystal.Booey
     ${KRYSTAL_BOOEY_BUNDLED_FONTS_SOURCES}
     ${KRYSTAL_BOOEY_ACCESSIBILITY_SOURCES}
     ${KRYSTAL_BOOEY_ANIMATION_SOURCES}
+    ${KRYSTAL_BOOEY_CLIPBOARDAPI_SOURCES}
     ${KRYSTAL_BOOEY_CSS_SOURCES}
     ${KRYSTAL_BOOEY_DOM_SOURCES}
     ${KRYSTAL_BOOEY_EDITING_SOURCES}
+    ${KRYSTAL_BOOEY_EVENTS_SOURCES}
     ${KRYSTAL_BOOEY_FILEAPI_SOURCES}
     ${KRYSTAL_BOOEY_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_HISTORY_SOURCES}

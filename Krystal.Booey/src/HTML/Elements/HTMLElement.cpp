@@ -15,8 +15,6 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
-#include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Nodes/Attr.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
@@ -40,6 +38,8 @@
 #include "Krystal.Booey/HTML/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/Events/SimulatedClick.hpp"
+#include "Krystal.Booey/HTML/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/HTML/Forms/FormAssociatedElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
@@ -319,9 +319,9 @@ namespace krys::boo
   // (SimulateClick does each, with a set of the elements being clicked for the flags.)
   void HTMLElement::Click() noexcept
   {
-    (void)dom::SimulateClick(*this, nullptr, dom::SimulatedClickMouseEventOptions::SendNoEvents,
-                             dom::SimulatedClickVisualOptions::DoNotShowPressedLook,
-                             dom::SimulatedClickSource::Bindings);
+    (void)html::SimulateClick(*this, nullptr, html::SimulatedClickMouseEventOptions::SendNoEvents,
+                              html::SimulatedClickVisualOptions::DoNotShowPressedLook,
+                              html::SimulatedClickSource::Bindings);
   }
 
   DOMString HTMLElement::AccessKey() const noexcept
@@ -339,8 +339,8 @@ namespace krys::boo
   {
     (void)StyledElement::AccessKeyAction(sendMouseEvents);
     return DispatchSimulatedClick(nullptr, sendMouseEvents
-                                             ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
-                                             : dom::SimulatedClickMouseEventOptions::SendNoEvents);
+                                             ? html::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
+                                             : html::SimulatedClickMouseEventOptions::SendNoEvents);
   }
 
   DOMString HTMLElement::AccessKeyLabel() const noexcept
@@ -999,7 +999,7 @@ namespace krys::boo
     //    attribute initialized to true, the oldState attribute initialized to "closed", the newState
     //    attribute initialized to "open", and the source attribute initialized to source at element is false,
     //    then run cleanupShowingSteps and return.
-    if (!FirePopoverBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
+    if (!FirePopoverBeforeToggleEvent(html::ToggleState::Closed, html::ToggleState::Open, true, source))
     {
       cleanupShowingSteps();
       return {};
@@ -1148,7 +1148,7 @@ namespace krys::boo
     // 26. Queue a popover toggle event task given element, "closed", "open", and source.
     if (GetPopoverData())
     {
-      QueuePopoverToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
+      QueuePopoverToggleEventTask(html::ToggleState::Closed, html::ToggleState::Open, source);
     }
     if (auto *cache = NodeDocument().ExistingAXObjectCache())
     {
@@ -1246,7 +1246,7 @@ namespace krys::boo
       // 12a. Fire an event named beforetoggle, using ToggleEvent, with the oldState attribute initialized to
       //      "open", the newState attribute initialized to "closed", and the source attribute set to source
       //      at element.
-      (void)FirePopoverBeforeToggleEvent(dom::ToggleState::Open, dom::ToggleState::Closed, false, source);
+      (void)FirePopoverBeforeToggleEvent(html::ToggleState::Open, html::ToggleState::Closed, false, source);
 
       // 12b. Set validityResult to the result of running check popover validity given element, true, and
       //      document.
@@ -1295,7 +1295,7 @@ namespace krys::boo
     //     source.
     if (fireEvents == html::FireEvents::Yes)
     {
-      QueuePopoverToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
+      QueuePopoverToggleEventTask(html::ToggleState::Open, html::ToggleState::Closed, source);
     }
 
     // 19. Let previouslyFocusedElement be element's previously focused element.
@@ -1433,7 +1433,7 @@ namespace krys::boo
 
   // https://html.spec.whatwg.org/multipage/popover.html#queue-a-popover-toggle-event-task
   // (ToggleEventTask is the popover toggle task tracker.)
-  void HTMLElement::QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+  void HTMLElement::QueuePopoverToggleEventTask(html::ToggleState oldState, html::ToggleState newState,
                                                 HTMLElement *source) noexcept
   {
     GetPopoverData()->EnsureToggleEventTask(*this)->Queue(oldState, newState, source);
@@ -1476,12 +1476,12 @@ namespace krys::boo
     return false;
   }
 
-  bool HTMLElement::FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState,
+  bool HTMLElement::FirePopoverBeforeToggleEvent(html::ToggleState oldState, html::ToggleState newState,
                                                  bool cancelable, HTMLElement *source) noexcept
   {
-    auto stringForState = [](dom::ToggleState state)
+    auto stringForState = [](html::ToggleState state)
     {
-      return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
+      return DOMString(state == html::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
     ToggleEventInit init;

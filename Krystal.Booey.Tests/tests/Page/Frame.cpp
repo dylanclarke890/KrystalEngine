@@ -9,11 +9,11 @@
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
@@ -625,7 +625,8 @@ namespace krys::boo::tests
       CHECK(events == List<bool> {true, true});
     }
 
-    // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering (hidden documents aren't rendered)
+    // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering (hidden documents aren't
+    // rendered)
     SECTION("A hidden page's rendering updates wait for it to be shown")
     {
       frame.SetIsVisible(false);

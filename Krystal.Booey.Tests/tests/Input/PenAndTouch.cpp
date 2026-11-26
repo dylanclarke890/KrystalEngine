@@ -3,10 +3,10 @@
 #include "Krystal.Booey.Tests/Input/InputTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListener.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
@@ -396,7 +396,7 @@ namespace krys::boo::tests
       PlatformMouseEvent event(PointD(10, 10), PointD(10, 10), button, type,
                                type == PlatformEvent::Type::MouseMoved ? 0 : 1, {}, MonotonicTime::Now(),
                                buttons, {}, force, SyntheticClickType::NoTap, PenPointerId,
-                               dom::PenPointerEventType());
+                               pointer_events::PenPointerEventType());
       event.SetPenOrientation({30, 0, 45});
       if (type == PlatformEvent::Type::MouseMoved)
       {

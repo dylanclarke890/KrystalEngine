@@ -54,7 +54,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::ui_events
 {
   enum class TextEventInputType : uint8;
 }
@@ -546,7 +546,7 @@ namespace krys::boo
     /// target, or else the focused element, and has the editor insert it unless a listener cancels it.
     /// @return Whether the editor handled it.
     bool HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
-                              dom::TextEventInputType inputType) noexcept;
+                              ui_events::TextEventInputType inputType) noexcept;
 
     /// @brief Scrolls the box of @p startingNode (the focused element, or else the last pressed node, if
     /// null), or else its nearest containing block that scrolls, by a step of @p granularity.

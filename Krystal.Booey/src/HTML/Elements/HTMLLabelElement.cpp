@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
@@ -193,7 +193,7 @@ namespace krys::boo
 
   void HTMLLabelElement::DefaultEventHandler(Event &event) noexcept
   {
-    if (dom::IsAnyClick(event) && !_processingClick)
+    if (pointer_events::IsAnyClick(event) && !_processingClick)
     {
       auto control = Control();
 

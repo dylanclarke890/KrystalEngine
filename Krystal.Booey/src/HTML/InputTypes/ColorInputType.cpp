@@ -36,7 +36,6 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
@@ -44,6 +43,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -293,7 +293,7 @@ namespace krys::boo::html
     }
 
     // input and change wait until the swatch shows the new value.
-    dom::EventQueueScope eventQueue;
+    html::EventQueueScope eventQueue;
     input->SetValueFromRenderer(serializedColor);
     UpdateColorSwatch();
     input->DispatchFormControlChangeEvent();

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
@@ -1089,11 +1089,11 @@ namespace krys::boo
     void RunPopoverFocusingSteps() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/popover.html#queue-a-popover-toggle-event-task
-    void QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+    void QueuePopoverToggleEventTask(html::ToggleState oldState, html::ToggleState newState,
                                      HTMLElement *source) noexcept;
 
     /// @return Whether the event wasn't canceled.
-    bool FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
+    bool FirePopoverBeforeToggleEvent(html::ToggleState oldState, html::ToggleState newState, bool cancelable,
                                       HTMLElement *source) noexcept;
 
     /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.

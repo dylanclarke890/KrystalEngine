@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Events/ToggleEventTask.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
@@ -24,7 +24,7 @@ namespace krys::boo
     WeakPtr<HTMLSummaryElement> _defaultSummary;
     RefPtr<HTMLSlotElement> _defaultSlot;
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#details-toggle-task-tracker
-    RefPtr<dom::ToggleEventTask> _toggleEventTask;
+    RefPtr<html::ToggleEventTask> _toggleEventTask;
 
   public:
     explicit HTMLDetailsElement(Document &document) noexcept;
@@ -56,8 +56,9 @@ namespace krys::boo
     /// summary if it has none.
     KRYS_NODISCARD bool IsActiveSummary(const HTMLSummaryElement &summary) const noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
-    void QueueDetailsToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState) noexcept;
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
+    void QueueDetailsToggleEventTask(html::ToggleState oldState, html::ToggleState newState) noexcept;
 
     /// @brief The slot of the element's shadow tree that takes @p child: the summary slot for the first
     /// `summary` child, the content slot otherwise.
@@ -89,7 +90,8 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#details-name-group
     KRYS_NODISCARD List<Ref<HTMLDetailsElement>> OtherElementsInNameGroup() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#ensure-details-exclusivity-by-closing-the-given-element-if-needed
     void EnsureDetailsExclusivityAfterMutation() noexcept;
   };
 }

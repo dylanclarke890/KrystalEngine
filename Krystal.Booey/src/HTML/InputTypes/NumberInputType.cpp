@@ -30,9 +30,9 @@
  */
 
 #include "Krystal.Booey/HTML/InputTypes/NumberInputType.hpp"
-#include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/Internals/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"

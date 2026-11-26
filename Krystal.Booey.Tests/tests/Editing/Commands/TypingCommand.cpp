@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/Events/InputEvent.hpp"
+#include "Krystal.Booey/Events/UI/InputEvent.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/Scrollbar.hpp"
 

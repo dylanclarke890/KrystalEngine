@@ -51,6 +51,10 @@ namespace krys::boo::dom
   class Range;
   struct SimpleRange;
   class StaticRange;
+}
+
+namespace krys::boo::ui_events
+{
   enum class TextEventInputType : uint8;
 }
 
@@ -397,7 +401,8 @@ namespace krys::boo
     void SetBaseWritingDirection(WritingDirection direction) noexcept;
 
     /// @brief Inserts typed text, firing `textInput` at the event's target first.
-    bool InsertText(utf8_stringview text, Event *triggeringEvent, dom::TextEventInputType inputType) noexcept;
+    bool InsertText(utf8_stringview text, Event *triggeringEvent,
+                    ui_events::TextEventInputType inputType) noexcept;
 
     bool InsertText(utf8_stringview text, Event *triggeringEvent) noexcept;
 

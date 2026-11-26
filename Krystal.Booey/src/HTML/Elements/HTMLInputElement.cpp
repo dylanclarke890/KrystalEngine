@@ -3,15 +3,13 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Events/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
@@ -23,7 +21,9 @@
 #include "Krystal.Booey/HTML/InputTypes/FileInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
 #include "Krystal.Booey/HTML/InputTypes/TextInputType.hpp"
+#include "Krystal.Booey/HTML/Internals/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
@@ -41,7 +41,8 @@ namespace krys::boo
 {
   namespace
   {
-    /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-non-negative-numbers-greater-than-zero
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#limited-to-only-non-negative-numbers-greater-than-zero
     KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<DOMStringView> value,
                                                                            uint32 defaultValue) noexcept
     {
@@ -1164,8 +1165,8 @@ namespace krys::boo
     // A text field's input event comes from editing; other controls fire it here.
     if (!IsTextField())
     {
-      dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
-                                             ShareRef(*this));
+      html::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
+                                              ShareRef(*this));
     }
 
     UpdateValidity();

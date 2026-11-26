@@ -26,8 +26,8 @@
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
@@ -174,7 +174,7 @@ namespace krys::boo
         event_names::Click,
         [document = CreateWeakPtr(this)](MouseEvent &event)
         {
-          if (document && dom::IsAnyClick(event))
+          if (document && pointer_events::IsAnyClick(event))
           {
             document->ImageClicked(static_cast<int32>(event.OffsetX()), static_cast<int32>(event.OffsetY()));
           }

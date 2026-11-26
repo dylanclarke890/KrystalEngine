@@ -31,7 +31,7 @@
 
 #include "Krystal.Booey/HTML/InputTypes/CheckboxInputType.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"

@@ -1742,7 +1742,7 @@ namespace krys::boo
     }
     return pressElement->AccessKeyAction(true)
            || pressElement->DispatchSimulatedClick(
-             nullptr, dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
+             nullptr, html::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
   }
 
   void AXObject::SetFocused(bool focused) noexcept

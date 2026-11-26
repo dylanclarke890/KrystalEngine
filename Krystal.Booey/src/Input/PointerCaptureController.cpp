@@ -25,9 +25,9 @@
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop/TaskSource.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
@@ -224,7 +224,7 @@ namespace krys::boo
     _haveAnyCapturingElement = false;
 
     _activePointerIdsToCapturingData.emplace(MousePointerId,
-                                             CapturingData::Create(dom::MousePointerEventType()));
+                                             CapturingData::Create(pointer_events::MousePointerEventType()));
   }
 
   void PointerCaptureController::UpdateHaveAnyCapturingElement() noexcept
@@ -319,7 +319,7 @@ namespace krys::boo
     // for instance in the case of a long press to initiate a system drag.
     for (auto &[id, capturingData] : _activePointerIdsToCapturingData)
     {
-      if (capturingData->PointerType == dom::TouchPointerEventType()
+      if (capturingData->PointerType == pointer_events::TouchPointerEventType()
           && capturingData->CurrentState == CapturingData::State::Ready)
       {
         return true;
@@ -376,7 +376,7 @@ namespace krys::boo
     }
 
     // As for an event that's dispatched: see DispatchEvent.
-    if (pointerType != dom::MousePointerEventType())
+    if (pointerType != pointer_events::MousePointerEventType())
     {
       ProcessPendingPointerCapture(pointerId);
     }
@@ -392,7 +392,8 @@ namespace krys::boo
   {
     capturingData.ActiveDocument = CreateWeakPtr(&document);
     capturingData.IsPrimary = isPrimary;
-    if (capturingData.PointerType == dom::MousePointerEventType() && !capturingData.PointerIsPressed)
+    if (capturingData.PointerType == pointer_events::MousePointerEventType()
+        && !capturingData.PointerIsPressed)
     {
       capturingData.PreventsCompatibilityMouseEvents = false;
     }
@@ -495,7 +496,8 @@ namespace krys::boo
       return;
     }
 
-    Ref<CapturingData> capturingData = EnsureCapturingData(pointerId, dom::TouchPointerEventType());
+    Ref<CapturingData> capturingData =
+      EnsureCapturingData(pointerId, pointer_events::TouchPointerEventType());
 
     // Check if the target changed, which would require dispatching boundary events.
     RefPtr<Element> previousTarget = capturingData->PreviousTarget;
@@ -642,7 +644,7 @@ namespace krys::boo
     // If the event is not gotpointercapture or lostpointercapture, run Process Pending Pointer Capture steps
     // for this PointerEvent. We only need to do this for non-mouse type since for mouse events this method
     // will be called in Document::PrepareMouseEvent().
-    if (event.PointerType() != dom::MousePointerEventType())
+    if (event.PointerType() != pointer_events::MousePointerEventType())
     {
       ProcessPendingPointerCapture(event.PointerId());
     }
@@ -684,7 +686,7 @@ namespace krys::boo
 
     capturingData->PointerIsPressed = isPointerdown;
 
-    if (event.PointerType() == dom::TouchPointerEventType() && isPointerdown)
+    if (event.PointerType() == pointer_events::TouchPointerEventType() && isPointerdown)
     {
       // https://w3c.github.io/pointerevents/#implicit-pointer-capture
 
@@ -746,7 +748,8 @@ namespace krys::boo
     // If a mouse pointer has moved while it isn't pressed, make sure we reset the
     // preventsCompatibilityMouseEvents flag since we could otherwise prevent compatibility mouse events while
     // those are only supposed to be prevented while the pointer is pressed.
-    if (event.Type() == event_names::PointerMove && capturingData->PointerType == dom::MousePointerEventType()
+    if (event.Type() == event_names::PointerMove
+        && capturingData->PointerType == pointer_events::MousePointerEventType()
         && !capturingData->PointerIsPressed)
     {
       capturingData->PreventsCompatibilityMouseEvents = false;
@@ -886,7 +889,7 @@ namespace krys::boo
                                                  capturingData->IsPrimary, capturingData->PointerType),
           targetOverride.get());
       }
-      if (capturingData->PointerType == dom::MousePointerEventType())
+      if (capturingData->PointerType == pointer_events::MousePointerEventType())
       {
         if (auto *frame = targetOverride->NodeDocument().Frame())
         {
@@ -900,7 +903,7 @@ namespace krys::boo
     // pointer capture target override.
     if (capturingData->PendingTargetOverride && capturingData->TargetOverride != pendingTargetOverride)
     {
-      if (capturingData->PointerType == dom::MousePointerEventType())
+      if (capturingData->PointerType == pointer_events::MousePointerEventType())
       {
         if (auto *frame = pendingTargetOverride->NodeDocument().Frame())
         {

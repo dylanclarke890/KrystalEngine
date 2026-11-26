@@ -27,10 +27,6 @@
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
@@ -50,6 +46,10 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/WheelEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -1040,8 +1040,9 @@ namespace krys::boo
     {
       // https://www.w3.org/TR/pointerevents/#compatibility-mapping-with-mouse-events
       auto type = mouseEvent.Type();
-      return !dom::IsAnyClick(mouseEvent) && type != event_names::MouseOver && type != event_names::MouseOut
-             && type != event_names::MouseEnter && type != event_names::MouseLeave;
+      return !pointer_events::IsAnyClick(mouseEvent) && type != event_names::MouseOver
+             && type != event_names::MouseOut && type != event_names::MouseEnter
+             && type != event_names::MouseLeave;
     }
 
     enum class ShouldIgnoreMouseEvent : bool
@@ -1057,15 +1058,15 @@ namespace krys::boo
       if (auto *frame = element.NodeDocument().Frame())
       {
         auto &pointerCaptureController = frame->GetPointerCaptureController();
-        if (platformEvent.PointerId() != MousePointerId && !dom::IsAnyClick(mouseEvent)
+        if (platformEvent.PointerId() != MousePointerId && !pointer_events::IsAnyClick(mouseEvent)
             && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
               platformEvent.PointerId()))
         {
           return ShouldIgnoreMouseEvent::Yes;
         }
 
-        if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap && !dom::IsAnyClick(mouseEvent)
-            && mouseEvent.Type() != event_names::ContextMenu)
+        if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap
+            && !pointer_events::IsAnyClick(mouseEvent) && mouseEvent.Type() != event_names::ContextMenu)
         {
           return ShouldIgnoreMouseEvent::No;
         }
@@ -1161,7 +1162,7 @@ namespace krys::boo
     }
 
     bool shouldNotDispatchMouseEvent =
-      dom::IsAnyClick(*mouseEvent) || mouseEvent->Type() == event_names::ContextMenu;
+      pointer_events::IsAnyClick(*mouseEvent) || mouseEvent->Type() == event_names::ContextMenu;
     if (!shouldNotDispatchMouseEvent)
     {
       krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
@@ -1248,11 +1249,11 @@ namespace krys::boo
   }
 
   bool Element::DispatchSimulatedClick(Event *underlyingEvent,
-                                       dom::SimulatedClickMouseEventOptions eventOptions,
-                                       dom::SimulatedClickVisualOptions visualOptions) noexcept
+                                       html::SimulatedClickMouseEventOptions eventOptions,
+                                       html::SimulatedClickVisualOptions visualOptions) noexcept
   {
-    return dom::SimulateClick(*this, underlyingEvent, eventOptions, visualOptions,
-                              dom::SimulatedClickSource::UserAgent);
+    return html::SimulateClick(*this, underlyingEvent, eventOptions, visualOptions,
+                               html::SimulatedClickSource::UserAgent);
   }
 
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept

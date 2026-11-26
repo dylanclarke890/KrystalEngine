@@ -37,18 +37,9 @@
 #include "Krystal.Booey/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/Collections/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/CustomEvent.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/FocusEvent.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/Events/UIEvent.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -68,6 +59,14 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
+#include "Krystal.Booey/Events/UI/CompositionEvent.hpp"
+#include "Krystal.Booey/Events/UI/FocusEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
+#include "Krystal.Booey/Events/UI/UIEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -102,6 +101,7 @@
 #include "Krystal.Booey/HTML/Events/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/HTML/Internals/UserActionElementSet.hpp"
 #include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
@@ -4712,7 +4712,7 @@ namespace krys::boo
 
     // The events the command fires (mutation and input events) are dispatched once it's done, as script they
     // run could change the tree under it.
-    dom::EventQueueScope eventQueueScope;
+    html::EventQueueScope eventQueueScope;
     Ref protectedThis = ShareRef(*this);
     return DOMCommand(*this, commandId, showUI).Execute(value);
   }

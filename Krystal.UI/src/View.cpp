@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
@@ -1875,7 +1875,7 @@ namespace krys::ui
       return boo::PlatformMouseEvent(PointD(point), PointD(ToScreen(point)), button, type, count, {},
                                      boo::html::EventLoop::Current().Now(), buttons, {}, 0,
                                      boo::SyntheticClickType::OneFingerTap, pointerId,
-                                     boo::dom::TouchPointerEventType());
+                                     boo::pointer_events::TouchPointerEventType());
     };
 
     auto &handler = _frame->GetEventHandler();
@@ -1905,7 +1905,7 @@ namespace krys::ui
     boo::PlatformMouseEvent event(
       PointD(point), PointD(ToScreen(point)), boo::MouseButton::Right, boo::PlatformEvent::Type::MousePressed,
       1, {}, boo::html::EventLoop::Current().Now(), 0, {}, 0, boo::SyntheticClickType::NoTap,
-      boo::PointerEvent::PointerIdForTouch(touchPoint), boo::dom::TouchPointerEventType());
+      boo::PointerEvent::PointerIdForTouch(touchPoint), boo::pointer_events::TouchPointerEventType());
     (void)_frame->GetEventHandler().SendContextMenuEvent(event);
     PerformMicrotaskCheckpoint();
   }
@@ -2298,7 +2298,7 @@ namespace krys::ui
       if (RefPtr<boo::Element> element = ShareRefPtr(Document().FocusedElement()))
       {
         (void)element->DispatchSimulatedClick(
-          nullptr, boo::dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
+          nullptr, boo::html::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
       }
       PerformMicrotaskCheckpoint();
     }
@@ -2776,7 +2776,7 @@ namespace krys::ui
     boo::PlatformMouseEvent event(point, ToScreen(point), button, type, clickCount,
                                   input::ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now(),
                                   _penButtons, {}, force, boo::SyntheticClickType::NoTap, boo::PenPointerId,
-                                  boo::dom::PenPointerEventType());
+                                  boo::pointer_events::PenPointerEventType());
     event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),
                              static_cast<int32>(std::round(input.TiltY)),
                              static_cast<int32>(std::round(input.Twist))});

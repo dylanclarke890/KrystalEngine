@@ -31,8 +31,8 @@
 
 #include "Krystal.Booey/HTML/InputTypes/SearchInputType.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"

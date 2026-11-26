@@ -36,11 +36,11 @@ namespace krys::boo::html
     _closeWatcher = krys::move(closeWatcher);
   }
 
-  Ref<dom::ToggleEventTask> PopoverData::EnsureToggleEventTask(Element &element) noexcept
+  Ref<html::ToggleEventTask> PopoverData::EnsureToggleEventTask(Element &element) noexcept
   {
     if (!_toggleEventTask)
     {
-      _toggleEventTask = dom::ToggleEventTask::Create(element);
+      _toggleEventTask = html::ToggleEventTask::Create(element);
     }
     return ShareRef(*_toggleEventTask);
   }

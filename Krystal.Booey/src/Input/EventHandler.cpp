@@ -31,11 +31,6 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
@@ -47,6 +42,11 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/WheelEvent.hpp"
+#include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
@@ -1414,7 +1414,7 @@ namespace krys::boo
   }
 
   bool EventHandler::HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
-                                          dom::TextEventInputType inputType) noexcept
+                                          ui_events::TextEventInputType inputType) noexcept
   {
     // Platforms should differentiate real commands like selectAll from text input in disguise (like
     // insertNewline), and avoid dispatching text input events from keydown default handlers.

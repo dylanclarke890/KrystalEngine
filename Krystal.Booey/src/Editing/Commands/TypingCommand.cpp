@@ -26,7 +26,6 @@
 #include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertLineBreakCommand.hpp"
@@ -37,6 +36,7 @@
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
@@ -202,7 +202,7 @@ namespace krys::boo
 
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(compositionType);
       lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
@@ -220,7 +220,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
-        dom::EventQueueScope eventQueue;
+        html::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -241,7 +241,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
-        dom::EventQueueScope eventQueue;
+        html::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -293,7 +293,7 @@ namespace krys::boo
     // to deal with custom selections in a general way that can be used by all of the commands.
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       if (lastTypingCommand->EndingSelection() != selectionForInsertion)
       {
         lastTypingCommand->SetStartingSelection(selectionForInsertion);
@@ -321,7 +321,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
@@ -337,7 +337,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(

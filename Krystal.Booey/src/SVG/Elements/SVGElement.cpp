@@ -934,8 +934,8 @@ namespace krys::boo
   {
     (void)StyledElement::AccessKeyAction(sendMouseEvents);
     return DispatchSimulatedClick(nullptr, sendMouseEvents
-                                             ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
-                                             : dom::SimulatedClickMouseEventOptions::SendNoEvents);
+                                             ? html::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
+                                             : html::SimulatedClickMouseEventOptions::SendNoEvents);
   }
 
   void SVGElement::OnInsert() noexcept

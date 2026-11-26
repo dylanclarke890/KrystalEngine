@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/InputTypes/RadioInputType.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
@@ -163,8 +163,9 @@ namespace krys::boo::html
         // If the focused radio button is not visible (e.g., during arrow key navigation), scroll it into
         // view.
         inputElement->ScrollIntoViewIfNotVisible(false);
-        (void)inputElement->DispatchSimulatedClick(&event, dom::SimulatedClickMouseEventOptions::SendNoEvents,
-                                                   dom::SimulatedClickVisualOptions::DoNotShowPressedLook);
+        (void)inputElement->DispatchSimulatedClick(&event,
+                                                   html::SimulatedClickMouseEventOptions::SendNoEvents,
+                                                   html::SimulatedClickVisualOptions::DoNotShowPressedLook);
         event.SetDefaultHandled();
         return ShouldCallBaseEventHandler::Yes;
       }

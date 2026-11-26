@@ -28,15 +28,10 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Accessibility/AXObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Booey/ClipboardApi/ClipboardEvent.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Events/ClipboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/InputEvent.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
@@ -58,6 +53,10 @@
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
+#include "Krystal.Booey/Events/UI/CompositionEvent.hpp"
+#include "Krystal.Booey/Events/UI/InputEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
 #include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLEmbedElement.hpp"
@@ -65,6 +64,7 @@
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLObjectElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
@@ -124,7 +124,7 @@ namespace krys::boo
     }
 
     bool DispatchBeforeInputEvent(Element &element, utf8_stringview inputType,
-                                  dom::IsInputMethodComposing isInputMethodComposing,
+                                  ui_events::IsInputMethodComposing isInputMethodComposing,
                                   Maybe<DOMString> data = null, RefPtr<DataTransfer> &&dataTransfer = nullptr,
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
@@ -139,21 +139,21 @@ namespace krys::boo
     // `input` goes through the scoped event queue: typing added to an open typing command fires it from
     // within the command, so it waits until the typing is applied.
     void DispatchInputEvent(Element &element, utf8_stringview inputType,
-                            dom::IsInputMethodComposing isInputMethodComposing, Maybe<DOMString> data = null,
-                            RefPtr<DataTransfer> &&dataTransfer = nullptr,
+                            ui_events::IsInputMethodComposing isInputMethodComposing,
+                            Maybe<DOMString> data = null, RefPtr<DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
       auto event = InputEvent::Create(event_names::Input, element.NodeDocument().Window(), inputType, false,
                                       krys::move(data), krys::move(dataTransfer), targetRanges, 0,
                                       isInputMethodComposing);
-      dom::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
+      html::ScopedEventQueue::DispatchOrQueue(krys::move(event), ShareRef(element));
     }
 
     // By value: they keep the roots alive while script runs.
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     bool DispatchBeforeInputEvents(RefPtr<Element> startRoot, RefPtr<Element> endRoot,
                                    utf8_stringview inputTypeName,
-                                   dom::IsInputMethodComposing isInputMethodComposing,
+                                   ui_events::IsInputMethodComposing isInputMethodComposing,
                                    const Maybe<DOMString> &data = null,
                                    const RefPtr<DataTransfer> &dataTransfer = nullptr,
                                    const List<RefPtr<dom::StaticRange>> &targetRanges = {},
@@ -179,7 +179,7 @@ namespace krys::boo
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     void DispatchInputEvents(RefPtr<Element> startRoot, RefPtr<Element> endRoot,
                              utf8_stringview inputTypeName,
-                             dom::IsInputMethodComposing isInputMethodComposing,
+                             ui_events::IsInputMethodComposing isInputMethodComposing,
                              const Maybe<DOMString> &data = null,
                              const RefPtr<DataTransfer> &dataTransfer = nullptr) noexcept
     {
@@ -504,7 +504,7 @@ namespace krys::boo
     }
     auto event =
       TextEvent::CreateForFragmentPaste(target->NodeDocument().Window(), krys::move(pastingFragment),
-                                        dom::TextEventInputType::Paste, smartReplace, matchStyle);
+                                        ui_events::TextEventInputType::Paste, smartReplace, matchStyle);
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (!event->DefaultPrevented())
     {
@@ -780,8 +780,8 @@ namespace krys::boo
       }
     }
 
-    auto isInputMethodComposing =
-      command.IsInputMethodComposing() ? dom::IsInputMethodComposing::Yes : dom::IsInputMethodComposing::No;
+    auto isInputMethodComposing = command.IsInputMethodComposing() ? ui_events::IsInputMethodComposing::Yes
+                                                                   : ui_events::IsInputMethodComposing::No;
     bool proceed = DispatchBeforeInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
                                              ShareRefPtr(composition->EndingRootEditableElement()),
                                              command.InputEventTypeName(), isInputMethodComposing,
@@ -844,8 +844,8 @@ namespace krys::boo
       ChangeSelectionAfterCommand(newSelection, options);
     }
 
-    auto isInputMethodComposing =
-      command.IsInputMethodComposing() ? dom::IsInputMethodComposing::Yes : dom::IsInputMethodComposing::No;
+    auto isInputMethodComposing = command.IsInputMethodComposing() ? ui_events::IsInputMethodComposing::Yes
+                                                                   : ui_events::IsInputMethodComposing::No;
     if (command.ShouldDispatchInputEvents())
     {
       DispatchInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
@@ -889,7 +889,7 @@ namespace krys::boo
     TypingCommand::CloseTyping(_document);
     return DispatchBeforeInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                                      ShareRefPtr(composition.EndingRootEditableElement()), u8"historyUndo",
-                                     dom::IsInputMethodComposing::No);
+                                     ui_events::IsInputMethodComposing::No);
   }
 
   void Editor::UnappliedEditing(EditCommandComposition &composition) noexcept
@@ -903,7 +903,7 @@ namespace krys::boo
     ChangeSelectionAfterCommand(newSelection, FrameSelection::DefaultSetSelectionOptions());
     DispatchInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                         ShareRefPtr(composition.EndingRootEditableElement()), u8"historyUndo",
-                        dom::IsInputMethodComposing::No);
+                        ui_events::IsInputMethodComposing::No);
 
     _lastEditCommand = nullptr;
     if (auto *client = Client())
@@ -917,7 +917,7 @@ namespace krys::boo
   {
     return DispatchBeforeInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                                      ShareRefPtr(composition.EndingRootEditableElement()), u8"historyRedo",
-                                     dom::IsInputMethodComposing::No);
+                                     ui_events::IsInputMethodComposing::No);
   }
 
   void Editor::ReappliedEditing(EditCommandComposition &composition) noexcept
@@ -931,7 +931,7 @@ namespace krys::boo
     ChangeSelectionAfterCommand(newSelection, FrameSelection::DefaultSetSelectionOptions());
     DispatchInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
                         ShareRefPtr(composition.EndingRootEditableElement()), u8"historyRedo",
-                        dom::IsInputMethodComposing::No);
+                        ui_events::IsInputMethodComposing::No);
 
     _lastEditCommand = nullptr;
     if (auto *client = Client())
@@ -1052,8 +1052,8 @@ namespace krys::boo
 
     auto inputTypeName = InputTypeNameForEditingAction(editingAction);
     auto isInputMethodComposing = IsInputMethodComposingForEditingAction(editingAction)
-                                    ? dom::IsInputMethodComposing::Yes
-                                    : dom::IsInputMethodComposing::No;
+                                    ? ui_events::IsInputMethodComposing::Yes
+                                    : ui_events::IsInputMethodComposing::No;
     auto inputEventData = InputEventDataForEditingStyleAndAction(style->Style(), editingAction);
     RefPtr<Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
 
@@ -1097,8 +1097,8 @@ namespace krys::boo
 
     auto inputTypeName = InputTypeNameForEditingAction(editingAction);
     auto isInputMethodComposing = IsInputMethodComposingForEditingAction(editingAction)
-                                    ? dom::IsInputMethodComposing::Yes
-                                    : dom::IsInputMethodComposing::No;
+                                    ? ui_events::IsInputMethodComposing::Yes
+                                    : ui_events::IsInputMethodComposing::No;
     auto inputEventData = InputEventDataForEditingStyleAndAction(style, editingAction);
     RefPtr<Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
     if (element && !DispatchBeforeInputEvent(*element, inputTypeName, isInputMethodComposing, inputEventData))
@@ -1185,14 +1185,14 @@ namespace krys::boo
       auto directionValue = direction == WritingDirection::LeftToRight ? u8"ltr" : u8"rtl";
       auto writingDirectionInputTypeName =
         InputTypeNameForEditingAction(EditAction::SetBlockWritingDirection);
-      if (!DispatchBeforeInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
-                                    DOMString(directionValue)))
+      if (!DispatchBeforeInputEvent(*element, writingDirectionInputTypeName,
+                                    ui_events::IsInputMethodComposing::No, DOMString(directionValue)))
       {
         return;
       }
 
       (void)element->SetAttribute(u8"dir", directionValue);
-      DispatchInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
+      DispatchInputEvent(*element, writingDirectionInputTypeName, ui_events::IsInputMethodComposing::No,
                          DOMString(directionValue));
       (void)_document.UpdateStyleIfNeeded();
       return;
@@ -1275,7 +1275,7 @@ namespace krys::boo
   }
 
   bool Editor::InsertText(utf8_stringview text, Event *triggeringEvent,
-                          dom::TextEventInputType inputType) noexcept
+                          ui_events::TextEventInputType inputType) noexcept
   {
     auto *frame = _document.Frame();
     return frame && frame->GetEventHandler().HandleTextInputEvent(text, triggeringEvent, inputType);
@@ -1283,7 +1283,7 @@ namespace krys::boo
 
   bool Editor::InsertText(utf8_stringview text, Event *triggeringEvent) noexcept
   {
-    return InsertText(text, triggeringEvent, dom::TextEventInputType::Keyboard);
+    return InsertText(text, triggeringEvent, ui_events::TextEventInputType::Keyboard);
   }
 
   // FIXME: Revealing the selection when the client asks (shouldRevealCurrentSelectionAfterInsertion), with
@@ -1633,8 +1633,8 @@ namespace krys::boo
 
   bool Editor::InsertTextForConfirmedComposition(utf8_stringview text) noexcept
   {
-    return _document.Frame()->GetEventHandler().HandleTextInputEvent(text, nullptr,
-                                                                     dom::TextEventInputType::Composition);
+    return _document.Frame()->GetEventHandler().HandleTextInputEvent(
+      text, nullptr, ui_events::TextEventInputType::Composition);
   }
 
   void Editor::SelectComposition() noexcept

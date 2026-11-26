@@ -6,13 +6,13 @@
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/CSS/Containment/ContentRelevancy.hpp"
 #include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/DOM/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Nodes/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/Events/SimulatedClick.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
@@ -1611,11 +1611,11 @@ namespace krys::boo
 
     /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
     /// @return False if the element is a disabled form control, or is already being clicked.
-    bool DispatchSimulatedClick(
-      Event *underlyingEvent,
-      dom::SimulatedClickMouseEventOptions eventOptions = dom::SimulatedClickMouseEventOptions::SendNoEvents,
-      dom::SimulatedClickVisualOptions visualOptions =
-        dom::SimulatedClickVisualOptions::ShowPressedLook) noexcept;
+    bool DispatchSimulatedClick(Event *underlyingEvent,
+                                html::SimulatedClickMouseEventOptions eventOptions =
+                                  html::SimulatedClickMouseEventOptions::SendNoEvents,
+                                html::SimulatedClickVisualOptions visualOptions =
+                                  html::SimulatedClickVisualOptions::ShowPressedLook) noexcept;
 
 #pragma endregion
 

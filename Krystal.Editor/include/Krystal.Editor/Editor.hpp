@@ -5,9 +5,9 @@
 #endif
 
 #include "Krystal.Booey/DOM/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/DOM/Events/CommandEvent.hpp"
+#include "Krystal.Booey/HTML/Events/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"

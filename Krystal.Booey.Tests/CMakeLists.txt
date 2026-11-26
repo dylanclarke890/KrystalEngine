@@ -408,14 +408,6 @@ set(KRYSTAL_BOOEY_TESTS_DOM_SOURCES
   tests/DOM/Events/Event.cpp
   tests/DOM/Events/EventListenerHandle.cpp
   tests/DOM/Events/EventTarget.cpp
-  tests/DOM/Events/KeyboardEvent.cpp
-  tests/DOM/Events/MouseEvent.cpp
-  tests/DOM/Events/PointerEvent.cpp
-  tests/DOM/Events/ScopedEventQueue.cpp
-  tests/DOM/Events/SimulatedClick.cpp
-  tests/DOM/Events/ToggleEvent.cpp
-  tests/DOM/Events/UIEvent.cpp
-  tests/DOM/Events/WheelEvent.cpp
   tests/DOM/Internals/ElementFactory.cpp
   tests/DOM/Internals/EventFactory.cpp
   tests/DOM/Internals/QualifiedNameCache.cpp
@@ -480,8 +472,16 @@ set(KRYSTAL_BOOEY_TESTS_EDITING_SOURCES
   tests/Editing/TextIterator.cpp
 )
 
+set(KRYSTAL_BOOEY_TESTS_EVENTS_SOURCES
+  tests/Events/Pointer/MouseEvent.cpp
+  tests/Events/Pointer/PointerEvent.cpp
+  tests/Events/Pointer/WheelEvent.cpp
+  tests/Events/UI/KeyboardEvent.cpp
+  tests/Events/UI/UIEvent.cpp
+)
+
 set(KRYSTAL_BOOEY_TESTS_FILEAPI_SOURCES
-  tests/FileAPI/Blob.cpp
+  tests/FileApi/Blob.cpp
 )
 
 set(KRYSTAL_BOOEY_TESTS_GRAPHICS_HEADERS
@@ -557,6 +557,8 @@ set(KRYSTAL_BOOEY_TESTS_HTML_SOURCES
   tests/HTML/CustomElement/CustomElementRegistry.cpp
   tests/HTML/CustomElement/ElementInternals.cpp
   tests/HTML/DragAndDrop/DataTransfer.cpp
+  tests/HTML/Events/SimulatedClick.cpp
+  tests/HTML/Events/ToggleEvent.cpp
   tests/HTML/Elements/HTMLAnchorElement.cpp
   tests/HTML/Elements/HTMLBaseElement.cpp
   tests/HTML/Elements/HTMLButtonElement.cpp
@@ -608,6 +610,7 @@ set(KRYSTAL_BOOEY_TESTS_HTML_SOURCES
   tests/HTML/InputTypes/ImageInputType.cpp
   tests/HTML/InputTypes/NumberInputType.cpp
   tests/HTML/InputTypes/RadioInputType.cpp
+  tests/HTML/Internals/ScopedEventQueue.cpp
   tests/HTML/Internals/PresentationalHints.cpp
   tests/HTML/Internals/UserActionElementSet.cpp
   tests/HTML/MicroParsers/Dimensions.cpp
@@ -968,6 +971,7 @@ target_sources(Krystal.Booey.Tests
     ${KRYSTAL_BOOEY_TESTS_CSS_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_DOM_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_EDITING_SOURCES}
+    ${KRYSTAL_BOOEY_TESTS_EVENTS_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_FILEAPI_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_GRAPHICS_SOURCES}
     ${KRYSTAL_BOOEY_TESTS_HTML_SOURCES}

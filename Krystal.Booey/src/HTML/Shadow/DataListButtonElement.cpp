@@ -26,7 +26,7 @@
 #include "Krystal.Booey/HTML/Shadow/DataListButtonElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Events/MouseEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -59,7 +59,7 @@ namespace krys::boo::html
       return;
     }
 
-    if (dom::IsAnyClick(event))
+    if (pointer_events::IsAnyClick(event))
     {
       if (_owner)
       {

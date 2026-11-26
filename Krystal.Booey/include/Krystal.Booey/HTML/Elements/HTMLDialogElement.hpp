@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Events/ToggleEventTask.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/Events/ToggleEventTask.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -56,7 +56,8 @@ namespace krys::boo
     DOMString _returnValue;
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#is-modal
     bool _isModal {false};
-    /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#enable-close-watcher-for-requestclose()
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/interactive-elements.html#enable-close-watcher-for-requestclose()
     bool _enableCloseWatcherForRequestClose {false};
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#request-close-return-value
     Maybe<DOMString> _requestCloseReturnValue;
@@ -67,7 +68,7 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-close-watcher
     RefPtr<html::CloseWatcher> _closeWatcher;
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-toggle-task-tracker
-    RefPtr<dom::ToggleEventTask> _toggleEventTask;
+    RefPtr<html::ToggleEventTask> _toggleEventTask;
 
   public:
     HTMLDialogElement(Document &document) noexcept;
@@ -163,12 +164,12 @@ namespace krys::boo
     void SetIsModal(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-dialog-toggle-event-task
-    void QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+    void QueueDialogToggleEventTask(html::ToggleState oldState, html::ToggleState newState,
                                     Element *source) noexcept;
 
     /// @brief Fires `beforetoggle` from @p oldState to @p newState.
     /// @return Whether it wasn't canceled.
-    bool FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
+    bool FireBeforeToggleEvent(html::ToggleState oldState, html::ToggleState newState, bool cancelable,
                                Element *source) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/interactive-elements.html#dialog-setup-steps

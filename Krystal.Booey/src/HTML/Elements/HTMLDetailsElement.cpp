@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
+#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
-#include "Krystal.Booey/DOM/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Nodes/Text.hpp"
@@ -143,13 +143,13 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-details-toggle-event-task
-  void HTMLDetailsElement::QueueDetailsToggleEventTask(dom::ToggleState oldState,
-                                                       dom::ToggleState newState) noexcept
+  void HTMLDetailsElement::QueueDetailsToggleEventTask(html::ToggleState oldState,
+                                                       html::ToggleState newState) noexcept
   {
     // (The task tracker is a ToggleEventTask, which coalesces the queued events.)
     if (!_toggleEventTask)
     {
-      _toggleEventTask = dom::ToggleEventTask::Create(*this);
+      _toggleEventTask = html::ToggleEventTask::Create(*this);
     }
 
     _toggleEventTask->Queue(oldState, newState);
@@ -187,7 +187,7 @@ namespace krys::boo
 
           // 3a.i. If oldValue is null, queue a details toggle event task given the details element, "closed",
           //       and "open".
-          QueueDetailsToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open);
+          QueueDetailsToggleEventTask(html::ToggleState::Closed, html::ToggleState::Open);
 
           // 3b. If oldValue is null and value is not null, then ensure details exclusivity by closing other
           //     elements if needed given element.
@@ -217,7 +217,7 @@ namespace krys::boo
 
           // 3a.ii. Otherwise, queue a details toggle event task given the details element, "open", and
           //        "closed".
-          QueueDetailsToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed);
+          QueueDetailsToggleEventTask(html::ToggleState::Open, html::ToggleState::Closed);
         }
       }
     }

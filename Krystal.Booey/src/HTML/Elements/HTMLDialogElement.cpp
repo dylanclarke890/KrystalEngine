@@ -28,7 +28,6 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
@@ -37,6 +36,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/HTML/Events/ToggleEvent.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo
@@ -102,7 +102,7 @@ namespace krys::boo
     // 3. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable
     //    attribute initialized to true, the oldState attribute initialized to "closed", and the newState
     //    attribute initialized to "open" at this is false, then return.
-    if (!FireBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, nullptr))
+    if (!FireBeforeToggleEvent(html::ToggleState::Closed, html::ToggleState::Open, true, nullptr))
     {
       return {};
     }
@@ -114,7 +114,7 @@ namespace krys::boo
     }
 
     // 5. Queue a dialog toggle event task given this, "closed", "open", and null.
-    QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, nullptr);
+    QueueDialogToggleEventTask(html::ToggleState::Closed, html::ToggleState::Open, nullptr);
 
     // 6. Add an open attribute to this, whose value is the empty string.
     (void)SetAttribute(u8"open", DOMString());
@@ -211,7 +211,7 @@ namespace krys::boo
     //    attribute initialized to true, the oldState attribute initialized to "closed", the newState
     //    attribute initialized to "open", and the source attribute initialized to source at subject is false,
     //    then return.
-    if (!FireBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
+    if (!FireBeforeToggleEvent(html::ToggleState::Closed, html::ToggleState::Open, true, source))
     {
       return {};
     }
@@ -225,7 +225,7 @@ namespace krys::boo
     }
 
     // 10. Queue a dialog toggle event task given subject, "closed", "open", and source.
-    QueueDialogToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
+    QueueDialogToggleEventTask(html::ToggleState::Closed, html::ToggleState::Open, source);
 
     // 11. Add an open attribute to subject, whose value is the empty string.
     (void)SetAttribute(u8"open", DOMString());
@@ -270,7 +270,7 @@ namespace krys::boo
     //    "open", the newState attribute initialized to "closed", and the source attribute initialized to
     //    source at subject.
     Ref<HTMLDialogElement> protectedThis = ShareRef(*this);
-    (void)FireBeforeToggleEvent(dom::ToggleState::Open, dom::ToggleState::Closed, false, source);
+    (void)FireBeforeToggleEvent(html::ToggleState::Open, html::ToggleState::Closed, false, source);
 
     // 3. If subject does not have an open attribute, then return.
     if (!Open())
@@ -279,7 +279,7 @@ namespace krys::boo
     }
 
     // 4. Queue a dialog toggle event task given subject, "open", "closed", and source.
-    QueueDialogToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
+    QueueDialogToggleEventTask(html::ToggleState::Open, html::ToggleState::Closed, source);
 
     // 5. Remove subject's open attribute.
     RemoveAttribute(u8"open");
@@ -563,23 +563,23 @@ namespace krys::boo
   }
 
   // https://html.spec.whatwg.org/multipage/interactive-elements.html#queue-a-dialog-toggle-event-task
-  void HTMLDialogElement::QueueDialogToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+  void HTMLDialogElement::QueueDialogToggleEventTask(html::ToggleState oldState, html::ToggleState newState,
                                                      Element *source) noexcept
   {
     // (The task tracker is a ToggleEventTask, which coalesces the queued events.)
     if (!_toggleEventTask)
     {
-      _toggleEventTask = dom::ToggleEventTask::Create(*this);
+      _toggleEventTask = html::ToggleEventTask::Create(*this);
     }
     _toggleEventTask->Queue(oldState, newState, source);
   }
 
-  bool HTMLDialogElement::FireBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState,
+  bool HTMLDialogElement::FireBeforeToggleEvent(html::ToggleState oldState, html::ToggleState newState,
                                                 bool cancelable, Element *source) noexcept
   {
-    auto stringForState = [](dom::ToggleState state)
+    auto stringForState = [](html::ToggleState state)
     {
-      return DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
+      return DOMString(state == html::ToggleState::Closed ? u8"closed" : u8"open");
     };
 
     ToggleEventInit init;

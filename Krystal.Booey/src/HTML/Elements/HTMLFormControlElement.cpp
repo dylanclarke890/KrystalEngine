@@ -2,13 +2,13 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
@@ -169,7 +169,7 @@ namespace krys::boo
 
   void HTMLFormControlElement::DispatchChangeEvent() noexcept
   {
-    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Change, true, false), ShareRef(*this));
+    html::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Change, true, false), ShareRef(*this));
   }
 
   void HTMLFormControlElement::DispatchCancelEvent() noexcept
@@ -188,8 +188,8 @@ namespace krys::boo
   void HTMLFormControlElement::DispatchFormControlInputEvent() noexcept
   {
     SetChangedSinceLastFormControlChangeEvent(true);
-    dom::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
-                                           ShareRef(*this));
+    html::ScopedEventQueue::DispatchOrQueue(Event::Create(event_names::Input, true, false, true),
+                                            ShareRef(*this));
   }
 
   Maybe<DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept

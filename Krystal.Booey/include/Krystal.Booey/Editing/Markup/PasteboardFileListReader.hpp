@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/FileAPI/File.hpp"
+#include "Krystal.Booey/FileApi/File.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 
 namespace krys::boo

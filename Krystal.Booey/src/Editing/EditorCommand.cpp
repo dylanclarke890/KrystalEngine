@@ -27,12 +27,12 @@
  */
 
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
 #include "Krystal.Booey/DOM/Nodes/Document.hpp"
 #include "Krystal.Booey/DOM/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/EditorClient.hpp"
@@ -743,7 +743,7 @@ namespace krys::boo
     {
       return TargetFrame(frame, event)
         .GetEventHandler()
-        .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::BackTab);
+        .HandleTextInputEvent(u8"\t", event, ui_events::TextEventInputType::BackTab);
     }
 
     bool ExecuteInsertLineBreak(boo::Frame &frame, Event *event, EditorCommandSource source,
@@ -754,7 +754,7 @@ namespace krys::boo
         case EditorCommandSource::MenuOrKeyBinding:
           return TargetFrame(frame, event)
             .GetEventHandler()
-            .HandleTextInputEvent(u8"\n", event, dom::TextEventInputType::LineBreak);
+            .HandleTextInputEvent(u8"\n", event, ui_events::TextEventInputType::LineBreak);
         case EditorCommandSource::DOM:
         case EditorCommandSource::DOMWithUserInterface:
           // Doesn't scroll to make the selection visible, or modify the kill ring.
@@ -772,8 +772,8 @@ namespace krys::boo
       auto &targetFrame = TargetFrame(frame, event);
       return targetFrame.GetEventHandler().HandleTextInputEvent(
         u8"\n", event,
-        targetFrame.Document()->GetEditor().CanEditRichly() ? dom::TextEventInputType::Keyboard
-                                                            : dom::TextEventInputType::LineBreak);
+        targetFrame.Document()->GetEditor().CanEditRichly() ? ui_events::TextEventInputType::Keyboard
+                                                            : ui_events::TextEventInputType::LineBreak);
     }
 
     bool ExecuteInsertParagraph(boo::Frame &frame, Event *, EditorCommandSource, utf8_stringview) noexcept
@@ -786,7 +786,7 @@ namespace krys::boo
     {
       return TargetFrame(frame, event)
         .GetEventHandler()
-        .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::Keyboard);
+        .HandleTextInputEvent(u8"\t", event, ui_events::TextEventInputType::Keyboard);
     }
 
     bool ExecuteInsertText(boo::Frame &frame, Event *event, EditorCommandSource,

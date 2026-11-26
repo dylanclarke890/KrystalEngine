@@ -1238,7 +1238,7 @@ Status: reviewed (2026-11-01)
 ##### [8.1.8.3 Event firing](https://html.spec.whatwg.org/multipage/webappapis.html#event-firing)
 
 Status: reviewed (2026-11-01)
-> `dom::SimulateClick` fires a click: a `PointerEvent` that bubbles, is cancelable and composed, with a pointer ID of -1.
+> `html::SimulateClick` fires a click: a `PointerEvent` that bubbles, is cancelable and composed, with a pointer ID of -1.
 
 - [x] [Firing a synthetic pointer event named e](https://html.spec.whatwg.org/multipage/webappapis.html#fire-a-synthetic-pointer-event) — Firing a synthetic pointer event named e at target, with an optional not trusted flag, means running these steps:
   - 1. Let event be the result of creating an event using PointerEvent.

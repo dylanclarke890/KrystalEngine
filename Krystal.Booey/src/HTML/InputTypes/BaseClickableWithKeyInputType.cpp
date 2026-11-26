@@ -30,7 +30,7 @@
  */
 
 #include "Krystal.Booey/HTML/InputTypes/BaseClickableWithKeyInputType.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
 
 namespace krys::boo::html
