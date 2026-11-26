@@ -38,7 +38,6 @@ namespace krys::web::dom::tests
       CHECK(TreeQueries::Length(*doc) == 0);
       REQUIRE_FALSE(doc->AppendChild(*doctype.Value()).HasException());
       CHECK(TreeQueries::Length(*doc) == 1);
-      CHECK(doc->Length() == 1);
     }
 
     SECTION("Character data counts UTF-8 code units")
@@ -1008,6 +1007,39 @@ namespace krys::web::dom::tests
     CHECK_FALSE(TreeQueries::IsExclusiveTextNode(*document->CreateCDATASection(u8"a").ReleaseValue()));
     CHECK_FALSE(TreeQueries::IsExclusiveTextNode(*document->CreateComment(u8"a")));
     CHECK_FALSE(TreeQueries::IsExclusiveTextNode(nullptr));
+  }
+
+  TEST_CASE("CountChildNodes: a node's children, none for character data", "[TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestElement>(*doc);
+    CHECK(TreeQueries::CountChildNodes(*parent) == 0);
+
+    auto element = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<krys::web::Text>(*doc, u8"text");
+    REQUIRE_FALSE(parent->AppendChild(*element).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+    CHECK(TreeQueries::CountChildNodes(*parent) == 2);
+
+    // Unlike its length, a text node's data doesn't count.
+    auto text = CreateRef<krys::web::Text>(*doc, u8"text");
+    CHECK(TreeQueries::Length(*text) == 4);
+    CHECK(TreeQueries::CountChildNodes(*text) == 0);
+  }
+
+  TEST_CASE("IsDescendant and IsShadowIncludingDescendant: never of a null node",
+            "[TreeQueries][dom:concept-tree-descendant][dom:concept-shadow-including-descendant]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+
+    const Node *none = nullptr;
+    CHECK(TreeQueries::IsDescendant(*child, parent.get()));
+    CHECK_FALSE(TreeQueries::IsDescendant(*child, none));
+    CHECK(TreeQueries::IsShadowIncludingDescendant(*child, parent.get()));
+    CHECK_FALSE(TreeQueries::IsShadowIncludingDescendant(*child, none));
   }
 
 #pragma endregion

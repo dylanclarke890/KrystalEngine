@@ -43,6 +43,11 @@ namespace krys::web::dom
     return std::ranges::any_of(ConstAncestorRange(a), [&](const Node &n) { return &n == &b; });
   }
 
+  bool TreeQueries::IsDescendant(const Node &a, const Node *b) noexcept
+  {
+    return b && IsDescendant(a, *b);
+  }
+
   bool TreeQueries::IsInclusiveDescendant(const Node &a, const Node &b) noexcept
   {
     return std::ranges::any_of(ConstInclusiveAncestorRange(a), [&](const Node &n) { return &n == &b; });
@@ -226,6 +231,11 @@ namespace krys::web::dom
     }
 
     return false;
+  }
+
+  bool TreeQueries::IsShadowIncludingDescendant(const Node &a, const Node *b) noexcept
+  {
+    return b && IsShadowIncludingDescendant(a, *b);
   }
 
   bool TreeQueries::IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept
@@ -449,6 +459,12 @@ namespace krys::web::dom
   bool TreeQueries::IsExclusiveTextNode(const Node *node) noexcept
   {
     return Is<Text>(node) && !Is<CDATASection>(node);
+  }
+
+  size_t TreeQueries::CountChildNodes(const Node &node) noexcept
+  {
+    auto *container = DynamicDowncast<ContainerNode>(node);
+    return container ? Count(ConstChildNodeRange(*container)) : 0uz;
   }
 
 #pragma endregion

@@ -40,7 +40,7 @@ namespace krys::web::dom
     {
       return null;
     }
-    uint64 offset = node.ComputeNodeIndex();
+    uint64 offset = dom::TreeQueries::Index(node);
     return SimpleRange {{ShareRef<Node>(*parent), offset}, {ShareRef<Node>(*parent), offset + 1}};
   }
 
@@ -63,7 +63,8 @@ namespace krys::web::dom
       {
         return range.Start.Container;
       }
-      if (auto *child = range.Start.Container->TraverseToChildAt(static_cast<uint32>(range.Start.Offset)))
+      if (auto *child =
+            dom::TreeTraversal::ChildAt(*range.Start.Container, static_cast<uint32>(range.Start.Offset)))
       {
         return ShareRefPtr(child);
       }
@@ -76,7 +77,8 @@ namespace krys::web::dom
       {
         return ShareRefPtr(TreeTraversal::NextSkippingChildren(*range.End.Container));
       }
-      if (auto *child = range.End.Container->TraverseToChildAt(static_cast<uint32>(range.End.Offset)))
+      if (auto *child =
+            dom::TreeTraversal::ChildAt(*range.End.Container, static_cast<uint32>(range.End.Offset)))
       {
         return ShareRefPtr(child);
       }
@@ -90,7 +92,8 @@ namespace krys::web::dom
       {
         return range.Start.Container;
       }
-      if (auto *child = range.Start.Container->TraverseToChildAt(static_cast<uint32>(range.Start.Offset)))
+      if (auto *child =
+            dom::TreeTraversal::ChildAt(*range.Start.Container, static_cast<uint32>(range.Start.Offset)))
       {
         return ShareRefPtr(child);
       }

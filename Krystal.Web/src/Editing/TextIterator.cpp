@@ -122,12 +122,12 @@ namespace krys::web
     {
       if (rangeEndOffset >= 0 && !Is<CharacterData>(rangeEndContainer))
       {
-        if (auto *next = rangeEndContainer.TraverseToChildAt(static_cast<uint32>(rangeEndOffset)))
+        if (auto *next = dom::TreeTraversal::ChildAt(rangeEndContainer, static_cast<uint32>(rangeEndOffset)))
         {
           return ShareRefPtr(next);
         }
       }
-      for (Node *node = &rangeEndContainer; node; node = node->ParentOrShadowHostNode())
+      for (Node *node = &rangeEndContainer; node; node = dom::TreeTraversal::ParentOrShadowHostNode(*node))
       {
         if (auto *next = node->NextSibling())
         {
@@ -190,7 +190,8 @@ namespace krys::web
       // Put the nodes in a vector so we can iterate in reverse order.
       // FIXME: This (and TextIterator in general) should use ComposedTreeIterator.
       List<Node *> ancestry;
-      for (auto *parent = node.ParentOrShadowHostNode(); parent; parent = parent->ParentOrShadowHostNode())
+      for (auto *parent = dom::TreeTraversal::ParentOrShadowHostNode(node); parent;
+           parent = dom::TreeTraversal::ParentOrShadowHostNode(*parent))
       {
         ancestry.push_back(parent);
       }
@@ -308,7 +309,7 @@ namespace krys::web
       {
         return point.Container.get();
       }
-      if (auto *child = point.Container->TraverseToChildAt(static_cast<uint32>(point.Offset)))
+      if (auto *child = dom::TreeTraversal::ChildAt(*point.Container, static_cast<uint32>(point.Offset)))
       {
         return child;
       }
@@ -392,12 +393,12 @@ namespace krys::web
     KRYS_NODISCARD inline bool IsDescendantOf(TextIteratorBehaviors, Node &node,
                                               Node &possibleAncestor) noexcept
     {
-      return node.IsDescendantOf(&possibleAncestor);
+      return dom::TreeQueries::IsDescendant(node, &possibleAncestor);
     }
 
     KRYS_NODISCARD inline Node *ParentNodeOrShadowHost(TextIteratorBehaviors, Node &node) noexcept
     {
-      return node.ParentOrShadowHostNode();
+      return dom::TreeTraversal::ParentOrShadowHostNode(node);
     }
 
     KRYS_NODISCARD inline bool HasDisplayContents(Node &node) noexcept
@@ -1199,7 +1200,7 @@ namespace krys::web
     // If we are outside the start container's subtree, assume we need to emit.
     // FIXME: m_startContainer could be an inline block
     auto &currentNode = *_currentNode;
-    if (!currentNode.IsDescendantOf(_startContainer.get()))
+    if (!dom::TreeQueries::IsDescendant(currentNode, _startContainer.get()))
     {
       return true;
     }
@@ -1432,7 +1433,7 @@ namespace krys::web
     // Use the current run information, if we have it.
     if (_positionOffsetBaseNode)
     {
-      uint32 index = _positionOffsetBaseNode->ComputeNodeIndex();
+      auto index = static_cast<uint32>(dom::TreeQueries::Index(*_positionOffsetBaseNode));
       _positionStartOffset += static_cast<int32>(index);
       _positionEndOffset += static_cast<int32>(index);
       _positionOffsetBaseNode = nullptr;
@@ -1448,7 +1449,7 @@ namespace krys::web
     {
       return start.Container.get();
     }
-    return start.Container->TraverseToChildAt(static_cast<uint32>(start.Offset));
+    return dom::TreeTraversal::ChildAt(*start.Container, static_cast<uint32>(start.Offset));
   }
 
   // --------
@@ -1464,18 +1465,18 @@ namespace krys::web
 
     if (!Is<CharacterData>(*startNode))
     {
-      if (startOffset < startNode->CountChildNodes())
+      if (startOffset < dom::TreeQueries::CountChildNodes(*startNode))
       {
-        startNode = startNode->TraverseToChildAt(startOffset);
+        startNode = dom::TreeTraversal::ChildAt(*startNode, startOffset);
         startOffset = 0;
       }
     }
     if (!Is<CharacterData>(*endNode))
     {
-      if (endOffset > 0 && endOffset <= endNode->CountChildNodes())
+      if (endOffset > 0 && endOffset <= dom::TreeQueries::CountChildNodes(*endNode))
       {
-        endNode = endNode->TraverseToChildAt(endOffset - 1);
-        endOffset = endNode->Length();
+        endNode = dom::TreeTraversal::ChildAt(*endNode, endOffset - 1);
+        endOffset = static_cast<uint32>(dom::TreeQueries::Length(*endNode));
       }
     }
 
@@ -1562,7 +1563,7 @@ namespace krys::web
         // Exit all other containers.
         while (!_node->PreviousSibling())
         {
-          if (!AdvanceRespectingRange(_node->ParentOrShadowHostNode()))
+          if (!AdvanceRespectingRange(dom::TreeTraversal::ParentOrShadowHostNode(*_node)))
           {
             break;
           }
@@ -1683,7 +1684,7 @@ namespace krys::web
 
   bool SimplifiedBackwardsTextIterator::HandleReplacedElement() noexcept
   {
-    int32 index = static_cast<int32>(_node->ComputeNodeIndex());
+    int32 index = static_cast<int32>(dom::TreeQueries::Index(*_node));
     // We want replaced elements to behave like punctuation for boundary
     // finding, and to simply take up space for the selection preservation
     // code in moveParagraphs, so we use a comma. Unconditionally emit
@@ -1697,7 +1698,7 @@ namespace krys::web
     RefPtr<Node> currentNode = _node;
     if (ShouldEmitTabBeforeNode(*currentNode))
     {
-      int32 index = static_cast<int32>(currentNode->ComputeNodeIndex());
+      int32 index = static_cast<int32>(dom::TreeQueries::Index(*currentNode));
       EmitCharacter('\t', ShareRefPtr<Node>(currentNode->ParentNode()), index + 1, index + 1);
     }
     else if (ShouldEmitNewlineForNode(currentNode.get(),
@@ -1707,7 +1708,7 @@ namespace krys::web
       if (_lastCharacter != '\n')
       {
         // Corresponds to the same check in TextIterator::exitNode.
-        int32 index = static_cast<int32>(currentNode->ComputeNodeIndex());
+        int32 index = static_cast<int32>(dom::TreeQueries::Index(*currentNode));
         // The start of this emitted range is wrong. Ensuring correctness would require
         // VisiblePositions and so would be slow. previousBoundary expects this.
         EmitCharacter('\n', ShareRefPtr<Node>(currentNode->ParentNode()), index + 1, index + 1);

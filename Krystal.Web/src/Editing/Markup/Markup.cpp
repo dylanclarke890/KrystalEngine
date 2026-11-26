@@ -251,7 +251,7 @@ namespace krys::web
         {
           return node.ParentInComposedTree();
         }
-        return node.ParentOrShadowHostNode();
+        return dom::TreeTraversal::ParentOrShadowHostNode(node);
       }
 
       // FIXME: The `meta charset` for clients that read the markup back from the pasteboard as UTF-8, with
@@ -386,7 +386,7 @@ namespace krys::web
         {
           return TreeQueries::IsShadowIncludingDescendant(node, possibleAncestor);
         }
-        return node.IsDescendantOf(&possibleAncestor);
+        return dom::TreeQueries::IsDescendant(node, &possibleAncestor);
       }
 
       RefPtr<Node> TraverseNodesForSerialization(Node &startNode, Node *pastEnd,
@@ -1431,7 +1431,7 @@ namespace krys::web
     {
       return node.ParentInComposedTree();
     }
-    return node.ParentOrShadowHostNode();
+    return dom::TreeTraversal::ParentOrShadowHostNode(node);
   }
 
   Node *UserSelectNoneStateCache::FirstChild(Node &node) const noexcept

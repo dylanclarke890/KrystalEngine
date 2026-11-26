@@ -22,6 +22,7 @@
 
 #include "Krystal.Web/Svg/Elements/SVGFEImageElement.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Graphics/Filters/FEImage.hpp"
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
 #include "Krystal.Web/Graphics/ImageBuffers/ImageBuffer.hpp"
@@ -209,7 +210,7 @@ namespace krys::web
       return {};
     }
 
-    if (IsShadowIncludingDescendantOf(targetElement))
+    if (dom::TreeQueries::IsShadowIncludingDescendant(*this, targetElement))
     {
       return {};
     }

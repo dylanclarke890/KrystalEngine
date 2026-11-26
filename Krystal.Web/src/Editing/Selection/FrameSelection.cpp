@@ -224,7 +224,7 @@ namespace krys::web
       // We use AnchorNode instead of GetContainerNode() because NodeWillBeRemoved must update position when
       // anchored node is removed.
       for (Node *currentNode = position.AnchorNode(); currentNode;
-           currentNode = currentNode->ParentOrShadowHostNode())
+           currentNode = dom::TreeTraversal::ParentOrShadowHostNode(*currentNode))
       {
         if (currentNode->ContainsSelectionEndPoint() == value)
         {
@@ -2016,7 +2016,7 @@ namespace krys::web
           Downcast<HTMLTextFormControlElement>(*focusedElement).Select();
           return;
         }
-        root = ShareRefPtr(focusedElement->NonBoundaryShadowTreeRootNode());
+        root = ShareRefPtr(dom::TreeTraversal::NonBoundaryShadowTreeRootNode(*focusedElement));
       }
       else
       {

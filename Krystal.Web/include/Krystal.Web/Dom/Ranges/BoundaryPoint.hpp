@@ -28,6 +28,7 @@
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Web/Dom/Nodes/Node.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include <compare>
 
 namespace krys::web
@@ -83,6 +84,6 @@ namespace krys::web::dom
 
   KRYS_NODISCARD inline BoundaryPoint CreateBoundaryPointAfterNodeContents(Node &node) noexcept
   {
-    return {ShareRef(node), node.Length()};
+    return {ShareRef(node), dom::TreeQueries::Length(node)};
   }
 }

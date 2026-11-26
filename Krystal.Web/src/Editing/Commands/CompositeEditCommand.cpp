@@ -746,7 +746,7 @@ namespace krys::web
   void CompositeEditCommand::RemoveNode(
     web::Node &node, ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable) noexcept
   {
-    if (!node.NonShadowBoundaryParentNode())
+    if (!dom::TreeTraversal::NonShadowBoundaryParentNode(node))
     {
       return;
     }
@@ -837,7 +837,7 @@ namespace krys::web
   {
     Ref<Element> protectedFirst = ShareRef(first);
     Ref<Element> protectedSecond = ShareRef(second);
-    krys_debug_assert(!first.IsDescendantOf(&second) && &second != &first);
+    krys_debug_assert(!dom::TreeQueries::IsDescendant(first, &second) && &second != &first);
     if (first.NextSibling() != &second)
     {
       RemoveNode(second);
@@ -1586,7 +1586,7 @@ namespace krys::web
       }
       else if (upstreamEnd.DeprecatedNode() && IsBlock(*upstreamEnd.DeprecatedNode()))
       {
-        if (!upstreamEnd.DeprecatedNode()->IsDescendantOf(upstreamStart.DeprecatedNode()))
+        if (!dom::TreeQueries::IsDescendant(*upstreamEnd.DeprecatedNode(), upstreamStart.DeprecatedNode()))
         {
           // If the paragraph end is a descendant of paragraph start, then we need to run
           // the rest of this function. If not, we can bail here.
@@ -1597,8 +1597,8 @@ namespace krys::web
       {
         // The visibleEnd. If it is an ancestor of the paragraph start, then
         // we can bail as we have a full block to work with.
-        if (upstreamStart.DeprecatedNode()->IsDescendantOf(
-              EnclosingBlock(ShareRefPtr(upstreamEnd.DeprecatedNode())).get()))
+        if (dom::TreeQueries::IsDescendant(*upstreamStart.DeprecatedNode(),
+                                           EnclosingBlock(ShareRefPtr(upstreamEnd.DeprecatedNode())).get()))
         {
           return nullptr;
         }
@@ -1673,7 +1673,7 @@ namespace krys::web
     }
 
     if (start.DeprecatedNode() != outerNode && Is<Element>(*lastNode)
-        && start.AnchorNode()->IsDescendantOf(outerNode.get()))
+        && dom::TreeQueries::IsDescendant(*start.AnchorNode(), outerNode.get()))
     {
       List<RefPtr<web::Node>> ancestors;
 
@@ -1703,12 +1703,13 @@ namespace krys::web
     // cloning all the siblings until end.deprecatedNode() is reached.
 
     if (start.DeprecatedNode() != end.DeprecatedNode()
-        && !start.DeprecatedNode()->IsDescendantOf(end.DeprecatedNode()))
+        && !dom::TreeQueries::IsDescendant(*start.DeprecatedNode(), end.DeprecatedNode()))
     {
       // If end is not a descendant of outerNode we need to
       // find the first common ancestor to increase the scope
       // of our nextSibling traversal.
-      while (!end.DeprecatedNode()->IsDescendantOf(outerNode.get()) && outerNode->ParentNode())
+      while (!dom::TreeQueries::IsDescendant(*end.DeprecatedNode(), outerNode.get())
+             && outerNode->ParentNode())
       {
         outerNode = ShareRefPtr(outerNode->ParentNode());
       }
@@ -1731,7 +1732,7 @@ namespace krys::web
         auto clonedNode = cloneNode(*node, true);
         InsertNodeAfter(*clonedNode, *lastNode);
         lastNode = krys::move(clonedNode);
-        if (node == end.DeprecatedNode() || end.DeprecatedNode()->IsDescendantOf(*node))
+        if (node == end.DeprecatedNode() || dom::TreeQueries::IsDescendant(*end.DeprecatedNode(), *node))
         {
           break;
         }
@@ -2201,7 +2202,7 @@ namespace krys::web
         // probably be safe to move the line break so that we could still avoid the anchor here.
         Position downstream(visiblePos.DeepEquivalent().Downstream());
         if (LineBreakExistsAtVisiblePosition(visiblePos)
-            && downstream.DeprecatedNode()->IsDescendantOf(enclosingAnchor.get()))
+            && dom::TreeQueries::IsDescendant(*downstream.DeprecatedNode(), enclosingAnchor.get()))
         {
           return original;
         }

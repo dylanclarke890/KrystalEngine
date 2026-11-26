@@ -23,6 +23,7 @@
  */
 
 #include "Krystal.Web/Rendering/Replaced/RenderReplaced.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Web/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Web/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
@@ -120,7 +121,8 @@ namespace krys::web
       }
 
       auto *element = renderer.GetElement();
-      uint32 end = element->HasChildNodes() ? element->CountChildNodes() : 1;
+      auto end =
+        element->HasChildNodes() ? static_cast<uint32>(dom::TreeQueries::CountChildNodes(*element)) : 1u;
       if (state == HighlightState::End)
       {
         return selectionEnd == end;

@@ -298,7 +298,7 @@ namespace krys::web
     RefPtr<Element> startBlock =
       EnclosingBlock(ShareRefPtr(insertionPosition.ParentAnchoredEquivalent().GetContainerNode()));
     Position canonicalPos = VisiblePosition(insertionPosition).DeepEquivalent();
-    if (!startBlock || !startBlock->NonShadowBoundaryParentNode()
+    if (!startBlock || !dom::TreeTraversal::NonShadowBoundaryParentNode(*startBlock)
         || IsEditableRootPhrasingContent(insertionPosition) || IsRenderedTable(startBlock.get())
         || IsTableCell(*startBlock)
         || IsHTMLElementOfType(startBlock.get(), html::TagName::form)

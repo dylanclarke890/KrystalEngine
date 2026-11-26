@@ -112,7 +112,7 @@ namespace krys::web
           break;
         }
 
-        if (position.GetContainerNode()->NonShadowBoundaryParentNode())
+        if (dom::TreeTraversal::NonShadowBoundaryParentNode(*position.GetContainerNode()))
         {
           nextPosition = PositionInParentAfterNode(position.GetContainerNode());
         }
@@ -535,7 +535,7 @@ namespace krys::web
 
   void ReplacementFragment::RemoveNode(web::Node &node) noexcept
   {
-    if (auto *parent = node.NonShadowBoundaryParentNode())
+    if (auto *parent = dom::TreeTraversal::NonShadowBoundaryParentNode(node))
     {
       (void)parent->RemoveChild(node);
     }
@@ -543,7 +543,7 @@ namespace krys::web
 
   void ReplacementFragment::InsertNodeBefore(web::Node &node, web::Node &refNode) noexcept
   {
-    if (auto *parent = refNode.NonShadowBoundaryParentNode())
+    if (auto *parent = dom::TreeTraversal::NonShadowBoundaryParentNode(refNode))
     {
       (void)parent->InsertBefore(node, &refNode);
     }
@@ -679,7 +679,7 @@ namespace krys::web
     {
       _firstNodeInserted = _lastNodeInserted;
     }
-    else if (_firstNodeInserted->IsDescendantOf(_lastNodeInserted.get()))
+    else if (dom::TreeQueries::IsDescendant(*_firstNodeInserted, _lastNodeInserted.get()))
     {
       std::swap(_firstNodeInserted, _lastNodeInserted);
     }
@@ -687,8 +687,8 @@ namespace krys::web
 
   void ReplaceSelectionCommand::InsertedNodes::WillRemoveNode(web::Node *node) noexcept
   {
-    krys_debug_assert(!_firstNodeInserted || !_firstNodeInserted->IsDescendantOf(node));
-    krys_debug_assert(!_lastNodeInserted || !_lastNodeInserted->IsDescendantOf(node));
+    krys_debug_assert(!_firstNodeInserted || !dom::TreeQueries::IsDescendant(*_firstNodeInserted, node));
+    krys_debug_assert(!_lastNodeInserted || !dom::TreeQueries::IsDescendant(*_lastNodeInserted, node));
 
     if (_firstNodeInserted == node && _lastNodeInserted == node)
     {
@@ -1430,7 +1430,8 @@ namespace krys::web
     // paragraph.
     if (!startOfInsertedContent.IsNull() && insertionBlock
         && insertionPos.DeprecatedNode() == insertionBlock->ParentNode()
-        && static_cast<uint32>(insertionPos.DeprecatedEditingOffset()) < insertionBlock->ComputeNodeIndex()
+        && static_cast<uint32>(insertionPos.DeprecatedEditingOffset())
+             < dom::TreeQueries::Index(*insertionBlock)
         && !IsStartOfParagraph(startOfInsertedContent))
     {
       InsertNodeAt(*CreateHTMLElement(GetDocument(), u8"br"), startOfInsertedContent.DeepEquivalent());

@@ -33,6 +33,7 @@
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
@@ -117,8 +118,8 @@ namespace krys::web
       // children, so an element can be destroyed while its descendants still reference it (an animation
       // element's target is its parent by default); their references are dropped.
       auto referencingElements = CopyToRefs(_svgRareData->TakeReferencingElements());
-      krys_assert(std::ranges::all_of(referencingElements,
-                                      [&](const auto &element) { return element->IsDescendantOf(*this); }));
+      krys_assert(std::ranges::all_of(referencingElements, [&](const auto &element)
+                                      { return dom::TreeQueries::IsDescendant(*element, *this); }));
       for (auto &instance : Instances())
       {
         instance->_svgRareData->SetCorrespondingElement(nullptr);
@@ -295,7 +296,7 @@ namespace krys::web
         return svg;
       }
 
-      node = node->ParentOrShadowHostNode();
+      node = dom::TreeTraversal::ParentOrShadowHostNode(*node);
     }
 
     return nullptr;
@@ -318,7 +319,7 @@ namespace krys::web
         return DynamicDowncast<SVGElement>(node);
       }
 
-      node = node->ParentOrShadowHostNode();
+      node = dom::TreeTraversal::ParentOrShadowHostNode(*node);
     }
 
     return nullptr;

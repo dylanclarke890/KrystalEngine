@@ -80,7 +80,7 @@ namespace krys::web
       if (RefPtr<Node> shadowAncestor = SelectionShadowAncestor(frame))
       {
         auto *parent = shadowAncestor->ParentNode();
-        dom::BoundaryPoint point {ShareRef(*parent), shadowAncestor->ComputeNodeIndex()};
+        dom::BoundaryPoint point {ShareRef(*parent), dom::TreeQueries::Index(*shadowAncestor)};
         return CreateRef<dom::Range>(point, point);
       }
 
@@ -513,7 +513,7 @@ namespace krys::web
       auto *host = dom::TreeTraversal::ShadowHost(*startNode);
       krys_debug_assert(host && host->ParentNode());
       startNode = ShareRef(*host->ParentNode());
-      startOffset = host->ComputeNodeIndex();
+      startOffset = static_cast<uint32>(dom::TreeQueries::Index(*host));
     }
 
     Ref<Node> endNode = range->End.Container;
@@ -523,7 +523,7 @@ namespace krys::web
       auto *host = dom::TreeTraversal::ShadowHost(*endNode);
       krys_debug_assert(host && host->ParentNode());
       endNode = ShareRef(*host->ParentNode());
-      endOffset = host->ComputeNodeIndex() + 1;
+      endOffset = static_cast<uint32>(dom::TreeQueries::Index(*host) + 1);
     }
 
     auto init = dom::StaticRangeInit::Create(dom::BoundaryPoint {krys::move(startNode), startOffset},
@@ -556,7 +556,7 @@ namespace krys::web
   {
     // This doesn't (and shouldn't) select the characters in a node if passed a text node.
     // Selection API specification seems to have this wrong: https://github.com/w3c/selection-api/issues/125
-    return SetBaseAndExtent(node, 0, node, node.CountChildNodes());
+    return SetBaseAndExtent(node, 0, node, static_cast<uint32>(dom::TreeQueries::CountChildNodes(node)));
   }
 
   // FIXME: Copying text that isn't selectable (the needsToCopyUserSelectNoneQuirk), with quirks.
@@ -615,6 +615,6 @@ namespace krys::web
       return static_cast<uint32>(position.ComputeOffsetInContainerNode());
     }
 
-    return adjustedNode->ComputeNodeIndex();
+    return static_cast<uint32>(dom::TreeQueries::Index(*adjustedNode));
   }
 }

@@ -84,7 +84,7 @@ namespace krys::web::dom
     {
       return null;
     }
-    return BoundaryPoint {ShareRef<Node>(*parent), node.ComputeNodeIndex()};
+    return BoundaryPoint {ShareRef<Node>(*parent), dom::TreeQueries::Index(node)};
   }
 
   Maybe<BoundaryPoint> CreateBoundaryPointAfterNode(Node &node) noexcept
@@ -94,7 +94,7 @@ namespace krys::web::dom
     {
       return null;
     }
-    return BoundaryPoint {ShareRef<Node>(*parent), node.ComputeNodeIndex() + 1};
+    return BoundaryPoint {ShareRef<Node>(*parent), dom::TreeQueries::Index(node) + 1};
   }
 
   namespace

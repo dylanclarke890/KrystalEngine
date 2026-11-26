@@ -773,9 +773,10 @@ namespace krys::web
         {
           continue;
         }
-        bool focusIsInsideElement = focusedElement && focusedElement->IsInclusiveDescendantOf(*element);
+        bool focusIsInsideElement =
+          focusedElement && dom::TreeQueries::IsInclusiveDescendant(*focusedElement, *element);
         if (modalElementToReturn && foundModalWithFocusInside
-            && (modalElementToReturn->IsDescendantOf(*element) || !focusIsInsideElement))
+            && (dom::TreeQueries::IsDescendant(*modalElementToReturn, *element) || !focusIsInsideElement))
         {
           continue;
         }
@@ -1524,7 +1525,7 @@ namespace krys::web
       {
         object->RecomputeIsIgnoredForDescendants(true);
       }
-      if (_currentModalElement && _currentModalElement->IsDescendantOf(element))
+      if (_currentModalElement && dom::TreeQueries::IsDescendant(*_currentModalElement, element))
       {
         DeferModalChange(*_currentModalElement);
       }

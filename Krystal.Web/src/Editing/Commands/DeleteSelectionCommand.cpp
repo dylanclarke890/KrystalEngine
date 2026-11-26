@@ -341,13 +341,15 @@ namespace krys::web
         break;
       }
 
-      if (startSpecialContainer && startSpecialContainer->IsDescendantOf(endSpecialContainer.get()))
+      if (startSpecialContainer
+          && dom::TreeQueries::IsDescendant(*startSpecialContainer, endSpecialContainer.get()))
       {
         // Don't adjust the end yet, it is the end of a special element that contains the start
         // special element (which may or may not be fully selected).
         start = startBeforeSpecialElement;
       }
-      else if (endSpecialContainer && endSpecialContainer->IsDescendantOf(startSpecialContainer.get()))
+      else if (endSpecialContainer
+               && dom::TreeQueries::IsDescendant(*endSpecialContainer, startSpecialContainer.get()))
       {
         // Don't adjust the start yet, it is the start of a special element that contains the end
         // special element (which may or may not be fully selected).
@@ -688,7 +690,8 @@ namespace krys::web
 
     Ref<web::Node> protectedNode = ShareRef(node);
     if (_startRoot != _endRoot
-        && !(node.IsDescendantOf(_startRoot.get()) && node.IsDescendantOf(_endRoot.get())))
+        && !(dom::TreeQueries::IsDescendant(node, _startRoot.get())
+             && dom::TreeQueries::IsDescendant(node, _endRoot.get())))
     {
       // If a node is not in both the start and end editable roots, remove it only if its inside an editable
       // region.
@@ -878,7 +881,7 @@ namespace krys::web
     else
     {
       bool startNodeWasDescendantOfEndNode =
-        _upstreamStart.DeprecatedNode()->IsDescendantOf(_downstreamEnd.DeprecatedNode());
+        dom::TreeQueries::IsDescendant(*_upstreamStart.DeprecatedNode(), _downstreamEnd.DeprecatedNode());
       // The selection to delete spans more than one node.
       RefPtr<web::Node> node = startNode;
 
@@ -920,7 +923,7 @@ namespace krys::web
           continue;
         }
 
-        if (!_downstreamEnd.DeprecatedNode()->IsDescendantOf(*node))
+        if (!dom::TreeQueries::IsDescendant(*_downstreamEnd.DeprecatedNode(), *node))
         {
           auto *parentNode = node->ParentNode();
           if (!parentNode || CanHaveChildrenForEditing(*parentNode))
@@ -950,7 +953,8 @@ namespace krys::web
 
       if (!_downstreamEnd.IsNull() && !_downstreamEnd.IsOrphan()
           && startNode != _downstreamEnd.DeprecatedNode()
-          && !_upstreamStart.DeprecatedNode()->IsDescendantOf(_downstreamEnd.DeprecatedNode())
+          && !dom::TreeQueries::IsDescendant(*_upstreamStart.DeprecatedNode(),
+                                             _downstreamEnd.DeprecatedNode())
           && _downstreamEnd.DeprecatedEditingOffset() >= CaretMinOffset(*_downstreamEnd.DeprecatedNode()))
       {
         if (_downstreamEnd.AtLastEditingPositionForNode()
@@ -978,7 +982,8 @@ namespace krys::web
           else if (!(startNodeWasDescendantOfEndNode && !_upstreamStart.AnchorNode()->IsConnected()))
           {
             uint32 offset = 0;
-            if (_upstreamStart.DeprecatedNode()->IsDescendantOf(_downstreamEnd.DeprecatedNode()))
+            if (dom::TreeQueries::IsDescendant(*_upstreamStart.DeprecatedNode(),
+                                               _downstreamEnd.DeprecatedNode()))
             {
               auto *n = _upstreamStart.DeprecatedNode();
               while (n && n->ParentNode() != _downstreamEnd.DeprecatedNode())
@@ -987,7 +992,7 @@ namespace krys::web
               }
               if (n)
               {
-                offset = n->ComputeNodeIndex() + 1;
+                offset = static_cast<uint32>(dom::TreeQueries::Index(*n) + 1);
               }
             }
             RefPtr<web::Node> downstreamEndNode = ShareRefPtr(_downstreamEnd.DeprecatedNode());
@@ -1099,7 +1104,8 @@ namespace krys::web
 
     // We need to merge into m_upstreamStart's block, but it's been emptied out and collapsed by deletion.
     if (!mergeDestination.DeepEquivalent().DeprecatedNode()
-        || !mergeDestination.DeepEquivalent().DeprecatedNode()->IsDescendantOf(
+        || !dom::TreeQueries::IsDescendant(
+          *mergeDestination.DeepEquivalent().DeprecatedNode(),
           EnclosingBlock(ShareRefPtr(_upstreamStart.GetContainerNode())).get())
         || _startsAtEmptyLine)
     {
@@ -1211,7 +1217,7 @@ namespace krys::web
       if (IsTableRowEmpty(*endTableRow))
       {
         // Don't remove m_endTableRow if it's where we're putting the ending selection.
-        if (!_endingPosition.DeprecatedNode()->IsDescendantOf(*endTableRow))
+        if (!dom::TreeQueries::IsDescendant(*_endingPosition.DeprecatedNode(), *endTableRow))
         {
           // FIXME: We probably shouldn't remove m_endTableRow unless it's fully selected, even if it is
           // empty. We'll need to start adjusting the selection endpoints during deletion to know whether or
@@ -1330,7 +1336,7 @@ namespace krys::web
       // handled elsewhere).
       if (auto table = IsLastPositionBeforeTable(_selectionToDelete.VisibleStart()))
       {
-        if (_selectionToDelete.End().DeprecatedNode()->IsDescendantOf(*table))
+        if (dom::TreeQueries::IsDescendant(*_selectionToDelete.End().DeprecatedNode(), *table))
         {
           _needPlaceholder = false;
         }

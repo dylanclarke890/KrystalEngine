@@ -24,6 +24,7 @@
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Core/Memory/PointerComparison.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Web/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
@@ -68,7 +69,7 @@ namespace krys::web
                              const SVGFilterRenderer &filter,
                              const GraphicsContext &destinationContext) noexcept
     {
-      if (filterElement.CountChildNodes() > MaxCountChildNodes)
+      if (dom::TreeQueries::CountChildNodes(filterElement) > MaxCountChildNodes)
       {
         return null;
       }
@@ -125,7 +126,7 @@ namespace krys::web
     KRYS_NODISCARD Maybe<SVGFilterPrimitiveGraph>
       BuildFilterPrimitiveGraph(web::SVGFilterElement &filterElement) noexcept
     {
-      auto countChildNodes = filterElement.CountChildNodes();
+      auto countChildNodes = dom::TreeQueries::CountChildNodes(filterElement);
       if (!countChildNodes || countChildNodes > MaxCountChildNodes)
       {
         return null;

@@ -838,7 +838,7 @@ namespace krys::web
           // This is a plaintext-only region. Only proceed if it's fully selected.
           // pastEndNode is the node after the last fully selected node, so if it's inside node then
           // node isn't fully selected.
-          if (pastEndNode && pastEndNode->IsDescendantOf(*node))
+          if (pastEndNode && dom::TreeQueries::IsDescendant(*pastEndNode, *node))
           {
             break;
           }
@@ -1554,7 +1554,7 @@ namespace krys::web
 
     // FIXME: Inconsistent that we use computeOffsetInContainerNode for start, but deprecatedEditingOffset for
     // end.
-    uint32 startOffset = startChild->ComputeNodeIndex();
+    auto startOffset = static_cast<uint32>(dom::TreeQueries::Index(*startChild));
     uint32 endOffset = static_cast<uint32>(end.DeprecatedEditingOffset())
                        + (startNode == end.DeprecatedNode() ? startOffset : 0);
     UpdateStartEnd(
@@ -1606,7 +1606,8 @@ namespace krys::web
     MergeIdenticalElements(*element, *nextElement);
 
     bool shouldUpdateStart = start.GetContainerNode() == endNode;
-    uint32 endOffset = nextChild ? nextChild->ComputeNodeIndex() : nextElement->CountChildNodes();
+    auto endOffset = static_cast<uint32>(nextChild ? dom::TreeQueries::Index(*nextChild)
+                                                   : dom::TreeQueries::CountChildNodes(*nextElement));
     UpdateStartEnd(shouldUpdateStart ? Position(RefPtr<web::Node>(nextElement),
                                                 static_cast<uint32>(start.OffsetInContainerNode()),
                                                 Position::AnchorType::PositionIsOffsetInAnchor)

@@ -6,6 +6,7 @@
 #include "Krystal.Web/Css/Geometry/DOMRectList.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
@@ -63,7 +64,7 @@ namespace krys::boo::tests
             return std::string(id->begin(), id->end()) + path;
           }
         }
-        path = "/" + std::to_string(current->ComputeNodeIndex()) + path;
+        path = "/" + std::to_string(web::dom::TreeQueries::Index(*current)) + path;
         current = current->ParentNode();
       }
       return "?" + path;

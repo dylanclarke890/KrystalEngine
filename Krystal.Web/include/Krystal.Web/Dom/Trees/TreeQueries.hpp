@@ -46,6 +46,10 @@ namespace krys::web::dom
     /// @see https://dom.spec.whatwg.org/#concept-tree-descendant
     KRYS_NODISCARD static bool IsDescendant(const Node &a, const Node &b) noexcept;
 
+    /// @brief Whether @p b isn't null and @p a is a descendant of it.
+    /// @see https://dom.spec.whatwg.org/#concept-tree-descendant
+    KRYS_NODISCARD static bool IsDescendant(const Node &a, const Node *b) noexcept;
+
     /// @brief Whether @p a is @p b or one of its descendants.
     /// @see https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant
     KRYS_NODISCARD static bool IsInclusiveDescendant(const Node &a, const Node &b) noexcept;
@@ -128,6 +132,10 @@ namespace krys::web::dom
     /// @see https://dom.spec.whatwg.org/#concept-shadow-including-descendant
     KRYS_NODISCARD static bool IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept;
 
+    /// @brief Whether @p b isn't null and @p a is a shadow-including descendant of it.
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-descendant
+    KRYS_NODISCARD static bool IsShadowIncludingDescendant(const Node &a, const Node *b) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-descendant
     KRYS_NODISCARD static bool IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept;
 
@@ -193,6 +201,10 @@ namespace krys::web::dom
 
     /// @see https://dom.spec.whatwg.org/#exclusive-text-node
     KRYS_NODISCARD static bool IsExclusiveTextNode(const Node *node) noexcept;
+
+    /// @brief The number of @p node's children (a container's length, where a character data node's is its
+    /// data's).
+    KRYS_NODISCARD static size_t CountChildNodes(const Node &node) noexcept;
 
 #pragma endregion
   };

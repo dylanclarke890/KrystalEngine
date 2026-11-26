@@ -347,14 +347,15 @@ namespace krys::web
     }
 
     while (candidate.DeprecatedNode() && !IsEditablePosition(candidate)
-           && candidate.DeprecatedNode()->IsDescendantOf(*highestRoot))
+           && dom::TreeQueries::IsDescendant(*candidate.DeprecatedNode(), *highestRoot))
     {
       candidate = IsAtomicNode(candidate.DeprecatedNode())
                     ? PositionInParentAfterNode(candidate.DeprecatedNode())
                     : NextVisuallyDistinctCandidate(candidate);
     }
 
-    if (candidate.DeprecatedNode() && !candidate.DeprecatedNode()->IsInclusiveDescendantOf(*highestRoot))
+    if (candidate.DeprecatedNode()
+        && !dom::TreeQueries::IsInclusiveDescendant(*candidate.DeprecatedNode(), *highestRoot))
     {
       return {};
     }
@@ -390,14 +391,15 @@ namespace krys::web
     }
 
     while (candidate.DeprecatedNode() && !IsEditablePosition(candidate)
-           && candidate.DeprecatedNode()->IsDescendantOf(*highestRoot))
+           && dom::TreeQueries::IsDescendant(*candidate.DeprecatedNode(), *highestRoot))
     {
       candidate = IsAtomicNode(candidate.DeprecatedNode())
                     ? PositionInParentBeforeNode(candidate.DeprecatedNode())
                     : PreviousVisuallyDistinctCandidate(candidate);
     }
 
-    if (candidate.DeprecatedNode() && !candidate.DeprecatedNode()->IsInclusiveDescendantOf(*highestRoot))
+    if (candidate.DeprecatedNode()
+        && !dom::TreeQueries::IsInclusiveDescendant(*candidate.DeprecatedNode(), *highestRoot))
     {
       return {};
     }
@@ -467,7 +469,7 @@ namespace krys::web
   {
     if (Is<CharacterData>(node) || node.HasChildNodes())
     {
-      return static_cast<int32>(node.Length());
+      return static_cast<int32>(dom::TreeQueries::Length(node));
     }
 
     // FIXME: Might be more helpful to return 1 for any node where editingIgnoresContent is true, even one
@@ -820,7 +822,7 @@ namespace krys::web
     }
     auto isShadowIncludingInclusiveAncestorOf = [&](const Node *other)
     {
-      return other && (other == &node || other->IsShadowIncludingDescendantOf(&node));
+      return other && (other == &node || dom::TreeQueries::IsShadowIncludingDescendant(*other, &node));
     };
     switch (position.GetAnchorType())
     {
@@ -833,7 +835,7 @@ namespace krys::web
         break;
       case Position::AnchorType::PositionIsOffsetInAnchor:
         if (position.GetContainerNode() == node.ParentNode()
-            && static_cast<uint32>(position.OffsetInContainerNode()) > node.ComputeNodeIndex())
+            && static_cast<uint32>(position.OffsetInContainerNode()) > dom::TreeQueries::Index(node))
         {
           position.MoveToOffset(static_cast<uint32>(position.OffsetInContainerNode() - 1));
         }
@@ -873,7 +875,7 @@ namespace krys::web
       {
         if (IsHTMLElementOfType(child, html::TagName::img))
         {
-          return static_cast<int32>(child->ComputeNodeIndex());
+          return static_cast<int32>(dom::TreeQueries::Index(*child));
         }
       }
     }

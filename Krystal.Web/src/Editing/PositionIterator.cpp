@@ -24,6 +24,7 @@
  */
 
 #include "Krystal.Web/Editing/PositionIterator.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLHtmlElement.hpp"
@@ -37,8 +38,8 @@ namespace krys::web
 {
   PositionIterator::PositionIterator(const Position &position) noexcept
       : _anchorNode(ShareRefPtr(position.AnchorNode())),
-        _nodeAfterPositionInAnchor(ShareRefPtr(
-          _anchorNode->TraverseToChildAt(static_cast<uint32>(position.DeprecatedEditingOffset())))),
+        _nodeAfterPositionInAnchor(ShareRefPtr(dom::TreeTraversal::ChildAt(
+          *_anchorNode, static_cast<uint32>(position.DeprecatedEditingOffset())))),
         _offsetInAnchor(_nodeAfterPositionInAnchor ? 0 : position.DeprecatedEditingOffset())
   {
   }

@@ -34,6 +34,7 @@
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Editing/PositionIterator.hpp"
 #include "Krystal.Web/Editing/Selection/InlineRunAndOffset.hpp"
@@ -244,10 +245,13 @@ namespace krys::web
     switch (GetAnchorType())
     {
       case AnchorType::PositionIsBeforeChildren: return 0;
-      case AnchorType::PositionIsAfterChildren:  return static_cast<int32>(_anchorNode->Length());
+      case AnchorType::PositionIsAfterChildren:
+        return static_cast<int32>(dom::TreeQueries::Length(*_anchorNode));
       case AnchorType::PositionIsOffsetInAnchor: return static_cast<int32>(_offset);
-      case AnchorType::PositionIsBeforeAnchor:   return static_cast<int32>(_anchorNode->ComputeNodeIndex());
-      case AnchorType::PositionIsAfterAnchor:    return static_cast<int32>(_anchorNode->ComputeNodeIndex() + 1);
+      case AnchorType::PositionIsBeforeAnchor:
+        return static_cast<int32>(dom::TreeQueries::Index(*_anchorNode));
+      case AnchorType::PositionIsAfterAnchor:
+        return static_cast<int32>(dom::TreeQueries::Index(*_anchorNode) + 1);
     }
     krys_unreachable();
   }
@@ -287,7 +291,8 @@ namespace krys::web
 
     if (!Is<CharacterData>(*anchorNode)
         && (_anchorType == AnchorType::PositionIsAfterAnchor
-            || _anchorType == AnchorType::PositionIsAfterChildren || _offset == anchorNode->CountChildNodes())
+            || _anchorType == AnchorType::PositionIsAfterChildren
+            || _offset == dom::TreeQueries::CountChildNodes(*anchorNode))
         && (EditingIgnoresContent(*anchorNode) || IsRenderedTable(anchorNode)) && GetContainerNode())
     {
       return PositionInParentAfterNode(anchorNode);
@@ -331,7 +336,7 @@ namespace krys::web
       case AnchorType::PositionIsBeforeChildren: return nullptr;
       case AnchorType::PositionIsAfterChildren:  return _anchorNode->LastChild();
       case AnchorType::PositionIsOffsetInAnchor:
-        return _offset ? _anchorNode->TraverseToChildAt(_offset - 1) : nullptr;
+        return _offset ? dom::TreeTraversal::ChildAt(*_anchorNode, _offset - 1) : nullptr;
       case AnchorType::PositionIsBeforeAnchor: return _anchorNode->PreviousSibling();
       case AnchorType::PositionIsAfterAnchor:  return _anchorNode.get();
     }
@@ -349,7 +354,7 @@ namespace krys::web
     {
       case AnchorType::PositionIsBeforeChildren: return _anchorNode->FirstChild();
       case AnchorType::PositionIsAfterChildren:  return nullptr;
-      case AnchorType::PositionIsOffsetInAnchor: return _anchorNode->TraverseToChildAt(_offset);
+      case AnchorType::PositionIsOffsetInAnchor: return dom::TreeTraversal::ChildAt(*_anchorNode, _offset);
       case AnchorType::PositionIsBeforeAnchor:   return _anchorNode.get();
       case AnchorType::PositionIsAfterAnchor:    return _anchorNode->NextSibling();
     }
@@ -409,7 +414,7 @@ namespace krys::web
 
     if (offset > 0)
     {
-      if (auto *child = node->TraverseToChildAt(offset - 1))
+      if (auto *child = dom::TreeTraversal::ChildAt(*node, offset - 1))
       {
         return LastPositionInOrAfterNode(child);
       }
@@ -453,7 +458,8 @@ namespace krys::web
       return PositionAfterNode(previousSibling);
     }
 
-    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex());
+    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent),
+                                         static_cast<uint32>(dom::TreeQueries::Index(*node)));
   }
 
   Position Position::Next(PositionMoveType moveType) const noexcept
@@ -482,7 +488,7 @@ namespace krys::web
       offset = static_cast<uint32>(ComputeOffsetInContainerNode());
     }
 
-    auto *child = node->TraverseToChildAt(offset);
+    auto *child = dom::TreeTraversal::ChildAt(*node, offset);
     if (child || (!node->HasChildNodes() && offset < static_cast<uint32>(LastOffsetForEditing(*node))))
     {
       if (child)
@@ -518,7 +524,8 @@ namespace krys::web
       return PositionBeforeNode(nextSibling);
     }
 
-    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent), node->ComputeNodeIndex() + 1);
+    return CreateContainerOffsetPosition(ShareRefPtr<Node>(parent),
+                                         static_cast<uint32>(dom::TreeQueries::Index(*node) + 1));
   }
 
   int32 Position::UncheckedPreviousOffset(const Node *node, uint32 current) noexcept
@@ -612,10 +619,10 @@ namespace krys::web
     }
 
     Node *boundary = _anchorNode.get();
-    while (boundary != documentElement.get() && boundary->NonShadowBoundaryParentNode()
+    while (boundary != documentElement.get() && dom::TreeTraversal::NonShadowBoundaryParentNode(*boundary)
            && _anchorNode->HasEditableStyle() == boundary->ParentNode()->HasEditableStyle())
     {
-      boundary = boundary->NonShadowBoundaryParentNode();
+      boundary = dom::TreeTraversal::NonShadowBoundaryParentNode(*boundary);
     }
 
     return ShareRefPtr(boundary);
@@ -1730,7 +1737,8 @@ namespace krys::web
             krys_debug_assert(!Is<Text>(*other._anchorNode));
             return _anchorNode == other._anchorNode;
           case AnchorType::PositionIsOffsetInAnchor:
-            return _anchorNode == other._anchorNode && _anchorNode->CountChildNodes() == _offset;
+            return _anchorNode == other._anchorNode
+                   && dom::TreeQueries::CountChildNodes(*_anchorNode) == _offset;
           case AnchorType::PositionIsBeforeAnchor: return false;
           case AnchorType::PositionIsAfterAnchor:  return _anchorNode->LastChild() == other._anchorNode.get();
         }
@@ -1743,13 +1751,15 @@ namespace krys::web
             return _anchorNode == other._anchorNode && !_offset;
           case AnchorType::PositionIsAfterChildren:
             krys_debug_assert(!Is<Text>(*other._anchorNode));
-            return _anchorNode == other._anchorNode && _offset == other._anchorNode->CountChildNodes();
+            return _anchorNode == other._anchorNode
+                   && _offset == dom::TreeQueries::CountChildNodes(*other._anchorNode);
           case AnchorType::PositionIsOffsetInAnchor:
             return _anchorNode == other._anchorNode && _offset == other._offset;
           case AnchorType::PositionIsBeforeAnchor:
-            return _anchorNode->TraverseToChildAt(_offset) == other._anchorNode.get();
+            return dom::TreeTraversal::ChildAt(*_anchorNode, _offset) == other._anchorNode.get();
           case AnchorType::PositionIsAfterAnchor:
-            return _offset && _anchorNode->TraverseToChildAt(_offset - 1) == other._anchorNode.get();
+            return _offset
+                   && dom::TreeTraversal::ChildAt(*_anchorNode, _offset - 1) == other._anchorNode.get();
         }
         break;
       case AnchorType::PositionIsBeforeAnchor:
@@ -1762,7 +1772,7 @@ namespace krys::web
             krys_debug_assert(!Is<Text>(*other._anchorNode));
             return false;
           case AnchorType::PositionIsOffsetInAnchor:
-            return _anchorNode.get() == other._anchorNode->TraverseToChildAt(other._offset);
+            return _anchorNode.get() == dom::TreeTraversal::ChildAt(*other._anchorNode, other._offset);
           case AnchorType::PositionIsBeforeAnchor: return _anchorNode == other._anchorNode;
           case AnchorType::PositionIsAfterAnchor:
             return _anchorNode->PreviousSibling() == other._anchorNode.get();
@@ -1779,7 +1789,7 @@ namespace krys::web
             return _anchorNode.get() == other._anchorNode->LastChild();
           case AnchorType::PositionIsOffsetInAnchor:
             return other._offset
-                   && _anchorNode.get() == other._anchorNode->TraverseToChildAt(other._offset - 1);
+                   && _anchorNode.get() == dom::TreeTraversal::ChildAt(*other._anchorNode, other._offset - 1);
           case AnchorType::PositionIsBeforeAnchor:
             return _anchorNode->NextSibling() == other._anchorNode.get();
           case AnchorType::PositionIsAfterAnchor: return _anchorNode == other._anchorNode;
@@ -1811,7 +1821,7 @@ namespace krys::web
       ancestor = ancestor->ParentNode();
     }
     krys_debug_assert(ancestor);
-    return Position(ShareRefPtr(ancestor), currentNode->ComputeNodeIndex(),
+    return Position(ShareRefPtr(ancestor), static_cast<uint32>(dom::TreeQueries::Index(*currentNode)),
                     Position::AnchorType::PositionIsOffsetInAnchor);
   }
 
@@ -1825,7 +1835,7 @@ namespace krys::web
       ancestor = ancestor->ParentNode();
     }
     krys_debug_assert(ancestor);
-    return Position(ShareRefPtr(ancestor), currentNode->ComputeNodeIndex() + 1,
+    return Position(ShareRefPtr(ancestor), static_cast<uint32>(dom::TreeQueries::Index(*currentNode) + 1),
                     Position::AnchorType::PositionIsOffsetInAnchor);
   }
 
@@ -1842,7 +1852,7 @@ namespace krys::web
   {
     if (Is<CharacterData>(*anchorNode))
     {
-      return Position(ShareRefPtr(anchorNode), anchorNode->Length(),
+      return Position(ShareRefPtr(anchorNode), static_cast<uint32>(dom::TreeQueries::Length(*anchorNode)),
                       Position::AnchorType::PositionIsOffsetInAnchor);
     }
     return Position(ShareRefPtr(anchorNode), Position::AnchorType::PositionIsAfterChildren);
@@ -1852,7 +1862,7 @@ namespace krys::web
   {
     if (Is<CharacterData>(*anchorNode))
     {
-      return offset < anchorNode->Length();
+      return offset < dom::TreeQueries::Length(*anchorNode);
     }
 
     uint32 currentOffset = 0;

@@ -31,6 +31,7 @@
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/IntersectionObserver/IntersectionObserverEntry.hpp"
@@ -146,7 +147,7 @@ namespace krys::web::css
     {
       for (auto &element : target.NodeDocument().TopLayerElements())
       {
-        if (element->IsDescendantOf(target))
+        if (dom::TreeQueries::IsDescendant(*element, target))
         {
           return true;
         }
@@ -312,7 +313,7 @@ namespace krys::web::css
         continue;
       }
       auto owningElement = styleOriginatedAnimation->OwningElement();
-      if (!owningElement || !owningElement->Element.IsShadowIncludingDescendantOf(&element))
+      if (!owningElement || !dom::TreeQueries::IsShadowIncludingDescendant(owningElement->Element, &element))
       {
         continue;
       }

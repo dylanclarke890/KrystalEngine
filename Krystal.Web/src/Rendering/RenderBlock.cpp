@@ -23,6 +23,7 @@
 
 #include "Krystal.Web/Rendering/RenderBlock.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
@@ -3033,11 +3034,11 @@ namespace krys::web
       parent.IsHorizontalWritingMode() ? pointInChildCoordinates.X() : pointInChildCoordinates.Y();
     if (logicalLeft < childMiddle)
     {
-      return ancestor->CreatePositionWithAffinity(static_cast<int32>(childElement->ComputeNodeIndex()),
+      return ancestor->CreatePositionWithAffinity(static_cast<int32>(dom::TreeQueries::Index(*childElement)),
                                                   Affinity::Downstream);
     }
-    return ancestor->CreatePositionWithAffinity(static_cast<int32>(childElement->ComputeNodeIndex() + 1),
-                                                Affinity::Upstream);
+    return ancestor->CreatePositionWithAffinity(
+      static_cast<int32>(dom::TreeQueries::Index(*childElement) + 1), Affinity::Upstream);
   }
 
   PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,

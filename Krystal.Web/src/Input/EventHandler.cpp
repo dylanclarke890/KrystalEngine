@@ -898,7 +898,7 @@ namespace krys::web
 
     // The innermost scrolling layer, or list box, the node is in.
     RenderLayer *scrollableLayer = nullptr;
-    for (auto *ancestor = node; ancestor; ancestor = ancestor->ParentOrShadowHostNode())
+    for (auto *ancestor = node; ancestor; ancestor = dom::TreeTraversal::ParentOrShadowHostNode(*ancestor))
     {
       if (Is<HTMLHtmlElement>(*ancestor) || Is<Document>(*ancestor))
       {
@@ -2748,7 +2748,8 @@ namespace krys::web
       VisibleSelection newSelection;
       VisiblePosition pos(
         targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
-      if (pos.IsNotNull() && pos.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*urlElement))
+      if (pos.IsNotNull()
+          && dom::TreeQueries::IsDescendant(*pos.DeepEquivalent().DeprecatedNode(), *urlElement))
       {
         newSelection = VisibleSelection::SelectionFromContentsOfNode(urlElement.get());
       }

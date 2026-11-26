@@ -1727,11 +1727,11 @@ namespace krys::web
 
     // The action element is pressed if it's inside the object's element.
     RefPtr<Element> pressElement = ShareRefPtr(GetElement());
-    if (!pressElement || actionElement->IsDescendantOf(*pressElement))
+    if (!pressElement || dom::TreeQueries::IsDescendant(*actionElement, *pressElement))
     {
       pressElement = actionElement;
     }
-    if (hitTestElement && hitTestElement->IsDescendantOf(*pressElement))
+    if (hitTestElement && dom::TreeQueries::IsDescendant(*hitTestElement, *pressElement))
     {
       pressElement = hitTestElement;
     }

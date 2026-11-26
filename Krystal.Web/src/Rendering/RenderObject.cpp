@@ -35,6 +35,8 @@
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
@@ -593,7 +595,7 @@ namespace krys::web
   {
     if (IsBlockLevelReplacedOrAtomicInline())
     {
-      return GetNode() ? static_cast<int32>(std::max(1u, GetNode()->CountChildNodes())) : 1;
+      return GetNode() ? static_cast<int32>(std::max(1uz, dom::TreeQueries::CountChildNodes(*GetNode()))) : 1;
     }
     if (IsHR())
     {
@@ -1192,7 +1194,7 @@ namespace krys::web
 
     KRYS_NODISCARD RefPtr<Node> NodeAfter(const dom::BoundaryPoint &point) noexcept
     {
-      if (auto node = point.Container->TraverseToChildAt(static_cast<uint32>(point.Offset + 1)))
+      if (auto node = dom::TreeTraversal::ChildAt(*point.Container, static_cast<uint32>(point.Offset + 1)))
       {
         return ShareRefPtr(node);
       }

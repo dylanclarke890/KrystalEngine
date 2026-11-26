@@ -47,6 +47,36 @@ namespace krys::web::dom
     return nullptr;
   }
 
+  ContainerNode *TreeTraversal::ParentOrShadowHostNode(const Node &node) noexcept
+  {
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node))
+    {
+      return shadowRoot->Host();
+    }
+    return node.ParentNode();
+  }
+
+  ContainerNode *TreeTraversal::NonShadowBoundaryParentNode(const Node &node) noexcept
+  {
+    auto *parent = node.ParentNode();
+    return parent && !Is<ShadowRoot>(*parent) ? parent : nullptr;
+  }
+
+  Node *TreeTraversal::NonBoundaryShadowTreeRootNode(Node &node) noexcept
+  {
+    krys_debug_assert(!Is<ShadowRoot>(node));
+    for (Node *root = &node; root;)
+    {
+      Node *parent = root->ParentNode();
+      if (parent && Is<ShadowRoot>(*parent))
+      {
+        return root;
+      }
+      root = parent;
+    }
+    return nullptr;
+  }
+
 #pragma endregion
 
 #pragma region Tree Order Traversal
@@ -407,6 +437,11 @@ namespace krys::web::dom
     return last;
   }
 
+  const Node *TreeTraversal::DeepLastChild(const Node &current) noexcept
+  {
+    return DeepLastChild(const_cast<Node &>(current));
+  }
+
   const Element *TreeTraversal::NextElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstNextSiblingRange(current);
@@ -702,6 +737,18 @@ namespace krys::web::dom
     auto children = ChildNodeRange(node);
     auto it = std::ranges::find_if(children, [&](const Node &) { return i++ == index; });
     return it == std::ranges::end(children) ? nullptr : &*it;
+  }
+
+  const Node *TreeTraversal::ChildAt(const Node &node, size_t index) noexcept
+  {
+    auto *container = DynamicDowncast<ContainerNode>(node);
+    return container ? ChildAt(*container, index) : nullptr;
+  }
+
+  Node *TreeTraversal::ChildAt(Node &node, size_t index) noexcept
+  {
+    auto *container = DynamicDowncast<ContainerNode>(node);
+    return container ? ChildAt(*container, index) : nullptr;
   }
 
   const Node *TreeTraversal::ChildAt(const ContainerNode &node, size_t index) noexcept

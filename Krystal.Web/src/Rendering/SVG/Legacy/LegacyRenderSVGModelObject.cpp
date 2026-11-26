@@ -32,6 +32,7 @@
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Web/Rendering/SVG/SVGRenderSupport.hpp"
@@ -194,7 +195,7 @@ namespace krys::web
           break;
         }
 
-        current = current->ParentOrShadowHostNode();
+        current = dom::TreeTraversal::ParentOrShadowHostNode(*current);
       }
     }
 

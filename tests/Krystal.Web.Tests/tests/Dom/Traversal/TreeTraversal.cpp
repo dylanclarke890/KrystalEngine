@@ -50,6 +50,64 @@ namespace krys::web::dom::tests
     REQUIRE(TreeTraversal::ParentOrShadowHostElement(*shadow) == nullptr);
   }
 
+  TEST_CASE("TreeTraversal: the shadow boundary helpers", "[DOM][TreeTraversal]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto inner = doc->CreateElement(u8"span").ReleaseValue();
+    auto innermost = doc->CreateElement(u8"b").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+    REQUIRE_FALSE(inner->AppendChild(*innermost).HasException());
+
+    SECTION("ParentOrShadowHostNode: a shadow root's host, otherwise the parent")
+    {
+      CHECK(TreeTraversal::ParentOrShadowHostNode(*shadow) == host.get());
+      CHECK(TreeTraversal::ParentOrShadowHostNode(*inner) == shadow.get());
+      CHECK(TreeTraversal::ParentOrShadowHostNode(*host) == doc.get());
+      CHECK(TreeTraversal::ParentOrShadowHostNode(*doc) == nullptr);
+    }
+
+    SECTION("NonShadowBoundaryParentNode: the parent, unless it's a shadow root")
+    {
+      CHECK(TreeTraversal::NonShadowBoundaryParentNode(*innermost) == inner.get());
+      CHECK(TreeTraversal::NonShadowBoundaryParentNode(*inner) == nullptr);
+      CHECK(TreeTraversal::NonShadowBoundaryParentNode(*host) == doc.get());
+    }
+
+    SECTION("NonBoundaryShadowTreeRootNode: the ancestor that's a shadow root's child")
+    {
+      CHECK(TreeTraversal::NonBoundaryShadowTreeRootNode(*innermost) == inner.get());
+      CHECK(TreeTraversal::NonBoundaryShadowTreeRootNode(*inner) == inner.get());
+      CHECK(TreeTraversal::NonBoundaryShadowTreeRootNode(*host) == nullptr);
+    }
+  }
+
+  TEST_CASE("TreeTraversal: ChildAt and DeepLastChild on any node", "[DOM][TreeTraversal]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto parent = doc->CreateElement(u8"div").ReleaseValue();
+    auto first = doc->CreateElement(u8"span").ReleaseValue();
+    auto last = doc->CreateElement(u8"span").ReleaseValue();
+    auto text = doc->CreateTextNode(u8"text");
+    REQUIRE_FALSE(parent->AppendChild(*first).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*last).HasException());
+    REQUIRE_FALSE(last->AppendChild(*text).HasException());
+
+    Node &node = *parent;
+    const Node &constNode = *parent;
+    CHECK(TreeTraversal::ChildAt(node, 0) == first.get());
+    CHECK(TreeTraversal::ChildAt(constNode, 1) == last.get());
+    CHECK(TreeTraversal::ChildAt(node, 2) == nullptr);
+    // Nodes that can't have children have none at any index.
+    CHECK(TreeTraversal::ChildAt(static_cast<Node &>(*text), 0) == nullptr);
+
+    CHECK(TreeTraversal::DeepLastChild(node) == text.get());
+    CHECK(TreeTraversal::DeepLastChild(constNode) == text.get());
+    CHECK(TreeTraversal::DeepLastChild(static_cast<Node &>(*text)) == text.get());
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "TreeTraversal: traversal including pseudo-elements",
                    "[DOM][TreeTraversal]")
   {

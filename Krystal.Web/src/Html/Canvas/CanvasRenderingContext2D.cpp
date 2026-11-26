@@ -38,6 +38,7 @@
 #include "Krystal.Web/Css/Properties/Consumers/Font.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
 #include "Krystal.Web/Graphics/TextRuns/TextRun.hpp"
 #include "Krystal.Web/Html/Canvas/Path2D.hpp"
@@ -171,8 +172,8 @@ namespace krys::web::html
     // (Nor is an empty path drawn.)
     auto *context = EffectiveDrawingContext();
     auto &canvas = Canvas();
-    if (!element.Focused() || !HasInvertibleTransform() || path.IsEmpty() || !element.IsDescendantOf(canvas)
-        || !context)
+    if (!element.Focused() || !HasInvertibleTransform() || path.IsEmpty()
+        || !dom::TreeQueries::IsDescendant(element, canvas) || !context)
     {
       return;
     }

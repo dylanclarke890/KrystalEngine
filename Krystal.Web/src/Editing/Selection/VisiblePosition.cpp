@@ -606,7 +606,8 @@ namespace krys::web
     auto highestRoot = HighestEditableRoot(DeepEquivalent());
 
     // Return empty position if pos is not somewhere inside the editable region containing this position
-    if (highestRoot && !position.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*highestRoot))
+    if (highestRoot
+        && !dom::TreeQueries::IsDescendant(*position.DeepEquivalent().DeprecatedNode(), *highestRoot))
     {
       if (reachedBoundary)
       {
@@ -658,7 +659,8 @@ namespace krys::web
 
     // Return empty position if otherPosition is not somewhere inside the editable region containing this
     // position
-    if (highestRoot && !otherPosition.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*highestRoot))
+    if (highestRoot
+        && !dom::TreeQueries::IsDescendant(*otherPosition.DeepEquivalent().DeprecatedNode(), *highestRoot))
     {
       if (reachedBoundary)
       {
@@ -792,8 +794,10 @@ namespace krys::web
 
     // The new position should be in the same block flow element. Favor that.
     auto *originalBlock = DeprecatedEnclosingBlockFlowElement(node);
-    bool nextIsOutsideOriginalBlock = !nextNode->IsDescendantOf(originalBlock) && nextNode != originalBlock;
-    bool prevIsOutsideOriginalBlock = !prevNode->IsDescendantOf(originalBlock) && prevNode != originalBlock;
+    bool nextIsOutsideOriginalBlock =
+      !dom::TreeQueries::IsDescendant(*nextNode, originalBlock) && nextNode != originalBlock;
+    bool prevIsOutsideOriginalBlock =
+      !dom::TreeQueries::IsDescendant(*prevNode, originalBlock) && prevNode != originalBlock;
     if (nextIsOutsideOriginalBlock && !prevIsOutsideOriginalBlock)
     {
       return prev;
@@ -924,13 +928,14 @@ namespace krys::web
       return false;
     }
 
-    if (!visiblePosition.DeepEquivalent().GetContainerNode()->IsDescendantOf(node))
+    if (!dom::TreeQueries::IsDescendant(*visiblePosition.DeepEquivalent().GetContainerNode(), node))
     {
       return false;
     }
 
     VisiblePosition previous = visiblePosition.Previous();
-    return previous.IsNull() || !previous.DeepEquivalent().DeprecatedNode()->IsDescendantOf(node);
+    return previous.IsNull()
+           || !dom::TreeQueries::IsDescendant(*previous.DeepEquivalent().DeprecatedNode(), node);
   }
 
   bool IsLastVisiblePositionInNode(const VisiblePosition &visiblePosition, const Node *node) noexcept
@@ -940,13 +945,13 @@ namespace krys::web
       return false;
     }
 
-    if (!visiblePosition.DeepEquivalent().GetContainerNode()->IsDescendantOf(node))
+    if (!dom::TreeQueries::IsDescendant(*visiblePosition.DeepEquivalent().GetContainerNode(), node))
     {
       return false;
     }
 
     VisiblePosition next = visiblePosition.Next();
-    return next.IsNull() || !next.DeepEquivalent().DeprecatedNode()->IsDescendantOf(node);
+    return next.IsNull() || !dom::TreeQueries::IsDescendant(*next.DeepEquivalent().DeprecatedNode(), node);
   }
 
   bool AreVisiblePositionsInSameTreeScope(const VisiblePosition &a, const VisiblePosition &b) noexcept

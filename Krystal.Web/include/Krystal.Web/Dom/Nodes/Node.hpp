@@ -590,47 +590,6 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region Tree Helpers
-
-    KRYS_NODISCARD uint32 CountChildNodes() const noexcept;
-
-    /// @brief The child at @p index, or null if there are fewer children.
-    KRYS_NODISCARD Node *TraverseToChildAt(uint32 index) const noexcept;
-
-    /// @brief The node's index among its siblings.
-    KRYS_NODISCARD uint32 ComputeNodeIndex() const noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-node-length
-    KRYS_NODISCARD uint32 Length() const noexcept;
-
-    /// @brief The parent, or a shadow root's host.
-    KRYS_NODISCARD ContainerNode *ParentOrShadowHostNode() const noexcept;
-
-    /// @brief The parent, unless it's a shadow root.
-    KRYS_NODISCARD ContainerNode *NonShadowBoundaryParentNode() const noexcept;
-
-    /// @brief The ancestor that's a child of a shadow root, or null outside shadow trees.
-    KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() noexcept;
-
-    KRYS_NODISCARD bool IsDescendantOf(const Node *other) const noexcept;
-
-    KRYS_NODISCARD bool IsDescendantOf(const Node &other) const noexcept
-    {
-      return IsDescendantOf(&other);
-    }
-
-    KRYS_NODISCARD bool IsInclusiveDescendantOf(const Node &other) const noexcept
-    {
-      return this == &other || IsDescendantOf(other);
-    }
-
-    KRYS_NODISCARD bool IsShadowIncludingDescendantOf(const Node *other) const noexcept;
-
-    /// @brief The last node in the subtree, in tree order.
-    KRYS_NODISCARD Node *LastDescendant() const noexcept;
-
-#pragma endregion
-
 #pragma region Editing
 
     /// @brief Whether `user-select: all` content counts as editable; it's selected as one unit, so editing

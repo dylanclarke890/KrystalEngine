@@ -54,7 +54,8 @@ namespace krys::web
         return true;
       }
 
-      for (Node *currentNode = &node; currentNode; currentNode = currentNode->ParentOrShadowHostNode())
+      for (Node *currentNode = &node; currentNode;
+           currentNode = dom::TreeTraversal::ParentOrShadowHostNode(*currentNode))
       {
         if (currentNode->HasEditableStyle())
         {
@@ -857,6 +858,7 @@ namespace krys::web
   Node *VisibleSelection::NonBoundaryShadowTreeRootNode() const noexcept
   {
     auto *node = Start().DeprecatedNode();
-    return node && !Is<ShadowRoot>(*node) ? node->NonBoundaryShadowTreeRootNode() : nullptr;
+    return node && !Is<ShadowRoot>(*node) ? dom::TreeTraversal::NonBoundaryShadowTreeRootNode(*node)
+                                          : nullptr;
   }
 }

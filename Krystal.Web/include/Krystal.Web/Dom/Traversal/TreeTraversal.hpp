@@ -33,6 +33,16 @@ namespace krys::web::dom
     /// @return @p node's parent element or, if @p node is the child of a shadow root, its host.
     KRYS_NODISCARD static Element *ParentOrShadowHostElement(const Node &node) noexcept;
 
+    /// @return @p node's parent or, if @p node is a shadow root, its host.
+    KRYS_NODISCARD static ContainerNode *ParentOrShadowHostNode(const Node &node) noexcept;
+
+    /// @return @p node's parent, unless it's a shadow root.
+    KRYS_NODISCARD static ContainerNode *NonShadowBoundaryParentNode(const Node &node) noexcept;
+
+    /// @return The inclusive ancestor of @p node that's a child of a shadow root, or null outside shadow
+    /// trees. @p node mustn't be a shadow root.
+    KRYS_NODISCARD static Node *NonBoundaryShadowTreeRootNode(Node &node) noexcept;
+
 #pragma endregion
 
 #pragma region Tree Order Traversal
@@ -122,6 +132,9 @@ namespace krys::web::dom
 
     /// @brief Helper function for getting the deepest last child of a node in tree order.
     KRYS_NODISCARD static Node *DeepLastChild(Node &current) noexcept;
+
+    /// @brief Helper function for getting the deepest last child of a node in tree order.
+    KRYS_NODISCARD static const Node *DeepLastChild(const Node &current) noexcept;
 
     /// @brief Helper function for getting the next sibling of a node that is an Element, or nullptr if there
     /// are no more element siblings.
@@ -241,6 +254,12 @@ namespace krys::web::dom
 
     /// @brief Helper function for getting the nth child of a node.
     KRYS_NODISCARD static Node *ChildAt(ContainerNode &node, size_t index) noexcept;
+
+    /// @brief The child of @p node at @p index, or null if it has fewer children (or can't have any).
+    KRYS_NODISCARD static const Node *ChildAt(const Node &node, size_t index) noexcept;
+
+    /// @brief The child of @p node at @p index, or null if it has fewer children (or can't have any).
+    KRYS_NODISCARD static Node *ChildAt(Node &node, size_t index) noexcept;
 
 #pragma endregion
   };

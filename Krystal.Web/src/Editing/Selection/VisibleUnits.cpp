@@ -1421,13 +1421,13 @@ namespace krys::web
     if (!lineBox)
     {
       // FIXME: We need do the same in previousLinePosition.
-      if (auto *child = node->TraverseToChildAt(static_cast<uint32>(p.DeprecatedEditingOffset())))
+      if (auto *child = dom::TreeTraversal::ChildAt(*node, static_cast<uint32>(p.DeprecatedEditingOffset())))
       {
         node = child;
       }
       else
       {
-        node = node->LastDescendant();
+        node = dom::TreeTraversal::DeepLastChild(*node);
       }
       Position position = NextLineCandidatePosition(node, visiblePosition, editableType);
       if (position.IsNotNull())
@@ -1530,7 +1530,7 @@ namespace krys::web
         {
           n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
         }
-        if (!n || !n->IsDescendantOf(highestRoot))
+        if (!n || !dom::TreeQueries::IsDescendant(*n, highestRoot))
         {
           break;
         }
@@ -1614,7 +1614,7 @@ namespace krys::web
         {
           n = dom::TreeQueries::Next(*n, stayInsideBlock);
         }
-        if (!n || !n->IsDescendantOf(highestRoot))
+        if (!n || !dom::TreeQueries::IsDescendant(*n, highestRoot))
         {
           break;
         }
@@ -1902,8 +1902,8 @@ namespace krys::web
     // when descending from the root element, so we construct the visible position directly from a
     // valid candidate.
     auto documentElement = node->NodeDocument().DocumentElement();
-    Position lastPosition =
-      CreateDeprecatedLegacyPosition(documentElement, documentElement->CountChildNodes());
+    Position lastPosition = CreateDeprecatedLegacyPosition(
+      documentElement, static_cast<uint32>(dom::TreeQueries::CountChildNodes(*documentElement)));
     Position lastCandidate = PreviousCandidate(lastPosition);
     if (lastCandidate.IsNull())
     {

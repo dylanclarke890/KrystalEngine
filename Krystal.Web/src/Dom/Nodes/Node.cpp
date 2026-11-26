@@ -723,95 +723,6 @@ namespace krys::web
     return false;
   }
 
-#pragma region Tree Helpers
-
-  uint32 Node::CountChildNodes() const noexcept
-  {
-    uint32 count = 0;
-    for (auto *child = FirstChild(); child; child = child->NextSibling())
-    {
-      ++count;
-    }
-    return count;
-  }
-
-  Node *Node::TraverseToChildAt(uint32 index) const noexcept
-  {
-    auto *child = FirstChild();
-    for (; child && index; --index)
-    {
-      child = child->NextSibling();
-    }
-    return child;
-  }
-
-  uint32 Node::ComputeNodeIndex() const noexcept
-  {
-    return static_cast<uint32>(dom::TreeQueries::Index(*this));
-  }
-
-  uint32 Node::Length() const noexcept
-  {
-    return static_cast<uint32>(dom::TreeQueries::Length(*this));
-  }
-
-  ContainerNode *Node::ParentOrShadowHostNode() const noexcept
-  {
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*this))
-    {
-      return shadowRoot->Host();
-    }
-    return ParentNode();
-  }
-
-  ContainerNode *Node::NonShadowBoundaryParentNode() const noexcept
-  {
-    auto *parent = ParentNode();
-    return parent && !parent->IsShadowRootNode() ? parent : nullptr;
-  }
-
-  Node *Node::NonBoundaryShadowTreeRootNode() noexcept
-  {
-    krys_debug_assert(!IsShadowRootNode());
-    Node *root = this;
-    while (root)
-    {
-      if (root->IsShadowRootNode())
-      {
-        return root;
-      }
-      Node *parent = root->ParentNode();
-      if (parent && parent->IsShadowRootNode())
-      {
-        return root;
-      }
-      root = parent;
-    }
-    return nullptr;
-  }
-
-  bool Node::IsDescendantOf(const Node *other) const noexcept
-  {
-    return other && dom::TreeQueries::IsDescendant(*this, *other);
-  }
-
-  bool Node::IsShadowIncludingDescendantOf(const Node *other) const noexcept
-  {
-    return other && dom::TreeQueries::IsShadowIncludingDescendant(*this, *other);
-  }
-
-  Node *Node::LastDescendant() const noexcept
-  {
-    auto *node = const_cast<Node *>(this);
-    while (auto *lastChild = node->LastChild())
-    {
-      node = lastChild;
-    }
-    return node;
-  }
-
-#pragma endregion
-
 #pragma region Editing
 
   bool Node::IsContentEditable() const noexcept
@@ -951,7 +862,8 @@ namespace krys::web
 
     // From the target: this runs on the nodes above the link too.
     auto target = event.Target();
-    for (auto *node = DynamicDowncast<Node>(target.get()); node; node = node->ParentOrShadowHostNode())
+    for (auto *node = DynamicDowncast<Node>(target.get()); node;
+         node = dom::TreeTraversal::ParentOrShadowHostNode(*node))
     {
       if (auto *element = DynamicDowncast<Element>(*node); element && css::IsLink(*element))
       {
@@ -990,7 +902,7 @@ namespace krys::web
         return false;
       }
     }
-    auto *parent = ParentOrShadowHostNode();
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostNode(*this);
     return parent ? parent->CanStartSelection() : true;
   }
 
@@ -1126,7 +1038,7 @@ namespace krys::web
   template <>
   ContainerNode *dom::Parent<dom::TreeType::ShadowIncludingTree>(const Node &node) noexcept
   {
-    return node.ParentOrShadowHostNode();
+    return dom::TreeTraversal::ParentOrShadowHostNode(node);
   }
 
   template <>
