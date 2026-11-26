@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Html/Events/SimulatedClick.hpp"
 #include "Krystal.Core/Containers/HashSet.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"

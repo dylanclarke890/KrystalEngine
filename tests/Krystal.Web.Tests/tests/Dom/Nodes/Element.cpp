@@ -2,8 +2,6 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Web.Tests/Dom/TestElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
@@ -13,6 +11,8 @@
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Nodes/XMLDocument.hpp"
+#include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 

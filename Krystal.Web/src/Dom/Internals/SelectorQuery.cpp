@@ -33,12 +33,12 @@
 #include "Krystal.Web/Css/Selectors/Selector.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorChecker.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorParser.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/StaticNodeList.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 
 namespace krys::web::dom

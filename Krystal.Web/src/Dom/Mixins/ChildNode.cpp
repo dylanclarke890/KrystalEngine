@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Web/Dom/Mixins/ChildNode.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Mixins/ParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 
 namespace krys::web::dom::mixins

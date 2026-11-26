@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Traversal/NodeIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Traversal/IteratorAlgorithms.hpp"
 
 namespace krys::web
 {

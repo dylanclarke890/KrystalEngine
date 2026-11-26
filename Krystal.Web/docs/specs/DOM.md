@@ -13,20 +13,20 @@ Status: n/a (front matter)
 ## [1. Infrastructure](https://dom.spec.whatwg.org/#infrastructure)
 
 Status: reviewed (2026-10-31)
-> Other applicable specifications hook in through `ExtensibilityHooks` (`Dom/Algorithms/ExtensibilityHooks.hpp`), whose hooks the DOM algorithms call; each hook is reviewed with its algorithm.
+> Other applicable specifications hook in through `ExtensibilityHooks` (`Dom/Trees/ExtensibilityHooks.hpp`), whose hooks the DOM algorithms call; each hook is reviewed with its algorithm.
 <!-- definitions: other-applicable-specifications -->
 
 ### [1.1. Trees](https://dom.spec.whatwg.org/#trees)
 
 Status: reviewed (2026-10-30)
-> Code: `TreeQueries`'s Trees region (`IsParent`, `IsChild`, `Root`, `IsDescendant` and the rest, `Index`), `TreeQueries::Next`/`Previous` for tree order, and `Node::ParentNode`, `FirstChild`, `LastChild`, `PreviousSibling` and `NextSibling`. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`.
+> Code: `TreeQueries`'s Trees region (`IsParent`, `IsChild`, `Root`, `IsDescendant` and the rest, `Index`), `TreeQueries::Next`/`Previous` for tree order, and `Node::ParentNode`, `FirstChild`, `LastChild`, `PreviousSibling` and `NextSibling`. Tests: `tests/Dom/Trees/TreeQueries.cpp`.
 > `IsSibling` excludes the node itself, as "inclusive sibling" implies, though the definition alone doesn't.
 <!-- definitions: concept-tree concept-tree-order concept-tree-participate concept-tree-parent concept-tree-child concept-tree-root concept-tree-descendant concept-tree-inclusive-descendant concept-tree-ancestor concept-tree-inclusive-ancestor concept-tree-sibling concept-tree-inclusive-sibling concept-tree-preceding concept-tree-following concept-tree-first-child concept-tree-last-child concept-tree-previous-sibling concept-tree-next-sibling concept-tree-index -->
 
 ### [1.2. Ordered sets](https://dom.spec.whatwg.org/#ordered-sets)
 
 Status: reviewed (2026-10-30)
-> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/Dom/Algorithms/OrderedSet.cpp`.
+> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/Dom/Types/OrderedSet.cpp`.
 
 - [x] [ordered set parser](https://dom.spec.whatwg.org/#concept-ordered-set-parser) — The ordered set parser takes a string input and then runs these steps:
   - 1. Let inputTokens be the result of splitting input on ASCII whitespace.
@@ -50,7 +50,7 @@ Status: reviewed (2026-10-30)
 ### [1.4. Name validation](https://dom.spec.whatwg.org/#namespaces)
 
 Status: reviewed (2026-10-30)
-> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/Dom/Algorithms/NameValidation.cpp`.
+> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/Dom/Types/NameValidation.cpp`.
 <!-- definitions: valid-doctype-name -->
 
 - [x] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
@@ -240,7 +240,7 @@ Status: n/a (guidance for specification authors)
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
 Status: reviewed (2026-10-30)
-> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/Dom/Events/EventTarget.cpp`, `tests/Dom/Algorithms/EventTargetAlgorithms.cpp`.
+> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/Dom/Events/EventTarget.cpp`, `tests/Dom/Events/EventTargetAlgorithms.cpp`.
 <!-- definitions: eventtarget-event-listener-list concept-event-listener event-listener-type event-listener-callback event-listener-capture event-listener-passive event-listener-once event-listener-signal event-listener-removed get-the-parent eventtarget-activation-behavior eventtarget-legacy-pre-activation-behavior eventtarget-legacy-canceled-activation-behavior -->
 
 - [x] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
@@ -305,7 +305,7 @@ Status: n/a (service workers)
 ### [2.9. Dispatching events](https://dom.spec.whatwg.org/#dispatching-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/Dom/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/Dom/Events/Event.cpp` and the window in `tests/Html/Window.cpp`.
+> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/Dom/Events/EventDispatcher.cpp`, with the path's effects in `tests/Dom/Events/Event.cpp` and the window in `tests/Html/Window.cpp`.
 
 - [x] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
   - 1. Set event’s dispatch flag.
@@ -419,7 +419,7 @@ Status: reviewed (2026-10-30)
 ### [2.10. Firing events](https://dom.spec.whatwg.org/#firing-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher::FireEvent<TEvent>`, which takes the event's other IDL attributes as the dictionary its constructor takes and gives it to `EventFactory::Create`. Known issue: no task timing (steps 1 and 7). Tests: `tests/Dom/Algorithms/EventDispatcher.cpp`.
+> Code: `EventDispatcher::FireEvent<TEvent>`, which takes the event's other IDL attributes as the dictionary its constructor takes and gives it to `EventFactory::Create`. Known issue: no task timing (steps 1 and 7). Tests: `tests/Dom/Events/EventDispatcher.cpp`.
 
 - [x] [fire an event](https://dom.spec.whatwg.org/#concept-event-fire) — To fire an event named e at target, optionally using an eventConstructor, with a description of how IDL attributes are to be initialized, and a legacy target override flag, run these steps:
   - 1. Let recordingTimingAsTask be the result of calling start recording task time if needed given target’s relevant settings object.
@@ -436,7 +436,7 @@ Status: reviewed (2026-10-30)
 ### [2.11. Action versus occurrence](https://dom.spec.whatwg.org/#action-versus-occurrence)
 
 Status: reviewed (2026-10-30)
-> Krystal.Web's default event handlers (`DIFFERENCES.md`, from upstream) are the "default actions" model the section warns against, but they only act on the events the user agent dispatches for an ongoing action: keyboard events a script dispatches don't type or move focus, as in Chrome. Test: `tests/Dom/Algorithms/EventDispatcher.cpp` (`[dom:action-versus-occurrence]`).
+> Krystal.Web's default event handlers (`DIFFERENCES.md`, from upstream) are the "default actions" model the section warns against, but they only act on the events the user agent dispatches for an ongoing action: keyboard events a script dispatches don't type or move focus, as in Chrome. Test: `tests/Dom/Events/EventDispatcher.cpp` (`[dom:action-versus-occurrence]`).
 
 ## [3. Aborting ongoing activities](https://dom.spec.whatwg.org/#aborting-ongoing-activities)
 
@@ -462,7 +462,7 @@ Status: reviewed (2026-10-30)
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/Dom/Abort/AbortSignal.cpp` and `tests/Dom/Algorithms/AbortAlgorithms.cpp`. `AbortSignal::Timeout` takes the document standing in for the global, and waits on one of its timers, which is held while the document is suspended.
+> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/Dom/Abort/AbortSignal.cpp` and `tests/Dom/Abort/AbortAlgorithms.cpp`. `AbortSignal::Timeout` takes the document standing in for the global, and waits on one of its timers, which is held while the document is suspended.
 <!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
 - [x] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
@@ -529,7 +529,7 @@ Status: reviewed (2026-10-31)
 ### [3.3. Using AbortController and AbortSignal objects in APIs](https://dom.spec.whatwg.org/#abortcontroller-api-integration)
 
 Status: reviewed (2026-10-31)
-> Guidance for APIs that take a signal; none of Krystal.Web's promise-like APIs takes one. The APIs that take a signal follow it: `addEventListener()` adds nothing for an aborted signal and otherwise removes the listener from an abort algorithm (`EventTargetAlgorithms::AddEventListener`), and `CloseWatcher` starts inactive for an aborted signal and is destroyed from an abort algorithm (`CloseWatcher::Create`). Each adds its own algorithm, so observers don't clash. Tests: `tests/Dom/Algorithms/EventTargetAlgorithms.cpp`, `tests/Html/CloseWatcher/CloseWatcher.cpp`.
+> Guidance for APIs that take a signal; none of Krystal.Web's promise-like APIs takes one. The APIs that take a signal follow it: `addEventListener()` adds nothing for an aborted signal and otherwise removes the listener from an abort algorithm (`EventTargetAlgorithms::AddEventListener`), and `CloseWatcher` starts inactive for an aborted signal and is destroyed from an abort algorithm (`CloseWatcher::Create`). Each adds its own algorithm, so observers don't clash. Tests: `tests/Dom/Events/EventTargetAlgorithms.cpp`, `tests/Html/CloseWatcher/CloseWatcher.cpp`.
 
 ## [4. Nodes](https://dom.spec.whatwg.org/#nodes)
 
@@ -543,7 +543,7 @@ Status: reviewed (2026-10-31)
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
 Status: reviewed (2026-10-31)
-> Nodes are `Node`, with the same interfaces beneath it; `Attr` derives from `Node` rather than `ContainerNode`, so it never has children. The node tree's constraints are kept by ensure pre-insert validity and replace (`MutationAlgorithms`). Length and empty are `TreeQueries::Length`/`IsEmpty` (`Node::Length` forwards); character data's length counts UTF-8 code units (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/TreeQueries.cpp`, `tests/Dom/Algorithms/MutationAlgorithms.cpp`.
+> Nodes are `Node`, with the same interfaces beneath it; `Attr` derives from `Node` rather than `ContainerNode`, so it never has children. The node tree's constraints are kept by ensure pre-insert validity and replace (`MutationAlgorithms`). Length and empty are `TreeQueries::Length`/`IsEmpty` (`Node::Length` forwards); character data's length counts UTF-8 code units (`DIFFERENCES.md`). Tests: `tests/Dom/Trees/TreeQueries.cpp`, `tests/Dom/Trees/MutationAlgorithms.cpp`.
 <!-- definitions: concept-node concept-node-tree concept-node-empty -->
 
 - [x] [length (Node)](https://dom.spec.whatwg.org/#concept-node-length) — To determine the length of a node node, run these steps:
@@ -554,13 +554,13 @@ Status: reviewed (2026-10-31)
 #### [4.2.1. Document tree](https://dom.spec.whatwg.org/#document-trees)
 
 Status: reviewed (2026-10-31)
-> In a document tree is `Node::IsInDocumentTree` (connected and not in a shadow tree, which together mean the root is a document), with `TreeQueries::IsInDocumentTree` forwarding. The document element is the document's first element child (`Document::DocumentElement`, `TreeQueries::DocumentElement`). The deprecated "in a document" has no code of its own. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`.
+> In a document tree is `Node::IsInDocumentTree` (connected and not in a shadow tree, which together mean the root is a document), with `TreeQueries::IsInDocumentTree` forwarding. The document element is the document's first element child (`Document::DocumentElement`, `TreeQueries::DocumentElement`). The deprecated "in a document" has no code of its own. Tests: `tests/Dom/Trees/TreeQueries.cpp`.
 <!-- definitions: concept-document-tree document-element in-a-document-tree in-a-document -->
 
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)
 
 Status: reviewed (2026-10-31)
-> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`, `tests/Dom/Nodes/Node.cpp`.
+> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/Dom/Trees/TreeQueries.cpp`, `tests/Dom/Nodes/Node.cpp`.
 <!-- definitions: concept-shadow-tree concept-light-tree connected -->
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
@@ -581,7 +581,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
 Status: reviewed (2026-10-31)
-> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`, `tests/Dom/Nodes/Element.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
+> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/Dom/Trees/SlotAlgorithms.cpp`, `tests/Dom/Nodes/Element.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
 - [x] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
@@ -597,7 +597,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.3. Finding slots and slottables](https://dom.spec.whatwg.org/#finding-slots-and-slotables)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
+> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/Dom/Trees/SlotAlgorithms.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
 
 - [x] [find a slot](https://dom.spec.whatwg.org/#find-a-slot) — To find a slot for a given slottable slottable and an optional boolean open (default false):
   - 1. If slottable’s parent is null, then return null.
@@ -634,7 +634,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.4. Assigning slottables and slots](https://dom.spec.whatwg.org/#assigning-slotables-and-slots)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::AssignSlottables`, `AssignSlottablesForTree` and `AssignSlot`. Assign slottables also clears the assigned slot of a slottable the slot no longer finds (`DIFFERENCES.md`), and when the assigned nodes change it rebuilds the host's renderers and updates the slot's directionality. Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`.
+> Code: `SlotAlgorithms::AssignSlottables`, `AssignSlottablesForTree` and `AssignSlot`. Assign slottables also clears the assigned slot of a slottable the slot no longer finds (`DIFFERENCES.md`), and when the assigned nodes change it rebuilds the host's renderers and updates the slot's directionality. Tests: `tests/Dom/Trees/SlotAlgorithms.cpp`.
 
 - [x] [assign slottables](https://dom.spec.whatwg.org/#assign-slotables) — To assign slottables for a slot slot:
   - 1. Let slottables be the result of finding slottables for slot.
@@ -651,7 +651,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.5. Signaling slot change](https://dom.spec.whatwg.org/#signaling-slot-change)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::SignalSlotChange`; the signal slots are a set in `MutationObserverAlgorithms`, process-wide rather than per agent (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`.
+> Code: `SlotAlgorithms::SignalSlotChange`; the signal slots are a set in `MutationObserverAlgorithms`, process-wide rather than per agent (`DIFFERENCES.md`). Tests: `tests/Dom/Trees/SlotAlgorithms.cpp`.
 <!-- definitions: signal-slot-list -->
 
 - [x] [signal a slot change](https://dom.spec.whatwg.org/#signal-a-slot-change) — To signal a slot change, for a slot slot:
@@ -661,7 +661,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.3. Mutation algorithms](https://dom.spec.whatwg.org/#mutation-algorithms)
 
 Status: reviewed (2026-10-31)
-> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/MutationAlgorithms.cpp`, `tests/Dom/Traversal/NodeIterator.cpp`.
+> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/Dom/Trees/MutationAlgorithms.cpp`, `tests/Dom/Traversal/NodeIterator.cpp`.
 <!-- definitions: insert-suppressobservers remove-suppressobservers -->
 
 - [x] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:

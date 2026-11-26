@@ -31,7 +31,7 @@
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Net/DataUrlDecoder.hpp"
-#include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Loader/FrameLoader.hpp"

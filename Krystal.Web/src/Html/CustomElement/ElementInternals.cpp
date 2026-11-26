@@ -25,10 +25,10 @@
 
 #include "Krystal.Web/Html/CustomElement/ElementInternals.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
 #include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Web/Html/CustomElement/FormAssociatedCustomElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"

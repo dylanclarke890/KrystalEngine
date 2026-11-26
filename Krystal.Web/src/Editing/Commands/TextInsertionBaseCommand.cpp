@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Editing/Commands/TextInsertionBaseCommand.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"

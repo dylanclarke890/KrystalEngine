@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"

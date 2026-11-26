@@ -32,7 +32,7 @@
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
-#include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/DOMImplementation.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Html/Images/ImageDocument.hpp"

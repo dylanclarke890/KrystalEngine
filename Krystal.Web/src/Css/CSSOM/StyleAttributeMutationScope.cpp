@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Css/CSSOM/StyleAttributeMutationScope.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp"
+#include "Krystal.Web/Dom/MutationObserver/MutationObserverAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 

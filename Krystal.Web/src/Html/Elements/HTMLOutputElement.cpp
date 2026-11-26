@@ -30,9 +30,9 @@
  */
 
 #include "Krystal.Web/Html/Elements/HTMLOutputElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 

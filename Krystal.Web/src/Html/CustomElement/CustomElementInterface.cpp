@@ -25,8 +25,8 @@
  */
 
 #include "Krystal.Web/Html/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElement.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Html/Elements/HTMLMaybeFormAssociatedCustomElement.hpp"

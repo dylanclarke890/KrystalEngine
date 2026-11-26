@@ -32,7 +32,7 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/ClipboardApi/ClipboardEvent.hpp"
 #include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"

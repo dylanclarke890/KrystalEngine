@@ -29,7 +29,7 @@
 
 #include "Krystal.Web/Html/Forms/ValidatedFormListedElement.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"

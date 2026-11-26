@@ -25,10 +25,10 @@
 
 #include "Krystal.Web/Dom/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Core/Utils/StrongOrder.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 
 namespace krys::web::dom

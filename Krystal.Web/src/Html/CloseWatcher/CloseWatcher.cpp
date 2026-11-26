@@ -25,10 +25,10 @@
  */
 
 #include "Krystal.Web/Html/CloseWatcher/CloseWatcher.hpp"
+#include "Krystal.Web/Dom/Abort/AbortAlgorithms.hpp"
 #include "Krystal.Web/Dom/Abort/AbortSignal.hpp"
-#include "Krystal.Web/Dom/Algorithms/AbortAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/CloseWatcher/CloseWatcherManager.hpp"

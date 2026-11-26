@@ -3,7 +3,7 @@
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Web.Tests/Svg/SVGTestUtils.hpp"
-#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Web/Svg/Elements/SVGSvgElement.hpp"

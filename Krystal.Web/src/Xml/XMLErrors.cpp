@@ -27,11 +27,11 @@
  */
 
 #include "Krystal.Web/Xml/XMLErrors.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include <cstring>
 

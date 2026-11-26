@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Traversal/TreeWalker.hpp"
-#include "Krystal.Web/Dom/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Web/Dom/Traversal/IteratorAlgorithms.hpp"
 
 namespace krys::web
 {

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Html/Images/HTMLImageLoader.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 

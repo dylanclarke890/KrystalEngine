@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLTemplateElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 

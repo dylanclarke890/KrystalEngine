@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Abort/AbortAlgorithmHandle.hpp"
+#include "Krystal.Web/Dom/Abort/AbortAlgorithms.hpp"
 #include "Krystal.Web/Dom/Abort/AbortSignal.hpp"
-#include "Krystal.Web/Dom/Algorithms/AbortAlgorithms.hpp"
 #include <utility>
 
 namespace krys::web

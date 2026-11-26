@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Web/Editing/Commands/SimplifyMarkupCommand.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Rendering/RenderInline.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle.hpp"

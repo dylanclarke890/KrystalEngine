@@ -30,7 +30,7 @@
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Web/Css/Values/ValuePool.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"

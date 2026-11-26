@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"

@@ -25,10 +25,10 @@
 
 #include "Krystal.Web/Html/Elements/HTMLDialogElement.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorEnums.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"

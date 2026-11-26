@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/OrderedSet.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Types/OrderedSet.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 

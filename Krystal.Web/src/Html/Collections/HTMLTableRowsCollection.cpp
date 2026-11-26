@@ -27,7 +27,7 @@
  */
 
 #include "Krystal.Web/Html/Collections/HTMLTableRowsCollection.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTableElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTableRowElement.hpp"

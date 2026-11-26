@@ -4,7 +4,7 @@
 #include "Krystal.Web/Css/CSSOM/MediaQueryListEvent.hpp"
 #include "Krystal.Web/Css/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Web/Css/Queries/MediaQueryParser.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 
 namespace krys::web

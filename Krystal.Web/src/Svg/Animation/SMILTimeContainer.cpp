@@ -26,8 +26,8 @@
 
 #include "Krystal.Web/Svg/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Web/Animation/Timelines/DocumentTimeline.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Svg/Animation/SVGSMILElement.hpp"
 #include "Krystal.Web/Svg/Elements/SVGSvgElement.hpp"

@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Mixins/ParentNode.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::web

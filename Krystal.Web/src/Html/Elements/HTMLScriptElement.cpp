@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLScriptElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 
 #include "Krystal.Core/Strings/ASCII.hpp"

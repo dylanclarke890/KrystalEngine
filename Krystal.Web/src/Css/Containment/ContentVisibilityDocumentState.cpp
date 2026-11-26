@@ -27,7 +27,7 @@
 #include "Krystal.Web/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Web/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Web/Css/Containment/ContentVisibilityAutoStateChangeEvent.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"

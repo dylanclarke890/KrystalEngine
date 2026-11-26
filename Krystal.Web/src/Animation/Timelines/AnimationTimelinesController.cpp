@@ -31,7 +31,7 @@
 #include "Krystal.Web/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Web/Animation/WebAnimation.hpp"
 #include "Krystal.Web/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Window.hpp"

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLDataListElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
 
 namespace krys::web

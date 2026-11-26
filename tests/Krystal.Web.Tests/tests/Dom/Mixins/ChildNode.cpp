@@ -2,6 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -144,5 +147,20 @@ namespace krys::web::dom::mixins::tests
     CHECK(data.B->ParentNode() == nullptr);
 
     REQUIRE_FALSE(mixins::ChildNode::Remove(*data.B).HasException());
+  }
+
+  template <typename T>
+  concept ChildNodeMixin = requires(T &node, const List<NodeOrString> &nodes) {
+    { node.Before(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.After(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.ReplaceWith(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.Remove() } -> SameType<ExceptionOr<void>>;
+  };
+
+  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins][dom:interface-childnode]")
+  {
+    STATIC_REQUIRE(ChildNodeMixin<DocumentType>);
+    STATIC_REQUIRE(ChildNodeMixin<Element>);
+    STATIC_REQUIRE(ChildNodeMixin<CharacterData>);
   }
 }

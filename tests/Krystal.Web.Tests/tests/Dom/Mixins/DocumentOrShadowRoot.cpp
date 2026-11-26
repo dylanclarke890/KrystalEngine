@@ -1,7 +1,15 @@
 ﻿#include "Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Html/CustomElementTestUtils.hpp"
+#include "Krystal.Web/Dom/Nodes/Attr.hpp"
+#include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Html/Window.hpp"
 
 namespace krys::web::dom::tests
@@ -36,5 +44,16 @@ namespace krys::web::dom::tests
           .ReleaseValue();
       CHECK(scopedShadow->CustomElementRegistry() == scoped);
     }
+  }
+
+  template <typename T>
+  concept DocumentOrShadowRootMixin = requires(T &node) {
+    { node.CustomElementRegistry() } -> SameType<html::CustomElementRegistry *>;
+  };
+
+  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins][dom:mixin-documentorshadowroot]")
+  {
+    STATIC_REQUIRE(DocumentOrShadowRootMixin<Document>);
+    STATIC_REQUIRE(DocumentOrShadowRootMixin<ShadowRoot>);
   }
 }

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
-#include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Types/NameValidation.hpp"
 #include "Krystal.Web/Html/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"

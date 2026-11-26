@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Nodes/NamedNodeMap.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"

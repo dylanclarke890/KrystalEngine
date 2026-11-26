@@ -22,8 +22,8 @@
  */
 
 #include "Krystal.Web/Rendering/FormControls/RenderTextControlSingleLine.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"

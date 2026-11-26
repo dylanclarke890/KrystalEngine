@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/MutationObserver/MutationObserver.hpp"
 #include "Krystal.Core/Move.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp"
+#include "Krystal.Web/Dom/MutationObserver/MutationObserverAlgorithms.hpp"
 #include "Krystal.Web/Dom/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"

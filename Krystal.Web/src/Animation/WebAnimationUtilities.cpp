@@ -32,8 +32,8 @@
 #include "Krystal.Web/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorParser.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Web/Style/Styleable.hpp"
 

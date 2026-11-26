@@ -27,8 +27,8 @@
 
 #include "Krystal.Web/Svg/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
 #include "Krystal.Web/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Web/Loader/DocumentLoader.hpp"

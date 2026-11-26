@@ -26,8 +26,8 @@
  */
 
 #include "Krystal.Web/Accessibility/AXSVGObject.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include "Krystal.Web/Rendering/RenderText.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"

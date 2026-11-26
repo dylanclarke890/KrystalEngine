@@ -25,8 +25,6 @@
  */
 
 #include "Krystal.Web/Editing/Markup/MarkupAccumulator.hpp"
-#include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
@@ -39,6 +37,8 @@
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Types/NameValidation.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"

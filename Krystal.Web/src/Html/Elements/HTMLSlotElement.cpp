@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 
 namespace krys::web

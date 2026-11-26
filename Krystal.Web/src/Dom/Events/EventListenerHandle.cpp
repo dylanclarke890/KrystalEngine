@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
+#include "Krystal.Web/Dom/Events/EventTargetAlgorithms.hpp"
 
 namespace krys::web
 {

@@ -31,7 +31,7 @@
 
 #include "Krystal.Web/Html/InputTypes/HiddenInputType.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Forms/DOMFormData.hpp"
 

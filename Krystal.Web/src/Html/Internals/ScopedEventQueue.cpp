@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Web/Html/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
 
 namespace krys::web::html

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Dom/Collections/LiveCollection.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Node.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 
 namespace krys::web::dom
 {

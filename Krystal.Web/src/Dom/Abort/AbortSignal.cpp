@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Dom/Abort/AbortSignal.hpp"
-#include "Krystal.Web/Dom/Algorithms/AbortAlgorithms.hpp"
+#include "Krystal.Web/Dom/Abort/AbortAlgorithms.hpp"
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"

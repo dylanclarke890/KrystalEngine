@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Html/Events/ToggleEvent.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Web/Dom/Events/EventTargetAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 

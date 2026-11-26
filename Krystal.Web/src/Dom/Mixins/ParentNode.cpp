@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Web/Dom/Mixins/ParentNode.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
 #include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Internals/SelectorQuery.hpp"
@@ -9,6 +8,7 @@
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 
 namespace krys::web::dom::mixins
 {

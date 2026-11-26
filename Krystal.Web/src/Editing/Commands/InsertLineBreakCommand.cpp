@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Editing/Commands/InsertLineBreakCommand.hpp"
-#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"

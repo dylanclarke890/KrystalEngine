@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"

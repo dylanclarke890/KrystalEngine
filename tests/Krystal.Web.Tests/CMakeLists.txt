@@ -377,23 +377,9 @@ set(KRYSTAL_WEB_TESTS_DOM_HEADERS
 )
 
 set(KRYSTAL_WEB_TESTS_DOM_SOURCES
+  tests/Dom/Abort/AbortAlgorithms.cpp
   tests/Dom/Abort/AbortController.cpp
   tests/Dom/Abort/AbortSignal.cpp
-  tests/Dom/Algorithms/AbortAlgorithms.cpp
-  tests/Dom/Algorithms/DocumentAlgorithms.cpp
-  tests/Dom/Algorithms/ElementAlgorithms.cpp
-  tests/Dom/Algorithms/EventDispatcher.cpp
-  tests/Dom/Algorithms/EventTargetAlgorithms.cpp
-  tests/Dom/Algorithms/IteratorAlgorithms.cpp
-  tests/Dom/Algorithms/Mixins.cpp
-  tests/Dom/Algorithms/MutationAlgorithms.cpp
-  tests/Dom/Algorithms/MutationObserverAlgorithms.cpp
-  tests/Dom/Algorithms/NameValidation.cpp
-  tests/Dom/Algorithms/NodeAlgorithms.cpp
-  tests/Dom/Algorithms/OrderedSet.cpp
-  tests/Dom/Algorithms/SlotAlgorithms.cpp
-  tests/Dom/Algorithms/TextAlgorithms.cpp
-  tests/Dom/Algorithms/TreeQueries.cpp
   tests/Dom/Collections/DOMStringMap.cpp
   tests/Dom/Collections/DOMTokenList.cpp
   tests/Dom/Collections/HTMLCollection.cpp
@@ -401,8 +387,10 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Collections/NodeList.cpp
   tests/Dom/Events/CustomEvent.cpp
   tests/Dom/Events/Event.cpp
+  tests/Dom/Events/EventDispatcher.cpp
   tests/Dom/Events/EventListenerHandle.cpp
   tests/Dom/Events/EventTarget.cpp
+  tests/Dom/Events/EventTargetAlgorithms.cpp
   tests/Dom/Internals/ElementFactory.cpp
   tests/Dom/Internals/EventFactory.cpp
   tests/Dom/Internals/Iterators/ComposedTreeIterator.cpp
@@ -418,6 +406,10 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Mixins/NonElementParentNode.cpp
   tests/Dom/Mixins/ParentNode.cpp
   tests/Dom/Mixins/Slottable.cpp
+  tests/Dom/Nodes/Algorithms/DocumentAlgorithms.cpp
+  tests/Dom/Nodes/Algorithms/ElementAlgorithms.cpp
+  tests/Dom/Nodes/Algorithms/NodeAlgorithms.cpp
+  tests/Dom/Nodes/Algorithms/TextAlgorithms.cpp
   tests/Dom/Nodes/Attr.cpp
   tests/Dom/Nodes/CDATASection.cpp
   tests/Dom/Nodes/CharacterData.cpp
@@ -436,12 +428,14 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Nodes/StyledElement.cpp
   tests/Dom/Nodes/Text.cpp
   tests/Dom/MutationObserver/MutationObserver.cpp
+  tests/Dom/MutationObserver/MutationObserverAlgorithms.cpp
   tests/Dom/MutationObserver/MutationRecord.cpp
   tests/Dom/Ranges/AbstractRange.cpp
   tests/Dom/Ranges/BoundaryPoint.cpp
   tests/Dom/Ranges/Range.cpp
   tests/Dom/Ranges/SimpleRange.cpp
   tests/Dom/Ranges/StaticRange.cpp
+  tests/Dom/Traversal/IteratorAlgorithms.cpp
   tests/Dom/Traversal/NodeFilter.cpp
   tests/Dom/Traversal/NodeIterator.cpp
   tests/Dom/Traversal/TreeWalker.cpp
@@ -452,6 +446,11 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/HTMLInsertionMethods.cpp
   tests/Dom/NodeLifetime.cpp
   tests/Dom/TopLayer.cpp
+  tests/Dom/Trees/MutationAlgorithms.cpp
+  tests/Dom/Trees/SlotAlgorithms.cpp
+  tests/Dom/Trees/TreeQueries.cpp
+  tests/Dom/Types/NameValidation.cpp
+  tests/Dom/Types/OrderedSet.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_EDITING_HEADERS

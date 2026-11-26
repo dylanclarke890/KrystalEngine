@@ -4,6 +4,8 @@
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/DOMImplementation.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -305,5 +307,32 @@ namespace krys::web::dom::tests
     // A static list doesn't change with the tree.
     REQUIRE_FALSE(root->AppendChild(*document->CreateElement(u8"p").Value()).HasException());
     CHECK(all->Length() == 2u);
+  }
+
+  template <typename T>
+  concept ParentNodeMixin = requires(T &node, const T &constNode, const List<NodeOrString> &nodes,
+                                     Node *optionalNode, DOMString selectors) {
+    { node.Children() } -> SameType<Ref<HTMLCollection>>;
+    { constNode.FirstElementChild() } -> SameType<RefPtr<const Element>>;
+    { node.FirstElementChild() } -> SameType<RefPtr<Element>>;
+    { constNode.LastElementChild() } -> SameType<RefPtr<const Element>>;
+    { node.LastElementChild() } -> SameType<RefPtr<Element>>;
+    { node.ChildElementCount() } -> SameType<size_t>;
+
+    { node.Prepend(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.Append(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.ReplaceChildren(nodes) } -> SameType<ExceptionOr<void>>;
+
+    { node.MoveBefore(node, optionalNode) } -> SameType<ExceptionOr<void>>;
+
+    { node.QuerySelector(selectors) } -> SameType<ExceptionOr<RefPtr<Element>>>;
+    { node.QuerySelectorAll(selectors) } -> SameType<ExceptionOr<Ref<NodeList>>>;
+  };
+
+  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins][dom:interface-parentnode]")
+  {
+    STATIC_REQUIRE(ParentNodeMixin<Element>);
+    STATIC_REQUIRE(ParentNodeMixin<Document>);
+    STATIC_REQUIRE(ParentNodeMixin<DocumentFragment>);
   }
 }

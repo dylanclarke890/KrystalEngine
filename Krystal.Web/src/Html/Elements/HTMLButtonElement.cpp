@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"

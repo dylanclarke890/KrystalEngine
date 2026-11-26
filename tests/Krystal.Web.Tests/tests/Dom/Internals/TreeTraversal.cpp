@@ -3,7 +3,7 @@
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Web.Tests/Dom/TestElement.hpp"
 #include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Web/Dom/Events/EventTargetAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"

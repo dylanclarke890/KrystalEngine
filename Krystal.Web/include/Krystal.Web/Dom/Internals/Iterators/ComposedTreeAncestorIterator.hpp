@@ -26,10 +26,10 @@
 #pragma once
 
 #include "Krystal.Core/Memory/CheckedPtr.hpp"
-#include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Trees/SlotAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 
 namespace krys::web::dom

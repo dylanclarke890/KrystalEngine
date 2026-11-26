@@ -1,5 +1,11 @@
 ﻿#include "Krystal.Web/Dom/Mixins/Slottable.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web/Dom/Nodes/Attr.hpp"
+#include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -41,5 +47,16 @@ namespace krys::web::dom::tests
       CHECK(text->AssignedSlot() == nullptr);
       CHECK(Downcast<HTMLSlotElement>(*slot).AssignedNodes());
     }
+  }
+
+  template <typename T>
+  concept SlottableMixin = requires(T &node) {
+    { node.AssignedSlot() } -> SameType<RefPtr<HTMLSlotElement>>;
+  };
+
+  TEST_CASE("Mixin::Slottable", "[HTML][Mixins][dom:mixin-slotable]")
+  {
+    STATIC_REQUIRE(SlottableMixin<Element>);
+    STATIC_REQUIRE(SlottableMixin<krys::web::Text>);
   }
 }

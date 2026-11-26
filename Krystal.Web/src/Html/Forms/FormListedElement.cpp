@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Web/Html/Forms/FormListedElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserver.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserverRegistry.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
 #include "Krystal.Web/Infra/StringAlgorithms.hpp"
 

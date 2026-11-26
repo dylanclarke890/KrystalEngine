@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Nodes/Text.hpp"
-#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Mixins/Slottable.hpp"
+#include "Krystal.Web/Dom/Nodes/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Rendering/RenderCombineText.hpp"
 #include "Krystal.Web/Rendering/RenderText.hpp"

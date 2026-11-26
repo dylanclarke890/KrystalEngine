@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Trees/MutationAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"

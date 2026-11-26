@@ -2,6 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -72,5 +75,21 @@ namespace krys::web::dom::tests
     REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child1) == data.Child3);
     REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child2) == data.Child3);
     REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child3) == nullptr);
+  }
+
+  template <typename T>
+  concept NonDocumentTypeChildNodeMixin = requires(T &node, const T &constNode) {
+    { constNode.PreviousElementSibling() } -> SameType<RefPtr<const Element>>;
+    { node.PreviousElementSibling() } -> SameType<RefPtr<Element>>;
+    { constNode.NextElementSibling() } -> SameType<RefPtr<const Element>>;
+    { node.NextElementSibling() } -> SameType<RefPtr<Element>>;
+  };
+
+  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins][dom:interface-nondocumenttypechildnode]")
+  {
+    STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
+    STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
+    // Not doctypes, for web compatibility.
+    STATIC_REQUIRE_FALSE(NonDocumentTypeChildNodeMixin<DocumentType>);
   }
 }

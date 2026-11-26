@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Core/TypeTraits.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include <ranges>
 
 namespace krys::web::dom::detail

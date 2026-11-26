@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Html/Forms/FormAssociatedElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
 
 namespace krys::web::html

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLLegendElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"

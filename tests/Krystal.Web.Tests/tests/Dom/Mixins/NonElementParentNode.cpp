@@ -1,10 +1,14 @@
 ﻿#include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
+#include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 
 namespace krys::web::dom::tests
@@ -119,5 +123,17 @@ namespace krys::web::dom::tests
       REQUIRE_FALSE(host->AppendChild(*element).HasException());
       CHECK(document->GetElementById(u8"a") == nullptr);
     }
+  }
+
+  template <typename T>
+  concept NonElementParentNodeMixin = requires(T &node, const T &constNode, DOMStringView id) {
+    { node.GetElementById(id) } -> SameType<RefPtr<Element>>;
+    { constNode.GetElementById(id) } -> SameType<RefPtr<const Element>>;
+  };
+
+  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins][dom:interface-nonelementparentnode]")
+  {
+    STATIC_REQUIRE(NonElementParentNodeMixin<Document>);
+    STATIC_REQUIRE(NonElementParentNodeMixin<DocumentFragment>);
   }
 }

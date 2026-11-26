@@ -17,7 +17,7 @@ Krystal.Web is the engine's web engine: the DOM, HTML and CSS for declaring, cha
 - **Scope:** keep standard features a C++ application could use, even before Krystal.Web does; remove browser-oriented ones (the not-planned list in `docs/OVERVIEW.md`), `-webkit-`/`-apple-` and non-standard features.
 - **Reviewing against a specification:** work through a checklist a section at a time (`python Krystal.Web/tools/spec_status.py dom <section anchor>` lists each algorithm's code and tests).
   - Label each step in its implementation as `// 1.`, `// 1a.`, `// 1a.i.` followed by the step's text, as the checklist numbers them. A step left out on purpose is `// 3. (Skipped: <reason>.)` with a `DIFFERENCES.md` entry; a missing or wrong one is a bug as above. Single-sentence algorithms and definitions need no labels.
-  - Tag the tests that cover an algorithm with `[<spec>:<anchor>]` (`[dom:concept-node-pre-insert]`). Existing tests for it move into the test file matching the file that implements it (pre-insert's into `tests/Dom/Algorithms/MutationAlgorithms.cpp`), named after the algorithm and behaviour.
+  - Tag the tests that cover an algorithm with `[<spec>:<anchor>]` (`[dom:concept-node-pre-insert]`). Existing tests for it move into the test file matching the file that implements it (pre-insert's into `tests/Dom/Trees/MutationAlgorithms.cpp`), named after the algorithm and behaviour.
   - Sections without algorithms (such as Trees) still get reviewed: check their definitions against the code, note where they live in `>` lines under the status, and tag their tests with the definition's or section's anchor.
   - Tick it and set the section's status with `python Krystal.Web/tools/spec_status.py <spec> --tick <section anchor> --note "..."`.
 
