@@ -1,14 +1,22 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/ElementOrText.hpp"
 #include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+
+namespace krys::boo
+{
+  class Text;
+}
 
 namespace krys::boo::dom
 {
   class MutationAlgorithms;
   class SlotAlgorithms;
+
+  /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-slot-assign
+  using ElementOrText = Variant<Ref<Element>, Ref<Text>>;
 }
 
 namespace krys::boo::html

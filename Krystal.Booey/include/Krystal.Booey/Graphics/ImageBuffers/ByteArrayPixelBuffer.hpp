@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
+#include "Krystal.Booey/HTML/ImageData/Uint8ClampedArray.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo

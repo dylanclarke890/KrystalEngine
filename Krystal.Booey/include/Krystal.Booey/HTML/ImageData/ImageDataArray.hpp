@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp"
 #include "Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp"
+#include "Krystal.Booey/HTML/ImageData/Uint8ClampedArray.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp"
+#include "Krystal.Booey/HTML/ImageData/Uint8ClampedArray.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBufferConversion.hpp"
 #include <cmath>

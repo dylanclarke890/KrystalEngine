@@ -1198,12 +1198,10 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Traversal/TreeWalker.hpp
   include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
   include/Krystal.Booey/DOM/Types/DOMString.hpp
-  include/Krystal.Booey/DOM/Types/ElementOrText.hpp
   include/Krystal.Booey/DOM/Types/Exception.hpp
   include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
   include/Krystal.Booey/DOM/Types/NodeOrString.hpp
   include/Krystal.Booey/DOM/Types/QualifiedName.hpp
-  include/Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp
   include/Krystal.Booey/DOM/Types/USVString.hpp
 )
 
@@ -1969,6 +1967,7 @@ set(KRYSTAL_BOOEY_HTML_HEADERS
   include/Krystal.Booey/HTML/ImageData/ImageDataArray.hpp
   include/Krystal.Booey/HTML/ImageData/ImageDataPixelFormat.hpp
   include/Krystal.Booey/HTML/ImageData/ImageDataSettings.hpp
+  include/Krystal.Booey/HTML/ImageData/Uint8ClampedArray.hpp
   include/Krystal.Booey/HTML/Images/HTMLImageLoader.hpp
   include/Krystal.Booey/HTML/Images/ImageDocument.hpp
   include/Krystal.Booey/HTML/Images/LazyLoadImageObserver.hpp

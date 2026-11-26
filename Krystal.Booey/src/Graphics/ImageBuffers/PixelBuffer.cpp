@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/ImageBuffers/PixelBuffer.hpp"
-#include "Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp"
+#include "Krystal.Booey/HTML/ImageData/Uint8ClampedArray.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <cstring>
 #include <limits>
