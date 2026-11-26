@@ -16,10 +16,10 @@ namespace krys::web
 #pragma region HTMLQuoteElement - https://html.spec.whatwg.org/multipage/grouping-content.html#htmlquoteelement
 
     /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-quote-cite
-    KRYS_NODISCARD dom::USVString Cite() const noexcept;
+    KRYS_NODISCARD USVString Cite() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-quote-cite
-    void Cite(dom::USVString value) noexcept;
+    void Cite(USVString value) noexcept;
 
 #pragma endregion
   };

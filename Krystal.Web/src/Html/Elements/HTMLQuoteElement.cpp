@@ -10,14 +10,14 @@ namespace krys::web
 
 #pragma region HTMLQuoteElement
 
-  dom::USVString HTMLQuoteElement::Cite() const noexcept
+  USVString HTMLQuoteElement::Cite() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"cite");
+    return html::ReflectUrl<USVString>(*this, u8"cite");
   }
 
-  void HTMLQuoteElement::Cite(dom::USVString value) noexcept
+  void HTMLQuoteElement::Cite(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"cite", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"cite", krys::move(value));
   }
 
 #pragma endregion

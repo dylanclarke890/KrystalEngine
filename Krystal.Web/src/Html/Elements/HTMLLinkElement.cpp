@@ -700,14 +700,14 @@ namespace krys::web
 
 #pragma region HTMLLinkElement
 
-  dom::USVString HTMLLinkElement::Href() const noexcept
+  USVString HTMLLinkElement::Href() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<USVString>(*this, u8"href");
   }
 
-  void HTMLLinkElement::Href(dom::USVString value) noexcept
+  void HTMLLinkElement::Href(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"href", krys::move(value));
   }
 
   Maybe<DOMString> HTMLLinkElement::CrossOrigin() const noexcept
@@ -808,14 +808,14 @@ namespace krys::web
     return *_sizes;
   }
 
-  dom::USVString HTMLLinkElement::ImageSrcset() const noexcept
+  USVString HTMLLinkElement::ImageSrcset() const noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"imagesrcset");
+    return html::Reflect<USVString>(*this, u8"imagesrcset");
   }
 
-  void HTMLLinkElement::ImageSrcset(dom::USVString value) noexcept
+  void HTMLLinkElement::ImageSrcset(USVString value) noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
+    return html::Reflect<USVString>(*this, u8"imagesrcset", krys::move(value));
   }
 
   DOMString HTMLLinkElement::ImageSizes() const noexcept

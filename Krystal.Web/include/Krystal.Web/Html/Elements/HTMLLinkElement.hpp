@@ -74,10 +74,10 @@ namespace krys::web
 #pragma region HTMLLinkElement - https://html.spec.whatwg.org/multipage/semantics.html#htmllinkelement
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-href
-    KRYS_NODISCARD dom::USVString Href() const noexcept;
+    KRYS_NODISCARD USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-href
-    void Href(dom::USVString value) noexcept;
+    void Href(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-crossorigin
     KRYS_NODISCARD Maybe<DOMString> CrossOrigin() const noexcept;
@@ -130,10 +130,10 @@ namespace krys::web
     KRYS_NODISCARD DOMTokenList &Sizes() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-imagesrcset
-    KRYS_NODISCARD dom::USVString ImageSrcset() const noexcept;
+    KRYS_NODISCARD USVString ImageSrcset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-imagesrcset
-    void ImageSrcset(dom::USVString value) noexcept;
+    void ImageSrcset(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-link-imagesizes
     KRYS_NODISCARD DOMString ImageSizes() const noexcept;

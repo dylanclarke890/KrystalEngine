@@ -168,10 +168,10 @@ namespace krys::web
     KRYS_NODISCARD DOMString DisplayString() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    KRYS_NODISCARD dom::USVString FormAction() const noexcept;
+    KRYS_NODISCARD USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    void FormAction(dom::USVString value) noexcept;
+    void FormAction(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
     KRYS_NODISCARD DOMString FormEnctype() const noexcept;
@@ -301,10 +301,10 @@ namespace krys::web
     ExceptionOr<void> Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/input.html#dom-input-step
     KRYS_NODISCARD DOMString Step() const noexcept;

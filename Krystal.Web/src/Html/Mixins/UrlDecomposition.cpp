@@ -30,7 +30,7 @@
 
 namespace krys::web::html
 {
-  dom::USVString UrlDecomposition::SerializedOrigin(const net::Url &url) noexcept
+  USVString UrlDecomposition::SerializedOrigin(const net::Url &url) noexcept
   {
     // https://url.spec.whatwg.org/#concept-url-origin
     if (url.ProtocolIsBlob())
@@ -42,7 +42,7 @@ namespace krys::web::html
       {
         return SerializedOrigin(pathUrl);
       }
-      return dom::USVString(u8"null");
+      return USVString(u8"null");
     }
 
     // https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin
@@ -50,7 +50,7 @@ namespace krys::web::html
         || url.ProtocolIs(u8"ws") || url.ProtocolIs(u8"wss"))
     {
       // 2. Let result be origin's scheme.
-      dom::USVString result(url.Protocol());
+      USVString result(url.Protocol());
       // 3. Append "://" to result.
       result += u8"://";
       // 4. Append origin's host, serialized, to result.
@@ -64,17 +64,17 @@ namespace krys::web::html
     // The origin of a file URL is left to the implementation: like the other engines, it's `file://`.
     if (url.ProtocolIsFile())
     {
-      return dom::USVString(u8"file://");
+      return USVString(u8"file://");
     }
 
     // 1. If origin is an opaque origin, then return "null".
-    return dom::USVString(u8"null");
+    return USVString(u8"null");
   }
 
   // The steps are those of HTMLHyperlinkElementUtils, whose url is FullUrl(): an invalid URL is a null one,
   // and reinitializing the url is computing it again.
 
-  dom::USVString UrlDecomposition::Origin() const noexcept
+  USVString UrlDecomposition::Origin() const noexcept
   {
     // 1. Reinitialize url.
     auto fullUrl = FullUrl();
@@ -89,19 +89,19 @@ namespace krys::web::html
     return SerializedOrigin(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Protocol() const noexcept
+  USVString UrlDecomposition::Protocol() const noexcept
   {
     // 1. Reinitialize url.
     auto fullUrl = FullUrl();
     if (net::ProtocolIsJavaScript(fullUrl.String()))
     {
-      return dom::USVString(u8"javascript:");
+      return USVString(u8"javascript:");
     }
 
     // 2. If this's url is null, return ":".
     // 3. Return this's url's scheme, followed by ":".
     // (An invalid URL's scheme is empty.)
-    dom::USVString result(fullUrl.Protocol());
+    USVString result(fullUrl.Protocol());
     result += u8':';
     return result;
   }
@@ -125,12 +125,12 @@ namespace krys::web::html
     SetFullUrl(copy);
   }
 
-  dom::USVString UrlDecomposition::Username() const noexcept
+  USVString UrlDecomposition::Username() const noexcept
   {
     // 1. Reinitialize url.
     // 2. If this's url is null, return the empty string.
     // 3. Return this's url's username.
-    return dom::USVString(FullUrl().EncodedUser());
+    return USVString(FullUrl().EncodedUser());
   }
 
   void UrlDecomposition::Username(DOMStringView user) noexcept
@@ -152,13 +152,13 @@ namespace krys::web::html
     SetFullUrl(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Password() const noexcept
+  USVString UrlDecomposition::Password() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, then return the empty string.
     // 4. Return url's password.
-    return dom::USVString(FullUrl().EncodedPassword());
+    return USVString(FullUrl().EncodedPassword());
   }
 
   void UrlDecomposition::Password(DOMStringView password) noexcept
@@ -180,14 +180,14 @@ namespace krys::web::html
     SetFullUrl(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Host() const noexcept
+  USVString UrlDecomposition::Host() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url or url's host is null, return the empty string.
     // 4. If url's port is null, return url's host, serialized.
     // 5. Return url's host, serialized, followed by ":" and url's port, serialized.
-    return dom::USVString(FullUrl().HostAndPort());
+    return USVString(FullUrl().HostAndPort());
   }
 
   void UrlDecomposition::Host(DOMStringView value) noexcept
@@ -217,13 +217,13 @@ namespace krys::web::html
     }
   }
 
-  dom::USVString UrlDecomposition::Hostname() const noexcept
+  USVString UrlDecomposition::Hostname() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url or url's host is null, return the empty string.
     // 4. Return url's host, serialized.
-    return dom::USVString(FullUrl().Host());
+    return USVString(FullUrl().Host());
   }
 
   void UrlDecomposition::Hostname(DOMStringView host) noexcept
@@ -253,7 +253,7 @@ namespace krys::web::html
     }
   }
 
-  dom::USVString UrlDecomposition::Port() const noexcept
+  USVString UrlDecomposition::Port() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -265,7 +265,7 @@ namespace krys::web::html
     }
 
     // 4. Return url's port, serialized.
-    return dom::USVString(utf8_string(reinterpret_cast<const char8_t *>(std::to_string(*port).c_str())));
+    return USVString(utf8_string(reinterpret_cast<const char8_t *>(std::to_string(*port).c_str())));
   }
 
   Maybe<Maybe<uint16>> UrlDecomposition::ParsePort(DOMStringView string, DOMStringView protocol) noexcept
@@ -329,13 +329,13 @@ namespace krys::web::html
     SetFullUrl(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Pathname() const noexcept
+  USVString UrlDecomposition::Pathname() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, then return the empty string.
     // 4. Return the result of URL path serializing url.
-    return dom::USVString(FullUrl().Path());
+    return USVString(FullUrl().Path());
   }
 
   void UrlDecomposition::Pathname(DOMStringView value) noexcept
@@ -358,15 +358,14 @@ namespace krys::web::html
     SetFullUrl(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Search() const noexcept
+  USVString UrlDecomposition::Search() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
     // 3. If url is null, or url's query is either null or the empty string, return the empty string.
     // 4. Return "?", followed by url's query.
     auto fullUrl = FullUrl();
-    return fullUrl.Query().empty() ? dom::USVString()
-                                   : dom::USVString(fullUrl.QueryWithLeadingQuestionMark());
+    return fullUrl.Query().empty() ? USVString() : USVString(fullUrl.QueryWithLeadingQuestionMark());
   }
 
   void UrlDecomposition::Search(DOMStringView value) noexcept
@@ -413,7 +412,7 @@ namespace krys::web::html
     SetFullUrl(fullUrl);
   }
 
-  dom::USVString UrlDecomposition::Hash() const noexcept
+  USVString UrlDecomposition::Hash() const noexcept
   {
     // 1. Reinitialize url.
     // 2. Let url be this's url.
@@ -421,8 +420,8 @@ namespace krys::web::html
     // 4. Return "#", followed by url's fragment.
     auto fullUrl = FullUrl();
     return fullUrl.FragmentIdentifier().empty()
-             ? dom::USVString()
-             : dom::USVString(fullUrl.FragmentIdentifierWithLeadingNumberSign());
+             ? USVString()
+             : USVString(fullUrl.FragmentIdentifierWithLeadingNumberSign());
   }
 
   void UrlDecomposition::Hash(DOMStringView value) noexcept

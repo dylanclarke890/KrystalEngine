@@ -28,14 +28,14 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::USVString HTMLScriptElement::Src() const noexcept
+  USVString HTMLScriptElement::Src() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<USVString>(*this, u8"src");
   }
 
-  void HTMLScriptElement::Src(dom::USVString value) noexcept
+  void HTMLScriptElement::Src(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"src", krys::move(value));
   }
 
   bool HTMLScriptElement::NoModule() const noexcept

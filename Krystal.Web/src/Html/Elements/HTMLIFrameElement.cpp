@@ -12,14 +12,14 @@ namespace krys::web
 
 #pragma region HTMLIFrameElement
 
-  dom::USVString HTMLIFrameElement::Src() const noexcept
+  USVString HTMLIFrameElement::Src() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<USVString>(*this, u8"src");
   }
 
-  void HTMLIFrameElement::Src(dom::USVString value) noexcept
+  void HTMLIFrameElement::Src(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLIFrameElement::SrcDoc() const noexcept
@@ -146,14 +146,14 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"frameborder", krys::move(value));
   }
 
-  dom::USVString HTMLIFrameElement::LongDesc() const noexcept
+  USVString HTMLIFrameElement::LongDesc() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectUrl<USVString>(*this, u8"longdesc");
   }
 
-  void HTMLIFrameElement::LongDesc(dom::USVString value) noexcept
+  void HTMLIFrameElement::LongDesc(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"longdesc", krys::move(value));
   }
 
   DOMString HTMLIFrameElement::MarginWidth() const noexcept

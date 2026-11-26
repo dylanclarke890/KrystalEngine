@@ -335,14 +335,14 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"download", krys::move(value));
   }
 
-  dom::USVString HTMLAreaElement::Ping() const noexcept
+  USVString HTMLAreaElement::Ping() const noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"ping");
+    return html::Reflect<USVString>(*this, u8"ping");
   }
 
-  void HTMLAreaElement::Ping(dom::USVString value) noexcept
+  void HTMLAreaElement::Ping(USVString value) noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
+    return html::Reflect<USVString>(*this, u8"ping", krys::move(value));
   }
 
   DOMString HTMLAreaElement::Rel() const noexcept
@@ -385,17 +385,17 @@ namespace krys::web
 
 #pragma region HTMLHyperlinkElementUtils
 
-  dom::USVString HTMLAreaElement::Href() const noexcept
+  USVString HTMLAreaElement::Href() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"href");
+    return html::ReflectUrl<USVString>(*this, u8"href");
   }
 
-  void HTMLAreaElement::Href(dom::USVString value) noexcept
+  void HTMLAreaElement::Href(USVString value) noexcept
   {
-    html::ReflectUrl<dom::USVString>(*this, u8"href", krys::move(value));
+    html::ReflectUrl<USVString>(*this, u8"href", krys::move(value));
   }
 
-  dom::USVString HTMLAreaElement::ToString() const noexcept
+  USVString HTMLAreaElement::ToString() const noexcept
   {
     return Href();
   }

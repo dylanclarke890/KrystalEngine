@@ -60,10 +60,10 @@ namespace krys::web
     KRYS_NODISCARD static uint32 VideoHeight() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-poster
-    KRYS_NODISCARD dom::USVString Poster() const noexcept;
+    KRYS_NODISCARD USVString Poster() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-poster
-    void Poster(dom::USVString value) noexcept;
+    void Poster(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-video-playsinline
     KRYS_NODISCARD bool PlaysInline() const noexcept;

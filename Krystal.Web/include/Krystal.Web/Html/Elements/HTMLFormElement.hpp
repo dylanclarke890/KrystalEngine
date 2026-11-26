@@ -66,10 +66,10 @@ namespace krys::web
     void AcceptCharset(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    KRYS_NODISCARD dom::USVString Action() const noexcept;
+    KRYS_NODISCARD USVString Action() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    void Action(dom::USVString value) noexcept;
+    void Action(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/forms.html#dom-form-autocomplete
     KRYS_NODISCARD DOMString Autocomplete() const noexcept;

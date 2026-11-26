@@ -27,10 +27,10 @@ namespace krys::web
 #pragma region HTMLObjectElement - https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmlobjectelement
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-data
-    KRYS_NODISCARD dom::USVString Data() const noexcept;
+    KRYS_NODISCARD USVString Data() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-data
-    void Data(dom::USVString value) noexcept;
+    void Data(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-type
     KRYS_NODISCARD DOMString Type() const noexcept;

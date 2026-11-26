@@ -37,10 +37,10 @@ namespace krys::web
     void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/scripting.html#dom-script-nomodule
     KRYS_NODISCARD bool NoModule() const noexcept;

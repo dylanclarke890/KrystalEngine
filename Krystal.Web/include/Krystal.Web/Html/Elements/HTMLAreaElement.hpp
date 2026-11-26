@@ -105,10 +105,10 @@ namespace krys::web
     void Download(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-ping
-    KRYS_NODISCARD dom::USVString Ping() const noexcept;
+    KRYS_NODISCARD USVString Ping() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-ping
-    void Ping(dom::USVString value) noexcept;
+    void Ping(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/image-maps.html#dom-area-rel
     KRYS_NODISCARD DOMString Rel() const noexcept;
@@ -130,14 +130,14 @@ namespace krys::web
 #pragma region HTMLHyperlinkElementUtils - https://html.spec.whatwg.org/multipage/links.html#htmlhyperlinkelementutils
 
     /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
-    KRYS_NODISCARD dom::USVString Href() const noexcept;
+    KRYS_NODISCARD USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
-    void Href(dom::USVString value) noexcept;
+    void Href(USVString value) noexcept;
 
     /// @brief The `href` stringifier.
     /// @see https://html.spec.whatwg.org/multipage/links.html#dom-hyperlink-href
-    KRYS_NODISCARD dom::USVString ToString() const noexcept;
+    KRYS_NODISCARD USVString ToString() const noexcept;
 
 #pragma endregion
 

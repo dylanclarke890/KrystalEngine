@@ -237,7 +237,7 @@ namespace krys::web
     html::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::USVString HTMLInputElement::FormAction() const noexcept
+  USVString HTMLInputElement::FormAction() const noexcept
   {
     // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formaction
     // Let attributeValue be the result of running get an attribute value given this and formaction. If
@@ -245,21 +245,21 @@ namespace krys::web
     auto attributeValue = GetAttribute(u8"formaction");
     if (!attributeValue || attributeValue->empty())
     {
-      return dom::USVString(NodeDocument().GetUrl().String());
+      return USVString(NodeDocument().GetUrl().String());
     }
     // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
     // this's node document. If urlString is not failure, return urlString.
     if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
     {
-      return dom::USVString(url.String());
+      return USVString(url.String());
     }
     // Return attributeValue, converted to a scalar value string.
-    return dom::USVString(krys::move(*attributeValue));
+    return USVString(krys::move(*attributeValue));
   }
 
-  void HTMLInputElement::FormAction(dom::USVString value) noexcept
+  void HTMLInputElement::FormAction(USVString value) noexcept
   {
-    return html::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
+    return html::ReflectSetter<USVString>(*this, u8"formaction", krys::move(value));
   }
 
   DOMString HTMLInputElement::FormEnctype() const noexcept
@@ -443,14 +443,14 @@ namespace krys::web
     return {};
   }
 
-  dom::USVString HTMLInputElement::Src() const noexcept
+  USVString HTMLInputElement::Src() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<USVString>(*this, u8"src");
   }
 
-  void HTMLInputElement::Src(dom::USVString value) noexcept
+  void HTMLInputElement::Src(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLInputElement::Step() const noexcept

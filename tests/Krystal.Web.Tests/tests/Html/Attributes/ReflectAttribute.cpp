@@ -67,17 +67,17 @@ namespace krys::web::html::tests
       SECTION("USVString")
       {
         TestData data;
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
+        REQUIRE(Reflect<USVString>(*data.Element, TestAttribute).empty());
 
         // Not treated as a URL: the value is returned as it is, not completed.
         data.Document->SetUrl(net::Url(u8"https://example.com/dir/page.html"));
-        Reflect<dom::USVString>(*data.Element, TestAttribute, u8"source.html");
+        Reflect<USVString>(*data.Element, TestAttribute, u8"source.html");
         REQUIRE(data.Element->GetAttribute(TestAttribute) == u8"source.html");
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"source.html");
+        REQUIRE(Reflect<USVString>(*data.Element, TestAttribute) == u8"source.html");
 
-        Reflect<dom::USVString>(*data.Element, TestAttribute, u8"");
+        Reflect<USVString>(*data.Element, TestAttribute, u8"");
         REQUIRE(data.Element->HasAttribute(TestAttribute));
-        REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute).empty());
+        REQUIRE(Reflect<USVString>(*data.Element, TestAttribute).empty());
       }
 
       SECTION("bool")
@@ -315,31 +315,29 @@ namespace krys::web::html::tests
 
     SECTION("An absent attribute is the empty string")
     {
-      REQUIRE(ReflectUrl<dom::USVString>(*data.Element, TestAttribute).empty());
+      REQUIRE(ReflectUrl<USVString>(*data.Element, TestAttribute).empty());
     }
 
     SECTION("The value is completed against the document's base URL, and set as it is")
     {
-      ReflectUrl<dom::USVString>(*data.Element, TestAttribute, u8"source.html");
+      ReflectUrl<USVString>(*data.Element, TestAttribute, u8"source.html");
       REQUIRE(data.Element->GetAttribute(TestAttribute) == u8"source.html");
-      REQUIRE(ReflectUrl<dom::USVString>(*data.Element, TestAttribute)
-              == u8"https://example.com/dir/source.html");
+      REQUIRE(ReflectUrl<USVString>(*data.Element, TestAttribute) == u8"https://example.com/dir/source.html");
 
-      ReflectUrl<dom::USVString>(*data.Element, TestAttribute, u8"https://other.example/a?b#c");
-      REQUIRE(ReflectUrl<dom::USVString>(*data.Element, TestAttribute) == u8"https://other.example/a?b#c");
+      ReflectUrl<USVString>(*data.Element, TestAttribute, u8"https://other.example/a?b#c");
+      REQUIRE(ReflectUrl<USVString>(*data.Element, TestAttribute) == u8"https://other.example/a?b#c");
     }
 
     SECTION("An empty value is the base URL")
     {
-      ReflectUrl<dom::USVString>(*data.Element, TestAttribute, u8"");
-      REQUIRE(ReflectUrl<dom::USVString>(*data.Element, TestAttribute)
-              == u8"https://example.com/dir/page.html");
+      ReflectUrl<USVString>(*data.Element, TestAttribute, u8"");
+      REQUIRE(ReflectUrl<USVString>(*data.Element, TestAttribute) == u8"https://example.com/dir/page.html");
     }
 
     SECTION("A value that doesn't parse as a URL is returned as it is")
     {
-      ReflectUrl<dom::USVString>(*data.Element, TestAttribute, u8"http://[");
-      REQUIRE(ReflectUrl<dom::USVString>(*data.Element, TestAttribute) == u8"http://[");
+      ReflectUrl<USVString>(*data.Element, TestAttribute, u8"http://[");
+      REQUIRE(ReflectUrl<USVString>(*data.Element, TestAttribute) == u8"http://[");
     }
   }
 
@@ -471,8 +469,8 @@ namespace krys::web::html::tests
     SECTION("USVString")
     {
       TestData data;
-      ReflectSetter<dom::USVString>(*data.Element, TestAttribute, u8"setter value");
-      REQUIRE(Reflect<dom::USVString>(*data.Element, TestAttribute) == u8"setter value");
+      ReflectSetter<USVString>(*data.Element, TestAttribute, u8"setter value");
+      REQUIRE(Reflect<USVString>(*data.Element, TestAttribute) == u8"setter value");
     }
 
     SECTION("bool")

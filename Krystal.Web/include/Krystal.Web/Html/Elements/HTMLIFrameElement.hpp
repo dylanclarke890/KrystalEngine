@@ -31,10 +31,10 @@ namespace krys::web
 #pragma region HTMLIFrameElement - https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-srcdoc
     KRYS_NODISCARD DOMString SrcDoc() const noexcept;
@@ -113,10 +113,10 @@ namespace krys::web
     void FrameBorder(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-longdesc
-    KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
+    KRYS_NODISCARD USVString LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-longdesc
-    void LongDesc(dom::USVString value) noexcept;
+    void LongDesc(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-iframe-marginwidth
     KRYS_NODISCARD DOMString MarginWidth() const noexcept;

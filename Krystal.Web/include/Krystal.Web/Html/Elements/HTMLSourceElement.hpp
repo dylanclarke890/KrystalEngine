@@ -54,10 +54,10 @@ namespace krys::web
 #pragma region HTMLSourceElement - https://html.spec.whatwg.org/multipage/embedded-content.html#htmlsourceelement
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-type
     KRYS_NODISCARD DOMString Type() const noexcept;
@@ -66,10 +66,10 @@ namespace krys::web
     void Type(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-srcset
-    KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
+    KRYS_NODISCARD USVString SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-srcset
-    void SrcSet(dom::USVString value) noexcept;
+    void SrcSet(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-source-sizes
     KRYS_NODISCARD DOMString Sizes() const noexcept;

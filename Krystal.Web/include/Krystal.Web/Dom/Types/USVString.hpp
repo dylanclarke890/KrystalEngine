@@ -2,7 +2,7 @@
 
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
 
-namespace krys::web::dom
+namespace krys::web
 {
   /// @brief A string of Unicode scalar values. Krystal.Web's strings are UTF-8, which holds nothing else (it can't
   /// encode a lone surrogate), so it's a `DOMString` kept apart only where the IDL types it apart.

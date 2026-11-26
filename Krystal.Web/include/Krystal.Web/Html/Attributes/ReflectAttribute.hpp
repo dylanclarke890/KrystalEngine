@@ -26,7 +26,7 @@ namespace krys::web::html
   concept ReflectTypeDOMString = OneOf<T, DOMString, Maybe<DOMString>>;
 
   template <typename T>
-  concept ReflectUrlType = OneOf<T, dom::USVString>;
+  concept ReflectUrlType = OneOf<T, USVString>;
 
   // NOTE: `Element?` and `FrozenArray<Element>?` attributes reflect through their target's
   // `ElementForAttributeInternal` and `ElementsForAttributeInternal`. DOMTokenList is also a possible type
@@ -241,12 +241,12 @@ namespace krys::web::html
 
 #pragma region ReflectUSVString
 
-    /// @brief Helper for getting reflected content attributes with 'dom::USVString' type: the content
+    /// @brief Helper for getting reflected content attributes with 'USVString' type: the content
     /// attribute's value, or the empty string if it's absent. A URL is completed against the node document's
     /// base URL, unless it doesn't parse.
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#treated-as-a-url
     template <TreatedAsUrl AsUrl, ReflectTarget Target>
-    KRYS_NODISCARD dom::USVString ReflectUSVString(const Target &target, DOMStringAtom name) noexcept
+    KRYS_NODISCARD USVString ReflectUSVString(const Target &target, DOMStringAtom name) noexcept
     {
       // 1. Let element be the result of running this's get the element.
       // 2. Let contentAttributeValue be the result of running this's get the content attribute.
@@ -266,18 +266,18 @@ namespace krys::web::html
         // 3c. If urlString is not failure, then return urlString.
         if (auto url = target.NodeDocument().CompleteUrl(*contentAttributeValue); url.IsValid())
         {
-          return dom::USVString(url.String());
+          return USVString(url.String());
         }
       }
 
       // 4. Return contentAttributeValue, converted to a scalar value string.
       // (UTF-8 strings are scalar value strings.)
-      return dom::USVString(krys::move(*contentAttributeValue));
+      return USVString(krys::move(*contentAttributeValue));
     }
 
-    /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
+    /// @brief Helper for setting reflected content attributes with 'USVString' type.
     template <TreatedAsUrl AsUrl, ReflectTarget Target>
-    void ReflectUSVString(Target &target, DOMStringAtom name, dom::USVString value) noexcept
+    void ReflectUSVString(Target &target, DOMStringAtom name, USVString value) noexcept
     {
       // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, krys::move(name), krys::move(value));
@@ -613,7 +613,7 @@ namespace krys::web::html
     {
       return detail::ReflectDOMString(target, krys::move(name));
     }
-    else if constexpr (SameType<TValue, dom::USVString>)
+    else if constexpr (SameType<TValue, USVString>)
     {
       return detail::ReflectUSVString<detail::TreatedAsUrl::No>(target, krys::move(name));
     }
@@ -657,7 +657,7 @@ namespace krys::web::html
     {
       detail::ReflectDOMString(target, krys::move(name), krys::move(value));
     }
-    else if constexpr (SameType<TValue, dom::USVString>)
+    else if constexpr (SameType<TValue, USVString>)
     {
       return detail::ReflectUSVString<detail::TreatedAsUrl::No>(target, krys::move(name), krys::move(value));
     }

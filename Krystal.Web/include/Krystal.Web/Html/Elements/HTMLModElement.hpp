@@ -16,10 +16,10 @@ namespace krys::web
 #pragma region HTMLModElement - https://html.spec.whatwg.org/multipage/edits.html#htmlmodelement
 
     /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-cite
-    KRYS_NODISCARD dom::USVString Cite() const noexcept;
+    KRYS_NODISCARD USVString Cite() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-cite
-    void Cite(dom::USVString value) noexcept;
+    void Cite(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/edits.html#dom-mod-datetime
     KRYS_NODISCARD DOMString DateTime() const noexcept;

@@ -128,7 +128,7 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"accept-charset", krys::move(value));
   }
 
-  dom::USVString HTMLFormElement::Action() const noexcept
+  USVString HTMLFormElement::Action() const noexcept
   {
     // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-action
     // Let attributeValue be the result of running get an attribute value given this and action. If
@@ -136,21 +136,21 @@ namespace krys::web
     auto attributeValue = GetAttribute(u8"action");
     if (!attributeValue || attributeValue->empty())
     {
-      return dom::USVString(NodeDocument().GetUrl().String());
+      return USVString(NodeDocument().GetUrl().String());
     }
     // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
     // this's node document. If urlString is not failure, return urlString.
     if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
     {
-      return dom::USVString(url.String());
+      return USVString(url.String());
     }
     // Return attributeValue, converted to a scalar value string.
-    return dom::USVString(krys::move(*attributeValue));
+    return USVString(krys::move(*attributeValue));
   }
 
-  void HTMLFormElement::Action(dom::USVString value) noexcept
+  void HTMLFormElement::Action(USVString value) noexcept
   {
-    return html::ReflectSetter<dom::USVString>(*this, u8"action", krys::move(value));
+    return html::ReflectSetter<USVString>(*this, u8"action", krys::move(value));
   }
 
   DOMString HTMLFormElement::Autocomplete() const noexcept

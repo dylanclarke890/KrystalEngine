@@ -11,7 +11,7 @@ namespace krys::web
 
 #pragma region HTMLBaseElement
 
-  dom::USVString HTMLBaseElement::Href() const noexcept
+  USVString HTMLBaseElement::Href() const noexcept
   {
     // 1. Let document be element's node document.
     auto &document = NodeDocument();
@@ -27,16 +27,16 @@ namespace krys::web
     // 4. If urlRecord is failure, return url.
     if (!urlRecord.IsValid())
     {
-      return dom::USVString(krys::move(url));
+      return USVString(krys::move(url));
     }
 
     // 5. Return the serialization of urlRecord.
-    return dom::USVString(urlRecord.String());
+    return USVString(urlRecord.String());
   }
 
-  void HTMLBaseElement::Href(dom::USVString value) noexcept
+  void HTMLBaseElement::Href(USVString value) noexcept
   {
-    return html::ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
+    return html::ReflectSetter<USVString>(*this, u8"href", krys::move(value));
   }
 
   DOMString HTMLBaseElement::Target() const noexcept

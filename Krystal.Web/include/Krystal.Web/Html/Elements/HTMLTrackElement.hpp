@@ -43,10 +43,10 @@ namespace krys::web
     void Kind(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/media.html#dom-track-srclang
     KRYS_NODISCARD DOMString SrcLang() const noexcept;

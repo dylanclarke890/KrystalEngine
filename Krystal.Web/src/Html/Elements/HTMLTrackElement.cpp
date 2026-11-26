@@ -37,14 +37,14 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"kind", krys::move(value));
   }
 
-  dom::USVString HTMLTrackElement::Src() const noexcept
+  USVString HTMLTrackElement::Src() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<USVString>(*this, u8"src");
   }
 
-  void HTMLTrackElement::Src(dom::USVString value) noexcept
+  void HTMLTrackElement::Src(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"src", krys::move(value));
   }
 
   DOMString HTMLTrackElement::SrcLang() const noexcept

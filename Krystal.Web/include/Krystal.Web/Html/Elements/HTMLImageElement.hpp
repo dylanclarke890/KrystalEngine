@@ -70,16 +70,16 @@ namespace krys::web
     void Alt(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-src
-    KRYS_NODISCARD dom::USVString Src() const noexcept;
+    KRYS_NODISCARD USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-src
-    void Src(dom::USVString value) noexcept;
+    void Src(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-srcset
-    KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
+    KRYS_NODISCARD USVString SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-srcset
-    void SrcSet(dom::USVString value) noexcept;
+    void SrcSet(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-sizes
     KRYS_NODISCARD DOMString Sizes() const noexcept;
@@ -137,7 +137,7 @@ namespace krys::web
     KRYS_NODISCARD bool Complete() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-currentsrc
-    KRYS_NODISCARD dom::USVString CurrentSrc() const noexcept;
+    KRYS_NODISCARD USVString CurrentSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-referrerpolicy
     KRYS_NODISCARD DOMString ReferrerPolicy() const noexcept;
@@ -183,10 +183,10 @@ namespace krys::web
     void Name(DOMString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-lowsrc
-    KRYS_NODISCARD dom::USVString LowSrc() const noexcept;
+    KRYS_NODISCARD USVString LowSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-lowsrc
-    void LowSrc(dom::USVString value) noexcept;
+    void LowSrc(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-align
     KRYS_NODISCARD DOMString Align() const noexcept;
@@ -207,10 +207,10 @@ namespace krys::web
     void VSpace(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-longdesc
-    KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
+    KRYS_NODISCARD USVString LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-longdesc
-    void LongDesc(dom::USVString value) noexcept;
+    void LongDesc(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-img-border
     KRYS_NODISCARD DOMString Border() const noexcept;

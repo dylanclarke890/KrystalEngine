@@ -116,24 +116,24 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"alt", krys::move(value));
   }
 
-  dom::USVString HTMLImageElement::Src() const noexcept
+  USVString HTMLImageElement::Src() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src");
+    return html::ReflectUrl<USVString>(*this, u8"src");
   }
 
-  void HTMLImageElement::Src(dom::USVString value) noexcept
+  void HTMLImageElement::Src(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"src", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::USVString HTMLImageElement::SrcSet() const noexcept
+  USVString HTMLImageElement::SrcSet() const noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"srcset");
+    return html::Reflect<USVString>(*this, u8"srcset");
   }
 
-  void HTMLImageElement::SrcSet(dom::USVString value) noexcept
+  void HTMLImageElement::SrcSet(USVString value) noexcept
   {
-    return html::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return html::Reflect<USVString>(*this, u8"srcset", krys::move(value));
   }
 
   DOMString HTMLImageElement::Sizes() const noexcept
@@ -362,10 +362,10 @@ namespace krys::web
     return _imageLoader->ImageComplete();
   }
 
-  dom::USVString HTMLImageElement::CurrentSrc() const noexcept
+  USVString HTMLImageElement::CurrentSrc() const noexcept
   {
     // The currentSrc IDL attribute must return the img element's current request's current URL.
-    return dom::USVString(CurrentUrl().String());
+    return USVString(CurrentUrl().String());
   }
 
   DOMString HTMLImageElement::ReferrerPolicy() const noexcept
@@ -441,14 +441,14 @@ namespace krys::web
     html::Reflect<DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::USVString HTMLImageElement::LowSrc() const noexcept
+  USVString HTMLImageElement::LowSrc() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"lowsrc");
+    return html::ReflectUrl<USVString>(*this, u8"lowsrc");
   }
 
-  void HTMLImageElement::LowSrc(dom::USVString value) noexcept
+  void HTMLImageElement::LowSrc(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"lowsrc", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"lowsrc", krys::move(value));
   }
 
   DOMString HTMLImageElement::Align() const noexcept
@@ -481,14 +481,14 @@ namespace krys::web
     html::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
-  dom::USVString HTMLImageElement::LongDesc() const noexcept
+  USVString HTMLImageElement::LongDesc() const noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc");
+    return html::ReflectUrl<USVString>(*this, u8"longdesc");
   }
 
-  void HTMLImageElement::LongDesc(dom::USVString value) noexcept
+  void HTMLImageElement::LongDesc(USVString value) noexcept
   {
-    return html::ReflectUrl<dom::USVString>(*this, u8"longdesc", krys::move(value));
+    return html::ReflectUrl<USVString>(*this, u8"longdesc", krys::move(value));
   }
 
   DOMString HTMLImageElement::Border() const noexcept

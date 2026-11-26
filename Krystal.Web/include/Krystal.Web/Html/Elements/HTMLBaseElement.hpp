@@ -16,10 +16,10 @@ namespace krys::web
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/multipage/semantics.html#htmlbaseelement
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-href
-    KRYS_NODISCARD dom::USVString Href() const noexcept;
+    KRYS_NODISCARD USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-href
-    void Href(dom::USVString value) noexcept;
+    void Href(USVString value) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/semantics.html#dom-base-target
     KRYS_NODISCARD DOMString Target() const noexcept;
