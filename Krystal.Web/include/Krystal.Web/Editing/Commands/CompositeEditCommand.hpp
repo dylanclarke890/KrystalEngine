@@ -1,0 +1,444 @@
+﻿/*
+ * Copyright (C) 2005-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2013 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Editing/Commands/EditCommand.hpp"
+#include "Krystal.Web/Editing/Commands/UndoStep.hpp"
+#include "Krystal.Web/Editing/Position.hpp"
+#include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
+
+namespace krys::web::dom
+{
+  class StaticRange;
+}
+
+namespace krys::web
+{
+  class ContainerNode;
+  class DataTransfer;
+  class EditingStyle;
+  class Element;
+  class Text;
+
+  /// @brief A whitespace run rebalancing replaced in a text node. A no-break space is two bytes and a space
+  /// one, so the run's length can change while its characters stay as many.
+  struct WhitespaceRebalance
+  {
+    RefPtr<Text> Node;
+    uint32 Offset {0};
+    utf8_string OldText;
+    utf8_string NewText;
+
+    /// @brief @p position moved across the replacement: after the run by the change in length, within it to
+    /// the same character.
+    KRYS_NODISCARD Position Adjust(const Position &position) const noexcept;
+  };
+
+  enum class ApplyStylePropertyLevel : bool
+  {
+    Default,
+    ForceBlock,
+  };
+
+  /// @brief What accessibility needs to tell the host what text an undo or redo replaces: the ranges the edit
+  /// replaced and inserted, as indexes (which survive the DOM changing).
+  class AccessibilityUndoReplacedText
+  {
+  private:
+    DOMString _replacedText;
+    VisiblePositionIndexRange _rangeDeletedByUnapply;
+    VisiblePositionIndexRange _rangeDeletedByReapply;
+
+  public:
+    void ConfigureRangeDeletedByReapplyWithStartingSelection(const VisibleSelection &selection) noexcept;
+
+    void ConfigureRangeDeletedByReapplyWithEndingSelection(const VisibleSelection &selection) noexcept;
+
+    /// @brief The range the edit replaced (which an undo puts the old text back in).
+    void SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept;
+
+    void CaptureTextForUnapply() noexcept;
+
+    void CaptureTextForReapply() noexcept;
+
+    void PostTextStateChangeNotificationForUnapply(AXObjectCache *cache) noexcept;
+
+    void PostTextStateChangeNotificationForReapply(AXObjectCache *cache) noexcept;
+
+  private:
+    KRYS_NODISCARD DOMString TextDeletedByUnapply() const noexcept;
+
+    KRYS_NODISCARD DOMString TextDeletedByReapply() const noexcept;
+  };
+
+  /// @brief The simple commands a top-level command made, which undo and redo it, and the selections before
+  /// and after it.
+  class EditCommandComposition final : public UndoStep
+  {
+  public:
+    enum class AddToUndoStack : bool
+    {
+      No,
+      Yes,
+    };
+
+  private:
+    const Ref<Document> _document;
+    VisibleSelection _startingSelection;
+    VisibleSelection _endingSelection;
+    List<RefPtr<SimpleEditCommand>> _commands;
+    RefPtr<Element> _startingRootEditableElement;
+    RefPtr<Element> _endingRootEditableElement;
+    EditAction _editAction;
+    AccessibilityUndoReplacedText _replacedText;
+
+  public:
+    EditCommandComposition(Document &document, const VisibleSelection &startingSelection,
+                           const VisibleSelection &endingSelection, EditAction editAction) noexcept;
+
+    KRYS_NODISCARD static Ref<EditCommandComposition> Create(Document &document,
+                                                             const VisibleSelection &startingSelection,
+                                                             const VisibleSelection &endingSelection,
+                                                             EditAction editAction) noexcept;
+
+    void Unapply() noexcept override;
+
+    void Unapply(AddToUndoStack addToUndoStack) noexcept;
+
+    void Reapply() noexcept override;
+
+    KRYS_NODISCARD EditAction EditingAction() const noexcept override
+    {
+      return _editAction;
+    }
+
+    void Append(SimpleEditCommand *command) noexcept;
+
+    KRYS_NODISCARD bool WasCreateLinkCommand() const noexcept
+    {
+      return _editAction == EditAction::CreateLink;
+    }
+
+    KRYS_NODISCARD const VisibleSelection &StartingSelection() const noexcept
+    {
+      return _startingSelection;
+    }
+
+    KRYS_NODISCARD const VisibleSelection &EndingSelection() const noexcept
+    {
+      return _endingSelection;
+    }
+
+    void SetStartingSelection(const VisibleSelection &selection) noexcept;
+
+    void SetEndingSelection(const VisibleSelection &selection) noexcept;
+
+    /// @brief The range the edit replaced, for accessibility to tell the host what an undo puts back.
+    void SetRangeDeletedByUnapply(const VisiblePositionIndexRange &range) noexcept
+    {
+      _replacedText.SetRangeDeletedByUnapply(range);
+    }
+
+    KRYS_NODISCARD Element *StartingRootEditableElement() const noexcept
+    {
+      return _startingRootEditableElement.get();
+    }
+
+    KRYS_NODISCARD Element *EndingRootEditableElement() const noexcept
+    {
+      return _endingRootEditableElement.get();
+    }
+
+  private:
+    KRYS_NODISCARD utf8_string Label() const noexcept final;
+
+    void DidRemoveFromUndoManager() noexcept final
+    {
+    }
+
+    KRYS_NODISCARD bool AreRootEditabledElementsConnected() noexcept;
+  };
+
+  /// @brief An edit made of other edits, which it applies to the composition its top-level command makes.
+  // (There are no document markers for replaceTextInNodePreservingMarkers to keep; see DIFFERENCES.md.)
+  class CompositeEditCommand : public EditCommand, public CanMakeWeakPtr<CompositeEditCommand>
+  {
+  protected:
+    List<RefPtr<EditCommand>> _commands;
+
+  private:
+    RefPtr<EditCommandComposition> _composition;
+
+  public:
+    ~CompositeEditCommand() noexcept override;
+
+    void Apply() noexcept;
+
+    KRYS_NODISCARD bool IsFirstCommand(EditCommand *command) const noexcept
+    {
+      return !_commands.empty() && _commands.front().get() == command;
+    }
+
+    KRYS_NODISCARD EditCommandComposition *Composition() const noexcept;
+
+    Ref<EditCommandComposition> EnsureComposition() noexcept;
+
+    KRYS_NODISCARD virtual bool IsTypingCommand() const noexcept;
+
+    KRYS_NODISCARD virtual bool IsDictationCommand() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool PreservesTypingStyle() const noexcept;
+
+    KRYS_NODISCARD virtual bool ShouldRetainAutocorrectionIndicator() const noexcept;
+
+    virtual void SetShouldRetainAutocorrectionIndicator(bool) noexcept;
+
+    KRYS_NODISCARD virtual bool ShouldStopCaretBlinking() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual DOMString InputEventTypeName() const noexcept;
+
+    KRYS_NODISCARD virtual bool IsInputMethodComposing() const noexcept;
+
+    KRYS_NODISCARD virtual DOMString InputEventData() const noexcept
+    {
+      return {};
+    }
+
+    /// @brief The data transfer the command's input events carry: what it pastes or drops, if anything.
+    KRYS_NODISCARD virtual RefPtr<DataTransfer> InputEventDataTransfer() const noexcept;
+
+    KRYS_NODISCARD virtual bool IsBeforeInputEventCancelable() const noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD virtual bool ShouldDispatchInputEvents() const noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD List<RefPtr<dom::StaticRange>> TargetRangesForBindings() const noexcept;
+
+  protected:
+    explicit CompositeEditCommand(Document &document,
+                                  EditAction editingAction = EditAction::Unspecified) noexcept;
+
+    // If WillApplyCommand returns false, we won't proceed with applying the command.
+    virtual bool WillApplyCommand() noexcept;
+
+    virtual void DidApplyCommand() noexcept;
+
+    KRYS_NODISCARD virtual List<RefPtr<dom::StaticRange>> TargetRanges() const noexcept;
+
+    //
+    // sugary-sweet convenience functions to help create and apply edit commands in composite commands
+    //
+    void AppendNode(web::Node &node, ContainerNode &parent) noexcept;
+
+    void ApplyCommandToComposite(Ref<EditCommand> &&command) noexcept;
+
+    void ApplyCommandToComposite(Ref<CompositeEditCommand> &&command,
+                                 const VisibleSelection &selection) noexcept;
+
+    void ApplyStyle(const EditingStyle *style,
+                    EditAction editingAction = EditAction::ChangeAttributes) noexcept;
+
+    void ApplyStyle(const EditingStyle *style, const Position &start, const Position &end,
+                    EditAction editingAction = EditAction::ChangeAttributes,
+                    ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
+
+    void ApplyStyledElement(Element &element) noexcept;
+
+    void RemoveStyledElement(Element &element) noexcept;
+
+    void DeleteSelection(bool smartDelete = false, bool mergeBlocksAfterDelete = true, bool replace = false,
+                         bool expandForSpecialElements = true, bool sanitizeMarkup = true) noexcept;
+
+    void DeleteSelection(const VisibleSelection &selection, bool smartDelete = false,
+                         bool mergeBlocksAfterDelete = true, bool replace = false,
+                         bool expandForSpecialElements = true, bool sanitizeMarkup = true) noexcept;
+
+    virtual void DeleteTextFromNode(Text &node, uint32 offset, uint32 count) noexcept;
+
+    void InputText(utf8_stringview text, bool selectInsertedText = false) noexcept;
+
+    KRYS_NODISCARD static bool IsRemovableBlock(const web::Node *node) noexcept;
+
+    void InsertNodeAfter(web::Node &insertChild, web::Node &refChild) noexcept;
+
+    void InsertNodeAt(web::Node &insertChild, const Position &editingPosition) noexcept;
+
+    void InsertNodeAtTabSpanPosition(web::Node &node, const Position &position) noexcept;
+
+    bool InsertNodeBefore(web::Node &insertChild, web::Node &refChild,
+                          ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
+                            DoNotAssumeContentIsAlwaysEditable) noexcept;
+
+    void InsertParagraphSeparator(bool useDefaultParagraphElement = false) noexcept;
+
+    void InsertLineBreak() noexcept;
+
+    void InsertTextIntoNode(Text &node, uint32 offset, utf8_stringview text,
+                            AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
+
+    void MergeIdenticalElements(Element &first, Element &second) noexcept;
+
+    void RebalanceWhitespace() noexcept;
+
+    /// @return The run it replaced, if any, to move positions in its text node across.
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceAt(const Position &position) noexcept;
+
+    /// @return The run it replaced, if any, to move positions in its text node across.
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceOnTextSubstring(Text &textNode, int32 startOffset,
+                                                                  int32 endOffset) noexcept;
+
+    void PrepareWhitespaceAtPositionForSplit(Position &position) noexcept;
+
+    void ReplaceCollapsibleWhitespaceWithNonBreakingSpaceIfNeeded(
+      const VisiblePosition &visiblePosition) noexcept;
+
+    KRYS_NODISCARD static RefPtr<Text> TextNodeForRebalance(const Position &position) noexcept;
+
+    KRYS_NODISCARD static bool ShouldRebalanceLeadingWhitespaceFor(utf8_stringview text) noexcept;
+
+    void RemoveNodeAttribute(Element &element, DOMStringAtom attribute) noexcept;
+
+    void RemoveChildrenInRange(web::Node &node, uint32 from, uint32 to) noexcept;
+
+    virtual void RemoveNode(web::Node &node,
+                            ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
+                              DoNotAssumeContentIsAlwaysEditable) noexcept;
+
+    RefPtr<Element> ReplaceElementWithSpanPreservingChildrenAndAttributes(Element &element) noexcept;
+
+    void
+      RemoveNodePreservingChildren(web::Node &node,
+                                   ShouldAssumeContentIsAlwaysEditable shouldAssumeContentIsAlwaysEditable =
+                                     DoNotAssumeContentIsAlwaysEditable) noexcept;
+
+    void RemoveNodeAndPruneAncestors(web::Node &node) noexcept;
+
+    void MoveRemainingSiblingsToNewParent(web::Node *node, web::Node *pastLastNodeToMove,
+                                          Element &newParent) noexcept;
+
+    static void UpdatePositionForNodeRemovalPreservingChildren(Position &position, web::Node &node) noexcept;
+
+    void Prune(web::Node *node) noexcept;
+
+    void ReplaceTextInNode(Text &node, uint32 offset, uint32 count, utf8_stringview replacementText,
+                           AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
+
+    Position ReplaceSelectedTextInNode(utf8_stringview text) noexcept;
+
+    void ReplaceTextInNodePreservingMarkers(Text &node, uint32 offset, uint32 count,
+                                            utf8_stringview replacementText) noexcept;
+
+    Position PositionOutsideTabSpan(const Position &position) noexcept;
+
+    void SetNodeAttribute(Element &element, DOMStringAtom attribute, Maybe<DOMString> value) noexcept;
+
+    void SplitElement(Element &element, web::Node &atChild) noexcept;
+
+    void SplitTextNode(Text &node, uint32 offset) noexcept;
+
+    void SplitTextNodeContainingElement(Text &text, uint32 offset) noexcept;
+
+    void WrapContentsInDummySpan(Element &element) noexcept;
+
+    void DeleteInsignificantText(Text &textNode, uint32 start, uint32 end) noexcept;
+
+    void DeleteInsignificantText(const Position &start, const Position &end) noexcept;
+
+    void DeleteInsignificantTextDownstream(const Position &position) noexcept;
+
+    RefPtr<Element> AppendBlockPlaceholder(Element &container) noexcept;
+
+    RefPtr<web::Node> InsertBlockPlaceholder(const Position &position) noexcept;
+
+    RefPtr<web::Node> AddBlockPlaceholderIfNeeded(Element *container) noexcept;
+
+    void RemovePlaceholderAt(const Position &position) noexcept;
+
+    Ref<Element> InsertNewDefaultParagraphElementAt(const Position &position) noexcept;
+
+    RefPtr<web::Node> MoveParagraphContentsToNewBlockIfNecessary(const Position &position) noexcept;
+
+    void PushAnchorElementDown(Element &anchorElement) noexcept;
+
+    void MoveParagraph(const VisiblePosition &startOfParagraphToMove,
+                       const VisiblePosition &endOfParagraphToMove, const VisiblePosition &destination,
+                       bool preserveSelection = false, bool preserveStyle = true) noexcept;
+
+    void MoveParagraphs(const VisiblePosition &startOfParagraphToMove,
+                        const VisiblePosition &endOfParagraphToMove, const VisiblePosition &destination,
+                        bool preserveSelection = false, bool preserveStyle = true) noexcept;
+
+    void MoveParagraphWithClones(const VisiblePosition &startOfParagraphToMove,
+                                 const VisiblePosition &endOfParagraphToMove, Element *blockElement,
+                                 web::Node *outerNode) noexcept;
+
+    void CloneParagraphUnderNewElement(const Position &start, const Position &end, web::Node *outerNode,
+                                       Element *blockElement) noexcept;
+
+    void CleanupAfterDeletion(const VisiblePosition &destination = VisiblePosition()) noexcept;
+
+    KRYS_NODISCARD VisibleSelection ShouldBreakOutOfEmptyListItem() const noexcept;
+
+    bool BreakOutOfEmptyListItem() noexcept;
+
+    Position PositionAvoidingSpecialElementBoundary(const Position &original) noexcept;
+
+    RefPtr<web::Node> SplitTreeToNode(web::Node &start, web::Node &end, bool splitAncestor = false) noexcept;
+
+  private:
+    KRYS_NODISCARD bool IsCompositeEditCommand() const noexcept override
+    {
+      return true;
+    }
+  };
+
+  KRYS_NODISCARD Ref<Element> CreateBlockPlaceholderElement(Document &document) noexcept;
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::CompositeEditCommand)
+  KRYS_NODISCARD static bool IsType(const krys::web::EditCommand &command) noexcept
+  {
+    return command.IsCompositeEditCommand();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

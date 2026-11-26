@@ -1,6 +1,6 @@
 ﻿# Krystal.Gfx
 
-Krystal.Gfx holds the render hardware interface (the RHI, `krys::gfx`) and Render2D, an immediate-mode 2D renderer built on it. Neither knows anything about Booey: Krystal.UI replays Booey's display lists through Render2D (see `Krystal.UI/docs/OVERVIEW.md`). This covers what the headers don't say: the design decisions, conventions and known issues.
+Krystal.Gfx holds the render hardware interface (the RHI, `krys::gfx`) and Render2D, an immediate-mode 2D renderer built on it. Neither knows anything about Krystal.Web: Krystal.Booey replays Krystal.Web's display lists through Render2D (see `Krystal.Booey/docs/OVERVIEW.md`). This covers what the headers don't say: the design decisions, conventions and known issues.
 
 ## The RHI
 
@@ -8,7 +8,7 @@ Krystal.Gfx holds the render hardware interface (the RHI, `krys::gfx`) and Rende
 - **Device.** OpenGL 4.5 (`OpenGL/`, WGL) is the only backend. A device needs no window: its context lives on a hidden window it owns and each swapchain attaches a real window, so several windows share one device and tests render offscreen. Equal sampler descriptions return the same, reference-counted handle.
 - **Shaders** are GLSL 4.50 strings passed to the driver unchanged (starting with `#version`), with numbered `layout(binding = N, std140)` slots and no uniform-name lookups; their C++ mirrors are `static_assert`-checked. GLSL puts every uniform block's members in one namespace, so blocks can't share member names. Per-draw data goes in an ordinary uniform block from `AllocateTransient`; there are no push constants. Shaders live in `Renderer2D.cpp` and `FilterRenderer2D.cpp`; `OpenGL/ShaderReflector.hpp` is unused.
 - **Frames.** `BeginFrame`, record, `Submit`, `Present`, `EndFrame`. Transient memory is one persistently mapped buffer split into `FramesInFlight` (3) regions; `BeginFrame` waits on the fence of the region it reuses, and an exhausted frame returns an empty allocation (an assert in debug builds). Caches (atlases, pooled textures, the layer pool) use `FrameNumber()` to know when a frame's commands have been submitted.
-- **Conventions.** Pixel coordinates (viewports, scissors, texture regions) have a top-left origin with y down; texture memory starts with the top row and UV (0, 0) is the top-left texel; clip space has y up and depth 0 to 1. Rendering into a texture and sampling it doesn't flip the image. The RHI has no colour type: clear values are four numbers in the target's encoding. `BlendMode` and `GradientSpreadMethod` live in Krystal.Core (`Colour/`), shared with Booey.
+- **Conventions.** Pixel coordinates (viewports, scissors, texture regions) have a top-left origin with y down; texture memory starts with the top row and UV (0, 0) is the top-left texel; clip space has y up and depth 0 to 1. Rendering into a texture and sampling it doesn't flip the image. The RHI has no colour type: clear values are four numbers in the target's encoding. `BlendMode` and `GradientSpreadMethod` live in Krystal.Core (`Colour/`), shared with Krystal.Web.
 
 ## Render2D
 

@@ -1,0 +1,203 @@
+﻿/*
+ * Copyright (C) 2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Animation/Timelines/ScrollTimeline.hpp"
+#include "Krystal.Web/Animation/Timelines/ViewTimelineOptions.hpp"
+#include "Krystal.Web/Css/TypedOM/CSSNumericValue.hpp"
+#include "Krystal.Web/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Web/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp"
+
+namespace krys::web
+{
+  class RenderBox;
+  class StickyPositionViewportConstraints;
+
+  namespace css
+  {
+    class PrimitiveValue;
+  }
+
+  namespace style
+  {
+    enum class SingleAnimationRangeName : uint8;
+  }
+
+  /// @brief How far a sticky container moves a view timeline's subject, and where the subject is in its
+  /// scroll container when it does.
+  struct StickinessAdjustmentData
+  {
+    enum class StickinessLocation : uint8
+    {
+      BeforeEntry,
+      DuringEntry,
+      WhileContained,
+      DuringExit,
+      AfterExit,
+    };
+
+    float StickyTopOrLeftAdjustment {0};
+    StickinessLocation TopOrLeftAdjustmentLocation {StickinessLocation::WhileContained};
+    float StickyBottomOrRightAdjustment {0};
+    StickinessLocation BottomOrRightAdjustmentLocation {StickinessLocation::WhileContained};
+
+    KRYS_NODISCARD bool operator==(const StickinessAdjustmentData &other) const noexcept = default;
+
+    KRYS_NODISCARD float EntryDistanceAdjustment() const noexcept;
+
+    KRYS_NODISCARD float ExitDistanceAdjustment() const noexcept;
+
+    KRYS_NODISCARD float RangeStartAdjustment() const noexcept;
+
+    KRYS_NODISCARD float RangeEndAdjustment() const noexcept;
+
+    KRYS_NODISCARD static StickinessAdjustmentData
+      ComputeStickinessAdjustmentData(const StickyPositionViewportConstraints &constraints,
+                                      ScrollTimeline::ResolvedScrollDirection scrollDirection,
+                                      float scrollContainerSize, float subjectSize,
+                                      float subjectOffset) noexcept;
+  };
+
+  /// @brief A timeline whose progress is how far its subject has moved through its scroll container's
+  /// scrollport, as a percentage.
+  /// @see https://drafts.csswg.org/scroll-animations-1/#viewtimeline-interface
+  class ViewTimeline final : public ScrollTimeline
+  {
+  private:
+    struct CurrentTimeData
+    {
+      float ScrollOffset {0};
+      float ScrollContainerSize {0};
+      float SubjectOffset {0};
+      float SubjectSize {0};
+      float InsetStart {0};
+      float InsetEnd {0};
+      StickinessAdjustmentData StickinessData {};
+    };
+
+    struct SpecifiedViewTimelineInsets
+    {
+      RefPtr<css::PrimitiveValue> Start;
+      RefPtr<css::PrimitiveValue> End;
+    };
+
+    style::WeakStyleable _subject;
+    Maybe<SpecifiedViewTimelineInsets> _specifiedInsets;
+    style::ViewTimelineInsetItem _insets;
+    CurrentTimeData _cachedCurrentTimeData {};
+
+  public:
+    /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-viewtimeline
+    KRYS_NODISCARD static ExceptionOr<Ref<ViewTimeline>>
+      Create(web::Document &document, const ViewTimelineOptions &options = {}) noexcept;
+
+    KRYS_NODISCARD static Ref<ViewTimeline> Create(const CSSOMStringAtom &name, ScrollAxis axis,
+                                                   const style::ViewTimelineInsetItem &insets) noexcept;
+
+    /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-subject
+    KRYS_NODISCARD const web::Element *Subject() const noexcept;
+
+    KRYS_NODISCARD const style::WeakStyleable &SubjectStyleable() const noexcept
+    {
+      return _subject;
+    }
+
+    void SetSubject(web::Element *subject) noexcept;
+
+    void SetSubject(const style::Styleable &styleable) noexcept;
+
+    KRYS_NODISCARD const style::ViewTimelineInsetItem &Insets() const noexcept
+    {
+      return _insets;
+    }
+
+    void SetInsets(const style::ViewTimelineInsetItem &insets) noexcept
+    {
+      _insets = insets;
+    }
+
+    /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-startoffset
+    KRYS_NODISCARD Ref<CSSNumericValue> StartOffset() const noexcept;
+
+    /// @see https://drafts.csswg.org/scroll-animations-1/#dom-viewtimeline-endoffset
+    KRYS_NODISCARD Ref<CSSNumericValue> EndOffset() const noexcept;
+
+    KRYS_NODISCARD ShouldUpdateAnimationsAndSendEvents
+      DocumentWillUpdateAnimationsAndSendEvents() noexcept override;
+
+    KRYS_NODISCARD AnimationTimelinesController *Controller() const noexcept override;
+
+    KRYS_NODISCARD const RenderBox *SourceScrollerRenderer() const noexcept;
+
+    KRYS_NODISCARD const RenderElement *StickyContainer() const noexcept;
+
+    KRYS_NODISCARD RefPtr<web::Element> BindingsSource() const noexcept override;
+
+    KRYS_NODISCARD RefPtr<web::Element> Source() const noexcept override;
+
+    KRYS_NODISCARD style::SingleAnimationRange DefaultRange() const noexcept final;
+
+    KRYS_NODISCARD Pair<WebAnimationTime, WebAnimationTime>
+      IntervalForAttachmentRange(const style::SingleAnimationRange &attachmentRange) const noexcept final;
+
+    /// @brief The start and end of @p attachmentRange, as offsets (0 to 1) of this timeline.
+    KRYS_NODISCARD Pair<double, double>
+      OffsetIntervalForAttachmentRange(const style::SingleAnimationRange &attachmentRange) const noexcept;
+
+    /// @brief The start and end of the named timeline range @p name, as offsets (0 to 1) of this timeline.
+    KRYS_NODISCARD Pair<double, double>
+      OffsetIntervalForTimelineRangeName(style::SingleAnimationRangeName name) const noexcept;
+
+  private:
+    explicit ViewTimeline(ScrollAxis axis) noexcept;
+
+    ViewTimeline(const CSSOMStringAtom &name, ScrollAxis axis, style::ViewTimelineInsetItem insets) noexcept;
+
+    KRYS_NODISCARD ScrollTimeline::Data ComputeTimelineData(
+      UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes) const noexcept final;
+
+    KRYS_NODISCARD Pair<double, double>
+      IntervalForTimelineRangeName(const ScrollTimeline::Data &data,
+                                   style::SingleAnimationRangeName name) const noexcept;
+
+    template <typename F>
+    KRYS_NODISCARD double MapOffsetToTimelineRange(const ScrollTimeline::Data &data,
+                                                   style::SingleAnimationRangeName name,
+                                                   F valueWithinSubjectRange) const noexcept;
+
+    KRYS_NODISCARD bool IsViewTimeline() const noexcept final
+    {
+      return true;
+    }
+
+    void CacheCurrentTime() noexcept;
+
+    KRYS_NODISCARD static ExceptionOr<SpecifiedViewTimelineInsets>
+      ValidateSpecifiedInsets(const ViewTimelineInsetValue &inset, const web::Document &document) noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_TRAITS_ANIMATION_TIMELINE(krys::web::ViewTimeline, IsViewTimeline())

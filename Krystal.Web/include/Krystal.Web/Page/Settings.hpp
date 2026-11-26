@@ -1,0 +1,122 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Web/Editing/EditingBehavior.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontGenericFamilies.hpp"
+#include "Krystal.Web/Graphics/Fonts/SystemFonts.hpp"
+
+namespace krys::web
+{
+  /// @brief Whether links in editable content act as links: whether a click follows one, a drag drags it and
+  /// the pointer over it is a hand. Outside editable content, links always do.
+  enum class EditableLinkBehavior : uint8
+  {
+    /// @brief Always.
+    AlwaysLive,
+    /// @brief Only with the shift key down.
+    OnlyLiveWithShiftKey,
+    /// @brief Never: a click places the caret in the link, as in browsers.
+    NeverLive,
+  };
+
+  /// @brief Whether a link in editable content acts as one under @p behavior, with or without @p shiftKey.
+  KRYS_NODISCARD constexpr bool IsEditableLinkLive(EditableLinkBehavior behavior, bool shiftKey) noexcept
+  {
+    switch (behavior)
+    {
+      case EditableLinkBehavior::AlwaysLive:           return true;
+      case EditableLinkBehavior::OnlyLiveWithShiftKey: return shiftKey;
+      case EditableLinkBehavior::NeverLive:            return false;
+    }
+    return false;
+  }
+
+  /// @brief The settings values that style resolution reads.
+  struct SettingsValues
+  {
+    int32 DefaultFontSize {16};
+    int32 DefaultFixedFontSize {13};
+    int32 MinimumFontSize {0};
+    int32 MinimumLogicalFontSize {0};
+    bool EvaluationTimeZoomEnabled {false};
+    /// @brief Whether characters no family has try the pictograph family before the registered fonts.
+    bool FontFallbackPrefersPictographs {false};
+    /// @brief The families the generic families resolve to; none by default, so they use the bundled font.
+    web::FontGenericFamilies FontGenericFamilies;
+    /// @brief The fonts of the `font` shorthand's system font keywords (`caption`, `menu`, ...).
+    web::SystemFonts SystemFonts;
+  };
+
+  /// @brief The host's settings for a document: the features without a specification it turns on, the
+  /// embedder features and the values style resolution reads. Standard features are always on.
+  /// @note Documents share the default settings unless the host gives them their own, and documents a
+  /// document creates share its settings. Changing the settings doesn't reparse style sheets that were
+  /// already parsed.
+  struct Settings : public RefCounted<Settings>
+  {
+    // Experimental features: these have no specification yet, or are WebKit's own.
+
+    /// @brief `color-layers()`.
+    bool CSSColorLayersEnabled {false};
+    /// @brief `transform-style: separated`.
+    bool CSSTransformStyleSeparatedEnabled {false};
+    /// @brief The `::thumb` and `::track` pseudo-elements.
+    bool ThumbAndTrackPseudoElementsEnabled {false};
+    /// @brief The `spring()` easing function.
+    bool SpringTimingFunctionEnabled {false};
+
+    // Embedder features.
+
+    /// @brief The system `appearance` values (`default-button` and friends).
+    bool UseSystemAppearance {false};
+    /// @brief Moving a caret through content that isn't editable, with the keys that move one.
+    bool CaretBrowsingEnabled {false};
+    /// @brief Whether a drag and drop held near the edge of a box that scrolls scrolls it.
+    bool AutoscrollForDragAndDropEnabled {true};
+    /// @brief Whether a hidden page suspends its CSS animations, transitions and Web Animations.
+    bool HiddenPageCSSAnimationSuspensionEnabled {true};
+    /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
+    /// scrolling.
+    bool SpatialNavigationEnabled {false};
+    /// @brief The keyboard's scrolls being animated, as a user's preference may turn off.
+    bool ScrollAnimatorEnabled {true};
+    /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
+    bool HTMLLegacyAttributeValueSerializationEnabled {false};
+    /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
+    /// the pasted copy stays in flow.
+    bool ShouldConvertPositionStyleOnCopy {false};
+    /// @brief Loading the icons documents name with `<link rel=icon>` (or `/favicon.ico` on `http(s):`), for
+    /// the host's frame loader client to show.
+    bool IconLoadingEnabled {true};
+    /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
+    bool TextAreasAreResizable {false};
+    /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather
+    /// than the user interface's.
+    bool LangAttributeAwareFormControlUIEnabled {false};
+    /// @brief The platform whose editing and selection conventions documents follow.
+    web::EditingBehaviorType EditingBehaviorType {web::EditingBehaviorType::Windows};
+    /// @brief Whether submitting a form checks its controls' constraints first, reporting the problems
+    /// (`invalid` events) rather than submitting; off, forms submit as if they had `novalidate`, for hosts
+    /// that validate in their own interface.
+    bool InteractiveFormValidationEnabled {true};
+    /// @brief Whether links in editable content act as links.
+    web::EditableLinkBehavior EditableLinkBehavior {web::EditableLinkBehavior::NeverLive};
+
+    // Debugging.
+
+    /// @brief Outlining each composited layer, in a colour for what it holds, as the host composites it.
+    bool ShowDebugBorders {false};
+    /// @brief Showing on each composited layer how many times it's been repainted.
+    bool ShowRepaintCounter {false};
+
+    SettingsValues Values;
+
+    KRYS_NODISCARD static Ref<Settings> Create() noexcept;
+
+    /// @brief The settings documents share unless the host gives them their own.
+    KRYS_NODISCARD static Settings &Default() noexcept;
+  };
+}

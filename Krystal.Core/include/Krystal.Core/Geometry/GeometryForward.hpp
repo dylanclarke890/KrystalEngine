@@ -6,7 +6,7 @@
 namespace krys
 {
   /// @brief What the geometry types need to know about a coordinate type that isn't a built-in number;
-  /// specialise it for one (as Booey does for its fixed-point `LayoutUnit`).
+  /// specialise it for one (as Krystal.Web does for its fixed-point `LayoutUnit`).
   /// @note A specialisation may also define `InfiniteRectMin()` and `InfiniteRectExtent()`, the location and
   /// size of the type's `Rect::InfiniteRect()`, which `Rect::Scale` then leaves alone.
   template <typename T>

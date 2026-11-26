@@ -1,0 +1,364 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ *           (C) 1999 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2005 Allan Sandfeld Jensen (kde@carewolf.com)
+ *           (C) 2005, 2006 Samuel Weinig (sam.weinig@gmail.com)
+ * Copyright (C) 2005-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2010-2015 Google Inc. All rights reserved.
+ * Copyright (C) 2023, 2024 Igalia S.L.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Web/Animation/Keyframes/BlendingKeyframes.hpp"
+#include "Krystal.Web/Page/FrameView.hpp"
+#include "Krystal.Web/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Web/Rendering/Layers/RenderLayerBacking.hpp"
+#include "Krystal.Web/Rendering/MotionPath.hpp"
+#include "Krystal.Web/Rendering/ReferencedSVGResources.hpp"
+#include "Krystal.Web/Rendering/RenderBlock.hpp"
+#include "Krystal.Web/Rendering/RenderView.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Style/TransformResolver.hpp"
+
+namespace krys::web
+{
+  RenderLayerModelObject::RenderLayerModelObject(Type type, Element &element, RenderStyle &&style,
+                                                 EnumSet<TypeFlag> baseTypeFlags,
+                                                 TypeSpecificFlags typeSpecificFlags) noexcept
+      : RenderElement(type, element, krys::move(style), baseTypeFlags | TypeFlag::IsLayerModelObject,
+                      typeSpecificFlags)
+  {
+    krys_debug_assert(IsRenderLayerModelObject());
+  }
+
+  RenderLayerModelObject::RenderLayerModelObject(Type type, Document &document, RenderStyle &&style,
+                                                 EnumSet<TypeFlag> baseTypeFlags,
+                                                 TypeSpecificFlags typeSpecificFlags) noexcept
+      : RenderElement(type, document, krys::move(style), baseTypeFlags | TypeFlag::IsLayerModelObject,
+                      typeSpecificFlags)
+  {
+    krys_debug_assert(IsRenderLayerModelObject());
+  }
+
+  namespace
+  {
+    // Used to store state between styleWillChange and styleDidChange
+    bool s_wasFloating = false;
+    bool s_hadLayer = false;
+    bool s_wasTransformed = false;
+    bool s_layerWasSelfPainting = false;
+    bool s_establishesTopLayerChanged = false;
+  }
+
+  // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
+  RenderLayerModelObject::~RenderLayerModelObject() noexcept = default;
+
+  void RenderLayerModelObject::WillBeDestroyed() noexcept
+  {
+    if (IsPositioned())
+    {
+      if (Style().HasViewportConstrainedPosition())
+      {
+        View().FrameView().RemoveViewportConstrainedObject(*this);
+      }
+    }
+
+    DestroyLayer();
+
+    RenderElement::WillBeDestroyed();
+  }
+
+  void RenderLayerModelObject::DestroyLayer() noexcept
+  {
+    SetHasLayer(false);
+    _layer = nullptr;
+  }
+
+  void RenderLayerModelObject::CreateLayer() noexcept
+  {
+    krys_debug_assert(!_layer);
+    _layer = RenderLayer::Create(*this);
+    SetHasLayer(true);
+    _layer->InsertOnlyThisLayer();
+  }
+
+  void RenderLayerModelObject::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    s_wasFloating = IsFloating();
+    s_hadLayer = HasLayer();
+    s_wasTransformed = IsTransformed();
+    if (s_hadLayer)
+    {
+      s_layerWasSelfPainting = Layer()->IsSelfPaintingLayer();
+    }
+
+    const auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+
+    // Whether the element is rendered in the top layer follows its overlay, so its layer moves to or from the
+    // view's layer as its style changes.
+    s_establishesTopLayerChanged = s_hadLayer && oldStyle && Layer()->Parent()
+                                   && dom::IsInTopLayerOrBackdrop(*oldStyle, GetElement())
+                                        != dom::IsInTopLayerOrBackdrop(newStyle, GetElement());
+    if (s_establishesTopLayerChanged)
+    {
+      Layer()->EstablishesTopLayerWillChange();
+    }
+    if (diff == style::DifferenceResult::RepaintLayer && Parent() && oldStyle
+        && oldStyle->Clip() != newStyle.Clip())
+    {
+      Layer()->ClearClipRectsIncludingDescendants();
+    }
+    // What a filter that moves pixels paints reaches past the layer's repaint rects, so when the filter
+    // changes, all it painted is repainted, and all it paints after.
+    if (s_hadLayer && Parent() && oldStyle && oldStyle->Filter() != newStyle.Filter()
+        && Layer()->FilterMovesPixels())
+    {
+      View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
+    }
+    RenderElement::StyleWillChange(diff, newStyle);
+  }
+
+  void RenderLayerModelObject::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
+  {
+    UpdateFromStyle();
+    RenderElement::StyleDidChange(diff, oldStyle);
+
+    if (HasLayer() && Parent() && oldStyle && oldStyle->Filter() != Style().Filter()
+        && Layer()->FilterMovesPixels())
+    {
+      View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
+    }
+
+    // When an out-of-flow-positioned element changes its display between block and inline-block,
+    // then an incremental layout on the element's containing block lays out the element through
+    // LayoutPositionedObjects, which skips laying out the element's parent.
+    // The element's parent needs to relayout so that it calls
+    // RenderBlockFlow::setStaticInlinePositionForChild with the out-of-flow-positioned child, so
+    // that when it's laid out, its RenderBox::computeOutOfFlowPositionedLogicalWidth/Height takes into
+    // account its new inline/block position rather than its old block/inline position.
+    // Position changes and other types of display changes are handled elsewhere.
+    if ((oldStyle && IsOutOfFlowPositioned() && Parent() && (Parent() != ContainingBlock()))
+        && (Style().Position() == oldStyle->Position())
+        && (Style().IsOriginalDisplayInlineType() != oldStyle->IsOriginalDisplayInlineType())
+        && ((Style().IsOriginalDisplayBlockType()) || (Style().IsOriginalDisplayInlineType()))
+        && ((oldStyle->IsOriginalDisplayBlockType()) || (oldStyle->IsOriginalDisplayInlineType())))
+    {
+      Parent()->SetChildNeedsLayout();
+    }
+
+    if (s_establishesTopLayerChanged && HasLayer() && !Layer()->Parent())
+    {
+      Layer()->EstablishesTopLayerDidChange();
+    }
+
+    if (RequiresLayer())
+    {
+      if (!Layer())
+      {
+        if (s_wasFloating && IsFloating())
+        {
+          SetChildNeedsLayout();
+        }
+        CreateLayer();
+        if (Parent() && !NeedsLayout())
+        {
+          Layer()->SetRepaintStatus(RepaintStatus::NeedsFullRepaint);
+        }
+      }
+    }
+    else if (Layer() && Layer()->Parent())
+    {
+      if (oldStyle && oldStyle->HasBlendMode())
+      {
+        Layer()->WillRemoveChildWithBlendMode();
+      }
+      // All transform-related properties force layers, so we know we don't have one or the object doesn't
+      // support them.
+      SetHasTransformRelatedProperty(false);
+
+      // Repaint the about to be destroyed self-painting layer when style change also triggers repaint.
+      if (Layer()->IsSelfPaintingLayer() && Layer()->GetRepaintStatus() == RepaintStatus::NeedsFullRepaint
+          && Layer()->CachedClippedOverflowRect())
+      {
+        RepaintUsingContainer(ContainerForRepaint().Renderer, *Layer()->CachedClippedOverflowRect());
+      }
+
+      Layer()->RemoveOnlyThisLayer(); // calls destroyLayer() which clears m_layer
+      if (s_wasFloating && IsFloating())
+      {
+        SetChildNeedsLayout();
+      }
+      if (s_wasTransformed)
+      {
+        SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
+
+    if (Layer())
+    {
+      Layer()->StyleChanged(diff, oldStyle);
+      if (s_hadLayer && Layer()->IsSelfPaintingLayer() != s_layerWasSelfPainting)
+      {
+        SetChildNeedsLayout();
+      }
+    }
+
+    bool newStyleIsViewportConstrained = Style().HasViewportConstrainedPosition();
+    bool oldStyleIsViewportConstrained = oldStyle && oldStyle->HasViewportConstrainedPosition();
+    if (newStyleIsViewportConstrained != oldStyleIsViewportConstrained)
+    {
+      if (newStyleIsViewportConstrained && Layer())
+      {
+        View().FrameView().AddViewportConstrainedObject(*this);
+      }
+      else
+      {
+        View().FrameView().RemoveViewportConstrainedObject(*this);
+      }
+    }
+
+    // A page's step leaves out the scroll padding. (A scroll snap container's changes make it lay out, which
+    // finds its snap positions.)
+    if (oldStyle && !oldStyle->ScrollPaddingEqual(Style()))
+    {
+      if (IsDocumentElementRenderer())
+      {
+        View().FrameView().UpdateScrollbarSteps();
+      }
+      else if (auto *renderLayer = Layer())
+      {
+        renderLayer->UpdateScrollbarSteps();
+      }
+    }
+  }
+
+  bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(
+    RepaintRects &, const RenderLayerModelObject *,
+    // NOLINTNEXTLINE(performance-unnecessary-value-param): overrides change their copy.
+    VisibleRectContext) const noexcept
+  {
+    return false;
+  }
+
+  TransformationMatrix *RenderLayerModelObject::LayerTransform() const noexcept
+  {
+    if (HasLayer())
+    {
+      return Layer()->Transform();
+    }
+    return nullptr;
+  }
+
+  void RenderLayerModelObject::UpdateLayerTransform() noexcept
+  {
+    if (auto *box = DynamicDowncast<RenderBox>(*this);
+        box && MotionPath::NeedsUpdateAfterContainingBlockLayout(Style().OffsetPath()))
+    {
+      if (auto *containingBlock = ContainingBlock())
+      {
+        View().FrameView().LayoutContext().SetBoxNeedsTransformUpdateAfterContainerLayout(*box,
+                                                                                          *containingBlock);
+        return;
+      }
+    }
+    // Transform-origin depends on box size, so we need to update the layer transform after layout.
+    if (HasLayer())
+    {
+      Layer()->UpdateTransform();
+    }
+  }
+
+  void RenderLayerModelObject::ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
+                                              const RectF &boundingBox) const noexcept
+  {
+    // FIXME: Shouldn't this be using Style::TransformResolver::individualTransformOperations?
+    ApplyTransform(transform, style, boundingBox, style::TransformResolver::AllTransformOperations);
+  }
+
+  // Every renderer is pixel snapped: there are no layer-aware SVG renderers.
+  bool RenderLayerModelObject::StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
+                                              const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return false;
+    }
+    return Layer()->Backing()->StartAnimation(timeOffset, animation, keyframes);
+  }
+
+  void RenderLayerModelObject::AnimationPaused(double timeOffset, const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->AnimationPaused(timeOffset, keyframes.AcceleratedAnimationName());
+  }
+
+  void RenderLayerModelObject::AnimationFinished(const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->AnimationFinished(keyframes.AcceleratedAnimationName());
+  }
+
+  void RenderLayerModelObject::TransformRelatedPropertyDidChange() noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->TransformRelatedPropertyDidChange();
+  }
+
+  void RenderLayerModelObject::SuspendAnimations(MonotonicTime::duration time) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->SuspendAnimations(time);
+  }
+
+  RectF SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                       const RenderLayerModelObject &renderer) noexcept
+  {
+    return SnapRectToDevicePixels(rect, renderer.GetDocument().DeviceScaleFactor());
+  }
+
+  RectF SnapRectToDevicePixelsIfNeeded(const RectF &rect, const RenderLayerModelObject &renderer) noexcept
+  {
+    return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
+  }
+
+  Maybe<LayoutRect> RenderLayerModelObject::CachedLayerClippedOverflowRect() const noexcept
+  {
+    return HasLayer() ? Layer()->CachedClippedOverflowRect() : null;
+  }
+
+  LegacyRenderSVGResourceClipper *RenderLayerModelObject::LegacySVGClipperResourceFromStyle() const noexcept
+  {
+    if (auto clipPath = Style().ClipPath().TryReference())
+    {
+      return ReferencedSVGResources::ReferencedClipperRenderer(TreeScopeForSVGReferences(), *clipPath);
+    }
+    return nullptr;
+  }
+}

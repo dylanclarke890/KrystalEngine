@@ -1,11 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/Dom/Nodes/Document.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
-#include "Krystal.Booey/Html/Canvas/EngineTextureRenderingContext.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/EngineTexture.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -14,7 +9,12 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include "Krystal.Gfx/CommandBuffer.hpp"
 #include "Krystal.Gfx/Device.hpp"
-#include "Krystal.UI/EngineTexture.hpp"
+#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Web/Html/Canvas/EngineTextureRenderingContext.hpp"
+#include "Krystal.Web/Html/Elements/HTMLCanvasElement.hpp"
 #include <cmath>
 #include <format>
 #include <numbers>
@@ -70,9 +70,9 @@ void main()
 
   private:
     gfx::Device &_device;
-    WeakPtr<boo::Document> _document;
-    List<boo::EventListenerHandle> _listeners;
-    List<boo::html::EngineTextureRenderingContext *> _contexts;
+    WeakPtr<web::Document> _document;
+    List<web::EventListenerHandle> _listeners;
+    List<web::html::EngineTextureRenderingContext *> _contexts;
     gfx::TextureHandle _texture {};
     gfx::TextureHandle _depth {};
     gfx::ShaderHandle _vertexShader {};
@@ -88,7 +88,7 @@ void main()
     double _lastY {0};
 
   public:
-    PageCube(boo::Document &document, gfx::Device &device) noexcept
+    PageCube(web::Document &document, gfx::Device &device) noexcept
         : _device(device), _document(CreateWeakPtr(&document))
     {
       auto cube = document.GetElementById(u8"cube");
@@ -97,17 +97,17 @@ void main()
         return;
       }
 
-      auto texture = ui::EngineTexture::Create(
+      auto texture = boo::EngineTexture::Create(
         _texture, {static_cast<int32>(TextureSize), static_cast<int32>(TextureSize)});
       for (auto id : {u8"cube", u8"cube-strip"})
       {
-        auto *canvas = DynamicDowncast<boo::HTMLCanvasElement>(document.GetElementById(id).get());
+        auto *canvas = DynamicDowncast<web::HTMLCanvasElement>(document.GetElementById(id).get());
         if (!canvas)
         {
           continue;
         }
-        auto context = canvas->GetContext(boo::html::EngineTextureRenderingContext::ContextType);
-        if (auto *textureContext = DynamicDowncast<boo::html::EngineTextureRenderingContext>(context.get()))
+        auto context = canvas->GetContext(web::html::EngineTextureRenderingContext::ContextType);
+        if (auto *textureContext = DynamicDowncast<web::html::EngineTextureRenderingContext>(context.get()))
         {
           textureContext->SetTexture(texture);
           _contexts.push_back(textureContext);
@@ -115,14 +115,14 @@ void main()
       }
 
       // The pointer that presses the cube captures itself to it, and turns the cube until it lets go.
-      auto listen = [&](utf8_stringview type, Func<void(boo::PointerEvent &)> &&callback)
+      auto listen = [&](utf8_stringview type, Func<void(web::PointerEvent &)> &&callback)
       {
-        _listeners.push_back(cube->AddEventListener(boo::DOMStringAtom(type),
-                                                    [callback = krys::move(callback)](boo::Event &event)
-                                                    { callback(static_cast<boo::PointerEvent &>(event)); }));
+        _listeners.push_back(cube->AddEventListener(web::DOMStringAtom(type),
+                                                    [callback = krys::move(callback)](web::Event &event)
+                                                    { callback(static_cast<web::PointerEvent &>(event)); }));
       };
       listen(u8"pointerdown",
-             [this](boo::PointerEvent &pointer)
+             [this](web::PointerEvent &pointer)
              {
                if (auto element = ById(u8"cube"))
                {
@@ -132,9 +132,9 @@ void main()
                }
              });
       listen(u8"gotpointercapture",
-             [this](boo::PointerEvent &pointer) { _dragPointer = static_cast<int32>(pointer.PointerId()); });
-      listen(u8"lostpointercapture", [this](boo::PointerEvent &) { _dragPointer = -1; });
-      listen(u8"pointermove", [this](boo::PointerEvent &pointer) { Drag(pointer); });
+             [this](web::PointerEvent &pointer) { _dragPointer = static_cast<int32>(pointer.PointerId()); });
+      listen(u8"lostpointercapture", [this](web::PointerEvent &) { _dragPointer = -1; });
+      listen(u8"pointermove", [this](web::PointerEvent &pointer) { Drag(pointer); });
     }
 
     ~PageCube() noexcept
@@ -324,12 +324,12 @@ void main()
       return true;
     }
 
-    KRYS_NODISCARD RefPtr<boo::Element> ById(utf8_stringview id) const noexcept
+    KRYS_NODISCARD RefPtr<web::Element> ById(utf8_stringview id) const noexcept
     {
       return _document ? _document->GetElementById(id) : nullptr;
     }
 
-    void Drag(const boo::PointerEvent &pointer) noexcept
+    void Drag(const web::PointerEvent &pointer) noexcept
     {
       if (static_cast<int32>(pointer.PointerId()) != _dragPointer)
       {
@@ -348,7 +348,7 @@ void main()
                              / std::numbers::pi_v<float>);
         };
         auto text = std::format("Turned {}° across, {}° up", degrees(_yaw), -degrees(_pitch));
-        (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)label->TextContent(web::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
     }
   };

@@ -1,0 +1,697 @@
+﻿/*
+ * Copyright (C) 2010-2013 Google Inc. All rights reserved.
+ * Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Html/InputTypes/BaseDateAndTimeInputType.hpp"
+#include "Krystal.I18n/Locale.hpp"
+#include "Krystal.Web/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Elements/HTMLDataListElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Web/Html/InputTypes/BaseClickableWithKeyInputType.hpp"
+#include "Krystal.Web/Page/Clients/WebClient.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Page/FrameView.hpp"
+#include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Web/Platform/Choosers/DateTimeChooserParameters.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
+#include <charconv>
+#include <cmath>
+
+namespace krys::web::html
+{
+  namespace
+  {
+    constexpr int MsecPerMinute = 60 * 1'000;
+    constexpr int MsecPerSecond = 1'000;
+  }
+
+  void
+    BaseDateAndTimeInputType::DateTimeFormatValidator::VisitField(i18n::DateTimeFormat::FieldType fieldType,
+                                                                  int) noexcept
+  {
+    using FieldType = i18n::DateTimeFormat::FieldType;
+    switch (fieldType)
+    {
+      case FieldType::Year:            _results.Add(DateTimeFormatValidationResults::HasYear); break;
+
+      case FieldType::Month:
+      case FieldType::MonthStandAlone: _results.Add(DateTimeFormatValidationResults::HasMonth); break;
+
+      case FieldType::WeekOfYear:      _results.Add(DateTimeFormatValidationResults::HasWeek); break;
+
+      case FieldType::DayOfMonth:      _results.Add(DateTimeFormatValidationResults::HasDay); break;
+
+      case FieldType::Period:          _results.Add(DateTimeFormatValidationResults::HasMeridiem); break;
+
+      case FieldType::Hour11:
+      case FieldType::Hour12:          _results.Add(DateTimeFormatValidationResults::HasHour); break;
+
+      case FieldType::Hour23:
+      case FieldType::Hour24:
+        _results.Add(DateTimeFormatValidationResults::HasHour);
+        _results.Add(DateTimeFormatValidationResults::HasMeridiem);
+        break;
+
+      case FieldType::Minute: _results.Add(DateTimeFormatValidationResults::HasMinute); break;
+
+      case FieldType::Second: _results.Add(DateTimeFormatValidationResults::HasSecond); break;
+
+      default:                break;
+    }
+  }
+
+  bool BaseDateAndTimeInputType::DateTimeFormatValidator::ValidateFormat(
+    DOMStringView format, const BaseDateAndTimeInputType &inputType) noexcept
+  {
+    if (!i18n::DateTimeFormat::Parse(format, *this))
+    {
+      return false;
+    }
+    return inputType.IsValidFormat(_results);
+  }
+
+  BaseDateAndTimeInputType::~BaseDateAndTimeInputType() noexcept
+  {
+    CloseDateTimeChooser();
+    if (_dateTimeEditElement)
+    {
+      _dateTimeEditElement->RemoveEditControlOwner();
+    }
+  }
+
+  double BaseDateAndTimeInputType::ValueAsDate() const noexcept
+  {
+    return ValueAsDouble();
+  }
+
+  ExceptionOr<void> BaseDateAndTimeInputType::SetValueAsDate(double value) const noexcept
+  {
+    krys_debug_assert(Element());
+    (void)Element()->SetValue(SerializeWithMilliseconds(value));
+    return {};
+  }
+
+  double BaseDateAndTimeInputType::ValueAsDouble() const noexcept
+  {
+    krys_debug_assert(Element());
+    const Decimal value = ParseToNumber(Element()->Value(), Decimal::NaN());
+    return value.IsFinite() ? value.ToDouble() : DateComponents::InvalidMilliseconds();
+  }
+
+  ExceptionOr<void>
+    BaseDateAndTimeInputType::SetValueAsDecimal(const Decimal &newValue,
+                                                TextFieldEventBehavior eventBehavior) const noexcept
+  {
+    krys_debug_assert(Element());
+    (void)Element()->SetValue(Serialize(newValue), eventBehavior);
+    return {};
+  }
+
+  bool BaseDateAndTimeInputType::TypeMismatchFor(DOMStringView value) const noexcept
+  {
+    return !value.empty() && !ParseToDateComponents(value);
+  }
+
+  bool BaseDateAndTimeInputType::TypeMismatch() const noexcept
+  {
+    krys_debug_assert(Element());
+    return TypeMismatchFor(Element()->Value());
+  }
+
+  bool BaseDateAndTimeInputType::HasBadInput() const noexcept
+  {
+    krys_debug_assert(Element());
+    return Element()->Value().empty() && _dateTimeEditElement
+           && _dateTimeEditElement->EditableFieldsHaveValues();
+  }
+
+  Decimal BaseDateAndTimeInputType::DefaultValueForStepUp() const noexcept
+  {
+    return Decimal::FromDouble(LocalTimeNow());
+  }
+
+  Decimal BaseDateAndTimeInputType::ParseToNumber(DOMStringView source,
+                                                  const Decimal &defaultValue) const noexcept
+  {
+    auto date = ParseToDateComponents(source);
+    if (!date)
+    {
+      return defaultValue;
+    }
+    double msec = date->MillisecondsSinceEpoch();
+    krys_debug_assert(std::isfinite(msec));
+    return Decimal::FromDouble(msec);
+  }
+
+  DOMString BaseDateAndTimeInputType::Serialize(const Decimal &value) const noexcept
+  {
+    if (!value.IsFinite())
+    {
+      return {};
+    }
+
+    auto date = SetMillisecondToDateComponents(value.ToDouble());
+    if (!date)
+    {
+      return {};
+    }
+
+    return SerializeWithComponents(*date);
+  }
+
+  DOMString BaseDateAndTimeInputType::SerializeWithComponents(const DateComponents &date) const noexcept
+  {
+    krys_debug_assert(Element());
+    Decimal step;
+    if (!Element()->GetAllowedValueStep(&step) || step.Remainder(Decimal(MsecPerMinute)).IsZero())
+    {
+      return date.ToString();
+    }
+    if (step.Remainder(Decimal(MsecPerSecond)).IsZero())
+    {
+      return date.ToString(SecondFormat::Second);
+    }
+    return date.ToString(SecondFormat::Millisecond);
+  }
+
+  DOMString BaseDateAndTimeInputType::SerializeWithMilliseconds(double value) const noexcept
+  {
+    return Serialize(Decimal::FromDouble(value));
+  }
+
+  DOMString BaseDateAndTimeInputType::LocalizeValue(DOMStringView proposedValue) const noexcept
+  {
+    auto date = ParseToDateComponents(proposedValue);
+    if (!date)
+    {
+      return DOMString(proposedValue);
+    }
+
+    krys_debug_assert(Element());
+    auto fields = date->ToDateTimeFields();
+    auto localized = fields ? Element()->GetLocale().FormatDateTime(*fields) : utf8_string();
+    return localized.empty() ? DOMString(proposedValue) : localized;
+  }
+
+  DOMString BaseDateAndTimeInputType::VisibleValue() const noexcept
+  {
+    krys_debug_assert(Element());
+    return LocalizeValue(Element()->Value());
+  }
+
+  DOMString BaseDateAndTimeInputType::SanitizeValue(DOMStringView proposedValue) const noexcept
+  {
+    if (TypeMismatchFor(proposedValue))
+    {
+      return {};
+    }
+    return DOMString(proposedValue);
+  }
+
+  bool BaseDateAndTimeInputType::SupportsReadOnly() const noexcept
+  {
+    return true;
+  }
+
+  bool BaseDateAndTimeInputType::ValueMissing(DOMStringView value) const noexcept
+  {
+    krys_debug_assert(Element());
+    return Element()->IsMutable() && Element()->IsRequired() && value.empty();
+  }
+
+  DOMString BaseDateAndTimeInputType::PadNumber(uint32 value, size_t width) noexcept
+  {
+    char buffer[16];
+    auto end = std::to_chars(buffer, buffer + sizeof(buffer), value).ptr;
+    auto length = static_cast<size_t>(end - buffer);
+    DOMString result(length < width ? width - length : 0, u8'0');
+    result.append(reinterpret_cast<const char8 *>(buffer), length);
+    return result;
+  }
+
+  bool BaseDateAndTimeInputType::ShouldHaveSecondField(const DateComponents &date) const noexcept
+  {
+    if (date.Second())
+    {
+      return true;
+    }
+
+    auto stepRange = CreateStepRange(AnyStepHandling::Default);
+    return !stepRange.Minimum().Remainder(Decimal(MsecPerMinute)).IsZero()
+           || !stepRange.Step().Remainder(Decimal(MsecPerMinute)).IsZero();
+  }
+
+  bool BaseDateAndTimeInputType::ShouldHaveMillisecondField(const DateComponents &date) const noexcept
+  {
+    if (date.Millisecond())
+    {
+      return true;
+    }
+
+    auto stepRange = CreateStepRange(AnyStepHandling::Default);
+    return !stepRange.Minimum().Remainder(Decimal(MsecPerSecond)).IsZero()
+           || !stepRange.Step().Remainder(Decimal(MsecPerSecond)).IsZero();
+  }
+
+  void BaseDateAndTimeInputType::SetValue(DOMStringView value, bool valueChanged,
+                                          TextFieldEventBehavior eventBehavior,
+                                          TextControlSetValueSelection selection) noexcept
+  {
+    InputType::SetValue(value, valueChanged, eventBehavior, selection);
+    if (valueChanged)
+    {
+      UpdateInnerTextValue();
+    }
+  }
+
+  void BaseDateAndTimeInputType::HandleActivationBehavior(Event &event) noexcept
+  {
+    krys_debug_assert(Element());
+    // Only for a user's click or key.
+    if (!HasTransientActivation() || !Element()->Renderer() || !Element()->IsMutable())
+    {
+      return;
+    }
+
+    _pickerWasActivatedByKeyboard = Is<KeyboardEvent>(event);
+
+    if (_dateTimeChooser)
+    {
+      return;
+    }
+
+    ShowPicker();
+  }
+
+  void BaseDateAndTimeInputType::ShowPicker() noexcept
+  {
+    if (!Element() || !Element()->Renderer())
+    {
+      return;
+    }
+
+    auto *webClient = GetWebClient();
+    if (!webClient)
+    {
+      return;
+    }
+
+    DateTimeChooserParameters parameters;
+    if (!SetupDateTimeChooserParameters(parameters))
+    {
+      return;
+    }
+
+    if (auto *frame = Element()->NodeDocument().Frame())
+    {
+      frame->NotifyPopupOpeningObservers();
+    }
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*Element(), css::SelectorPseudoClass::Open,
+                                                             true);
+      _dateTimeChooser = webClient->CreateDateTimeChooser(*this);
+    }
+    if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
+    {
+      dateTimeChooser->ShowChooser(parameters);
+    }
+  }
+
+  void BaseDateAndTimeInputType::CreateShadowSubtree() noexcept
+  {
+    krys_debug_assert(NeedsShadowSubtree());
+    krys_debug_assert(Element());
+
+    auto &element = *Element();
+    auto &shadowRoot = *element.UserAgentShadowRoot();
+    // The fields are focused instead of the input, and sequential navigation moves between them.
+    shadowRoot.SetUserAgentDelegatesFocus(true);
+
+    auto dateTimeEditElement = DateTimeEditElement::Create(element.NodeDocument(), *this);
+    _dateTimeEditElement = dateTimeEditElement;
+    (void)shadowRoot.AppendChild(*dateTimeEditElement);
+    UpdateInnerTextValue();
+  }
+
+  void BaseDateAndTimeInputType::RemoveShadowSubtree() noexcept
+  {
+    InputType::RemoveShadowSubtree();
+    if (_dateTimeEditElement)
+    {
+      _dateTimeEditElement->RemoveEditControlOwner();
+      _dateTimeEditElement = nullptr;
+    }
+    if (auto *shadowRoot = Element() ? Element()->UserAgentShadowRoot() : nullptr)
+    {
+      shadowRoot->SetUserAgentDelegatesFocus(false);
+    }
+  }
+
+  void BaseDateAndTimeInputType::UpdateInnerTextValue() noexcept
+  {
+    krys_debug_assert(Element());
+
+    CreateShadowSubtreeIfNeeded();
+
+    if (!_dateTimeEditElement)
+    {
+      return;
+    }
+
+    auto &input = *Element();
+    DateTimeEditElement::LayoutParameters layoutParameters(input.GetLocale());
+
+    auto date = ParseToDateComponents(input.Value());
+    if (date)
+    {
+      SetupLayoutParameters(layoutParameters, *date);
+    }
+    else if (auto dateForLayout =
+               SetMillisecondToDateComponents(CreateStepRange(AnyStepHandling::Default).Minimum().ToDouble()))
+    {
+      SetupLayoutParameters(layoutParameters, *dateForLayout);
+    }
+    else
+    {
+      SetupLayoutParameters(layoutParameters, DateComponents());
+    }
+
+    if (!DateTimeFormatValidator().ValidateFormat(layoutParameters.DateTimeFormat, *this))
+    {
+      layoutParameters.DateTimeFormat = layoutParameters.FallbackDateTimeFormat;
+    }
+
+    Ref<DateTimeEditElement> dateTimeEditElement = ShareRef(*_dateTimeEditElement);
+    if (date)
+    {
+      dateTimeEditElement->SetValueAsDate(layoutParameters, *date);
+    }
+    else
+    {
+      dateTimeEditElement->SetEmptyValue(layoutParameters);
+    }
+  }
+
+  void BaseDateAndTimeInputType::AttributeChanged(const DOMStringAtom &name) noexcept
+  {
+    if (name == u8"max" || name == u8"min")
+    {
+      if (auto *element = Element())
+      {
+        element->InvalidateStyleForSubtree();
+      }
+    }
+    else if (name == u8"value")
+    {
+      if (auto *element = Element())
+      {
+        if (!element->HasDirtyValue())
+        {
+          UpdateInnerTextValue();
+        }
+      }
+    }
+    else if (name == u8"step")
+    {
+      if (_dateTimeEditElement)
+      {
+        UpdateInnerTextValue();
+      }
+    }
+
+    InputType::AttributeChanged(name);
+  }
+
+  void BaseDateAndTimeInputType::ElementDidBlur() noexcept
+  {
+    if (!_dateTimeEditElement)
+    {
+      CloseDateTimeChooser();
+    }
+  }
+
+  void BaseDateAndTimeInputType::Detach() noexcept
+  {
+    CloseDateTimeChooser();
+  }
+
+  bool BaseDateAndTimeInputType::IsPresentingAttachedView() const noexcept
+  {
+    return !!_dateTimeChooser;
+  }
+
+  InputType::ShouldCallBaseEventHandler
+    BaseDateAndTimeInputType::HandleKeydownEvent(KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(Element());
+    return BaseClickableWithKeyInputType::HandleKeydownEvent(*Element(), event);
+  }
+
+  void BaseDateAndTimeInputType::HandleKeypressEvent(KeyboardEvent &event) noexcept
+  {
+    // The return key should not activate the element, as it conflicts with the key binding to submit a form.
+    if (event.CharCode() == '\r')
+    {
+      return;
+    }
+
+    krys_debug_assert(Element());
+    BaseClickableWithKeyInputType::HandleKeypressEvent(*Element(), event);
+  }
+
+  void BaseDateAndTimeInputType::HandleKeyupEvent(KeyboardEvent &event) noexcept
+  {
+    BaseClickableWithKeyInputType::HandleKeyupEvent(*this, event);
+  }
+
+  void BaseDateAndTimeInputType::DidBlurFromControl() noexcept
+  {
+    CloseDateTimeChooser();
+
+    auto *element = Element();
+    if (element && element->WasChangedSinceLastFormControlChangeEvent())
+    {
+      element->DispatchFormControlChangeEvent();
+    }
+  }
+
+  void BaseDateAndTimeInputType::DidChangeValueFromControl() noexcept
+  {
+    krys_debug_assert(Element());
+    Ref<HTMLInputElement> input = ShareRef(*Element());
+
+    auto value = SanitizeValue(_dateTimeEditElement->Value());
+    bool valueChanged = value != input->Value();
+
+    InputType::SetValue(value, valueChanged, TextFieldEventBehavior::DispatchNoEvent,
+                        TextControlSetValueSelection::DoNotSet);
+
+    if (!valueChanged)
+    {
+      // The input's value only changes once every field is filled in, but assistive technology reads the
+      // partial value as it's typed.
+      if (auto *cache = input->NodeDocument().ExistingAXObjectCache())
+      {
+        cache->ValueChanged(*input);
+      }
+      return;
+    }
+
+    if (input->UserAgentShadowRoot()->ContainsFocusedElement())
+    {
+      input->DispatchFormControlInputEvent();
+    }
+    else
+    {
+      input->DispatchFormControlChangeEvent();
+    }
+
+    DateTimeChooserParameters parameters;
+    if (!SetupDateTimeChooserParameters(parameters))
+    {
+      return;
+    }
+
+    if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
+    {
+      dateTimeChooser->ShowChooser(parameters);
+    }
+  }
+
+  void BaseDateAndTimeInputType::DidReceiveSpaceKeyFromControl() noexcept
+  {
+    // One of our subfields received a space key event, so let's move focus into the picker.
+    _pickerWasActivatedByKeyboard = true;
+
+    RefPtr<DateTimeChooser> chooser = _dateTimeChooser;
+    if (!chooser)
+    {
+      ShowPicker();
+      return;
+    }
+
+    DateTimeChooserParameters parameters;
+    if (SetupDateTimeChooserParameters(parameters))
+    {
+      chooser->ShowChooser(parameters);
+    }
+  }
+
+  bool BaseDateAndTimeInputType::IsEditControlOwnerDisabled() const noexcept
+  {
+    krys_debug_assert(Element());
+    return Element()->IsDisabledFormControl();
+  }
+
+  bool BaseDateAndTimeInputType::IsEditControlOwnerReadOnly() const noexcept
+  {
+    krys_debug_assert(Element());
+    return Element()->IsReadOnly();
+  }
+
+  DOMString BaseDateAndTimeInputType::LocaleIdentifier() const noexcept
+  {
+    krys_debug_assert(Element());
+    return css::EffectiveLang(*Element());
+  }
+
+  void BaseDateAndTimeInputType::DidChooseValue(utf8_stringview value) noexcept
+  {
+    if (auto *element = Element())
+    {
+      (void)element->SetValue(value, TextFieldEventBehavior::DispatchInputAndChangeEvent);
+    }
+  }
+
+  bool
+    BaseDateAndTimeInputType::SetupDateTimeChooserParameters(DateTimeChooserParameters &parameters) noexcept
+  {
+    krys_debug_assert(Element());
+
+    auto &element = *Element();
+    auto &document = element.NodeDocument();
+
+    auto *view = document.View();
+    if (!view)
+    {
+      return false;
+    }
+
+    parameters.Type = element.Type();
+    parameters.Minimum = element.Minimum();
+    parameters.Maximum = element.Maximum();
+    parameters.Required = element.IsRequired();
+
+    if (!document.GetSettings().LangAttributeAwareFormControlUIEnabled)
+    {
+      parameters.Locale = i18n::DefaultLanguage();
+    }
+    else
+    {
+      auto computedLocale = css::EffectiveLang(element);
+      parameters.Locale = computedLocale.empty() ? i18n::DefaultLanguage() : computedLocale;
+    }
+
+    auto stepRange = CreateStepRange(AnyStepHandling::Reject);
+    if (stepRange.HasStep())
+    {
+      parameters.Step = stepRange.Step().ToDouble();
+      parameters.StepBase = stepRange.StepBase().ToDouble();
+    }
+    else
+    {
+      parameters.Step = 1.0;
+      parameters.StepBase = 0;
+    }
+
+    auto *renderer = element.Renderer();
+    parameters.AnchorRectInRootView =
+      renderer ? view->ContentsToView(renderer->AbsoluteBoundingBoxRect()) : RectI();
+    parameters.CurrentValue = element.Value();
+
+    if (renderer)
+    {
+      parameters.IsAnchorElementRTL =
+        renderer->Style().GetWritingMode().ComputedTextDirection() == text::TextDirection::RTL;
+      parameters.UseDarkAppearance = renderer->UseDarkAppearance();
+    }
+    auto date = ParseToDateComponents(element.Value()).value_or(DateComponents());
+    parameters.HasSecondField = ShouldHaveSecondField(date);
+    parameters.HasMillisecondField = ShouldHaveMillisecondField(date);
+    parameters.WasActivatedByKeyboard = _pickerWasActivatedByKeyboard;
+
+    // The datalist's suggestions with valid values, and their labels where they differ from their values.
+    if (auto dataList = element.List())
+    {
+      for (auto &option : dataList->Suggestions())
+      {
+        auto label = option->Label();
+        auto value = option->Value();
+        if (!element.IsValidValue(value))
+        {
+          continue;
+        }
+        parameters.SuggestionValues.push_back(
+          element.SanitizeValue(DOMStringView(value)).value_or(DOMString()));
+        parameters.LocalizedSuggestionValues.push_back(LocalizeValue(value));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move): a new label each iteration.
+        parameters.SuggestionLabels.push_back(value == label ? DOMString() : krys::move(label));
+      }
+    }
+
+    return true;
+  }
+
+  void BaseDateAndTimeInputType::DidEndChooser() noexcept
+  {
+    Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+    if (auto *element = Element())
+    {
+      styleInvalidation.emplace(*element, css::SelectorPseudoClass::Open, false);
+    }
+    _dateTimeChooser = nullptr;
+  }
+
+  void BaseDateAndTimeInputType::CloseDateTimeChooser() noexcept
+  {
+    if (RefPtr<DateTimeChooser> dateTimeChooser = _dateTimeChooser)
+    {
+      dateTimeChooser->EndChooser();
+    }
+
+    _pickerWasActivatedByKeyboard = false;
+  }
+}

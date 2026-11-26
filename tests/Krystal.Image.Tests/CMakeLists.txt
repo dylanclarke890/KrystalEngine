@@ -25,7 +25,7 @@ target_compile_options(Krystal.Image.Tests
 
 catch_discover_tests(Krystal.Image.Tests)
 
-# The test images, which Krystal.Booey.Tests shares.
+# The test images, which Krystal.Web.Tests shares.
 target_sources(Krystal.Image.Tests
   PUBLIC
     FILE_SET HEADERS

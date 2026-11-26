@@ -1,16 +1,16 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
-#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/Dom/Nodes/Document.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Web/Animation/KeyframeAnimationOptions.hpp"
+#include "Krystal.Web/Animation/KeyframeEffect.hpp"
+#include "Krystal.Web/Animation/WebAnimation.hpp"
+#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Web/Html/Window.hpp"
 #include <format>
 
 namespace krys::editor
@@ -28,13 +28,13 @@ namespace krys::editor
     constexpr static double Duration = 2'000;
 
   private:
-    WeakPtr<boo::Document> _document;
-    RefPtr<boo::WebAnimation> _animation;
-    Array<boo::EventListenerHandle, 4> _listeners;
+    WeakPtr<web::Document> _document;
+    RefPtr<web::WebAnimation> _animation;
+    Array<web::EventListenerHandle, 4> _listeners;
     int32 _frameRequest {0};
 
   public:
-    explicit PageAnimations(boo::Document &document) noexcept : _document(CreateWeakPtr(&document))
+    explicit PageAnimations(web::Document &document) noexcept : _document(CreateWeakPtr(&document))
     {
       auto ball = document.GetElementById(u8"anim-ball");
       if (!ball)
@@ -55,8 +55,8 @@ namespace krys::editor
         return;
       }
 
-      auto listen = [&](utf8_stringview id, boo::DOMStringAtom type,
-                        Func<void(boo::Event &)> &&callback) -> boo::EventListenerHandle
+      auto listen = [&](utf8_stringview id, web::DOMStringAtom type,
+                        Func<void(web::Event &)> &&callback) -> web::EventListenerHandle
       {
         if (auto element = document.GetElementById(id))
         {
@@ -64,16 +64,16 @@ namespace krys::editor
         }
         return {};
       };
-      _listeners[0] = listen(u8"anim-play", u8"click", [this](boo::Event &) { (void)_animation->Play(); });
-      _listeners[1] = listen(u8"anim-pause", u8"click", [this](boo::Event &) { (void)_animation->Pause(); });
+      _listeners[0] = listen(u8"anim-play", u8"click", [this](web::Event &) { (void)_animation->Play(); });
+      _listeners[1] = listen(u8"anim-pause", u8"click", [this](web::Event &) { (void)_animation->Pause(); });
       _listeners[2] =
-        listen(u8"anim-reverse", u8"click", [this](boo::Event &) { (void)_animation->Reverse(); });
+        listen(u8"anim-reverse", u8"click", [this](web::Event &) { (void)_animation->Reverse(); });
       _listeners[3] = listen(u8"anim-seek", u8"input",
-                             [this](boo::Event &)
+                             [this](web::Event &)
                              {
                                if (auto seek = _document ? _document->GetElementById(u8"anim-seek") : nullptr)
                                {
-                                 if (auto *input = DynamicDowncast<boo::HTMLInputElement>(seek.get()))
+                                 if (auto *input = DynamicDowncast<web::HTMLInputElement>(seek.get()))
                                  {
                                    Seek(input->ValueAsNumber() / 100);
                                  }
@@ -96,7 +96,7 @@ namespace krys::editor
     }
 
     /// @brief The ball's animation; null on a page without it.
-    KRYS_NODISCARD boo::WebAnimation *Animation() const noexcept
+    KRYS_NODISCARD web::WebAnimation *Animation() const noexcept
     {
       return _animation.get();
     }
@@ -108,25 +108,25 @@ namespace krys::editor
       {
         return;
       }
-      (void)_animation->SetBindingsCurrentTime(boo::WebAnimationTime::FromMilliseconds(progress * Duration));
+      (void)_animation->SetBindingsCurrentTime(web::WebAnimationTime::FromMilliseconds(progress * Duration));
       ShowTime();
     }
 
   private:
     /// @brief Animates @p ball from its track's start to its end, paused at the start.
-    KRYS_NODISCARD bool CreateAnimation(boo::Element &ball) noexcept
+    KRYS_NODISCARD bool CreateAnimation(web::Element &ball) noexcept
     {
       // The ball's margin is a share of the track's width, less its own.
-      boo::InputKeyframe start;
+      web::InputKeyframe start;
       start.Properties = {{u8"marginLeft", u8"0%"}};
-      boo::InputKeyframe end;
+      web::InputKeyframe end;
       end.Properties = {{u8"marginLeft", u8"calc(100% - 40px)"}};
-      boo::KeyframeAnimationOptions options;
+      web::KeyframeAnimationOptions options;
       options.Id = u8"ball";
       options.Duration = Duration;
       options.Easing = u8"ease-in-out";
-      options.Fill = boo::FillMode::Both;
-      auto animation = ball.Animate(List<boo::InputKeyframe> {krys::move(start), krys::move(end)}, options);
+      options.Fill = web::FillMode::Both;
+      auto animation = ball.Animate(List<web::InputKeyframe> {krys::move(start), krys::move(end)}, options);
       if (animation.HasException())
       {
         return false;
@@ -153,14 +153,14 @@ namespace krys::editor
         });
     }
 
-    KRYS_NODISCARD static const char *PlayStateName(boo::WebAnimation::PlayState playState) noexcept
+    KRYS_NODISCARD static const char *PlayStateName(web::WebAnimation::PlayState playState) noexcept
     {
       switch (playState)
       {
-        case boo::WebAnimation::PlayState::Idle:     return "idle";
-        case boo::WebAnimation::PlayState::Running:  return "running";
-        case boo::WebAnimation::PlayState::Paused:   return "paused";
-        case boo::WebAnimation::PlayState::Finished: return "finished";
+        case web::WebAnimation::PlayState::Idle:     return "idle";
+        case web::WebAnimation::PlayState::Running:  return "running";
+        case web::WebAnimation::PlayState::Paused:   return "paused";
+        case web::WebAnimation::PlayState::Finished: return "finished";
       }
       return "";
     }
@@ -178,11 +178,11 @@ namespace krys::editor
                               PlayStateName(_animation->GetPlayState()));
       if (auto label = _document->GetElementById(u8"anim-time"))
       {
-        (void)label->TextContent(boo::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+        (void)label->TextContent(web::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
       }
       if (auto seek = _document->GetElementById(u8"anim-seek"))
       {
-        if (auto *input = DynamicDowncast<boo::HTMLInputElement>(seek.get()))
+        if (auto *input = DynamicDowncast<web::HTMLInputElement>(seek.get()))
         {
           (void)input->SetValueAsNumber(seconds * 1'000 / Duration * 100);
         }

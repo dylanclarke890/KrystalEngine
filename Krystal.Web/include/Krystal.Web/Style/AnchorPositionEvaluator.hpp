@@ -1,0 +1,340 @@
+﻿/*
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Memory/CheckedPtr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Web/Css/Properties/Property.hpp"
+#include "Krystal.Web/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Web/Css/Values/ValueId.hpp"
+#include "Krystal.Web/Graphics/Geometry/BoxSides.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutPoint.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Web/Style/AnchorSizeDimension.hpp"
+#include "Krystal.Web/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Web/Style/Scope/ResolvedScopedName.hpp"
+#include "Krystal.Web/Style/Scope/ScopedName.hpp"
+#include "Krystal.Web/Text/WritingMode.hpp"
+
+namespace krys::web
+{
+  class Document;
+  class Element;
+  class RenderBox;
+  class RenderBoxModelObject;
+  class RenderElement;
+  class RenderStyle;
+  class RenderView;
+
+  /// @brief A scroller's scroll position, or the viewport's (without a scroller), when an anchor-positioned
+  /// box was laid out.
+  struct AnchorScrollSnapshot
+  {
+    WeakPtr<const RenderBox> Scroller;
+    LayoutPoint ScrollSnapshot;
+
+    AnchorScrollSnapshot(const RenderBox &scroller, LayoutPoint snapshot) noexcept;
+
+    explicit AnchorScrollSnapshot(LayoutPoint snapshot) noexcept;
+
+    KRYS_NODISCARD LayoutSize AdjustmentForCurrentScrollPosition() const noexcept;
+
+    KRYS_NODISCARD bool operator==(const AnchorScrollSnapshot &) const noexcept;
+  };
+
+  /// @brief Shifts an anchor-positioned box by how far the scrollers between it and its default anchor have
+  /// scrolled since it was laid out: its default scroll shift.
+  /// @see https://drafts.csswg.org/css-anchor-position-1/#scroll
+  class AnchorScrollAdjuster
+  {
+  public:
+    enum class Diff : uint8
+    {
+      New,
+      SnapshotsDiffer,
+      SnapshotsMatch,
+    };
+
+  private:
+    CheckedRef<RenderBox> _anchored;
+    List<AnchorScrollSnapshot> _scrollSnapshots;
+    bool _needsXAdjustment : 1 {false};
+    bool _needsYAdjustment : 1 {false};
+    bool _adjustForViewport : 1 {false};
+    bool _hasChainedAnchor : 1 {false};
+    bool _hasStickyAnchor : 1 {false};
+    bool _isHidden : 1 {false};
+    bool _hasFallback : 1 {false};
+    LayoutSize _stickySnapshot;
+    LayoutSizeLimits _fallbackLimits;
+
+  public:
+    AnchorScrollAdjuster(RenderBox &anchored, const RenderBoxModelObject &defaultAnchor) noexcept;
+
+    AnchorScrollAdjuster(const AnchorScrollAdjuster &) noexcept;
+
+    AnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept;
+
+    ~AnchorScrollAdjuster() noexcept;
+
+    AnchorScrollAdjuster &operator=(const AnchorScrollAdjuster &) noexcept;
+
+    AnchorScrollAdjuster &operator=(AnchorScrollAdjuster &&) noexcept;
+
+    KRYS_NODISCARD RenderBox *Anchored() const noexcept;
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept;
+
+    KRYS_NODISCARD bool MayNeedAdjustment() const noexcept
+    {
+      return _needsXAdjustment || _needsYAdjustment;
+    }
+
+    KRYS_NODISCARD bool MayNeedXAdjustment() const noexcept
+    {
+      return _needsXAdjustment;
+    }
+
+    KRYS_NODISCARD bool MayNeedYAdjustment() const noexcept
+    {
+      return _needsYAdjustment;
+    }
+
+    KRYS_NODISCARD bool IsHidden() const noexcept
+    {
+      return _isHidden;
+    }
+
+    void SetHidden(bool hide) noexcept
+    {
+      _isHidden = hide;
+    }
+
+    void AddSnapshot(const RenderBox &scroller) noexcept;
+
+    void AddViewportSnapshot(const RenderView &) noexcept;
+
+    KRYS_NODISCARD bool HasViewportSnapshot() const noexcept
+    {
+      return _adjustForViewport;
+    }
+
+    // Snapshot differences can require invalidation.
+    KRYS_NODISCARD bool RecaptureDiffers(const AnchorScrollAdjuster &) const noexcept;
+
+    void SetFallbackLimits(const RenderBox &anchored) noexcept;
+
+    KRYS_NODISCARD bool HasFallbackLimits() const noexcept
+    {
+      return _hasFallback;
+    }
+
+    KRYS_NODISCARD bool ExceedsFallbackLimits(LayoutSize adjustment) const noexcept
+    {
+      return !_fallbackLimits.Fits(adjustment);
+    }
+
+    KRYS_NODISCARD LayoutSize AccumulateAdjustments(const RenderView &,
+                                                    const RenderBox &anchored) const noexcept;
+
+    bool InvalidateForScroller(const RenderBox &scroller) noexcept;
+
+  private:
+    KRYS_NODISCARD LayoutSize AdjustmentForViewport(const RenderView &) const noexcept;
+  };
+}
+
+namespace krys::web::style
+{
+  struct BuilderPositionTryFallback;
+  class BuilderState;
+
+  enum class AnchorPositionResolutionStage : uint8
+  {
+    FindAnchors,
+    ResolveAnchorFunctions,
+    Resolved,
+    Positioned,
+  };
+
+  using AnchorElements = HashMap<ResolvedScopedName, WeakPtr<web::Element>>;
+
+  struct AnchorPositionedState
+  {
+    style::AnchorElements AnchorElements;
+    HashSet<ResolvedScopedName> AnchorNames;
+    AnchorPositionResolutionStage Stage {AnchorPositionResolutionStage::FindAnchors};
+  };
+
+  using AnchorPositionedKey = Pair<RefPtr<const web::Element>, Maybe<PseudoElementIdentifier>>;
+
+  /// @brief Hashes an anchor-positioned element or pseudo-element, for maps keyed by it.
+  struct AnchorPositionedKeyHash
+  {
+    KRYS_NODISCARD size_t operator()(const AnchorPositionedKey &key) const noexcept
+    {
+      return CombineFastHashes(key.first.get(), key.second);
+    }
+  };
+
+  using AnchorPositionedStates =
+    HashMap<AnchorPositionedKey, UniquePtr<AnchorPositionedState>, AnchorPositionedKeyHash>;
+
+  using AnchorsForAnchorName = HashMap<ResolvedScopedName, List<const RenderBoxModelObject *>>;
+
+  struct ResolvedAnchor
+  {
+    WeakPtr<RenderBoxModelObject> Renderer;
+    ResolvedScopedName Name;
+  };
+
+  struct AnchorPositionedToAnchorEntry
+  {
+    // The anchor-positioned element: the map is keyed by its address, and this tells a destroyed element from
+    // a new one at the same address.
+    WeakPtr<web::Element> Element;
+
+    // The pseudo-element identifier can be used to access the AnchorPositionedState struct of the current
+    // element in an AnchorPositionedStates map, in combination with the relevant Element object.
+    Maybe<style::PseudoElementIdentifier> PseudoElementIdentifier;
+
+    List<ResolvedAnchor> Anchors;
+  };
+
+  using AnchorPositionedToAnchorMap = HashMap<const web::Element *, AnchorPositionedToAnchorEntry>;
+  using AnchorToAnchorPositionedMap = HashMap<const RenderBoxModelObject *, List<Ref<web::Element>>>;
+
+  /// @brief Resolves anchor positioning: finds the anchors of anchor-positioned boxes and evaluates the
+  /// `anchor()` and `anchor-size()` functions against their geometry.
+  /// @see https://drafts.csswg.org/css-anchor-position-1/
+  class AnchorPositionEvaluator
+  {
+  public:
+    using Side = Variant<css::ValueId, double>;
+
+    AnchorPositionEvaluator() = delete;
+
+    /// @brief Whether @p property takes `anchor()`: the inset properties.
+    KRYS_NODISCARD static bool PropertyAllowsAnchorFunction(css::PropertyId property) noexcept
+    {
+      return css::IsInsetProperty(property);
+    }
+
+    KRYS_NODISCARD static Maybe<double> Evaluate(BuilderState &, Maybe<ScopedName> elementName,
+                                                 Side) noexcept;
+
+    /// @brief Whether @p property takes `anchor-size()`: the sizing, inset and margin properties.
+    KRYS_NODISCARD static bool PropertyAllowsAnchorSizeFunction(css::PropertyId property) noexcept
+    {
+      return css::IsSizingProperty(property) || css::IsInsetProperty(property)
+             || css::IsMarginProperty(property);
+    }
+
+    KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,
+                                                     Maybe<AnchorSizeDimension>) noexcept;
+
+    static void UpdateAnchorPositioningStatesAfterInterleavedLayout(Document &,
+                                                                    AnchorPositionedStates &) noexcept;
+
+    static void UpdateScrollAdjustments(RenderView &) noexcept;
+
+    static void
+      UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(web::Element &, const RenderStyle &,
+                                                                       AnchorPositionedStates &) noexcept;
+
+    KRYS_NODISCARD static LayoutRect
+      ComputeAnchorRectRelativeToContainingBlock(const RenderBoxModelObject &anchorBox,
+                                                 const RenderElement &containingBlock,
+                                                 const RenderBox &anchoredBox) noexcept;
+
+    static void CaptureScrollSnapshots(RenderBox &anchored,
+                                       bool invalidateStyleForScrollPositionChanges = true) noexcept;
+
+    KRYS_NODISCARD static AnchorToAnchorPositionedMap
+      MakeAnchorPositionedForAnchorMap(AnchorPositionedToAnchorMap &) noexcept;
+
+    KRYS_NODISCARD static bool IsAnchorPositioned(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static bool IsStyleTimeAnchorPositioned(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static bool IsLayoutTimeAnchorPositioned(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static css::PropertyId
+      ResolvePositionTryFallbackProperty(css::PropertyId, WritingMode,
+                                         const BuilderPositionTryFallback &) noexcept;
+
+    /// @brief Swaps a self-alignment position (`align-self`/`justify-self`) according to a position-try
+    /// fallback's tactics.
+    KRYS_NODISCARD static css::ValueId
+      ResolvePositionTryFallbackValueForSelfPosition(css::PropertyId, css::ValueId position, WritingMode,
+                                                     const BuilderPositionTryFallback &) noexcept;
+
+    KRYS_NODISCARD static bool OverflowsInsetModifiedContainingBlock(const RenderBox &anchoredBox) noexcept;
+
+    KRYS_NODISCARD static bool
+      IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(const RenderBox &anchoredBox) noexcept;
+
+    KRYS_NODISCARD static ScopedName DefaultAnchorName(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static bool IsAnchor(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static bool IsImplicitAnchor(const RenderStyle &) noexcept;
+
+    KRYS_NODISCARD static RenderBoxModelObject *DefaultAnchorForBox(const RenderBox &) noexcept;
+
+    /// @brief The index of the position option each of @p positionTryBoxes is using.
+    KRYS_NODISCARD static HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash>
+      RecordLastSuccessfulPositionOptions(const HashSet<const RenderBox *> &positionTryBoxes) noexcept;
+
+  private:
+    KRYS_NODISCARD static RenderBoxModelObject *
+      FindAnchorForAnchorFunctionAndAttemptResolution(BuilderState &,
+                                                      Maybe<ScopedName> anchorNameArgument) noexcept;
+
+    KRYS_NODISCARD static AnchorElements
+      FindAnchorsForAnchorPositionedElement(const web::Element &,
+                                            const HashSet<ResolvedScopedName> &anchorNames,
+                                            const AnchorsForAnchorName &) noexcept;
+
+    KRYS_NODISCARD static RefPtr<const web::Element>
+      AnchorPositionedElementOrPseudoElement(BuilderState &) noexcept;
+
+    KRYS_NODISCARD static AnchorPositionedKey KeyForElementOrPseudoElement(const web::Element &) noexcept;
+
+    static void AddAnchorFunctionScrollCompensatedAxis(RenderStyle &, const RenderBox &anchored,
+                                                       const RenderBoxModelObject &anchor, BoxAxis) noexcept;
+  };
+}

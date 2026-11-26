@@ -1,0 +1,105 @@
+﻿#include "Krystal.Web/Html/Elements/HTMLSelectedContentElement.hpp"
+#include "Krystal.Web/Html/Algorithms/FormControlAlgorithms.hpp"
+#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
+
+namespace krys::web
+{
+  HTMLSelectedContentElement::HTMLSelectedContentElement(Document &document) noexcept
+      : HTMLElement(document, html::HTMLElementInterface::SelectedContent)
+  {
+  }
+
+#pragma region Extension Hooks
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-insertion-steps
+  void HTMLSelectedContentElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+
+    // Recalculate a selectedcontent element's disabledness given selectedcontent.
+    (void)RecalculateDisabledness();
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-post-connection-steps
+  void HTMLSelectedContentElement::OnPostConnection() noexcept
+  {
+    HTMLElement::OnPostConnection();
+
+    // 1. Let select be the result of recalculate a selectedcontent element's disabledness given
+    // selectedcontent.
+    RefPtr<HTMLSelectElement> select = ShareRefPtr(RecalculateDisabledness());
+
+    // 2. If selectedcontent's disabled is true, select is null, or select has the multiple attribute, then
+    //    return.
+    if (_disabled || !select || select->HasAttribute(u8"multiple"))
+    {
+      return;
+    }
+
+    // 3. Update a selectedcontent given select and selectedcontent.
+    html::FormControlAlgorithms::UpdateSelectedContent(*select, *this);
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-selectedcontent-element:html-element-moving-steps
+  void HTMLSelectedContentElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    // 1. Let select be the result of recalculate a selectedcontent element's disabledness given movedNode.
+    RefPtr<HTMLSelectElement> select = ShareRefPtr(RecalculateDisabledness());
+
+    // 2. If movedNode's disabled is true, select is null, or select has the multiple attribute, then return.
+    if (_disabled || !select || select->HasAttribute(u8"multiple"))
+    {
+      return;
+    }
+
+    // 3. Queue a microtask to update a selectedcontent given select and movedNode.
+    html::EventLoop::Current().QueueMicrotask(
+      [select, selectedcontent = ShareRef(*this)]
+      { html::FormControlAlgorithms::UpdateSelectedContent(*select, *selectedcontent); });
+  }
+
+#pragma endregion
+
+  HTMLSelectElement *HTMLSelectedContentElement::RecalculateDisabledness() noexcept
+  {
+    // 1. Let nearestSelectAncestor be null.
+    HTMLSelectElement *nearestSelectAncestor = nullptr;
+
+    // 2. Set selectedcontent's disabled to false.
+    _disabled = false;
+
+    // 3. For each ancestor of selectedcontent's ancestors, in reverse tree order:
+    for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+    {
+      // 3a. If ancestor is a select element:
+      if (auto *select = DynamicDowncast<HTMLSelectElement>(*ancestor))
+      {
+        // 3a.i. If nearestSelectAncestor is null, then set nearestSelectAncestor to ancestor and continue.
+        if (!nearestSelectAncestor)
+        {
+          nearestSelectAncestor = select;
+          continue;
+        }
+
+        // 3a.ii. Set selectedcontent's disabled to true and break.
+        _disabled = true;
+        break;
+      }
+
+      // 3b. If ancestor is an option element or a selectedcontent element, then set selectedcontent's
+      //     disabled to true and break.
+      if (Is<HTMLOptionElement>(*ancestor) || Is<HTMLSelectedContentElement>(*ancestor))
+      {
+        _disabled = true;
+        break;
+      }
+    }
+
+    // 4. Return nearestSelectAncestor.
+    return nearestSelectAncestor;
+  }
+}

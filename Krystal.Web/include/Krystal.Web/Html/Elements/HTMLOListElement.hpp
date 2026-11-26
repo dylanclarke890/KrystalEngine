@@ -1,0 +1,112 @@
+﻿#pragma once
+
+#include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+
+namespace krys::web
+{
+  /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
+  class HTMLOListElement : public HTMLElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOListElement);
+
+  private:
+    Maybe<int32> _start;
+    mutable Maybe<uint32> _itemCount;
+    bool _isReversed {false};
+
+  public:
+    HTMLOListElement(Document &document) noexcept;
+
+#pragma region HTMLOListElement https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-reversed
+    KRYS_NODISCARD bool Reversed() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-reversed
+    void Reversed(bool value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-start
+    KRYS_NODISCARD int32 Start() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-start
+    void Start(int32 value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-type
+    KRYS_NODISCARD DOMString Type() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#dom-ol-type
+    void Type(DOMString value) noexcept;
+
+#pragma endregion
+
+#pragma region HTMLOListElement Obsolete members - https://html.spec.whatwg.org/multipage/obsolete.html#HTMLOListElement-partial
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ol-compact
+    KRYS_NODISCARD bool Compact() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-ol-compact
+    void Compact(bool value) noexcept;
+
+#pragma endregion
+
+    /// @brief The value the list's numbering starts from: the start attribute, else the number of items for a
+    /// reversed list, else 1.
+    /// @note It doesn't trigger layout because it is called from rendering code.
+    /// @see https://html.spec.whatwg.org/multipage/grouping-content.html#concept-ol-start
+    KRYS_NODISCARD int32 StartValue() const noexcept
+    {
+      // 1. If the ol element has a start attribute:
+      // 1a. Let parsed be the result of parsing the value of the attribute as an integer.
+      // 1b. If parsed is not an error, then return parsed.
+      // (Parsed when the attribute changes.)
+      if (_start)
+      {
+        return *_start;
+      }
+
+      // 2. If the ol element has a reversed attribute, then return the number of owned li elements.
+      if (_isReversed)
+      {
+        return static_cast<int32>(ItemCount());
+      }
+
+      // 3. Return 1.
+      return 1;
+    }
+
+    /// @brief Whether the list has a `reversed` attribute: its items count down.
+    KRYS_NODISCARD bool IsReversed() const noexcept
+    {
+      return _isReversed;
+    }
+
+    /// @brief Forgets the cached number of items, as one was added or removed.
+    void ItemCountChanged() noexcept
+    {
+      _itemCount = null;
+    }
+
+  protected:
+    void OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                            Maybe<DOMStringView> value, const DOMStringAtom &namespaceURI) noexcept override;
+
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
+
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
+  private:
+    /// @brief The number of the list's items, which a reversed list's numbering starts from; cached.
+    KRYS_NODISCARD uint32 ItemCount() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::HTMLOListElement)
+  KRYS_NODISCARD static bool IsType(const krys::web::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLOListElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

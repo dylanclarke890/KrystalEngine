@@ -1,0 +1,1208 @@
+﻿/*
+ * Copyright (C) 2016-2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
+#include "Krystal.Web/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Web/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Web/Rendering/RenderInline.hpp"
+#include "Krystal.Web/Rendering/RenderText.hpp"
+#include "Krystal.Web/Rendering/RenderView.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
+#include "Krystal.Web/Rendering/Updating/RenderTreeBuilder.hpp"
+#include "Krystal.Web/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
+#include "Krystal.Web/Style/Styleable.hpp"
+#include "Krystal.Web/Style/TreeResolver.hpp"
+#include "Krystal.Web/Style/Update.hpp"
+
+namespace krys::web
+{
+  RenderTreeUpdater::Parent::Parent(ContainerNode &root) noexcept
+      : Element(DynamicDowncast<web::Element>(root)),
+        Position(RenderTreePosition(Downcast<RenderElement>(*root.Renderer())))
+  {
+  }
+
+  RenderTreeUpdater::Parent::Parent(web::Element &element, const style::ElementUpdate *update) noexcept
+      : Element(&element), Update(update)
+  {
+    if (auto *renderer = element.Renderer())
+    {
+      Position = RenderTreePosition(*renderer);
+    }
+  }
+
+  RenderTreeUpdater::RenderTreeUpdater(Document &document, style::PostResolutionCallbackDisabler &) noexcept
+      : _document(ShareRef(document)), _generatedContent(CreateUnique<GeneratedContent>(*this))
+  {
+    if (auto *renderView = document.GetRenderView())
+    {
+      _builder = CreateUnique<RenderTreeBuilder>(*renderView);
+    }
+  }
+
+  RenderTreeUpdater::~RenderTreeUpdater() noexcept = default;
+
+  static web::Element *FindRenderingAncestor(Node &node) noexcept
+  {
+    for (auto &ancestor : dom::ComposedTreeAncestors(node))
+    {
+      if (ancestor.Renderer())
+      {
+        return &ancestor;
+      }
+      if (!ancestor.HasDisplayContents())
+      {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
+
+  static ContainerNode *FindRenderingRoot(ContainerNode &node) noexcept
+  {
+    if (node.Renderer())
+    {
+      return &node;
+    }
+    return FindRenderingAncestor(node);
+  }
+
+  void RenderTreeUpdater::Commit(UniquePtr<style::Update> styleUpdate) noexcept
+  {
+    krys_debug_assert(_document.get() == &styleUpdate->Document());
+
+    if (!_document->GetRenderView())
+    {
+      // Documents without a render view are still styled; they keep the style the render view would have.
+      if (styleUpdate->InitialContainingBlockUpdate())
+      {
+        _document->_renderViewStyle = RenderStyle::ClonePtr(*styleUpdate->InitialContainingBlockUpdate());
+      }
+      return;
+    }
+
+    _styleUpdate = krys::move(styleUpdate);
+
+    UpdateRebuildRoots();
+
+    UpdateRenderViewStyle();
+
+    for (auto &root : _styleUpdate->Roots())
+    {
+      if (&root->NodeDocument() != _document.get())
+      {
+        continue;
+      }
+      auto *renderingRoot = FindRenderingRoot(*root);
+      if (!renderingRoot)
+      {
+        continue;
+      }
+      UpdateRenderTree(*renderingRoot);
+    }
+
+    GetGeneratedContent().UpdateRemainingQuotes();
+    GetGeneratedContent().UpdateCounters();
+
+    _builder->UpdateAfterDescendants(GetRenderView());
+
+    _styleUpdate = nullptr;
+  }
+
+  void RenderTreeUpdater::UpdateRebuildRoots() noexcept
+  {
+    auto findNewRebuildRoot = [&](web::Element &root) -> web::Element *
+    {
+      auto *renderingAncestor = FindRenderingAncestor(root);
+      if (!renderingAncestor)
+      {
+        return nullptr;
+      }
+      auto *rootRenderer = root.Renderer();
+      auto isInsideAnonymousFlexItemWithSiblings = [&]
+      {
+        if (!Is<RenderFlexibleBox>(renderingAncestor->Renderer()))
+        {
+          return false;
+        }
+        if (!root.PreviousSibling() || !root.PreviousSibling()->Renderer() || !root.NextSibling()
+            || !root.NextSibling()->Renderer())
+        {
+          return false;
+        }
+        // Direct children of a flex box are supposed to be individual flex items.
+        if (auto *parent = root.PreviousSibling()->Renderer()->Parent(); parent && parent->IsAnonymousBlock())
+        {
+          return true;
+        }
+        return false;
+      };
+      auto isBlockInInline = [&]
+      {
+        if (!Is<RenderInline>(renderingAncestor->Renderer()))
+        {
+          return false;
+        }
+        return rootRenderer && rootRenderer->IsInFlow() && !rootRenderer->IsInline();
+      };
+      if (isInsideAnonymousFlexItemWithSiblings() || isBlockInInline()
+          || RenderTreeBuilder::IsRebuildRootForChildren(*renderingAncestor->Renderer()))
+      {
+        return renderingAncestor;
+      }
+      return nullptr;
+    };
+
+    auto addForRebuild = [&](web::Element &element)
+    {
+      auto *existingUpdate = _styleUpdate->GetElementUpdate(element);
+      if (existingUpdate)
+      {
+        if (existingUpdate->Changes.contains(style::Change::Renderer))
+        {
+          return false;
+        }
+        existingUpdate->Changes.Add(style::Change::Renderer);
+        return true;
+      }
+
+      auto *existingStyle = element.RenderOrDisplayContentsStyle();
+      if (!existingStyle)
+      {
+        return false;
+      }
+
+      auto *parent = dom::ComposedTreeAncestors(element).First();
+      _styleUpdate->AddElement(
+        element, parent,
+        style::ElementUpdate {
+          CreateUnique<RenderStyle>(RenderStyle::CloneIncludingPseudoElements(*existingStyle)),
+          style::Change::Renderer});
+      return true;
+    };
+
+    auto addSubtreeForRebuild = [&](web::Element &root)
+    {
+      if (!addForRebuild(root))
+      {
+        return;
+      }
+      auto descendants = dom::ComposedTreeDescendants(root);
+      auto it = descendants.begin();
+      auto end = descendants.end();
+      while (it != end)
+      {
+        auto *descendant = DynamicDowncast<web::Element>(*it);
+        if (!descendant)
+        {
+          it.TraverseNext();
+          continue;
+        }
+        if (!addForRebuild(*descendant))
+        {
+          it.TraverseNextSkippingChildren();
+          continue;
+        }
+        it.TraverseNext();
+      }
+    };
+
+    while (true)
+    {
+      auto rebuildRoots = _styleUpdate->TakeRebuildRoots();
+      if (rebuildRoots.empty())
+      {
+        break;
+      }
+      for (auto &rebuildRoot : rebuildRoots)
+      {
+        if (auto *newRebuildRoot = findNewRebuildRoot(*rebuildRoot))
+        {
+          addSubtreeForRebuild(*newRebuildRoot);
+        }
+      }
+    }
+  }
+
+  static bool ShouldCreateRenderer(const web::Element &element, const RenderElement &parentRenderer) noexcept
+  {
+    if (!parentRenderer.CanHaveChildren()
+        && !(Is<PseudoElement>(element) && parentRenderer.CanHaveGeneratedChildren()))
+    {
+      return false;
+    }
+    if (parentRenderer.GetElement() && !parentRenderer.GetElement()->ChildShouldCreateRenderer(element))
+    {
+      return false;
+    }
+    return true;
+  }
+
+  void RenderTreeUpdater::UpdateRenderTree(ContainerNode &root) noexcept
+  {
+    krys_debug_assert(root.Renderer());
+    krys_debug_assert(_parentStack.empty());
+
+    _parentStack.emplace_back(root);
+
+    auto descendants = dom::ComposedTreeDescendants(root);
+    auto it = descendants.begin();
+    auto end = descendants.end();
+
+    while (it != end)
+    {
+      PopParentsToDepth(it.Depth());
+
+      auto &node = *it;
+
+      if (auto *renderer = node.Renderer())
+      {
+        GetRenderTreePosition().InvalidateNextSibling(*renderer);
+      }
+      else if (auto *element = DynamicDowncast<web::Element>(node); element && element->HasDisplayContents())
+      {
+        GetRenderTreePosition().InvalidateNextSibling();
+      }
+
+      if (auto *text = DynamicDowncast<Text>(node))
+      {
+        auto *textUpdate = _styleUpdate->GetTextUpdate(*text);
+        bool didCreateParent =
+          GetParent().Update && GetParent().Update->Changes.contains(style::Change::Renderer);
+        bool mayNeedUpdateWhitespaceOnlyRenderer =
+          RenderingParent().DidCreateOrDestroyChildRenderer && text->ContainsOnlyASCIIWhitespace();
+        if (didCreateParent || textUpdate || mayNeedUpdateWhitespaceOnlyRenderer)
+        {
+          UpdateTextRenderer(*text, textUpdate, nullptr);
+        }
+
+        StorePreviousRenderer(*text);
+        it.TraverseNextSkippingChildren();
+        continue;
+      }
+
+      auto &element = Downcast<web::Element>(node);
+
+      bool needsSVGRendererUpdate = element.NeedsSVGRendererUpdate();
+      if (needsSVGRendererUpdate)
+      {
+        UpdateSVGRenderer(element);
+      }
+
+      auto *elementUpdate = _styleUpdate->GetElementUpdate(element);
+
+      // We hop through display: contents elements in findRenderingRoot, so
+      // there may be other updates down the tree.
+      if (!elementUpdate && !element.HasDisplayContents() && !needsSVGRendererUpdate)
+      {
+        StorePreviousRenderer(element);
+        it.TraverseNextSkippingChildren();
+        continue;
+      }
+
+      if (elementUpdate)
+      {
+        UpdateElementRenderer(element, *elementUpdate);
+      }
+
+      StorePreviousRenderer(element);
+
+      auto mayHaveRenderedDescendants = [&]
+      {
+        if (element.Renderer())
+        {
+          return !(element.IsInTopLayer() && element.Renderer()->IsSkippedContent());
+        }
+        return element.HasDisplayContents()
+               && ShouldCreateRenderer(element, GetRenderTreePosition().Parent());
+      }();
+
+      if (!mayHaveRenderedDescendants)
+      {
+        it.TraverseNextSkippingChildren();
+        continue;
+      }
+
+      PushParent(element, elementUpdate);
+
+      it.TraverseNext();
+    }
+
+    PopParentsToDepth(0);
+  }
+
+  auto RenderTreeUpdater::RenderingParent() noexcept -> Parent &
+  {
+    for (auto i = _parentStack.size(); i--;)
+    {
+      if (_parentStack[i].Position)
+      {
+        return _parentStack[i];
+      }
+    }
+    krys_debug_assert(false);
+    return _parentStack.back();
+  }
+
+  RenderTreePosition &RenderTreeUpdater::GetRenderTreePosition() noexcept
+  {
+    return *RenderingParent().Position;
+  }
+
+  void RenderTreeUpdater::PushParent(web::Element &element, const style::ElementUpdate *update) noexcept
+  {
+    _parentStack.emplace_back(element, update);
+
+    UpdateBeforeDescendants(element, update);
+  }
+
+  void RenderTreeUpdater::PopParent() noexcept
+  {
+    auto &parent = _parentStack.back();
+    if (parent.Element)
+    {
+      UpdateAfterDescendants(*parent.Element, parent.Update);
+    }
+
+    if (&parent != &RenderingParent())
+    {
+      GetRenderTreePosition().InvalidateNextSibling();
+    }
+
+    _parentStack.pop_back();
+  }
+
+  void RenderTreeUpdater::PopParentsToDepth(uint32 depth) noexcept
+  {
+    krys_debug_assert(_parentStack.size() >= depth);
+
+    while (_parentStack.size() > depth)
+    {
+      PopParent();
+    }
+  }
+
+  void RenderTreeUpdater::UpdateBeforeDescendants(web::Element &element,
+                                                  const style::ElementUpdate *update) noexcept
+  {
+    if (update)
+    {
+      GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::Before);
+    }
+
+    if (auto *before = element.BeforePseudoElement())
+    {
+      StorePreviousRenderer(*before);
+    }
+  }
+
+  void RenderTreeUpdater::UpdateAfterDescendants(web::Element &element,
+                                                 const style::ElementUpdate *update) noexcept
+  {
+    if (update)
+    {
+      GetGeneratedContent().UpdateBeforeOrAfterPseudoElement(element, *update, PseudoElementType::After);
+    }
+
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal;
+    if (update && update->RecompositeLayer)
+    {
+      minimalStyleDifference = style::DifferenceResult::RecompositeLayer;
+    }
+
+    GetGeneratedContent().UpdateBackdropRenderer(*renderer, minimalStyleDifference);
+    // FIXME: Writing suggestions, once there are any.
+
+    _builder->UpdateAfterDescendants(*renderer);
+
+    if (update && update->Changes.contains(style::Change::Renderer))
+    {
+      element.DidAttachRenderers();
+    }
+  }
+
+  void RenderTreeUpdater::UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
+                                              style::DifferenceResult minimalStyleDifference) noexcept
+  {
+    auto oldStyle = RenderStyle::Clone(renderer.Style());
+    renderer.SetStyle(krys::move(newStyle), minimalStyleDifference);
+    _builder->NormalizeTreeAfterStyleChange(renderer, oldStyle);
+  }
+
+  void RenderTreeUpdater::UpdateSVGRenderer(web::Element &element) noexcept
+  {
+    krys_debug_assert(element.NeedsSVGRendererUpdate());
+    element.SetNeedsSVGRendererUpdate(false);
+
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(*renderer);
+  }
+
+  void RenderTreeUpdater::UpdateElementRenderer(web::Element &element,
+                                                const style::ElementUpdate &elementUpdate) noexcept
+  {
+    if (!elementUpdate.Style)
+    {
+      return;
+    }
+
+    auto elementUpdateStyle = RenderStyle::CloneIncludingPseudoElements(*elementUpdate.Style);
+
+    bool shouldTearDownRenderers = [&]
+    {
+      if (element.IsInTopLayer() && elementUpdate.Changes.contains(style::Change::Inherited)
+          && elementUpdate.Style->IsSkippedRootOrSkippedContent())
+      {
+        return true;
+      }
+      return elementUpdate.Changes.contains(style::Change::Renderer)
+             && (element.Renderer() || element.HasDisplayContents());
+    }();
+
+    if (shouldTearDownRenderers)
+    {
+      if (!element.Renderer())
+      {
+        // We may be tearing down a descendant renderer cached in renderTreePosition.
+        GetRenderTreePosition().InvalidateNextSibling();
+      }
+
+      // display:none cancels animations.
+      auto teardownType = !elementUpdate.Style->HasDisplayAffectedByAnimations()
+                              && elementUpdate.Style->Display() == DisplayType::None
+                            ? TeardownType::RendererUpdateCancelingAnimations
+                            : TeardownType::RendererUpdate;
+
+      TearDownRenderers(element, teardownType, *_builder);
+
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
+    }
+
+    bool hasDisplayContents = elementUpdate.Style->Display() == DisplayType::Contents;
+    bool hasDisplayNonePreventingRendererCreation =
+      elementUpdate.Style->Display() == DisplayType::None && !element.RendererIsNeeded(elementUpdateStyle);
+    bool hasDisplayContentsOrNone = hasDisplayContents || hasDisplayNonePreventingRendererCreation;
+    if (hasDisplayContentsOrNone)
+    {
+      element.StoreDisplayContentsOrNoneStyle(CreateUnique<RenderStyle>(krys::move(elementUpdateStyle)));
+    }
+    else
+    {
+      element.ClearDisplayContentsOrNoneStyle();
+    }
+
+    if (!hasDisplayContentsOrNone)
+    {
+      if (!elementUpdateStyle.LogicalContainIntrinsicWidth().HasAuto())
+      {
+        element.ClearLastRememberedLogicalWidth();
+      }
+      if (!elementUpdateStyle.LogicalContainIntrinsicHeight().HasAuto())
+      {
+        element.ClearLastRememberedLogicalHeight();
+      }
+    }
+
+    auto scopeExit = MakeScopeExit(
+      [&]
+      {
+        if (!hasDisplayContentsOrNone)
+        {
+          auto *box = element.GetRenderBox();
+          if (box && box->Style().HasAutoLengthContainIntrinsicSize() && !IsSkippedContentRoot(*box))
+          {
+            _document->ObserveForContainIntrinsicSize(element);
+          }
+          else
+          {
+            _document->UnobserveForContainIntrinsicSize(element);
+          }
+        }
+      });
+
+    bool shouldCreateNewRenderer =
+      !element.Renderer() && !hasDisplayContentsOrNone
+      && !(element.IsInTopLayer()
+           && GetRenderTreePosition().Parent().Style().IsSkippedRootOrSkippedContent());
+    if (shouldCreateNewRenderer)
+    {
+      element.WillAttachRenderers();
+      CreateRenderer(element, krys::move(elementUpdateStyle));
+
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
+      return;
+    }
+
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    if (elementUpdate.RecompositeLayer)
+    {
+      UpdateRendererStyle(*renderer, krys::move(elementUpdateStyle),
+                          style::DifferenceResult::RecompositeLayer);
+      return;
+    }
+
+    // FIXME: Pseudo-element styles that changed without the element's style changing
+    // (pseudoStyleCacheIsInvalid), once there are generated content renderers.
+    if (elementUpdate.Changes.empty())
+    {
+      return;
+    }
+
+    UpdateRendererStyle(*renderer, krys::move(elementUpdateStyle), style::DifferenceResult::Equal);
+  }
+
+  void RenderTreeUpdater::CreateRenderer(web::Element &element, RenderStyle &&style) noexcept
+  {
+    auto computeInsertionPosition = [this, &element]() -> RenderTreePosition &
+    {
+      GetRenderTreePosition().ComputeNextSibling(element);
+      return GetRenderTreePosition();
+    };
+
+    if (!ShouldCreateRenderer(element, GetRenderTreePosition().Parent()))
+    {
+      return;
+    }
+
+    if (!element.RendererIsNeeded(style))
+    {
+      return;
+    }
+
+    auto &insertionPosition = computeInsertionPosition();
+    // FIXME: Pass the insertion position, once an override uses it.
+    auto newRenderer = element.CreateElementRenderer(krys::move(style));
+    if (!newRenderer)
+    {
+      return;
+    }
+
+    if (!insertionPosition.Parent().IsChildAllowed(*newRenderer, newRenderer->Style()))
+    {
+      return;
+    }
+
+    element.SetRenderer(newRenderer.get());
+
+    newRenderer->InitializeStyle();
+
+    _builder->Attach(insertionPosition.Parent(), krys::move(newRenderer), insertionPosition.NextSibling());
+
+    // FIXME: The text manipulation controller, once there is one.
+    if (auto *cache = element.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRendererCreated(element);
+    }
+  }
+
+  bool RenderTreeUpdater::TextRendererIsNeeded(const Text &textNode) noexcept
+  {
+    auto &renderingParent = RenderingParent();
+    auto &parentRenderer = renderingParent.Position->Parent();
+    if (!parentRenderer.CanHaveChildren())
+    {
+      return false;
+    }
+    if (parentRenderer.GetElement() && !parentRenderer.GetElement()->ChildShouldCreateRenderer(textNode))
+    {
+      return false;
+    }
+    // FIXME: Editing text always gets a renderer.
+    if (!textNode.Length())
+    {
+      return false;
+    }
+    if (!textNode.ContainsOnlyASCIIWhitespace())
+    {
+      return true;
+    }
+    if (Is<RenderText>(renderingParent.PreviousChildRenderer))
+    {
+      return true;
+    }
+    // This text node has nothing but white space. We may still need a renderer in some cases.
+    if (parentRenderer.IsRenderTable() || parentRenderer.IsRenderTableRow()
+        || parentRenderer.IsRenderTableSection() || parentRenderer.IsRenderTableCol()
+        || parentRenderer.IsRenderFrameSet() || parentRenderer.IsRenderGrid()
+        || (parentRenderer.IsRenderFlexibleBox() && !parentRenderer.IsRenderButton()))
+    {
+      return false;
+    }
+    if (parentRenderer.Style().PreserveNewline()) // pre/pre-wrap/pre-line always make renderers.
+    {
+      return true;
+    }
+
+    auto *previousRenderer = renderingParent.PreviousChildRenderer;
+    if (previousRenderer && previousRenderer->IsBR()) // <span><br/> <br/></span>
+    {
+      return false;
+    }
+
+    if (parentRenderer.IsRenderInline())
+    {
+      // <span><div/> <div/></span>
+      if (previousRenderer && !previousRenderer->IsInline() && !previousRenderer->IsOutOfFlowPositioned())
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+    auto wouldBeFirstInlineContentInsideBlock = [&]
+    {
+      if (!parentRenderer.IsRenderBlock())
+      {
+        return false;
+      }
+
+      if (!previousRenderer)
+      {
+        return !parentRenderer.ChildrenInline();
+      }
+
+      if (previousRenderer->Parent() == &parentRenderer)
+      {
+        return !parentRenderer.ChildrenInline() && !previousRenderer->IsInline();
+      }
+
+      if (auto *parent = previousRenderer->Parent(); parent->IsAnonymous())
+      {
+        return !parent->ChildrenInline() && !previousRenderer->IsInline();
+      }
+
+      // Can't tell yet.
+      return false;
+    };
+    if (wouldBeFirstInlineContentInsideBlock())
+    {
+      return false;
+    }
+
+    return renderingParent.HasPrecedingInFlowChild;
+  }
+
+  void RenderTreeUpdater::CreateTextRenderer(Text &textNode, const style::TextUpdate *textUpdate) noexcept
+  {
+    krys_debug_assert(!textNode.Renderer());
+
+    auto &renderTreePosition = GetRenderTreePosition();
+    auto textRenderer = textNode.CreateTextRenderer(renderTreePosition.Parent().Style());
+
+    renderTreePosition.ComputeNextSibling(textNode);
+
+    if (!renderTreePosition.Parent().IsChildAllowed(*textRenderer, renderTreePosition.Parent().Style()))
+    {
+      return;
+    }
+
+    textNode.SetRenderer(textRenderer.get());
+
+    if (textUpdate && textUpdate->InheritedDisplayContentsStyle && *textUpdate->InheritedDisplayContentsStyle)
+    {
+      // Wrap text renderer into anonymous inline so we can give it a style.
+      // This is to support "<div style='display:contents;color:green'>text</div>" type cases
+      auto newDisplayContentsAnonymousWrapper =
+        web::CreateRenderer<RenderInline>(RenderObject::Type::Inline, textNode.NodeDocument(),
+                                          RenderStyle::Clone(**textUpdate->InheritedDisplayContentsStyle));
+      newDisplayContentsAnonymousWrapper->InitializeStyle();
+      auto &displayContentsAnonymousWrapper = *newDisplayContentsAnonymousWrapper;
+      _builder->Attach(renderTreePosition.Parent(), krys::move(newDisplayContentsAnonymousWrapper),
+                       renderTreePosition.NextSibling());
+
+      textRenderer->SetInlineWrapperForDisplayContents(&displayContentsAnonymousWrapper);
+      _builder->Attach(displayContentsAnonymousWrapper, krys::move(textRenderer));
+      return;
+    }
+
+    _builder->Attach(renderTreePosition.Parent(), krys::move(textRenderer), renderTreePosition.NextSibling());
+
+    // FIXME: The text manipulation controller, once there is one.
+    if (auto *cache = textNode.NodeDocument().ExistingAXObjectCache())
+    {
+      cache->OnRendererCreated(textNode);
+    }
+  }
+
+  void RenderTreeUpdater::UpdateTextRenderer(Text &text, const style::TextUpdate *textUpdate,
+                                             const ContainerNode *root) noexcept
+  {
+    auto *existingRenderer = text.Renderer();
+    bool needsRenderer = TextRendererIsNeeded(text);
+
+    if (existingRenderer && textUpdate && textUpdate->InheritedDisplayContentsStyle)
+    {
+      if (existingRenderer->InlineWrapperForDisplayContents() || *textUpdate->InheritedDisplayContentsStyle)
+      {
+        // FIXME: We could update without teardown.
+        TearDownTextRenderer(text, root, *_builder);
+        existingRenderer = nullptr;
+      }
+    }
+
+    if (existingRenderer)
+    {
+      if (needsRenderer)
+      {
+        if (textUpdate)
+        {
+          existingRenderer->SetTextWithOffset(text.Data(), textUpdate->Offset);
+        }
+        return;
+      }
+      TearDownTextRenderer(text, root, *_builder);
+      RenderingParent().DidCreateOrDestroyChildRenderer = true;
+      return;
+    }
+    if (!needsRenderer)
+    {
+      return;
+    }
+    CreateTextRenderer(text, textUpdate);
+    RenderingParent().DidCreateOrDestroyChildRenderer = true;
+  }
+
+  void RenderTreeUpdater::StorePreviousRenderer(Node &node) noexcept
+  {
+    auto *renderer = node.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+    krys_debug_assert(RenderingParent().PreviousChildRenderer != renderer);
+    RenderingParent().PreviousChildRenderer = renderer;
+    if (renderer->IsInFlow())
+    {
+      RenderingParent().HasPrecedingInFlowChild = true;
+    }
+  }
+
+  void RenderTreeUpdater::UpdateRenderViewStyle() noexcept
+  {
+    if (_styleUpdate->InitialContainingBlockUpdate())
+    {
+      GetRenderView().SetStyle(RenderStyle::Clone(*_styleUpdate->InitialContainingBlockUpdate()));
+    }
+  }
+
+  RenderView &RenderTreeUpdater::GetRenderView() noexcept
+  {
+    return *_document->GetRenderView();
+  }
+
+  static void InvalidateRebuildRootIfNeeded(Node &node) noexcept
+  {
+    auto *ancestor = FindRenderingAncestor(node);
+    if (!ancestor)
+    {
+      return;
+    }
+    if (!RenderTreeBuilder::IsRebuildRootForChildren(*ancestor->Renderer()))
+    {
+      return;
+    }
+    ancestor->InvalidateRenderer();
+  }
+
+  void RenderTreeUpdater::TearDownRenderers(web::Element &root, TeardownType teardownType) noexcept
+  {
+    if (!root.Renderer() && !root.HasDisplayContents())
+    {
+      return;
+    }
+    auto *view = root.NodeDocument().GetRenderView();
+    if (!view)
+    {
+      return;
+    }
+
+    RenderTreeBuilder builder(*view);
+    TearDownRenderers(root, teardownType, builder);
+    InvalidateRebuildRootIfNeeded(root);
+  }
+
+  void RenderTreeUpdater::TearDownRenderers(web::Element &root) noexcept
+  {
+    TearDownRenderers(root, TeardownType::Full);
+  }
+
+  void RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(web::Element &host) noexcept
+  {
+    krys_debug_assert(!dom::TreeQueries::GetShadowRoot(host));
+    TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
+  }
+
+  void RenderTreeUpdater::TearDownRenderersAfterSlotChange(web::Element &host) noexcept
+  {
+    krys_debug_assert(dom::TreeQueries::GetShadowRoot(host));
+    TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
+  }
+
+  void RenderTreeUpdater::TearDownRenderer(Text &text) noexcept
+  {
+    auto *view = text.NodeDocument().GetRenderView();
+    if (!view)
+    {
+      return;
+    }
+
+    RenderTreeBuilder builder(*view);
+    TearDownTextRenderer(text, nullptr, builder);
+    InvalidateRebuildRootIfNeeded(text);
+  }
+
+  enum class DidRepaintAndMarkContainingBlock : bool
+  {
+    No,
+    Yes,
+  };
+
+  static Maybe<DidRepaintAndMarkContainingBlock>
+    RepaintAndMarkContainingBlockDirtyBeforeTearDown(const web::Element &root,
+                                                     const auto &composedTreeDescendants) noexcept
+  {
+    auto *destroyRootRenderer = root.Renderer();
+    if (destroyRootRenderer && destroyRootRenderer->RenderTreeBeingDestroyed())
+    {
+      return null;
+    }
+
+    auto markContainingBlockDirty = [&](RenderElement &renderer)
+    {
+      auto *container = renderer.Container();
+      if (!container)
+      {
+        krys_debug_assert(false);
+        renderer.SetNeedsLayout();
+        return;
+      }
+      if (!renderer.IsOutOfFlowPositioned())
+      {
+        container->SetChildNeedsLayout();
+        container->SetNeedsPreferredWidthsUpdate();
+        return;
+      }
+      container->SetNeedsLayoutForOverflowChange();
+    };
+
+    auto repaintBackdropIfApplicable = [&](RenderElement &renderer)
+    {
+      if (auto *backdropRenderer = renderer.BackdropRenderer())
+      {
+        backdropRenderer->Repaint(RenderObject::ForceRepaint::Yes);
+      }
+    };
+
+    auto repaintRoot = [&](RenderElement &destroyRoot)
+    {
+      if (destroyRoot.IsBody())
+      {
+        destroyRoot.View().RepaintRootContents();
+        return;
+      }
+      auto shouldForceRepaint = [&]
+      {
+        auto *destroyRootWithLayer = DynamicDowncast<RenderLayerModelObject>(destroyRoot);
+        if (!destroyRootWithLayer || !destroyRootWithLayer->HasLayer())
+        {
+          return false;
+        }
+
+        // When any subtree repaint is propagated to this destroy root layer, we have to force it here
+        // as this layer will not be around to issue it _after_ layout.
+        // We also need to force repaint on a non-inflow box as the parent layer with full-repaint status
+        // would not necessarily enclose this box.
+        return destroyRootWithLayer->Layer()->NeedsFullRepaint()
+               || destroyRootWithLayer->IsOutOfFlowPositioned();
+      };
+      destroyRoot.Repaint(shouldForceRepaint() ? RenderObject::ForceRepaint::Yes
+                                               : RenderObject::ForceRepaint::No);
+    };
+
+    if (destroyRootRenderer)
+    {
+      repaintRoot(*destroyRootRenderer);
+      repaintBackdropIfApplicable(*destroyRootRenderer);
+      markContainingBlockDirty(*destroyRootRenderer);
+    }
+
+    for (auto it = composedTreeDescendants.begin(), end = composedTreeDescendants.end(); it != end;
+         it.TraverseNext())
+    {
+      auto *renderer = it->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      // If child is the start or end of the selection, then clear the selection to
+      // avoid problems of invalid pointers.
+      if (renderer->IsSelectionBorder())
+      {
+        renderer->GetDocument().Selection().SetNeedsSelectionUpdate();
+      }
+
+      auto *renderElement = DynamicDowncast<RenderElement>(renderer);
+      if (!renderElement)
+      {
+        continue;
+      }
+
+      auto shouldRepaint = [&]
+      {
+        if (!renderElement->EverHadLayout())
+        {
+          return false;
+        }
+        if (renderElement->Style().Opacity().IsTransparent())
+        {
+          return false;
+        }
+        if (renderElement->IsOutOfFlowPositioned())
+        {
+          return destroyRootRenderer != renderElement->ContainingBlock()
+                 || !destroyRootRenderer->HasNonVisibleOverflow();
+        }
+        if (renderElement->IsFloating() || renderElement->IsPositioned())
+        {
+          return !destroyRootRenderer || !destroyRootRenderer->HasNonVisibleOverflow();
+        }
+        return false;
+      };
+      if (shouldRepaint())
+      {
+        renderElement->Repaint();
+      }
+      repaintBackdropIfApplicable(*renderElement);
+      if (renderElement->IsOutOfFlowPositioned())
+      {
+        // FIXME: Ideally we would check if containing block is the destory root or a descendent of the
+        // destroy root.
+        markContainingBlockDirty(*renderElement);
+      }
+    }
+    return destroyRootRenderer ? DidRepaintAndMarkContainingBlock::Yes : DidRepaintAndMarkContainingBlock::No;
+  }
+
+  void RenderTreeUpdater::TearDownRenderers(web::Element &root, TeardownType teardownType,
+                                            RenderTreeBuilder &builder) noexcept
+  {
+    List<web::Element *> teardownStack;
+
+    auto push = [&](web::Element &element)
+    {
+      element.WillDetachRenderers();
+      teardownStack.push_back(&element);
+    };
+
+    auto pop = [&](uint32 depth, NeedsRepaintAndLayout needsRepaintAndLayout)
+    {
+      while (teardownStack.size() > depth)
+      {
+        auto &element = *teardownStack.back();
+        teardownStack.pop_back();
+
+        // Make sure we don't leave any renderers behind in nodes outside the composed tree.
+        // See ComposedTreeIterator::ComposedTreeIterator().
+        if (Is<HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
+        {
+          TearDownLeftoverChildrenOfComposedTree(element, builder);
+        }
+
+        auto styleable = style::Styleable::FromElement(element);
+
+        switch (teardownType)
+        {
+          case TeardownType::FullAfterSlotOrShadowRootChange:
+            if (&element == &root)
+            {
+              // Keep animations going on the host.
+              styleable.WillChangeRenderer();
+              break;
+            }
+            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+            break;
+          case TeardownType::Full:
+            styleable.CancelStyleOriginatedAnimations();
+            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+            break;
+          case TeardownType::RendererUpdateCancelingAnimations:
+            styleable.CancelStyleOriginatedAnimations();
+            break;
+          case TeardownType::RendererUpdate: styleable.WillChangeRenderer(); break;
+        }
+
+        GeneratedContent::RemoveBeforePseudoElement(element, builder);
+        GeneratedContent::RemoveAfterPseudoElement(element, builder);
+
+        if (!Is<PseudoElement>(element))
+        {
+          // ::before and ::after cannot have a ::marker pseudo-element addressable via CSS selectors, and as
+          // such cannot possibly have animations on them. Additionally, we cannot create a Styleable with a
+          // PseudoElement.
+          if (auto *renderListItem = DynamicDowncast<RenderListItem>(element.Renderer()))
+          {
+            if (renderListItem->MarkerRenderer())
+            {
+              style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Marker})
+                .CancelStyleOriginatedAnimations();
+            }
+          }
+          // Nor can they have a ::checkmark or ::picker-icon.
+          if (Is<HTMLOptionElement>(element))
+          {
+            style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Checkmark})
+              .CancelStyleOriginatedAnimations();
+          }
+          else if (Is<HTMLSelectElement>(element))
+          {
+            style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::PickerIcon})
+              .CancelStyleOriginatedAnimations();
+          }
+        }
+
+        if (auto *renderer = element.Renderer())
+        {
+          if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
+          {
+            renderer->Repaint();
+            if (auto *parent = renderer->Parent())
+            {
+              parent->SetChildNeedsLayout();
+              parent->SetNeedsPreferredWidthsUpdate();
+            }
+          }
+          if (auto *backdropRenderer = renderer->BackdropRenderer())
+          {
+            builder.DestroyAndCleanUpAnonymousWrappers(*backdropRenderer, {});
+          }
+          builder.DestroyAndCleanUpAnonymousWrappers(*renderer, root.Renderer());
+          element.SetRenderer(nullptr);
+        }
+
+        element.DidDetachRenderers();
+      }
+    };
+
+    push(root);
+
+    auto descendants = dom::ComposedTreeDescendants(root);
+    auto didRepaintRoot = RepaintAndMarkContainingBlockDirtyBeforeTearDown(root, descendants);
+    auto needsDescendantRepaintAndLayout =
+      !didRepaintRoot || *didRepaintRoot == DidRepaintAndMarkContainingBlock::Yes
+        ? NeedsRepaintAndLayout::No
+        : NeedsRepaintAndLayout::Yes;
+    for (auto it = descendants.begin(), end = descendants.end(); it != end; it.TraverseNext())
+    {
+      pop(it.Depth(), needsDescendantRepaintAndLayout);
+
+      if (auto *text = DynamicDowncast<Text>(*it))
+      {
+        TearDownTextRenderer(*text, &root, builder, needsDescendantRepaintAndLayout);
+        continue;
+      }
+
+      push(Downcast<web::Element>(*it));
+    }
+
+    pop(0, needsDescendantRepaintAndLayout);
+  }
+
+  void RenderTreeUpdater::TearDownLeftoverChildrenOfComposedTree(web::Element &element,
+                                                                 RenderTreeBuilder &builder) noexcept
+  {
+    for (auto *child = element.FirstChild(); child; child = child->NextSibling())
+    {
+      if (!child->Renderer())
+      {
+        continue;
+      }
+      if (auto *text = DynamicDowncast<Text>(*child))
+      {
+        TearDownTextRenderer(*text, &element, builder, NeedsRepaintAndLayout::No);
+        continue;
+      }
+      if (auto *childElement = DynamicDowncast<web::Element>(*child))
+      {
+        TearDownRenderers(*childElement, TeardownType::Full, builder);
+      }
+    }
+  }
+
+  void RenderTreeUpdater::TearDownTextRenderer(Text &text, const ContainerNode *root,
+                                               RenderTreeBuilder &builder,
+                                               NeedsRepaintAndLayout needsRepaintAndLayout) noexcept
+  {
+    auto *renderer = text.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+    if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
+    {
+      renderer->Repaint();
+      if (auto *parent = renderer->Parent())
+      {
+        parent->SetChildNeedsLayout();
+        parent->SetNeedsPreferredWidthsUpdate();
+      }
+    }
+    builder.DestroyAndCleanUpAnonymousWrappers(
+      *renderer, root ? DynamicDowncast<RenderElement>(root->Renderer()) : nullptr);
+    text.SetRenderer(nullptr);
+  }
+}

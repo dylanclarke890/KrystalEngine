@@ -1,0 +1,125 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ *           (C) 1999 Antti Koivisto (koivisto@kde.org)
+ * Copyright (C) 2003-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 Google Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Rendering/Painting/BorderEdge.hpp"
+#include "Krystal.Web/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Rendering/Style/BorderData.hpp"
+
+namespace krys::web
+{
+  class BorderShape;
+  struct PaintInfo;
+  class Path;
+
+  namespace style
+  {
+    struct BorderImage;
+  }
+
+  /// @brief Paints a box's border: its image, or each side in its style, joined at the corners and following
+  /// the border radii.
+  class BorderPainter
+  {
+    friend class OutlinePainter;
+
+  private:
+    struct Sides
+    {
+      Maybe<BorderData::RadiiType> Radii; // FIXME: Do we need this separately from the shape?
+      const BorderEdges &Edges;
+      bool HaveAllSolidEdges {true};
+      bool OuterEdgeIsRectangular {true};
+      bool InnerEdgeIsRectangular {true};
+      web::BleedAvoidance BleedAvoidance {web::BleedAvoidance::None};
+      RectEdges<bool> ClosedEdges {true};
+      bool AppliedClipAlready {false};
+    };
+
+    const RenderElement &_renderer;
+    const PaintInfo &_paintInfo;
+
+  public:
+    BorderPainter(const RenderElement &, const PaintInfo &) noexcept;
+
+    void PaintBorder(const LayoutRect &, const RenderStyle &, BleedAvoidance = BleedAvoidance::None,
+                     RectEdges<bool> closedEdges = {true}) const noexcept;
+
+    bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::BorderImage &,
+                             CompositeOperator = CompositeOperator::SourceOver) const noexcept;
+
+    bool PaintNinePieceImage(const LayoutRect &, const RenderStyle &, const style::MaskBorder &,
+                             CompositeOperator = CompositeOperator::SourceOver) const noexcept;
+
+    static void DrawLineForBoxSide(GraphicsContext &, const web::Document &, const RectF &, BoxSide, Color,
+                                   BorderStyle, float adjacentWidth1, float adjacentWidth2,
+                                   bool antialias = false) noexcept;
+
+    KRYS_NODISCARD static Maybe<Path> PathForBorderArea(const LayoutRect &, const RenderStyle &,
+                                                        float deviceScaleFactor,
+                                                        RectEdges<bool> closedEdges = {true}) noexcept;
+
+    KRYS_NODISCARD static bool ShouldAntialiasLines(GraphicsContext &) noexcept;
+
+    KRYS_NODISCARD static bool DecorationHasAllSolidEdges(const RectEdges<BorderEdge> &) noexcept;
+
+  private:
+    void PaintSides(const BorderShape &, const Sides &) const noexcept;
+
+    template <typename T>
+    bool PaintNinePieceImageImpl(const LayoutRect &, const RenderStyle &, const T &,
+                                 CompositeOperator = CompositeOperator::SourceOver) const noexcept;
+
+    void PaintTranslucentBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw,
+                                     bool antialias) const noexcept;
+
+    void PaintBorderSides(const BorderShape &, const Sides &, EnumSet<BoxSide> edgesToDraw, bool antialias,
+                          const Color *overrideColor = nullptr) const noexcept;
+
+    void PaintOneBorderSide(const BorderShape &, const Sides &, const LayoutRect &sideRect, BoxSide,
+                            BoxSide adjacentSide1, BoxSide adjacentSide2, const Path *, bool antialias,
+                            const Color *overrideColor) const noexcept;
+
+    void DrawBoxSideFromPath(const BorderShape &, const Path &borderPath, const BorderEdges &,
+                             float thickness, float drawThickness, BoxSide, Color, BorderStyle,
+                             BleedAvoidance) const noexcept;
+
+    void ClipBorderSidePolygon(const BorderShape &, BoxSide, bool firstEdgeMatches,
+                               bool secondEdgeMatches) const noexcept;
+
+    KRYS_NODISCARD LayoutRect BorderRectAdjustedForBleedAvoidance(const LayoutRect &,
+                                                                  BleedAvoidance) const noexcept;
+
+    KRYS_NODISCARD static Color CalculateBorderStyleColor(const BorderStyle &, const BoxSide &,
+                                                          const Color &) noexcept;
+
+    KRYS_NODISCARD const web::Document &Document() const noexcept;
+  };
+
+  /// @brief @p rect inset by a device pixel on each side.
+  KRYS_NODISCARD LayoutRect ShrinkRectByOneDevicePixel(const GraphicsContext &, const LayoutRect &,
+                                                       float devicePixelRatio) noexcept;
+}

@@ -1,0 +1,1125 @@
+﻿#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Nodes/Attr.hpp"
+#include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
+#include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Nodes/Node.hpp"
+#include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include <ranges>
+
+namespace krys::web::dom
+{
+#pragma region Trees
+
+  bool TreeQueries::IsParent(const Node &a, const Node &b) noexcept
+  {
+    return &a == b.ParentNode();
+  }
+
+  bool TreeQueries::IsChild(const Node &a, const Node &b) noexcept
+  {
+    return a.ParentNode() == &b;
+  }
+
+  const Node &TreeQueries::Root(const Node &node) noexcept
+  {
+    return *krys::web::dom::Last(ConstInclusiveAncestorRange(node));
+  }
+
+  Node &TreeQueries::Root(Node &node) noexcept
+  {
+    return *krys::web::dom::Last(InclusiveAncestorRange(node));
+  }
+
+  bool TreeQueries::IsDescendant(const Node &a, const Node &b) noexcept
+  {
+    return std::ranges::any_of(ConstAncestorRange(a), [&](const Node &n) { return &n == &b; });
+  }
+
+  bool TreeQueries::IsInclusiveDescendant(const Node &a, const Node &b) noexcept
+  {
+    return std::ranges::any_of(ConstInclusiveAncestorRange(a), [&](const Node &n) { return &n == &b; });
+  }
+
+  bool TreeQueries::IsAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsDescendant(b, a);
+  }
+
+  bool TreeQueries::IsInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsInclusiveDescendant(b, a);
+  }
+
+  bool TreeQueries::IsSibling(const Node &a, const Node &b) noexcept
+  {
+    if (a.ParentNode() == nullptr || b.ParentNode() == nullptr || &a == &b)
+    {
+      return false;
+    }
+
+    return a.ParentNode() == b.ParentNode();
+  }
+
+  bool TreeQueries::IsInclusiveSibling(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsSibling(a, b);
+  }
+
+  bool TreeQueries::IsPreceding(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return false;
+    }
+
+    return std::ranges::any_of(ConstPrecedingRange(b), [&](const Node &current) { return &current == &a; });
+  }
+
+  bool TreeQueries::IsFollowing(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return false;
+    }
+
+    return std::ranges::any_of(ConstPrecedingRange(a), [&](const Node &current) { return &current == &b; });
+  }
+
+  size_t TreeQueries::Index(const Node &node) noexcept
+  {
+    return Count(ConstPreviousSiblingRange(node));
+  }
+
+#pragma endregion
+
+#pragma region Node Trees
+
+  size_t TreeQueries::Length(const Node &node) noexcept
+  {
+    if (Is<DocumentType>(node) || Is<Attr>(node))
+    {
+      return 0uz;
+    }
+
+    if (auto *characterData = DynamicDowncast<CharacterData>(node))
+    {
+      return characterData->Length();
+    }
+
+    return Count(ConstChildNodeRange(Downcast<ContainerNode>(node)));
+  }
+
+  bool TreeQueries::IsEmpty(const Node &node) noexcept
+  {
+    return Length(node) == 0uz;
+  }
+
+#pragma endregion
+
+#pragma region Document Trees
+
+  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
+  {
+    return node.IsInDocumentTree();
+  }
+
+  const Element *TreeQueries::DocumentElement(const Document &document) noexcept
+  {
+    return TreeQueries::FirstElementChild(document);
+  }
+
+  Element *TreeQueries::DocumentElement(Document &document) noexcept
+  {
+    return TreeQueries::FirstElementChild(document);
+  }
+
+#pragma endregion
+
+#pragma region Shadow Trees
+
+  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
+  {
+    return node.IsInShadowTree();
+  }
+
+  bool TreeQueries::IsHostIncludingInclusiveAncestorOf(const Node &a, const Node &b) noexcept
+  {
+    // A is an inclusive ancestor of B,
+    if (IsInclusiveAncestor(a, b))
+    {
+      return true;
+    }
+
+    // or B's root has a non-null host and A is a host-including inclusive ancestor of B's root's host.
+    // (A shadow root's host, or a template's contents' template element.)
+    if (auto *fragment = DynamicDowncast<DocumentFragment>(Root(b)))
+    {
+      if (auto *host = fragment->Host())
+      {
+        return IsHostIncludingInclusiveAncestorOf(a, *host);
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsExclusiveDocumentFragmentNode(const Node &node) noexcept
+  {
+    return Is<DocumentFragment>(node) && !Is<ShadowRoot>(node);
+  }
+
+#pragma endregion
+
+#pragma region Shadow Roots
+
+  const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
+  {
+    auto &root = TreeQueries::Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
+  Node &TreeQueries::ShadowIncludingRoot(Node &node) noexcept
+  {
+    auto &root = TreeQueries::Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
+  bool TreeQueries::IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (TreeQueries::IsDescendant(a, b))
+    {
+      return true;
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(a)))
+    {
+      // A's root is a shadow root and A's root's host is a shadow-including inclusive descendant of B.
+      if (auto *host = shadowRoot->Host())
+      {
+        return IsShadowIncludingInclusiveDescendant(*host, b);
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsShadowIncludingDescendant(a, b);
+  }
+
+  bool TreeQueries::IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingDescendant(b, a);
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingInclusiveDescendant(b, a);
+  }
+
+  bool TreeQueries::IsClosedShadowHidden(const Node &a, const Node &b) noexcept
+  {
+    auto &aRoot = TreeQueries::Root(a);
+    auto *aShadowRoot = DynamicDowncast<ShadowRoot>(aRoot);
+    if (aShadowRoot == nullptr)
+    {
+      return false;
+    }
+
+    if (IsShadowIncludingInclusiveAncestor(aRoot, b))
+    {
+      return false;
+    }
+
+    if (aShadowRoot->Mode() != ShadowRootMode::Open)
+    {
+      return true;
+    }
+
+    if (aShadowRoot->Host() && IsClosedShadowHidden(*aShadowRoot->Host(), b))
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsShadowHost(const Node &node) noexcept
+  {
+    if (!Is<Element>(node))
+    {
+      return false;
+    }
+
+    return IsShadowHost(Downcast<Element>(node));
+  }
+
+  bool TreeQueries::IsShadowHost(const Element &node) noexcept
+  {
+    return node._shadowRoot != nullptr;
+  }
+
+  ShadowRoot *TreeQueries::GetShadowRoot(const Element &element) noexcept
+  {
+    return element._shadowRoot.get();
+  }
+
+  ShadowRoot *TreeQueries::ContainingShadowRoot(const Node &node) noexcept
+  {
+    return DynamicDowncast<ShadowRoot>(const_cast<Node &>(Root(node)));
+  }
+
+  Element *TreeQueries::ShadowHost(const Node &node) noexcept
+  {
+    auto *shadowRoot = ContainingShadowRoot(node);
+    return shadowRoot ? shadowRoot->Host() : nullptr;
+  }
+
+  Element *TreeQueries::ParentOrShadowHostElement(const Node &node) noexcept
+  {
+    if (auto *parent = node.ParentElement())
+    {
+      return parent;
+    }
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node.ParentNode()))
+    {
+      return shadowRoot->Host();
+    }
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Tree Order Traversal
+
+  namespace
+  {
+    template <bool CheckChildren = true, typename TNode>
+    static Node *GetNext(const TNode &current) noexcept
+    {
+      if constexpr (CheckChildren)
+      {
+        if (current.FirstChild())
+        {
+          return current.FirstChild();
+        }
+      }
+
+      if (current.NextSibling())
+      {
+        return current.NextSibling();
+      }
+
+      return TreeQueries::NextAncestorSibling(current);
+    }
+
+    template <bool CheckChildren = true, typename TNode>
+    static Node *GetNext(const TNode &current, const Node *stayWithin) noexcept
+    {
+      if constexpr (CheckChildren)
+      {
+        if (current.FirstChild())
+        {
+          return current.FirstChild();
+        }
+      }
+
+      if (&current == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (current.NextSibling())
+      {
+        return current.NextSibling();
+      }
+
+      return TreeQueries::NextAncestorSibling(current, stayWithin);
+    }
+  }
+
+  Node *TreeQueries::Next(const Node &current) noexcept
+  {
+    return GetNext(current);
+  }
+
+  Node *TreeQueries::Next(const ContainerNode &current) noexcept
+  {
+    return GetNext(current);
+  }
+
+  Node *TreeQueries::Next(const Node &current, const Node *stayWithin) noexcept
+  {
+    return GetNext(current, stayWithin);
+  }
+
+  Node *TreeQueries::Next(const ContainerNode &current, const Node *stayWithin) noexcept
+  {
+    return GetNext(current, stayWithin);
+  }
+
+  Node *TreeQueries::NextSkippingChildren(const Node &current) noexcept
+  {
+    return GetNext<false>(current);
+  }
+
+  Node *TreeQueries::NextSkippingChildren(const Node &current, const Node *stayWithin) noexcept
+  {
+    return GetNext<false>(current, stayWithin);
+  }
+
+  Node *TreeQueries::NextShadowIncluding(const Node &current) noexcept
+  {
+    return NextShadowIncluding(current, nullptr);
+  }
+
+  Node *TreeQueries::NextShadowIncluding(const Node &current, const Node *stayWithin) noexcept
+  {
+    // A shadow host's shadow tree comes just after it, before its children.
+    if (auto *host = DynamicDowncast<Element>(current))
+    {
+      if (auto *shadowRoot = GetShadowRoot(*host))
+      {
+        return shadowRoot;
+      }
+    }
+
+    if (auto *child = current.FirstChild())
+    {
+      return child;
+    }
+
+    for (const Node *node = &current; node;)
+    {
+      if (node == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (auto *sibling = node->NextSibling())
+      {
+        return sibling;
+      }
+
+      // Climbing out of a shadow tree continues with the host's children, then what follows the host.
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
+      {
+        auto *host = shadowRoot->Host();
+        if (auto *child = host->FirstChild())
+        {
+          return child;
+        }
+        node = host;
+        continue;
+      }
+
+      node = node->ParentNode();
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::NextAncestorSibling(const Node &current) noexcept
+  {
+    krys_debug_assert(!current.NextSibling());
+
+    for (const Node &ancestor : ConstAncestorRange(current))
+    {
+      if (ancestor.NextSibling())
+      {
+        return ancestor.NextSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::NextAncestorSibling(const Node &current, const Node *stayWithin) noexcept
+  {
+    krys_debug_assert(!current.NextSibling());
+    krys_debug_assert(&current != stayWithin);
+
+    for (const Node &ancestor : ConstAncestorRange(current))
+    {
+      if (&ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (ancestor.NextSibling())
+      {
+        return ancestor.NextSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+  const Text *TreeQueries::NextExclusiveTextNode(const Node &current) noexcept
+  {
+    auto next = ConstFollowingRange(current);
+    auto it = std::ranges::find_if(next, [](const auto &n) { return IsExclusiveTextNode(n); });
+    return it == std::ranges::end(next) ? nullptr : Downcast<Text>(&*it);
+  }
+
+  Text *TreeQueries::NextExclusiveTextNode(Node &current) noexcept
+  {
+    auto next = FollowingRange(current);
+    auto it = std::ranges::find_if(next, [](const auto &n) { return IsExclusiveTextNode(n); });
+    return it == std::ranges::end(next) ? nullptr : Downcast<Text>(&*it);
+  }
+
+  Text *TreeQueries::NextExclusiveTextNode(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (Node *next = Next(current, stayWithin); next; next = Next(*next, stayWithin))
+    {
+      if (IsExclusiveTextNode(*next))
+      {
+        return Downcast<Text>(next);
+      }
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::Previous(const Node &current) noexcept
+  {
+    if (Node *previous = current.PreviousSibling())
+    {
+      return DeepLastChild(*previous);
+    }
+
+    return current.ParentNode();
+  }
+
+  Node *TreeQueries::Previous(const Node &current, const Node *stayWithin) noexcept
+  {
+    // Nothing within stayWithin comes before it, so its previous sibling's descendants are out of bounds.
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+
+    if (Node *previous = current.PreviousSibling())
+    {
+      return DeepLastChild(*previous);
+    }
+
+    return current.ParentNode();
+  }
+
+  Node *TreeQueries::PreviousSkippingChildren(const Node &current) noexcept
+  {
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    for (Node *ancestor = current.ParentNode(); ancestor; ancestor = ancestor->ParentNode())
+    {
+      if (ancestor->PreviousSibling())
+      {
+        return ancestor->PreviousSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::PreviousSkippingChildren(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    for (Node *ancestor = current.ParentNode(); ancestor != nullptr; ancestor = ancestor->ParentNode())
+    {
+      if (ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (ancestor->PreviousSibling())
+      {
+        return ancestor->PreviousSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Element *ParentOrHostOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? pseudoElement->HostElement() : node.ParentElement();
+    }
+
+    KRYS_NODISCARD bool IsPseudoElementOfType(const Node &node, PseudoElementType type) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement && pseudoElement->GetPseudoElementType() == type;
+    }
+
+    KRYS_NODISCARD const Node *ParentOrHostNodeOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? static_cast<const Node *>(pseudoElement->HostElement()) : node.ParentNode();
+    }
+  }
+
+  Node *TreeQueries::PseudoAwarePreviousSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.PreviousSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::After) && parentOrHost->LastChild())
+      {
+        return parentOrHost->LastChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::Before))
+      {
+        return parentOrHost->BeforePseudoElement();
+      }
+    }
+    return node.PreviousSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareNextSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.NextSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::Before) && parentOrHost->FirstChild())
+      {
+        return parentOrHost->FirstChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::After))
+      {
+        return parentOrHost->AfterPseudoElement();
+      }
+    }
+    return node.NextSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareFirstChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *first = currentElement->BeforePseudoElement();
+      if (first)
+      {
+        return first;
+      }
+      first = currentElement->FirstChild();
+      if (!first)
+      {
+        first = currentElement->AfterPseudoElement();
+      }
+      return first;
+    }
+    return node.FirstChild();
+  }
+
+  Node *TreeQueries::PseudoAwareLastChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *last = currentElement->AfterPseudoElement();
+      if (last)
+      {
+        return last;
+      }
+      last = currentElement->LastChild();
+      if (!last)
+      {
+        last = currentElement->BeforePseudoElement();
+      }
+      return last;
+    }
+    return node.LastChild();
+  }
+
+  Node *TreeQueries::PreviousIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *previous = PseudoAwarePreviousSibling(current))
+    {
+      while (auto *lastChild = PseudoAwareLastChild(*previous))
+      {
+        previous = lastChild;
+      }
+      return previous;
+    }
+    return const_cast<Node *>(ParentOrHostNodeOfPseudo(current));
+  }
+
+  Node *TreeQueries::NextIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (auto *next = PseudoAwareFirstChild(current))
+    {
+      return next;
+    }
+    return NextIncludingPseudoSkippingChildren(current, stayWithin);
+  }
+
+  Node *TreeQueries::NextIncludingPseudoSkippingChildren(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *next = PseudoAwareNextSibling(current))
+    {
+      return next;
+    }
+    for (auto *ancestor = ParentOrHostNodeOfPseudo(current); ancestor; ancestor = ancestor->ParentNode())
+    {
+      if (ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+      if (auto *next = PseudoAwareNextSibling(*ancestor))
+      {
+        return next;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PreviousElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = PreviousIncludingPseudo(current, stayWithin); node;
+         node = PreviousIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudo(current, stayWithin); node;
+         node = NextIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudoSkippingChildren(const Node &current,
+                                                                   const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudoSkippingChildren(current, stayWithin); node;
+         node = NextIncludingPseudoSkippingChildren(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PseudoAwarePreviousElementSibling(const Node &node) noexcept
+  {
+    for (auto *sibling = PseudoAwarePreviousSibling(node); sibling;
+         sibling = PseudoAwarePreviousSibling(*sibling))
+    {
+      if (auto *element = DynamicDowncast<Element>(*sibling))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Node *TreeQueries::Last(const ContainerNode &current) noexcept
+  {
+    Node *node = current.LastChild();
+    if (node == nullptr)
+    {
+      return nullptr;
+    }
+
+    while (node->LastChild())
+    {
+      node = node->LastChild();
+    }
+    return node;
+  }
+
+  Node *TreeQueries::DeepLastChild(Node &current) noexcept
+  {
+    Node *last = &current;
+    while (last->LastChild())
+    {
+      last = last->LastChild();
+    }
+
+    return last;
+  }
+
+  const Element *TreeQueries::NextElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstNextSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  Element *TreeQueries::NextElementSibling(Node &current) noexcept
+  {
+    auto siblings = NextSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  const Element *TreeQueries::PreviousElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstPreviousSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  Element *TreeQueries::PreviousElementSibling(Node &current) noexcept
+  {
+    auto siblings = PreviousSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  const Element *TreeQueries::FirstElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = FirstOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  Element *TreeQueries::FirstElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = FirstOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  const Element *TreeQueries::LastElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = LastOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  Element *TreeQueries::LastElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = LastOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  const HTMLElement *TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstNextSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  HTMLElement *TreeQueries::NextHTMLElementSibling(Node &current) noexcept
+  {
+    auto siblings = NextSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  const HTMLElement *TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstPreviousSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  HTMLElement *TreeQueries::PreviousHTMLElementSibling(Node &current) noexcept
+  {
+    auto siblings = PreviousSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  const HTMLElement *TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  HTMLElement *TreeQueries::FirstHTMLElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  const HTMLElement *TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  HTMLElement *TreeQueries::LastHTMLElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+#pragma endregion
+
+#pragma region Post Order Traversal
+
+  Node *TreeQueries::NextPostOrder(const Node &current) noexcept
+  {
+    if (!current.NextSibling())
+    {
+      return current.ParentNode();
+    }
+
+    Node *next = current.NextSibling();
+    while (next->FirstChild())
+    {
+      next = next->FirstChild();
+    }
+
+    return next;
+  }
+
+  Node *TreeQueries::NextPostOrder(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+
+    if (!current.NextSibling())
+    {
+      return current.ParentNode();
+    }
+
+    Node *next = current.NextSibling();
+    while (next->FirstChild())
+    {
+      next = next->FirstChild();
+    }
+
+    return next;
+  }
+
+  Node *TreeQueries::PreviousPostOrder(const Node &current) noexcept
+  {
+    if (current.LastChild())
+    {
+      return current.LastChild();
+    }
+
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    return PreviousAncestorSiblingPostOrder(current);
+  }
+
+  Node *TreeQueries::PreviousPostOrder(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (current.LastChild())
+    {
+      return current.LastChild();
+    }
+
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    return PreviousAncestorSiblingPostOrder(current, stayWithin);
+  }
+
+  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current) noexcept
+  {
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    return PreviousAncestorSiblingPostOrder(current);
+  }
+
+  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+
+    if (current.PreviousSibling())
+    {
+      return current.PreviousSibling();
+    }
+
+    return PreviousAncestorSiblingPostOrder(current, stayWithin);
+  }
+
+  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current) noexcept
+  {
+    krys_debug_assert(!current.PreviousSibling());
+
+    for (const auto &ancestor : ConstAncestorRange(current))
+    {
+      if (ancestor.PreviousSibling())
+      {
+        return ancestor.PreviousSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current, const Node *stayWithin) noexcept
+  {
+    krys_debug_assert(!current.PreviousSibling());
+
+    for (const auto &ancestor : ConstAncestorRange(current))
+    {
+      if (&ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (ancestor.PreviousSibling())
+      {
+        return ancestor.PreviousSibling();
+      }
+    }
+
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Helpers
+
+  bool TreeQueries::SameRoot(const Node &a, const Node &b) noexcept
+  {
+    return &Root(a) == &Root(b);
+  }
+
+  ContainerNode *TreeQueries::CommonAncestor(Node &a, Node &b) noexcept
+  {
+    auto *commonAncestor = &a;
+    while (commonAncestor != nullptr)
+    {
+      if (IsInclusiveAncestor(*commonAncestor, b))
+      {
+        return Downcast<ContainerNode>(commonAncestor);
+      }
+
+      commonAncestor = commonAncestor->ParentNode();
+    }
+
+    return nullptr;
+  }
+
+  const ContainerNode *TreeQueries::CommonAncestor(const Node &a, const Node &b) noexcept
+  {
+    auto *commonAncestor = &a;
+    while (commonAncestor != nullptr)
+    {
+      if (IsInclusiveAncestor(*commonAncestor, b))
+      {
+        return Downcast<ContainerNode>(commonAncestor);
+      }
+
+      commonAncestor = commonAncestor->ParentNode();
+    }
+
+    return nullptr;
+  }
+
+  Node *TreeQueries::ChildAt(ContainerNode &node, size_t index) noexcept
+  {
+    size_t i = 0;
+    auto children = ChildNodeRange(node);
+    auto it = std::ranges::find_if(children, [&](const Node &) { return i++ == index; });
+    return it == std::ranges::end(children) ? nullptr : &*it;
+  }
+
+  const Node *TreeQueries::ChildAt(const ContainerNode &node, size_t index) noexcept
+  {
+    size_t i = 0;
+    auto children = ConstChildNodeRange(node);
+    auto it = std::ranges::find_if(children, [&](const Node &) { return i++ == index; });
+    return it == std::ranges::end(children) ? nullptr : &*it;
+  }
+
+  bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
+  {
+    return Is<Text>(node) && !Is<CDATASection>(node);
+  }
+
+  bool TreeQueries::IsExclusiveTextNode(const Node *node) noexcept
+  {
+    return Is<Text>(node) && !Is<CDATASection>(node);
+  }
+
+#pragma endregion
+}

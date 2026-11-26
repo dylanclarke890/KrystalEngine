@@ -1,0 +1,191 @@
+﻿#include "Krystal.Web/Style/Invalidation/Invalidator.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
+#include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Web.Tests/Style/StyleTestUtils.hpp"
+#include "Krystal.Web/Css/Parser/ParserContext.hpp"
+#include "Krystal.Web/Css/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Html/Elements/HTMLStyleElement.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+
+namespace krys::web::style::tests
+{
+  using web::tests::CreateElement;
+
+  namespace
+  {
+    const web::Color Red {web::Color::red};
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Invalidator: style sheet changes", "[Style][Invalidator]")
+  {
+    ResolverFixture fixture {u8R"(<!DOCTYPE html><style>p { color: rgb(255, 0, 0) }</style>
+      <body><p id=a class=x></p><p id=b></p></body>)"};
+    auto &document = *fixture.Document;
+    document.UpdateStyleIfNeeded();
+    auto &a = fixture.ById(u8"a");
+    auto &b = fixture.ById(u8"b");
+    REQUIRE(Rendered(a).Color() == Red);
+
+    SECTION("An added style sheet invalidates the elements its rules match")
+    {
+      auto style = CreateStyle(document, u8".x { color: rgb(0, 0, 255) }");
+      REQUIRE_FALSE(document.Body()->AppendChild(*style).HasException());
+      document.StyleScope().FlushPendingUpdate();
+
+      CHECK_FALSE(document.HasPendingFullStyleRebuild());
+      CHECK(a.StyleValidity() == Validity::ElementInvalid);
+      CHECK(b.StyleValidity() == Validity::Valid);
+
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(a).Color() == Blue);
+      CHECK(Rendered(b).Color() == Red);
+
+      SECTION("A removed one rebuilds all style")
+      {
+        REQUIRE_FALSE(document.Body()->RemoveChild(*style).HasException());
+        document.StyleScope().FlushPendingUpdate();
+        CHECK(document.HasPendingFullStyleRebuild());
+
+        document.UpdateStyleIfNeeded();
+        CHECK(Rendered(a).Color() == Red);
+      }
+    }
+
+    SECTION("Rules other than style rules rebuild all style")
+    {
+      auto style =
+        CreateStyle(document, u8"@font-face { font-family: f; src: local(f) } .x { color: rgb(0, 0, 255) }");
+      REQUIRE_FALSE(document.Body()->AppendChild(*style).HasException());
+      document.StyleScope().FlushPendingUpdate();
+      CHECK(document.HasPendingFullStyleRebuild());
+
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(a).Color() == Blue);
+    }
+
+    SECTION("Media and nested style rules are looked into")
+    {
+      auto style =
+        CreateStyle(document, u8"@media all { .x { color: rgb(0, 0, 255) } } #b { & { color: blue } }");
+      REQUIRE_FALSE(document.Body()->AppendChild(*style).HasException());
+      document.StyleScope().FlushPendingUpdate();
+      CHECK_FALSE(document.HasPendingFullStyleRebuild());
+      CHECK(a.StyleValidity() == Validity::ElementInvalid);
+      CHECK(b.StyleValidity() == Validity::ElementInvalid);
+
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(a).Color() == Blue);
+      CHECK(Rendered(b).Color() == Blue);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Invalidator: rule information and direct invalidation",
+                   "[Style][Invalidator]")
+  {
+    ResolverFixture fixture {
+      u8R"(<!DOCTYPE html><body><div id=d class=x><p id=p class=y></p><p id=q></p></div>
+      <div id=e></div></body>)"};
+    auto &document = *fixture.Document;
+    document.UpdateStyleIfNeeded();
+
+    SECTION("Sheets with only style rules don't dirty all style")
+    {
+      Invalidator invalidator({ParseSheet(u8".y { color: blue }")},
+                              fixture.GetResolver().MediaQueryEvaluator());
+      CHECK_FALSE(invalidator.DirtiesAllStyle());
+
+      invalidator.InvalidateStyle(document);
+      CHECK(fixture.ById(u8"p").StyleValidity() == Validity::ElementInvalid);
+      CHECK(fixture.ById(u8"q").StyleValidity() == Validity::Valid);
+      CHECK(fixture.ById(u8"d").StyleValidity() == Validity::Valid);
+    }
+
+    SECTION("Other rules dirty all style")
+    {
+      Invalidator invalidator({ParseSheet(u8"@font-face { font-family: a }")},
+                              fixture.GetResolver().MediaQueryEvaluator());
+      CHECK(invalidator.DirtiesAllStyle());
+
+      invalidator.InvalidateStyle(document.StyleScope());
+      CHECK(document.HasPendingFullStyleRebuild());
+    }
+
+    SECTION("Invalidating an element's subtree")
+    {
+      Invalidator invalidator({ParseSheet(u8".x, .y { color: blue }")},
+                              fixture.GetResolver().MediaQueryEvaluator());
+      invalidator.InvalidateStyle(fixture.ById(u8"d"));
+      CHECK(fixture.ById(u8"d").StyleValidity() == Validity::ElementInvalid);
+      CHECK(fixture.ById(u8"p").StyleValidity() == Validity::ElementInvalid);
+      CHECK(fixture.ById(u8"e").StyleValidity() == Validity::Valid);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Invalidator: shadow trees", "[Style][Invalidator]")
+  {
+    ResolverFixture fixture {
+      u8R"html(<!DOCTYPE html><body><div id=host><span id=light class=s></span></div></body>)html"};
+    auto &document = *fixture.Document;
+    auto &host = fixture.ById(u8"host");
+    auto shadow = host.AttachShadow({}).ReleaseValue();
+    auto inner = CreateElement(document, u8"div");
+    REQUIRE_FALSE(inner->SetAttribute(u8"class", u8"i").HasException());
+    auto slot = CreateElement(document, u8"slot");
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+    document.UpdateStyleIfNeeded();
+    REQUIRE(Rendered(*inner).Color() != Blue);
+
+    SECTION("An added sheet invalidates its shadow tree")
+    {
+      auto style = CreateStyle(document, u8".i { color: rgb(0, 0, 255) }");
+      REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(*inner).Color() == Blue);
+    }
+
+    SECTION(":host and ::slotted() rules invalidate the host and its children")
+    {
+      auto style = CreateStyle(document, u8":host { color: rgb(0, 0, 255) } ::slotted(.s) { width: 5px }");
+      REQUIRE_FALSE(shadow->AppendChild(*style).HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(host).Color() == Blue);
+      CHECK(ResolverFixture::Serialised(Rendered(fixture.ById(u8"light")),
+                                        Rendered(fixture.ById(u8"light")).Width())
+            == "5px");
+
+      Invalidator::InvalidateHostAndSlottedStyleIfNeeded(*shadow);
+      CHECK(host.StyleValidity() == Validity::ElementInvalid);
+      CHECK(fixture.ById(u8"light").StyleValidity() == Validity::ElementInvalid);
+      document.UpdateStyleIfNeeded();
+
+      // Changing the sheet's contents invalidates them again.
+      REQUIRE_FALSE(style->TextContent(u8".i { color: rgb(0, 0, 255) }").HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(host).Color() != Blue);
+      CHECK(ResolverFixture::Serialised(Rendered(fixture.ById(u8"light")),
+                                        Rendered(fixture.ById(u8"light")).Width())
+            == "auto");
+    }
+
+    SECTION("::part() rules")
+    {
+      REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"p").HasException());
+      auto style = CreateStyle(document, u8"#host::part(p) { color: rgb(0, 0, 255) }");
+      REQUIRE_FALSE(document.Body()->AppendChild(*style).HasException());
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(*inner).Color() == Blue);
+
+      // Changing the part name invalidates the element.
+      REQUIRE_FALSE(inner->SetAttribute(u8"part", u8"q").HasException());
+      CHECK(inner->StyleValidity() == Validity::ElementInvalid);
+      document.UpdateStyleIfNeeded();
+      CHECK(Rendered(*inner).Color() != Blue);
+
+      Invalidator::InvalidateShadowParts(*shadow);
+      CHECK(inner->StyleValidity() == Validity::ElementInvalid);
+    }
+  }
+}

@@ -1,0 +1,373 @@
+﻿/*
+ * Copyright (C) 2020 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Rendering/Selection/RenderSelection.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Rendering/Layers/RenderLayer.hpp"
+#include "Krystal.Web/Rendering/RenderBlock.hpp"
+#include "Krystal.Web/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Web/Rendering/RenderView.hpp"
+#include "Krystal.Web/Rendering/Selection/RenderSelectionGeometry.hpp"
+
+namespace krys::web
+{
+  namespace
+  {
+    struct SelectionContext
+    {
+      using RendererMap = HashMap<RenderObject *, UniquePtr<RenderSelectionGeometry>>;
+      using RenderBlockMap = HashMap<const RenderBlock *, UniquePtr<RenderBlockSelectionGeometry>>;
+
+      uint32 StartOffset;
+      uint32 EndOffset;
+      RendererMap Renderers;
+      RenderBlockMap Blocks;
+    };
+
+    KRYS_NODISCARD bool IsValidRendererForSelection(const RenderObject &renderer,
+                                                    const RenderRange &selection) noexcept
+    {
+      if (!renderer.ContainingBlock())
+      {
+        return false;
+      }
+
+      if (renderer.IsSkippedContent())
+      {
+        return false;
+      }
+
+      if (renderer.SelectionState() == RenderObject::HighlightState::None)
+      {
+        return false;
+      }
+
+      return renderer.CanBeSelectionLeaf() || &renderer == selection.Start() || &renderer == selection.End();
+    }
+
+    KRYS_NODISCARD RenderBlock *ContainingBlockBelowView(const RenderObject &renderer) noexcept
+    {
+      auto *containingBlock = renderer.ContainingBlock();
+      return Is<RenderView>(containingBlock) ? nullptr : containingBlock;
+    }
+
+    KRYS_NODISCARD SelectionContext CollectSelectionData(const RenderRange &selection,
+                                                         bool repaintDifference) noexcept
+    {
+      SelectionContext oldSelectionData {selection.StartOffset(), selection.EndOffset(), {}, {}};
+      // Blocks contain selected objects and fill gaps between them, either on the left, right, or in between
+      // lines and blocks. In order to get the repaint rect right, we have to examine left, middle, and right
+      // rects individually, since otherwise the union of those rects might remain the same even when changes
+      // have occurred.
+      auto *start = selection.Start();
+      RenderObject *stop = nullptr;
+      if (auto *selectionEnd = selection.End())
+      {
+        stop = RendererAfterOffset(*selectionEnd, selection.EndOffset());
+      }
+      RenderRangeIterator selectionIterator(start);
+      while (start && start != stop)
+      {
+        if (IsValidRendererForSelection(*start, selection))
+        {
+          // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
+          oldSelectionData.Renderers.insert_or_assign(start,
+                                                      CreateUnique<RenderSelectionGeometry>(*start, true));
+          if (repaintDifference)
+          {
+            for (auto *block = ContainingBlockBelowView(*start); block;
+                 block = ContainingBlockBelowView(*block))
+            {
+              auto &blockInfo = oldSelectionData.Blocks[block];
+              if (blockInfo)
+              {
+                break;
+              }
+              blockInfo = CreateUnique<RenderBlockSelectionGeometry>(*block);
+            }
+          }
+        }
+        start = selectionIterator.Next();
+      }
+      return oldSelectionData;
+    }
+  }
+
+  RenderSelection::RenderSelection(RenderView &view) noexcept
+      : RenderHighlight(IsSelection), _renderView(view)
+  {
+  }
+
+  void RenderSelection::Set(const RenderRange &selection, RepaintMode blockRepaintMode) noexcept
+  {
+    if ((selection.Start() && !selection.End()) || (selection.End() && !selection.Start()))
+    {
+      return;
+    }
+    // Just return if the selection hasn't changed.
+    auto isCaret = _renderView.GetDocument().Selection().IsCaret();
+    if (selection == _renderRange && _selectionWasCaret == isCaret)
+    {
+      return;
+    }
+    _selectionWasCaret = isCaret;
+    Apply(selection, blockRepaintMode);
+  }
+
+  void RenderSelection::Clear() noexcept
+  {
+    if (!_selectionWasCaret)
+    {
+      _renderView.Layer()->RepaintBlockSelectionGaps();
+    }
+    Set({}, RepaintMode::NewMinusOld);
+  }
+
+  void RenderSelection::Repaint() const noexcept
+  {
+    HashSet<RenderBlock *> processedBlocks;
+    RenderObject *end = nullptr;
+    if (auto *rangeEnd = _renderRange.End())
+    {
+      end = RendererAfterOffset(*rangeEnd, _renderRange.EndOffset());
+    }
+    RenderRangeIterator highlightIterator(_renderRange.Start());
+    for (auto *renderer = highlightIterator.Current(); renderer && renderer != end;
+         renderer = highlightIterator.Next())
+    {
+      if (!IsValidRendererForSelection(*renderer, _renderRange))
+      {
+        continue;
+      }
+      RenderSelectionGeometry(*renderer, true).Repaint();
+      // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
+      for (auto *block = ContainingBlockBelowView(*renderer); block; block = ContainingBlockBelowView(*block))
+      {
+        if (!processedBlocks.insert(block).second)
+        {
+          break;
+        }
+        RenderSelectionGeometry(*block, true).Repaint();
+      }
+    }
+  }
+
+  RectI RenderSelection::CollectBounds(ClipToVisibleContent clipToVisibleContent) const noexcept
+  {
+    SelectionContext::RendererMap renderers;
+    auto *start = _renderRange.Start();
+    RenderObject *stop = nullptr;
+    if (auto *rangeEnd = _renderRange.End())
+    {
+      stop = RendererAfterOffset(*rangeEnd, _renderRange.EndOffset());
+    }
+
+    RenderRangeIterator selectionIterator(start);
+    while (start && start != stop)
+    {
+      if (IsValidRendererForSelection(*start, _renderRange))
+      {
+        // Blocks are responsible for painting line gaps and margin gaps. They must be examined as well.
+        renderers.insert_or_assign(start, CreateUnique<RenderSelectionGeometry>(
+                                            *start, clipToVisibleContent == ClipToVisibleContent::Yes));
+
+        auto *block = start->ContainingBlock();
+        while (block && !Is<RenderView>(*block))
+        {
+          auto &blockSelectionGeometry = renderers[block];
+          if (blockSelectionGeometry)
+          {
+            break;
+          }
+          blockSelectionGeometry =
+            CreateUnique<RenderSelectionGeometry>(*block, clipToVisibleContent == ClipToVisibleContent::Yes);
+          block = block->ContainingBlock();
+        }
+      }
+      start = selectionIterator.Next();
+    }
+
+    // Now create a single bounding box rect that encloses the whole selection.
+    LayoutRect selectionRect;
+    for (const auto &[renderer, selectionGeometry] : renderers)
+    {
+      // RenderSelectionGeometry::Rect() is in the coordinates of the repaintContainer, so map to page
+      // coordinates.
+      LayoutRect currentRect = selectionGeometry->Rect();
+      if (currentRect.IsEmpty())
+      {
+        continue;
+      }
+
+      if (auto *repaintContainer = selectionGeometry->RepaintContainer())
+      {
+        RectF localRect = currentRect;
+        QuadF absQuad = repaintContainer->LocalToAbsoluteQuad(localRect);
+        currentRect = LayoutRect(absQuad.EnclosingBoundingBox());
+      }
+      selectionRect.Unite(currentRect);
+    }
+
+    return SnappedRectI(selectionRect);
+  }
+
+  void RenderSelection::Apply(const RenderRange &newSelection, RepaintMode blockRepaintMode) noexcept
+  {
+    auto oldSelectionData = CollectSelectionData(_renderRange, blockRepaintMode == RepaintMode::NewXOROld);
+    // Remove current selection.
+    for (const auto &[renderer, geometry] : oldSelectionData.Renderers)
+    {
+      renderer->SetSelectionStateIfNeeded(RenderObject::HighlightState::None);
+    }
+    _renderRange = newSelection;
+    auto *selectionStart = _renderRange.Start();
+    // Update the selection status of all objects between selectionStart and selectionEnd
+    if (selectionStart && selectionStart == _renderRange.End())
+    {
+      selectionStart->SetSelectionStateIfNeeded(RenderObject::HighlightState::Both);
+    }
+    else
+    {
+      if (selectionStart)
+      {
+        selectionStart->SetSelectionStateIfNeeded(RenderObject::HighlightState::Start);
+      }
+      if (auto *end = _renderRange.End())
+      {
+        end->SetSelectionStateIfNeeded(RenderObject::HighlightState::End);
+      }
+    }
+
+    RenderObject *selectionEnd = nullptr;
+    if (auto *selectionDataEnd = _renderRange.End())
+    {
+      selectionEnd = RendererAfterOffset(*selectionDataEnd, _renderRange.EndOffset());
+    }
+    RenderRangeIterator selectionIterator(selectionStart);
+    for (auto *currentRenderer = selectionStart; currentRenderer && currentRenderer != selectionEnd;
+         currentRenderer = selectionIterator.Next())
+    {
+      if (currentRenderer == selectionStart || currentRenderer == _renderRange.End())
+      {
+        continue;
+      }
+      if (!currentRenderer->CanBeSelectionLeaf() || currentRenderer->IsSkippedContent())
+      {
+        continue;
+      }
+      currentRenderer->SetSelectionStateIfNeeded(RenderObject::HighlightState::Inside);
+    }
+
+    if (blockRepaintMode != RepaintMode::Nothing)
+    {
+      _renderView.Layer()->ClearBlockSelectionGapsBounds();
+    }
+
+    // Now that the selection state has been updated for the new objects, walk them again and
+    // put them in the new objects list.
+    SelectionContext::RendererMap newSelectedRenderers;
+    SelectionContext::RenderBlockMap newSelectedBlocks;
+    selectionIterator = RenderRangeIterator(selectionStart);
+    for (auto *currentRenderer = selectionStart; currentRenderer && currentRenderer != selectionEnd;
+         currentRenderer = selectionIterator.Next())
+    {
+      if (IsValidRendererForSelection(*currentRenderer, _renderRange))
+      {
+        newSelectedRenderers.insert_or_assign(currentRenderer,
+                                              CreateUnique<RenderSelectionGeometry>(*currentRenderer, true));
+        auto *containingBlock = currentRenderer->ContainingBlock();
+        while (containingBlock && !Is<RenderView>(*containingBlock))
+        {
+          auto &blockSelectionGeometry = newSelectedBlocks[containingBlock];
+          if (blockSelectionGeometry)
+          {
+            break;
+          }
+          blockSelectionGeometry = CreateUnique<RenderBlockSelectionGeometry>(*containingBlock);
+          containingBlock = containingBlock->ContainingBlock();
+        }
+      }
+    }
+
+    if (blockRepaintMode == RepaintMode::Nothing)
+    {
+      return;
+    }
+
+    // Have any of the old selected objects changed compared to the new selection?
+    for (const auto &[renderer, oldInfo] : oldSelectionData.Renderers)
+    {
+      auto newIt = newSelectedRenderers.find(renderer);
+      auto *newInfo = newIt != newSelectedRenderers.end() ? newIt->second.get() : nullptr;
+      if (!newInfo || oldInfo->Rect() != newInfo->Rect() || oldInfo->State() != newInfo->State()
+          || (_renderRange.Start() == renderer && oldSelectionData.StartOffset != _renderRange.StartOffset())
+          || (_renderRange.End() == renderer && oldSelectionData.EndOffset != _renderRange.EndOffset()))
+      {
+        oldInfo->Repaint();
+        if (newInfo)
+        {
+          newInfo->Repaint();
+          newSelectedRenderers.erase(newIt);
+        }
+      }
+    }
+
+    // Any new objects that remain were not found in the old objects dict, and so they need to be updated.
+    for (const auto &[renderer, newInfo] : newSelectedRenderers)
+    {
+      newInfo->Repaint();
+    }
+
+    // Have any of the old blocks changed?
+    for (const auto &[block, oldInfo] : oldSelectionData.Blocks)
+    {
+      auto newIt = newSelectedBlocks.find(block);
+      auto *newInfo = newIt != newSelectedBlocks.end() ? newIt->second.get() : nullptr;
+      if (!newInfo || oldInfo->Rects() != newInfo->Rects() || oldInfo->State() != newInfo->State())
+      {
+        oldInfo->Repaint();
+        if (newInfo)
+        {
+          newInfo->Repaint();
+          newSelectedBlocks.erase(newIt);
+        }
+      }
+    }
+
+    // Any new blocks that remain were not found in the old blocks dict, and so they need to be updated.
+    for (const auto &[block, newInfo] : newSelectedBlocks)
+    {
+      newInfo->Repaint();
+    }
+  }
+}

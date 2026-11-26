@@ -1,0 +1,27 @@
+﻿#include "Krystal.Web/Css/Properties/Consumers/Transitions.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/ConsumerTestUtils.hpp"
+
+namespace krys::web::css::parse_property::tests
+{
+  using css::tests::ConsumeToText;
+
+  TEST_CASE("parse_property(ConsumeSingleTransitionProperty)", "[CSS][Properties][Consumers]")
+  {
+    CHECK(ConsumeToText(u8"all", ConsumeSingleTransitionProperty) == "all");
+    CHECK(ConsumeToText(u8"opacity", ConsumeSingleTransitionProperty) == "opacity");
+    CHECK(ConsumeToText(u8"OPACITY", ConsumeSingleTransitionProperty) == "opacity");
+    CHECK(ConsumeToText(u8"not-a-property", ConsumeSingleTransitionProperty) == "not-a-property");
+
+    CHECK(ConsumeToText(u8"none", ConsumeSingleTransitionProperty) == "<null>");
+    CHECK(ConsumeToText(u8"inherit", ConsumeSingleTransitionProperty) == "<null>");
+    CHECK(ConsumeToText(u8"5", ConsumeSingleTransitionProperty) == "<null>");
+  }
+
+  TEST_CASE("parse_property(ConsumeSingleTransitionPropertyOrNone)", "[CSS][Properties][Consumers]")
+  {
+    CHECK(ConsumeToText(u8"none", ConsumeSingleTransitionPropertyOrNone) == "none");
+    CHECK(ConsumeToText(u8"width", ConsumeSingleTransitionPropertyOrNone) == "width");
+    CHECK(ConsumeToText(u8"\"width\"", ConsumeSingleTransitionPropertyOrNone) == "<null>");
+  }
+}

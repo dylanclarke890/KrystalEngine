@@ -1,0 +1,385 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003-2023 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#include "Krystal.Web/Rendering/Style/StyleCachedImage.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Web/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Web/Rendering/ReferencedSVGResources.hpp"
+#include "Krystal.Web/Rendering/RenderElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGSvgElement.hpp"
+#include "Krystal.Web/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Web/Svg/Graphics/SVGResourceImage.hpp"
+#include "Krystal.Web/Svg/SVGURIReference.hpp"
+
+namespace krys::web
+{
+  Ref<StyleCachedImage> StyleCachedImage::Create(style::Url &&url, Ref<css::ImageValue> &&cssValue,
+                                                 float scaleFactor) noexcept
+  {
+    return AdoptRef(*new StyleCachedImage(krys::move(url), krys::move(cssValue), scaleFactor));
+  }
+
+  Ref<StyleCachedImage> StyleCachedImage::Create(const style::Url &url, const Ref<css::ImageValue> &cssValue,
+                                                 float scaleFactor) noexcept
+  {
+    return AdoptRef(*new StyleCachedImage(url, cssValue, scaleFactor));
+  }
+
+  Ref<StyleCachedImage> StyleCachedImage::CopyOverridingScaleFactor(StyleCachedImage &other,
+                                                                    float scaleFactor) noexcept
+  {
+    if (other._scaleFactor == scaleFactor)
+    {
+      return ShareRef(other);
+    }
+    return StyleCachedImage::Create(other._url, other._cssValue, scaleFactor);
+  }
+
+  StyleCachedImage::StyleCachedImage(style::Url &&url, Ref<css::ImageValue> &&cssValue,
+                                     float scaleFactor) noexcept
+      : StyleImage {Type::CachedImage}, _url {krys::move(url)}, _cssValue {krys::move(cssValue)},
+        _scaleFactor {scaleFactor}
+  {
+    _cachedImage = _cssValue->GetCachedImage();
+    if (_cachedImage)
+    {
+      _isPending = false;
+    }
+  }
+
+  StyleCachedImage::StyleCachedImage(const style::Url &url, const Ref<css::ImageValue> &cssValue,
+                                     float scaleFactor) noexcept
+      : StyleImage {Type::CachedImage}, _url {url}, _cssValue {cssValue}, _scaleFactor {scaleFactor}
+  {
+    _cachedImage = _cssValue->GetCachedImage();
+    if (_cachedImage)
+    {
+      _isPending = false;
+    }
+  }
+
+  StyleCachedImage::~StyleCachedImage() noexcept = default;
+
+  bool StyleCachedImage::Equals(const StyleImage &other) const noexcept
+  {
+    const auto *otherCachedImage = DynamicDowncast<StyleCachedImage>(other);
+    return otherCachedImage && Equals(*otherCachedImage);
+  }
+
+  bool StyleCachedImage::Equals(const StyleCachedImage &other) const noexcept
+  {
+    if (&other == this)
+    {
+      return true;
+    }
+    if (_scaleFactor != other._scaleFactor)
+    {
+      return false;
+    }
+    if (_cssValue.get() == other._cssValue.get() || _cssValue->Equals(*other._cssValue))
+    {
+      return true;
+    }
+    if (_cachedImage && _cachedImage == other._cachedImage)
+    {
+      return true;
+    }
+    return false;
+  }
+
+  style::Url StyleCachedImage::Url() const noexcept
+  {
+    return _url;
+  }
+
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::UncheckedRenderSVGResource(DocumentOrShadowRoot &treeScope,
+                                                 const DOMStringAtom &fragment) const noexcept
+  {
+    auto *renderSVGResource = ReferencedSVGResources::ReferencedRenderResource(treeScope, fragment);
+    _isRenderSVGResource = renderSVGResource != nullptr;
+    return renderSVGResource;
+  }
+
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::UncheckedRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    if (!renderer)
+    {
+      return nullptr;
+    }
+
+    if (!_url.Resolved.String().contains(u8'#'))
+    {
+      _isRenderSVGResource = false;
+      return nullptr;
+    }
+
+    if (!_cachedImage)
+    {
+      auto fragmentIdentifier =
+        SVGURIReference::FragmentIdentifierFromIRIString(_url, renderer->GetDocument());
+      return UncheckedRenderSVGResource(renderer->TreeScopeForSVGReferences(), fragmentIdentifier);
+    }
+
+    auto *image = DynamicDowncast<SVGImage>(_cachedImage->GetImage());
+    if (!image)
+    {
+      return nullptr;
+    }
+
+    auto rootElement = image->RootElement();
+    if (!rootElement)
+    {
+      return nullptr;
+    }
+
+    return UncheckedRenderSVGResource(rootElement->TreeScopeForSVGReferences(),
+                                      DOMStringAtom(_url.Resolved.FragmentIdentifier()));
+  }
+
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::LegacyRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    if (_isRenderSVGResource && !*_isRenderSVGResource)
+    {
+      return nullptr;
+    }
+    return UncheckedRenderSVGResource(renderer);
+  }
+
+  bool StyleCachedImage::IsRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    return LegacyRenderSVGResource(renderer);
+  }
+
+  void StyleCachedImage::Load(CachedResourceLoader &loader, const ResourceLoaderOptions &options) noexcept
+  {
+    krys_debug_assert(_isPending);
+    _isPending = false;
+    _cachedImage = _cssValue->LoadImage(loader, options);
+  }
+
+  WrappedImagePtr StyleCachedImage::Data() const noexcept
+  {
+    return _cachedImage.get();
+  }
+
+  CachedImage *StyleCachedImage::GetCachedImage() const noexcept
+  {
+    return _cachedImage.get();
+  }
+
+  Ref<css::Value> StyleCachedImage::ComputedStyleValue(const RenderStyle &style) const noexcept
+  {
+    return _cssValue->CopyForComputedStyle(style::ConvertToCSS(_url, style));
+  }
+
+  bool StyleCachedImage::CanRender(const RenderElement *renderer, float multiplier) const noexcept
+  {
+    if (IsRenderSVGResource(renderer))
+    {
+      return true;
+    }
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->CanRender(renderer, multiplier);
+  }
+
+  bool StyleCachedImage::IsPending() const noexcept
+  {
+    return _isPending;
+  }
+
+  bool StyleCachedImage::IsLoaded(const RenderElement *renderer) const noexcept
+  {
+    if (IsRenderSVGResource(renderer))
+    {
+      return true;
+    }
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return !_cachedImage->IsLoading();
+  }
+
+  bool StyleCachedImage::ErrorOccurred() const noexcept
+  {
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->ErrorOccurred();
+  }
+
+  SizeF StyleCachedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
+  {
+    if (IsRenderSVGResource(renderer))
+    {
+      return _containerSize;
+    }
+    if (!_cachedImage)
+    {
+      return {};
+    }
+    return SizeF(_cachedImage->ImageSizeForRenderer(renderer, multiplier)) / _scaleFactor;
+  }
+
+  bool StyleCachedImage::ImageHasRelativeWidth() const noexcept
+  {
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->ImageHasRelativeWidth();
+  }
+
+  bool StyleCachedImage::ImageHasRelativeHeight() const noexcept
+  {
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->ImageHasRelativeHeight();
+  }
+
+  void StyleCachedImage::ComputeIntrinsicDimensions(const RenderElement *renderer, float &intrinsicWidth,
+                                                    float &intrinsicHeight, SizeF &intrinsicRatio) noexcept
+  {
+    // In case of an SVG resource, we should return the container size.
+    if (IsRenderSVGResource(renderer))
+    {
+      SizeF size = FloorSizeToDevicePixels(LayoutSize(_containerSize),
+                                           renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
+      intrinsicWidth = size.Width();
+      intrinsicHeight = size.Height();
+      intrinsicRatio = size;
+      return;
+    }
+
+    if (!_cachedImage)
+    {
+      return;
+    }
+
+    _cachedImage->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
+  }
+
+  bool StyleCachedImage::UsesImageContainerSize() const noexcept
+  {
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->UsesImageContainerSize();
+  }
+
+  void StyleCachedImage::SetContainerContextForRenderer(const RenderElement &renderer,
+                                                        const SizeF &containerSize,
+                                                        float containerZoom) noexcept
+  {
+    _containerSize = containerSize;
+    if (!_cachedImage)
+    {
+      return;
+    }
+    _cachedImage->SetContainerContextForClient(renderer.GetCachedImageClient(), LayoutSize(containerSize),
+                                               containerZoom, _url.Resolved);
+  }
+
+  void StyleCachedImage::AddClient(RenderElement &renderer) noexcept
+  {
+    krys_debug_assert(!_isPending);
+    if (!_cachedImage)
+    {
+      return;
+    }
+    _cachedImage->AddClient(renderer.GetCachedImageClient());
+  }
+
+  void StyleCachedImage::RemoveClient(RenderElement &renderer) noexcept
+  {
+    krys_debug_assert(!_isPending);
+    if (!_cachedImage)
+    {
+      return;
+    }
+    _cachedImage->RemoveClient(renderer.GetCachedImageClient());
+  }
+
+  bool StyleCachedImage::HasClient(RenderElement &renderer) const noexcept
+  {
+    krys_debug_assert(!_isPending);
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->HasClient(renderer.GetCachedImageClient());
+  }
+
+  bool StyleCachedImage::HasImage() const noexcept
+  {
+    if (!_cachedImage)
+    {
+      return false;
+    }
+    return _cachedImage->HasImage();
+  }
+
+  RefPtr<Image> StyleCachedImage::GetImage(const RenderElement *renderer, const SizeF &,
+                                           const GraphicsContext &, bool) const noexcept
+  {
+    krys_debug_assert(!_isPending);
+
+    if (auto *renderSVGResource = LegacyRenderSVGResource(renderer))
+    {
+      return SVGResourceImage::Create(*renderSVGResource, _url);
+    }
+
+    if (!_cachedImage)
+    {
+      return nullptr;
+    }
+
+    return ShareRefPtr(_cachedImage->ImageForRenderer(renderer));
+  }
+
+  float StyleCachedImage::ImageScaleFactor() const noexcept
+  {
+    return _scaleFactor;
+  }
+
+  bool StyleCachedImage::KnownToBeOpaque(const RenderElement &renderer) const noexcept
+  {
+    return _cachedImage && _cachedImage->CurrentFrameKnownToBeOpaque(&renderer);
+  }
+
+  bool StyleCachedImage::UsesDataProtocol() const noexcept
+  {
+    return _url.Resolved.ProtocolIsData();
+  }
+}

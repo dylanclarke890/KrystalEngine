@@ -1,0 +1,254 @@
+﻿/*
+ * Copyright (C) 2006 Samuel Weinig (sam.weinig@gmail.com)
+ * Copyright (C) 2004-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Graphics/Images/BitmapImage.hpp"
+#include "Krystal.Web/Graphics/GraphicsContext.hpp"
+#include "Krystal.Web/Graphics/Images/BitmapImageSource.hpp"
+#include "Krystal.Web/Graphics/Images/ImageObserver.hpp"
+#include "Krystal.Web/Graphics/Images/NativeImageSource.hpp"
+
+namespace krys::web
+{
+  Ref<BitmapImage> BitmapImage::Create(ImageObserver *observer, img::AlphaOption alphaOption,
+                                       img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+  {
+    return AdoptRef(*new BitmapImage(observer, alphaOption, gammaAndColorProfileOption));
+  }
+
+  Ref<BitmapImage> BitmapImage::Create(Ref<NativeImage> &&nativeImage) noexcept
+  {
+    return AdoptRef(*new BitmapImage(krys::move(nativeImage)));
+  }
+
+  RefPtr<BitmapImage> BitmapImage::Create(RefPtr<NativeImage> &&nativeImage) noexcept
+  {
+    if (!nativeImage)
+    {
+      return nullptr;
+    }
+    return AdoptRef(*new BitmapImage(krys::move(nativeImage)));
+  }
+
+  RefPtr<BitmapImage> BitmapImage::Create(PlatformImagePtr &&platformImage) noexcept
+  {
+    return Create(NativeImage::Create(krys::move(platformImage)));
+  }
+
+  BitmapImage::BitmapImage(ImageObserver *observer, img::AlphaOption alphaOption,
+                           img::GammaAndColorProfileOption gammaAndColorProfileOption) noexcept
+      : Image(observer), _source(BitmapImageSource::Create(*this, alphaOption, gammaAndColorProfileOption))
+  {
+  }
+
+  BitmapImage::BitmapImage(Ref<NativeImage> &&image) noexcept
+      : _source(NativeImageSource::Create(krys::move(image)))
+  {
+  }
+
+  img::EncodedDataStatus BitmapImage::DataChanged(bool allDataReceived) noexcept
+  {
+    return _source->DataChanged(Data(), allDataReceived);
+  }
+
+  void BitmapImage::DestroyDecodedData(bool destroyAll) noexcept
+  {
+    _source->DestroyDecodedData(destroyAll);
+  }
+
+  ImageDrawResult BitmapImage::Draw(GraphicsContext &context, const RectF &destinationRect,
+                                    const RectF &sourceRect, ImagePaintingOptions options) noexcept
+  {
+    if (destinationRect.IsEmpty() || sourceRect.IsEmpty())
+    {
+      return ImageDrawResult::DidNothing;
+    }
+
+    auto size = SizeF(_source->Size(img::ImageOrientation::Orientation::None));
+    auto sourceSize = SizeF(_source->SourceSize(img::ImageOrientation::Orientation::None));
+
+    // adjustedSourceRect is in the coordinates of densityCorrectedSize, so map it to the sourceSize.
+    auto adjustedSourceRect = sourceRect;
+    if (sourceSize != size)
+    {
+      adjustedSourceRect.Scale(sourceSize / size);
+    }
+
+    auto scaleFactorForDrawing = context.ScaleFactorForDrawing(destinationRect, adjustedSourceRect);
+    auto sizeForDrawing = ExpandedSizeI(sourceSize * scaleFactorForDrawing);
+    auto subsamplingLevel = _source->SubsamplingLevelForScaleFactor(context, scaleFactorForDrawing,
+                                                                    options.GetAllowImageSubsampling());
+
+    auto nativeImageOrError =
+      _source->CurrentNativeImageForDrawing(subsamplingLevel, {options.GetDecodingMode(), sizeForDrawing});
+
+    if (!nativeImageOrError)
+    {
+      // The decoder has not returned a frame. Fill the image rectangle with a debugging color to show what
+      // has happened.
+      if (options.GetShowDebugBackground() == ShowDebugBackground::Yes)
+      {
+        if (nativeImageOrError.error() == img::DecodingStatus::Decoding)
+        {
+          FillWithSolidColor(context, destinationRect, SRGBA<uint8> {255, 255, 0, 128},
+                             options.GetCompositeOperator());
+        }
+        else if (nativeImageOrError.error() == img::DecodingStatus::Invalid)
+        {
+          FillWithSolidColor(context, destinationRect, SRGBA<uint8> {255, 0, 0, 128},
+                             options.GetCompositeOperator());
+        }
+      }
+      return nativeImageOrError.error() == img::DecodingStatus::Decoding ? ImageDrawResult::DidRequestDecoding
+                                                                         : ImageDrawResult::DidNothing;
+    }
+
+    Ref<NativeImage> nativeImage = krys::move(*nativeImageOrError);
+    if (auto color = nativeImage->SinglePixelSolidColor())
+    {
+      FillWithSolidColor(context, destinationRect, *color, options.GetCompositeOperator());
+    }
+    else
+    {
+      // adjustedSourceRect is in the coordinates of the unsubsampled image, so map it to the subsampled
+      // image.
+      auto imageSize = SizeF(nativeImage->Size());
+      if (imageSize != sourceSize)
+      {
+        adjustedSourceRect.Scale(imageSize / sourceSize);
+      }
+
+      auto orientation = options.Orientation();
+      if (orientation == img::ImageOrientation::Orientation::FromImage)
+      {
+        orientation = CurrentFrameOrientation();
+      }
+
+      context.DrawNativeImage(*nativeImage, destinationRect, adjustedSourceRect, {options, orientation});
+    }
+
+    if (auto observer = GetImageObserver())
+    {
+      observer->DidDraw(*this);
+    }
+
+    return ImageDrawResult::DidDraw;
+  }
+
+  void BitmapImage::DrawPattern(GraphicsContext &context, const RectF &destinationRect, const RectF &tileRect,
+                                const AffineTransform &transform, const PointF &phase, const SizeF &spacing,
+                                ImagePaintingOptions options) noexcept
+  {
+    if (tileRect.IsEmpty())
+    {
+      return;
+    }
+
+    // FIXME: HDR content for testing (hasHDRContentForTesting), once there's HDR.
+    if (context.DrawLuminanceMask())
+    {
+      DrawLuminanceMaskPattern(context, destinationRect, tileRect, transform, phase, spacing, options);
+    }
+    else if (HasDensityCorrectedSize())
+    {
+      DrawDensityCorrectedPattern(context, destinationRect, tileRect, transform, phase, spacing, options);
+    }
+    else
+    {
+      Image::DrawPattern(context, destinationRect, tileRect, transform, phase, spacing,
+                         {options, img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
+    }
+  }
+
+  void BitmapImage::DrawDensityCorrectedPattern(GraphicsContext &context, const RectF &destinationRect,
+                                                const RectF &tileRect, const AffineTransform &transform,
+                                                const PointF &phase, const SizeF &spacing,
+                                                ImagePaintingOptions options) noexcept
+  {
+    // As Chrome, the pattern tiles the full-resolution pixels, scaled to the density-corrected size, rather
+    // than pixels resampled to it (upstream's pre-transformed image).
+    const img::ImageOrientation orientation = img::ImageOrientation::Orientation::FromImage;
+    RefPtr<NativeImage> tileImage = _source->CurrentOrientedNativeImage(orientation);
+    if (!tileImage)
+    {
+      return;
+    }
+
+    // The tile rectangle is in the density-corrected size's units; map it to the pixels, and the pattern's
+    // transform back.
+    auto pixelsPerUnit = SizeF(_source->SourceSize(orientation)) / SizeF(_source->Size(orientation));
+    auto pixelTileRect = tileRect;
+    pixelTileRect.Scale(pixelsPerUnit.Width(), pixelsPerUnit.Height());
+    auto pixelTransform = transform;
+    pixelTransform.Scale(1 / pixelsPerUnit.Width(), 1 / pixelsPerUnit.Height());
+
+    context.DrawPattern(*tileImage, destinationRect, pixelTileRect, pixelTransform, phase, spacing,
+                        {options, orientation});
+
+    if (auto observer = GetImageObserver())
+    {
+      observer->DidDraw(*this);
+    }
+  }
+
+  void BitmapImage::DrawLuminanceMaskPattern(GraphicsContext &context, const RectF &destinationRect,
+                                             const RectF &tileRect, const AffineTransform &transform,
+                                             const PointF &phase, const SizeF &spacing,
+                                             ImagePaintingOptions options) noexcept
+  {
+    krys_debug_assert(!tileRect.IsEmpty());
+    krys_debug_assert(context.DrawLuminanceMask());
+
+    auto buffer = context.CreateImageBuffer(SizeF(ExpandedSizeI(tileRect.Size())));
+    if (!buffer)
+    {
+      return;
+    }
+
+    auto observer = GetImageObserver();
+
+    // Temporarily reset image observer, we don't want to receive any changeInRect() calls due to this
+    // relayout.
+    SetImageObserver(nullptr);
+
+    auto bufferRect = RectF {{}, buffer->LogicalSize()};
+    (void)Draw(buffer->Context(), bufferRect, tileRect,
+               {options, DecodingMode::Synchronous,
+                img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
+
+    SetImageObserver(krys::move(observer));
+    buffer->ConvertToLuminanceMask();
+
+    context.SetDrawLuminanceMask(false);
+    context.DrawPattern(*buffer, destinationRect, bufferRect, transform, phase, spacing,
+                        {options, img::ImageOrientation(img::ImageOrientation::Orientation::FromImage)});
+  }
+
+  void BitmapImage::Dump(TextStream &ts) const noexcept
+  {
+    Image::Dump(ts);
+    _source->Dump(ts);
+  }
+}

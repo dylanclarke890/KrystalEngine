@@ -1,0 +1,90 @@
+﻿/*
+ * Copyright (C) 2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Visitor.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Style/Scope/ScopeOrdinal.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::css
+{
+  class PrimitiveValue;
+}
+
+namespace krys::web::style
+{
+  /// @brief A name defined or referenced in a tree scope, e.g. a `@keyframes` or container name.
+  struct ScopedName
+  {
+    CSSOMStringAtom Name;
+    style::ScopeOrdinal ScopeOrdinal {style::ScopeOrdinal::Element};
+    bool IsIdentifier {true};
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+      if (IsIdentifier)
+      {
+        return visitor(css::CustomIdentifier {Name});
+      }
+      return visitor(Name);
+    }
+
+    KRYS_NODISCARD bool operator==(const ScopedName &) const noexcept = default;
+  };
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<ScopedName>
+  {
+    KRYS_NODISCARD ScopedName operator()(BuilderState &, const css::PrimitiveValue &) noexcept;
+
+    KRYS_NODISCARD ScopedName operator()(BuilderState &, const css::Value &) noexcept;
+  };
+}
+
+namespace krys
+{
+  template <>
+  struct MarkableTraits<web::style::ScopedName>
+  {
+    KRYS_NODISCARD static bool IsEmptyValue(const web::style::ScopedName &value) noexcept
+    {
+      return value.Name == null;
+    }
+
+    KRYS_NODISCARD static web::style::ScopedName EmptyValue() noexcept
+    {
+      return web::style::ScopedName {null};
+    }
+  };
+}
+
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::ScopedName)

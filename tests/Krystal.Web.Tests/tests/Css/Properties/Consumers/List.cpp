@@ -1,0 +1,82 @@
+﻿#include "Krystal.Web/Css/Properties/Consumers/List.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/ConsumerTestUtils.hpp"
+#include "Krystal.Web.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Web/Css/Parser/InputStream.hpp"
+#include "Krystal.Web/Css/Parser/Tokenizer.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+
+namespace krys::web::css::parse_property::tests
+{
+  using css::tests::CssText;
+  using css::tests::Tokens;
+  using css::tests::ValueFixture;
+
+  namespace
+  {
+    constexpr auto ConsumeIdentValue = [](TokenRange &tokens)
+    {
+      return ConsumeIdent(tokens);
+    };
+
+    template <char Separator, ListBounds Bounds, ListOptimization Optimization = ListOptimization::None>
+    std::string ConsumeList(utf8_stringview css, bool expectAtEnd = true)
+    {
+      Tokens tokens {css};
+      auto range = tokens.Tokenizer.Tokens();
+      auto list = ConsumeListSeparatedBy<Separator, Bounds, Optimization>(range, ConsumeIdentValue);
+      if (!list)
+      {
+        return "<null>";
+      }
+
+      CHECK(range.IsAtEnd() == expectAtEnd);
+      return CssText(*list);
+    }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy)", "[CSS][Properties][Consumers]")
+  {
+    CHECK(ConsumeList<',', OneOrMore>(u8"a, b ,c") == "a, b, c");
+    CHECK(ConsumeList<'/', OneOrMore>(u8"a / b") == "a / b");
+    CHECK(ConsumeList<' ', OneOrMore>(u8"a b c") == "a b c");
+
+    // A failed element fails a comma- or slash-separated list, but ends a space-separated one.
+    CHECK(ConsumeList<',', OneOrMore>(u8"a, 5") == "<null>");
+    CHECK(ConsumeList<'/', OneOrMore>(u8"a / 5") == "<null>");
+    CHECK(ConsumeList<' ', OneOrMore>(u8"a b 5", false) == "a b");
+    CHECK(ConsumeList<' ', OneOrMore>(u8"5", false) == "<null>");
+    CHECK(ConsumeList<' ', ZeroOrMore>(u8"5", false).empty());
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy bounds)",
+                   "[CSS][Properties][Consumers]")
+  {
+    CHECK(ConsumeList<',', ListBounds::Exactly(2)>(u8"a, b") == "a, b");
+    CHECK(ConsumeList<',', ListBounds::Exactly(2)>(u8"a") == "<null>");
+    CHECK(ConsumeList<',', ListBounds::Exactly(2)>(u8"a, b, c") == "<null>");
+    CHECK(ConsumeList<',', ListBounds::MinimumOf(2)>(u8"a, b, c") == "a, b, c");
+    CHECK(ConsumeList<' ', ListBounds {1, 2}>(u8"a b c") == "<null>");
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "parse_property(ConsumeListSeparatedBy single value)",
+                   "[CSS][Properties][Consumers]")
+  {
+    Tokens tokens {u8"a"};
+    auto range = tokens.Tokenizer.Tokens();
+    auto single =
+      ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(range, ConsumeIdentValue);
+    REQUIRE(single);
+    CHECK(Is<PrimitiveValue>(*single));
+
+    Tokens many {u8"a, b"};
+    range = many.Tokenizer.Tokens();
+    auto list =
+      ConsumeListSeparatedBy<',', OneOrMore, ListOptimization::SingleValue>(range, ConsumeIdentValue);
+    REQUIRE(list);
+    CHECK(Is<ValueList>(*list));
+    CHECK(CssText(*list) == "a, b");
+  }
+}

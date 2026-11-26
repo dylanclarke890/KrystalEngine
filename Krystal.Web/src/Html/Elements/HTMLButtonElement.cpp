@@ -1,0 +1,539 @@
+﻿#include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Core/Containers/Array.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Web/Html/Elements/HTMLFormElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Web/Html/Events/CommandEvent.hpp"
+#include "Krystal.Web/Html/Forms/DOMFormData.hpp"
+#include "Krystal.Web/Rendering/FormControls/RenderButton.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+
+namespace krys::web
+{
+  namespace
+  {
+    struct CommandKeyword
+    {
+      utf8_stringview Keyword;
+      dom::CommandType Type;
+    };
+
+    /// @brief The built-in commands' keywords.
+    constexpr Array<CommandKeyword, 6> CommandKeywords = {{
+      {u8"toggle-popover", dom::CommandType::TogglePopover},
+      {u8"show-popover", dom::CommandType::ShowPopover},
+      {u8"hide-popover", dom::CommandType::HidePopover},
+      {u8"show-modal", dom::CommandType::ShowModal},
+      {u8"close", dom::CommandType::Close},
+      {u8"request-close", dom::CommandType::RequestClose},
+    }};
+  }
+
+  HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
+      : HTMLFormControlElement(document, html::HTMLElementInterface::Button)
+  {
+    _eventTargetFlags.Add(dom::EventTargetFlag::HasActivationBehavior);
+  }
+
+  RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    // A flex or grid button lays its contents out as such; otherwise it's a button box.
+    // https://html.spec.whatwg.org/multipage/rendering.html#button-layout
+    if (style.IsDisplayFlexibleOrGridFormattingContextBox())
+    {
+      return HTMLFormControlElement::CreateElementRenderer(krys::move(style));
+    }
+    return CreateRenderer<RenderButton>(*this, krys::move(style));
+  }
+
+  DOMString HTMLButtonElement::FormControlType() const noexcept
+  {
+    switch (_type)
+    {
+      case ButtonType::Submit: return u8"submit";
+      case ButtonType::Button: return u8"button";
+      case ButtonType::Reset:  return u8"reset";
+    }
+    krys_unreachable();
+  }
+
+  void HTMLButtonElement::OnAttributeChanged(const DOMStringAtom &localName, Maybe<DOMStringView> oldValue,
+                                             Maybe<DOMStringView> value,
+                                             const DOMStringAtom &namespaceURI) noexcept
+  {
+    HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != null)
+    {
+      return;
+    }
+    if (localName == u8"type")
+    {
+      ComputeType(value.value_or(DOMStringView()));
+    }
+    else if (localName == u8"command" || localName == u8"commandfor")
+    {
+      ComputeType(GetAttribute(u8"type").value_or(DOMString()));
+    }
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element:activation-behaviour
+  void HTMLButtonElement::ActivationBehavior(Event &event) noexcept
+  {
+    // 1. If element is disabled, then return.
+    if (IsDisabledFormControl())
+    {
+      return;
+    }
+
+    // 2. If element's node document is not fully active, then return.
+    if (!NodeDocument().IsFullyActive())
+    {
+      return;
+    }
+
+    // 3. If element has a form owner:
+    if (Form())
+    {
+      // Update layout before processing form actions in case the style changes the form or button
+      // relationships.
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+      if (RefPtr<HTMLFormElement> currentForm = ShareRefPtr(Form()))
+      {
+        // 3a. If element is a submit button, then submit element's form owner from element with
+        //     userInvolvement set to event's user navigation involvement, and return.
+        if (_type == ButtonType::Submit)
+        {
+          currentForm->SubmitIfPossible(&event, this);
+        }
+        // 3b. If element's type attribute is in the Reset Button state, then reset element's form owner, and
+        //     return.
+        if (_type == ButtonType::Reset)
+        {
+          currentForm->Reset();
+        }
+      }
+      if (_type == ButtonType::Submit || _type == ButtonType::Reset)
+      {
+        event.SetDefaultHandled();
+        return;
+      }
+
+      // 3c. If element's type attribute is in the Auto state, then return.
+      if (_type == ButtonType::Button
+          && !text::IsASCIICaselessEqual(DOMStringView(GetAttribute(u8"type").value_or(DOMString())),
+                                         u8"button"))
+      {
+        return;
+      }
+    }
+
+    // 4. Let target be the result of running element's get the commandfor-associated element.
+    // 5. If target is not null:
+    if (CommandForElement())
+    {
+      HandleCommand();
+      return;
+    }
+
+    // 6. Otherwise, run the popover target attribute activation behavior given element and event's target.
+    HandlePopoverTargetAction(event.Target().get());
+  }
+
+  void HTMLButtonElement::DefaultEventHandler(Event &event) noexcept
+  {
+    if (auto *keyboardEvent = DynamicDowncast<KeyboardEvent>(event))
+    {
+      if (keyboardEvent->Type() == event_names::KeyDown && keyboardEvent->Key() == u8" ")
+      {
+        SetActive(true);
+        // No SetDefaultHandled(): a keypress follows.
+        return;
+      }
+      if (keyboardEvent->Type() == event_names::KeyPress)
+      {
+        switch (keyboardEvent->CharCode())
+        {
+          case '\r':
+            (void)DispatchSimulatedClick(keyboardEvent);
+            keyboardEvent->SetDefaultHandled();
+            return;
+          case ' ':
+            // The space bar's keypress doesn't scroll the page: the keyup activates the button.
+            keyboardEvent->SetDefaultHandled();
+            return;
+          default: break;
+        }
+      }
+      if (keyboardEvent->Type() == event_names::KeyUp && keyboardEvent->Key() == u8" ")
+      {
+        if (Active())
+        {
+          (void)DispatchSimulatedClick(keyboardEvent);
+        }
+        keyboardEvent->SetDefaultHandled();
+        return;
+      }
+    }
+
+    HTMLFormControlElement::DefaultEventHandler(event);
+  }
+
+  bool HTMLButtonElement::IsSuccessfulSubmitButton() const noexcept
+  {
+    // Any submit button, named or not, can submit its form (only a named one adds an entry).
+    return _type == ButtonType::Submit;
+  }
+
+  bool HTMLButtonElement::MatchesDefaultPseudoClass() const noexcept
+  {
+    auto *form = Form();
+    return IsSuccessfulSubmitButton() && form && form->DefaultButton() == this;
+  }
+
+  bool HTMLButtonElement::IsActivatedSubmit() const noexcept
+  {
+    return _isActivatedSubmit;
+  }
+
+  void HTMLButtonElement::SetActivatedSubmit(bool flag) noexcept
+  {
+    _isActivatedSubmit = flag;
+  }
+
+  bool HTMLButtonElement::AppendFormData(html::DOMFormData &formData) noexcept
+  {
+    if (_type != ButtonType::Submit || Name().empty() || !_isActivatedSubmit)
+    {
+      return false;
+    }
+    formData.Append(Name(), Value());
+    return true;
+  }
+
+  bool HTMLButtonElement::ComputeWillValidate() const noexcept
+  {
+    return _type == ButtonType::Submit && HTMLFormControlElement::ComputeWillValidate();
+  }
+
+  bool HTMLButtonElement::IsSubmitButton() const noexcept
+  {
+    return _type == ButtonType::Submit;
+  }
+
+  void HTMLButtonElement::OnInsert() noexcept
+  {
+    HTMLFormControlElement::OnInsert();
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    HTMLFormControlElement::OnRemove(isSubtreeRoot, oldAncestor);
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    HTMLFormControlElement::OnMove(isSubtreeRoot, oldAncestor);
+    UpdateTypeForParent();
+  }
+
+  void HTMLButtonElement::UpdateTypeForParent() noexcept
+  {
+    ComputeType(GetAttribute(u8"type").value_or(DOMString()));
+  }
+
+  // https://html.spec.whatwg.org/multipage/forms.html#concept-submit-button
+  void HTMLButtonElement::ComputeType(DOMStringView typeAttributeValue) noexcept
+  {
+    auto oldType = _type;
+    // NOLINTBEGIN(bugprone-branch-clone): the keywords' states, then the missing and invalid value defaults.
+    if (text::IsASCIICaselessEqual(typeAttributeValue, u8"reset"))
+    {
+      _type = ButtonType::Reset;
+    }
+    else if (text::IsASCIICaselessEqual(typeAttributeValue, u8"button"))
+    {
+      _type = ButtonType::Button;
+    }
+    else if (text::IsASCIICaselessEqual(typeAttributeValue, u8"submit"))
+    {
+      _type = ButtonType::Submit;
+    }
+    else if (HasAttribute(u8"command") || HasAttribute(u8"commandfor") || Is<HTMLSelectElement>(ParentNode()))
+    {
+      _type = ButtonType::Button;
+    }
+    else
+    {
+      _type = ButtonType::Submit;
+    }
+    // NOLINTEND(bugprone-branch-clone)
+
+    if (oldType != _type)
+    {
+      UpdateWillValidateAndValidity();
+      if (auto *currentForm = Form();
+          currentForm && (oldType == ButtonType::Submit || _type == ButtonType::Submit))
+      {
+        currentForm->ResetDefaultButton();
+      }
+    }
+  }
+
+  RefPtr<web::Element> HTMLButtonElement::CommandForElement() const noexcept
+  {
+    return ResolvedElementForAttribute(u8"commandfor");
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-command
+  dom::CommandType HTMLButtonElement::GetCommandType() const noexcept
+  {
+    auto action = GetAttribute(u8"command");
+    if (!action || action->empty())
+    {
+      return dom::CommandType::Invalid;
+    }
+
+    for (const auto &[keyword, type] : CommandKeywords)
+    {
+      if (text::IsASCIICaselessEqual(DOMStringView(*action), DOMStringView(keyword)))
+      {
+        return type;
+      }
+    }
+
+    // A custom command keyword is a string that starts with "--".
+    if (action->starts_with(u8"--"))
+    {
+      return dom::CommandType::Custom;
+    }
+
+    return dom::CommandType::Invalid;
+  }
+
+  void HTMLButtonElement::HandleCommand() noexcept
+  {
+    RefPtr<web::Element> invokee = CommandForElement();
+    if (!invokee)
+    {
+      return;
+    }
+
+    // 5a. Let command be element's command attribute.
+    auto commandRaw = GetAttribute(u8"command");
+    auto command = GetCommandType();
+
+    // 5b. If the result of determining if a command is valid for a target given command and target is false,
+    //     then return.
+    // https://html.spec.whatwg.org/multipage/form-elements.html#determine-if-command-is-valid
+    // 1. If command is in the Unknown state, then return false.
+    if (command == dom::CommandType::Invalid)
+    {
+      return;
+    }
+
+    // 2. If command is in the Custom state, then return true.
+    // 3. If target is not an HTML element, then return false.
+    // 4. If command is in any of the following states: Toggle Popover; Show Popover; Hide Popover then return
+    //    true.
+    // 5. If this standard does not define is valid command steps for target's local name, then return false.
+    // 6. Otherwise, return the result of running target's corresponding is valid command steps given command.
+    // (Steps 3 to 6 are Element::IsValidCommandType and its overrides.)
+    if (command != dom::CommandType::Custom && !invokee->IsValidCommandType(command))
+    {
+      return;
+    }
+
+    // 5c. Let relatedTarget be target if the result of retargeting element against target is target;
+    //     otherwise element.
+    // 5d. Let continue be the result of firing an event named command at target, using CommandEvent, with its
+    //     command attribute initialized to command, its source attribute initialized to element, its
+    //     cancelable attribute initialized to true, its composed flag set, and relatedTarget set to
+    //     relatedTarget.
+    CommandEventInit init;
+    init.Bubbles = false;
+    init.Cancelable = true;
+    init.Composed = true;
+    init.Source = this;
+    init.Command = commandRaw.value_or(DOMString());
+
+    auto event = CommandEvent::Create(event_names::Command, init, true);
+    (void)dom::EventDispatcher::DispatchFromSource(*event, *invokee, this);
+
+    // 5e. If continue is false, then return.
+    // 5f. If target is not connected, then return.
+    // 5g. If command is in the Custom state, then return.
+    if (event->DefaultPrevented() || !invokee->IsConnected() || command == dom::CommandType::Custom)
+    {
+      return;
+    }
+
+    // 5g. If command is in the Hide Popover state: ...
+    // 5h. Otherwise, if command is in the Toggle Popover state: ...
+    // 5i. Otherwise, if command is in the Show Popover state: ...
+    // 5j. Otherwise, if this standard defines command steps for target's local name, then run the
+    //     corresponding command steps given target, element, and command.
+    // (HTMLElement::HandleCommandInternal and its overrides; showing and hiding check the popover's
+    // validity.)
+    (void)invokee->HandleCommandInternal(*this, command);
+  }
+
+#pragma region HTMLButtonElement
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-command
+  DOMString HTMLButtonElement::Command() const noexcept
+  {
+    // 1. Let command be this's command attribute.
+    auto command = GetCommandType();
+
+    // 2. If command is in the Custom state, then return command's value.
+    if (command == dom::CommandType::Custom)
+    {
+      return GetAttribute(u8"command").value_or(DOMString());
+    }
+
+    // 3. If command is in the Unknown state, then return the empty string.
+    // 4. Return the keyword corresponding to the value of command.
+    for (const auto &[keyword, type] : CommandKeywords)
+    {
+      if (type == command)
+      {
+        return DOMString(keyword);
+      }
+    }
+    return {};
+  }
+
+  void HTMLButtonElement::Command(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"command", krys::move(value));
+  }
+
+  RefPtr<web::Element> HTMLButtonElement::CommandForElementForBindings() const noexcept
+  {
+    // The getter steps are to return the result of running this's get the unresolved commandfor target
+    // element (a host, not what its reference target names).
+    return ElementForAttributeInternal(u8"commandfor");
+  }
+
+  void HTMLButtonElement::CommandForElementForBindings(web::Element *element) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    SetElementAttribute(u8"commandfor", element);
+  }
+
+  bool HTMLButtonElement::Disabled() const noexcept
+  {
+    return html::Reflect<bool>(*this, u8"disabled");
+  }
+
+  void HTMLButtonElement::Disabled(bool value) noexcept
+  {
+    html::Reflect<bool>(*this, u8"disabled", krys::move(value));
+  }
+
+  dom::USVString HTMLButtonElement::FormAction() const noexcept
+  {
+    // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formaction
+    // Let attributeValue be the result of running get an attribute value given this and formaction. If
+    // attributeValue is null or the empty string, return this's node document's URL, serialized.
+    auto attributeValue = GetAttribute(u8"formaction");
+    if (!attributeValue || attributeValue->empty())
+    {
+      return dom::USVString(NodeDocument().GetUrl().String());
+    }
+    // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
+    // this's node document. If urlString is not failure, return urlString.
+    if (auto url = NodeDocument().CompleteUrl(*attributeValue); url.IsValid())
+    {
+      return dom::USVString(url.String());
+    }
+    // Return attributeValue, converted to a scalar value string.
+    return dom::USVString(krys::move(*attributeValue));
+  }
+
+  void HTMLButtonElement::FormAction(dom::USVString value) noexcept
+  {
+    return html::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
+  }
+
+  DOMString HTMLButtonElement::EncType() const noexcept
+  {
+    return html::ReflectEnumerated<"formenctype">(*this);
+  }
+
+  void HTMLButtonElement::EncType(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"formenctype", krys::move(value));
+  }
+
+  DOMString HTMLButtonElement::FormMethod() const noexcept
+  {
+    return html::ReflectEnumerated<"formmethod">(*this);
+  }
+
+  void HTMLButtonElement::FormMethod(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"formmethod", krys::move(value));
+  }
+
+  void HTMLButtonElement::FormNoValidate(bool value) noexcept
+  {
+    html::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
+  }
+
+  DOMString HTMLButtonElement::FormTarget() const noexcept
+  {
+    return html::Reflect<DOMString>(*this, u8"formtarget").value_or(u8"");
+  }
+
+  void HTMLButtonElement::FormTarget(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"formtarget", krys::move(value));
+  }
+
+  DOMString HTMLButtonElement::Name() const noexcept
+  {
+    return html::Reflect<DOMString>(*this, u8"name").value_or(u8"");
+  }
+
+  void HTMLButtonElement::Name(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"name", krys::move(value));
+  }
+
+  // https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-type
+  DOMString HTMLButtonElement::Type() const noexcept
+  {
+    // 1. If this is a submit button, then return "submit".
+    // 2. Let state be this's type attribute.
+    // 3. Assert: state is not in the Submit Button state.
+    // 4. If state is in the Auto state, then return "button".
+    // 5. Return the keyword value corresponding to state.
+    return FormControlType();
+  }
+
+  void HTMLButtonElement::Type(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"type", krys::move(value));
+  }
+
+  DOMString HTMLButtonElement::Value() const noexcept
+  {
+    return html::Reflect<DOMString>(*this, u8"value").value_or(u8"");
+  }
+
+  void HTMLButtonElement::Value(DOMString value) noexcept
+  {
+    html::Reflect<DOMString>(*this, u8"value", krys::move(value));
+  }
+
+#pragma endregion
+}

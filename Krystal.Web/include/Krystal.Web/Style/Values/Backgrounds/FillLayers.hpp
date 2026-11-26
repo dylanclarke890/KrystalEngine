@@ -1,0 +1,143 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003, 2005, 2006, 2007, 2008, 2014 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Style/Values/Backgrounds/BackgroundSize.hpp"
+#include "Krystal.Web/Style/Values/Backgrounds/RepeatStyle.hpp"
+#include "Krystal.Web/Style/Values/Images/ImageOrNone.hpp"
+#include "Krystal.Web/Style/Values/Primitives/CoordinatedValueList.hpp"
+#include "Krystal.Web/Style/Values/Primitives/Position.hpp"
+#include <ranges>
+
+namespace krys::web
+{
+  class RenderElement;
+
+  namespace style
+  {
+    // Utilities for working with the BackgroundLayers and MaskLayers types.
+    // FIXME: `hasHDRContent`, once there's HDR.
+
+    template <typename T>
+    concept FillLayer = CoordinatedValueListValue<T> && requires(T value) {
+      { value.GetImage() } -> std::same_as<const ImageOrNone &>;
+      { value.HasImage() } -> std::same_as<bool>;
+      { value.GetSize() } -> std::same_as<const BackgroundSize &>;
+      { value.GetAttachment() } -> std::same_as<FillAttachment>;
+      { value.GetClip() } -> std::same_as<FillBox>;
+      { value.SetClipMax(std::declval<FillBox>()) };
+    };
+
+    template <FillLayer T>
+    void ComputeClipMax(const CoordinatedValueList<T> &list) noexcept
+    {
+      auto computedClipMax = FillBox::NoClip;
+      for (auto &layer : list.UsedValues() | std::views::reverse)
+      {
+        computedClipMax = ClipMax(computedClipMax, layer.GetClip());
+        layer.SetClipMax(computedClipMax);
+      }
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool ImagesAreLoaded(const CoordinatedValueList<T> &list,
+                                        const RenderElement &renderer) noexcept
+    {
+      return std::ranges::all_of(list.UsedValues(),
+                                 [&renderer](auto &layer)
+                                 {
+                                   auto image = layer.GetImage().TryStyleImage();
+                                   return !image || image->IsLoaded(&renderer);
+                                 });
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool HasImageInAnyLayer(const CoordinatedValueList<T> &list) noexcept
+    {
+      return std::ranges::any_of(list.UsedValues(), [](auto &layer) { return layer.HasImage(); });
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool HasImageWithAttachment(const CoordinatedValueList<T> &list,
+                                               FillAttachment attachment) noexcept
+    {
+      return std::ranges::any_of(list.UsedValues(), [&attachment](auto &layer)
+                                 { return layer.HasImage() && layer.GetAttachment() == attachment; });
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool HasEntirelyFixedBackground(const CoordinatedValueList<T> &list) noexcept
+    {
+      return std::ranges::all_of(
+        list.UsedValues(), [](auto &layer)
+        { return layer.HasImage() && layer.GetAttachment() == FillAttachment::FixedBackground; });
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool HasAnyBackgroundClipText(const CoordinatedValueList<T> &list) noexcept
+    {
+      return std::ranges::any_of(list.UsedValues(),
+                                 [](auto &layer) { return layer.GetClip() == FillBox::Text; });
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD RefPtr<StyleImage> FindLayerUsedImage(const CoordinatedValueList<T> &list,
+                                                         WrappedImagePtr image, bool &isNonEmpty) noexcept
+    {
+      for (auto &layer : list.UsedValues())
+      {
+        auto layerImage = layer.GetImage().TryStyleImage();
+        if (!layerImage || layerImage->Data() != image)
+        {
+          continue;
+        }
+
+        // FIXME: This really needs to compute the tile rect with BackgroundPainter::calculateFillTileSize().
+        isNonEmpty = krys::SwitchOn(
+          layer.GetSize(), [&](const css::keywords::Cover &) { return false; },
+          [&](const css::keywords::Contain &) { return false; },
+          [&](const style::BackgroundSize::LengthSize &size)
+          {
+            auto isAutoOrKnownNonZero = [](auto &length)
+            {
+              return krys::SwitchOn(
+                length, [](const style::BackgroundSizeLength::Fixed &fixed) { return !fixed.IsZero(); },
+                [](const style::BackgroundSizeLength::Percentage &percentage)
+                { return !percentage.IsZero(); }, [](const style::BackgroundSizeLength::Calc &)
+                { return false; }, [](const css::keywords::Auto &) { return true; });
+            };
+            return isAutoOrKnownNonZero(size.Width()) && isAutoOrKnownNonZero(size.Height());
+          });
+        return layerImage;
+      }
+
+      isNonEmpty = false;
+      return nullptr;
+    }
+  }
+}

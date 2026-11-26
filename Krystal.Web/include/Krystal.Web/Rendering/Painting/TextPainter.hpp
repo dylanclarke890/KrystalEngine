@@ -1,0 +1,134 @@
+﻿/*
+ * (C) 1999 Lars Knoll (knoll@kde.org)
+ * (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2004-2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Core/Strings/StringAtom.hpp"
+#include "Krystal.Web/Graphics/Paths/RotationDirection.hpp"
+#include "Krystal.Web/Rendering/Painting/TextPaintStyle.hpp"
+#include "Krystal.Web/Style/Values/TextDecoration/TextShadow.hpp"
+
+namespace krys::web
+{
+  class FontCascade;
+  class GraphicsContext;
+  class RenderCombineText;
+  class RenderStyle;
+  class TextRun;
+
+  /// @brief The transform turning @p boxRect a quarter turn in @p direction about its top left corner's
+  /// diagonal, for vertical text.
+  KRYS_NODISCARD inline AffineTransform Rotation(const RectF &boxRect, RotationDirection direction) noexcept
+  {
+    return direction == RotationDirection::Clockwise
+             ? AffineTransform(0, 1, -1, 0, boxRect.X() + boxRect.MaxY(), boxRect.MaxY() - boxRect.X())
+             : AffineTransform(0, -1, 1, 0, boxRect.X() - boxRect.MaxY(), boxRect.X() + boxRect.MaxY());
+  }
+
+  /// @brief Paints a range of a text run: its shadows, the text, and its emphasis marks.
+  /// FIXME: Cached glyph display lists (`setGlyphDisplayListIfNeeded`, `GlyphDisplayListCache`) are still to
+  /// come.
+  class TextPainter
+  {
+  private:
+    GraphicsContext &_context;
+    const FontCascade &_font;
+    const RenderStyle &_renderStyle;
+    TextPaintStyle _style;
+    StringAtom _emphasisMark;
+    const style::TextShadows &_shadow;
+    float _emphasisMarkOffset {0};
+    const RenderCombineText *_combinedText;
+
+  public:
+    TextPainter(GraphicsContext &context, const FontCascade &font, const RenderStyle &renderStyle,
+                TextPaintStyle textPaintStyle, const style::TextShadows &shadow, StringAtom emphasisMark,
+                float emphasisMarkOffset, const RenderCombineText *combinedText = nullptr) noexcept;
+
+    /// @brief Paints @p textRun from byte offset @p start to @p end.
+    /// @param boxRect The rect of the whole text box.
+    /// @param textOrigin Where the whole text box's text starts, on its baseline.
+    void PaintRange(const TextRun &textRun, const RectF &boxRect, const PointF &textOrigin, uint32 start,
+                    uint32 end) noexcept;
+
+  private:
+    void PaintTextOrEmphasisMarks(const FontCascade &font, const TextRun &textRun,
+                                  const StringAtom &emphasisMark, float emphasisMarkOffset,
+                                  const PointF &textOrigin, uint32 startOffset, uint32 endOffset) noexcept;
+
+    void PaintTextWithShadows(const style::TextShadows *shadows, const FontCascade &font,
+                              const TextRun &textRun, const RectF &boxRect, const PointF &textOrigin,
+                              uint32 startOffset, uint32 endOffset, const StringAtom &emphasisMark,
+                              float emphasisMarkOffset, bool stroked) noexcept;
+
+    void PaintTextAndEmphasisMarksIfNeeded(const TextRun &textRun, const RectF &boxRect,
+                                           const PointF &textOrigin, uint32 startOffset, uint32 endOffset,
+                                           const TextPaintStyle &paintStyle,
+                                           const style::TextShadows &shadow) noexcept;
+  };
+
+  /// @brief Sets a context up to draw one shadow of some text for as long as it lives: the shadow alone
+  /// (clipped to where it falls, the text drawn far off it) or, for the last shadow, the shadow and the text
+  /// together.
+  class ShadowApplier
+  {
+    KRYS_NON_COPY_MOVABLE(ShadowApplier);
+
+  private:
+    SizeF _extraOffset;
+    GraphicsContext &_context;
+    const style::TextShadow *_shadow;
+    bool _onlyDrawsShadow : 1;
+    bool _avoidDrawingShadow : 1;
+    bool _nothingToDraw : 1;
+    bool _didSaveContext : 1 {false};
+
+  public:
+    ShadowApplier(const RenderStyle &renderStyle, GraphicsContext &context, const style::TextShadow *shadow,
+                  const RectF &textRect, bool isLastShadowIteration,
+                  bool lastShadowIterationShouldDrawText = true, bool opaque = false,
+                  bool ignoreWritingMode = false) noexcept;
+
+    ~ShadowApplier() noexcept;
+
+    /// @brief How far the text is moved to draw only its shadow.
+    KRYS_NODISCARD SizeF ExtraOffset() const noexcept
+    {
+      return _extraOffset;
+    }
+
+    KRYS_NODISCARD bool NothingToDraw() const noexcept
+    {
+      return _nothingToDraw;
+    }
+
+    KRYS_NODISCARD bool DidSaveContext() const noexcept
+    {
+      return _didSaveContext;
+    }
+
+  private:
+    KRYS_NODISCARD bool ShadowIsCompletelyCoveredByText(bool textIsOpaque) const noexcept;
+  };
+}

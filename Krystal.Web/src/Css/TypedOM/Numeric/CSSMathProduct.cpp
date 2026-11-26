@@ -1,0 +1,165 @@
+﻿/*
+ * Copyright (C) 2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/TypedOM/Numeric/CSSMathProduct.hpp"
+#include "Krystal.Web/Css/Calc/Tree.hpp"
+#include "Krystal.Web/Css/TypedOM/Numeric/CSSMathInvert.hpp"
+
+namespace krys::web
+{
+  ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<CSSNumberish> numberishes) noexcept
+  {
+    List<Ref<CSSNumericValue>> values;
+    values.reserve(numberishes.size());
+    for (auto &numberish : numberishes)
+    {
+      values.push_back(RectifyNumberish(krys::move(numberish)));
+    }
+    return Create(krys::move(values));
+  }
+
+  ExceptionOr<Ref<CSSMathProduct>> CSSMathProduct::Create(List<Ref<CSSNumericValue>> &&values) noexcept
+  {
+    if (values.empty())
+    {
+      return Exception {ExceptionCode::SyntaxError};
+    }
+
+    auto type = CSSNumericType::MultiplyTypes(values);
+    if (!type)
+    {
+      return Exception {ExceptionCode::TypeError};
+    }
+
+    return AdoptRef(*new CSSMathProduct(krys::move(values), krys::move(*type)));
+  }
+
+  CSSMathProduct::CSSMathProduct(List<Ref<CSSNumericValue>> &&values, CSSNumericType &&type) noexcept
+      : CSSMathValue(krys::move(type)), _values(CSSNumericArray::Create(krys::move(values)))
+  {
+  }
+
+  void CSSMathProduct::Serialise(StringBuilder &builder,
+                                 EnumSet<SerialisationArguments> arguments) const noexcept
+  {
+    // https://drafts.css-houdini.org/css-typed-om/#calc-serialization
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
+    {
+      builder.Append(arguments.contains(SerialisationArguments::Nested) ? u8"(" : u8"calc(");
+    }
+    _values->ForEach(
+      [&](const CSSNumericValue &numericValue, bool first)
+      {
+        EnumSet<SerialisationArguments> operandSerialisationArguments {SerialisationArguments::Nested};
+        if (arguments.contains(SerialisationArguments::WithoutParentheses))
+        {
+          operandSerialisationArguments.Add(SerialisationArguments::WithoutParentheses);
+        }
+        if (!first)
+        {
+          if (auto *mathInvert = DynamicDowncast<CSSMathInvert>(numericValue))
+          {
+            builder.Append(u8" / ");
+            mathInvert->Value().Serialise(builder, operandSerialisationArguments);
+            return;
+          }
+          builder.Append(u8" * ");
+        }
+        numericValue.Serialise(builder, operandSerialisationArguments);
+      });
+    if (!arguments.contains(SerialisationArguments::WithoutParentheses))
+    {
+      builder.Append(u8')');
+    }
+  }
+
+  auto CSSMathProduct::ToSumValue() const noexcept -> Maybe<SumValue>
+  {
+    auto productOfUnits = [](const UnitMap &units1, const UnitMap &units2)
+    {
+      // https://drafts.css-houdini.org/css-typed-om/#product-of-two-unit-maps
+      auto result = units1;
+      for (const auto &[unit, exponent] : units2)
+      {
+        auto [iterator, isNewEntry] = result.try_emplace(unit, exponent);
+        if (!isNewEntry)
+        {
+          iterator->second += exponent;
+        }
+        if (!iterator->second)
+        {
+          result.erase(iterator);
+        }
+      }
+      return result;
+    };
+
+    // https://drafts.css-houdini.org/css-typed-om/#create-a-sum-value
+    SumValue values {Addend {1.0, {}}};
+    for (const auto &item : _values->Array())
+    {
+      auto newValues = item->ToSumValue();
+      if (!newValues)
+      {
+        return null;
+      }
+      SumValue temp;
+      for (const auto &item1 : values)
+      {
+        for (const auto &item2 : *newValues)
+        {
+          temp.push_back(Addend {item1.Value * item2.Value, productOfUnits(item1.Units, item2.Units)});
+        }
+      }
+      values = krys::move(temp);
+    }
+    return values;
+  }
+
+  Maybe<css::calc::Child> CSSMathProduct::ToCalcTreeNode() const noexcept
+  {
+    List<css::calc::Child> children;
+    for (const auto &child : _values->Array())
+    {
+      if (auto node = child->ToCalcTreeNode())
+      {
+        children.push_back(krys::move(*node));
+      }
+    }
+    if (children.size() != _values->Array().size())
+    {
+      return null;
+    }
+
+    auto operation = css::calc::Product {.Children = krys::move(children)};
+    auto type = css::calc::ToType(operation);
+    if (!type)
+    {
+      return null;
+    }
+
+    return css::calc::CreateChild(krys::move(operation), *type);
+  }
+}

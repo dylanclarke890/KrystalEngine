@@ -1,0 +1,310 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2006, 2007 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005 Rob Buis <buis@kde.org>
+ * Copyright (C) 2005 Eric Seidel <eric@webkit.org>
+ * Copyright (C) 2009 Dirk Schulze <krit@webkit.org>
+ * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ * Copyright (C) 2021-2023 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Web/Graphics/Filters/FilterEffect.hpp"
+#include "Krystal.Web/Graphics/Filters/FilterResults.hpp"
+#include "Krystal.Web/Graphics/GraphicsContext.hpp"
+#include "Krystal.Web/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGRenderingContext.hpp"
+#include "Krystal.Web/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Web/Svg/SVGLengthContext.hpp"
+
+namespace krys::web
+{
+  LegacyRenderSVGResourceFilter::LegacyRenderSVGResourceFilter(SVGFilterElement &element,
+                                                               RenderStyle &&style) noexcept
+      : LegacyRenderSVGResourceContainer(Type::LegacySVGResourceFilter, element, krys::move(style))
+  {
+  }
+
+  LegacyRenderSVGResourceFilter::~LegacyRenderSVGResourceFilter() noexcept = default;
+
+  SVGFilterElement &LegacyRenderSVGResourceFilter::FilterElement() const noexcept
+  {
+    return Downcast<SVGFilterElement>(LegacyRenderSVGResourceContainer::GetElement());
+  }
+
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::FilterUnits() const noexcept
+  {
+    return FilterElement().FilterUnits();
+  }
+
+  SVGUnitTypes::SVGUnitType LegacyRenderSVGResourceFilter::PrimitiveUnits() const noexcept
+  {
+    return FilterElement().PrimitiveUnits();
+  }
+
+  bool LegacyRenderSVGResourceFilter::IsIdentity() const noexcept
+  {
+    return SVGFilterRenderer::IsIdentity(FilterElement());
+  }
+
+  void LegacyRenderSVGResourceFilter::RemoveAllClientsFromCache() noexcept
+  {
+    _rendererFilterDataMap.clear();
+  }
+
+  void LegacyRenderSVGResourceFilter::RemoveClientFromCache(RenderElement &client) noexcept
+  {
+    auto findResult = _rendererFilterDataMap.find(&client);
+    if (findResult != _rendererFilterDataMap.end())
+    {
+      FilterData &filterData = *findResult->second;
+      if (filterData.SavedContext)
+      {
+        filterData.State = FilterData::MarkedForRemoval;
+      }
+      else
+      {
+        _rendererFilterDataMap.erase(findResult);
+      }
+    }
+  }
+
+  auto LegacyRenderSVGResourceFilter::ApplyResource(
+    RenderElement &renderer, const RenderStyle &, GraphicsContext *&context,
+    KRYS_MAYBE_UNUSED EnumSet<RenderSVGResourceMode> resourceMode) noexcept -> EnumSet<ApplyResult>
+  {
+    krys_debug_assert(context);
+    krys_debug_assert(resourceMode.empty());
+
+    if (auto it = _rendererFilterDataMap.find(&renderer); it != _rendererFilterDataMap.end())
+    {
+      FilterData *filterData = it->second.get();
+      if (filterData->State == FilterData::PaintingSource || filterData->State == FilterData::Applying)
+      {
+        filterData->State = FilterData::CycleDetected;
+        return {}; // Already built, or we're in a cycle, or we're marked for removal. Regardless, just do
+                   // nothing more now.
+      }
+
+      krys_debug_assert(filterData->TargetSwitcher);
+      if (filterData->TargetSwitcher->HasSourceImage())
+      {
+        return {};
+      }
+
+      filterData->TargetSwitcher->BeginDrawSourceImage(*context);
+      return {ApplyResult::ResourceApplied};
+    }
+
+    auto &filterDataSlot = _rendererFilterDataMap[&renderer];
+    filterDataSlot = CreateUnique<FilterData>();
+    auto *filterData = filterDataSlot.get();
+
+    auto &filterElement = FilterElement();
+    auto *contextElement = DynamicDowncast<SVGElement>(renderer.GetElement());
+
+    auto targetBoundingBox = renderer.ObjectBoundingBox();
+    auto filterRegion = SVGLengthContext::ResolveRectangle(contextElement, filterElement,
+                                                           filterElement.FilterUnits(), targetBoundingBox);
+    if (filterRegion.IsEmpty())
+    {
+      _rendererFilterDataMap.erase(&renderer);
+      return {};
+    }
+
+    // Determine absolute transformation matrix for filter.
+    auto absoluteTransform =
+      SVGRenderingContext::CalculateTransformationToOutermostCoordinateSystem(renderer);
+    if (!absoluteTransform.IsInvertible())
+    {
+      _rendererFilterDataMap.erase(&renderer);
+      return {};
+    }
+
+    // Eliminate shear of the absolute transformation matrix, to be able to produce unsheared tile images for
+    // feTile.
+    SizeF filterScale(static_cast<float>(absoluteTransform.XScale()),
+                      static_cast<float>(absoluteTransform.YScale()));
+
+    // Determine absolute boundaries of the filter and the drawing region.
+    filterData->SourceImageRect = renderer.StrokeBoundingBox();
+    filterData->SourceImageRect.Intersect(filterRegion);
+
+    // Determine scale factor for filter. The size of intermediate ImageBuffers shouldn't be bigger than
+    // kMaxFilterSize.
+    (void)ImageBuffer::SizeNeedsClamping(filterData->SourceImageRect.Size(), filterScale);
+
+    auto *frame = renderer.GetDocument().Frame();
+    if (!frame)
+    {
+      _rendererFilterDataMap.erase(&renderer);
+      return {};
+    }
+    auto preferredFilterModes = frame->PreferredFilterRenderingModes(*context);
+
+    // Create the SVGFilterRenderer object.
+    filterData->Filter = SVGFilterRenderer::Create(contextElement, filterElement,
+                                                   {
+                                                     .ReferenceBox = targetBoundingBox,
+                                                     .FilterRegion = filterRegion,
+                                                     .Scale = filterScale,
+                                                   },
+                                                   preferredFilterModes, *context);
+    if (!filterData->Filter)
+    {
+      _rendererFilterDataMap.erase(&renderer);
+      return {};
+    }
+
+    filterData->Filter->ClampFilterRegionIfNeeded();
+
+    auto &results = filterData->Filter->EnsureResults([] { return CreateUnique<FilterResults>(); });
+    filterData->TargetSwitcher =
+      GraphicsContextSwitcher::Create(*context, filterData->SourceImageRect, filterData->Filter, &results);
+    if (!filterData->TargetSwitcher)
+    {
+      _rendererFilterDataMap.erase(&renderer);
+      return {};
+    }
+
+    // If the sourceImageRect is empty, we have something like <g filter=".."/>.
+    // Even if the target objectBoundingBox() is empty, we still have to draw the last effect result image in
+    // postApplyResource.
+    if (filterData->SourceImageRect.IsEmpty())
+    {
+      krys_debug_assert(_rendererFilterDataMap.contains(&renderer));
+      filterData->SavedContext = context;
+      return {};
+    }
+
+    filterData->TargetSwitcher->BeginDrawSourceImage(*context);
+
+    filterData->SavedContext = context;
+    context = filterData->TargetSwitcher->DrawingContext(*context);
+
+    krys_debug_assert(_rendererFilterDataMap.contains(&renderer));
+    return {ApplyResult::ResourceApplied};
+  }
+
+  void LegacyRenderSVGResourceFilter::PostApplyResource(
+    RenderElement &renderer, GraphicsContext *&context,
+    KRYS_MAYBE_UNUSED EnumSet<RenderSVGResourceMode> resourceMode, const Path *,
+    const RenderElement *) noexcept
+  {
+    krys_debug_assert(context);
+    krys_debug_assert(resourceMode.empty());
+
+    auto findResult = _rendererFilterDataMap.find(&renderer);
+    if (findResult == _rendererFilterDataMap.end())
+    {
+      return;
+    }
+
+    FilterData &filterData = *findResult->second;
+
+    switch (filterData.State)
+    {
+      case FilterData::MarkedForRemoval: _rendererFilterDataMap.erase(findResult); return;
+
+      case FilterData::CycleDetected:
+      case FilterData::Applying:
+        // We have a cycle if we are already applying the data.
+        // This can occur due to FeImage referencing a source that makes use of the FEImage itself.
+        // This is the first place we've hit the cycle, so set the state back to PaintingSource so the return
+        // stack will continue correctly.
+        filterData.State = FilterData::PaintingSource;
+        return;
+
+      case FilterData::PaintingSource:
+        if (!filterData.SavedContext)
+        {
+          RemoveClientFromCacheAndMarkForInvalidation(renderer);
+          return;
+        }
+
+        context = filterData.SavedContext;
+        filterData.SavedContext = nullptr;
+        break;
+
+      case FilterData::Built: break;
+    }
+
+    if (filterData.TargetSwitcher)
+    {
+      filterData.State = FilterData::Built;
+      filterData.TargetSwitcher->EndDrawSourceImage(*context);
+    }
+  }
+
+  RectF LegacyRenderSVGResourceFilter::ResourceBoundingBox(const RenderObject &object,
+                                                           RepaintRectCalculation) noexcept
+  {
+    auto &filterElement = FilterElement();
+    auto *renderer = DynamicDowncast<RenderElement>(object);
+    if (!renderer)
+    {
+      return SVGLengthContext::ResolveRectangle(filterElement, filterElement.FilterUnits(),
+                                                object.ObjectBoundingBox());
+    }
+
+    auto *contextElement = DynamicDowncast<SVGElement>(renderer->GetElement());
+    return SVGLengthContext::ResolveRectangle(contextElement, filterElement, filterElement.FilterUnits(),
+                                              object.ObjectBoundingBox());
+  }
+
+  void LegacyRenderSVGResourceFilter::MarkFilterForRepaint(FilterEffect &effect) noexcept
+  {
+    for (const auto &[object, filterData] : _rendererFilterDataMap)
+    {
+      if (filterData->State != FilterData::Built)
+      {
+        continue;
+      }
+
+      // Repaint the image on the screen.
+      MarkClientForInvalidation(const_cast<RenderObject &>(*object), InvalidationMode::RepaintInvalidation);
+
+      filterData->Filter->ClearEffectResult(effect);
+    }
+  }
+
+  void LegacyRenderSVGResourceFilter::MarkFilterForRebuild() noexcept
+  {
+    RemoveAllClientsFromCacheAndMarkForInvalidation();
+  }
+
+  RectF LegacyRenderSVGResourceFilter::DrawingRegion(RenderObject &object) const noexcept
+  {
+    auto it = _rendererFilterDataMap.find(&object);
+    return it != _rendererFilterDataMap.end() ? it->second->SourceImageRect : RectF();
+  }
+
+  TextStream &operator<<(TextStream &ts, FilterData::FilterDataState state) noexcept
+  {
+    switch (state)
+    {
+      case FilterData::PaintingSource:   ts << u8"painting source"; break;
+      case FilterData::Applying:         ts << u8"applying"; break;
+      case FilterData::Built:            ts << u8"built"; break;
+      case FilterData::CycleDetected:    ts << u8"cycle detected"; break;
+      case FilterData::MarkedForRemoval: ts << u8"marked for removal"; break;
+    }
+    return ts;
+  }
+}

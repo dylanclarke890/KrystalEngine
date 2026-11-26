@@ -1,0 +1,72 @@
+﻿#include "Krystal.Web/Css/Values/FilterImageValue.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Web/Css/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+
+namespace krys::web::css::tests
+{
+  namespace
+  {
+    Filter BlurFilter(Blur::Parameter radius)
+    {
+      return Filter {FilterValueList {FilterValueList::Container {BlurFunction {.Parameters = {radius}}}}};
+    }
+
+    Filter SepiaFilter()
+    {
+      return Filter {FilterValueList {FilterValueList::Container {SepiaFunction {}}}};
+    }
+
+    Ref<FilterImageValue> FilterImage(utf8_stringview name, Filter filter)
+    {
+      return FilterImageValue::Create(TestImage(name), krys::move(filter));
+    }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "FilterImageValue::Create", "[CSS][Values][FilterImageValue]")
+  {
+    auto value = FilterImage(u8"a", SepiaFilter());
+    CHECK(Is<FilterImageValue>(*value));
+    CHECK(value->IsImageGeneratorValue());
+    CHECK(value->IsImage());
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "FilterImageValue serialisation", "[CSS][Values][FilterImageValue]")
+  {
+    CHECK(CssText(*FilterImage(u8"a", SepiaFilter()))
+          == "filter(url(\"https://example.com/a.png\"), sepia())");
+    CHECK(CssText(*FilterImage(u8"a", BlurFilter(2_css_px)))
+          == "filter(url(\"https://example.com/a.png\"), blur(2px))");
+
+    // The image can be `none`.
+    CHECK(CssText(*FilterImageValue::Create(PrimitiveValue::Create(ValueId::None), SepiaFilter()))
+          == "filter(none, sepia())");
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "FilterImageValue equality", "[CSS][Values][FilterImageValue]")
+  {
+    auto a = FilterImage(u8"a", BlurFilter(2_css_px));
+    CHECK(*a == *FilterImage(u8"a", BlurFilter(2_css_px)));
+    CHECK_FALSE(*a == *FilterImage(u8"b", BlurFilter(2_css_px)));
+    CHECK_FALSE(*a == *FilterImage(u8"a", BlurFilter(3_css_px)));
+    CHECK_FALSE(*a == *FilterImage(u8"a", SepiaFilter()));
+
+    CHECK(a->EqualInputImages(*FilterImage(u8"a", SepiaFilter())));
+    CHECK_FALSE(a->EqualInputImages(*FilterImage(u8"b", BlurFilter(2_css_px))));
+
+    size_t seed = 0uz;
+    CHECK_FALSE(a->AddHash(seed));
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "FilterImageValue children", "[CSS][Values][FilterImageValue]")
+  {
+    // The filter has no values to visit, so only the image is visited.
+    auto value = FilterImage(u8"a", BlurFilter(2_css_px));
+    auto children = Children(*value);
+    REQUIRE(children.size() == 1uz);
+    CHECK(CssText(*children[0uz]) == "url(\"https://example.com/a.png\")");
+
+    CHECK_FALSE(value->MayDependOnBaseUrl());
+  }
+}

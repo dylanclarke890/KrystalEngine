@@ -33,10 +33,10 @@ add_subdirectory(Krystal.Net)
 add_subdirectory(Krystal.Image)
 
 # Krystal Engine modules
-add_subdirectory(Krystal.Booey)
+add_subdirectory(Krystal.Web)
 add_subdirectory(Krystal.Gfx)
 add_subdirectory(Krystal.PAL)
-add_subdirectory(Krystal.UI)
+add_subdirectory(Krystal.Booey)
 
 # Krystal Editor
 add_subdirectory(Krystal.Editor)
@@ -48,7 +48,7 @@ add_subdirectory(tests/Krystal.Text.Tests Krystal.Text.Tests)
 add_subdirectory(tests/Krystal.I18n.Tests Krystal.I18n.Tests)
 add_subdirectory(tests/Krystal.Net.Tests Krystal.Net.Tests)
 add_subdirectory(tests/Krystal.Image.Tests Krystal.Image.Tests)
-add_subdirectory(tests/Krystal.Booey.Tests Krystal.Booey.Tests)
+add_subdirectory(tests/Krystal.Web.Tests Krystal.Web.Tests)
 add_subdirectory(tests/Krystal.Gfx.Tests Krystal.Gfx.Tests)
-add_subdirectory(tests/Krystal.UI.Tests Krystal.UI.Tests)
+add_subdirectory(tests/Krystal.Booey.Tests Krystal.Booey.Tests)
 unset(CMAKE_FOLDER)

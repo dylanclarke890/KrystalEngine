@@ -1,0 +1,276 @@
+﻿/*
+ * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ * Copyright (C) 2015-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Google Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/SVG/SVGTextChunk.hpp"
+#include "Krystal.Core/Strings/Unicode.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Web/Svg/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Web/Svg/SVGLengthContext.hpp"
+#include <algorithm>
+#include <ranges>
+
+namespace krys::web
+{
+  namespace
+  {
+    /// @brief The number of characters (code points) of @p text that @p fragment covers.
+    KRYS_NODISCARD uint32 NumberOfCharacters(utf8_stringview text, const SVGTextFragment &fragment) noexcept
+    {
+      return static_cast<uint32>(std::ranges::count_if(text.substr(fragment.CharacterOffset, fragment.Length),
+                                                       [](char8 c)
+                                                       { return !krys::text::IsTrailingUTF8(c); }));
+    }
+  }
+
+  SVGTextChunk::SVGTextChunk(const List<inline_iterator::SVGTextBoxIterator> &lineLayoutBoxes, uint32 first,
+                             uint32 limit, SVGTextFragmentMap &fragmentMap) noexcept
+  {
+    krys_debug_assert(first < limit);
+    krys_debug_assert(limit <= lineLayoutBoxes.size());
+
+    auto firstBox = lineLayoutBoxes[first];
+    auto &style = firstBox->Renderer().Style();
+
+    if (style.GetWritingMode().IsBidiRTL())
+    {
+      _chunkStyle |= SVGTextChunk::RightToLeftText;
+    }
+
+    if (style.GetWritingMode().IsVertical())
+    {
+      _chunkStyle |= SVGTextChunk::VerticalText;
+    }
+
+    switch (style.TextAnchor())
+    {
+      case TextAnchor::Start:  break;
+      case TextAnchor::Middle: _chunkStyle |= MiddleAnchor; break;
+      case TextAnchor::End:    _chunkStyle |= EndAnchor; break;
+    }
+
+    if (RefPtr textContentElement =
+          ShareRefPtr(SVGTextContentElement::ElementFromRenderer(firstBox->Renderer().Parent())))
+    {
+      SVGLengthContext lengthContext(textContentElement.get());
+      _desiredTextLength = textContentElement->SpecifiedTextLength().Value(lengthContext);
+
+      switch (textContentElement->LengthAdjust())
+      {
+        case SVGLengthAdjustUnknown:          break;
+        case SVGLengthAdjustSpacing:          _chunkStyle |= LengthAdjustSpacing; break;
+        case SVGLengthAdjustSpacingAndGlyphs: _chunkStyle |= LengthAdjustSpacingAndGlyphs; break;
+      }
+    }
+
+    for (uint32 i = first; i < limit; ++i)
+    {
+      auto &box = lineLayoutBoxes[i];
+      auto it = fragmentMap.find(inline_iterator::MakeKey(*box));
+      if (it == fragmentMap.end())
+      {
+        continue;
+      }
+      _boxes.push_back({box, &it->second});
+    }
+  }
+
+  uint32 SVGTextChunk::TotalCharacters() const noexcept
+  {
+    uint32 characters = 0;
+    for (auto &box : _boxes)
+    {
+      auto text = box.Box->Renderer().Text();
+      for (auto &fragment : *box.Fragments)
+      {
+        characters += NumberOfCharacters(text, fragment);
+      }
+    }
+    return characters;
+  }
+
+  float SVGTextChunk::TotalLength() const noexcept
+  {
+    const SVGTextFragment *firstFragment = nullptr;
+    const SVGTextFragment *lastFragment = nullptr;
+
+    for (auto &box : _boxes)
+    {
+      if (!box.Fragments->empty())
+      {
+        firstFragment = &box.Fragments->front();
+        break;
+      }
+    }
+
+    for (auto &box : _boxes | std::views::reverse)
+    {
+      if (!box.Fragments->empty())
+      {
+        lastFragment = &box.Fragments->back();
+        break;
+      }
+    }
+
+    krys_debug_assert(!firstFragment == !lastFragment);
+    if (!firstFragment)
+    {
+      return 0;
+    }
+
+    if (_chunkStyle & VerticalText)
+    {
+      return (lastFragment->Y + lastFragment->Height) - firstFragment->Y;
+    }
+
+    return (lastFragment->X + lastFragment->Width) - firstFragment->X;
+  }
+
+  float SVGTextChunk::TotalAnchorShift() const noexcept
+  {
+    float length = TotalLength();
+    if (_chunkStyle & MiddleAnchor)
+    {
+      return -length / 2;
+    }
+    if (_chunkStyle & EndAnchor)
+    {
+      return _chunkStyle & RightToLeftText ? 0 : -length;
+    }
+    return _chunkStyle & RightToLeftText ? -length : 0;
+  }
+
+  void SVGTextChunk::Layout(SVGChunkTransformMap &textBoxTransformations) const noexcept
+  {
+    if (HasDesiredTextLength())
+    {
+      if (HasLengthAdjustSpacing())
+      {
+        ProcessTextLengthSpacingCorrection();
+      }
+      else
+      {
+        krys_debug_assert(HasLengthAdjustSpacingAndGlyphs());
+        BuildBoxTransformations(textBoxTransformations);
+      }
+    }
+
+    if (HasTextAnchor())
+    {
+      ProcessTextAnchorCorrection();
+    }
+  }
+
+  void SVGTextChunk::ProcessTextLengthSpacingCorrection() const noexcept
+  {
+    float textLengthShift = 0;
+    auto totalCharacters = TotalCharacters();
+    if (totalCharacters > 1)
+    {
+      textLengthShift = (DesiredTextLength() - TotalLength()) / (totalCharacters - 1);
+    }
+
+    bool isVerticalText = _chunkStyle & VerticalText;
+    uint32 atCharacter = 0;
+    for (auto &box : _boxes)
+    {
+      auto text = box.Box->Renderer().Text();
+      for (auto &fragment : *box.Fragments)
+      {
+        if (isVerticalText)
+        {
+          fragment.Y += textLengthShift * atCharacter;
+        }
+        else
+        {
+          fragment.X += textLengthShift * atCharacter;
+        }
+
+        atCharacter += NumberOfCharacters(text, fragment);
+      }
+    }
+  }
+
+  void SVGTextChunk::BuildBoxTransformations(SVGChunkTransformMap &textBoxTransformations) const noexcept
+  {
+    AffineTransform spacingAndGlyphsTransform;
+    bool foundFirstFragment = false;
+    for (auto &box : _boxes)
+    {
+      if (!foundFirstFragment)
+      {
+        if (!BoxSpacingAndGlyphsTransform(*box.Fragments, spacingAndGlyphsTransform))
+        {
+          continue;
+        }
+        foundFirstFragment = true;
+      }
+
+      textBoxTransformations[inline_iterator::MakeKey(*box.Box)] = spacingAndGlyphsTransform;
+    }
+  }
+
+  bool SVGTextChunk::BoxSpacingAndGlyphsTransform(const List<SVGTextFragment> &fragments,
+                                                  AffineTransform &spacingAndGlyphsTransform) const noexcept
+  {
+    if (fragments.empty())
+    {
+      return false;
+    }
+
+    const SVGTextFragment &fragment = fragments.front();
+    float scale = DesiredTextLength() / TotalLength();
+
+    spacingAndGlyphsTransform.Translate(fragment.X, fragment.Y);
+
+    if (_chunkStyle & VerticalText)
+    {
+      spacingAndGlyphsTransform.ScaleNonUniform(1, scale);
+    }
+    else
+    {
+      spacingAndGlyphsTransform.ScaleNonUniform(scale, 1);
+    }
+
+    spacingAndGlyphsTransform.Translate(-fragment.X, -fragment.Y);
+    return true;
+  }
+
+  void SVGTextChunk::ProcessTextAnchorCorrection() const noexcept
+  {
+    float textAnchorShift = TotalAnchorShift();
+    bool isVerticalText = _chunkStyle & VerticalText;
+    for (auto &box : _boxes)
+    {
+      for (auto &fragment : *box.Fragments)
+      {
+        if (isVerticalText)
+        {
+          fragment.Y += textAnchorShift;
+        }
+        else
+        {
+          fragment.X += textAnchorShift;
+        }
+      }
+    }
+  }
+}

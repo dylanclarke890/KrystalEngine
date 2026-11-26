@@ -1,0 +1,312 @@
+﻿/*
+ * Copyright (C) 2006 Oliver Hunt <ojh16@student.canterbury.ac.nz>
+ * Copyright (C) 2006-2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2015 Google Inc. All rights reserved.
+ * Copyright (C) 2007 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2008 Rob Buis <buis@kde.org>
+ * Copyright (C) Research In Motion Limited 2010. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Web/Css/Font/CSSFontSelector.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Editing/Position.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
+#include "Krystal.Web/Rendering/RenderBlock.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGRenderingContext.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGTextBoxPainter.hpp"
+#include "Krystal.Web/Style/Builder/FontSizeFunctions.hpp"
+#include <cmath>
+#include <limits>
+
+namespace krys::web
+{
+  namespace
+  {
+    KRYS_NODISCARD utf8_string ApplySVGWhitespaceRules(utf8_stringview string,
+                                                       bool preserveWhiteSpace) noexcept
+    {
+      utf8_string newString;
+      newString.reserve(string.size());
+      if (preserveWhiteSpace)
+      {
+        // Spec: When xml:space="preserve", the SVG user agent will do the following using a
+        // copy of the original character data content. It will convert all newline and tab
+        // characters into space characters. Then, it will draw all space characters, including
+        // leading, trailing and multiple contiguous space characters.
+        for (auto character : string)
+        {
+          newString.push_back(character == u8'\t' || character == u8'\n' || character == u8'\r' ? u8' '
+                                                                                                : character);
+        }
+        return newString;
+      }
+
+      // Spec: When xml:space="default", the SVG user agent will do the following using a
+      // copy of the original character data content. First, it will remove all newline
+      // characters. Then it will convert all tab characters into space characters.
+      // Then, it will strip off all leading and trailing space characters.
+      // Then, all contiguous space characters will be consolidated.
+      for (auto character : string)
+      {
+        if (character == u8'\n' || character == u8'\r')
+        {
+          continue;
+        }
+        newString.push_back(character == u8'\t' ? u8' ' : character);
+      }
+      return newString;
+    }
+  }
+
+  RenderSVGInlineText::RenderSVGInlineText(web::Text &textNode, const utf8_string &string) noexcept
+      : RenderText(Type::SVGInlineText, textNode, ApplySVGWhitespaceRules(string, false)),
+        _layoutAttributes(*this)
+  {
+    krys_debug_assert(IsRenderSVGInlineText());
+  }
+
+  RenderSVGInlineText::~RenderSVGInlineText() noexcept = default;
+
+  utf8_string RenderSVGInlineText::OriginalText() const noexcept
+  {
+    return TextNode().Data();
+  }
+
+  void RenderSVGInlineText::SetTextInternal(utf8_string newText, bool force) noexcept
+  {
+    RenderText::SetTextInternal(newText, force);
+    if (!force)
+    {
+      SetRenderedText(newText);
+    }
+    if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
+    {
+      textAncestor->SubtreeTextDidChange(this);
+    }
+  }
+
+  void RenderSVGInlineText::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
+  {
+    RenderText::StyleDidChange(diff, oldStyle);
+    UpdateScaledFont();
+
+    bool newPreserves = Style().WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve;
+    bool oldPreserves = oldStyle ? oldStyle->WhiteSpaceCollapse() == WhiteSpaceCollapse::Preserve : false;
+    if (oldPreserves && !newPreserves)
+    {
+      SetText(ApplySVGWhitespaceRules(OriginalText(), false), true);
+      return;
+    }
+
+    if (!oldPreserves && newPreserves)
+    {
+      SetText(ApplySVGWhitespaceRules(OriginalText(), true), true);
+      return;
+    }
+
+    if (diff != style::DifferenceResult::Layout)
+    {
+      return;
+    }
+
+    // The text metrics may be influenced by style changes.
+    if (auto *textAncestor = RenderSVGText::LocateRenderSVGTextAncestor(*this))
+    {
+      textAncestor->SetNeedsLayout();
+    }
+  }
+
+  RectF RenderSVGInlineText::FloatLinesBoundingBox() const noexcept
+  {
+    RectF boundingBox;
+    for (auto &box : inline_iterator::SVGTextBoxesFor(*this))
+    {
+      boundingBox.Unite(box.CalculateBoundariesIncludingSVGTransform());
+    }
+
+    return boundingBox;
+  }
+
+  RectI RenderSVGInlineText::LinesBoundingBox() const noexcept
+  {
+    return EnclosingRectI(FloatLinesBoundingBox());
+  }
+
+  bool RenderSVGInlineText::CharacterStartsNewTextChunk(int32 position) const noexcept
+  {
+    krys_debug_assert(position >= 0);
+    krys_debug_assert(position < static_cast<int32>(Text().size()));
+
+    // Each <textPath> element starts a new text chunk, regardless of any x/y values.
+    if (!position && Parent()->IsRenderSVGTextPath() && !PreviousSibling())
+    {
+      return true;
+    }
+
+    auto it = _layoutAttributes.CharacterDataMap().find(static_cast<uint32>(position + 1));
+    if (it == _layoutAttributes.CharacterDataMap().end())
+    {
+      return false;
+    }
+
+    return !SVGTextLayoutAttributes::IsEmptyValue(it->second.X)
+           || !SVGTextLayoutAttributes::IsEmptyValue(it->second.Y);
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD int32 OffsetForPositionInFragment(const inline_iterator::SVGTextBox &textBox,
+                                                     const SVGTextFragment &fragment, float position) noexcept
+    {
+      float scalingFactor = textBox.Renderer().ScalingFactor();
+      krys_debug_assert(scalingFactor);
+
+      TextRun textRun = ConstructTextRun(textBox.Renderer().Text(), textBox.Direction(), fragment);
+
+      // Eventually handle lengthAdjust="spacingAndGlyphs".
+      // FIXME: Handle vertical text.
+      AffineTransform fragmentTransform;
+      fragment.BuildFragmentTransform(fragmentTransform);
+      if (!fragmentTransform.IsIdentity())
+      {
+        textRun.SetHorizontalGlyphStretch(static_cast<float>(fragmentTransform.XScale()));
+      }
+
+      const bool includePartialGlyphs = true;
+      return static_cast<int32>(fragment.CharacterOffset - textBox.Start())
+             + textBox.Renderer().ScaledFont().OffsetForPosition(textRun, position * scalingFactor,
+                                                                 includePartialGlyphs);
+    }
+  }
+
+  PositionWithAffinity
+    RenderSVGInlineText::PositionForPoint(const LayoutPoint &point, HitTestSource,
+                                          const RenderFragmentContainer * /*fragment*/) noexcept
+  {
+    if (!inline_iterator::LineLeftmostTextBoxFor(*this) || Text().empty())
+    {
+      return CreatePositionWithAffinity(0, Affinity::Downstream);
+    }
+
+    float baseline = _scaledFont.MetricsOfPrimaryFont().Ascent();
+
+    RenderBlock *containingBlock = ContainingBlock();
+    krys_debug_assert(containingBlock);
+
+    // Map local point to absolute point, as the character origins stored in the text fragments use absolute
+    // coordinates.
+    PointF absolutePoint(point);
+    absolutePoint.MoveBy(containingBlock->Location());
+
+    float closestDistance = std::numeric_limits<float>::max();
+    float closestDistancePosition = 0;
+    const SVGTextFragment *closestDistanceFragment = nullptr;
+    inline_iterator::SVGTextBoxIterator closestDistanceBox;
+
+    AffineTransform fragmentTransform;
+    for (auto &box : inline_iterator::SVGTextBoxesFor(*this))
+    {
+      auto &fragments = box.TextFragments();
+
+      for (auto &fragment : fragments)
+      {
+        RectF fragmentRect(fragment.X, fragment.Y - baseline, fragment.Width, fragment.Height);
+        fragment.BuildFragmentTransform(fragmentTransform);
+        if (!fragmentTransform.IsIdentity())
+        {
+          fragmentRect = fragmentTransform.MapRect(fragmentRect);
+        }
+
+        float distance = std::pow(fragmentRect.X() - absolutePoint.X(), 2.f)
+                         + std::pow(fragmentRect.Y() + fragmentRect.Height() / 2 - absolutePoint.Y(), 2.f);
+
+        if (distance < closestDistance)
+        {
+          closestDistance = distance;
+          closestDistanceBox = inline_iterator::SVGTextBoxIterator {box};
+          closestDistanceFragment = &fragment;
+          closestDistancePosition = fragmentRect.X();
+        }
+      }
+    }
+
+    if (!closestDistanceFragment)
+    {
+      return CreatePositionWithAffinity(0, Affinity::Downstream);
+    }
+
+    int32 offset = OffsetForPositionInFragment(*closestDistanceBox, *closestDistanceFragment,
+                                               absolutePoint.X() - closestDistancePosition);
+    return CreatePositionWithAffinity(offset + static_cast<int32>(closestDistanceBox->Start()),
+                                      offset > 0 ? Affinity::Upstream : Affinity::Downstream);
+  }
+
+  void RenderSVGInlineText::UpdateScaledFont() noexcept
+  {
+    if (ComputeNewScaledFontForStyle(*this, Style(), _scalingFactor, _scaledFont))
+    {
+      _canUseSimplifiedTextMeasuring = null;
+    }
+  }
+
+  float RenderSVGInlineText::ComputeScalingFactorForRenderer(const RenderObject &renderer) noexcept
+  {
+    return SVGRenderingContext::CalculateScreenFontSizeScalingFactor(renderer);
+  }
+
+  bool RenderSVGInlineText::ComputeNewScaledFontForStyle(const RenderObject &renderer,
+                                                         const RenderStyle &style, float &scalingFactor,
+                                                         FontCascade &scaledFont) noexcept
+  {
+    // Alter font-size to the right on-screen value to avoid scaling the glyphs themselves, except when
+    // GeometricPrecision is specified.
+    scalingFactor = ComputeScalingFactorForRenderer(renderer);
+    if (!scalingFactor)
+    {
+      scalingFactor = 1;
+      scaledFont = style.GetFontCascade();
+      return false;
+    }
+
+    if (style.GetFontDescription().GetTextRenderingMode() == TextRenderingMode::GeometricPrecision)
+    {
+      scalingFactor = 1;
+    }
+
+    auto fontDescription = style.GetFontDescription();
+
+    // FIXME: We need to better handle the case when we compute very small fonts below (below 1pt).
+    fontDescription.SetComputedSize(style::ComputedFontSizeFromSpecifiedSizeForSVGInlineText(
+      fontDescription.SpecifiedSize(), fontDescription.IsAbsoluteSize(), scalingFactor,
+      renderer.GetDocument()));
+
+    // SVG controls its own glyph orientation, so don't allow writing-mode
+    // to affect it.
+    if (fontDescription.Orientation() != FontOrientation::Horizontal)
+    {
+      fontDescription.SetOrientation(FontOrientation::Horizontal);
+    }
+
+    scaledFont = FontCascade(krys::move(fontDescription));
+    scaledFont.Update(ShareRefPtr<FontSelector>(&renderer.GetDocument().GetFontSelector()));
+    return true;
+  }
+}

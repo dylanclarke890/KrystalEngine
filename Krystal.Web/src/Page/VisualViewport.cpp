@@ -1,0 +1,182 @@
+﻿/*
+ * Copyright (C) 2017 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Page/VisualViewport.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Html/Window.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Page/FrameView.hpp"
+
+namespace krys::web
+{
+  VisualViewport::VisualViewport(Window &window) noexcept : _window(CreateWeakPtr(&window))
+  {
+  }
+
+  Ref<VisualViewport> VisualViewport::Create(Window &window) noexcept
+  {
+    return AdoptRef(*new VisualViewport(window));
+  }
+
+  web::Frame *VisualViewport::Frame() const noexcept
+  {
+    auto *window = _window.get();
+    return window ? window->Frame() : nullptr;
+  }
+
+  void VisualViewport::UpdateFrameLayout() const noexcept
+  {
+    krys_debug_assert(Frame());
+    (void)Frame()->Document()->UpdateLayoutIgnorePendingStylesheets();
+  }
+
+  double VisualViewport::OffsetLeft() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _offsetLeft;
+  }
+
+  double VisualViewport::OffsetTop() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _offsetTop;
+  }
+
+  double VisualViewport::PageLeft() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _pageLeft;
+  }
+
+  double VisualViewport::PageTop() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _pageTop;
+  }
+
+  double VisualViewport::Width() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _width;
+  }
+
+  double VisualViewport::Height() const noexcept
+  {
+    if (!Frame())
+    {
+      return 0;
+    }
+    UpdateFrameLayout();
+    return _height;
+  }
+
+  double VisualViewport::Scale() const noexcept
+  {
+    if (!Frame())
+    {
+      return 1;
+    }
+    UpdateFrameLayout();
+    return _scale;
+  }
+
+  void VisualViewport::Update() noexcept
+  {
+    double offsetLeft = 0;
+    double offsetTop = 0;
+    _pageLeft = 0;
+    _pageTop = 0;
+    double width = 0;
+    double height = 0;
+    double scale = 1;
+
+    auto *frame = Frame();
+    if (frame)
+    {
+      if (auto *view = frame->View())
+      {
+        // The visual viewport is the visible content, less the scrollbars, unscaled.
+        auto visualViewportRect = RectF(view->VisibleContentRect());
+        visualViewportRect.Scale(1 / view->FrameScaleFactor());
+        auto layoutViewportRect = RectF(view->LayoutViewportRect());
+        auto pageZoomFactor = frame->PageZoomFactor();
+        krys_debug_assert(pageZoomFactor);
+        offsetLeft = (visualViewportRect.X() - layoutViewportRect.X()) / pageZoomFactor;
+        offsetTop = (visualViewportRect.Y() - layoutViewportRect.Y()) / pageZoomFactor;
+        _pageLeft = visualViewportRect.X() / pageZoomFactor;
+        _pageTop = visualViewportRect.Y() / pageZoomFactor;
+        width = visualViewportRect.Width() / pageZoomFactor;
+        height = visualViewportRect.Height() / pageZoomFactor;
+      }
+      if (frame)
+      {
+        // FIXME: Divided by the Krystal.Web client's base viewport layout size scale factor, once it has one.
+        scale = frame->PageScaleFactor();
+      }
+    }
+
+    auto *document = frame ? frame->Document() : nullptr;
+    if (_offsetLeft != offsetLeft || _offsetTop != offsetTop)
+    {
+      if (document)
+      {
+        document->SetNeedsVisualViewportScrollEvent();
+      }
+      _offsetLeft = offsetLeft;
+      _offsetTop = offsetTop;
+    }
+
+    if (_width != width || _height != height)
+    {
+      if (document)
+      {
+        document->SetNeedsVisualViewportResize();
+      }
+      _width = width;
+      _height = height;
+      _scale = scale;
+    }
+  }
+}

@@ -1,0 +1,349 @@
+﻿/*
+ * Copyright (C) 2019-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/HashSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/CanMakeCheckedPtr.hpp"
+#include "Krystal.Web/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Web/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/Style/PropertyCascade.hpp"
+#include "Krystal.Web/Style/TreeResolutionState.hpp"
+#include "Krystal.Web/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
+#include "Krystal.Web/Text/TextFlags.hpp"
+#include <bitset>
+
+namespace krys::web
+{
+  class FontCascadeDescription;
+  class StyleImage;
+}
+
+namespace krys::web::css::calc
+{
+  struct RandomCachingKey;
+}
+
+namespace krys::web::style
+{
+  class BuilderState;
+  struct FontFamilies;
+  struct FontFeatureSettings;
+  struct FontPalette;
+  struct FontSizeAdjust;
+  struct FontStyle;
+  struct FontVariantAlternates;
+  struct FontVariantEastAsian;
+  struct FontVariantLigatures;
+  struct FontVariantNumeric;
+  struct FontVariationSettings;
+  struct FontWeight;
+  struct FontWidth;
+  struct TextAutospace;
+  struct TextSpacingTrim;
+  struct WebkitLocale;
+  struct Zoom;
+
+  void MaybeUpdateFontForLetterSpacingOrWordSpacing(BuilderState &, css::Value &) noexcept;
+
+  enum class ApplyValueType : uint8
+  {
+    Value,
+    Initial,
+    Inherit,
+  };
+
+  struct BuilderPositionTryFallback
+  {
+    RefPtr<const css::StyleProperties> Properties;
+    List<PositionTryFallbackTactic> Tactics;
+  };
+
+  struct BuilderContext
+  {
+    RefPtr<const web::Document> Document;
+    const RenderStyle *ParentStyle {};
+    const RenderStyle *RootElementStyle {};
+    RefPtr<const web::Element> Element;
+    style::TreeResolutionState *TreeResolutionState {};
+    Maybe<BuilderPositionTryFallback> PositionTryFallback;
+  };
+
+  class BuilderState : public CanMakeCheckedPtr<BuilderState>
+  {
+    // See the comment in maybeUpdateFontForLetterSpacingOrWordSpacing() about why this needs to be a friend.
+    friend void MaybeUpdateFontForLetterSpacingOrWordSpacing(BuilderState &, css::Value &) noexcept;
+
+    friend class Builder;
+    KRYS_NON_COPY_MOVABLE(BuilderState);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(BuilderState);
+
+  private:
+    RenderStyle &_style;
+    BuilderContext _context;
+
+    const css::ToLengthConversionData _cssToLengthConversionData;
+
+    HashSet<CSSOMStringAtom> _appliedCustomProperties;
+    HashSet<CSSOMStringAtom> _inProgressCustomProperties;
+    HashSet<CSSOMStringAtom> _inCycleCustomProperties;
+    std::bitset<css::TotalPropertyIdValues> _inProgressProperties;
+    std::bitset<css::TotalPropertyIdValues> _invalidAtComputedValueTimeProperties;
+
+    const PropertyCascade::Property *_currentProperty {nullptr};
+
+    bool _fontDirty {false};
+    List<CSSOMStringAtom> _registeredContentAttributes;
+
+    bool _isBuildingKeyframeStyle {false};
+
+  public:
+    explicit BuilderState(RenderStyle &) noexcept;
+
+    BuilderState(RenderStyle &, BuilderContext &&) noexcept;
+
+    ~BuilderState() noexcept;
+
+    KRYS_NODISCARD RenderStyle &Style() noexcept
+    {
+      return _style;
+    }
+
+    KRYS_NODISCARD const RenderStyle &Style() const noexcept
+    {
+      return _style;
+    }
+
+    KRYS_NODISCARD const RenderStyle &ParentStyle() const noexcept
+    {
+      return *_context.ParentStyle;
+    }
+
+    KRYS_NODISCARD const RenderStyle *RootElementStyle() const noexcept
+    {
+      return _context.RootElementStyle;
+    }
+
+    KRYS_NODISCARD const web::Document &GetDocument() const noexcept
+    {
+      return *_context.Document;
+    }
+
+    KRYS_NODISCARD const web::Element *GetElement() const noexcept
+    {
+      return _context.Element.get();
+    }
+
+    inline void SetZoom(Zoom) noexcept;
+
+    inline void SetUsedZoom(float) noexcept;
+
+    inline void SetWritingMode(StyleWritingMode) noexcept;
+
+    inline void SetTextOrientation(TextOrientation) noexcept;
+
+    KRYS_NODISCARD bool FontDirty() const noexcept
+    {
+      return _fontDirty;
+    }
+
+    void SetFontDirty() noexcept
+    {
+      _fontDirty = true;
+    }
+
+    KRYS_NODISCARD inline const FontCascadeDescription &GetFontDescription() const noexcept;
+
+    KRYS_NODISCARD inline const FontCascadeDescription &ParentFontDescription() const noexcept;
+
+    KRYS_NODISCARD float ZoomWithTextZoomFactor() noexcept;
+
+    KRYS_NODISCARD bool UseSVGZoomRules() const noexcept;
+
+    KRYS_NODISCARD bool UseSVGZoomRulesForLength() const noexcept;
+
+    KRYS_NODISCARD style::ScopeOrdinal StyleScopeOrdinal() const noexcept
+    {
+      return _currentProperty->StyleScopeOrdinal;
+    }
+
+    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const css::Value &) const noexcept;
+
+    KRYS_NODISCARD const List<CSSOMStringAtom> &RegisteredContentAttributes() const noexcept
+    {
+      return _registeredContentAttributes;
+    }
+
+    void RegisterContentAttribute(const CSSOMStringAtom &attributeLocalName) noexcept;
+
+    KRYS_NODISCARD const css::ToLengthConversionData &CssToLengthConversionData() const noexcept
+    {
+      return _cssToLengthConversionData;
+    }
+
+    void SetIsBuildingKeyframeStyle() noexcept
+    {
+      _isBuildingKeyframeStyle = true;
+    }
+
+    KRYS_NODISCARD bool IsAuthorOrigin() const noexcept
+    {
+      return _currentProperty && _currentProperty->Origin == PropertyCascade::Origin::Author;
+    }
+
+    KRYS_NODISCARD css::PropertyId CssPropertyId() const noexcept;
+
+    KRYS_NODISCARD bool IsCurrentPropertyInvalidAtComputedValueTime() const noexcept;
+
+    void SetCurrentPropertyInvalidAtComputedValueTime() noexcept;
+
+    void SetUsesViewportUnits() noexcept;
+
+    void SetUsesContainerUnits() noexcept;
+
+    KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &,
+                                                   Maybe<css::keywords::ElementShared>) const noexcept;
+
+    // Accessors for sibling information used by the sibling-count() and sibling-index() CSS functions.
+    KRYS_NODISCARD uint32 SiblingCount() noexcept;
+
+    KRYS_NODISCARD uint32 SiblingIndex() noexcept;
+
+    KRYS_NODISCARD style::AnchorPositionedStates *AnchorPositionedStates() noexcept
+    {
+      return _context.TreeResolutionState ? &_context.TreeResolutionState->AnchorPositionedStates : nullptr;
+    }
+
+    KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept
+    {
+      return _context.PositionTryFallback;
+    }
+
+    // FIXME: Copying a FontCascadeDescription is really inefficient. Migrate all callers to
+    // setFontDescriptionXXX() variants below, then remove these functions.
+    inline void SetFontDescription(FontCascadeDescription &&) noexcept;
+
+    void SetFontSize(FontCascadeDescription &, float size) noexcept;
+
+    inline void SetFontDescriptionKeywordSizeFromIdentifier(css::ValueId) noexcept;
+
+    inline void SetFontDescriptionIsAbsoluteSize(bool) noexcept;
+
+    inline void SetFontDescriptionFontSize(float) noexcept;
+
+    inline void SetFontDescriptionFamilies(FontFamilies) noexcept;
+
+    inline void SetFontDescriptionFeatureSettings(FontFeatureSettings) noexcept;
+
+    inline void SetFontDescriptionFontPalette(const FontPalette &) noexcept;
+
+    inline void SetFontDescriptionFontSizeAdjust(FontSizeAdjust) noexcept;
+
+    inline void SetFontDescriptionFontStyle(FontStyle) noexcept;
+
+    inline void SetFontDescriptionFontSynthesisSmallCaps(FontSynthesisLonghandValue) noexcept;
+
+    inline void SetFontDescriptionFontSynthesisStyle(FontSynthesisLonghandValue) noexcept;
+
+    inline void SetFontDescriptionFontSynthesisWeight(FontSynthesisLonghandValue) noexcept;
+
+    inline void SetFontDescriptionKerning(Kerning) noexcept;
+
+    inline void SetFontDescriptionOpticalSizing(FontOpticalSizing) noexcept;
+
+    inline void SetFontDescriptionSpecifiedLocale(WebkitLocale) noexcept;
+
+    inline void SetFontDescriptionTextAutospace(TextAutospace) noexcept;
+
+    inline void SetFontDescriptionTextRenderingMode(TextRenderingMode) noexcept;
+
+    inline void SetFontDescriptionTextSpacingTrim(TextSpacingTrim) noexcept;
+
+    inline void SetFontDescriptionVariantCaps(FontVariantCaps) noexcept;
+
+    inline void SetFontDescriptionVariantEmoji(FontVariantEmoji) noexcept;
+
+    inline void SetFontDescriptionVariantPosition(FontVariantPosition) noexcept;
+
+    inline void SetFontDescriptionVariationSettings(FontVariationSettings) noexcept;
+
+    inline void SetFontDescriptionWeight(FontWeight) noexcept;
+
+    inline void SetFontDescriptionWidth(FontWidth) noexcept;
+
+    inline void SetFontDescriptionVariantAlternates(FontVariantAlternates) noexcept;
+
+    inline void SetFontDescriptionVariantEastAsian(FontVariantEastAsian) noexcept;
+
+    inline void SetFontDescriptionVariantEastAsianVariant(FontVariantEastAsianVariant) noexcept;
+
+    inline void SetFontDescriptionVariantEastAsianWidth(FontVariantEastAsianWidth) noexcept;
+
+    inline void SetFontDescriptionVariantEastAsianRuby(FontVariantEastAsianRuby) noexcept;
+
+    inline void SetFontDescriptionKeywordSize(uint32) noexcept;
+
+    inline void SetFontDescriptionVariantLigatures(FontVariantLigatures) noexcept;
+
+    inline void SetFontDescriptionVariantCommonLigatures(web::FontVariantLigatures) noexcept;
+
+    inline void SetFontDescriptionVariantDiscretionaryLigatures(web::FontVariantLigatures) noexcept;
+
+    inline void SetFontDescriptionVariantHistoricalLigatures(web::FontVariantLigatures) noexcept;
+
+    inline void SetFontDescriptionVariantContextualAlternates(web::FontVariantLigatures) noexcept;
+
+    inline void SetFontDescriptionVariantNumeric(FontVariantNumeric) noexcept;
+
+    inline void SetFontDescriptionVariantNumericFigure(FontVariantNumericFigure) noexcept;
+
+    inline void SetFontDescriptionVariantNumericSpacing(FontVariantNumericSpacing) noexcept;
+
+    inline void SetFontDescriptionVariantNumericFraction(FontVariantNumericFraction) noexcept;
+
+    inline void SetFontDescriptionVariantNumericOrdinal(FontVariantNumericOrdinal) noexcept;
+
+    inline void SetFontDescriptionVariantNumericSlashedZero(FontVariantNumericSlashedZero) noexcept;
+
+    void DisableNativeAppearanceIfNeeded(css::PropertyId, PropertyCascade::Origin) noexcept;
+
+  private:
+    void AdjustStyleForInterCharacterRuby() noexcept;
+
+    void UpdateFont() noexcept;
+
+    void UpdateFontForZoomChange() noexcept;
+
+    void UpdateFontForGenericFamilyChange() noexcept;
+
+    void UpdateFontForOrientationChange() noexcept;
+
+    void UpdateFontForSizeChange() noexcept;
+  };
+}

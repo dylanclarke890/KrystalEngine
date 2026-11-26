@@ -1,0 +1,182 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ *           (C) 1999 Antti Koivisto (koivisto@kde.org)
+ * Copyright (C) 2003-2021 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Web/Rendering/RenderBox.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+
+namespace krys::web::css
+{
+  class CounterStyle;
+}
+
+namespace krys::web
+{
+  class RenderListItem;
+  class StyleImage;
+
+  /// @brief The text of a list marker, with its suffix.
+  struct ListMarkerTextContent
+  {
+    utf8_string TextWithSuffix;
+    // In bytes.
+    size_t TextWithoutSuffixLength {0};
+    text::TextDirection TextDirection {text::TextDirection::LTR};
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return TextWithSuffix.empty();
+    }
+
+    KRYS_NODISCARD utf8_stringview TextWithoutSuffix() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return utf8_stringview {TextWithSuffix}.substr(0, TextWithoutSuffixLength);
+    }
+
+    KRYS_NODISCARD utf8_stringview Suffix() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return utf8_stringview {TextWithSuffix}.substr(TextWithoutSuffixLength);
+    }
+  };
+
+  /// @brief Used to render the list item's marker.
+  /// The RenderListMarker always has to be a child of a RenderListItem.
+  class RenderListMarker final : public RenderBox
+  {
+    KRYS_NON_COPY_MOVABLE(RenderListMarker);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderListMarker);
+
+  private:
+    ListMarkerTextContent _textContent;
+    RefPtr<StyleImage> _image;
+
+    WeakPtr<RenderListItem> _listItem;
+    LayoutUnit _lineLogicalOffsetForListItem;
+    Pair<float, float> _layoutBounds;
+
+  public:
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept final;
+
+    RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept;
+
+    ~RenderListMarker() noexcept override;
+
+    KRYS_NODISCARD utf8_stringview RenderName() const noexcept final
+    {
+      return u8"RenderListMarker";
+    }
+
+    void ImageChanged(WrappedImagePtr, const RectI * = nullptr) noexcept override;
+
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent) noexcept final;
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD LayoutRect LocalSelectionRect() const noexcept;
+
+    KRYS_NODISCARD utf8_string TextWithoutSuffix() const noexcept
+    {
+      return utf8_string(_textContent.TextWithoutSuffix());
+    }
+
+    KRYS_NODISCARD utf8_string TextWithSuffix() const noexcept
+    {
+      return _textContent.TextWithSuffix;
+    }
+
+    KRYS_NODISCARD bool IsInside() const noexcept;
+
+    KRYS_NODISCARD bool IsDisclosureMarker() const noexcept;
+
+    /// @brief Updates the marker's text from its list item's value and its style.
+    void UpdateInlineMarginsAndContent() noexcept;
+
+    KRYS_NODISCARD bool IsImage() const noexcept;
+
+    /// @brief Where the marker's image, bullet or text is drawn, relative to the marker.
+    KRYS_NODISCARD RectF RelativeMarkerRect() noexcept;
+
+    KRYS_NODISCARD LayoutUnit LineLogicalOffsetForListItem() const noexcept
+    {
+      return _lineLogicalOffsetForListItem;
+    }
+
+    KRYS_NODISCARD const RenderListItem *ListItem() const noexcept;
+
+    /// @brief The marker's ascent and descent on its line.
+    KRYS_NODISCARD Pair<float, float> LayoutBounds() const noexcept
+    {
+      return _layoutBounds;
+    }
+
+  private:
+    void WillBeDestroyed() noexcept final;
+
+    void ComputePreferredLogicalWidths() noexcept final;
+
+    void ComputeIntrinsicLogicalWidths(LayoutUnit &, LayoutUnit &) const noexcept override
+    {
+      krys_debug_assert(false);
+    }
+
+    KRYS_NODISCARD bool CanHaveChildren() const noexcept final
+    {
+      return false;
+    }
+
+    void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept final;
+
+    void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept final;
+
+    void Layout() noexcept final;
+
+    KRYS_NODISCARD Pair<float, float> LayoutBoundForTextContent(utf8_stringview text) const noexcept;
+
+    void UpdateInlineMargins() noexcept;
+
+    void UpdateContent() noexcept;
+
+    KRYS_NODISCARD RenderBox *ParentBox(RenderBox &box) noexcept;
+
+    KRYS_NODISCARD RefPtr<css::CounterStyle> GetCounterStyle() const noexcept;
+
+    KRYS_NODISCARD bool WidthUsesMetricsOfPrimaryFont() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderListMarker)
+  KRYS_NODISCARD static bool IsType(const krys::web::RenderObject &renderer) noexcept
+  {
+    return renderer.IsRenderListMarker();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

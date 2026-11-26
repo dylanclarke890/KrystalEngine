@@ -1,0 +1,421 @@
+﻿/*
+ * Copyright (C) 2013-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/Style/Change.hpp"
+#include "Krystal.Web/Style/PropertyCascade.hpp"
+#include "Krystal.Web/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Web/Style/ResolvedStyle.hpp"
+#include "Krystal.Web/Style/Resolver.hpp"
+#include "Krystal.Web/Style/Rules/SelectorMatchingState.hpp"
+#include "Krystal.Web/Style/Styleable.hpp"
+#include "Krystal.Web/Style/TreeResolutionState.hpp"
+#include "Krystal.Web/Style/Update.hpp"
+#include "Krystal.Web/Style/Validity.hpp"
+#include "Krystal.Web/Style/Values/AnchorPosition/PositionTryFallback.hpp"
+
+namespace krys::web
+{
+  class Document;
+  class Element;
+  class ShadowRoot;
+}
+
+namespace krys::web::style
+{
+  enum class IsInDisplayNoneTree : bool
+  {
+    No,
+    Yes,
+  };
+
+  /// @brief Resolves the styles of a document's elements that need resolving, walking the composed tree.
+  // FIXME: Animations (the animated updates, @starting-style, after-change styles), accessibility updates and
+  // elements with custom style resolve callbacks.
+  class TreeResolver
+  {
+    KRYS_NON_COPY_MOVABLE(TreeResolver);
+
+    enum class ResolutionType : uint8
+    {
+      RebuildUsingExisting,
+      AnimationOnly,
+      FastPathInherit,
+      FullWithMatchResultCache,
+      Full,
+    };
+
+    enum class LayoutInterleavingAction : uint8
+    {
+      None,
+      SkipDescendants,
+    };
+
+    enum class DescendantsToResolve : uint8
+    {
+      None,
+      RebuildAllUsingExisting,
+      ChildrenWithExplicitInherit,
+      Children,
+      All,
+    };
+
+    struct Scope : RefCounted<Scope>
+    {
+      Ref<style::Resolver> Resolver;
+      style::SelectorMatchingState SelectorMatchingState;
+      RefPtr<web::ShadowRoot> ShadowRoot;
+      RefPtr<Scope> EnclosingScope;
+
+      Scope(Document &document, Update &update) noexcept;
+
+      Scope(web::ShadowRoot &shadowRoot, Scope &enclosingScope) noexcept;
+
+      ~Scope() noexcept;
+    };
+
+    struct Parent
+    {
+      web::Element *Element;
+      const RenderStyle &Style;
+      EnumSet<Change> Changes;
+      TreeResolver::DescendantsToResolve DescendantsToResolve {TreeResolver::DescendantsToResolve::None};
+      bool DidPushScope {false};
+      bool ResolvedFirstLineAndLetterChild {false};
+      bool NeedsUpdateQueryContainerDependentStyle {false};
+      style::IsInDisplayNoneTree IsInDisplayNoneTree {style::IsInDisplayNoneTree::No};
+
+      explicit Parent(Document &document) noexcept;
+
+      Parent(web::Element &element, const RenderStyle &style, EnumSet<Change> changes,
+             TreeResolver::DescendantsToResolve descendantsToResolve,
+             style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept;
+    };
+
+    // States relevant to deferring and resuming descendant resolution.
+    // Also see deferDescendantResolution and resumeDescendantResolutionIfNeeded.
+    struct DeferredDescendantResolutionState
+    {
+      EnumSet<Change> Changes;
+      TreeResolver::DescendantsToResolve DescendantsToResolve {TreeResolver::DescendantsToResolve::None};
+    };
+
+    struct QueryContainerState
+    {
+      bool Invalidated {false};
+    };
+
+    struct PositionOption
+    {
+      // New style after applying the option.
+      UniquePtr<RenderStyle> Style;
+
+      // The position option used to generate the style. If option is null, no position option is used.
+      Maybe<PositionTryFallback> Option;
+
+      // The size of the content box of the element when the style is generated.
+      // Non-overlay scrollbars appearing or disappearing may affect the content box size that anchor
+      // functions are resolved against.
+      Maybe<LayoutSize> ScrollContainerSizeOnGeneration;
+    };
+
+    struct PositionOptions
+    {
+      // Array of option styles. By convention, the original style is at index 0.
+      List<PositionOption> OptionStyles;
+      ResolvedStyle OriginalResolvedStyle;
+      size_t Index {0};
+      bool Sorted {false};
+      bool Chosen {false};
+      bool IsFirstTry {true};
+
+      KRYS_NODISCARD const RenderStyle &OriginalStyle() const noexcept;
+
+      KRYS_NODISCARD UniquePtr<RenderStyle> CurrentOption() const noexcept;
+    };
+
+  private:
+    Ref<Document> _document;
+    UniquePtr<RenderStyle> _computedDocumentElementStyle;
+
+    List<Ref<Scope>> _scopeStack;
+    List<Parent> _parentStack;
+    bool _didSeePendingStylesheet {false};
+
+    HashMap<Ref<web::Element>, DeferredDescendantResolutionState> _deferredDescendantResolutionStates;
+    bool _needsInterleavedLayout {false};
+    bool _didFirstInterleavedLayout {false};
+
+    HashMap<Ref<web::Element>, QueryContainerState> _queryContainerStates;
+
+    // This state gets passes to the style builder and holds state for a single tree resolution, including
+    // over any interleaving.
+    TreeResolutionState _treeResolutionState;
+    HashMap<Ref<const web::Element>, UniquePtr<RenderStyle>> _savedBeforeResolutionStylesForInterleaving;
+
+    HashMap<AnchorPositionedKey, PositionOptions, AnchorPositionedKeyHash> _positionOptions;
+
+    HashSet<CSSOMStringAtom> _changedAnchorNames;
+    bool _allAnchorNamesInvalid {false};
+
+    UniquePtr<Update> _update;
+
+  public:
+    explicit TreeResolver(Document &document, UniquePtr<Update> update = {}) noexcept;
+
+    ~TreeResolver() noexcept;
+
+    /// @brief Resolves the styles that need resolving.
+    /// @return The update to apply to the render tree, or null if nothing changed.
+    KRYS_NODISCARD UniquePtr<Update> Resolve() noexcept;
+
+    KRYS_NODISCARD bool NeedsInterleavedLayout() const noexcept
+    {
+      return _needsInterleavedLayout;
+    }
+
+  private:
+    KRYS_NODISCARD ResolvedStyle StyleForStyleable(const Styleable &styleable, ResolutionType resolutionType,
+                                                   const ResolutionContext &resolutionContext,
+                                                   const RenderStyle *existingStyle) noexcept;
+
+    void ResolveComposedTree() noexcept;
+
+    KRYS_NODISCARD const RenderStyle *ExistingStyle(const web::Element &element) noexcept;
+
+    KRYS_NODISCARD LayoutInterleavingAction UpdateStateForQueryContainer(
+      web::Element &element, const RenderStyle *style, DescendantsToResolve &descendantsToResolve) noexcept;
+
+    KRYS_NODISCARD LayoutInterleavingAction UpdateAnchorPositioningState(web::Element &element,
+                                                                         const RenderStyle *style) noexcept;
+
+    void GeneratePositionOptionsIfNeeded(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                         const ResolutionContext &resolutionContext) noexcept;
+
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      GeneratePositionOption(const PositionTryFallback &fallback, const ResolvedStyle &resolvedStyle,
+                             const Styleable &styleable, const ResolutionContext &resolutionContext) noexcept;
+
+    void SortPositionOptionsIfNeeded(PositionOptions &options, const Styleable &styleable) noexcept;
+
+    KRYS_NODISCARD Maybe<ResolvedStyle>
+      TryChoosePositionOption(const Styleable &styleable,
+                              const ResolutionContext &resolutionContext) noexcept;
+
+    void UpdateForPositionVisibility(RenderStyle &style, const Styleable &styleable) noexcept;
+
+    // For elements requiring style/layout interleaving (anchor-positioned and query
+    // containers), descendant resolution is deferred on the first style resolution
+    // pass and resumed in subsequent passes.
+    // When deferral is needed, deferDescendantResolution saves the internal state
+    // relevant to which descendants should be resolved.
+    void DeferDescendantResolution(web::Element &element, EnumSet<Change> changes,
+                                   DescendantsToResolve descendantsToResolve) noexcept;
+
+    // When descendant resolution can be resumed, resumeDescendantResolutionIfNeeded
+    // restores the previously saved state (if there is)
+    void ResumeDescendantResolutionIfNeeded(web::Element &element, EnumSet<Change> &changes,
+                                            DescendantsToResolve &descendantsToResolve) noexcept;
+
+    KRYS_NODISCARD Pair<ElementUpdate, DescendantsToResolve>
+      ResolveElement(web::Element &element, const RenderStyle *existingStyle,
+                     ResolutionType resolutionType) noexcept;
+
+    KRYS_NODISCARD ElementUpdate CreateAnimatedElementUpdate(
+      ResolvedStyle resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
+      const ResolutionContext &resolutionContext,
+      style::IsInDisplayNoneTree isInDisplayNoneTree = style::IsInDisplayNoneTree::No) noexcept;
+
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveStartingStyle(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                           const ResolutionContext &resolutionContext) noexcept;
+
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveAfterChangeStyleForNonAnimated(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                            const ResolutionContext &resolutionContext) noexcept;
+
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveAgainInDifferentContext(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                     const RenderStyle &parentStyle,
+                                     EnumSet<PropertyCascade::PropertyType> properties,
+                                     Maybe<BuilderPositionTryFallback> &&positionTryFallback,
+                                     const ResolutionContext &resolutionContext) noexcept;
+
+    KRYS_NODISCARD const RenderStyle &
+      ParentAfterChangeStyle(const Styleable &styleable,
+                             const ResolutionContext &resolutionContext) const noexcept;
+
+    KRYS_NODISCARD HashSet<AnimatableCSSProperty> ApplyCascadeAfterAnimation(
+      RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties,
+      const AnimatableCSSPropertySet &transitioningProperties, const MatchResult &matchResult,
+      const web::Element &element, const ResolutionContext &resolutionContext) noexcept;
+
+    KRYS_NODISCARD Maybe<ElementUpdate>
+      ResolvePseudoElement(web::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,
+                           const ElementUpdate &elementUpdate, style::IsInDisplayNoneTree isInDisplayNoneTree,
+                           const RenderStyle *existingStyle) noexcept;
+
+    KRYS_NODISCARD Maybe<ElementUpdate>
+      ResolveAncestorPseudoElement(web::Element &element,
+                                   const PseudoElementIdentifier &pseudoElementIdentifier,
+                                   const ElementUpdate &elementUpdate) noexcept;
+
+    KRYS_NODISCARD Maybe<ResolvedStyle>
+      ResolveAncestorFirstLinePseudoElement(web::Element &element,
+                                            const ElementUpdate &elementUpdate) noexcept;
+
+    KRYS_NODISCARD Maybe<ResolvedStyle>
+      ResolveAncestorFirstLetterPseudoElement(web::Element &element, const ElementUpdate &elementUpdate,
+                                              ResolutionContext &resolutionContext) noexcept;
+
+    void ResetStyleForNonRenderedDescendants(web::Element &subtreeRoot) noexcept;
+
+    KRYS_NODISCARD Scope &GetScope() noexcept
+    {
+      return *_scopeStack.back();
+    }
+
+    KRYS_NODISCARD const Scope &GetScope() const noexcept
+    {
+      return *_scopeStack.back();
+    }
+
+    KRYS_NODISCARD Parent &GetParent() noexcept
+    {
+      return _parentStack.back();
+    }
+
+    KRYS_NODISCARD const Parent &GetParent() const noexcept
+    {
+      return _parentStack.back();
+    }
+
+    void PushScope(web::ShadowRoot &shadowRoot) noexcept;
+
+    void PushEnclosingScope() noexcept;
+
+    void PopScope() noexcept;
+
+    void PushParent(web::Element &element, const RenderStyle &style, EnumSet<Change> changes,
+                    DescendantsToResolve descendantsToResolve,
+                    style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept;
+
+    void PopParent() noexcept;
+
+    void PopParentsToDepth(uint32 depth) noexcept;
+
+    KRYS_NODISCARD DescendantsToResolve ComputeDescendantsToResolve(const ElementUpdate &update,
+                                                                    const RenderStyle *existingStyle,
+                                                                    Validity validity) const noexcept;
+
+    KRYS_NODISCARD static Maybe<ResolutionType>
+      DetermineResolutionType(const web::Element &element, const RenderStyle *existingStyle,
+                              DescendantsToResolve parentDescendantsToResolve,
+                              EnumSet<Change> parentChanges) noexcept;
+
+    static void ResetDescendantStyleRelations(web::Element &element,
+                                              DescendantsToResolve descendantsToResolve) noexcept;
+
+    KRYS_NODISCARD ResolutionContext MakeResolutionContext() noexcept;
+
+    KRYS_NODISCARD ResolutionContext MakeResolutionContextForPseudoElement(
+      const ElementUpdate &elementUpdate, const PseudoElementIdentifier &pseudoElementIdentifier) noexcept;
+
+    KRYS_NODISCARD Maybe<ResolutionContext>
+      MakeResolutionContextForInheritedFirstLine(const ElementUpdate &elementUpdate,
+                                                 const RenderStyle &inheritStyle) noexcept;
+
+    KRYS_NODISCARD const Parent *BoxGeneratingParent() const noexcept;
+
+    KRYS_NODISCARD const RenderStyle *ParentBoxStyle() const noexcept;
+
+    KRYS_NODISCARD const RenderStyle *
+      ParentBoxStyleForPseudoElement(const ElementUpdate &elementUpdate) const noexcept;
+
+    KRYS_NODISCARD const RenderStyle *DocumentElementStyle() const noexcept;
+
+    // This returns the style that was in effect (applied to the render tree) before we started the style
+    // resolution. Layout interleaving may cause different styles to be applied during the style resolution.
+    KRYS_NODISCARD const RenderStyle *
+      BeforeResolutionStyle(const web::Element &element,
+                            const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
+    void SaveBeforeResolutionStyleForInterleaving(const web::Element &element) noexcept;
+
+    KRYS_NODISCARD bool HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept;
+
+    KRYS_NODISCARD bool HasResolvedAnchorPosition(const Styleable &styleable) const noexcept;
+
+    void CollectChangedAnchorNames(const RenderStyle &newStyle, const RenderStyle *currentStyle) noexcept;
+  };
+
+  // Integrate with the HTML5 event loop instead, see EventLoop.cpp and consumers.
+  void DeprecatedQueuePostResolutionCallback(Func<void()> &&callback) noexcept;
+
+  KRYS_NODISCARD bool PostResolutionCallbacksAreSuspended() noexcept;
+
+  KRYS_NODISCARD inline bool SupportsFirstLineAndLetterPseudoElement(const RenderStyle &style) noexcept
+  {
+    auto display = style.Display();
+    return display == DisplayType::Block || display == DisplayType::ListItem
+           || display == DisplayType::InlineBlock || display == DisplayType::TableCell
+           || display == DisplayType::TableCaption || display == DisplayType::FlowRoot;
+  }
+
+  /// @brief Suspends the callbacks queued with `DeprecatedQueuePostResolutionCallback` until the outermost
+  /// disabler goes away, which runs them.
+  class PostResolutionCallbackDisabler
+  {
+    KRYS_NON_COPY_MOVABLE(PostResolutionCallbackDisabler);
+
+  public:
+    enum class DrainCallbacks : bool
+    {
+      No,
+      Yes,
+    };
+
+  private:
+    DrainCallbacks _drainCallbacks;
+
+  public:
+    explicit PostResolutionCallbackDisabler(Document &document,
+                                            DrainCallbacks drainCallbacks = DrainCallbacks::Yes) noexcept;
+
+    ~PostResolutionCallbackDisabler() noexcept;
+  };
+}

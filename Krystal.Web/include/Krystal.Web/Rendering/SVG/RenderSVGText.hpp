@@ -1,0 +1,184 @@
+﻿/*
+ * Copyright (C) 2006-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Google Inc. All rights reserved.
+ * Copyright (C) 2007 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) Research In Motion Limited 2010-2012. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Geometry/AffineTransform.hpp"
+#include "Krystal.Web/Rendering/SVG/RenderSVGBlock.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGTextChunk.hpp"
+#include "Krystal.Web/Rendering/SVG/SVGTextLayoutAttributesBuilder.hpp"
+
+namespace krys::web::inline_iterator
+{
+  class InlineBoxIterator;
+}
+
+namespace krys::web
+{
+  class RenderSVGInlineText;
+  class SVGTextElement;
+  class SVGTextLayoutEngine;
+
+  /// @brief The renderer of a `<text>`: a block whose inline content is laid out character by character by
+  /// the SVG text layout.
+  class RenderSVGText final : public RenderSVGBlock
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderSVGText);
+
+  private:
+    bool _needsReordering : 1 {false};
+    bool _needsPositioningValuesUpdate : 1 {false};
+    bool _needsTransformUpdate : 1 {true};
+    bool _needsTextMetricsUpdate : 1 {false};
+    // Needed to distinguish between when we perform a full pass of layout and EverHadLayout (which can be set
+    // be content visibility for skipped content).
+    bool _hasPerformedLayout : 1 {false};
+    AffineTransform _localTransform;
+    SVGTextLayoutAttributesBuilder _layoutAttributesBuilder;
+    List<SVGTextLayoutAttributes *> _layoutAttributes;
+    RectF _objectBoundingBox;
+
+  public:
+    RenderSVGText(SVGTextElement &, RenderStyle &&) noexcept;
+
+    ~RenderSVGText() noexcept override;
+
+    KRYS_NODISCARD SVGTextElement &TextElement() const noexcept;
+
+    KRYS_NODISCARD bool IsChildAllowed(const RenderObject &, const RenderStyle &) const noexcept override;
+
+    void SetNeedsPositioningValuesUpdate() noexcept
+    {
+      _needsPositioningValuesUpdate = true;
+    }
+
+    void SetNeedsTextMetricsUpdate() noexcept
+    {
+      _needsTextMetricsUpdate = true;
+    }
+
+    void SetNeedsTransformUpdate() noexcept override
+    {
+      _needsTransformUpdate = true;
+    }
+
+    KRYS_NODISCARD static RenderSVGText *LocateRenderSVGTextAncestor(RenderObject &) noexcept;
+
+    KRYS_NODISCARD static const RenderSVGText *LocateRenderSVGTextAncestor(const RenderObject &) noexcept;
+
+    KRYS_NODISCARD bool NeedsReordering() const noexcept
+    {
+      return _needsReordering;
+    }
+
+    KRYS_NODISCARD List<SVGTextLayoutAttributes *> &LayoutAttributes() noexcept
+    {
+      return _layoutAttributes;
+    }
+
+    void SubtreeChildWasAdded(RenderObject *) noexcept;
+
+    void SubtreeChildWillBeRemoved(RenderObject *,
+                                   SmallList<SVGTextLayoutAttributes *, 2> &affectedAttributes) noexcept;
+
+    void SubtreeChildWasRemoved(const SmallList<SVGTextLayoutAttributes *, 2> &affectedAttributes) noexcept;
+
+    void SubtreeTextDidChange(RenderSVGInlineText *) noexcept;
+
+    KRYS_NODISCARD RectF ObjectBoundingBox() const noexcept final
+    {
+      return _objectBoundingBox;
+    }
+
+    KRYS_NODISCARD RectF StrokeBoundingBox() const noexcept final;
+
+    KRYS_NODISCARD bool IsObjectBoundingBoxValid() const noexcept;
+
+    KRYS_NODISCARD RectF RepaintRectInLocalCoordinates(
+      RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept final;
+
+    KRYS_NODISCARD RectF DecoratedBoundingBox() const noexcept final;
+
+    void UpdatePositionAndOverflow(const RectF &) noexcept;
+
+    void GraphicsElement() const = delete;
+
+  private:
+    KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
+    {
+      return u8"RenderSVGText";
+    }
+
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    void PaintInlineChildren(PaintInfo &, const LayoutPoint &) noexcept override;
+
+    bool HitTestInlineChildren(const HitTestRequest &, HitTestResult &,
+                               const HitTestLocation &locationInContainer,
+                               const LayoutPoint &accumulatedOffset, HitTestAction) noexcept override;
+
+    KRYS_NODISCARD PositionWithAffinity PositionForPoint(
+      const LayoutPoint &, HitTestSource, const RenderFragmentContainer * = nullptr) noexcept override;
+
+    KRYS_NODISCARD bool RequiresLayer() const noexcept override
+    {
+      return false;
+    }
+
+    void Layout() noexcept override;
+
+    void ComputePerCharacterLayoutInformation() noexcept;
+
+    void LayoutCharactersInTextBoxes(const inline_iterator::InlineBoxIterator &,
+                                     SVGTextLayoutEngine &) noexcept;
+
+    void ReorderValueListsToLogicalOrder() noexcept;
+
+    void WillBeDestroyed() noexcept override;
+
+    void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;
+
+    bool NodeAtPointF(const HitTestRequest &, HitTestResult &, const PointF &pointInParent,
+                      HitTestAction) noexcept override;
+
+    KRYS_NODISCARD const AffineTransform &LocalToParentTransform() const noexcept override
+    {
+      return _localTransform;
+    }
+
+    KRYS_NODISCARD AffineTransform LocalTransform() const noexcept override
+    {
+      return _localTransform;
+    }
+
+    KRYS_NODISCARD bool ShouldHandleSubtreeMutations() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderSVGText)
+  KRYS_NODISCARD static bool IsType(const krys::web::RenderObject &renderer) noexcept
+  {
+    return renderer.IsRenderSVGText();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

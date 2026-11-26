@@ -1,0 +1,952 @@
+﻿/*
+ * Copyright (C) 2005-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Editing/Commands/TypingCommand.hpp"
+#include "Krystal.Web/Accessibility/AXObjectCache.hpp"
+#include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
+#include "Krystal.Web/Editing/Commands/InsertLineBreakCommand.hpp"
+#include "Krystal.Web/Editing/Commands/InsertParagraphSeparatorCommand.hpp"
+#include "Krystal.Web/Editing/Commands/InsertTextCommand.hpp"
+#include "Krystal.Web/Editing/Editing.hpp"
+#include "Krystal.Web/Editing/Editor.hpp"
+#include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Editing/Selection/VisibleUnits.hpp"
+#include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Web/Html/Internals/ScopedEventQueue.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Rendering/RenderObject.hpp"
+
+namespace krys::web
+{
+  class TypingCommandLineOperation
+  {
+  private:
+    TypingCommand &_typingCommand;
+    bool _selectInsertedText;
+    utf8_stringview _text;
+
+  public:
+    TypingCommandLineOperation(TypingCommand &typingCommand, bool selectInsertedText,
+                               utf8_stringview text) noexcept
+        : _typingCommand(typingCommand), _selectInsertedText(selectInsertedText), _text(text)
+    {
+    }
+
+    void operator()(size_t lineOffset, size_t lineLength, bool isLastLine) const noexcept
+    {
+      if (isLastLine)
+      {
+        if (!lineOffset || lineLength > 0)
+        {
+          _typingCommand.InsertTextRunWithoutNewlines(_text.substr(lineOffset, lineLength),
+                                                      _selectInsertedText);
+        }
+      }
+      else
+      {
+        if (lineLength > 0)
+        {
+          _typingCommand.InsertTextRunWithoutNewlines(_text.substr(lineOffset, lineLength), false);
+        }
+        _typingCommand.InsertParagraphSeparator();
+      }
+    }
+  };
+
+  namespace
+  {
+    KRYS_NODISCARD EditAction EditActionForTypingCommand(TypingCommand::Type command,
+                                                         TextGranularity granularity,
+                                                         TypingCommand::TextCompositionType compositionType,
+                                                         bool isAutocompletion) noexcept
+    {
+      if (compositionType == TypingCommand::TextCompositionType::Pending)
+      {
+        if (command == TypingCommand::Type::InsertText)
+        {
+          return EditAction::TypingInsertPendingComposition;
+        }
+        if (command == TypingCommand::Type::DeleteSelection)
+        {
+          return EditAction::TypingDeletePendingComposition;
+        }
+        krys_debug_assert(false);
+      }
+
+      if (compositionType == TypingCommand::TextCompositionType::Final)
+      {
+        if (command == TypingCommand::Type::InsertText)
+        {
+          return EditAction::TypingInsertFinalComposition;
+        }
+        if (command == TypingCommand::Type::DeleteSelection)
+        {
+          return EditAction::TypingDeleteFinalComposition;
+        }
+        krys_debug_assert(false);
+      }
+
+      switch (command)
+      {
+        case TypingCommand::Type::DeleteSelection: return EditAction::TypingDeleteSelection;
+        case TypingCommand::Type::DeleteKey:
+        {
+          if (granularity == TextGranularity::WordGranularity)
+          {
+            return EditAction::TypingDeleteWordBackward;
+          }
+          if (granularity == TextGranularity::LineBoundary)
+          {
+            return EditAction::TypingDeleteLineBackward;
+          }
+          return EditAction::TypingDeleteBackward;
+        }
+        case TypingCommand::Type::ForwardDeleteKey:
+          if (granularity == TextGranularity::WordGranularity)
+          {
+            return EditAction::TypingDeleteWordForward;
+          }
+          if (granularity == TextGranularity::LineBoundary)
+          {
+            return EditAction::TypingDeleteLineForward;
+          }
+          return EditAction::TypingDeleteForward;
+        case TypingCommand::Type::InsertText:
+          return isAutocompletion ? EditAction::InsertReplacement : EditAction::TypingInsertText;
+        case TypingCommand::Type::InsertLineBreak:          return EditAction::TypingInsertLineBreak;
+        case TypingCommand::Type::InsertParagraphSeparator: return EditAction::TypingInsertParagraph;
+      }
+      return EditAction::Unspecified;
+    }
+
+    KRYS_NODISCARD bool EditActionIsDeleteByTyping(EditAction action) noexcept
+    {
+      switch (action)
+      {
+        case EditAction::TypingDeleteSelection:
+        case EditAction::TypingDeleteBackward:
+        case EditAction::TypingDeleteWordBackward:
+        case EditAction::TypingDeleteLineBackward:
+        case EditAction::TypingDeleteForward:
+        case EditAction::TypingDeleteWordForward:
+        case EditAction::TypingDeleteLineForward:  return true;
+        default:                                   return false;
+      }
+    }
+  }
+
+  TypingCommand::TypingCommand(Document &document, Type commandType, utf8_stringview textToInsert,
+                               EnumSet<Option> options, TextGranularity granularity,
+                               TextCompositionType compositionType) noexcept
+      : TextInsertionBaseCommand(document,
+                                 EditActionForTypingCommand(commandType, granularity, compositionType,
+                                                            options.contains(Option::IsAutocompletion))),
+        _commandType(commandType), _textToInsert(textToInsert), _currentTextToInsert(textToInsert),
+        _selectInsertedText(options.contains(Option::SelectInsertedText)),
+        _smartDelete(options.contains(Option::SmartDelete)), _granularity(granularity),
+        _compositionType(compositionType), _shouldAddToKillRing(options.contains(Option::AddsToKillRing)),
+        _isAutocompletion(options.contains(Option::IsAutocompletion)),
+        _shouldRetainAutocorrectionIndicator(options.contains(Option::RetainAutocorrectionIndicator)),
+        _shouldPreventSpellChecking(options.contains(Option::PreventSpellChecking))
+  {
+    _currentTypingEditAction = EditingAction();
+    UpdatePreservesTypingStyle(_commandType);
+  }
+
+  Ref<TypingCommand> TypingCommand::Create(Document &document, Type command, utf8_stringview text,
+                                           EnumSet<Option> options, TextGranularity granularity,
+                                           TextCompositionType compositionType) noexcept
+  {
+    return CreateRef<TypingCommand>(document, command, text, options, granularity, compositionType);
+  }
+
+  Ref<TypingCommand> TypingCommand::Create(Document &document, Type command, utf8_stringview text,
+                                           EnumSet<Option> options,
+                                           TextCompositionType compositionType) noexcept
+  {
+    return CreateRef<TypingCommand>(document, command, text, options, TextGranularity::CharacterGranularity,
+                                    compositionType);
+  }
+
+  void TypingCommand::DeleteSelection(Document &document, EnumSet<Option> options,
+                                      TextCompositionType compositionType) noexcept
+  {
+    if (!document.Selection().IsRange())
+    {
+      return;
+    }
+
+    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+    {
+      html::EventQueueScope eventQueue;
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+      lastTypingCommand->SetCompositionType(compositionType);
+      lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+      lastTypingCommand->DeleteSelection(options.contains(Option::SmartDelete));
+      return;
+    }
+
+    Create(document, Type::DeleteSelection, {}, options, compositionType)->Apply();
+  }
+
+  void TypingCommand::DeleteKeyPressed(Document &document, EnumSet<Option> options,
+                                       TextGranularity granularity) noexcept
+  {
+    if (granularity == TextGranularity::CharacterGranularity)
+    {
+      if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+      {
+        html::EventQueueScope eventQueue;
+        UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
+        lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+        lastTypingCommand->SetCompositionType(TextCompositionType::None);
+        lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+        lastTypingCommand->DeleteKeyPressed(granularity, options.contains(Option::AddsToKillRing));
+        return;
+      }
+    }
+
+    Create(document, Type::DeleteKey, {}, options, granularity)->Apply();
+  }
+
+  void TypingCommand::ForwardDeleteKeyPressed(Document &document, EnumSet<Option> options,
+                                              TextGranularity granularity) noexcept
+  {
+    // FIXME: Forward delete in TextEdit appears to open and close a new typing command.
+    if (granularity == TextGranularity::CharacterGranularity)
+    {
+      if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+      {
+        html::EventQueueScope eventQueue;
+        UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
+        lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+        lastTypingCommand->SetCompositionType(TextCompositionType::None);
+        lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+        lastTypingCommand->ForwardDeleteKeyPressed(granularity, options.contains(Option::AddsToKillRing));
+        return;
+      }
+    }
+
+    Create(document, Type::ForwardDeleteKey, {}, options, granularity)->Apply();
+  }
+
+  void TypingCommand::UpdateSelectionIfDifferentFromCurrentSelection(TypingCommand *typingCommand,
+                                                                     Document &document) noexcept
+  {
+    VisibleSelection currentSelection = document.Selection().Selection();
+    if (currentSelection == typingCommand->EndingSelection())
+    {
+      return;
+    }
+
+    typingCommand->SetStartingSelection(currentSelection);
+    typingCommand->SetEndingSelection(currentSelection);
+  }
+
+  // (There are no spelling and grammar markers to update; see DIFFERENCES.md.)
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
+                                 EnumSet<Option> options, TextCompositionType composition) noexcept
+  {
+    const auto &selection = document.Selection().Selection();
+    InsertText(document, text, triggeringEvent, selection, options, composition);
+  }
+
+  // FIXME: We shouldn't need to take selectionForInsertion. It should be identical to FrameSelection's
+  // current selection.
+  void TypingCommand::InsertText(Document &document, utf8_stringview text, Event *triggeringEvent,
+                                 const VisibleSelection &selectionForInsertion, EnumSet<Option> options,
+                                 TextCompositionType compositionType) noexcept
+  {
+    VisibleSelection currentSelection = document.Selection().Selection();
+
+    auto newText = DispatchBeforeTextInsertedEvent(text, selectionForInsertion,
+                                                   compositionType == TextCompositionType::Pending);
+
+    bool triggeringEventIsUntrusted = triggeringEvent && !triggeringEvent->IsTrusted();
+
+    // Set the starting and ending selection appropriately if we are using a selection
+    // that is different from the current selection.  In the future, we should change EditCommand
+    // to deal with custom selections in a general way that can be used by all of the commands.
+    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+    {
+      html::EventQueueScope eventQueue;
+      if (lastTypingCommand->EndingSelection() != selectionForInsertion)
+      {
+        lastTypingCommand->SetStartingSelection(selectionForInsertion);
+        lastTypingCommand->SetEndingSelection(selectionForInsertion);
+      }
+
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+      lastTypingCommand->SetCompositionType(compositionType);
+      lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
+        options.contains(Option::RetainAutocorrectionIndicator));
+      lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
+      lastTypingCommand->SetTriggeringEventIsUntrusted(triggeringEventIsUntrusted);
+      lastTypingCommand->InsertTextAndNotifyAccessibility(newText,
+                                                          options.contains(Option::SelectInsertedText));
+      return;
+    }
+
+    RefPtr<Frame> frame = ShareRefPtr(document.Frame());
+    auto command = Create(document, Type::InsertText, newText, options, compositionType);
+    command->SetTriggeringEventIsUntrusted(triggeringEventIsUntrusted);
+    ApplyTextInsertionCommand(frame.get(), *command, selectionForInsertion, currentSelection);
+  }
+
+  void TypingCommand::InsertLineBreak(Document &document, EnumSet<Option> options) noexcept
+  {
+    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+    {
+      html::EventQueueScope eventQueue;
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+      lastTypingCommand->SetCompositionType(TextCompositionType::None);
+      lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
+        options.contains(Option::RetainAutocorrectionIndicator));
+      lastTypingCommand->InsertLineBreakAndNotifyAccessibility();
+      return;
+    }
+
+    Create(document, Type::InsertLineBreak, {}, options)->Apply();
+  }
+
+  void TypingCommand::InsertParagraphSeparator(Document &document, EnumSet<Option> options) noexcept
+  {
+    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+    {
+      html::EventQueueScope eventQueue;
+      lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
+      lastTypingCommand->SetCompositionType(TextCompositionType::None);
+      lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
+        options.contains(Option::RetainAutocorrectionIndicator));
+      lastTypingCommand->InsertParagraphSeparatorAndNotifyAccessibility();
+      return;
+    }
+
+    Create(document, Type::InsertParagraphSeparator, {}, options)->Apply();
+  }
+
+  RefPtr<TypingCommand> TypingCommand::LastTypingCommandIfStillOpenForTyping(Document &document) noexcept
+  {
+    auto *lastEditCommand = DynamicDowncast<TypingCommand>(document.GetEditor().LastEditCommand());
+    if (!lastEditCommand || !lastEditCommand->IsOpenForMoreTyping())
+    {
+      return nullptr;
+    }
+    return ShareRefPtr(lastEditCommand);
+  }
+
+  bool TypingCommand::ShouldDeferWillApplyCommandUntilAddingTypingCommand() const noexcept
+  {
+    return !_isHandlingInitialTypingCommand || EditActionIsDeleteByTyping(EditingAction());
+  }
+
+  void TypingCommand::CloseTyping(Document &document) noexcept
+  {
+    if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
+    {
+      lastTypingCommand->CloseTyping();
+    }
+  }
+
+  bool TypingCommand::WillApplyCommand() noexcept
+  {
+    if (ShouldDeferWillApplyCommandUntilAddingTypingCommand())
+    {
+      // The TypingCommand will handle the willApplyCommand logic separately in
+      // TypingCommand::willAddTypingToOpenCommand.
+      return true;
+    }
+
+    return CompositeEditCommand::WillApplyCommand();
+  }
+
+  void TypingCommand::DoApply() noexcept
+  {
+    if (EndingSelection().IsNoneOrOrphaned())
+    {
+      return;
+    }
+
+    if (_commandType == Type::DeleteKey)
+    {
+      if (_commands.empty())
+      {
+        _openedByBackwardDelete = true;
+      }
+    }
+
+    switch (_commandType)
+    {
+      case Type::DeleteSelection:          DeleteSelection(_smartDelete); return;
+      case Type::DeleteKey:                DeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
+      case Type::ForwardDeleteKey:         ForwardDeleteKeyPressed(_granularity, _shouldAddToKillRing); return;
+      case Type::InsertLineBreak:          InsertLineBreakAndNotifyAccessibility(); return;
+      case Type::InsertParagraphSeparator: InsertParagraphSeparatorAndNotifyAccessibility(); return;
+      case Type::InsertText:               InsertTextAndNotifyAccessibility(_textToInsert, _selectInsertedText); return;
+    }
+
+    krys_debug_assert(false);
+  }
+
+  DOMString TypingCommand::InputEventTypeName() const noexcept
+  {
+    return DOMString(InputTypeNameForEditingAction(_currentTypingEditAction));
+  }
+
+  bool TypingCommand::IsInputMethodComposing() const noexcept
+  {
+    return IsInputMethodComposingForEditingAction(_currentTypingEditAction);
+  }
+
+  bool TypingCommand::IsBeforeInputEventCancelable() const noexcept
+  {
+    return _currentTypingEditAction != EditAction::TypingInsertPendingComposition
+           && _currentTypingEditAction != EditAction::TypingDeletePendingComposition;
+  }
+
+  DOMString TypingCommand::InputEventData() const noexcept
+  {
+    switch (_currentTypingEditAction)
+    {
+      case EditAction::TypingInsertText:
+      case EditAction::TypingInsertPendingComposition:
+      case EditAction::TypingInsertFinalComposition:   return _currentTextToInsert;
+      case EditAction::InsertReplacement:
+        return IsEditingTextAreaOrTextInput() ? _currentTextToInsert : DOMString();
+      default: return CompositeEditCommand::InputEventData();
+    }
+  }
+
+  void TypingCommand::DidApplyCommand() noexcept
+  {
+    // TypingCommands handle applied editing separately (see TypingCommand::typingAddedToOpenCommand).
+    _isHandlingInitialTypingCommand = false;
+  }
+
+  bool TypingCommand::WillAddTypingToOpenCommand(Type commandType, TextGranularity granularity,
+                                                 utf8_stringview text,
+                                                 const Maybe<dom::SimpleRange> &range) noexcept
+  {
+    _currentTextToInsert = utf8_string(text);
+    _currentTypingEditAction =
+      EditActionForTypingCommand(commandType, granularity, _compositionType, _isAutocompletion);
+
+    if (!ShouldDeferWillApplyCommandUntilAddingTypingCommand())
+    {
+      return true;
+    }
+
+    if (!range || IsEditingTextAreaOrTextInput())
+    {
+      return GetDocument().GetEditor().WillApplyEditing(*this,
+                                                        CompositeEditCommand::TargetRangesForBindings());
+    }
+
+    List<RefPtr<dom::StaticRange>> targetRanges;
+    if (auto init = dom::StaticRangeInit::Create(range->Start, range->End); !init.HasException())
+    {
+      targetRanges.emplace_back(CreateRef<dom::StaticRange>(init.ReleaseValue()));
+    }
+    return GetDocument().GetEditor().WillApplyEditing(*this, krys::move(targetRanges));
+  }
+
+  // Typing added to an open command is applied outside its Apply(), so the static entry points scope the
+  // events it fires (`input` from AppliedEditing) to the whole of the typing.
+  void TypingCommand::TypingAddedToOpenCommand(Type commandTypeForAddedTyping) noexcept
+  {
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+
+    UpdatePreservesTypingStyle(commandTypeForAddedTyping);
+
+    GetDocument().GetEditor().AppliedEditing(*this);
+  }
+
+  void TypingCommand::InsertText(utf8_stringview text, bool selectInsertedText) noexcept
+  {
+    // FIXME: Need to implement selectInsertedText for cases where more than one insert is involved.
+    // This requires support from insertTextRunWithoutNewlines and insertParagraphSeparator for extending
+    // an existing selection; at the moment they can either put the caret after what's inserted or
+    // select what's inserted, but there's no way to "extend selection" to include both an old selection
+    // that ends just before where we want to insert text and the newly inserted text.
+    TypingCommandLineOperation operation(*this, selectInsertedText, text);
+    ForEachLineInString(text, operation);
+  }
+
+  void TypingCommand::InsertTextRunWithoutNewlines(utf8_stringview text, bool selectInsertedText) noexcept
+  {
+    if (!WillAddTypingToOpenCommand(Type::InsertText, TextGranularity::CharacterGranularity, text))
+    {
+      return;
+    }
+
+    auto allowPasswordEcho = TriggeringEventIsUntrusted() ? AllowPasswordEcho::No : AllowPasswordEcho::Yes;
+    auto rebalanceWhitespaces = _compositionType == TextCompositionType::None
+                                  ? InsertTextCommand::RebalanceLeadingAndTrailingWhitespaces
+                                  : InsertTextCommand::RebalanceAllWhitespaces;
+    auto command = InsertTextCommand::Create(GetDocument(), text, allowPasswordEcho, selectInsertedText,
+                                             rebalanceWhitespaces, EditAction::TypingInsertText);
+
+    ApplyCommandToComposite(krys::move(command), EndingSelection());
+    TypingAddedToOpenCommand(Type::InsertText);
+  }
+
+  void TypingCommand::InsertTextAndNotifyAccessibility(utf8_stringview text, bool selectInsertedText) noexcept
+  {
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertText(text, selectInsertedText);
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), text,
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::InsertLineBreakAndNotifyAccessibility() noexcept
+  {
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertLineBreak();
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::InsertParagraphSeparatorAndNotifyAccessibility() noexcept
+  {
+    AXReplacedText replacedText(GetDocument().Selection().Selection());
+    InsertParagraphSeparator();
+    replacedText.PostTextStateChangeNotification(GetDocument().ExistingAXObjectCache(), u8"\n",
+                                                 GetDocument().Selection().Selection());
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(replacedText.ReplacedRange());
+    }
+  }
+
+  void TypingCommand::PostTextStateChangeNotificationForDeletion(const VisibleSelection &selection) noexcept
+  {
+    if (!AXObjectCache::AccessibilityEnabled())
+    {
+      return;
+    }
+    PostTextStateChangeNotification(
+      AXTextChange::Deleted,
+      AXObject::StringForVisiblePositionRange({selection.VisibleStart(), selection.VisibleEnd()}),
+      selection.VisibleStart());
+    VisiblePositionIndexRange range;
+    range.StartIndex.Value = IndexForVisiblePosition(selection.VisibleStart(), range.StartIndex.Scope);
+    range.EndIndex.Value = IndexForVisiblePosition(selection.VisibleEnd(), range.EndIndex.Scope);
+    if (auto *composition = Composition())
+    {
+      composition->SetRangeDeletedByUnapply(range);
+    }
+  }
+
+  void TypingCommand::InsertLineBreak() noexcept
+  {
+    if (!CanAppendNewLineFeedToSelection(EndingSelection()))
+    {
+      return;
+    }
+
+    if (!WillAddTypingToOpenCommand(Type::InsertLineBreak, TextGranularity::LineGranularity))
+    {
+      return;
+    }
+
+    ApplyCommandToComposite(InsertLineBreakCommand::Create(GetDocument()));
+    TypingAddedToOpenCommand(Type::InsertLineBreak);
+  }
+
+  void TypingCommand::InsertParagraphSeparator() noexcept
+  {
+    if (!CanAppendNewLineFeedToSelection(EndingSelection()))
+    {
+      return;
+    }
+
+    if (!WillAddTypingToOpenCommand(Type::InsertParagraphSeparator, TextGranularity::ParagraphGranularity))
+    {
+      return;
+    }
+
+    ApplyCommandToComposite(
+      InsertParagraphSeparatorCommand::Create(GetDocument(), false, EditAction::TypingInsertParagraph));
+    TypingAddedToOpenCommand(Type::InsertParagraphSeparator);
+  }
+
+  bool TypingCommand::MakeEditableRootEmpty() noexcept
+  {
+    RefPtr<Element> root = ShareRefPtr(EndingSelection().RootEditableElement());
+    if (!root || !root->FirstChild())
+    {
+      return false;
+    }
+
+    if (root->FirstChild() == root->LastChild() && IsHTMLElementOfType(root->FirstChild(), html::TagName::br))
+    {
+      // If there is a single child and it could be a placeholder, leave it alone.
+      if (root->Renderer() && root->Renderer()->IsRenderBlockFlow())
+      {
+        return false;
+      }
+    }
+
+    while (auto *child = root->FirstChild())
+    {
+      RemoveNode(*child);
+    }
+
+    (void)AddBlockPlaceholderIfNeeded(root.get());
+    SetEndingSelection(VisibleSelection(FirstPositionInNode(root.get()), Affinity::Downstream,
+                                        EndingSelection().GetDirectionality()));
+
+    return true;
+  }
+
+  void TypingCommand::DeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept
+  {
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+
+    VisibleSelection selectionToDelete;
+    VisibleSelection selectionAfterUndo;
+    bool expandForSpecialElements = false;
+
+    krys_debug_assert(EndingSelection().IsCaretOrRange());
+
+    if (EndingSelection().IsRange())
+    {
+      selectionToDelete = EndingSelection();
+      selectionAfterUndo = selectionToDelete;
+      expandForSpecialElements = true;
+    }
+    else
+    {
+      _smartDelete = false;
+
+      FrameSelection selection;
+      selection.SetSelection(EndingSelection());
+      (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Backward, granularity);
+      if (shouldAddToKillRing && selection.IsCaret() && granularity != TextGranularity::CharacterGranularity)
+      {
+        (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Backward,
+                               TextGranularity::CharacterGranularity);
+      }
+
+      const VisiblePosition visibleStart = EndingSelection().VisibleStart();
+      const VisiblePosition previousPosition =
+        visibleStart.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
+      auto enclosingTableCell = EnclosingNodeOfType(visibleStart.DeepEquivalent(), &IsTableCell);
+      auto enclosingTableCellForPreviousPosition =
+        EnclosingNodeOfType(previousPosition.DeepEquivalent(), &IsTableCell);
+      if (previousPosition.IsNull() || enclosingTableCell != enclosingTableCellForPreviousPosition)
+      {
+        // When the caret is at the start of the editable area in an empty list item, break out of the list
+        // item.
+        if (auto deleteListSelection = ShouldBreakOutOfEmptyListItem(); !deleteListSelection.IsNone())
+        {
+          if (WillAddTypingToOpenCommand(Type::DeleteKey, granularity, {}, deleteListSelection.FirstRange()))
+          {
+            (void)BreakOutOfEmptyListItem();
+            TypingAddedToOpenCommand(Type::DeleteKey);
+          }
+          return;
+        }
+      }
+      if (previousPosition.IsNull())
+      {
+        // When there are no visible positions in the editing root, delete its entire contents.
+        // FIXME: Dispatch a `beforeinput` event here and bail if preventDefault() was invoked.
+        if (visibleStart.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary).IsNull()
+            && MakeEditableRootEmpty())
+        {
+          TypingAddedToOpenCommand(Type::DeleteKey);
+          return;
+        }
+      }
+
+      // If we have a caret selection at the beginning of a cell, we have nothing to do.
+      if (enclosingTableCell
+          && visibleStart == VisiblePosition(FirstPositionInNode(enclosingTableCell.get())))
+      {
+        return;
+      }
+
+      // If the caret is at the start of a paragraph after a table, move content into the last table cell.
+      if (IsStartOfParagraph(visibleStart)
+          && IsFirstPositionAfterTable(
+            visibleStart.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary)))
+      {
+        // Unless the caret is just before a table.  We don't want to move a table into the last table cell.
+        if (IsLastPositionBeforeTable(visibleStart))
+        {
+          return;
+        }
+        // Extend the selection backward into the last cell, then deletion will handle the move.
+        (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Backward, granularity);
+        // If the caret is just after a table, select the table and don't delete anything.
+      }
+      else if (auto table = IsFirstPositionAfterTable(visibleStart))
+      {
+        SetEndingSelection(VisibleSelection(PositionBeforeNode(table.get()), EndingSelection().Start(),
+                                            Affinity::Downstream, EndingSelection().GetDirectionality()));
+        TypingAddedToOpenCommand(Type::DeleteKey);
+        return;
+      }
+
+      selectionToDelete = selection.Selection();
+
+      if (granularity == TextGranularity::CharacterGranularity
+          && selectionToDelete.End().GetContainerNode() == selectionToDelete.Start().GetContainerNode()
+          && selectionToDelete.End().ComputeOffsetInContainerNode()
+                 - selectionToDelete.Start().ComputeOffsetInContainerNode()
+               > 1)
+      {
+        // If there are multiple Unicode code points to be deleted, adjust the range to match platform
+        // conventions.
+        selectionToDelete.SetWithoutValidation(
+          selectionToDelete.End(), selectionToDelete.End().Previous(PositionMoveType::BackwardDeletion));
+      }
+
+      if (!StartingSelection().IsRange()
+          || selectionToDelete.CanonicalAnchor() != StartingSelection().Start())
+      {
+        selectionAfterUndo = selectionToDelete;
+      }
+      else
+      {
+        // It's a little tricky to compute what the starting selection would have been in the original
+        // document. We can't let the VisibleSelection class's validation kick in or it'll adjust for us based
+        // on the current state of the document and we'll get the wrong result.
+        selectionAfterUndo.SetWithoutValidation(StartingSelection().End(),
+                                                selectionToDelete.CanonicalFocus());
+      }
+    }
+
+    krys_debug_assert(!selectionToDelete.IsNone());
+    if (selectionToDelete.IsNone())
+    {
+      return;
+    }
+
+    if (selectionToDelete.IsCaret() || !GetDocument().Selection().ShouldDeleteSelection(selectionToDelete))
+    {
+      return;
+    }
+
+    if (!WillAddTypingToOpenCommand(Type::DeleteKey, granularity, {}, selectionToDelete.FirstRange()))
+    {
+      return;
+    }
+
+    // While the selection to delete is still there to read.
+    PostTextStateChangeNotificationForDeletion(selectionToDelete);
+
+    // Make undo select everything that has been deleted, unless an undo will undo more than just this
+    // deletion.
+    // FIXME: This behaves like TextEdit except for the case where you open with text insertion and then
+    // delete more text than you insert.  In that case all of the text that was around originally should be
+    // selected.
+    if (_openedByBackwardDelete)
+    {
+      SetStartingSelection(selectionAfterUndo);
+    }
+    CompositeEditCommand::DeleteSelection(selectionToDelete, _smartDelete, /* mergeBlocksAfterDelete*/ true,
+                                          /* replace*/ false, expandForSpecialElements,
+                                          /*sanitizeMarkup*/ true);
+    SetSmartDelete(false);
+    TypingAddedToOpenCommand(Type::DeleteKey);
+  }
+
+  void TypingCommand::ForwardDeleteKeyPressed(TextGranularity granularity, bool shouldAddToKillRing) noexcept
+  {
+    RefPtr<Frame> protectedFrame = ShareRefPtr(GetDocument().Frame());
+
+    VisibleSelection selectionToDelete;
+    VisibleSelection selectionAfterUndo;
+    bool expandForSpecialElements = false;
+
+    krys_debug_assert(EndingSelection().IsCaretOrRange());
+
+    if (EndingSelection().IsRange())
+    {
+      selectionToDelete = EndingSelection();
+      selectionAfterUndo = selectionToDelete;
+      expandForSpecialElements = true;
+    }
+    else
+    {
+      _smartDelete = false;
+
+      // Handle delete at beginning-of-block case.
+      // Do nothing in the case that the caret is at the start of a
+      // root editable element or at the start of a document.
+      FrameSelection selection;
+      selection.SetSelection(EndingSelection());
+      (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Forward, granularity);
+      if (selection.IsNone())
+      {
+        return;
+      }
+      if (shouldAddToKillRing && selection.IsCaret() && granularity != TextGranularity::CharacterGranularity)
+      {
+        (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Forward,
+                               TextGranularity::CharacterGranularity);
+      }
+
+      Position downstreamEnd = EndingSelection().End().Downstream();
+      VisiblePosition visibleEnd = EndingSelection().VisibleEnd();
+      auto enclosingTableCell = EnclosingNodeOfType(visibleEnd.DeepEquivalent(), &IsTableCell);
+      if (enclosingTableCell && visibleEnd == VisiblePosition(LastPositionInNode(enclosingTableCell.get())))
+      {
+        return;
+      }
+      if (visibleEnd == EndOfParagraph(visibleEnd))
+      {
+        downstreamEnd = visibleEnd.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary)
+                          .DeepEquivalent()
+                          .Downstream();
+      }
+      // When deleting tables: Select the table first, then perform the deletion
+      if (downstreamEnd.GetContainerNode() && downstreamEnd.GetContainerNode()->Renderer()
+          && downstreamEnd.GetContainerNode()->Renderer()->IsRenderTable()
+          && downstreamEnd.ComputeOffsetInContainerNode()
+               <= CaretMinOffset(*downstreamEnd.GetContainerNode()))
+      {
+        SetEndingSelection(VisibleSelection(EndingSelection().End(),
+                                            PositionAfterNode(downstreamEnd.GetContainerNode()),
+                                            Affinity::Downstream, EndingSelection().GetDirectionality()));
+        TypingAddedToOpenCommand(Type::ForwardDeleteKey);
+        return;
+      }
+
+      // deleting to end of paragraph when at end of paragraph needs to merge the next paragraph (if any)
+      if (granularity == TextGranularity::ParagraphBoundary && selection.Selection().IsCaret()
+          && IsEndOfParagraph(selection.Selection().VisibleEnd()))
+      {
+        (void)selection.Modify(FrameSelection::Alteration::Extend, SelectionDirection::Forward,
+                               TextGranularity::CharacterGranularity);
+      }
+
+      selectionToDelete = selection.Selection();
+      if (!StartingSelection().IsRange()
+          || selectionToDelete.CanonicalAnchor() != StartingSelection().Start())
+      {
+        selectionAfterUndo = selectionToDelete;
+      }
+      else
+      {
+        // It's a little tricky to compute what the starting selection would have been in the original
+        // document. We can't let the VisibleSelection class's validation kick in or it'll adjust for us based
+        // on the current state of the document and we'll get the wrong result.
+        Position extent = StartingSelection().End();
+        if (extent.GetContainerNode() != selectionToDelete.End().GetContainerNode())
+        {
+          extent = selectionToDelete.CanonicalFocus();
+        }
+        else
+        {
+          int32 extraCharacters;
+          if (selectionToDelete.Start().GetContainerNode() == selectionToDelete.End().GetContainerNode())
+          {
+            extraCharacters = selectionToDelete.End().ComputeOffsetInContainerNode()
+                              - selectionToDelete.Start().ComputeOffsetInContainerNode();
+          }
+          else
+          {
+            extraCharacters = selectionToDelete.End().ComputeOffsetInContainerNode();
+          }
+          extent = Position(ShareRefPtr(extent.GetContainerNode()),
+                            static_cast<uint32>(extent.ComputeOffsetInContainerNode() + extraCharacters),
+                            Position::AnchorType::PositionIsOffsetInAnchor);
+        }
+        selectionAfterUndo.SetWithoutValidation(StartingSelection().Start(), extent);
+      }
+    }
+
+    krys_debug_assert(!selectionToDelete.IsNone());
+    if (selectionToDelete.IsNone())
+    {
+      return;
+    }
+
+    if (selectionToDelete.IsCaret() || !GetDocument().Selection().ShouldDeleteSelection(selectionToDelete))
+    {
+      return;
+    }
+
+    if (!WillAddTypingToOpenCommand(Type::ForwardDeleteKey, granularity, {}, selectionToDelete.FirstRange()))
+    {
+      return;
+    }
+
+    // While the selection to delete is still there to read.
+    PostTextStateChangeNotificationForDeletion(selectionToDelete);
+
+    // make undo select what was deleted
+    SetStartingSelection(selectionAfterUndo);
+    CompositeEditCommand::DeleteSelection(selectionToDelete, _smartDelete, /* mergeBlocksAfterDelete*/ true,
+                                          /* replace*/ false, expandForSpecialElements,
+                                          /*sanitizeMarkup*/ true);
+    SetSmartDelete(false);
+    TypingAddedToOpenCommand(Type::ForwardDeleteKey);
+  }
+
+  void TypingCommand::DeleteSelection(bool smartDelete) noexcept
+  {
+    if (!WillAddTypingToOpenCommand(Type::DeleteSelection, TextGranularity::CharacterGranularity))
+    {
+      return;
+    }
+
+    CompositeEditCommand::DeleteSelection(smartDelete);
+    TypingAddedToOpenCommand(Type::DeleteSelection);
+  }
+
+  void TypingCommand::UpdatePreservesTypingStyle(Type commandType) noexcept
+  {
+    switch (commandType)
+    {
+      case Type::DeleteSelection:
+      case Type::DeleteKey:
+      case Type::ForwardDeleteKey:
+      case Type::InsertParagraphSeparator:
+      case Type::InsertLineBreak:          _preservesTypingStyle = true; return;
+      case Type::InsertText:               _preservesTypingStyle = false; return;
+    }
+    krys_debug_assert(false);
+    _preservesTypingStyle = false;
+  }
+
+  bool TypingCommand::IsTypingCommand() const noexcept
+  {
+    return true;
+  }
+}

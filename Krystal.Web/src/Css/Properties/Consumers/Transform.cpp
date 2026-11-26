@@ -1,0 +1,574 @@
+﻿/*
+// Copyright (C) 2016-2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/Transform.hpp"
+#include "Krystal.Web/Css/Parser/Tokenizer.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/AngleDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthPercentageDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/NumberDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Percentage.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParsing.hpp"
+#include "Krystal.Web/Css/Values/FunctionValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValueListBuilder.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Style/Values/Transforms/Transform.hpp"
+
+namespace krys::web::css::parse_property
+{
+  RefPtr<Value> ConsumeRotate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#funcdef-rotate3d
+    // rotate3d() = rotate3d( <number> , <number> , <number> , [ <angle> | <zero> ] )
+
+    auto consumeParameters = [](auto &args, auto &state) -> Maybe<ValueListBuilder>
+    {
+      auto firstValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      if (!firstValue)
+      {
+        return {};
+      }
+
+      if (!ConsumeComma(args))
+      {
+        return {};
+      }
+
+      auto secondValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      if (!secondValue)
+      {
+        return {};
+      }
+
+      if (!ConsumeComma(args))
+      {
+        return {};
+      }
+
+      auto thirdValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(args, state);
+      if (!thirdValue)
+      {
+        return {};
+      }
+
+      if (!ConsumeComma(args))
+      {
+        return {};
+      }
+
+      auto angle = PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(
+        args, state, {.UnitlessZeroAngle = AllowUnitlessZero::Yes});
+      if (!angle)
+      {
+        return {};
+      }
+
+      ValueListBuilder parameters;
+      parameters.push_back(krys::move(firstValue));
+      parameters.push_back(krys::move(secondValue));
+      parameters.push_back(krys::move(thirdValue));
+      parameters.push_back(krys::move(angle));
+
+      return {krys::move(parameters)};
+    };
+
+    auto functionId = tokens.Peek().FunctionId();
+    if (functionId != ValueId::Rotate3d)
+    {
+      return {};
+    }
+
+    auto rangeCopy = tokens;
+    auto args = ConsumeFunction(rangeCopy);
+    if (args.IsAtEnd())
+    {
+      return {};
+    }
+
+    auto parameters = consumeParameters(args, state);
+    if (!parameters || !args.IsAtEnd())
+    {
+      return {};
+    }
+
+    tokens = rangeCopy;
+    return FunctionValue::Create(functionId, krys::move(*parameters));
+  }
+
+  RefPtr<Value> ConsumeTranslateFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-1/#funcdef-transform-translate
+    // translate() = translate( <length-percentage> , <length-percentage>? )
+
+    auto consumeParameters = [](auto &args, auto &state) -> std::optional<ValueListBuilder>
+    {
+      ValueListBuilder arguments;
+
+      auto firstValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      if (!firstValue)
+      {
+        return {};
+      }
+      arguments.push_back(krys::move(firstValue));
+
+      if (ConsumeComma(args))
+      {
+        auto secondValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+        if (!secondValue)
+        {
+          return {};
+        }
+
+        // A second value of `0` is the same as no second argument, so there is no need to store one if we
+        // know it is `0`.
+        if (secondValue->IsZero() != true)
+        {
+          arguments.push_back(krys::move(secondValue));
+        }
+      }
+
+      return {krys::move(arguments)};
+    };
+
+    auto functionId = tokens.Peek().FunctionId();
+    if (functionId != ValueId::Translate)
+    {
+      return {};
+    }
+
+    auto rangeCopy = tokens;
+    auto args = ConsumeFunction(rangeCopy);
+    if (args.IsAtEnd())
+    {
+      return {};
+    }
+
+    auto parameters = consumeParameters(args, state);
+    if (!parameters || !args.IsAtEnd())
+    {
+      return {};
+    }
+
+    tokens = rangeCopy;
+    return FunctionValue::Create(functionId, krys::move(*parameters));
+  }
+
+  RefPtr<Value> ConsumeTranslate3dFunction(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#funcdef-translate3d
+    // translate3d() = translate3d( <length-percentage> , <length-percentage> , <length> )
+
+    auto consumeParameters = [](auto &args, auto &state) -> std::optional<ValueListBuilder>
+    {
+      auto firstValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      if (!firstValue)
+      {
+        return {};
+      }
+
+      if (!ConsumeComma(args))
+      {
+        return {};
+      }
+
+      auto secondValue = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(args, state);
+      if (!secondValue)
+      {
+        return {};
+      }
+
+      if (!ConsumeComma(args))
+      {
+        return {};
+      }
+
+      auto thirdValue = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(args, state);
+      if (!thirdValue)
+      {
+        return {};
+      }
+
+      ValueListBuilder parameters;
+      parameters.push_back(krys::move(firstValue));
+      parameters.push_back(krys::move(secondValue));
+      parameters.push_back(krys::move(thirdValue));
+
+      return {krys::move(parameters)};
+    };
+
+    auto functionId = tokens.Peek().FunctionId();
+    if (functionId != ValueId::Translate3d)
+    {
+      return {};
+    }
+
+    auto rangeCopy = tokens;
+    auto args = ConsumeFunction(rangeCopy);
+    if (args.IsAtEnd())
+    {
+      return {};
+    }
+
+    auto parameters = consumeParameters(args, state);
+    if (!parameters || !args.IsAtEnd())
+    {
+      return {};
+    }
+
+    tokens = rangeCopy;
+    return FunctionValue::Create(functionId, krys::move(*parameters));
+  }
+
+  RefPtr<Value> ConsumeTranslate(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#propdef-translate
+    // none | <length-percentage> [ <length-percentage> <length>? ]?
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    // https://drafts.csswg.org/css-transforms-2/#propdef-translate
+    //
+    // The translate property accepts 1-3 values, each specifying a translation against one axis, in the order
+    // X, Y, then Z. If only one or two values are given, this specifies a 2d translation, equivalent to the
+    // translate() function. If the second value is missing, it defaults to 0px. If three values are given,
+    // this specifies a 3d translation, equivalent to the translate3d() function.
+
+    auto x = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+    if (!x)
+    {
+      return nullptr;
+    }
+
+    tokens.DiscardWhitespace();
+
+    if (tokens.IsAtEnd())
+    {
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
+    }
+
+    auto y = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
+    if (!y)
+    {
+      return nullptr;
+    }
+
+    tokens.DiscardWhitespace();
+
+    // If we have a calc() or non-zero y value, we can directly add it to the list. We only
+    // want to add a zero y value if a non-zero z value is specified.
+    // Always include 0% in serialization per-spec.
+    bool haveNonZeroY = y->IsCalc() || y->IsPercentage() || !*y->IsZero();
+
+    if (tokens.IsAtEnd())
+    {
+      if (!haveNonZeroY)
+      {
+        return ValueList::CreateSpaceSeparated({krys::move(x)});
+      }
+
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+    }
+
+    auto z = PrimitiveValueResolver<Length<>>::ConsumeAndResolve(tokens, state);
+    if (!z)
+    {
+      return nullptr;
+    }
+
+    // If the z value is a zero value and not a percent value, we have nothing left to add to the list.
+    bool haveNonZeroZ = z && (z->IsCalc() || z->IsPercentage() || !*z->IsZero());
+
+    if (!haveNonZeroY && !haveNonZeroZ)
+    {
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
+    }
+
+    if (!haveNonZeroZ)
+    {
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+    }
+
+    return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
+  }
+
+  RefPtr<Value> ConsumeRotate(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#propdef-rotate
+    // none | <angle> | [ x | y | z | <number>{3} ] && <angle>
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    // https://www.w3.org/TR/css-transforms-2/#propdef-rotate
+    //
+    // The rotate property accepts an angle to rotate an element, and optionally an axis to rotate it around.
+    //
+    // If the axis is omitted, this specifies a 2d rotation, equivalent to the rotate() function.
+    //
+    // Otherwise, it specifies a 3d rotation: if x, y, or z is given, it specifies a rotation around that
+    // axis, equivalent to the rotateX()/etc 3d transform functions. Alternately, the axis can be specified
+    // explicitly by giving three numbers representing the x, y, and z components of an origin-centered
+    // vector, equivalent to the rotate3d() function.
+
+    ValueListBuilder list;
+    RefPtr<PrimitiveValue> angle;
+    RefPtr<PrimitiveValue> axisIdentifier;
+
+    while (!tokens.IsAtEnd())
+    {
+      // First, attempt to parse a number, which might be in a series of 3 specifying the rotation axis.
+      auto parsedValue = PrimitiveValueResolver<Number<>>::ConsumeAndResolve(tokens, state);
+      if (parsedValue)
+      {
+        // If we've encountered an axis identifier, then this value is invalid.
+        if (axisIdentifier)
+        {
+          return nullptr;
+        }
+
+        list.push_back(krys::move(parsedValue));
+        tokens.DiscardWhitespace();
+
+        continue;
+      }
+
+      // Then, attempt to parse an angle. We try this as a fallback rather than the first option because
+      // a unitless 0 angle would be consumed as an angle.
+      parsedValue = PrimitiveValueResolver<Angle<>>::ConsumeAndResolve(tokens, state);
+      if (parsedValue)
+      {
+        // If we had already parsed an angle or numbers but not 3 in a row, this value is invalid.
+        if (angle || (!list.empty() && list.size() != 3))
+        {
+          return nullptr;
+        }
+
+        angle = krys::move(parsedValue);
+        tokens.DiscardWhitespace();
+
+        continue;
+      }
+
+      // Finally, attempt to parse one of the axis identifiers.
+      parsedValue = ConsumeIdent<ValueId::X, ValueId::Y, ValueId::Z>(tokens);
+      // If we failed to find one of those identifiers or one was already specified, or we'd previously
+      // encountered numbers to specify a rotation axis, then this value is invalid.
+      if (!parsedValue || axisIdentifier || !list.empty())
+      {
+        return nullptr;
+      }
+
+      axisIdentifier = krys::move(parsedValue);
+      tokens.DiscardWhitespace();
+    }
+
+    // We must have an angle to have a valid value.
+    if (!angle)
+    {
+      return nullptr;
+    }
+
+    auto KnownToBeZero = [](std::optional<bool> value) -> bool
+    {
+      return !value ? false : *value == true;
+    };
+
+    auto KnownToBeNotZero = [](std::optional<bool> value) -> bool
+    {
+      return !value ? false : *value == false;
+    };
+
+    if (list.size() == 3)
+    {
+      // The first valid case is if we have 3 items in the list, meaning we parsed three consecutive number
+      // values to specify the rotation axis. In that case, we must not also have encountered an axis
+      // identifier.
+      krys_debug_assert(!axisIdentifier);
+
+      // Now we must check the values since if we have a vector in the x, y or z axis alone we must serialize
+      // to the matching identifier.
+      auto xIsZero = Downcast<PrimitiveValue>(list[0].get())->IsZero();
+      auto yIsZero = Downcast<PrimitiveValue>(list[1].get())->IsZero();
+      auto zIsZero = Downcast<PrimitiveValue>(list[2].get())->IsZero();
+
+      if (KnownToBeNotZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeZero(zIsZero))
+      {
+        return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::X), angle);
+      }
+
+      if (KnownToBeZero(xIsZero) && KnownToBeNotZero(yIsZero) && KnownToBeZero(zIsZero))
+      {
+        return ValueList::CreateSpaceSeparated(PrimitiveValue::Create(ValueId::Y), angle);
+      }
+
+      if (KnownToBeZero(xIsZero) && KnownToBeZero(yIsZero) && KnownToBeNotZero(zIsZero))
+      {
+        return ValueList::CreateSpaceSeparated({angle});
+      }
+
+      list.push_back(krys::move(angle));
+      return ValueList::CreateSpaceSeparated(krys::move(list));
+    }
+
+    if (list.empty())
+    {
+      // The second valid case is if we have no item in the list, meaning we have either an optional rotation
+      // axis using an identifier. In that case, we must add the axis identifier is specified and then add the
+      // angle.
+      if (axisIdentifier && axisIdentifier->ValueId() != ValueId::Z)
+      {
+        return ValueList::CreateSpaceSeparated(krys::move(axisIdentifier), krys::move(angle));
+      }
+
+      return ValueList::CreateSpaceSeparated({krys::move(angle)});
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<Value> ConsumeScale(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#propdef-scale
+    // none | [ <number> | <percentage> ]{1,3}
+
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    // https://www.w3.org/TR/css-transforms-2/#propdef-scale
+    //
+    // The scale property accepts 1-3 values, each specifying a scale along one axis, in order X, Y, then Z.
+    //
+    // If only the X value is given, the Y value defaults to the same value.
+    //
+    // If one or two values are given, this specifies a 2d scaling, equivalent to the scale() function.
+    // If three values are given, this specifies a 3d scaling, equivalent to the scale3d() function.
+
+    auto x = ConsumePercentageDividedBy100OrNumber(tokens, state);
+    if (!x)
+    {
+      return nullptr;
+    }
+
+    tokens.DiscardWhitespace();
+
+    if (tokens.IsAtEnd())
+    {
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
+    }
+
+    auto y = ConsumePercentageDividedBy100OrNumber(tokens, state);
+    if (!y)
+    {
+      return nullptr;
+    }
+
+    tokens.DiscardWhitespace();
+
+    auto xValue = x->ResolveAsNumberIfNotCalc();
+    auto yValue = y->ResolveAsNumberIfNotCalc();
+
+    if (tokens.IsAtEnd())
+    {
+      if (!xValue || !yValue || *xValue != *yValue)
+      {
+        return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+      }
+
+      return ValueList::CreateSpaceSeparated({krys::move(x)});
+    }
+
+    auto z = ConsumePercentageDividedBy100OrNumber(tokens, state);
+    if (!z)
+    {
+      return nullptr;
+    }
+
+    auto zValue = z->ResolveAsNumberIfNotCalc();
+
+    if (zValue != 1.0)
+    {
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y), krys::move(z));
+    }
+
+    if (!xValue || !yValue || *xValue != *yValue)
+    {
+      return ValueList::CreateSpaceSeparated(krys::move(x), krys::move(y));
+    }
+
+    return ValueList::CreateSpaceSeparated({krys::move(x)});
+  }
+
+  Maybe<style::Transform> ParseTransformRaw(const CSSOMString &string, const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto parsedValue = PropertyParsing::ConsumeTransform(range, state);
+    if (!parsedValue)
+    {
+      return null;
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return null;
+    }
+
+    auto dummyStyle = RenderStyle::Create();
+    auto dummyState = CreateUnique<style::BuilderState>(dummyStyle);
+
+    if (!parsedValue->CanResolveDependenciesWith(dummyState->CssToLengthConversionData()))
+    {
+      return null;
+    }
+
+    return style::ConvertCSSValueToStyle<style::Transform>(*dummyState, *parsedValue);
+  }
+}

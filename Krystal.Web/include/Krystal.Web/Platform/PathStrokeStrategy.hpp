@@ -1,0 +1,39 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Rect.hpp"
+#include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Graphics/Paths/DashArray.hpp"
+
+namespace krys::web
+{
+  class Path;
+
+  /// @brief How a path is stroked: what a stroke style applier set on a graphics context.
+  struct PathStrokeStyle
+  {
+    float Thickness {1};
+    LineCap Cap {LineCap::Butt};
+    LineJoin Join {LineJoin::Miter};
+    float MiterLimit {10};
+    /// @brief Empty for a solid stroke.
+    DashArray Dashes;
+    float DashOffset {0};
+  };
+
+  /// @brief How the host turns strokes into geometry, for hit testing strokes and measuring their bounds.
+  class PathStrokeStrategy
+  {
+  public:
+    virtual ~PathStrokeStrategy() noexcept = default;
+
+    /// @brief Whether @p point is inside @p path stroked with @p style.
+    KRYS_NODISCARD virtual bool StrokeContains(const Path &path, const PointF &point,
+                                               const PathStrokeStyle &style) noexcept = 0;
+
+    /// @brief The bounds of @p path stroked with @p style.
+    KRYS_NODISCARD virtual RectF StrokeBoundingRect(const Path &path,
+                                                    const PathStrokeStyle &style) noexcept = 0;
+  };
+}

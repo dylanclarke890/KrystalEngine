@@ -1,0 +1,120 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/HashMap.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/Span.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Strings/String.hpp"
+#include "Krystal.Text/FreeTypeFace.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontSelectionAlgorithm.hpp"
+#include <filesystem>
+
+namespace krys::web
+{
+  class FontDescription;
+
+  /// @brief The weights, widths and slopes a face provides, for font matching: its own style.
+  KRYS_NODISCARD FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept;
+
+  /// @brief The instance of the variable font @p face that @p description asks for, or @p face if it isn't
+  /// one: `font-weight`, `font-stretch` and `font-style` within the ranges of @p descriptors,
+  /// `font-optical-sizing`, then `font-variation-settings`.
+  /// @see https://drafts.csswg.org/css-fonts/#font-variation-settings-def
+  KRYS_NODISCARD Ref<text::FreeTypeFace>
+    InstanceOfFace(text::FreeTypeFace &face, const FontDescription &description,
+                   const FontSelectionSpecifiedCapabilities &descriptors = {}) noexcept;
+
+  /// @brief An OpenType tag as the big-endian integer `text::FreeTypeFace` names its axes by.
+  KRYS_NODISCARD constexpr uint32 FontAxisTag(char a, char b, char c, char d) noexcept
+  {
+    return (static_cast<uint32>(static_cast<uint8>(a)) << 24)
+           | (static_cast<uint32>(static_cast<uint8>(b)) << 16)
+           | (static_cast<uint32>(static_cast<uint8>(c)) << 8) | static_cast<uint32>(static_cast<uint8>(d));
+  }
+
+  /// @brief The fonts documents can use: the faces of the font files the host registers, by family, the
+  /// bundled Liberation Sans, the last resort, the bundled Noto Sans Arabic, the last resort for Arabic, and
+  /// the bundled STIX Two Math, for `font-family: math`.
+  /// @note The database is process-wide. Families are matched ASCII case-insensitively.
+  class FontDatabase final
+  {
+    KRYS_NON_COPY_MOVABLE(FontDatabase);
+
+  private:
+    List<Ref<text::FreeTypeFace>> _faces;
+    // Lowercased family name to the faces of the family, in registration order.
+    HashMap<utf8_string, List<Ref<text::FreeTypeFace>>> _families;
+    List<std::filesystem::path> _registeredFiles;
+    Ref<text::FreeTypeFace> _bundledFace;
+    Ref<text::FreeTypeFace> _bundledArabicFace;
+    Ref<text::FreeTypeFace> _bundledMathFace;
+    uint32 _generation {0};
+
+  public:
+    FontDatabase() noexcept;
+
+    KRYS_NODISCARD static FontDatabase &Singleton() noexcept;
+
+    /// @brief Registers the faces of the font file at @p path. A file that's already registered isn't read
+    /// again.
+    /// @return The number of faces registered: 0 if the file can't be read or isn't a scalable font.
+    uint32 AddFontFile(const std::filesystem::path &path);
+
+    /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc` and `.otc`) directly in @p path.
+    /// @return The number of faces registered.
+    uint32 AddFontDirectory(const std::filesystem::path &path);
+
+    /// @brief Registers the faces of a font file's contents.
+    /// @return The number of faces registered: 0 if @p bytes aren't a scalable font.
+    uint32 AddFontData(List<byte> &&bytes) noexcept;
+
+    /// @brief The faces of @p family, in registration order; empty if there's no such family.
+    KRYS_NODISCARD Span<const Ref<text::FreeTypeFace>> FacesInFamily(utf8_stringview family) const noexcept;
+
+    /// @brief The face of @p family that best matches @p request (CSS font matching), or null if there's no
+    /// such family.
+    KRYS_NODISCARD text::FreeTypeFace *MatchFace(utf8_stringview family,
+                                                 const FontSelectionRequest &request) const noexcept;
+
+    /// @brief The names of the registered families, as the fonts give them.
+    KRYS_NODISCARD List<utf8_string> Families() const noexcept;
+
+    /// @brief Every registered face, in registration order (the bundled faces first).
+    KRYS_NODISCARD Span<const Ref<text::FreeTypeFace>> Faces() const noexcept
+    {
+      return _faces;
+    }
+
+    /// @brief The bundled Liberation Sans, used when no registered font fits.
+    KRYS_NODISCARD text::FreeTypeFace &BundledFace() const noexcept
+    {
+      return *_bundledFace;
+    }
+
+    /// @brief The bundled Noto Sans Arabic, used for the Arabic script when no registered font has it.
+    KRYS_NODISCARD text::FreeTypeFace &BundledArabicFace() const noexcept
+    {
+      return *_bundledArabicFace;
+    }
+
+    /// @brief The bundled STIX Two Math, a font with an OpenType MATH table.
+    KRYS_NODISCARD text::FreeTypeFace &BundledMathFace() const noexcept
+    {
+      return *_bundledMathFace;
+    }
+
+    /// @brief Increases whenever fonts are registered.
+    KRYS_NODISCARD uint32 Generation() const noexcept
+    {
+      return _generation;
+    }
+
+  private:
+    uint32 AddFontFileData(const Ref<text::FontFileData> &data) noexcept;
+
+    void AddFace(Ref<text::FreeTypeFace> &&face) noexcept;
+  };
+}

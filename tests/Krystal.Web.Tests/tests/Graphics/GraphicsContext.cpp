@@ -1,0 +1,288 @@
+﻿#include "Krystal.Web/Graphics/GraphicsContext.hpp"
+#include "catch2/catch_approx.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Colour/ColourTextStream.hpp"
+#include "Krystal.Core/Geometry/Segment.hpp"
+#include "Krystal.Core/Strings/TextStream.hpp"
+#include "Krystal.Web.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Web/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Web/Graphics/NullGraphicsContext.hpp"
+#include "Krystal.Web/Graphics/TextRuns/TextRun.hpp"
+
+namespace krys::web::tests
+{
+  namespace
+  {
+    /// @brief A recorder that exposes how text lines are split into rects.
+    class LinesRecorder : public display_list::RecorderImpl
+    {
+    public:
+      LinesRecorder() noexcept : RecorderImpl(SizeF {100, 100})
+      {
+      }
+
+      using GraphicsContext::ComputeRectsAndStrokeColorForLinesForText;
+    };
+
+    template <typename T>
+    KRYS_NODISCARD utf8_string ToText(const T &value)
+    {
+      TextStream ts;
+      ts << value;
+      return ts.Release();
+    }
+  }
+
+  TEST_CASE("GraphicsContextState: records what changes", "[Graphics][GraphicsContext]")
+  {
+    using Change = GraphicsContextState::Change;
+    GraphicsContextState state;
+    CHECK(state.Changes().empty());
+
+    SECTION("Setting a property to its value isn't a change")
+    {
+      state.SetFillColor(Color::black);
+      state.SetAlpha(1);
+      CHECK(state.Changes().empty());
+      state.SetAlpha(0.5f);
+      state.SetStrokeThickness(2);
+      CHECK(state.Changes() == GraphicsContextState::ChangeFlags {Change::Alpha, Change::StrokeThickness});
+      state.DidApplyChanges();
+      CHECK(state.Changes().empty());
+    }
+
+    SECTION("Merging all changes copies every property that differs")
+    {
+      GraphicsContextState other;
+      other.SetTextDrawingMode(TextDrawingMode::Stroke);
+      other.SetImageInterpolationQuality(InterpolationQuality::High);
+      other.SetShadowsIgnoreTransforms(true);
+      state.MergeAllChanges(other);
+      CHECK(state.GetTextDrawingMode() == TextDrawingModeFlags {TextDrawingMode::Stroke});
+      CHECK(state.ImageInterpolationQuality() == InterpolationQuality::High);
+      CHECK(state.ShadowsIgnoreTransforms());
+      CHECK(state.Changes()
+            == GraphicsContextState::ChangeFlags {Change::TextDrawingMode, Change::ImageInterpolationQuality,
+                                                  Change::ShadowsIgnoreTransforms});
+    }
+
+    SECTION("Merging the last changes copies only what changed")
+    {
+      GraphicsContextState other;
+      other.SetAlpha(0.25f);
+      state.SetStrokeThickness(4);
+      state.DidApplyChanges();
+      state.MergeLastChanges(other);
+      CHECK(state.Alpha() == 0.25f);
+      CHECK(state.StrokeThickness() == 4);
+      CHECK(state.Changes() == GraphicsContextState::ChangeFlags {Change::Alpha});
+    }
+
+    SECTION("A change back to the last drawing state is no change")
+    {
+      GraphicsContextState lastDrawn;
+      GraphicsContextState other;
+      state.SetAlpha(0.5f);
+      other.SetAlpha(0.25f);
+      other.SetAlpha(1);
+      state.MergeLastChanges(other, lastDrawn);
+      CHECK(state.Alpha() == 1);
+      CHECK(state.Changes().empty());
+    }
+
+    SECTION("Repurposing as initial forgets the changes")
+    {
+      state.SetAlpha(0.5f);
+      auto clone = state.Clone(GraphicsContextState::Purpose::SaveRestore);
+      CHECK(clone.GetPurpose() == GraphicsContextState::Purpose::SaveRestore);
+      CHECK(!clone.Changes().empty());
+      clone.Repurpose(GraphicsContextState::Purpose::Initial);
+      CHECK(clone.Changes().empty());
+      CHECK(clone.Alpha() == 0.5f);
+    }
+  }
+
+  TEST_CASE("GraphicsContext: splits text lines into rects", "[Graphics][GraphicsContext]")
+  {
+    LinesRecorder context;
+    const SegmentF segment[] {{0, 10}};
+
+    SECTION("A solid line is a rect, its top rounded down to the next device pixel")
+    {
+      auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10.3f}, 1, segment, false, false,
+                                                                      StrokeStyle::SolidStroke);
+      REQUIRE(result.Rects.size() == 1u);
+      CHECK(result.Rects[0] == RectF(0, 11, 10, 1));
+      CHECK(result.StrokeColor == Color::black);
+    }
+
+    SECTION("A dashed line has dashes twice its thickness")
+    {
+      auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 1, segment, false, false,
+                                                                      StrokeStyle::DashedStroke);
+      REQUIRE(result.Rects.size() == 3u);
+      CHECK(result.Rects[0] == RectF(0, 10, 2, 1));
+      CHECK(result.Rects[1] == RectF(4, 10, 2, 1));
+      CHECK(result.Rects[2] == RectF(8, 10, 2, 1));
+    }
+
+    SECTION("A double line has a second line a line's height below")
+    {
+      auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 2, segment, false, true,
+                                                                      StrokeStyle::SolidStroke);
+      REQUIRE(result.Rects.size() == 2u);
+      CHECK(result.Rects[1] == RectF(0, 14, 10, 2));
+    }
+
+    SECTION("Scaled down, the line fades")
+    {
+      context.Scale(0.5f);
+      auto result = context.ComputeRectsAndStrokeColorForLinesForText({0, 10}, 1, segment, false, false,
+                                                                      StrokeStyle::SolidStroke);
+      CHECK(result.StrokeColor.AlphaAsFloat() == Catch::Approx(0.5f).margin(0.01f));
+    }
+  }
+
+  TEST_CASE("GraphicsContext: state savers", "[Graphics][GraphicsContext]")
+  {
+    display_list::RecorderImpl recorder({100, 100});
+    GraphicsContext &context = recorder;
+    {
+      GraphicsContextStateSaver saver(context);
+      context.SetAlpha(0.5f);
+      CHECK(context.StackSize() == 1u);
+      {
+        TransparencyLayerScope layer(context, 0.5f);
+        CHECK(context.IsInTransparencyLayer());
+      }
+      CHECK(!context.IsInTransparencyLayer());
+      {
+        InterpolationQualityMaintainer quality(context, InterpolationQuality::High);
+        CHECK(context.ImageInterpolationQuality() == InterpolationQuality::High);
+      }
+      CHECK(context.ImageInterpolationQuality() == InterpolationQuality::Default);
+    }
+    CHECK(context.StackSize() == 0u);
+    CHECK(context.Alpha() == 1);
+  }
+
+  TEST_CASE("NullGraphicsContext: draws nothing", "[Graphics][GraphicsContext]")
+  {
+    NullGraphicsContext nullContext;
+    GraphicsContext &context = nullContext;
+    CHECK(context.PaintingDisabled());
+    CHECK(!context.PerformingPaintInvalidation());
+    context.Translate(10, 10);
+    context.FillRect({0, 0, 10, 10}, Color::red);
+    CHECK(context.GetCTM().IsIdentity());
+    CHECK(context.ClipBounds().IsEmpty());
+
+    NullGraphicsContext detecting(NullGraphicsContext::PaintInvalidationReasons::DetectingContentfulPaint);
+    CHECK(static_cast<GraphicsContext &>(detecting).DetectingContentfulPaint());
+    CHECK(static_cast<GraphicsContext &>(detecting).PerformingPaintInvalidation());
+  }
+
+  TEST_CASE("SegmentF: subtracts dilated segments", "[Graphics][GraphicsContext]")
+  {
+    auto result = DifferenceWithDilation({0, 100}, {{50, 60}, {10, 20}}, 2);
+    CHECK(result == List<SegmentF> {{0, 8}, {22, 48}, {62, 100}});
+
+    // Gaps no longer than the dilation are dropped.
+    result = DifferenceWithDilation({0, 100}, {{3, 50}}, 2);
+    CHECK(result == List<SegmentF> {{52, 100}});
+  }
+
+  TEST_CASE("Graphics types: write themselves", "[Graphics][GraphicsContext]")
+  {
+    CHECK(ToText(AffineTransform {}) == u8"identity");
+    CHECK(ToText(CompositeOperator::DestinationOut) == u8"destination-out");
+    CHECK(ToText(BlendMode::ColorDodge) == u8"color-dodge");
+    CHECK(ToText(LineCap::Square) == u8"SQUARE");
+    CHECK(ToText(StrokeStyle::DashedStroke) == u8"dashed-stroke");
+    CHECK(ToText(Color(Color::red)) == u8"#FF0000");
+    CHECK(ToText(GraphicsContextState::Change::DropShadow) == u8"drop-shadow");
+  }
+
+  TEST_CASE("GraphicsContext: the dashes of a line, as Chrome has them", "[Graphics][GraphicsContext]")
+  {
+    auto gapOf = [](float length, float thickness, bool closed)
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(length, thickness, closed);
+      REQUIRE(pattern);
+      return pattern->Gap;
+    };
+
+    SECTION("Dashes are twice the thickness, with gaps of it, stretched to fit")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(108, 4, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == 8);
+      CHECK(pattern->Gap == 4.5f);
+      CHECK(gapOf(105, 4, false) == 4.125f);
+    }
+
+    SECTION("A gap can be squeezed instead, if that changes it less")
+    {
+      CHECK(gapOf(50, 3, false) == Catch::Approx(2.8f));
+    }
+
+    SECTION("Under 3 they're three and two times the thickness")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(102, 1, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == 3);
+      CHECK(pattern->Gap == Catch::Approx(1.95f));
+    }
+
+    SECTION("A closed path ends in a gap")
+    {
+      CHECK(gapOf(120, 4, true) == 4);
+      CHECK(gapOf(282.3f, 4, true) == Catch::Approx(3.7625f));
+    }
+
+    SECTION("Too short for more than two, they're scaled down")
+    {
+      auto pattern = GraphicsContext::DashPatternForStrokeLength(18, 4, false);
+      REQUIRE(pattern);
+      CHECK(pattern->Dash == Catch::Approx(7.2f));
+      CHECK(pattern->Gap == Catch::Approx(3.6f));
+    }
+
+    SECTION("Too short for two, it's solid")
+    {
+      CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(9, 2, false));
+      CHECK_FALSE(GraphicsContext::DashPatternForStrokeLength(16, 4, false));
+    }
+  }
+
+  TEST_CASE("GraphicsContext: draws bidi text's runs in visual order", "[Graphics][GraphicsContext]")
+  {
+    layout::tests::RegisterAhem();
+    FontCascadeDescription description;
+    description.SetFamilies({StringAtom {u8"Ahem"}});
+    description.SetComputedSize(16);
+    FontCascade font {krys::move(description)};
+    font.Update();
+
+    // In a right-to-left paragraph, "abc" and "d" are left-to-right runs either side of the Hebrew letter, so
+    // "d" is drawn leftmost and "abc" rightmost.
+    TextRun run {u8"abc א d", 0, 0, ExpansionBehavior::DefaultBehavior(), text::TextDirection::RTL};
+    display_list::RecorderImpl recorder({200, 50});
+    recorder.DrawBidiText(font, run, {0, 20});
+
+    auto displayList = recorder.TakeDisplayList();
+    List<const display_list::DrawGlyphs *> glyphRuns;
+    for (const auto &item : displayList->Items())
+    {
+      if (const auto *glyphs = std::get_if<display_list::DrawGlyphs>(&item))
+      {
+        glyphRuns.push_back(glyphs);
+      }
+    }
+    REQUIRE(glyphRuns.size() >= 3u);
+    CHECK(glyphRuns.front()->Glyphs().size() == 1u);
+    CHECK(glyphRuns.back()->Glyphs().size() == 3u);
+    CHECK(glyphRuns.front()->LocalAnchor().X() < glyphRuns.back()->LocalAnchor().X());
+  }
+}

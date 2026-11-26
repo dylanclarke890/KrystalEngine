@@ -1,0 +1,659 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ *           (C) 1999 Antti Koivisto (koivisto@kde.org)
+ * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2006 Andrew Wellington (proton@wiretapped.net)
+ * Copyright (C) 2010 Daniel Bates (dbates@intudata.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#include "Krystal.Web/Rendering/GeneratedContent/RenderListMarker.hpp"
+#include "Krystal.Core/Maths/Extras.hpp"
+#include "Krystal.Core/Strings/CodePointIterator.hpp"
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Text/Bidi.hpp"
+#include "Krystal.Web/Css/Counter/CounterStyle.hpp"
+#include "Krystal.Web/Css/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Graphics/Fonts/FontCascade.hpp"
+#include "Krystal.Web/Graphics/GraphicsContext.hpp"
+#include "Krystal.Web/Graphics/TextRuns/TextRun.hpp"
+#include "Krystal.Web/Rendering/GeneratedContent/RenderListItem.hpp"
+#include "Krystal.Web/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
+#include "Krystal.Web/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
+#include "Krystal.Web/Rendering/Painting/PaintInfo.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Web/Style/Scope/Scope.hpp"
+#include "Krystal.Web/Style/Values/Lists/ListStyleType.hpp"
+
+namespace krys::web
+{
+  namespace
+  {
+    KRYS_NODISCARD style::Difference AdjustedStyleDifference(style::Difference diff,
+                                                             const RenderStyle &oldStyle,
+                                                             const RenderStyle &newStyle) noexcept
+    {
+      if (diff >= style::DifferenceResult::Layout)
+      {
+        return diff;
+      }
+      // FIXME: Preferably we do this at RenderStyle::changeRequiresLayout but checking against
+      // pseudo(::marker) is not sufficient.
+      auto needsLayout = oldStyle.ListStylePosition() != newStyle.ListStylePosition()
+                         || oldStyle.ListStyleType() != newStyle.ListStyleType()
+                         || oldStyle.IsDisplayInlineType() != newStyle.IsDisplayInlineType();
+      return needsLayout ? style::Difference {style::DifferenceResult::Layout} : diff;
+    }
+
+    KRYS_NODISCARD text::TextDirection ContentTextDirection(utf8_stringview content) noexcept
+    {
+      if (content.empty())
+      {
+        return text::TextDirection::LTR;
+      }
+      // FIXME: Depending on the string value, we may need the real bidi algorithm. (rdar://106139180)
+      // Also we may need to start checking for the entire content for directionality (and whether we need to
+      // check for additional directionality characters like text::BidiClass::RightToLeftEmbedding).
+      auto bidiCategory = text::GetBidiClass(*text::CodePointIterator(content));
+      if (bidiCategory != text::BidiClass::RightToLeft && bidiCategory != text::BidiClass::RightToLeftArabic)
+      {
+        return text::TextDirection::LTR;
+      }
+      return text::TextDirection::RTL;
+    }
+
+    enum class SnapDirection : uint8
+    {
+      Floor,
+      Ceil,
+      Round,
+    };
+
+    KRYS_NODISCARD float Snap(float value, SnapDirection direction = SnapDirection::Round) noexcept
+    {
+      switch (direction)
+      {
+        case SnapDirection::Floor: return std::floor(value);
+        case SnapDirection::Ceil:  return std::ceil(value);
+        case SnapDirection::Round: return std::round(value);
+      }
+      krys_debug_assert(false);
+      return value;
+    }
+
+    KRYS_NODISCARD utf8_string Reversed(utf8_stringview text) noexcept
+    {
+      List<char32> codePoints;
+      for (auto it = text::CodePointIterator(text); !it.AtEnd(); ++it)
+      {
+        codePoints.push_back(*it);
+      }
+      StringBuilder builder;
+      for (auto codePoint = codePoints.rbegin(); codePoint != codePoints.rend(); ++codePoint)
+      {
+        builder.Append(*codePoint);
+      }
+      return krys::move(builder).ToString();
+    }
+
+    KRYS_NODISCARD utf8_string TextForRun(const ListMarkerTextContent &textContent,
+                                          const RenderStyle &style) noexcept
+    {
+      krys_debug_assert(!textContent.IsEmpty());
+
+      // Since the bidi algorithm doesn't run on this text, we instead reorder the characters here.
+      // We use text::GetBidiClass to figure out if the marker text is RTL and assume the suffix matches the
+      // surrounding direction.
+      StringBuilder textForRun;
+      if (textContent.TextDirection == text::TextDirection::LTR)
+      {
+        if (style.GetWritingMode().IsBidiLTR())
+        {
+          return textContent.TextWithSuffix;
+        }
+        textForRun.Append(Reversed(textContent.Suffix()), textContent.TextWithoutSuffix());
+      }
+      else
+      {
+        if (!style.GetWritingMode().IsBidiLTR())
+        {
+          return Reversed(textContent.TextWithSuffix);
+        }
+        textForRun.Append(Reversed(textContent.TextWithoutSuffix()), textContent.Suffix());
+      }
+      return krys::move(textForRun).ToString();
+    }
+  }
+
+  RenderListMarker::RenderListMarker(RenderListItem &listItem, RenderStyle &&style) noexcept
+      : RenderBox(Type::ListMarker, listItem.GetDocument(), krys::move(style)),
+        _listItem(CreateWeakPtr(&listItem))
+  {
+    SetInline(true);
+    SetBlockLevelReplacedOrAtomicInline(true); // pretend to be replaced
+    krys_debug_assert(IsRenderListMarker());
+  }
+
+  // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
+  RenderListMarker::~RenderListMarker() noexcept = default;
+
+  LayoutRect RenderListMarker::LocalSelectionRect() const noexcept
+  {
+    return {LayoutPoint(), Size()};
+  }
+
+  LayoutRect RenderListMarker::SelectionRectForRepaint(const RenderLayerModelObject *, bool) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+    return {};
+  }
+
+  void RenderListMarker::WillBeDestroyed() noexcept
+  {
+    if (_image)
+    {
+      _image->RemoveClient(*this);
+    }
+    RenderBox::WillBeDestroyed();
+  }
+
+  void RenderListMarker::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    RenderBox::StyleWillChange(AdjustedStyleDifference(diff, Style(), newStyle), newStyle);
+  }
+
+  void RenderListMarker::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
+  {
+    if (oldStyle)
+    {
+      diff = AdjustedStyleDifference(diff, *oldStyle, Style());
+    }
+    RenderBox::StyleDidChange(diff, oldStyle);
+
+    if (auto newImage = Style().ListStyleImage().TryStyleImage(); _image != newImage)
+    {
+      if (_image)
+      {
+        _image->RemoveClient(*this);
+      }
+      _image = krys::move(newImage);
+      if (_image)
+      {
+        _image->AddClient(*this);
+      }
+    }
+  }
+
+  void RenderListMarker::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (paintInfo.Phase != PaintPhase::Foreground)
+    {
+      return;
+    }
+
+    if (Style().UsedVisibility() != Visibility::Visible)
+    {
+      return;
+    }
+
+    LayoutPoint boxOrigin(paintOffset + Location());
+    LayoutRect overflowRect(VisualOverflowRect());
+    overflowRect.MoveBy(boxOrigin);
+    if (!paintInfo.Rect.Intersects(overflowRect))
+    {
+      return;
+    }
+
+    LayoutRect box(boxOrigin, Size());
+
+    auto markerRect = RelativeMarkerRect();
+    markerRect.MoveBy(boxOrigin);
+
+    if (markerRect.IsEmpty())
+    {
+      return;
+    }
+
+    GraphicsContext &context = paintInfo.Context();
+
+    if (IsImage())
+    {
+      if (RefPtr markerImage = _image->GetImage(this, markerRect.Size(), context))
+      {
+        context.DrawImage(*markerImage, markerRect);
+      }
+      if (SelectionState() != HighlightState::None)
+      {
+        LayoutRect selectionRect = LocalSelectionRect();
+        selectionRect.MoveBy(boxOrigin);
+        context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
+      }
+      return;
+    }
+
+    if (SelectionState() != HighlightState::None)
+    {
+      LayoutRect selectionRect = LocalSelectionRect();
+      selectionRect.MoveBy(boxOrigin);
+      context.FillRect(RectF(SnappedRectI(selectionRect)), _listItem->SelectionBackgroundColor());
+    }
+
+    auto color = Style().ColorResolvingCurrentColor(css::PropertyId::Color);
+    context.SetStrokeColor(color);
+    context.SetStrokeStyle(StrokeStyle::SolidStroke);
+    context.SetStrokeThickness(1.0f);
+    context.SetFillColor(color);
+
+    auto &listStyleType = Style().ListStyleType();
+    if (listStyleType.IsDisc())
+    {
+      context.FillEllipse(markerRect);
+      return;
+    }
+    if (listStyleType.IsCircle())
+    {
+      context.StrokeEllipse(markerRect);
+      return;
+    }
+    if (listStyleType.IsSquare())
+    {
+      context.FillRect(markerRect);
+      return;
+    }
+    if (_textContent.IsEmpty())
+    {
+      return;
+    }
+
+    GraphicsContextStateSaver stateSaver(context, false);
+    if (!GetWritingMode().IsHorizontal())
+    {
+      markerRect.MoveBy(-PointF(boxOrigin));
+      markerRect = markerRect.TransposedRect();
+      markerRect.MoveBy(PointF(box.X(), box.Y() - LogicalHeight()));
+      stateSaver.Save();
+      context.Translate(markerRect.X(), markerRect.MaxY());
+      context.Rotate(deg2rad(90.f));
+      context.Translate(-markerRect.X(), -markerRect.MaxY());
+    }
+
+    auto textOrigin = PointF {markerRect.X(), markerRect.Y() + Snap(Style().MetricsOfPrimaryFont().Ascent())};
+    textOrigin = RoundPointToDevicePixels(LayoutPoint(textOrigin), GetDocument().DeviceScaleFactor(),
+                                          GetWritingMode().IsLogicalLeftInlineStart());
+    auto text = TextForRun(_textContent, Style());
+    context.DrawText(Style().GetFontCascade(), RenderBlock::ConstructTextRun(text, Style()), textOrigin);
+  }
+
+  RectF RenderListMarker::RelativeMarkerRect() noexcept
+  {
+    if (IsImage())
+    {
+      auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+      return {0.f, 0.f, imageSize.Width(), imageSize.Height()};
+    }
+
+    RectF relativeRect;
+    if (WidthUsesMetricsOfPrimaryFont())
+    {
+      auto &fontMetrics = Style().MetricsOfPrimaryFont();
+      auto ascent = Snap(fontMetrics.Ascent());
+      auto bulletWidth = (ascent * 2 / 3 + 1) / 2;
+      relativeRect = {1, 3 * (ascent - ascent * 2 / 3) / 2, bulletWidth, bulletWidth};
+    }
+    else
+    {
+      if (_textContent.IsEmpty())
+      {
+        return {};
+      }
+      auto &font = Style().GetFontCascade();
+      auto text = TextForRun(_textContent, Style());
+      relativeRect = {0.f, 0.f, font.Width(RenderBlock::ConstructTextRun(text, Style())),
+                      Snap(font.MetricsOfPrimaryFont().Height())};
+    }
+
+    if (!GetWritingMode().IsHorizontal())
+    {
+      relativeRect = relativeRect.TransposedRect();
+      relativeRect.SetX(Width() - relativeRect.X() - relativeRect.Width());
+    }
+
+    return relativeRect;
+  }
+
+  bool RenderListMarker::IsImage() const noexcept
+  {
+    return _image && !_image->ErrorOccurred();
+  }
+
+  RenderBox *RenderListMarker::ParentBox(RenderBox &box) noexcept
+  {
+    krys_debug_assert(_listItem);
+    // A spanner's parent is its placeholder's, where it is in the flow.
+    auto *multiColumnFlow = DynamicDowncast<RenderMultiColumnFlow>(_listItem->EnclosingFragmentedFlow());
+    if (!multiColumnFlow)
+    {
+      return box.ParentBox();
+    }
+    auto *placeholder = multiColumnFlow->FindColumnSpannerPlaceholder(box);
+    return placeholder ? placeholder->ParentBox() : box.ParentBox();
+  }
+
+  void RenderListMarker::Layout() noexcept
+  {
+    krys_debug_assert(NeedsLayout());
+
+    LayoutUnit blockOffset;
+    for (auto *ancestor = ParentBox(*this); ancestor && ancestor != _listItem.get();
+         ancestor = ParentBox(*ancestor))
+    {
+      blockOffset += ancestor->LogicalTop();
+    }
+
+    _lineLogicalOffsetForListItem = _listItem->LogicalLeftOffsetForLine(blockOffset);
+
+    if (IsImage())
+    {
+      UpdateInlineMarginsAndContent();
+      auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+      SetWidth(LayoutUnit(imageSize.Width()));
+      SetHeight(LayoutUnit(imageSize.Height()));
+      _layoutBounds = {Height().ToFloat(), 0.f};
+    }
+    else
+    {
+      SetLogicalWidth(MinPreferredLogicalWidth());
+      SetLogicalHeight(LayoutUnit(Style().MetricsOfPrimaryFont().IntHeight()));
+      _layoutBounds = LayoutBoundForTextContent(_textContent.TextWithSuffix);
+    }
+
+    SetMarginStart(0_lu);
+    SetMarginEnd(0_lu);
+
+    if (auto fixedStartMargin = Style().MarginStart().TryFixed())
+    {
+      SetMarginStart(LayoutUnit(fixedStartMargin->ResolveZoom(Style().UsedZoomForLength())));
+    }
+    if (auto fixedEndMargin = Style().MarginEnd().TryFixed())
+    {
+      SetMarginEnd(LayoutUnit(fixedEndMargin->ResolveZoom(Style().UsedZoomForLength())));
+    }
+
+    ClearNeedsLayout();
+  }
+
+  void RenderListMarker::UpdateInlineMarginsAndContent() noexcept
+  {
+    // FIXME: It's messy to use the preferredLogicalWidths dirty bit for this optimization, also unclear if
+    // this is premature optimization.
+    if (NeedsPreferredLogicalWidthsUpdate())
+    {
+      UpdateContent();
+    }
+    UpdateInlineMargins();
+  }
+
+  void RenderListMarker::UpdateContent() noexcept
+  {
+    if (IsImage())
+    {
+      // FIXME: This is a somewhat arbitrary width.
+      LayoutUnit bulletWidth = LayoutUnit(Style().MetricsOfPrimaryFont().IntAscent()) / 2;
+      LayoutSize defaultBulletSize(bulletWidth, bulletWidth);
+      LayoutSize imageSize =
+        CalculateImageIntrinsicDimensions(_image.get(), defaultBulletSize, ScaleByUsedZoom::No);
+      _image->SetContainerContextForRenderer(*this, SizeF(imageSize), Style().UsedZoom());
+      _textContent = {
+        .TextWithSuffix = {},
+        .TextWithoutSuffixLength = 0,
+        .TextDirection = text::TextDirection::LTR,
+      };
+      return;
+    }
+
+    Style().ListStyleType().SwitchOn(
+      [&](const css::keywords::None &)
+      {
+        _textContent = {
+          .TextWithSuffix = u8" ",
+          .TextWithoutSuffixLength = 0,
+          .TextDirection = text::TextDirection::LTR,
+        };
+      },
+      [&](const CSSOMStringAtom &identifier)
+      {
+        _textContent = {
+          .TextWithSuffix = identifier.ToString(),
+          .TextWithoutSuffixLength = identifier.View().size(),
+          .TextDirection = ContentTextDirection(identifier.View()),
+        };
+      },
+      [&](const style::CounterStyle &)
+      {
+        auto counter = GetCounterStyle();
+        krys_debug_assert(counter);
+
+        StringBuilder text;
+        text.Append(counter->Prefix().Text, counter->Text(_listItem->Value(), Style().GetWritingMode()));
+        auto textWithoutSuffix = krys::move(text).ToString();
+        StringBuilder textWithSuffix;
+        textWithSuffix.Append(textWithoutSuffix, counter->Suffix().Text);
+        _textContent = {
+          .TextWithSuffix = krys::move(textWithSuffix).ToString(),
+          .TextWithoutSuffixLength = textWithoutSuffix.size(),
+          .TextDirection = ContentTextDirection(textWithoutSuffix),
+        };
+      });
+  }
+
+  void RenderListMarker::ComputePreferredLogicalWidths() noexcept
+  {
+    krys_debug_assert(NeedsPreferredLogicalWidthsUpdate());
+    UpdateContent();
+
+    if (IsImage())
+    {
+      LayoutSize imageSize = LayoutSize(_image->ImageSize(this, Style().UsedZoom()));
+      _minPreferredLogicalWidth = _maxPreferredLogicalWidth =
+        GetWritingMode().IsHorizontal() ? imageSize.Width() : imageSize.Height();
+      ClearNeedsPreferredWidthsUpdate();
+      UpdateInlineMargins();
+      return;
+    }
+
+    const FontCascade &font = Style().GetFontCascade();
+
+    LayoutUnit logicalWidth;
+    if (WidthUsesMetricsOfPrimaryFont())
+    {
+      logicalWidth = LayoutUnit((font.MetricsOfPrimaryFont().IntAscent() * 2 / 3 + 1) / 2 + 2);
+    }
+    else if (!_textContent.IsEmpty())
+    {
+      auto text = TextForRun(_textContent, Style());
+      logicalWidth = LayoutUnit(font.Width(TextRun(text)));
+    }
+
+    _minPreferredLogicalWidth = logicalWidth;
+    _maxPreferredLogicalWidth = logicalWidth;
+
+    ClearNeedsPreferredWidthsUpdate();
+
+    UpdateInlineMargins();
+  }
+
+  void RenderListMarker::UpdateInlineMargins() noexcept
+  {
+    constexpr int32 markerPadding = 7;
+    const FontMetrics &fontMetrics = Style().MetricsOfPrimaryFont();
+
+    auto marginsForInsideMarker = [&]() -> Pair<LayoutUnit, LayoutUnit>
+    {
+      if (IsImage())
+      {
+        return {0_lu, LayoutUnit(markerPadding)};
+      }
+
+      if (WidthUsesMetricsOfPrimaryFont())
+      {
+        return {LayoutUnit(-1), LayoutUnit(fontMetrics.IntAscent()) - MinPreferredLogicalWidth() + 1};
+      }
+
+      return {0_lu, 0_lu};
+    };
+
+    auto marginsForOutsideMarker = [&]() -> Pair<LayoutUnit, LayoutUnit>
+    {
+      if (IsImage())
+      {
+        return {-MinPreferredLogicalWidth() - markerPadding, LayoutUnit(markerPadding)};
+      }
+
+      int32 offset = fontMetrics.IntAscent() * 2 / 3;
+      if (WidthUsesMetricsOfPrimaryFont())
+      {
+        return {LayoutUnit(-offset - markerPadding - 1),
+                LayoutUnit(offset + markerPadding + 1) - MinPreferredLogicalWidth()};
+      }
+
+      if (_textContent.IsEmpty())
+      {
+        return {0_lu, 0_lu};
+      }
+
+      if (Style().ListStyleType().IsString())
+      {
+        return {-MinPreferredLogicalWidth(), 0_lu};
+      }
+
+      return {-MinPreferredLogicalWidth() - offset / 2, LayoutUnit(offset / 2)};
+    };
+
+    auto [marginStart, marginEnd] = IsInside() ? marginsForInsideMarker() : marginsForOutsideMarker();
+    MutableStyle().SetMarginStart(style::MarginEdge::Fixed {marginStart.ToFloat()});
+    MutableStyle().SetMarginEnd(style::MarginEdge::Fixed {marginEnd.ToFloat()});
+  }
+
+  bool RenderListMarker::IsInside() const noexcept
+  {
+    return Style().ListStylePosition() == ListStylePosition::Inside;
+  }
+
+  bool RenderListMarker::IsDisclosureMarker() const noexcept
+  {
+    const auto &listStyleType = Style().ListStyleType();
+    if (auto counterStyle = listStyleType.TryCounterStyle())
+    {
+      const auto &identifier = counterStyle->Identifier.Value;
+      return identifier == u8"disclosure-open" || identifier == u8"disclosure-closed";
+    }
+    return false;
+  }
+
+  const RenderListItem *RenderListMarker::ListItem() const noexcept
+  {
+    return _listItem.get();
+  }
+
+  RefPtr<css::CounterStyle> RenderListMarker::GetCounterStyle() const noexcept
+  {
+    auto counterStyle = Style().ListStyleType().TryCounterStyle();
+    if (!counterStyle)
+    {
+      return nullptr;
+    }
+    return GetDocument().StyleScope().GetCounterStyleRegistry().ResolvedCounterStyle(*counterStyle);
+  }
+
+  bool RenderListMarker::WidthUsesMetricsOfPrimaryFont() const noexcept
+  {
+    const auto &listType = Style().ListStyleType();
+    return listType.IsCircle() || listType.IsDisc() || listType.IsSquare();
+  }
+
+  Pair<float, float> RenderListMarker::LayoutBoundForTextContent(utf8_stringview text) const noexcept
+  {
+    // FIXME: This should be part of the inline box builder.
+    // This is essentially what we do in LineBoxBuilder::enclosingAscentDescentWithFallbackFonts.
+    auto ascentAndDescent = [&](const FontMetrics &fontMetrics)
+    {
+      auto ascent = Snap(fontMetrics.Ascent());
+      auto descent = Snap(fontMetrics.Descent());
+      auto halfLeading = (Snap(fontMetrics.LineSpacing()) - (ascent + descent)) / 2.f;
+      return Pair<float, float> {Snap(ascent + halfLeading, SnapDirection::Floor),
+                                 Snap(descent + halfLeading, SnapDirection::Ceil)};
+    };
+    const auto &style = Style();
+    const auto &metricsOfPrimaryFont = style.MetricsOfPrimaryFont();
+    auto primaryFontHeight = Snap(metricsOfPrimaryFont.Height());
+
+    if (style.LineHeight().IsNormal())
+    {
+      auto maxAscentAndDescent = ascentAndDescent(metricsOfPrimaryFont);
+
+      HashSet<RefPtr<const Font>> fallbackFonts;
+      (void)style.GetFontCascade().Width(
+        TextRun(text, 0, 0, ExpansionBehavior::DefaultBehavior(), style.GetWritingMode().BidiDirection()),
+        &fallbackFonts);
+      for (const auto &fallbackFont : fallbackFonts)
+      {
+        const auto &fontMetrics = fallbackFont->GetFontMetrics();
+        if (primaryFontHeight >= Snap(fontMetrics.Height(), SnapDirection::Floor))
+        {
+          // FIXME: Figure out why certain symbols (e.g. disclosure-open) would initiate fallback fonts with
+          // just slightly different (subpixel) metrics. This is mainly about preserving legacy behavior.
+          continue;
+        }
+        auto ascentDescent = ascentAndDescent(fontMetrics);
+        maxAscentAndDescent.first = std::max(maxAscentAndDescent.first, ascentDescent.first);
+        maxAscentAndDescent.second = std::max(maxAscentAndDescent.second, ascentDescent.second);
+      }
+      return maxAscentAndDescent;
+    }
+
+    auto primaryFontAscentAndDescent = ascentAndDescent(metricsOfPrimaryFont);
+    auto halfLeading = (Snap(style.ComputedLineHeight(), SnapDirection::Floor)
+                        - (primaryFontAscentAndDescent.first + primaryFontAscentAndDescent.second))
+                       / 2.f;
+    return {Snap(primaryFontAscentAndDescent.first + halfLeading, SnapDirection::Floor),
+            Snap(primaryFontAscentAndDescent.second + halfLeading, SnapDirection::Ceil)};
+  }
+
+  void RenderListMarker::ImageChanged(WrappedImagePtr o, const RectI *rect) noexcept
+  {
+    if (Parent())
+    {
+      if (_image && o == _image->Data())
+      {
+        auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+        if (Width() != LayoutUnit(imageSize.Width()) || Height() != LayoutUnit(imageSize.Height())
+            || _image->ErrorOccurred())
+        {
+          SetNeedsLayoutAndPreferredWidthsUpdate();
+        }
+        else
+        {
+          Repaint();
+        }
+      }
+    }
+    RenderBox::ImageChanged(o, rect);
+  }
+}

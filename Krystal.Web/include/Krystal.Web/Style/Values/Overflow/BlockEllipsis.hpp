@@ -1,0 +1,102 @@
+﻿/*
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style
+{
+  // <'block-ellipse'> = none | auto | <string>
+  // https://www.w3.org/TR/css-overflow-4/#propdef-block-ellipsis
+  struct BlockEllipsis
+  {
+    BlockEllipsis(css::keywords::None) noexcept
+    {
+    }
+
+    BlockEllipsis(css::keywords::Auto) noexcept : _type {Type::Auto}
+    {
+    }
+
+    BlockEllipsis(CSSOMStringAtom &&string) noexcept : _type {Type::String}, _string {krys::move(string)}
+    {
+    }
+
+    KRYS_NODISCARD bool IsNone() const noexcept
+    {
+      return _type == Type::None;
+    }
+
+    KRYS_NODISCARD bool IsAuto() const noexcept
+    {
+      return _type == Type::Auto;
+    }
+
+    KRYS_NODISCARD bool IsString() const noexcept
+    {
+      return _type == Type::String;
+    }
+
+    template <typename... F>
+    decltype(auto) SwitchOn(F &&...f) const noexcept
+    {
+      auto visitor = krys::CreateVisitor(std::forward<F>(f)...);
+
+      switch (_type)
+      {
+        case Type::None:   return visitor(css::keywords::None {});
+        case Type::Auto:   return visitor(css::keywords::Auto {});
+        case Type::String: return visitor(_string);
+      }
+      krys_unreachable();
+    }
+
+    KRYS_NODISCARD bool operator==(const BlockEllipsis &) const noexcept = default;
+
+  private:
+    enum class Type : uint8
+    {
+      None,
+      Auto,
+      String,
+    };
+
+    Type _type {Type::None};
+    CSSOMStringAtom _string {null};
+  };
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<BlockEllipsis>
+  {
+    KRYS_NODISCARD BlockEllipsis operator()(BuilderState &, const css::Value &) noexcept;
+  };
+}
+
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::BlockEllipsis)

@@ -1,0 +1,318 @@
+﻿/*
+ * Copyright (C) 2004, 2015 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Web/Editing/Position.hpp"
+#include "Krystal.Web/Editing/Selection/EditingBoundary.hpp"
+#include "Krystal.Web/Editing/Selection/TextAffinity.hpp"
+#include "Krystal.Web/Editing/Selection/TextGranularity.hpp"
+#include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
+
+namespace krys::web
+{
+  /// @brief Whether a selection keeps its anchor when extended.
+  /// On Mac, Shift-arrow keys move the anchor in a strongly directional selection
+  /// and moves either end to always extend in a weakly directional or non-directional selection.
+  // FIXME: Add Weak.
+  enum class Directionality : uint8
+  {
+    None,
+    Strong,
+  };
+
+  /// @brief Which way a selection is modified.
+  enum class SelectionDirection : uint8
+  {
+    Forward,
+    Backward,
+    Right,
+    Left,
+  };
+
+  /// @brief A selection: an anchor and a focus, canonicalised to candidate positions and expanded to a
+  /// granularity, as none, a caret or a range.
+  // FIXME: Writing suggestions (canEnableWritingSuggestions), with writing suggestions.
+  class VisibleSelection
+  {
+  private:
+    enum class Type : uint8
+    {
+      None,
+      Caret,
+      Range,
+    };
+
+    // We store only Positions because VisibleSelection is used to store values in
+    // editing commands for use when undoing the command. We need to be able to store
+    // a selection that, while currently invalid, will be valid once the changes are undone.
+
+    // FIXME: Consider doing canonicalization only as part of editing operations, and keeping all selection
+    // endpoints non-canonical outside of that code.
+    Position _anchor;          // Where the first click happened.
+    Position _focus;           // Where the end click/release happened.
+    Position _canonicalAnchor; // Anchor, canonical, not yet expended to respect granularity.
+    Position _canonicalFocus;  // Focus, canonical, but not expended to respect granularity.
+    Position _start;           // First of anchor and focus, caonicalized and expanded to respect granularity.
+    Position _end;             // Last of anchor and focus, caonicalized and expanded to respect granularity.
+
+    Affinity _affinity {DefaultAffinity};
+
+    // These are cached, can be recalculated by Validate()
+    Type _type {Type::None};
+    // True if the anchor is before the focus.
+    bool _anchorIsBeforeFocus {true};
+    web::Directionality _directionality {web::Directionality::None};
+
+  public:
+    constexpr static auto DefaultAffinity = VisiblePosition::DefaultAffinity;
+
+    VisibleSelection() noexcept = default;
+
+    VisibleSelection(Position anchor, Position focus, Affinity affinity = DefaultAffinity,
+                     web::Directionality directionality = web::Directionality::None) noexcept;
+
+    // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
+    // function.
+    VisibleSelection(const Position &position, Affinity affinity,
+                     web::Directionality directionality = web::Directionality::None) noexcept;
+
+    explicit VisibleSelection(const dom::SimpleRange &range, Affinity affinity = DefaultAffinity,
+                              web::Directionality directionality = web::Directionality::None) noexcept;
+
+    // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
+    // function.
+    explicit VisibleSelection(const VisiblePosition &position,
+                              web::Directionality directionality = web::Directionality::None) noexcept;
+
+    VisibleSelection(const VisiblePosition &anchor, const VisiblePosition &focus,
+                     web::Directionality directionality = web::Directionality::None) noexcept;
+
+    KRYS_NODISCARD static const VisibleSelection &EmptySelection() noexcept;
+
+    KRYS_NODISCARD static VisibleSelection SelectionFromContentsOfNode(Node *node) noexcept;
+
+    void SetAffinity(Affinity affinity) noexcept
+    {
+      _affinity = affinity;
+    }
+
+    KRYS_NODISCARD Affinity GetAffinity() const noexcept
+    {
+      return _affinity;
+    }
+
+    void SetAnchor(const Position &position) noexcept;
+
+    void SetAnchor(const VisiblePosition &visiblePosition) noexcept;
+
+    void SetFocus(const Position &position) noexcept;
+
+    void SetFocus(const VisiblePosition &visiblePosition) noexcept;
+
+    // These functions return the values that were passed in, without the canonicalization done by
+    // VisiblePosition.
+    // FIXME: When we expand granularity, we canonicalize as a side effect, so expanded values have been made
+    // canonical.
+    // FIXME: Replace start/range/base/end/firstRange with these, renaming these to the shorter names.
+    KRYS_NODISCARD const Position &UncanonicalizedStart() const noexcept;
+
+    KRYS_NODISCARD const Position &UncanonicalizedEnd() const noexcept;
+
+    KRYS_NODISCARD const Position &Anchor() const noexcept
+    {
+      return _anchor;
+    }
+
+    KRYS_NODISCARD const Position &Focus() const noexcept
+    {
+      return _focus;
+    }
+
+    KRYS_NODISCARD Maybe<dom::SimpleRange> Range() const noexcept;
+
+    KRYS_NODISCARD const Position &CanonicalAnchor() const noexcept
+    {
+      return _canonicalAnchor;
+    }
+
+    KRYS_NODISCARD const Position &CanonicalFocus() const noexcept
+    {
+      return _canonicalFocus;
+    }
+
+    KRYS_NODISCARD const Position &Start() const noexcept
+    {
+      return _start;
+    }
+
+    KRYS_NODISCARD const Position &End() const noexcept
+    {
+      return _end;
+    }
+
+    KRYS_NODISCARD VisiblePosition VisibleStart() const noexcept
+    {
+      return VisiblePosition(_start, IsRange() ? Affinity::Downstream : _affinity);
+    }
+
+    KRYS_NODISCARD VisiblePosition VisibleEnd() const noexcept
+    {
+      return VisiblePosition(_end, IsRange() ? Affinity::Upstream : _affinity);
+    }
+
+    KRYS_NODISCARD VisiblePosition VisibleBase() const noexcept
+    {
+      return VisiblePosition(_canonicalAnchor, IsRange()
+                                                 ? (IsBaseFirst() ? Affinity::Upstream : Affinity::Downstream)
+                                                 : _affinity);
+    }
+
+    KRYS_NODISCARD VisiblePosition VisibleExtent() const noexcept
+    {
+      return VisiblePosition(
+        _canonicalFocus, IsRange() ? (IsBaseFirst() ? Affinity::Downstream : Affinity::Upstream) : _affinity);
+    }
+
+    operator VisiblePositionRange() const noexcept
+    {
+      return {VisibleStart(), VisibleEnd()};
+    }
+
+    KRYS_NODISCARD bool IsNone() const noexcept
+    {
+      return _type == Type::None;
+    }
+
+    KRYS_NODISCARD bool IsCaret() const noexcept
+    {
+      return _type == Type::Caret;
+    }
+
+    KRYS_NODISCARD bool IsRange() const noexcept
+    {
+      return _type == Type::Range;
+    }
+
+    KRYS_NODISCARD bool IsCaretOrRange() const noexcept
+    {
+      return !IsNone();
+    }
+
+    KRYS_NODISCARD bool IsNonOrphanedRange() const noexcept
+    {
+      return IsRange() && !_start.IsOrphan() && !_end.IsOrphan();
+    }
+
+    KRYS_NODISCARD bool IsNoneOrOrphaned() const noexcept
+    {
+      return IsNone() || _start.IsOrphan() || _end.IsOrphan();
+    }
+
+    KRYS_NODISCARD bool IsOrphan() const noexcept;
+
+    KRYS_NODISCARD RefPtr<Document> GetDocument() const noexcept;
+
+    KRYS_NODISCARD bool IsBaseFirst() const noexcept
+    {
+      return _anchorIsBeforeFocus;
+    }
+
+    KRYS_NODISCARD web::Directionality GetDirectionality() const noexcept
+    {
+      return _directionality;
+    }
+
+    void SetDirectionality(web::Directionality directionality) noexcept
+    {
+      _directionality = directionality;
+    }
+
+    KRYS_NODISCARD bool IsAll(EditingBoundaryCrossingRule rule) const noexcept;
+
+    void AppendTrailingWhitespace() noexcept;
+
+    bool ExpandUsingGranularity(TextGranularity granularity) noexcept;
+
+    // FIXME: Rename to include the word "canonical" and remove the word "first" or remove.
+    // We don't yet support multi-range selections, so we only ever have one range to return.
+    KRYS_NODISCARD Maybe<dom::SimpleRange> FirstRange() const noexcept;
+
+    // FIXME: Most callers probably don't want this function, and should use range instead.
+    // This function contracts the range around text and moves the caret upstream before returning the range.
+    KRYS_NODISCARD Maybe<dom::SimpleRange> ToNormalizedRange() const noexcept;
+
+    KRYS_NODISCARD Element *RootEditableElement() const noexcept;
+
+    /// @brief Whether the selection starts in a password field.
+    KRYS_NODISCARD bool IsInPasswordField() const noexcept;
+
+    // FIXME: Fields the host autofilled and lets the user see (autofilledAndViewable), with autofill.
+    KRYS_NODISCARD static bool IsInAutoFilledAndViewableField() noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool IsContentEditable() const noexcept;
+
+    KRYS_NODISCARD bool HasEditableStyle() const noexcept;
+
+    KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
+
+    // Returns a child of the ShadowRoot node for shadow trees, or null for non-shadow trees.
+    KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() const noexcept;
+
+    KRYS_NODISCARD static Position AdjustPositionForEnd(const Position &currentPosition,
+                                                        Node *startContainerNode) noexcept;
+
+    KRYS_NODISCARD static Position AdjustPositionForStart(const Position &currentPosition,
+                                                          Node *endContainerNode) noexcept;
+
+    void SetWithoutValidation(const Position &anchor, const Position &focus) noexcept;
+
+    KRYS_NODISCARD friend bool operator==(const VisibleSelection &a, const VisibleSelection &b) noexcept
+    {
+      return a.Start() == b.Start() && a.End() == b.End() && a.GetAffinity() == b.GetAffinity()
+             && a.IsBaseFirst() == b.IsBaseFirst() && a.GetDirectionality() == b.GetDirectionality();
+    }
+
+  private:
+    void Validate(TextGranularity granularity = TextGranularity::CharacterGranularity) noexcept;
+
+    // Support methods for Validate()
+    void SetCanonicalAnchorAndFocusToDeepEquivalents() noexcept;
+
+    void AdjustSelectionRespectingGranularity(TextGranularity granularity) noexcept;
+
+    void AdjustSelectionToAvoidCrossingShadowBoundaries() noexcept;
+
+    void AdjustSelectionToAvoidCrossingEditingBoundaries() noexcept;
+
+    void UpdateSelectionType() noexcept;
+  };
+}

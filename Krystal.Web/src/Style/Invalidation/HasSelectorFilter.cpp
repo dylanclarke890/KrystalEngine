@@ -1,0 +1,141 @@
+﻿/*
+ * Copyright (C) 2021 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Invalidation/HasSelectorFilter.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Css/Selectors/Selector.hpp"
+#include "Krystal.Web/Css/Selectors/SelectorFilter.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Style/Rules/RuleFeature.hpp"
+
+namespace krys::web::style
+{
+  // FIXME: Support additional pseudo-classes.
+  constexpr static uint32 HoverSalt = 101;
+
+  HasSelectorFilter::HasSelectorFilter(const Element &element, Type type) noexcept : _type(type)
+  {
+    switch (type)
+    {
+      case Type::Descendants:
+        for (auto *node = dom::TreeQueries::Next(element, &element); node;
+             node = dom::TreeQueries::Next(*node, &element))
+        {
+          if (auto *descendant = DynamicDowncast<Element>(*node))
+          {
+            Add(*descendant);
+          }
+        }
+        break;
+      case Type::Children:
+        for (auto *child = dom::TreeQueries::FirstElementChild(element); child;
+             child = dom::TreeQueries::NextElementSibling(*child))
+        {
+          Add(*child);
+        }
+        break;
+    }
+  }
+
+  Maybe<HasSelectorFilter::Type> HasSelectorFilter::TypeForMatchElement(MatchElement matchElement) noexcept
+  {
+    switch (matchElement)
+    {
+      case MatchElement::HasChild:      return Type::Children;
+      case MatchElement::HasDescendant: return Type::Descendants;
+      default:                          return {};
+    }
+  }
+
+  HasSelectorFilter::Key HasSelectorFilter::MakeKey(const css::Selector &hasSelector) noexcept
+  {
+    css::SelectorFilter::CollectedSelectorHashes hashes;
+    bool hasHoverInCompound = false;
+    for (auto *simpleSelector = &hasSelector; simpleSelector;
+         simpleSelector = simpleSelector->PrecedingComplexSelectorComponent())
+    {
+      if (simpleSelector->Match() == css::SelectorMatch::PseudoClass
+          && simpleSelector->PseudoClass() == css::SelectorPseudoClass::Hover)
+      {
+        hasHoverInCompound = true;
+      }
+      css::SelectorFilter::CollectSimpleSelectorHash(hashes, *simpleSelector);
+      if (!hashes.Ids.empty())
+      {
+        break;
+      }
+      if (simpleSelector->Relation() != css::SelectorRelation::Compounding)
+      {
+        break;
+      }
+    }
+
+    auto pickKey = [&](auto &hashVector) -> Key
+    {
+      if (hashVector.empty())
+      {
+        return 0;
+      }
+      if (hasHoverInCompound)
+      {
+        return hashVector[0] * HoverSalt;
+      }
+      return hashVector[0];
+    };
+
+    if (auto key = pickKey(hashes.Ids))
+    {
+      return key;
+    }
+    if (auto key = pickKey(hashes.Classes))
+    {
+      return key;
+    }
+    if (auto key = pickKey(hashes.Attributes))
+    {
+      return key;
+    }
+    return pickKey(hashes.Tags);
+  }
+
+  void HasSelectorFilter::Add(const Element &element) noexcept
+  {
+    SmallList<uint32, 4> elementHashes;
+    css::SelectorFilter::CollectElementIdentifierHashes(element, elementHashes);
+
+    for (auto hash : elementHashes)
+    {
+      _filter.Add(hash);
+    }
+
+    if (element.Hovered())
+    {
+      for (auto hash : elementHashes)
+      {
+        _filter.Add(hash * HoverSalt);
+      }
+    }
+  }
+}

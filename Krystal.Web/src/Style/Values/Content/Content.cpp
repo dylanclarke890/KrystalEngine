@@ -1,0 +1,183 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Content/Content.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+
+#include "Krystal.Web/Css/Values/AttrValue.hpp"
+#include "Krystal.Web/Css/Values/CounterValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValuePair.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+
+namespace krys::web::style
+{
+  // MARK: - Conversion
+
+  Content CSSValueConversion<Content>::operator()(BuilderState &state, const css::Value &value) noexcept
+  {
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      switch (primitiveValue->ValueId())
+      {
+        case css::ValueId::Normal: return css::keywords::Normal {};
+        case css::ValueId::None:   return css::keywords::None {};
+        default:                   break;
+      }
+
+      state.SetCurrentPropertyInvalidAtComputedValueTime();
+      return css::keywords::Normal {};
+    }
+
+    const auto *contentListAltTextPair = DynamicDowncast<css::ValuePair>(value);
+    const auto *contentList = RequiredDowncast<css::ValueList>(
+      state, contentListAltTextPair ? contentListAltTextPair->First() : value);
+    if (!contentList)
+    {
+      return css::keywords::Normal {};
+    }
+
+    // FIXME: Replace with support for CSS Values 5 attr() substitution function.
+    auto processAttrContent = [&](const css::AttrValue &attrValue) -> CSSOMString
+    {
+      if (!state.Style().GetPseudoElementType())
+      {
+        state.Style().SetHasAttrContent();
+      }
+      else
+      {
+        const_cast<RenderStyle &>(state.ParentStyle()).SetHasAttrContent();
+      }
+
+      CSSOMStringAtom attributeLocalName {attrValue.AttributeName()};
+      const auto *element = state.GetElement();
+      auto attributeValue = element ? element->GetAttributeNS(null, attributeLocalName) : std::nullopt;
+
+      // Register the fact that the attribute value affects the style.
+      state.RegisterContentAttribute(attributeLocalName);
+
+      if (!attributeValue)
+      {
+        const auto *fallback = DynamicDowncast<css::PrimitiveValue>(attrValue.Fallback());
+        return fallback && fallback->IsString() ? fallback->StringValue() : CSSOMString {};
+      }
+      return *attributeValue;
+    };
+
+    auto computeContentList = [&]() -> Content::ListType
+    {
+      return Content::ListType(
+        std::from_range, *contentList
+                           | std::views::transform(
+                             [&](const css::Value &item) -> Content::ListItem
+                             {
+                               if (item.IsImage())
+                               {
+                                 if (auto image = state.CreateStyleImage(item))
+                                 {
+                                   return Content::Image {ImageWrapper {Ref<StyleImage> {krys::move(image)}}};
+                                 }
+                                 state.SetCurrentPropertyInvalidAtComputedValueTime();
+                                 return Content::Text {CSSOMString {}};
+                               }
+                               if (const auto *attr = DynamicDowncast<css::AttrValue>(item))
+                               {
+                                 return Content::Text {processAttrContent(*attr)};
+                               }
+                               if (const auto *primitive = DynamicDowncast<css::PrimitiveValue>(item))
+                               {
+                                 switch (primitive->ValueId())
+                                 {
+                                   case css::ValueId::OpenQuote: return Content::Quote {QuoteType::OpenQuote};
+                                   case css::ValueId::CloseQuote:
+                                     return Content::Quote {QuoteType::CloseQuote};
+                                   case css::ValueId::NoOpenQuote:
+                                     return Content::Quote {QuoteType::NoOpenQuote};
+                                   case css::ValueId::NoCloseQuote:
+                                     return Content::Quote {QuoteType::NoCloseQuote};
+                                   default: break;
+                                 }
+                                 if (primitive->IsString())
+                                 {
+                                   return Content::Text {primitive->StringValue()};
+                                 }
+                                 state.SetCurrentPropertyInvalidAtComputedValueTime();
+                                 return Content::Text {CSSOMString {}};
+                               }
+                               if (const auto *counter = DynamicDowncast<css::CounterValue>(item))
+                               {
+                                 return Content::Counter {
+                                   counter->Identifier(), counter->Separator(),
+                                   ConvertCSSValueToStyle<CounterStyle>(state, *counter->CounterStyle())};
+                               }
+                               state.SetCurrentPropertyInvalidAtComputedValueTime();
+                               return Content::Text {CSSOMString {}};
+                             }));
+    };
+
+    auto computeAltText = [&]() -> Maybe<CSSOMString>
+    {
+      if (!contentListAltTextPair)
+      {
+        return {};
+      }
+
+      auto *altTextList = RequiredDowncast<css::ValueList>(state, contentListAltTextPair->Second());
+      if (!altTextList)
+      {
+        return {};
+      }
+
+      CSSOMString altText;
+      for (const auto &item : *altTextList)
+      {
+        if (const auto *attr = DynamicDowncast<css::AttrValue>(item))
+        {
+          altText += processAttrContent(*attr);
+        }
+        else if (const auto *string = DynamicDowncast<css::PrimitiveValue>(item);
+                 string && string->IsString())
+        {
+          altText += string->StringValue();
+        }
+      }
+      return altText;
+    };
+
+    return Content::Data {computeContentList(), computeAltText()};
+  }
+
+  Ref<css::Value> CSSValueCreation<Content::Counter>::operator()(css::ValuePool &pool,
+                                                                 const RenderStyle &style,
+                                                                 const Content::Counter &value) noexcept
+  {
+    return css::CounterValue::Create(value.Identifier, value.Separator,
+                                     CreateCSSValue(pool, style, value.Style));
+  }
+}

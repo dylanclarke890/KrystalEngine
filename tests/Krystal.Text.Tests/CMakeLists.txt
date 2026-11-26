@@ -23,7 +23,7 @@ target_compile_options(Krystal.Text.Tests
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
-# The tests read Liberation Sans, as bundled with Booey.
+# The tests read Liberation Sans, as bundled with Krystal.Web.
 target_compile_definitions(Krystal.Text.Tests
   PRIVATE
     KRYS_TEXT_TESTS_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"

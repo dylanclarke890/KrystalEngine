@@ -1,0 +1,16 @@
+﻿#include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Core/Memory/NeverDestroyed.hpp"
+
+namespace krys::web
+{
+  Ref<Settings> Settings::Create() noexcept
+  {
+    return AdoptRef(*new Settings);
+  }
+
+  Settings &Settings::Default() noexcept
+  {
+    static MainThreadNeverDestroyed<Ref<Settings>> settings(Create());
+    return **settings;
+  }
+}

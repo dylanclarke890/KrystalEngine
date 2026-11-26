@@ -1,0 +1,92 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2006, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2006, 2007 Rob Buis <buis@kde.org>
+ * Copyright (C) 2018-2019 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Svg/Elements/SVGEllipseElement.hpp"
+#include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGEllipse.hpp"
+#include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Web/Svg/SVGNames.hpp"
+
+namespace krys::web
+{
+  SVGEllipseElement::SVGEllipseElement(Document &document) noexcept
+      : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Ellipse),
+        _cx(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
+        _cy(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
+        _rx(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
+        _ry(SVGAnimatedLength::Create(this, SVGLengthMode::Height))
+  {
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGEllipseElement::_cx>(SVGNames::CxAttr());
+      PropertyRegistry::RegisterProperty<&SVGEllipseElement::_cy>(SVGNames::CyAttr());
+      PropertyRegistry::RegisterProperty<&SVGEllipseElement::_rx>(SVGNames::RxAttr());
+      PropertyRegistry::RegisterProperty<&SVGEllipseElement::_ry>(SVGNames::RyAttr());
+    }
+  }
+
+  void SVGEllipseElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                           Maybe<DOMStringView> value) noexcept
+  {
+    auto parseError = SVGParsingError::None;
+    auto string = value.value_or(DOMStringView {});
+
+    if (name == SVGNames::CxAttr())
+    {
+      _cx->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Width, string, parseError));
+    }
+    else if (name == SVGNames::CyAttr())
+    {
+      _cy->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Height, string, parseError));
+    }
+    else if (name == SVGNames::RxAttr())
+    {
+      _rx->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Width, string, parseError,
+                                                        SVGLengthNegativeValuesMode::Forbid));
+    }
+    else if (name == SVGNames::RyAttr())
+    {
+      _ry->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Height, string, parseError,
+                                                        SVGLengthNegativeValuesMode::Forbid));
+    }
+    ReportAttributeParsingError(parseError, name, string);
+
+    SVGGeometryElement::AttributeChanged(name, oldValue, value);
+  }
+
+  void SVGEllipseElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
+  {
+    if (PropertyRegistry::IsKnownAttribute(attributeName))
+    {
+      InstanceInvalidationGuard guard(*this);
+      SetPresentationalHintStyleIsDirty();
+      return;
+    }
+
+    SVGGeometryElement::SVGAttributeChanged(attributeName);
+  }
+
+  RenderPtr<RenderElement> SVGEllipseElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<LegacyRenderSVGEllipse>(*this, krys::move(style));
+  }
+}

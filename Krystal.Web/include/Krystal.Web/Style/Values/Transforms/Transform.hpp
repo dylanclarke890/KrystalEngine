@@ -1,0 +1,154 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Graphics/Transforms/TransformOperations.hpp"
+#include "Krystal.Web/Style/Values/Transforms/TransformList.hpp"
+#include "Krystal.Web/Style/Values/Types.hpp"
+
+namespace krys::web::style
+{
+  // <'transform'> = none | <transform-list>
+  // https://drafts.csswg.org/css-transforms-1/#propdef-transform
+  struct Transform : css::ListOrNone<TransformList>
+  {
+    friend struct Blending<Transform>;
+
+    using css::ListOrNone<TransformList>::ListOrNone;
+
+    // Convenience constructors for creating a `transform` directly from transform functions.
+    Transform(std::initializer_list<TransformFunction>) noexcept;
+
+    Transform(TransformFunction &&) noexcept;
+
+    template <TransformFunctionType operationType>
+    KRYS_NODISCARD bool HasTransformOfType() const noexcept;
+
+    void Apply(TransformationMatrix &, const SizeF &, size_t start = 0) const noexcept;
+
+    // Return true if any of the operation types are 3D operation types (even if the
+    // values describe affine transforms)
+    KRYS_NODISCARD bool Has3DOperation() const noexcept;
+
+    KRYS_NODISCARD bool IsRepresentableIn2D() const noexcept;
+
+    KRYS_NODISCARD bool AffectedByTransformOrigin() const noexcept;
+
+    KRYS_NODISCARD bool ContainsNonInvertibleMatrix(const LayoutSize &) const noexcept;
+
+    KRYS_NODISCARD TransformFunctionSizeDependencies ComputeSizeDependencies() const noexcept;
+  };
+
+  inline Transform::Transform(std::initializer_list<TransformFunction> transformFunctions) noexcept
+      : Transform {TransformList {transformFunctions}}
+  {
+  }
+
+  inline Transform::Transform(TransformFunction &&transformFunction) noexcept
+      : Transform {TransformList {krys::move(transformFunction)}}
+  {
+  }
+
+  template <TransformFunctionType operationType>
+  bool Transform::HasTransformOfType() const noexcept
+  {
+    return _value.template HasTransformOfType<operationType>();
+  }
+
+  inline void Transform::Apply(TransformationMatrix &matrix, const SizeF &size, size_t start) const noexcept
+  {
+    _value.Apply(matrix, size, start);
+  }
+
+  inline bool Transform::Has3DOperation() const noexcept
+  {
+    return _value.Has3DOperation();
+  }
+
+  inline bool Transform::IsRepresentableIn2D() const noexcept
+  {
+    return _value.IsRepresentableIn2D();
+  }
+
+  inline bool Transform::AffectedByTransformOrigin() const noexcept
+  {
+    return _value.AffectedByTransformOrigin();
+  }
+
+  inline bool Transform::ContainsNonInvertibleMatrix(const LayoutSize &size) const noexcept
+  {
+    return _value.ContainsNonInvertibleMatrix(size);
+  }
+
+  inline TransformFunctionSizeDependencies Transform::ComputeSizeDependencies() const noexcept
+  {
+    return _value.ComputeSizeDependencies();
+  }
+
+  // MARK: - Conversion
+
+  template <>
+  struct CSSValueConversion<Transform>
+  {
+    KRYS_NODISCARD Transform operator()(BuilderState &, const css::Value &) noexcept;
+  };
+
+  template <>
+  struct CSSValueCreation<Transform>
+  {
+    KRYS_NODISCARD Ref<css::Value> operator()(css::ValuePool &, const RenderStyle &,
+                                              const Transform &) noexcept;
+  };
+
+  // MARK: - Blending
+
+  template <>
+  struct Blending<Transform>
+  {
+    KRYS_NODISCARD static bool CanBlend(const Transform &, const Transform &, CompositeOperation) noexcept;
+
+    KRYS_NODISCARD static constexpr bool
+      RequiresInterpolationForAccumulativeIteration(const Transform &, const Transform &) noexcept
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD static Transform Blend(const Transform &, const Transform &,
+                                          const BlendingContext &) noexcept;
+
+    KRYS_NODISCARD static Transform Blend(const Transform &, const Transform &,
+                                          const interpolation::Context &) noexcept;
+  };
+
+  // MARK: - Platform
+
+  template <>
+  struct ToPlatform<Transform>
+  {
+    KRYS_NODISCARD TransformOperations operator()(const Transform &, const SizeF &) noexcept;
+  };
+}
+
+KRYS_DEFINE_VARIANT_LIKE_CONFORMANCE(krys::web::style::Transform)

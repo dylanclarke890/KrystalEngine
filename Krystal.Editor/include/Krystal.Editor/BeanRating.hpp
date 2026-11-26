@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/Dom/Collections/DOMTokenList.hpp"
-#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
-#include "Krystal.Booey/Dom/Nodes/Document.hpp"
-#include "Krystal.Booey/Dom/Nodes/Element.hpp"
-#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/Dom/Nodes/Text.hpp"
-#include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
-#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
-#include "Krystal.Booey/Html/CustomElement/CustomElement.hpp"
-#include "Krystal.Booey/Html/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Booey/Html/CustomElement/CustomStateSet.hpp"
-#include "Krystal.Booey/Html/CustomElement/ElementInternals.hpp"
-#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
+#include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Web/Dom/Nodes/Text.hpp"
+#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/CustomElement/CustomElement.hpp"
+#include "Krystal.Web/Html/CustomElement/CustomElementInterface.hpp"
+#include "Krystal.Web/Html/CustomElement/CustomStateSet.hpp"
+#include "Krystal.Web/Html/CustomElement/ElementInternals.hpp"
+#include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include <algorithm>
 #include <charconv>
 
@@ -23,30 +23,30 @@ namespace krys
   /// with a click or the arrow keys. It's form-associated (it submits its rating under its `name`, is invalid
   /// while unrated if it's `required`, is cleared by its form's reset and disabled with its fieldset) and has
   /// the custom state `rated`, which the page styles with `:state(rated)`.
-  class BeanRating final : public boo::html::CustomElement
+  class BeanRating final : public web::html::CustomElement
   {
     constexpr static int32 MaxRating = 5;
 
   private:
-    RefPtr<boo::html::ElementInternals> _internals;
-    List<Ref<boo::Element>> _beans;
+    RefPtr<web::html::ElementInternals> _internals;
+    List<Ref<web::Element>> _beans;
     int32 _rating {0};
     bool _disabled {false};
 
   public:
-    explicit BeanRating(boo::HTMLElement &element) noexcept : CustomElement(element)
+    explicit BeanRating(web::HTMLElement &element) noexcept : CustomElement(element)
     {
       auto internals = element.AttachInternals();
       krys_assert(!internals.HasException());
       _internals = internals.ReleaseValue();
 
       // The beans are in a closed shadow root, which only the internals reach.
-      auto shadowRoot = element.AttachShadow({.Mode = boo::dom::ShadowRootMode::Closed});
+      auto shadowRoot = element.AttachShadow({.Mode = web::dom::ShadowRootMode::Closed});
       krys_assert(!shadowRoot.HasException());
       auto &document = element.NodeDocument();
 
       auto style = document.CreateElement(u8"style").ReleaseValue();
-      (void)style->TextContent(boo::DOMString(Styles));
+      (void)style->TextContent(web::DOMString(Styles));
       (void)shadowRoot.Value()->AppendChild(*style);
 
       for (int32 bean = 0; bean < MaxRating; ++bean)
@@ -56,22 +56,22 @@ namespace krys
         (void)shadowRoot.Value()->AppendChild(*span);
         // The beans go with the element, and their listeners with them: the target keeps them.
         span
-          ->AddEventListener<boo::MouseEvent>(u8"click",
-                                              [this, bean](boo::MouseEvent &) { Choose(bean + 1); })
+          ->AddEventListener<web::MouseEvent>(u8"click",
+                                              [this, bean](web::MouseEvent &) { Choose(bean + 1); })
           .Release();
         _beans.push_back(krys::move(span));
       }
 
       element
-        .AddEventListener<boo::KeyboardEvent>(u8"keydown",
-                                              [this](boo::KeyboardEvent &event) { HandleKey(event); })
+        .AddEventListener<web::KeyboardEvent>(u8"keydown",
+                                              [this](web::KeyboardEvent &event) { HandleKey(event); })
         .Release();
 
       Update();
     }
 
     /// @brief The options to define it with.
-    KRYS_NODISCARD static boo::html::CustomElementOptions Options() noexcept
+    KRYS_NODISCARD static web::html::CustomElementOptions Options() noexcept
     {
       return {.ObservedAttributes = {u8"value", u8"required"}, .FormAssociated = true};
     }
@@ -85,9 +85,9 @@ namespace krys
       }
     }
 
-    void AttributeChangedCallback(const boo::DOMStringAtom &localName, const boo::DOMStringAtom &,
-                                  const boo::DOMStringAtom &newValue,
-                                  const boo::DOMStringAtom &) noexcept override
+    void AttributeChangedCallback(const web::DOMStringAtom &localName, const web::DOMStringAtom &,
+                                  const web::DOMStringAtom &newValue,
+                                  const web::DOMStringAtom &) noexcept override
     {
       if (localName == u8"value")
       {
@@ -98,7 +98,7 @@ namespace krys
 
     void FormResetCallback() noexcept override
     {
-      _rating = Parse(boo::DOMStringAtom(Element().GetAttribute(u8"value").value_or(u8"")));
+      _rating = Parse(web::DOMStringAtom(Element().GetAttribute(u8"value").value_or(u8"")));
       Update();
     }
 
@@ -118,7 +118,7 @@ namespace krys
       .bean.filled { background-color: #6f4326; }
     )";
 
-    KRYS_NODISCARD static int32 Parse(const boo::DOMStringAtom &value) noexcept
+    KRYS_NODISCARD static int32 Parse(const web::DOMStringAtom &value) noexcept
     {
       auto text = value.View();
       int32 rating = 0;
@@ -137,7 +137,7 @@ namespace krys
       Update();
     }
 
-    void HandleKey(boo::KeyboardEvent &event) noexcept
+    void HandleKey(web::KeyboardEvent &event) noexcept
     {
       auto key = event.Key();
       if (key == u8"ArrowRight" || key == u8"ArrowUp")
@@ -164,13 +164,13 @@ namespace krys
     {
       for (int32 bean = 0; bean < MaxRating; ++bean)
       {
-        (void)_beans[static_cast<size_t>(bean)]->ClassList().Toggle(boo::DOMString(u8"filled"),
+        (void)_beans[static_cast<size_t>(bean)]->ClassList().Toggle(web::DOMString(u8"filled"),
                                                                     bean < _rating);
       }
 
       if (_rating > 0)
       {
-        (void)_internals->SetFormValue(boo::DOMString(utf8_string(1, static_cast<char8_t>(u8'0' + _rating))));
+        (void)_internals->SetFormValue(web::DOMString(utf8_string(1, static_cast<char8_t>(u8'0' + _rating))));
         (void)_internals->States().Add(u8"rated");
       }
       else

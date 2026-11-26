@@ -1,0 +1,118 @@
+﻿/*
+ * Copyright (C) 2023 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/DataRef.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Style/StyleAppearance.hpp"
+#include "Krystal.Web/Style/Values/Align/AlignContent.hpp"
+#include "Krystal.Web/Style/Values/Align/AlignItems.hpp"
+#include "Krystal.Web/Style/Values/Align/AlignSelf.hpp"
+#include "Krystal.Web/Style/Values/Align/JustifyContent.hpp"
+#include "Krystal.Web/Style/Values/Align/JustifyItems.hpp"
+#include "Krystal.Web/Style/Values/Align/JustifySelf.hpp"
+#include "Krystal.Web/Style/Values/Animations/Animations.hpp"
+#include "Krystal.Web/Style/Values/Borders/BoxShadow.hpp"
+#include "Krystal.Web/Style/Values/Color/Opacity.hpp"
+#include "Krystal.Web/Style/Values/Content/Content.hpp"
+#include "Krystal.Web/Style/Values/Display/Order.hpp"
+#include "Krystal.Web/Style/Values/Images/ObjectPosition.hpp"
+#include "Krystal.Web/Style/Values/Masking/MaskLayers.hpp"
+#include "Krystal.Web/Style/Values/Sizing/AspectRatio.hpp"
+#include "Krystal.Web/Style/Values/Transitions/Transitions.hpp"
+#include "Krystal.Web/Style/Values/UI/Resize.hpp"
+#include <memory>
+
+namespace krys::web
+{
+  class StyleFilterData;
+  class StyleFlexibleBoxData;
+  class StyleMultiColData;
+  class StyleTransformData;
+
+  class StyleMiscNonInheritedData : public RefCounted<StyleMiscNonInheritedData>
+  {
+  public:
+    KRYS_NODISCARD static Ref<StyleMiscNonInheritedData> Create() noexcept
+    {
+      return AdoptRef(*new StyleMiscNonInheritedData);
+    }
+
+    KRYS_NODISCARD Ref<StyleMiscNonInheritedData> Copy() const noexcept;
+
+    ~StyleMiscNonInheritedData() noexcept;
+
+    bool operator==(const StyleMiscNonInheritedData &) const noexcept;
+
+    KRYS_NODISCARD bool HasFilters() const noexcept;
+
+    // This is here to pack in with _refCount.
+    style::Opacity Opacity;
+
+    DataRef<StyleFlexibleBoxData> FlexibleBox;
+    DataRef<StyleMultiColData> MultiCol;   // CSS3 multicol properties
+    DataRef<StyleFilterData> Filter;       // Filter operations (url, sepia, blur, etc.)
+    DataRef<StyleTransformData> Transform; // Transform properties (rotate, scale, skew, etc.)
+
+    style::MaskLayers Mask;
+    style::Animations Animations;
+    style::Transitions Transitions;
+    style::Content Content;
+    style::BoxShadows BoxShadow;
+    style::AspectRatio AspectRatio;
+
+    style::AlignContent AlignContent;
+    style::AlignItems AlignItems;
+    style::AlignSelf AlignSelf;
+    style::JustifyContent JustifyContent;
+    style::JustifyItems JustifyItems;
+    style::JustifySelf JustifySelf;
+
+    style::ObjectPosition ObjectPosition;
+    style::Order Order;
+
+    unsigned HasAttrContent : 1 {false};
+    unsigned HasDisplayAffectedByAnimations : 1 {false};
+    unsigned HasExplicitlySetColorScheme : 1 {false};
+    unsigned HasExplicitlySetDirection : 1 {false};
+    unsigned HasExplicitlySetWritingMode : 1 {false};
+    unsigned TableLayout : 1;
+    unsigned Appearance : AppearanceBitWidth;
+    unsigned UsedAppearance : AppearanceBitWidth;
+    unsigned TextOverflow : 1; // Whether or not lines that spill out should be truncated with "..."
+    unsigned UserDrag : 2;
+    unsigned ObjectFit : 3;
+    unsigned Resize : 3;
+
+  private:
+    StyleMiscNonInheritedData() noexcept;
+
+    StyleMiscNonInheritedData(const StyleMiscNonInheritedData &) noexcept;
+  };
+}

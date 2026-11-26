@@ -1,0 +1,389 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ * Copyright (C) 2004-2005 Allan Sandfeld Jensen (kde@carewolf.com)
+ * Copyright (C) 2006, 2007 Nicholas Shanks (webkit@nickshanks.com)
+ * Copyright (C) 2005-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2007 Alexey Proskuryakov <ap@webkit.org>
+ * Copyright (C) 2007, 2008 Eric Seidel <eric@webkit.org>
+ * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
+ * Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+ * Copyright (C) Research In Motion Limited 2011. All rights reserved.
+ * Copyright (C) 2012, 2013 Google Inc. All rights reserved.
+ * Copyright (C) 2014 Igalia S.L.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Css/Font/CSSFontSelector.hpp"
+#include "Krystal.Web/Page/Settings.hpp"
+#include "Krystal.Web/Rendering/RenderTheme.hpp"
+#include "Krystal.Web/Style/Builder/BuilderStateInlines.hpp"
+
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Web/Css/Calc/RandomCachingKey.hpp"
+#include "Krystal.Web/Css/Properties/Property.hpp"
+#include "Krystal.Web/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Web/Css/Values/CrossFadeValue.hpp"
+#include "Krystal.Web/Css/Values/CursorImageValue.hpp"
+#include "Krystal.Web/Css/Values/FilterImageValue.hpp"
+#include "Krystal.Web/Css/Values/GradientValue.hpp"
+#include "Krystal.Web/Css/Values/ImageSetValue.hpp"
+#include "Krystal.Web/Css/Values/ImageValue.hpp"
+#include "Krystal.Web/Css/Values/PaintImageValue.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/Element.hpp"
+#include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Web/Rendering/Style/StyleCursorImage.hpp"
+#include "Krystal.Web/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Web/Style/Builder/FontSizeFunctions.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Web/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Web/Svg/Elements/SVGSvgElement.hpp"
+
+namespace krys::web::style
+{
+  BuilderState::BuilderState(RenderStyle &style) noexcept : _style(style)
+  {
+  }
+
+  BuilderState::BuilderState(RenderStyle &style, BuilderContext &&context) noexcept
+      : _style(style), _context(krys::move(context)), _cssToLengthConversionData(style, *this)
+  {
+  }
+
+  BuilderState::~BuilderState() noexcept = default;
+
+  float BuilderState::ZoomWithTextZoomFactor() noexcept
+  {
+    if (auto *frame = GetDocument().Frame())
+    {
+      // `-webkit-text-zoom: reset` isn't supported, so the text zoom always applies.
+      float textZoomFactor = frame->TextZoomFactor();
+      float usedZoom = EvaluationTimeZoomEnabled(*this) ? 1.0f : Style().UsedZoom();
+      return usedZoom * textZoomFactor;
+    }
+    return CssToLengthConversionData().Zoom();
+  }
+
+  // SVG handles zooming in a different way compared to CSS. The whole document is scaled instead
+  // of each individual length value in the render style / tree. CSSPrimitiveValue::resolveAsLength*()
+  // multiplies each resolved length with the zoom multiplier - so for SVG we need to disable that.
+  // Though all CSS values that can be applied to outermost <svg> elements (width/height/border/padding...)
+  // need to respect the scaling. RenderBox (the parent class of LegacyRenderSVGRoot) grabs values like
+  // width/height/border/padding/... from the RenderStyle -> for SVG these values would never scale,
+  // if we'd pass a 1.0 zoom factor everywhere. So we only pass a zoom factor of 1.0 for specific
+  // properties that are NOT allowed to scale within a zoomed SVG document (letter/word-spacing/font-size).
+  bool BuilderState::UseSVGZoomRules() const noexcept
+  {
+    return Is<SVGElement>(GetElement());
+  }
+
+  bool BuilderState::UseSVGZoomRulesForLength() const noexcept
+  {
+    auto *svgElement = DynamicDowncast<SVGElement>(GetElement());
+    return svgElement && !(Is<SVGSvgElement>(*svgElement) && svgElement->ParentNode());
+  }
+
+  RefPtr<StyleImage> BuilderState::CreateStyleImage(const css::Value &value) const noexcept
+  {
+    if (const auto *imageValue = DynamicDowncast<css::ImageValue>(value))
+    {
+      return imageValue->CreateStyleImage(*this);
+    }
+    if (const auto *imageSetValue = DynamicDowncast<css::ImageSetValue>(value))
+    {
+      return imageSetValue->CreateStyleImage(*this);
+    }
+    if (const auto *imageValue = DynamicDowncast<css::CursorImageValue>(value))
+    {
+      return imageValue->CreateStyleImage(*this);
+    }
+    if (const auto *crossfadeValue = DynamicDowncast<css::CrossFadeValue>(value))
+    {
+      return crossfadeValue->CreateStyleImage(*this);
+    }
+    if (const auto *filterImageValue = DynamicDowncast<css::FilterImageValue>(value))
+    {
+      return filterImageValue->CreateStyleImage(*this);
+    }
+    if (const auto *gradientValue = DynamicDowncast<css::GradientValue>(value))
+    {
+      return gradientValue->CreateStyleImage(*this);
+    }
+    if (const auto *paintImageValue = DynamicDowncast<css::PaintImageValue>(value))
+    {
+      return paintImageValue->CreateStyleImage(*this);
+    }
+    return nullptr;
+  }
+
+  void BuilderState::RegisterContentAttribute(const CSSOMStringAtom &attributeLocalName) noexcept
+  {
+    if (Style().GetPseudoElementType() == PseudoElementType::Before
+        || Style().GetPseudoElementType() == PseudoElementType::After)
+    {
+      _registeredContentAttributes.push_back(attributeLocalName);
+    }
+  }
+
+  void BuilderState::AdjustStyleForInterCharacterRuby() noexcept
+  {
+    if (!_style.IsInterCharacterRubyPosition() || !GetElement() || !Is<HTMLElement>(*GetElement())
+        || GetElement()->TagQualifiedName().TagName() != html::TagName::rt)
+    {
+      return;
+    }
+
+    _style.SetTextAlign(TextAlign::Center);
+    if (!_style.GetWritingMode().IsVerticalTypographic())
+    {
+      std::ignore = _style.SetWritingMode(StyleWritingMode::VerticalLr);
+    }
+  }
+
+  void BuilderState::UpdateFont() noexcept
+  {
+    auto &fontSelector = GetDocument().GetFontSelector();
+
+    auto needsUpdate = [&]
+    {
+      return _fontDirty || !_style.GetFontCascade().Fonts();
+    };
+
+    if (!needsUpdate())
+    {
+      return;
+    }
+
+    UpdateFontForGenericFamilyChange();
+    UpdateFontForZoomChange();
+    UpdateFontForOrientationChange();
+    UpdateFontForSizeChange();
+
+    _style.GetFontCascade().Update(ShareRefPtr<FontSelector>(&fontSelector));
+    // `font-size-adjust: from-font` computes to the primary font's aspect value, which descendants inherit.
+    if (_style.GetFontDescription().GetFontSizeAdjust().ShouldResolveFromFont())
+    {
+      (void)_style.GetFontCascade().PrimaryFont();
+    }
+
+    _fontDirty = false;
+  }
+
+  void BuilderState::UpdateFontForZoomChange() noexcept
+  {
+    if (_style.UsedZoom() == ParentStyle().UsedZoom())
+    {
+      return;
+    }
+
+    SetFontDescriptionFontSize(_style.GetFontDescription().SpecifiedSize());
+  }
+
+  void BuilderState::UpdateFontForGenericFamilyChange() noexcept
+  {
+    const auto &childFont = _style.GetFontDescription();
+
+    if (childFont.IsAbsoluteSize())
+    {
+      return;
+    }
+
+    const auto &parentFont = ParentStyle().GetFontDescription();
+    if (childFont.UseFixedDefaultSize() == parentFont.UseFixedDefaultSize())
+    {
+      return;
+    }
+
+    // We know the parent is monospace or the child is monospace, and that font
+    // size was unspecified. We want to scale our font size as appropriate.
+    // If the font uses a keyword size, then we refetch from the table rather than
+    // multiplying by our scale factor.
+    float size = [&]
+    {
+      if (css::ValueId sizeIdentifier = childFont.KeywordSizeAsIdentifier();
+          sizeIdentifier != css::ValueId::Invalid)
+      {
+        return style::FontSizeForKeyword(static_cast<uint32>(sizeIdentifier), childFont.UseFixedDefaultSize(),
+                                         GetDocument());
+      }
+
+      const auto &settings = GetDocument().GetSettings().Values;
+      auto fixedSize = settings.DefaultFixedFontSize;
+      auto defaultSize = settings.DefaultFontSize;
+      float fixedScaleFactor =
+        (fixedSize && defaultSize) ? static_cast<float>(fixedSize) / static_cast<float>(defaultSize) : 1;
+      return parentFont.UseFixedDefaultSize() ? childFont.SpecifiedSize() / fixedScaleFactor
+                                              : childFont.SpecifiedSize() * fixedScaleFactor;
+    }();
+
+    auto newFontDescription = childFont;
+    SetFontSize(newFontDescription, size);
+    std::ignore = _style.SetFontDescriptionWithoutUpdate(krys::move(newFontDescription));
+  }
+
+  void BuilderState::UpdateFontForOrientationChange() noexcept
+  {
+    auto [fontOrientation, glyphOrientation] = _style.FontAndGlyphOrientation();
+
+    const auto &fontDescription = _style.GetFontDescription();
+    if (fontDescription.Orientation() == fontOrientation
+        && fontDescription.GetNonCJKGlyphOrientation() == glyphOrientation)
+    {
+      return;
+    }
+
+    auto newFontDescription = fontDescription;
+    newFontDescription.SetNonCJKGlyphOrientation(glyphOrientation);
+    newFontDescription.SetOrientation(fontOrientation);
+    std::ignore = _style.SetFontDescriptionWithoutUpdate(krys::move(newFontDescription));
+  }
+
+  void BuilderState::UpdateFontForSizeChange() noexcept
+  {
+    _style.SynchronizeLetterSpacingWithFontCascadeWithoutUpdate();
+    _style.SynchronizeWordSpacingWithFontCascadeWithoutUpdate();
+  }
+
+  void BuilderState::SetFontSize(FontCascadeDescription &fontDescription, float size) noexcept
+  {
+    fontDescription.SetSpecifiedSize(size);
+    auto computedFontSize = style::ComputedFontSizeFromSpecifiedSize(
+      size, fontDescription.IsAbsoluteSize(), UseSVGZoomRules(), &Style(), GetDocument());
+    fontDescription.SetComputedSize(computedFontSize.Size, computedFontSize.UsedZoomFactor);
+  }
+
+  css::PropertyId BuilderState::CssPropertyId() const noexcept
+  {
+    return _currentProperty ? _currentProperty->Id : css::PropertyId::Invalid;
+  }
+
+  bool BuilderState::IsCurrentPropertyInvalidAtComputedValueTime() const noexcept
+  {
+    return _invalidAtComputedValueTimeProperties.test(static_cast<size_t>(CssPropertyId()));
+  }
+
+  void BuilderState::SetCurrentPropertyInvalidAtComputedValueTime() noexcept
+  {
+    _invalidAtComputedValueTimeProperties.set(static_cast<size_t>(CssPropertyId()));
+  }
+
+  void BuilderState::SetUsesViewportUnits() noexcept
+  {
+    _style.SetUsesViewportUnits();
+  }
+
+  void BuilderState::SetUsesContainerUnits() noexcept
+  {
+    _style.SetUsesContainerUnits();
+  }
+
+  double
+    BuilderState::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key,
+                                           Maybe<css::keywords::ElementShared> elementShared) const noexcept
+  {
+    if (!elementShared)
+    {
+      return GetElement()->LookupCSSRandomBaseValue(_style.GetPseudoElementIdentifier(), key);
+    }
+
+    return GetDocument().LookupCSSRandomBaseValue(key);
+  }
+
+  // MARK: - Tree Counting Functions
+
+  uint32 BuilderState::SiblingCount() noexcept
+  {
+    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-count
+
+    krys_debug_assert(GetElement());
+
+    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
+    if (!parent)
+    {
+      return 1;
+    }
+
+    _style.SetUsesTreeCountingFunctions();
+    parent->SetChildrenAffectedByBackwardPositionalRules();
+    parent->SetChildrenAffectedByForwardPositionalRules();
+
+    uint32 count = 1;
+    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
+         sibling = sibling->PreviousElementSibling())
+    {
+      ++count;
+    }
+    for (auto sibling = GetElement()->NextElementSibling(); sibling; sibling = sibling->NextElementSibling())
+    {
+      ++count;
+    }
+    return count;
+  }
+
+  uint32 BuilderState::SiblingIndex() noexcept
+  {
+    // https://drafts.csswg.org/css-values-5/#funcdef-sibling-index
+
+    krys_debug_assert(GetElement());
+
+    RefPtr parent = ShareRefPtr(GetElement()->ParentElement());
+    if (!parent)
+    {
+      return 1;
+    }
+
+    _style.SetUsesTreeCountingFunctions();
+    parent->SetChildrenAffectedByBackwardPositionalRules();
+    parent->SetChildrenAffectedByForwardPositionalRules();
+
+    uint32 count = 1;
+    for (auto sibling = GetElement()->PreviousElementSibling(); sibling;
+         sibling = sibling->PreviousElementSibling())
+    {
+      ++count;
+    }
+    return count;
+  }
+
+  void BuilderState::DisableNativeAppearanceIfNeeded(css::PropertyId propertyID,
+                                                     PropertyCascade::Origin origin) noexcept
+  {
+    auto shouldDisable = [&]
+    {
+      if (origin != PropertyCascade::Origin::Author)
+      {
+        return false;
+      }
+      if (!css::DisablesNativeAppearance(propertyID))
+      {
+        return false;
+      }
+      // FIXME: `Element::isDevolvableWidget()` comes with the form controls; the devolvable widgets are the
+      // elements the user agent style gives an appearance.
+      return RenderTheme::HasAppearanceForElementTypeFromUAStyle(*GetElement());
+    };
+
+    if (shouldDisable())
+    {
+      _style.SetNativeAppearanceDisabled(true);
+    }
+  }
+}

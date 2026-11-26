@@ -1,0 +1,22 @@
+﻿#include "Krystal.Web/Html/Elements/HTMLOptGroupElement.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Editing/EditorTestUtils.hpp"
+#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
+
+namespace krys::web::tests
+{
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLOptGroupElement: changing disabled resets its select's selectedness",
+                   "[HTML][HTMLOptGroupElement][html:attr-optgroup-disabled][html:optgroup-option-group]")
+  {
+    EditorFixture fixture(
+      u8"<select id=s><optgroup id=g disabled><option id=a>A</option></optgroup></select>");
+    auto &select = Downcast<HTMLSelectElement>(fixture.ById(u8"s"));
+    auto &group = Downcast<HTMLOptGroupElement>(fixture.ById(u8"g"));
+    CHECK(Downcast<HTMLOptionElement>(fixture.ById(u8"a")).IsDisabledFormControl());
+    CHECK(select.SelectedIndex() == -1);
+    group.Disabled(false);
+    CHECK(select.SelectedIndex() == 0);
+  }
+}

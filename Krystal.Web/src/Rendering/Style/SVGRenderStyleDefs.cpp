@@ -1,0 +1,172 @@
+﻿/*
+    Copyright (C) 2004, 2005, 2007 Nikolas Zimmermann <zimmermann@kde.org>
+                  2004, 2005, 2007 Rob Buis <buis@kde.org>
+    Copyright (C) Research In Motion Limited 2010. All rights reserved.
+    Copyright (C) 2014 Adobe Systems Incorporated. All rights reserved.
+
+    Based on khtml code by:
+    Copyright (C) 1999 Antti Koivisto (koivisto@kde.org)
+    Copyright (C) 1999-2003 Lars Knoll (knoll@kde.org)
+    Copyright (C) 2002-2003 Dirk Mueller (mueller@kde.org)
+    Copyright (C) 2002 Apple Inc. All rights reserved.
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public License
+    along with this library; see the file COPYING.LIB.  If not, write to
+    the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+    Boston, MA 02110-1301, USA.
+*/
+
+#include "Krystal.Web/Rendering/Style/SVGRenderStyleDefs.hpp"
+
+#include "Krystal.Web/Style/Computed/ComputedStyle+InitialInlines.hpp"
+
+namespace krys::web
+{
+  StyleFillData::StyleFillData() noexcept
+      : FillOpacity(style::ComputedStyle::InitialFillOpacity()), Fill(style::ComputedStyle::InitialFill())
+  {
+  }
+
+  inline StyleFillData::StyleFillData(const StyleFillData &other) noexcept
+      : FillOpacity(other.FillOpacity), Fill(other.Fill)
+  {
+  }
+
+  Ref<StyleFillData> StyleFillData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleFillData(*this));
+  }
+
+  bool StyleFillData::operator==(const StyleFillData &other) const noexcept
+  {
+    return FillOpacity == other.FillOpacity && Fill == other.Fill;
+  }
+
+  StyleStrokeData::StyleStrokeData() noexcept
+      : StrokeOpacity(style::ComputedStyle::InitialStrokeOpacity()),
+        Stroke(style::ComputedStyle::InitialStroke()),
+        StrokeDashOffset(style::ComputedStyle::InitialStrokeDashOffset()),
+        StrokeDashArray(style::ComputedStyle::InitialStrokeDashArray())
+  {
+  }
+
+  inline StyleStrokeData::StyleStrokeData(const StyleStrokeData &other) noexcept
+      : StrokeOpacity(other.StrokeOpacity), Stroke(other.Stroke), StrokeDashOffset(other.StrokeDashOffset),
+        StrokeDashArray(other.StrokeDashArray)
+  {
+  }
+
+  Ref<StyleStrokeData> StyleStrokeData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleStrokeData(*this));
+  }
+
+  bool StyleStrokeData::operator==(const StyleStrokeData &other) const noexcept
+  {
+    return StrokeOpacity == other.StrokeOpacity && Stroke == other.Stroke
+           && StrokeDashOffset == other.StrokeDashOffset && StrokeDashArray == other.StrokeDashArray;
+  }
+
+  StyleStopData::StyleStopData() noexcept
+      : StopOpacity(style::ComputedStyle::InitialStopOpacity()),
+        StopColor(style::ComputedStyle::InitialStopColor())
+  {
+  }
+
+  inline StyleStopData::StyleStopData(const StyleStopData &other) noexcept
+      : StopOpacity(other.StopOpacity), StopColor(other.StopColor)
+  {
+  }
+
+  Ref<StyleStopData> StyleStopData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleStopData(*this));
+  }
+
+  bool StyleStopData::operator==(const StyleStopData &other) const noexcept
+  {
+    return StopOpacity == other.StopOpacity && StopColor == other.StopColor;
+  }
+
+  StyleMiscData::StyleMiscData() noexcept
+      : FloodOpacity(style::ComputedStyle::InitialFloodOpacity()),
+        FloodColor(style::ComputedStyle::InitialFloodColor()),
+        LightingColor(style::ComputedStyle::InitialLightingColor()),
+        BaselineShift(style::ComputedStyle::InitialBaselineShift())
+  {
+  }
+
+  inline StyleMiscData::StyleMiscData(const StyleMiscData &other) noexcept
+      : FloodOpacity(other.FloodOpacity), FloodColor(other.FloodColor), LightingColor(other.LightingColor),
+        BaselineShift(other.BaselineShift)
+  {
+  }
+
+  Ref<StyleMiscData> StyleMiscData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleMiscData(*this));
+  }
+
+  bool StyleMiscData::operator==(const StyleMiscData &other) const noexcept
+  {
+    return FloodOpacity == other.FloodOpacity && FloodColor == other.FloodColor
+           && LightingColor == other.LightingColor && BaselineShift == other.BaselineShift;
+  }
+
+  StyleInheritedResourceData::StyleInheritedResourceData() noexcept
+      : MarkerStart(style::ComputedStyle::InitialMarkerStart()),
+        MarkerMid(style::ComputedStyle::InitialMarkerMid()),
+        MarkerEnd(style::ComputedStyle::InitialMarkerEnd())
+  {
+  }
+
+  inline StyleInheritedResourceData::StyleInheritedResourceData(
+    const StyleInheritedResourceData &other) noexcept
+      : MarkerStart(other.MarkerStart), MarkerMid(other.MarkerMid), MarkerEnd(other.MarkerEnd)
+  {
+  }
+
+  Ref<StyleInheritedResourceData> StyleInheritedResourceData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleInheritedResourceData(*this));
+  }
+
+  bool StyleInheritedResourceData::operator==(const StyleInheritedResourceData &other) const noexcept
+  {
+    return MarkerStart == other.MarkerStart && MarkerMid == other.MarkerMid && MarkerEnd == other.MarkerEnd;
+  }
+
+  StyleLayoutData::StyleLayoutData() noexcept
+      : Cx(style::ComputedStyle::InitialCx()), Cy(style::ComputedStyle::InitialCy()),
+        R(style::ComputedStyle::InitialR()), Rx(style::ComputedStyle::InitialRx()),
+        Ry(style::ComputedStyle::InitialRy()), X(style::ComputedStyle::InitialX()),
+        Y(style::ComputedStyle::InitialY()), D(style::ComputedStyle::InitialD())
+  {
+  }
+
+  inline StyleLayoutData::StyleLayoutData(const StyleLayoutData &other) noexcept
+      : Cx(other.Cx), Cy(other.Cy), R(other.R), Rx(other.Rx), Ry(other.Ry), X(other.X), Y(other.Y), D(other.D)
+  {
+  }
+
+  Ref<StyleLayoutData> StyleLayoutData::Copy() const noexcept
+  {
+    return AdoptRef(*new StyleLayoutData(*this));
+  }
+
+  bool StyleLayoutData::operator==(const StyleLayoutData &other) const noexcept
+  {
+    return Cx == other.Cx && Cy == other.Cy && R == other.R && Rx == other.Rx && Ry == other.Ry
+           && X == other.X && Y == other.Y && D == other.D;
+  }
+}

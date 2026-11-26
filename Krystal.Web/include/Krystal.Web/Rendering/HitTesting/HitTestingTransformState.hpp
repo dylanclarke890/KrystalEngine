@@ -1,0 +1,90 @@
+﻿/*
+ * Copyright (C) 2011 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Geometry/Point.hpp"
+#include "Krystal.Core/Geometry/Quad.hpp"
+#include "Krystal.Core/Geometry/TransformationMatrix.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Web/Graphics/Geometry/LayoutRect.hpp"
+
+namespace krys::web
+{
+  /// @brief The point and area of a hit test in the plane of the nearest flattening layer, and the transform
+  /// from that plane to the current layer, accumulated through transformed and preserve-3d layers.
+  // FIXME: Now that TransformState lazily creates its TransformationMatrix it takes up less space.
+  // So there's really no need for a ref counted version. So This class should be removed and replaced
+  // with TransformState. There are some minor differences (like the way translate() works slightly
+  // differently than move()) so care has to be taken when this is done.
+  class HitTestingTransformState : public RefCounted<HitTestingTransformState>
+  {
+  public:
+    PointF LastPlanarPoint;
+    QuadF LastPlanarQuad;
+    QuadF LastPlanarArea;
+    TransformationMatrix AccumulatedTransform;
+
+    KRYS_NODISCARD static Ref<HitTestingTransformState> Create(const PointF &p, const QuadF &quad,
+                                                               const QuadF &area) noexcept
+    {
+      return AdoptRef(*new HitTestingTransformState(p, quad, area));
+    }
+
+    KRYS_NODISCARD static Ref<HitTestingTransformState> Create(const HitTestingTransformState &other) noexcept
+    {
+      return AdoptRef(*new HitTestingTransformState(other));
+    }
+
+    void Translate(int32 x, int32 y) noexcept;
+
+    void ApplyTransform(const TransformationMatrix &transformFromContainer) noexcept;
+
+    KRYS_NODISCARD PointF MappedPoint() const noexcept;
+
+    KRYS_NODISCARD QuadF MappedQuad() const noexcept;
+
+    KRYS_NODISCARD QuadF MappedArea() const noexcept;
+
+    KRYS_NODISCARD LayoutRect BoundsOfMappedArea() const noexcept;
+
+    KRYS_NODISCARD LayoutRect BoundsOfMappedQuad() const noexcept;
+
+    void Flatten() noexcept;
+
+  private:
+    HitTestingTransformState(const PointF &p, const QuadF &quad, const QuadF &area) noexcept
+        : LastPlanarPoint(p), LastPlanarQuad(quad), LastPlanarArea(area)
+    {
+    }
+
+    HitTestingTransformState(const HitTestingTransformState &other) noexcept
+        : LastPlanarPoint(other.LastPlanarPoint), LastPlanarQuad(other.LastPlanarQuad),
+          LastPlanarArea(other.LastPlanarArea), AccumulatedTransform(other.AccumulatedTransform)
+    {
+    }
+  };
+}

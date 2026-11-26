@@ -1,0 +1,50 @@
+﻿#pragma once
+
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Gfx/Render2D/FontFace2D.hpp"
+
+namespace krys::web
+{
+  class Font;
+}
+
+namespace krys::boo
+{
+  /// @brief The Render2D faces Krystal.Web's fonts are drawn with: one per FreeType face and synthetic bold and
+  /// oblique, shared by every size.
+  class FontFaceCache
+  {
+    KRYS_NON_COPYABLE(FontFaceCache);
+
+  private:
+    struct Entry
+    {
+      const text::FreeTypeFace *Face;
+      bool SyntheticBold;
+      bool SyntheticOblique;
+      uint32 PaletteIndex;
+      List<gfx::PaletteColour> PaletteOverrides;
+      UniquePtr<gfx::FontFace2D> Face2D;
+    };
+
+    List<Entry> _entries;
+
+  public:
+    FontFaceCache() noexcept = default;
+
+    /// @brief The face @p font is drawn with, made on first use; null if the font has no face or it can't be
+    /// drawn.
+    KRYS_NODISCARD const gfx::FontFace2D *FaceFor(const web::Font &font) noexcept;
+
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _entries.size();
+    }
+
+    void Clear() noexcept
+    {
+      _entries.clear();
+    }
+  };
+}

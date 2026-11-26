@@ -1,0 +1,144 @@
+﻿/*
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Strings/StringBuilder.hpp"
+#include "Krystal.Web/Css/Values/Color/ColorDescriptors.hpp"
+#include "Krystal.Web/Css/Values/Color/RelativeColor.hpp"
+#include "Krystal.Web/Css/Values/Color/RelativeColorResolver.hpp"
+#include "Krystal.Web/Graphics/Color/Color.hpp"
+#include "Krystal.Web/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Web/Style/Values/Color/Color.hpp"
+#include "Krystal.Web/Style/Values/Color/ColorResolutionState.hpp"
+#include "Krystal.Web/Style/Values/Color/ResolvedColor.hpp"
+
+namespace krys::web::style
+{
+  template <typename D, size_t Index>
+  using RelativeColorComponent = css::GetCSSColorParseTypeWithCalcAndSymbolsComponentResult<D, Index>;
+
+  /// @brief A relative colour whose origin couldn't be resolved during style building because it depends on
+  /// `currentcolor`.
+  template <typename D>
+  struct RelativeColor
+  {
+    using Descriptor = D;
+
+    style::Color Origin;
+    css::CSSColorParseTypeWithCalcAndSymbols<Descriptor> Components;
+
+    KRYS_NODISCARD bool operator==(const RelativeColor<Descriptor> &) const noexcept = default;
+  };
+
+  template <typename D>
+  KRYS_NODISCARD style::Color ToStyleColor(const css::RelativeColor<D> &unresolved,
+                                           ColorResolutionState &state) noexcept
+  {
+    ColorResolutionStateNester nester {state};
+
+    auto origin = ToStyleColor(unresolved.Origin, state);
+    if (!origin.IsResolvedColor())
+    {
+      // If the origin is not absolute, we cannot fully resolve the color yet.
+      // Instead, we simplify the calc values using the conversion data, and
+      // return a style::RelativeColor to be resolved at use time.
+      return style::Color {RelativeColor<D> {
+        .Origin = krys::move(origin),
+        .Components =
+          css::SimplifyUnevaluatedCalc<D>(unresolved.Components, state.ConversionData, css::SymbolTable {}),
+      }};
+    }
+
+    // If the origin is absolute, we can fully resolve the entire color.
+    auto color = css::Resolve(css::RelativeColorResolver<D> {.Origin = origin.GetResolvedColor(),
+                                                             .Components = unresolved.Components},
+                              state.ConversionData);
+
+    return {ResolvedColor {krys::move(color)}};
+  }
+
+  template <typename D>
+  KRYS_NODISCARD web::Color ResolveColor(const RelativeColor<D> &relative,
+                                         const web::Color &currentColor) noexcept
+  {
+    return css::ResolveNoConversionDataRequired(css::RelativeColorResolver<D> {
+      .Origin = relative.Origin.ResolveColor(currentColor), .Components = relative.Components});
+  }
+
+  template <typename D>
+  KRYS_NODISCARD bool ContainsCurrentColor(const RelativeColor<D> &relative) noexcept
+  {
+    return style::ContainsCurrentColor(relative.Origin);
+  }
+
+  template <typename D>
+  void SerialisationForCSSTokenization(StringBuilder &builder, const css::SerialisationContext &context,
+                                       const RelativeColor<D> &relative) noexcept
+  {
+    using ColorType = typename D::ColorType;
+
+    if constexpr (D::UsesColorFunctionForSerialisation)
+    {
+      builder.Append(u8"color(from ");
+      SerialisationForCSSTokenization(builder, context, relative.Origin);
+      builder.Append(u8' ');
+      builder.Append(web::Serialisation(ColourSpaceFor<ColorType>));
+    }
+    else
+    {
+      builder.Append(D::SerialisationFunctionName);
+      builder.Append(u8"(from ");
+      SerialisationForCSSTokenization(builder, context, relative.Origin);
+    }
+
+    const auto &[c1, c2, c3, alpha] = relative.Components;
+
+    builder.Append(u8' ');
+    css::Serialise(builder, context, c1);
+    builder.Append(u8' ');
+    css::Serialise(builder, context, c2);
+    builder.Append(u8' ');
+    css::Serialise(builder, context, c3);
+
+    if (alpha)
+    {
+      builder.Append(u8" / ");
+      css::Serialise(builder, context, *alpha);
+    }
+
+    builder.Append(u8')');
+  }
+
+  template <typename D>
+  KRYS_NODISCARD CSSOMString SerialisationForCSSTokenization(const css::SerialisationContext &context,
+                                                             const RelativeColor<D> &relative) noexcept
+  {
+    StringBuilder builder;
+    SerialisationForCSSTokenization(builder, context, relative);
+    return krys::move(builder).ToString();
+  }
+}

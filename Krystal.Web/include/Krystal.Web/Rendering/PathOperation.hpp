@@ -1,0 +1,271 @@
+﻿/*
+ * Copyright (C) 2012, 2013 Adobe Systems Incorporated. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+#include "Krystal.Web/Graphics/Paths/Path.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Web/Rendering/TransformOperationData.hpp"
+#include "Krystal.Web/Style/Values/Motion/RayFunction.hpp"
+#include "Krystal.Web/Style/Values/Primitives/Url.hpp"
+#include "Krystal.Web/Style/Values/Shapes/BasicShape.hpp"
+
+namespace krys::web
+{
+  struct BlendingContext;
+  class SVGElement;
+
+  /// @brief A path given by `clip-path` or `offset-path`: a reference, a basic shape, a box or a ray.
+  class PathOperation : public RefCounted<PathOperation>
+  {
+  public:
+    enum class Type : uint8
+    {
+      Reference,
+      Shape,
+      Box,
+      Ray,
+    };
+
+  protected:
+    const Type _type;
+    CSSBoxType _referenceBox;
+
+  public:
+    virtual ~PathOperation() noexcept = default;
+
+    KRYS_NODISCARD virtual Ref<PathOperation> Clone() const noexcept = 0;
+
+    KRYS_NODISCARD bool operator==(const PathOperation &other) const noexcept
+    {
+      return Equals(other);
+    }
+
+    KRYS_NODISCARD virtual bool Equals(const PathOperation &) const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanBlend(const PathOperation &) const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual RefPtr<PathOperation> Blend(const PathOperation *,
+                                                       const BlendingContext &) const noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual Maybe<Path> GetPath(const TransformOperationData &) const noexcept = 0;
+
+    KRYS_NODISCARD Type GetType() const noexcept
+    {
+      return _type;
+    }
+
+    void SetReferenceBox(CSSBoxType type) noexcept
+    {
+      _referenceBox = type;
+    }
+
+    KRYS_NODISCARD CSSBoxType ReferenceBox() const noexcept
+    {
+      return _referenceBox;
+    }
+
+    KRYS_NODISCARD bool IsSameType(const PathOperation &o) const noexcept
+    {
+      return o.GetType() == _type;
+    }
+
+  protected:
+    explicit PathOperation(Type type, CSSBoxType referenceBox = CSSBoxType::BoxMissing) noexcept
+        : _type(type), _referenceBox(referenceBox)
+    {
+    }
+  };
+
+  /// @brief A path taken from an SVG shape element referenced by URL.
+  class ReferencePathOperation final : public PathOperation
+  {
+  private:
+    style::Url _url;
+    CSSOMStringAtom _fragment;
+    Maybe<Path> _path;
+
+  public:
+    KRYS_NODISCARD static Ref<ReferencePathOperation>
+      Create(const style::Url &, const CSSOMStringAtom &fragment, const web::SVGElement *) noexcept;
+
+    KRYS_NODISCARD static Ref<ReferencePathOperation> Create(Maybe<Path> &&) noexcept;
+
+    KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
+
+    KRYS_NODISCARD const style::Url &Url() const noexcept
+    {
+      return _url;
+    }
+
+    KRYS_NODISCARD const CSSOMStringAtom &Fragment() const noexcept
+    {
+      return _fragment;
+    }
+
+    KRYS_NODISCARD Maybe<Path> GetPath(const TransformOperationData &) const noexcept override
+    {
+      return _path;
+    }
+
+    KRYS_NODISCARD const Maybe<Path> &GetPath() const noexcept
+    {
+      return _path;
+    }
+
+    KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
+
+  private:
+    ReferencePathOperation(style::Url, CSSOMStringAtom fragment, const web::SVGElement *) noexcept;
+
+    explicit ReferencePathOperation(Maybe<Path> &&) noexcept;
+  };
+
+  /// @brief A path given by a basic shape.
+  class ShapePathOperation final : public PathOperation
+  {
+  private:
+    style::BasicShape _shape;
+
+  public:
+    KRYS_NODISCARD static Ref<ShapePathOperation> Create(style::BasicShape,
+                                                         CSSBoxType = CSSBoxType::BoxMissing) noexcept;
+
+    KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
+
+    KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
+    KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
+                                               const BlendingContext &) const noexcept override;
+
+    KRYS_NODISCARD const style::BasicShape &GetShape() const noexcept
+    {
+      return _shape;
+    }
+
+    KRYS_NODISCARD WindRule GetWindRule() const noexcept
+    {
+      return style::ComputeWindRule(_shape);
+    }
+
+    KRYS_NODISCARD Path PathForReferenceRect(const RectF &boundingRect) const noexcept
+    {
+      return style::ComputePath(_shape, boundingRect);
+    }
+
+    KRYS_NODISCARD Maybe<Path> GetPath(const TransformOperationData &) const noexcept override;
+
+    KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
+
+  private:
+    ShapePathOperation(style::BasicShape &&shape, CSSBoxType referenceBox) noexcept
+        : PathOperation(Type::Shape, referenceBox), _shape(krys::move(shape))
+    {
+    }
+  };
+
+  /// @brief A path following a reference box.
+  class BoxPathOperation final : public PathOperation
+  {
+  public:
+    KRYS_NODISCARD static Ref<BoxPathOperation> Create(CSSBoxType) noexcept;
+
+    KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
+
+    KRYS_NODISCARD Maybe<Path> GetPath(const TransformOperationData &) const noexcept override;
+
+    KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override
+    {
+      return IsSameType(other) && ReferenceBox() == other.ReferenceBox();
+    }
+
+  private:
+    explicit BoxPathOperation(CSSBoxType referenceBox) noexcept : PathOperation(Type::Box, referenceBox)
+    {
+    }
+  };
+
+  /// @brief A path given by `ray()`.
+  class RayPathOperation final : public PathOperation
+  {
+  private:
+    style::RayFunction _ray;
+
+  public:
+    KRYS_NODISCARD static Ref<RayPathOperation> Create(style::RayFunction &&,
+                                                       CSSBoxType = CSSBoxType::BoxMissing) noexcept;
+
+    KRYS_NODISCARD static Ref<RayPathOperation> Create(const style::RayFunction &,
+                                                       CSSBoxType = CSSBoxType::BoxMissing) noexcept;
+
+    KRYS_NODISCARD Ref<PathOperation> Clone() const noexcept override;
+
+    KRYS_NODISCARD const style::RayFunction &Ray() const noexcept
+    {
+      return _ray;
+    }
+
+    KRYS_NODISCARD bool CanBlend(const PathOperation &) const noexcept override;
+
+    KRYS_NODISCARD RefPtr<PathOperation> Blend(const PathOperation *,
+                                               const BlendingContext &) const noexcept override;
+
+    KRYS_NODISCARD Maybe<Path> GetPath(const TransformOperationData &) const noexcept override;
+
+    KRYS_NODISCARD bool Equals(const PathOperation &other) const noexcept override;
+
+  private:
+    RayPathOperation(style::RayFunction ray, CSSBoxType referenceBox) noexcept
+        : PathOperation(Type::Ray, referenceBox), _ray(krys::move(ray))
+    {
+    }
+  };
+}
+
+#define KRYS_SPECIALIZE_TYPE_TRAITS_PATH_OPERATION(ToValueTypeName, predicate)                               \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::ToValueTypeName)                                         \
+    KRYS_NODISCARD static bool IsType(const krys::web::PathOperation &operation) noexcept                    \
+    {                                                                                                        \
+      return operation.GetType() == krys::web::predicate;                                                    \
+    }                                                                                                        \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_TRAITS_PATH_OPERATION(ReferencePathOperation, PathOperation::Type::Reference)
+KRYS_SPECIALIZE_TYPE_TRAITS_PATH_OPERATION(ShapePathOperation, PathOperation::Type::Shape)
+KRYS_SPECIALIZE_TYPE_TRAITS_PATH_OPERATION(BoxPathOperation, PathOperation::Type::Box)
+KRYS_SPECIALIZE_TYPE_TRAITS_PATH_OPERATION(RayPathOperation, PathOperation::Type::Ray)

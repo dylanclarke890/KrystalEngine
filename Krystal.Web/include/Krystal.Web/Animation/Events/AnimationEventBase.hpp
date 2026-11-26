@@ -1,0 +1,105 @@
+﻿/*
+ * Copyright (C) 2020 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Animation/Timing/WebAnimationTime.hpp"
+#include "Krystal.Web/Animation/WebAnimation.hpp"
+#include "Krystal.Web/Dom/Events/Event.hpp"
+
+namespace krys::web
+{
+  class WebAnimation;
+
+  /// @brief An event about an animation: a playback event, or a CSS animation or transition event.
+  class AnimationEventBase : public Event
+  {
+  private:
+    RefPtr<WebAnimation> _animation;
+    Maybe<Seconds> _scheduledTime;
+
+  protected:
+    /// @brief A trusted event, fired by the user agent, that bubbles and isn't cancelable.
+    AnimationEventBase(DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime) noexcept;
+
+    AnimationEventBase(DOMStringAtom type, const EventInit &eventInitDict) noexcept;
+
+  public:
+    ~AnimationEventBase() noexcept override;
+
+    KRYS_NODISCARD bool IsAnimationEvent() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD virtual bool IsAnimationPlaybackEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCSSAnimationEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCSSTransitionEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD WebAnimation *Animation() const noexcept
+    {
+      return _animation.get();
+    }
+
+    KRYS_NODISCARD Maybe<Seconds> ScheduledTime() const noexcept
+    {
+      return _scheduledTime;
+    }
+
+    /// @brief Sets the target to dispatch the event at, once it's dispatched from the pending animation event
+    /// queue.
+    void SetTarget(RefPtr<EventTarget> &&target) noexcept
+    {
+      _target = krys::move(target);
+    }
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::AnimationEventBase)
+  KRYS_NODISCARD static bool IsType(const krys::web::Event &event) noexcept
+  {
+    return event.IsAnimationEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
+
+#define KRYS_SPECIALIZE_TYPE_TRAITS_ANIMATION_EVENT_BASE(ToValueTypeName, predicate)                         \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(ToValueTypeName)                                                    \
+    KRYS_NODISCARD static bool IsType(const krys::web::AnimationEventBase &value) noexcept                   \
+    {                                                                                                        \
+      return value.predicate;                                                                                \
+    }                                                                                                        \
+  KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

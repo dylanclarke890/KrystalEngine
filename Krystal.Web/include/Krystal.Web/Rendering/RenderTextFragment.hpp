@@ -1,0 +1,117 @@
+﻿/*
+ * (C) 1999 Lars Knoll (knoll@kde.org)
+ * (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2004, 2005, 2006, 2007 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Web/Rendering/RenderText.hpp"
+
+namespace krys::web
+{
+  class RenderBlock;
+  class RenderBoxModelObject;
+
+  /// @brief Used to represent a text substring of an element, e.g., for text runs that are split because of
+  /// first letter and that must therefore have different styles (and positions in the render tree).
+  /// We cache offsets so that text transformations can be applied in such a way that we can recover
+  /// the original unaltered string from our corresponding DOM node.
+  class RenderTextFragment final : public RenderText
+  {
+    KRYS_NON_COPY_MOVABLE(RenderTextFragment);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTextFragment);
+
+  private:
+    size_t _start;
+    size_t _end;
+    // Alternative description that can be used for accessibility instead of the native text.
+    Maybe<utf8_string> _altText;
+    utf8_string _contentString;
+    WeakPtr<RenderBoxModelObject> _firstLetter;
+
+  public:
+    RenderTextFragment(web::Text &textNode, utf8_stringview text, size_t startOffset, size_t length) noexcept;
+
+    RenderTextFragment(Document &document, utf8_stringview text, size_t startOffset, size_t length) noexcept;
+
+    RenderTextFragment(Document &document, utf8_string text) noexcept;
+
+    ~RenderTextFragment() noexcept override;
+
+    KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
+    {
+      return u8"RenderTextFragment";
+    }
+
+    /// @brief The byte offset of the fragment in the original text.
+    KRYS_NODISCARD size_t Start() const noexcept
+    {
+      return _start;
+    }
+
+    /// @brief The length of the fragment, in bytes.
+    KRYS_NODISCARD size_t End() const noexcept
+    {
+      return _end;
+    }
+
+    KRYS_NODISCARD RenderBoxModelObject *FirstLetter() const noexcept;
+
+    void SetFirstLetter(RenderBoxModelObject &firstLetter) noexcept;
+
+    KRYS_NODISCARD RenderBlock *BlockForAccompanyingFirstLetter() noexcept;
+
+    void SetContentString(utf8_string text) noexcept;
+
+    KRYS_NODISCARD const utf8_string &ContentString() const noexcept
+    {
+      return _contentString;
+    }
+
+    /// @brief The alt text CSS `content` gives the generated text, if any (empty marks it decorative).
+    KRYS_NODISCARD const Maybe<utf8_string> &AltText() const noexcept
+    {
+      return _altText;
+    }
+
+    void SetAltText(Maybe<utf8_string> altText) noexcept
+    {
+      _altText = krys::move(altText);
+    }
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override;
+
+  private:
+    void SetTextInternal(utf8_string text, bool force) noexcept override;
+
+    KRYS_NODISCARD utf8_string PreviousCharacter() const noexcept override;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::RenderTextFragment)
+  KRYS_NODISCARD static bool IsType(const krys::web::RenderObject &renderer) noexcept
+  {
+    return renderer.IsRenderTextFragment();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

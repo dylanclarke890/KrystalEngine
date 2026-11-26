@@ -1,0 +1,103 @@
+﻿/*
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ *           (C) 2000 Antti Koivisto (koivisto@kde.org)
+ *           (C) 2000 Dirk Mueller (mueller@kde.org)
+ * Copyright (C) 2003, 2005-2008, 2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2020 Noam Rosenthal (noam@webkit.org)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#include "Krystal.Web/Rendering/Style/StyleCursorImage.hpp"
+#include "Krystal.Core/Memory/PointerComparison.hpp"
+#include "Krystal.Web/Css/Values/CursorImageValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValuePair.hpp"
+#include "Krystal.Web/Rendering/Style/StyleImageSet.hpp"
+
+namespace krys::web
+{
+  Ref<StyleCursorImage> StyleCursorImage::Create(const Ref<StyleImage> &image, Maybe<PointI> hotSpot,
+                                                 const style::Url &originalUrl) noexcept
+  {
+    return AdoptRef(*new StyleCursorImage(image, hotSpot, originalUrl));
+  }
+
+  Ref<StyleCursorImage> StyleCursorImage::Create(Ref<StyleImage> &&image, Maybe<PointI> hotSpot,
+                                                 style::Url &&originalUrl) noexcept
+  {
+    return AdoptRef(*new StyleCursorImage(krys::move(image), hotSpot, krys::move(originalUrl)));
+  }
+
+  StyleCursorImage::StyleCursorImage(const Ref<StyleImage> &image, Maybe<PointI> hotSpot,
+                                     const style::Url &originalUrl) noexcept
+      : StyleMultiImage {Type::CursorImage}, _image {image}, _hotSpot {hotSpot}, _originalUrl {originalUrl}
+  {
+  }
+
+  StyleCursorImage::StyleCursorImage(Ref<StyleImage> &&image, Maybe<PointI> hotSpot,
+                                     style::Url &&originalUrl) noexcept
+      : StyleMultiImage {Type::CursorImage}, _image {krys::move(image)}, _hotSpot {hotSpot},
+        _originalUrl {krys::move(originalUrl)}
+  {
+  }
+
+  StyleCursorImage::~StyleCursorImage() noexcept = default;
+
+  bool StyleCursorImage::Equals(const StyleImage &other) const noexcept
+  {
+    const auto *otherCursorImage = DynamicDowncast<StyleCursorImage>(other);
+    return otherCursorImage && Equals(*otherCursorImage);
+  }
+
+  bool StyleCursorImage::Equals(const StyleCursorImage &other) const noexcept
+  {
+    return EqualInputImages(other) && StyleMultiImage::Equals(other);
+  }
+
+  bool StyleCursorImage::EqualInputImages(const StyleCursorImage &other) const noexcept
+  {
+    return ArePointingToEqualData(_image, other._image);
+  }
+
+  Ref<css::Value> StyleCursorImage::ComputedStyleValue(const RenderStyle &style) const noexcept
+  {
+    RefPtr<css::ValuePair> hotSpot;
+    if (_hotSpot)
+    {
+      hotSpot = css::ValuePair::CreateNonCoalescing(css::PrimitiveValue::Create(_hotSpot->X()),
+                                                    css::PrimitiveValue::Create(_hotSpot->Y()));
+    }
+    return css::CursorImageValue::Create(_image->ComputedStyleValue(style), krys::move(hotSpot),
+                                         style::ConvertToCSS(_originalUrl, style));
+  }
+
+  ImageWithScale StyleCursorImage::SelectBestFitImage(const Document &document) noexcept
+  {
+    if (auto *imageSet = DynamicDowncast<StyleImageSet>(_image.get()))
+    {
+      return imageSet->SelectBestFitImage(document);
+    }
+
+    return {RefPtr<StyleImage> {_image}, 1, std::nullopt};
+  }
+
+  bool StyleCursorImage::UsesDataProtocol() const noexcept
+  {
+    return _originalUrl.Resolved.ProtocolIsData();
+  }
+}

@@ -1,0 +1,221 @@
+﻿/*
+ * Copyright (C) 2020 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Layout/FormattingContexts/Flex/FlexFormattingUtils.hpp"
+#include "Krystal.Web/Layout/FormattingContexts/Flex/FlexFormattingContext.hpp"
+#include "Krystal.Web/Layout/FormattingContexts/Flex/LogicalFlexItem.hpp"
+#include "Krystal.Web/Layout/LayoutTree/LayoutBoxGeometry.hpp"
+#include "Krystal.Web/Layout/LayoutTree/LayoutBoxInlines.hpp"
+#include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+
+namespace krys::web::layout
+{
+  FlexFormattingUtils::FlexFormattingUtils(const FlexFormattingContext &flexFormattingContext) noexcept
+      : _flexFormattingContext(flexFormattingContext)
+  {
+  }
+
+  bool FlexFormattingUtils::IsMainAxisParallelWithInlineAxis(const ElementBox &flexContainer) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+    auto &flexContainerStyle = flexContainer.Style();
+    auto isHorizontalWritingMode = flexContainerStyle.GetWritingMode().IsHorizontal();
+    auto flexDirection = flexContainerStyle.FlexDirection();
+    return (isHorizontalWritingMode
+            && (flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse))
+           || (!isHorizontalWritingMode
+               && (flexDirection == FlexDirection::Column || flexDirection == FlexDirection::ColumnReverse));
+  }
+
+  ContentPosition
+    FlexFormattingUtils::LogicalJustifyContentPosition(const ElementBox &flexContainer,
+                                                       ContentPosition justifyContentPosition) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+
+    if (justifyContentPosition != ContentPosition::Right && justifyContentPosition != ContentPosition::Left)
+    {
+      return justifyContentPosition;
+    }
+
+    auto &flexContainerStyle = flexContainer.Style();
+    // If the property's axis is not parallel with either left<->right axis, this value behaves as start
+    // (https://drafts.csswg.org/css-align/#positional-values) Currently, the only case where the property's
+    // axis is not parallel with either left<->right axis is in a column flexbox.
+    // https://drafts.csswg.org/css-align/#positional-values
+    if (flexContainerStyle.IsColumnFlexDirection() && flexContainerStyle.GetWritingMode().IsHorizontal())
+    {
+      return ContentPosition::Start;
+    }
+
+    auto isLeftToRightInAxisDirection = flexContainerStyle.IsRowFlexDirection()
+                                          ? flexContainerStyle.GetWritingMode().IsLogicalLeftInlineStart()
+                                          : flexContainerStyle.GetWritingMode().IsBlockLeftToRight();
+    if (justifyContentPosition == ContentPosition::Left)
+    {
+      return isLeftToRightInAxisDirection ? ContentPosition::Start : ContentPosition::End;
+    }
+    return isLeftToRightInAxisDirection ? ContentPosition::End : ContentPosition::Start;
+  }
+
+  bool FlexFormattingUtils::IsMainReversedToContentDirection(const ElementBox &flexContainer) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+    auto flexDirection = flexContainer.Style().FlexDirection();
+    return flexDirection == FlexDirection::RowReverse || flexDirection == FlexDirection::ColumnReverse;
+  }
+
+  bool FlexFormattingUtils::AreFlexLinesReversedInCrossAxis(const ElementBox &flexContainer) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+    return flexContainer.Style().FlexWrap() == FlexWrap::Reverse;
+  }
+
+  // The column-gap property specifies spacing between "columns", separating boxes in the container's inline
+  // axis similar to inline-axis margin; while row-gap indicates spacing between "rows". separating boxes in
+  // the container's block axis. horizontal row    : column gap vertical   row    : column gap horizontal
+  // column : row gap vertical   column : row gap
+  LayoutUnit FlexFormattingUtils::MainAxisGapValue(const ElementBox &flexContainer,
+                                                   LayoutUnit flexContainerContentBoxWidth) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+    auto flexDirection = flexContainer.Style().FlexDirection();
+    auto isMainAxisInlineAxis =
+      flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
+    auto &gap = isMainAxisInlineAxis ? flexContainer.Style().ColumnGap() : flexContainer.Style().RowGap();
+    return style::EvaluateMinimum<LayoutUnit>(gap, flexContainerContentBoxWidth, style::ZoomNeeded {});
+  }
+
+  LayoutUnit FlexFormattingUtils::CrossAxisGapValue(const ElementBox &flexContainer,
+                                                    LayoutUnit flexContainerContentBoxHeight) noexcept
+  {
+    krys_debug_assert(flexContainer.IsFlexBox());
+    auto flexDirection = flexContainer.Style().FlexDirection();
+    auto isMainAxisInlineAxis =
+      flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
+    auto &gap = isMainAxisInlineAxis ? flexContainer.Style().RowGap() : flexContainer.Style().ColumnGap();
+    return style::EvaluateMinimum<LayoutUnit>(gap, flexContainerContentBoxHeight, style::ZoomNeeded {});
+  }
+
+  // flex container  direction  flex item    main axis size
+  // horizontal      row        horizontal : width
+  // vertical        column     horizontal : width
+  // vertical        row        vertical   : width
+  // horizontal      column     vertical   : width
+  //
+  // horizontal      row        vertical   : height
+  // horizontal      column     horizontal : height
+  // vertical        row        horizontal : height
+  // vertical        column     vertical   : height
+  LayoutUnit FlexFormattingUtils::UsedMinimumSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept
+  {
+    if (auto mainAxisMinimumWidth = flexItem.MainAxis().MinimumSize)
+    {
+      return *mainAxisMinimumWidth;
+    }
+
+    auto &flexContainer = FormattingContext().Root();
+    auto &flexItemBox = flexItem.LayoutBox();
+    auto isMainAxisParallelWithInlineAxis = IsMainAxisParallelWithInlineAxis(flexContainer);
+
+    auto minimumContentSize = LayoutUnit {};
+    auto shouldUseFlexItemContentWidth =
+      (isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsHorizontal())
+      || (!isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsVertical());
+    minimumContentSize = shouldUseFlexItemContentWidth
+                           ? FormattingContext().GetIntegrationUtils().MinContentWidth(flexItemBox)
+                           : FormattingContext().GetIntegrationUtils().MinContentHeight(flexItemBox);
+    if (auto mainAxisWidth = flexItem.MainAxis().Size)
+    {
+      minimumContentSize = std::min(*mainAxisWidth, minimumContentSize);
+    }
+    return minimumContentSize;
+  }
+
+  Maybe<LayoutUnit> FlexFormattingUtils::UsedMaximumSizeInMainAxis(const LogicalFlexItem &flexItem) noexcept
+  {
+    // Initial value of 'max-width: none' computes to used 'infinite'
+    return flexItem.MainAxis().MaximumSize;
+  }
+
+  LayoutUnit FlexFormattingUtils::UsedMaxContentSizeInMainAxis(const LogicalFlexItem &flexItem) const noexcept
+  {
+    auto &flexContainer = FormattingContext().Root();
+    auto &flexItemBox = flexItem.LayoutBox();
+    auto isMainAxisParallelWithInlineAxis = IsMainAxisParallelWithInlineAxis(flexContainer);
+
+    auto contentSize = LayoutUnit {};
+    auto shouldUseFlexItemContentWidth =
+      (isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsHorizontal())
+      || (!isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsVertical());
+    if (shouldUseFlexItemContentWidth)
+    {
+      contentSize = FormattingContext().GetIntegrationUtils().MaxContentWidth(flexItemBox);
+    }
+    else
+    {
+      FormattingContext().GetIntegrationUtils().LayoutWithFormattingContextForBox(flexItemBox);
+      auto isOrthogonal = flexContainer.GetWritingMode().IsOrthogonal(flexItem.GetWritingMode());
+      contentSize = !isOrthogonal ? FormattingContext().GeometryForFlexItem(flexItemBox).ContentBoxHeight()
+                                  : FormattingContext().GeometryForFlexItem(flexItemBox).ContentBoxWidth();
+    }
+
+    if (!flexItem.IsContentBoxBased())
+    {
+      contentSize += flexItem.MainAxis().BorderAndPadding;
+    }
+    return contentSize;
+  }
+
+  LayoutUnit FlexFormattingUtils::UsedSizeInCrossAxis(const LogicalFlexItem &flexItem,
+                                                      LayoutUnit maxAxisConstraint) const noexcept
+  {
+    if (auto definiteSize = flexItem.CrossAxis().DefiniteSize)
+    {
+      return *definiteSize;
+    }
+
+    auto &flexContainer = FormattingContext().Root();
+    auto &flexItemBox = flexItem.LayoutBox();
+    auto isMainAxisParallelWithInlineAxis = IsMainAxisParallelWithInlineAxis(flexContainer);
+
+    auto widthConstraintForLayout =
+      isMainAxisParallelWithInlineAxis ? Maybe<LayoutUnit>(maxAxisConstraint) : null;
+    auto shouldUseFlexItemContentHeight =
+      (isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsHorizontal())
+      || (!isMainAxisParallelWithInlineAxis && flexItem.GetWritingMode().IsVertical());
+    FormattingContext().GetIntegrationUtils().LayoutWithFormattingContextForBox(flexItemBox,
+                                                                                widthConstraintForLayout);
+    auto crossSize = shouldUseFlexItemContentHeight
+                       ? FormattingContext().GeometryForFlexItem(flexItemBox).ContentBoxHeight()
+                       : FormattingContext().GeometryForFlexItem(flexItemBox).ContentBoxWidth();
+    if (!flexItem.IsContentBoxBased())
+    {
+      crossSize += flexItem.CrossAxis().BorderAndPadding;
+    }
+    return crossSize;
+  }
+}

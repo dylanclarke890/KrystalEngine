@@ -1,0 +1,73 @@
+﻿#pragma once
+
+#include "Krystal.Web/Graphics/Color/DestinationColorSpace.hpp"
+#include "Krystal.Web/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Web/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Web/Graphics/ImageBuffers/ImageBufferBackend.hpp"
+#include "Krystal.Web/Page/Clients/WebClient.hpp"
+
+namespace krys::web::tests
+{
+  /// @brief A stand-in for a host's accelerated backend: it records what's drawn, and counts its flushes and
+  /// preparations for display.
+  class TestAcceleratedBackend final : public ImageBufferBackend
+  {
+  private:
+    display_list::RecorderImpl _recorder;
+
+  public:
+    constexpr static RenderingMode BackendRenderingMode = RenderingMode::Accelerated;
+
+    int32 Flushes {0};
+    int32 Preparations {0};
+
+    KRYS_NODISCARD static UniquePtr<TestAcceleratedBackend> Create(const Parameters &parameters) noexcept
+    {
+      return CreateUnique<TestAcceleratedBackend>(parameters);
+    }
+
+    explicit TestAcceleratedBackend(const Parameters &parameters) noexcept
+        : ImageBufferBackend(parameters), _recorder(SizeF(parameters.BackendSize))
+    {
+    }
+
+    KRYS_NODISCARD GraphicsContext &Context() noexcept override
+    {
+      return _recorder;
+    }
+
+    void FlushContext() noexcept override
+    {
+      ++Flushes;
+    }
+
+    void PrepareForDisplay() noexcept override
+    {
+      ++Preparations;
+    }
+  };
+
+  /// @brief A host that makes accelerated buffers with `TestAcceleratedBackend`, and leaves the rest to the
+  /// page.
+  class AcceleratingWebClient final : public WebClient
+  {
+  public:
+    mutable int32 BuffersMade {0};
+
+    void AttachRootGraphicsLayer(web::Frame &, GraphicsLayer *) noexcept override
+    {
+    }
+
+    KRYS_NODISCARD RefPtr<ImageBuffer>
+      CreateImageBuffer(const SizeF &size, RenderingMode mode, RenderingPurpose purpose,
+                        float resolutionScale, const DestinationColorSpace &) const noexcept override
+    {
+      if (mode != RenderingMode::Accelerated)
+      {
+        return nullptr;
+      }
+      ++BuffersMade;
+      return ImageBuffer::Create<TestAcceleratedBackend>(size, resolutionScale, purpose);
+    }
+  };
+}

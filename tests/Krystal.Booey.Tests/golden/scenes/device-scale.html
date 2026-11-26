@@ -1,0 +1,35 @@
+﻿<!doctype html>
+<!-- The "device-scale" page golden; Krystal.Booey.Tests/tests/Golden.cpp paints it through a View at a device
+     scale factor of 2. -->
+<html data-width="180" data-height="120" data-device-scale="2">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; }
+  .tile { width: 32px; height: 32px; background: linear-gradient(135deg, #ef476f, #ffd166 50%, #118ab2); }
+</style>
+</head>
+<body>
+  <!-- Hairline and rounded borders, and a shadow. -->
+  <div style="left: 8px; top: 8px; width: 40px; height: 32px; border: 1px solid #222222"></div>
+  <div style="left: 56px; top: 8px; width: 40px; height: 32px; border: 3px solid #4f6df5; border-radius: 12px"></div>
+  <div style="left: 104px; top: 8px; width: 32px; height: 32px; background: #06d6a0; box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.5)"></div>
+  <div style="left: 144px; top: 8px; width: 28px; height: 28px; border-radius: 50%; background: #ef476f"></div>
+
+  <!-- A gradient, an image and an SVG. -->
+  <div class="tile" style="left: 8px; top: 48px"></div>
+  <img src="images/landscape.png" style="position: absolute; left: 48px; top: 48px; width: 32px; height: 32px">
+  <svg style="position: absolute; left: 88px; top: 48px" width="32" height="32">
+    <circle cx="16" cy="16" r="13" fill="none" stroke="#118ab2" stroke-width="2"/>
+    <path d="M6 26 L26 6" stroke="#ef476f" stroke-width="1"/>
+  </svg>
+
+  <!-- Composited layers: one transformed, one blurred, one with a drop shadow. -->
+  <div class="tile" style="left: 128px; top: 48px; will-change: transform; transform: rotate(15deg)"></div>
+  <div class="tile" style="left: 8px; top: 84px; will-change: transform; filter: blur(2px)"></div>
+  <div class="tile" style="left: 48px; top: 84px; will-change: transform; filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.6))"></div>
+  <div class="tile" style="left: 96px; top: 84px; opacity: 0.5; will-change: opacity"></div>
+</body>
+</html>

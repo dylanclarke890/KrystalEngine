@@ -1,0 +1,154 @@
+﻿/*
+ * Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Style/Values/Transforms/Translate.hpp"
+
+#include "Krystal.Web/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Web/Style/Builder/BuilderChecking.hpp"
+#include "Krystal.Web/Style/Builder/BuilderState.hpp"
+#include "Krystal.Web/Style/Values/Primitives/LengthWrapperBlending.hpp"
+#include "Krystal.Web/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesCSSValueConversion.hpp"
+#include "Krystal.Web/Style/Values/Primitives/NumericTypesCSSValueCreation.hpp"
+
+namespace krys::web::style
+{
+  using namespace css::literals;
+
+  TransformFunctionSizeDependencies Translate::ComputeSizeDependencies() const noexcept
+  {
+    if (const auto &protectedValue = _value)
+    {
+      return protectedValue->ComputeSizeDependencies();
+    }
+    return {};
+  }
+
+  void Translate::Apply(TransformationMatrix &transform, const SizeF &size) const noexcept
+  {
+    if (const auto &protectedValue = _value)
+    {
+      protectedValue->Apply(transform, size);
+    }
+  }
+
+  // MARK: - Conversion
+
+  Translate CSSValueConversion<Translate>::operator()(BuilderState &state, const css::Value &value) noexcept
+  {
+    // https://drafts.csswg.org/css-transforms-2/#propdef-translate
+    // none | <length-percentage> [ <length-percentage> <length>? ]?
+
+    if (const auto *primitiveValue = DynamicDowncast<css::PrimitiveValue>(value))
+    {
+      krys_debug_assert(primitiveValue->ValueId() == css::ValueId::None);
+      return css::keywords::None {};
+    }
+
+    auto list = RequiredListDowncast<css::ValueList, css::PrimitiveValue>(state, value);
+    if (!list)
+    {
+      return css::keywords::None {};
+    }
+
+    auto type = list->size() > 2 ? TransformFunctionType::Translate3D : TransformFunctionType::Translate;
+    auto tx = ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, (*list)[0]);
+    auto ty = list->size() > 1
+                ? ConvertCSSValueToStyle<TranslateTransformFunction::LengthPercentage>(state, (*list)[1])
+                : TranslateTransformFunction::LengthPercentage {0_css_px};
+    auto tz = list->size() > 2 ? ConvertCSSValueToStyle<TranslateTransformFunction::Length>(state, (*list)[2])
+                               : TranslateTransformFunction::Length {0_css_px};
+
+    return TranslateTransformFunction::Create(krys::move(tx), krys::move(ty), krys::move(tz), type);
+  }
+
+  // MARK: - Blending
+
+  Translate Blending<Translate>::Blend(const Translate &from, const Translate &to,
+                                       const BlendingContext &context) noexcept
+  {
+    const auto &fromTranslate = from._value;
+    const auto &toTranslate = to._value;
+
+    if (!fromTranslate && !toTranslate)
+    {
+      return css::keywords::None {};
+    }
+
+    auto identity = [&](const auto &other)
+    {
+      return TranslateTransformFunction::Create(0_css_px, 0_css_px, 0_css_px, other.GetType());
+    };
+
+    auto fromFunction =
+      fromTranslate ? Ref<const TranslateTransformFunction> {fromTranslate} : identity(*toTranslate);
+    auto toFunction =
+      toTranslate ? Ref<const TranslateTransformFunction> {toTranslate} : identity(*fromTranslate);
+
+    // Ensure the two transforms have the same type.
+    if (!fromFunction->IsSameType(*toFunction))
+    {
+      RefPtr<const TranslateTransformFunction> normalizedFrom;
+      RefPtr<const TranslateTransformFunction> normalizedTo;
+      if (fromFunction->Is3DOperation() || toFunction->Is3DOperation())
+      {
+        normalizedFrom = TranslateTransformFunction::Create(
+          fromFunction->X(), fromFunction->Y(), fromFunction->Z(), TransformFunctionType::Translate3D);
+        normalizedTo = TranslateTransformFunction::Create(toFunction->X(), toFunction->Y(), toFunction->Z(),
+                                                          TransformFunctionType::Translate3D);
+      }
+      else
+      {
+        normalizedFrom = TranslateTransformFunction::Create(fromFunction->X(), fromFunction->Y(),
+                                                            TransformFunctionType::Translate);
+        normalizedTo = TranslateTransformFunction::Create(toFunction->X(), toFunction->Y(),
+                                                          TransformFunctionType::Translate);
+      }
+      return Blend(Translate {Ref<const TranslateTransformFunction> {krys::move(normalizedFrom)}},
+                   Translate {Ref<const TranslateTransformFunction> {krys::move(normalizedTo)}}, context);
+    }
+
+    if (auto blendedFunction = toFunction->Blend(fromFunction.get(), context);
+        const auto *translate = DynamicDowncast<TranslateTransformFunction>(*blendedFunction))
+    {
+      return TranslateTransformFunction::Create(translate->X(), translate->Y(), translate->Z(),
+                                                translate->GetType());
+    }
+
+    return css::keywords::None {};
+  }
+
+  // MARK: - Platform
+
+  RefPtr<TransformOperation> ToPlatform<Translate>::operator()(const Translate &value,
+                                                               const SizeF &size) noexcept
+  {
+    if (const auto &function = value._value)
+    {
+      return function->ToPlatform(size);
+    }
+    return nullptr;
+  }
+}

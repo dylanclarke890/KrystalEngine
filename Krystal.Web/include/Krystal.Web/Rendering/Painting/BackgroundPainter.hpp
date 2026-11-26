@@ -1,0 +1,182 @@
+﻿/*
+ * Copyright (C) 1999 Lars Knoll (knoll@kde.org)
+ *           (C) 1999 Antti Koivisto (koivisto@kde.org)
+ * Copyright (C) 2003-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 Google Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+#pragma once
+
+#include "Krystal.Web/Graphics/Geometry/LayoutRect.hpp"
+#include "Krystal.Web/Graphics/GraphicsTypes.hpp"
+#include "Krystal.Web/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
+#include "Krystal.Web/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Web/Style/Values/Backgrounds/BackgroundLayers.hpp"
+#include "Krystal.Web/Style/Values/Borders/Shadow.hpp"
+
+namespace krys::web
+{
+  class FloatRoundedRect;
+  class GraphicsContext;
+  struct PaintInfo;
+  class RenderView;
+
+  enum BaseBackgroundColorUsage
+  {
+    BaseBackgroundColorUse,
+    BaseBackgroundColorOnly,
+    BaseBackgroundColorSkip,
+  };
+
+  /// @brief Where a background image is drawn: the rect it covers, its tiles' size, the phase of the first
+  /// tile and the space between tiles.
+  struct BackgroundImageGeometry
+  {
+    LayoutRect DestinationRect;
+    LayoutPoint DestinationOrigin;
+    LayoutSize TileSizeWithoutPixelSnapping;
+    LayoutSize TileSize;
+    LayoutSize Phase;
+    LayoutSize SpaceSize;
+    bool HasNonLocalGeometry; // Has background-attachment: fixed. Implies that we can't always cheaply
+                              // compute destRect.
+
+    BackgroundImageGeometry(const LayoutRect &destinationRect, const LayoutSize &tileSizeWithoutPixelSnapping,
+                            const LayoutSize &tileSize, const LayoutSize &phase, const LayoutSize &spaceSize,
+                            bool fixedAttachment) noexcept;
+
+    KRYS_NODISCARD LayoutSize RelativePhase() const noexcept
+    {
+      LayoutSize relativePhase = Phase;
+      relativePhase += DestinationRect.Location() - DestinationOrigin;
+      return relativePhase;
+    }
+
+    void Clip(const LayoutRect &clipRect) noexcept
+    {
+      DestinationRect.Intersect(clipRect);
+    }
+  };
+
+  template <typename TLayer>
+  struct FillLayerToPaint
+  {
+    const TLayer &Layer;
+    bool IsLast;
+  };
+
+  /// @brief Paints a box's backgrounds: its colour and images, layer by layer, clipped and positioned as
+  /// their properties say, and the root's background over the canvas.
+  class BackgroundPainter
+  {
+  private:
+    RenderBoxModelObject &_renderer;
+    const PaintInfo &_paintInfo;
+    Maybe<FillBox> _overrideClip;
+    Maybe<FillBox> _overrideOrigin;
+
+  public:
+    BackgroundPainter(RenderBoxModelObject &, const PaintInfo &) noexcept;
+
+    void SetOverrideClip(FillBox overrideClip) noexcept
+    {
+      _overrideClip = overrideClip;
+    }
+
+    void SetOverrideOrigin(FillBox overrideOrigin) noexcept
+    {
+      _overrideOrigin = overrideOrigin;
+    }
+
+    void PaintBackground(const LayoutRect &, BleedAvoidance) const noexcept;
+
+    void PaintFillLayers(const Color &, const style::BackgroundLayers &, const LayoutRect &, BleedAvoidance,
+                         CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
+    void PaintFillLayer(const Color &, const FillLayerToPaint<style::BackgroundLayer> &, const LayoutRect &,
+                        BleedAvoidance, const inline_iterator::InlineBoxIterator &,
+                        const LayoutRect &backgroundImageStrip = {},
+                        CompositeOperator = CompositeOperator::SourceOver,
+                        RenderElement *backgroundObject = nullptr,
+                        BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
+
+    void PaintFillLayers(const Color &, const style::MaskLayers &, const LayoutRect &, BleedAvoidance,
+                         CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
+    void PaintFillLayer(const Color &, const FillLayerToPaint<style::MaskLayer> &, const LayoutRect &,
+                        BleedAvoidance, const inline_iterator::InlineBoxIterator &,
+                        const LayoutRect &backgroundImageStrip = {},
+                        CompositeOperator = CompositeOperator::SourceOver,
+                        RenderElement *backgroundObject = nullptr,
+                        BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
+
+    void PaintBoxShadow(const LayoutRect &, const RenderStyle &, style::ShadowStyle,
+                        RectEdges<bool> closedEdges = {true}) const noexcept;
+
+    KRYS_NODISCARD static bool PaintsOwnBackground(const RenderBoxModelObject &) noexcept;
+
+    KRYS_NODISCARD static BackgroundImageGeometry CalculateFillLayerImageGeometry(
+      const RenderBoxModelObject &, const RenderLayerModelObject *paintContainer,
+      const style::BackgroundLayer &, const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
+      Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+
+    KRYS_NODISCARD static BackgroundImageGeometry
+      CalculateFillLayerImageGeometry(const RenderBoxModelObject &,
+                                      const RenderLayerModelObject *paintContainer, const style::MaskLayer &,
+                                      const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
+                                      Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+
+    static void ClipRoundedInnerRect(GraphicsContext &, const FloatRoundedRect &clipRect) noexcept;
+
+    KRYS_NODISCARD static bool
+      BoxShadowShouldBeAppliedToBackground(const RenderBoxModelObject &, const LayoutPoint &paintOffset,
+                                           BleedAvoidance,
+                                           const inline_iterator::InlineBoxIterator &) noexcept;
+
+  private:
+    void PaintRootBoxFillLayers() const noexcept;
+
+    template <typename TLayers>
+    void PaintFillLayersImpl(const Color &, const TLayers &, const LayoutRect &, BleedAvoidance,
+                             CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+
+    template <typename TLayer>
+    void PaintFillLayerImpl(const Color &, const FillLayerToPaint<TLayer> &, const LayoutRect &,
+                            BleedAvoidance, const inline_iterator::InlineBoxIterator &,
+                            const LayoutRect &backgroundImageStrip = {},
+                            CompositeOperator = CompositeOperator::SourceOver,
+                            RenderElement *backgroundObject = nullptr,
+                            BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
+
+    template <typename TLayer>
+    KRYS_NODISCARD static BackgroundImageGeometry
+      CalculateFillLayerImageGeometryImpl(const RenderBoxModelObject &,
+                                          const RenderLayerModelObject *paintContainer, const TLayer &,
+                                          const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
+                                          Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+
+    template <typename TLayer>
+    KRYS_NODISCARD static LayoutSize CalculateFillTileSize(const RenderBoxModelObject &, const TLayer &,
+                                                           const LayoutSize &positioningAreaSize) noexcept;
+
+    KRYS_NODISCARD const web::Document &Document() const noexcept;
+
+    KRYS_NODISCARD const RenderView &View() const noexcept;
+  };
+}

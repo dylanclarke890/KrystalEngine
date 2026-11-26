@@ -1,0 +1,126 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2006, 2008 Rob Buis <buis@kde.org>
+ * Copyright (C) 2018-2019 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Web/Svg/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Web/Svg/SVGLengthList.hpp"
+#include "Krystal.Web/Svg/SVGNumberList.hpp"
+
+namespace krys::web
+{
+  class RenderBoxModelObject;
+
+  /// @brief The base of `<text>` and `<tspan>`: their characters' absolute and relative positions and
+  /// rotations.
+  /// @see https://svgwg.org/svg2-draft/text.html#InterfaceSVGTextPositioningElement
+  class SVGTextPositioningElement : public SVGTextContentElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGTextPositioningElement);
+
+  private:
+    Ref<SVGAnimatedLengthList> _x;
+    Ref<SVGAnimatedLengthList> _y;
+    Ref<SVGAnimatedLengthList> _dx;
+    Ref<SVGAnimatedLengthList> _dy;
+    Ref<SVGAnimatedNumberList> _rotate;
+
+  public:
+    KRYS_NODISCARD static RefPtr<SVGTextPositioningElement>
+      ElementFromRenderer(RenderBoxModelObject &) noexcept;
+
+    using PropertyRegistry = SVGPropertyOwnerRegistry<SVGTextPositioningElement, SVGTextContentElement>;
+
+    KRYS_NODISCARD const SVGLengthList &X() const noexcept
+    {
+      return _x->CurrentValue();
+    }
+
+    KRYS_NODISCARD const SVGLengthList &Y() const noexcept
+    {
+      return _y->CurrentValue();
+    }
+
+    KRYS_NODISCARD const SVGLengthList &Dx() const noexcept
+    {
+      return _dx->CurrentValue();
+    }
+
+    KRYS_NODISCARD const SVGLengthList &Dy() const noexcept
+    {
+      return _dy->CurrentValue();
+    }
+
+    KRYS_NODISCARD const SVGNumberList &Rotate() const noexcept
+    {
+      return _rotate->CurrentValue();
+    }
+
+    KRYS_NODISCARD SVGAnimatedLengthList &XAnimated() noexcept
+    {
+      return *_x;
+    }
+
+    KRYS_NODISCARD SVGAnimatedLengthList &YAnimated() noexcept
+    {
+      return *_y;
+    }
+
+    KRYS_NODISCARD SVGAnimatedLengthList &DxAnimated() noexcept
+    {
+      return *_dx;
+    }
+
+    KRYS_NODISCARD SVGAnimatedLengthList &DyAnimated() noexcept
+    {
+      return *_dy;
+    }
+
+    KRYS_NODISCARD SVGAnimatedNumberList &RotateAnimated() noexcept
+    {
+      return *_rotate;
+    }
+
+  protected:
+    SVGTextPositioningElement(Document &, UniquePtr<SVGPropertyRegistry> &&, SVGElementInterface) noexcept;
+
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept override;
+
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept override;
+
+  private:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept final;
+
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept final;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::SVGTextPositioningElement)
+  KRYS_NODISCARD static bool IsType(const krys::web::SVGElement &target) noexcept
+  {
+    return target.IsSVGTextPositioningElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

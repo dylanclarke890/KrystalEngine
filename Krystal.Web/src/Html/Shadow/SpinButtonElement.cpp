@@ -1,0 +1,284 @@
+﻿/*
+ * Copyright (C) 2006, 2008, 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2010 Google Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Html/Shadow/SpinButtonElement.hpp"
+#include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
+#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
+#include "Krystal.Web/Input/EventHandler.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
+#include "Krystal.Web/Platform/Scrolling/ScrollbarTheme.hpp"
+#include "Krystal.Web/Rendering/RenderBox.hpp"
+#include "Krystal.Web/Rendering/RenderTheme.hpp"
+
+namespace krys::web::html
+{
+  SpinButtonElement::SpinButtonElement(Document &document, SpinButtonOwner &spinButtonOwner) noexcept
+      : HTMLDivElement(document, dom::NodeFlag::HasCustomStyleResolveCallbacks),
+        _spinButtonOwner(&spinButtonOwner), _repeatingTimer(*this, &SpinButtonElement::RepeatingTimerFired)
+  {
+  }
+
+  SpinButtonElement::~SpinButtonElement() noexcept
+  {
+    StopObservingPopups();
+  }
+
+  Ref<SpinButtonElement> SpinButtonElement::Create(Document &document,
+                                                   SpinButtonOwner &spinButtonOwner) noexcept
+  {
+    auto element = CreateRef<SpinButtonElement>(document, spinButtonOwner);
+    element->SetUserAgentPart(css::user_agent_parts::WebkitInnerSpinButton());
+    return element;
+  }
+
+  bool SpinButtonElement::IsDisabledFormControl() const noexcept
+  {
+    auto *host = dom::TreeQueries::ShadowHost(*this);
+    return host && host->IsDisabledFormControl();
+  }
+
+  void SpinButtonElement::DefaultEventHandler(Event &event) noexcept
+  {
+    auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
+    if (!mouseEvent)
+    {
+      if (!event.DefaultHandled())
+      {
+        HTMLDivElement::DefaultEventHandler(event);
+      }
+      return;
+    }
+
+    auto *box = GetRenderBox();
+    if (!box)
+    {
+      if (!event.DefaultHandled())
+      {
+        HTMLDivElement::DefaultEventHandler(event);
+      }
+      return;
+    }
+
+    if (!ShouldRespondToMouseEvents())
+    {
+      if (!event.DefaultHandled())
+      {
+        HTMLDivElement::DefaultEventHandler(event);
+      }
+      return;
+    }
+
+    auto absoluteLocation = mouseEvent->AbsoluteLocation();
+    PointI local = RoundedPointI(box->AbsoluteToLocal(
+      PointF(static_cast<float>(absoluteLocation.X()), static_cast<float>(absoluteLocation.Y())),
+      MapCoordinatesMode::UseTransforms));
+    auto type = mouseEvent->Type();
+    if (type == event_names::MouseDown && mouseEvent->ButtonType() == MouseButton::Left)
+    {
+      if (box->BorderBoxRect().Contains(local))
+      {
+        Ref protectedThis = ShareRef(*this);
+        if (auto *owner = _spinButtonOwner)
+        {
+          owner->FocusAndSelectSpinButtonOwner();
+        }
+        if (Renderer())
+        {
+          if (_upDownState != UpDownState::Indeterminate)
+          {
+            // An event handler called in DoStepAction() below might change the element state and we might
+            // need to cancel the repeating timer by the state change. If we started the timer after
+            // DoStepAction(), we would have no chance to cancel the timer.
+            StartRepeatingTimer();
+            DoStepAction(_upDownState == UpDownState::Up ? 1 : -1);
+          }
+        }
+        mouseEvent->SetDefaultHandled();
+      }
+    }
+    else if (type == event_names::MouseUp && mouseEvent->ButtonType() == MouseButton::Left)
+    {
+      StopRepeatingTimer();
+    }
+    else if (type == event_names::MouseMove)
+    {
+      if (box->BorderBoxRect().Contains(local))
+      {
+        if (!_capturing)
+        {
+          if (auto *frame = NodeDocument().Frame())
+          {
+            frame->GetEventHandler().SetCapturingMouseEventsElement(ShareRefPtr(this));
+            _capturing = true;
+            frame->RegisterPopupOpeningObserver(*this);
+            _popupObservedFrame = CreateWeakPtr(frame);
+          }
+        }
+        auto oldUpDownState = _upDownState;
+        auto *renderer = Renderer();
+        switch (RenderTheme::Singleton().GetInnerSpinButtonLayout(*renderer))
+        {
+          case RenderTheme::InnerSpinButtonLayout::Vertical:
+            _upDownState = local.Y() < box->Height() / 2 ? UpDownState::Up : UpDownState::Down;
+            break;
+          case RenderTheme::InnerSpinButtonLayout::HorizontalUpLeft:
+            _upDownState = local.X() < box->Width() / 2 ? UpDownState::Up : UpDownState::Down;
+            break;
+          case RenderTheme::InnerSpinButtonLayout::HorizontalUpRight:
+            _upDownState = local.X() > box->Width() / 2 ? UpDownState::Up : UpDownState::Down;
+            break;
+        }
+        if (_upDownState != oldUpDownState)
+        {
+          renderer->Repaint();
+        }
+      }
+      else
+      {
+        ReleaseCapture();
+        _upDownState = UpDownState::Indeterminate;
+      }
+    }
+
+    if (!mouseEvent->DefaultHandled())
+    {
+      HTMLDivElement::DefaultEventHandler(*mouseEvent);
+    }
+  }
+
+  void SpinButtonElement::DoStepAction(int32 amount) noexcept
+  {
+    auto *owner = _spinButtonOwner;
+    if (!owner)
+    {
+      return;
+    }
+
+    if (amount > 0)
+    {
+      owner->SpinButtonStepUp();
+    }
+    else if (amount < 0)
+    {
+      owner->SpinButtonStepDown();
+    }
+  }
+
+  void SpinButtonElement::WillDetachRenderers() noexcept
+  {
+    ReleaseCapture();
+  }
+
+  void SpinButtonElement::WillOpenPopup() noexcept
+  {
+    ReleaseCapture();
+    _upDownState = UpDownState::Indeterminate;
+  }
+
+  void SpinButtonElement::ReleaseCapture() noexcept
+  {
+    StopRepeatingTimer();
+    if (_capturing)
+    {
+      if (auto *frame = NodeDocument().Frame())
+      {
+        frame->GetEventHandler().SetCapturingMouseEventsElement(nullptr);
+        _capturing = false;
+      }
+    }
+    StopObservingPopups();
+  }
+
+  void SpinButtonElement::StopObservingPopups() noexcept
+  {
+    if (auto *frame = _popupObservedFrame.get())
+    {
+      frame->UnregisterPopupOpeningObserver(*this);
+    }
+    _popupObservedFrame = nullptr;
+  }
+
+  bool SpinButtonElement::MatchesReadWritePseudoClass() const noexcept
+  {
+    return dom::TreeQueries::ShadowHost(*this)->MatchesReadWritePseudoClass();
+  }
+
+  void SpinButtonElement::StartRepeatingTimer() noexcept
+  {
+    _pressStartingState = _upDownState;
+    auto &theme = ScrollbarTheme::Theme();
+    _repeatingTimer.Start(theme.InitialAutoscrollTimerDelay(), theme.AutoscrollTimerDelay());
+  }
+
+  void SpinButtonElement::StopRepeatingTimer() noexcept
+  {
+    _repeatingTimer.Stop();
+  }
+
+  void SpinButtonElement::Step(int32 amount) noexcept
+  {
+    if (!ShouldRespondToMouseEvents())
+    {
+      return;
+    }
+
+    // On Mac OS, NSStepper updates the value for the button under the mouse
+    // cursor regardless of the button pressed at the beginning.
+    if (_upDownState != _pressStartingState)
+    {
+      return;
+    }
+
+    DoStepAction(amount);
+  }
+
+  void SpinButtonElement::RepeatingTimerFired() noexcept
+  {
+    if (_upDownState != UpDownState::Indeterminate)
+    {
+      Step(_upDownState == UpDownState::Up ? 1 : -1);
+    }
+  }
+
+  void SpinButtonElement::SetHovered(bool flag, style::InvalidationScope invalidationScope,
+                                     HitTestRequest request) noexcept
+  {
+    if (!flag)
+    {
+      _upDownState = UpDownState::Indeterminate;
+    }
+    HTMLDivElement::SetHovered(flag, invalidationScope, request);
+  }
+
+  bool SpinButtonElement::ShouldRespondToMouseEvents() const noexcept
+  {
+    auto *owner = _spinButtonOwner;
+    return !owner || owner->ShouldSpinButtonRespondToMouseEvents();
+  }
+}

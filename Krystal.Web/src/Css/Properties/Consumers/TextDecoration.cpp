@@ -1,0 +1,173 @@
+﻿/*
+ * Copyright (C) 2016-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/TextDecoration.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Color.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/List.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/MetaConsumer.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/TextDecoration/TextShadowProperty.hpp"
+#include "Krystal.Web/Css/Values/TextShadowPropertyValue.hpp"
+
+namespace krys::web::css::parse_property
+{
+  KRYS_NODISCARD static Maybe<TextShadow>
+    ConsumeSingleUnresolvedTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <single-text-shadow> = [ <color>? && <length>{2,3} ]
+    // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
+
+    // FIXME: CSS Text Decoration 4 has updated text-shadow to use the complete box-shadow grammar:
+    // <shadow> = <color>? && [<length>{2} <length [0,∞]>? <length>?] && inset?
+    // https://drafts.csswg.org/css-text-decor-4/#propdef-text-shadow
+
+    auto rangeCopy = tokens;
+
+    Maybe<Color> color;
+    Maybe<Length<AllUnzoomed>> x;
+    Maybe<Length<AllUnzoomed>> y;
+    Maybe<Length<NonNegativeUnzoomed>> blur;
+
+    auto consumeOptionalColor = [&] -> bool
+    {
+      if (color)
+      {
+        return false;
+      }
+
+      auto maybeColor = ConsumeUnresolvedColor(rangeCopy, state);
+      if (!maybeColor)
+      {
+        return false;
+      }
+
+      color = Color(krys::move(*maybeColor));
+      return !!color;
+    };
+
+    auto consumeLengths = [&] -> bool
+    {
+      if (x)
+      {
+        return false;
+      }
+
+      x = MetaConsumer<Length<AllUnzoomed>>::Consume(rangeCopy, state);
+      if (!x)
+      {
+        return false;
+      }
+
+      y = MetaConsumer<Length<AllUnzoomed>>::Consume(rangeCopy, state);
+      if (!y)
+      {
+        return false;
+      }
+
+      blur = MetaConsumer<Length<NonNegativeUnzoomed>>::Consume(rangeCopy, state);
+
+      return true;
+    };
+
+    while (!rangeCopy.IsAtEnd())
+    {
+      if (consumeOptionalColor() || consumeLengths())
+      {
+        continue;
+      }
+
+      break;
+    }
+
+    if (!y)
+    {
+      return {};
+    }
+
+    tokens = rangeCopy;
+
+    return TextShadow {
+      .Color = krys::move(color), .Location = {krys::move(*x), krys::move(*y)}, .Blur = krys::move(blur)};
+  }
+
+  KRYS_NODISCARD static Maybe<TextShadowProperty::List>
+    ConsumeUnresolvedTextShadowList(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    auto rangeCopy = tokens;
+
+    TextShadowProperty::List list;
+
+    do
+    {
+      auto shadow = ConsumeSingleUnresolvedTextShadow(rangeCopy, state);
+      if (!shadow)
+      {
+        return {};
+      }
+
+      list.Value.push_back(krys::move(*shadow));
+    } while (ConsumeComma(rangeCopy));
+
+    tokens = rangeCopy;
+
+    return list;
+  }
+
+  KRYS_NODISCARD static Maybe<TextShadowProperty>
+    ConsumeUnresolvedTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      tokens.Discard();
+      tokens.DiscardWhitespace();
+
+      return TextShadowProperty {keywords::None {}};
+    }
+
+    if (auto textShadowList = ConsumeUnresolvedTextShadowList(tokens, state))
+    {
+      return TextShadowProperty {krys::move(*textShadowList)};
+    }
+
+    return {};
+  }
+
+  RefPtr<Value> ConsumeTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'text-shadow'> = none | [ <color>? && <length>{2,3} ]#
+    // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
+
+    if (auto property = ConsumeUnresolvedTextShadow(tokens, state))
+    {
+      return TextShadowPropertyValue::Create({krys::move(*property)});
+    }
+
+    return nullptr;
+  }
+}

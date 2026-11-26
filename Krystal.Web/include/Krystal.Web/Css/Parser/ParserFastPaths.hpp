@@ -1,0 +1,70 @@
+﻿// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright (C) 2016-2020 Apple Inc. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//    * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//    * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//    * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Css/Properties/PropertyId.hpp"
+#include "Krystal.Web/Css/Types/CSSOMString.hpp"
+
+namespace krys::web::css
+{
+  class Value;
+
+  struct ParserContext;
+  struct PropertyParserState;
+  struct Range;
+
+  class ParserFastPaths
+  {
+  public:
+    /// @brief Parses simple values like '10px' or 'green', but makes no guarantees about handling any
+    /// property completely.
+    KRYS_NODISCARD static RefPtr<Value> MaybeParseValue(PropertyId property, CSSOMStringView string,
+                                                        PropertyParserState &state) noexcept;
+
+    /// @brief Returns the allowed numeric value range for a length value if the property supports a single
+    /// length value.
+    /// FIXME: This should be generated using the codegen scripts.
+    KRYS_NODISCARD static Maybe<Range>
+      LengthValueRangeForPropertiesSupportingSimpleLengths(PropertyId id) noexcept;
+
+    /// @brief Parses numeric and named colors.
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseSimpleColor(CSSOMStringView string,
+                                                               const ParserContext &context) noexcept;
+
+    /// @brief Hex colors of length 3, 4, 6, or 8, without leading "#".
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseHexColor(CSSOMStringView string) noexcept;
+
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseNamedColor(CSSOMStringView string) noexcept;
+  };
+}

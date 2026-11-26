@@ -1,0 +1,110 @@
+﻿#include "Krystal.Web/Css/Values/ImageSetOptionValue.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Web.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Web/Css/Parser/ParserContext.hpp"
+#include "Krystal.Web/Css/Values/ImageValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+
+namespace krys::web::css::tests
+{
+  namespace
+  {
+    Ref<Value> Image(utf8_stringview url)
+    {
+      return ImageValue::Create(*CompleteUrl(
+        CSSOMString {url}, ParserContext {ParserMode::HTMLStandard, net::Url {u8"https://example.com/"}}));
+    }
+
+    Ref<PrimitiveValue> X(double value)
+    {
+      return PrimitiveValue::Create(value, UnitType::x);
+    }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetOptionValue::Create", "[CSS][Values][ImageSetOptionValue]")
+  {
+    SECTION("The resolution defaults to 1x")
+    {
+      auto option = ImageSetOptionValue::Create(Image(u8"a.png"));
+      CHECK(Is<ImageSetOptionValue>(*option));
+      CHECK_FALSE(option->IsImage());
+      CHECK(Is<ImageValue>(option->Image()));
+      CHECK(CssText(option->Resolution()) == "1x");
+      CHECK_FALSE(option->Type());
+      CHECK(CssText(*option) == "url(\"a.png\") 1x");
+    }
+
+    SECTION("With a resolution")
+    {
+      auto option = ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0));
+      CHECK(CssText(option->Resolution()) == "2x");
+      CHECK_FALSE(option->Type());
+      CHECK(CssText(*option) == "url(\"a.png\") 2x");
+    }
+
+    SECTION("With a type")
+    {
+      auto option = ImageSetOptionValue::Create(Image(u8"a.avif"), X(2.0), u8"image/avif");
+      REQUIRE(option->Type());
+      CHECK(ToNarrow(*option->Type()) == "image/avif");
+      CHECK(CssText(*option) == "url(\"a.avif\") 2x type(\"image/avif\")");
+    }
+
+    SECTION("An empty type is still written")
+    {
+      auto option = ImageSetOptionValue::Create(Image(u8"a.png"), X(1.0), u8"");
+      REQUIRE(option->Type());
+      CHECK(CssText(*option) == "url(\"a.png\") 1x type(\"\")");
+    }
+
+    SECTION("Image generators are accepted")
+    {
+      auto option = ImageSetOptionValue::Create(TestImage(u8"name"));
+      CHECK(CssText(*option) == "url(\"https://example.com/name.png\") 1x");
+    }
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetOptionValue setters", "[CSS][Values][ImageSetOptionValue]")
+  {
+    auto option = ImageSetOptionValue::Create(Image(u8"a.png"));
+    option->SetResolution(PrimitiveValue::Create(96.0, UnitType::dpi));
+    CHECK(CssText(option->Resolution()) == "96dpi");
+
+    option->SetType(u8"image/png");
+    REQUIRE(option->Type());
+    CHECK(ToNarrow(*option->Type()) == "image/png");
+    CHECK(CssText(*option) == "url(\"a.png\") 96dpi type(\"image/png\")");
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetOptionValue equality", "[CSS][Values][ImageSetOptionValue]")
+  {
+    auto a = ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0), u8"image/png");
+    CHECK(*a == *ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0), u8"image/png"));
+    CHECK_FALSE(*a == *ImageSetOptionValue::Create(Image(u8"b.png"), X(2.0), u8"image/png"));
+    CHECK_FALSE(*a == *ImageSetOptionValue::Create(Image(u8"a.png"), X(1.0), u8"image/png"));
+    CHECK_FALSE(*a == *ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0), u8"image/avif"));
+
+    // No type isn't the same as an empty type.
+    CHECK_FALSE(*ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0))
+                == *ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0), u8""));
+
+    size_t seed = 0uz;
+    CHECK_FALSE(a->AddHash(seed));
+  }
+
+  TEST_CASE_METHOD(ValueFixture, "ImageSetOptionValue children and subresources",
+                   "[CSS][Values][ImageSetOptionValue]")
+  {
+    auto option = ImageSetOptionValue::Create(Image(u8"a.png"), X(2.0));
+    auto children = Children(*option);
+    REQUIRE(children.size() == 2uz);
+    CHECK(children[0uz] == &option->Image());
+    CHECK(children[1uz] == &option->Resolution());
+
+    // Only the values themselves are asked, not their children.
+    CHECK_FALSE(option->MayDependOnBaseUrl());
+
+    // Nothing is loaded, so there are no subresources.
+    CHECK_FALSE(option->TraverseSubresources([](const CachedResource &) { return true; }));
+  }
+}

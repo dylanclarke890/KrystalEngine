@@ -1,0 +1,573 @@
+﻿/*
+ * Copyright (C) 2016-2025 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Samuel Weinig <sam@webkit.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Web/Css/Properties/Consumers/Background.hpp"
+#include "Krystal.Web/Css/Calc/TreeParser.hpp"
+#include "Krystal.Web/Css/Parser/TokenRange.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Color.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Ident.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Image.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/LengthPercentageDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/MetaConsumer.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/NumberDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Web/Css/Properties/Consumers/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParserState.hpp"
+#include "Krystal.Web/Css/Properties/PropertyParsing.hpp"
+#include "Krystal.Web/Css/Values/BackgroundRepeatValue.hpp"
+#include "Krystal.Web/Css/Values/BorderImageSliceValue.hpp"
+#include "Krystal.Web/Css/Values/BorderImageWidthValue.hpp"
+#include "Krystal.Web/Css/Values/Borders/BorderImage.hpp"
+#include "Krystal.Web/Css/Values/Borders/BorderRadius.hpp"
+#include "Krystal.Web/Css/Values/Borders/BoxShadow.hpp"
+#include "Krystal.Web/Css/Values/Borders/BoxShadowProperty.hpp"
+#include "Krystal.Web/Css/Values/BoxShadowPropertyValue.hpp"
+#include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Web/Css/Values/ValueList.hpp"
+#include "Krystal.Web/Css/Values/ValuePair.hpp"
+
+namespace krys::web::css::parse_property
+{
+  template <typename ElementType>
+  static void Complete4Sides(Array<ElementType, 4uz> &sides) noexcept
+  {
+    if (!sides[1])
+    {
+      sides[1] = sides[0];
+    }
+
+    if (!sides[2])
+    {
+      sides[2] = sides[0];
+    }
+
+    if (!sides[3])
+    {
+      sides[3] = sides[1];
+    }
+  }
+
+  // MARK: - Border Radius
+
+  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
+
+    using OptionalRadiiForAxis = Array<Maybe<LengthPercentage<NonNegative>>, 4uz>;
+
+    OptionalRadiiForAxis horizontalRadii;
+    size_t i = 0uz;
+    for (; i < 4uz && !tokens.IsAtEnd() && tokens.Peek().Type() != TokenType::Delim; ++i)
+    {
+      horizontalRadii[i] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
+      if (!horizontalRadii[i])
+      {
+        return {};
+      }
+    }
+
+    if (!horizontalRadii[0])
+    {
+      return {};
+    }
+
+    if (tokens.IsAtEnd())
+    {
+      auto horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii));
+      auto vertical = horizontal; // Copy `horizontal` radii to `vertical`.
+
+      return BorderRadius {.Horizontal = krys::move(horizontal), .Vertical = krys::move(vertical)};
+    }
+
+    if (!ConsumeSlash(tokens))
+    {
+      return {};
+    }
+
+    OptionalRadiiForAxis verticalRadii;
+    for (size_t j = 0uz; j < 4uz && !tokens.IsAtEnd(); ++j)
+    {
+      verticalRadii[j] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
+      if (!verticalRadii[j])
+      {
+        return {};
+      }
+    }
+
+    if (!verticalRadii[0] || !tokens.IsAtEnd())
+    {
+      return {};
+    }
+
+    return BorderRadius {.Horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii)),
+                         .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
+  }
+
+  // MARK: - Border Image
+
+  RefPtr<Value> ConsumeBorderImageSlice(TokenRange &tokens, PropertyParserState &state,
+                                        BorderImageSliceFillDefault defaultFill) noexcept
+  {
+    // <'border-image-slice'> = [<number [0,∞]> | <percentage [0,∞]>]{1,4} && fill?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-slice
+
+    bool fill = ConsumeIdentRaw<ValueId::Fill>(tokens).has_value();
+    Array<RefPtr<PrimitiveValue>, 4uz> slices;
+
+    for (auto &value : slices)
+    {
+      value = PrimitiveValueResolver<Percentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+      if (!value)
+      {
+        value = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
+      }
+
+      if (!value)
+      {
+        break;
+      }
+    }
+    if (!slices[0])
+    {
+      return nullptr;
+    }
+
+    if (ConsumeIdent<ValueId::Fill>(tokens))
+    {
+      if (fill)
+      {
+        return nullptr;
+      }
+      fill = true;
+    }
+
+    Complete4Sides(slices);
+
+    // NOTE: For backwards compatibility, -webkit-border-image, -webkit-mask-box-image and -webkit-box-reflect
+    // set fill unconditionally.
+    if (defaultFill == BorderImageSliceFillDefault::Yes)
+    {
+      fill = true;
+    }
+
+    return BorderImageSliceValue::Create(
+      {krys::move(slices[0]), krys::move(slices[1]), krys::move(slices[2]), krys::move(slices[3])}, fill);
+  }
+
+  RefPtr<Value> ConsumeBorderImageWidth(TokenRange &tokens, PropertyParserState &state,
+                                        BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
+  {
+    // <'border-image-width'> = [ <length-percentage [0,∞]> | <number [0,∞]> | auto ]{1,4}
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image-width
+
+    Array<RefPtr<PrimitiveValue>, 4> widths;
+
+    bool hasLength = false;
+    for (auto &value : widths)
+    {
+      value = PrimitiveValueResolver<Number<NonNegative>>::ConsumeAndResolve(tokens, state);
+      if (value)
+      {
+        continue;
+      }
+
+      // FIXME: Figure out and document why overrideParserMode is explicitly set to HTMLStandardMode here or
+      // remove the special case.
+      // FIXME: As this falls into the "<length> ambiguous with <number>" case, this should probably be
+      // `.unitlessZeroLength = UnitlessZeroQuirk::Forbid` in case the order of checks ever changes.
+      if (auto numericValue = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(
+            tokens, state, {.OverrideParserMode = ParserMode::HTMLStandard}))
+      {
+        if (numericValue->IsLength())
+        {
+          hasLength = true;
+        }
+
+        value = numericValue;
+        continue;
+      }
+
+      value = ConsumeIdent<ValueId::Auto>(tokens);
+      if (!value)
+      {
+        break;
+      }
+    }
+
+    if (!widths[0])
+    {
+      return nullptr;
+    }
+
+    Complete4Sides(widths);
+
+    return BorderImageWidthValue::Create(
+      {krys::move(widths[0]), krys::move(widths[1]), krys::move(widths[2]), krys::move(widths[3])},
+      overridesWidth == BorderImageWidthOverridesWidthForLength::Yes && hasLength);
+  }
+
+  Maybe<BorderImageComponents>
+    ConsumeBorderImageComponents(TokenRange &tokens, PropertyParserState &state,
+                                 BorderImageSliceFillDefault defaultFill,
+                                 BorderImageWidthOverridesWidthForLength overridesWidth) noexcept
+  {
+    // <'border-image'> = <'border-image-source'>
+    //                 || <'border-image-slice'> [ / <'border-image-width'> | / <'border-image-width'>? /
+    //                 <'border-image-outset'> ]?
+    //                 || <'border-image-repeat'>
+    // https://drafts.csswg.org/css-backgrounds/#propdef-border-image
+
+    BorderImageComponents components;
+
+    do
+    {
+      if (!components.Source)
+      {
+        components.Source = ConsumeImageOrNone(tokens, state);
+        if (components.Source)
+        {
+          continue;
+        }
+      }
+      if (!components.Repeat)
+      {
+        components.Repeat = PropertyParsing::ConsumeBorderImageRepeat(tokens);
+        if (components.Repeat)
+        {
+          continue;
+        }
+      }
+      if (!components.Slice)
+      {
+        components.Slice = ConsumeBorderImageSlice(tokens, state, defaultFill);
+        if (components.Slice)
+        {
+          krys_debug_assert(!components.Width && !components.Outset);
+          if (ConsumeSlash(tokens))
+          {
+            components.Width = ConsumeBorderImageWidth(tokens, state, overridesWidth);
+            if (ConsumeSlash(tokens))
+            {
+              components.Outset = PropertyParsing::ConsumeBorderImageOutset(tokens, state);
+              if (!components.Outset)
+              {
+                return {};
+              }
+            }
+            else if (!components.Width)
+            {
+              return {};
+            }
+          }
+        }
+        else
+        {
+          return {};
+        }
+      }
+      else
+      {
+        return {};
+      }
+    } while (!tokens.IsAtEnd());
+
+    return components;
+  }
+
+  // MARK: - Background Size
+
+  template <PropertyId property>
+  KRYS_NODISCARD static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens,
+                                                            PropertyParserState &state) noexcept
+  {
+    // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
+    // https://drafts.csswg.org/css-backgrounds/#propdef-background-size
+
+    if (IdentMatches<ValueId::Contain, ValueId::Cover>(tokens.Peek().ValueId()))
+    {
+      return ConsumeIdent(tokens);
+    }
+
+    bool shouldCoalesce = true;
+    RefPtr<PrimitiveValue> horizontal = ConsumeIdent<ValueId::Auto>(tokens);
+    if (!horizontal)
+    {
+      horizontal = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+
+      if (!horizontal)
+      {
+        return nullptr;
+      }
+      shouldCoalesce = false;
+    }
+
+    RefPtr<PrimitiveValue> vertical;
+    if (!tokens.IsAtEnd())
+    {
+      vertical = ConsumeIdent<ValueId::Auto>(tokens);
+      if (!vertical)
+      {
+        vertical = PrimitiveValueResolver<LengthPercentage<NonNegative>>::ConsumeAndResolve(tokens, state);
+      }
+    }
+    if (!vertical)
+    {
+      if constexpr (property == PropertyId::BackgroundSize)
+      {
+        vertical = PrimitiveValue::Create(ValueId::Auto);
+      }
+      else if constexpr (property == PropertyId::MaskSize)
+      {
+        return horizontal;
+      }
+    }
+
+    if (shouldCoalesce)
+    {
+      return ValuePair::Create(krys::move(horizontal), krys::move(vertical));
+    }
+
+    return ValuePair::CreateNonCoalescing(krys::move(horizontal), krys::move(vertical));
+  }
+
+  RefPtr<Value> ConsumeSingleBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <single-background-size> = <bg-size>
+    // https://drafts.csswg.org/css-backgrounds/#background-size
+
+    return ConsumeBackgroundSize<PropertyId::BackgroundSize>(tokens, state);
+  }
+
+  RefPtr<Value> ConsumeSingleMaskSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <single-mask-size> = <bg-size>
+    // https://drafts.fxtf.org/css-masking/#the-mask-size
+
+    return ConsumeBackgroundSize<PropertyId::MaskSize>(tokens, state);
+  }
+
+  // MARK: - Background Repeat
+
+  RefPtr<Value> ConsumeRepeatStyle(TokenRange &tokens, PropertyParserState &) noexcept
+  {
+    // <repeat-style> = repeat-x | repeat-y | [repeat | space | round | no-repeat]{1,2}
+    // https://drafts.csswg.org/css-backgrounds/#typedef-repeat-style
+
+    if (ConsumeIdentRaw<ValueId::RepeatX>(tokens))
+    {
+      return BackgroundRepeatValue::Create(ValueId::Repeat, ValueId::NoRepeat);
+    }
+
+    if (ConsumeIdentRaw<ValueId::RepeatY>(tokens))
+    {
+      return BackgroundRepeatValue::Create(ValueId::NoRepeat, ValueId::Repeat);
+    }
+
+    auto value1 = ConsumeIdentRaw<ValueId::Repeat, ValueId::NoRepeat, ValueId::Round, ValueId::Space>(tokens);
+    if (!value1)
+    {
+      return nullptr;
+    }
+
+    auto value2 = ConsumeIdentRaw<ValueId::Repeat, ValueId::NoRepeat, ValueId::Round, ValueId::Space>(tokens);
+    if (!value2)
+    {
+      value2 = value1;
+    }
+
+    return BackgroundRepeatValue::Create(*value1, *value2);
+  }
+
+  // MARK: - Box Shadows
+
+  KRYS_NODISCARD static Maybe<BoxShadow> ConsumeSingleUnresolvedBoxShadow(TokenRange &tokens,
+                                                                          PropertyParserState &state) noexcept
+  {
+    // <box-shadow> = <color>? && [<length>{2} <length [0,∞]>? <length>?] && inset?
+    // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
+
+    auto rangeCopy = tokens;
+
+    Maybe<Color> color;
+    Maybe<Length<AllUnzoomed>> x;
+    Maybe<Length<AllUnzoomed>> y;
+    Maybe<Length<NonNegativeUnzoomed>> blur;
+    Maybe<Length<AllUnzoomed>> spread;
+    Maybe<keywords::Inset> inset;
+
+    for (size_t i = 0uz; i < 3uz; i++)
+    {
+      if (rangeCopy.IsAtEnd())
+      {
+        break;
+      }
+
+      const Token &nextToken = rangeCopy.Peek();
+      // If we have come to a comma (e.g. if this range represents a comma-separated list of <shadow>s), we
+      // are done parsing this <shadow>.
+      if (nextToken.Type() == TokenType::Comma)
+      {
+        break;
+      }
+
+      if (nextToken.ValueId() == ValueId::Inset)
+      {
+        if (inset)
+        {
+          return {};
+        }
+
+        rangeCopy.Discard();
+        rangeCopy.DiscardWhitespace();
+        inset = keywords::Inset {};
+        continue;
+      }
+
+      auto maybeColor = ConsumeUnresolvedColor(rangeCopy, state);
+      if (maybeColor)
+      {
+        // If we just parsed a color but already had one, the given token range is
+        // not a valid <shadow>.
+        if (color)
+        {
+          return {};
+        }
+
+        color = krys::move(*maybeColor);
+        continue;
+      }
+
+      // If the current token is neither a color nor the `inset` keyword, it must be
+      // the lengths component of this value.
+      if (x || y || blur || spread)
+      {
+        // If we've already parsed these lengths, the given value is invalid as there
+        // cannot be two lengths components in a single <shadow> value.
+        return {};
+      }
+
+      x = MetaConsumer<Length<AllUnzoomed>>::Consume(rangeCopy, state);
+      if (!x)
+      {
+        return {};
+      }
+
+      y = MetaConsumer<Length<AllUnzoomed>>::Consume(rangeCopy, state);
+      if (!y)
+      {
+        return {};
+      }
+
+      const auto &token = rangeCopy.Peek();
+
+      // The explicit check for calc() is unfortunate. This is ensuring that we only fail
+      // parsing if there is a length, but it fails the range check.
+      if (token.Type() == TokenType::Dimension || token.Type() == TokenType::Number
+          || (token.Type() == TokenType::Function && calc::IsCalcFunction(token.FunctionId())))
+      {
+        blur = MetaConsumer<Length<NonNegativeUnzoomed>>::Consume(rangeCopy, state);
+        if (!blur)
+        {
+          return {};
+        }
+      }
+
+      if (blur)
+      {
+        spread = MetaConsumer<Length<AllUnzoomed>>::Consume(rangeCopy, state);
+      }
+    }
+
+    if (!y)
+    {
+      return {};
+    }
+
+    tokens = rangeCopy;
+
+    return BoxShadow {.Color = krys::move(color),
+                      .Location = {krys::move(*x), krys::move(*y)},
+                      .Blur = krys::move(blur),
+                      .Spread = krys::move(spread),
+                      .Inset = krys::move(inset)};
+  }
+
+  KRYS_NODISCARD static Maybe<BoxShadowProperty::List>
+    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    auto rangeCopy = tokens;
+
+    BoxShadowProperty::List list;
+
+    do
+    {
+      auto shadow = ConsumeSingleUnresolvedBoxShadow(rangeCopy, state);
+      if (!shadow)
+      {
+        return {};
+      }
+
+      list.Value.push_back(krys::move(*shadow));
+    } while (ConsumeComma(rangeCopy));
+
+    tokens = rangeCopy;
+
+    return list;
+  }
+
+  KRYS_NODISCARD static Maybe<BoxShadowProperty>
+    ConsumeUnresolvedBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    if (tokens.Peek().ValueId() == ValueId::None)
+    {
+      tokens.Discard();
+      tokens.DiscardWhitespace();
+      return BoxShadowProperty {keywords::None {}};
+    }
+
+    if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state))
+    {
+      return BoxShadowProperty {krys::move(*boxShadowList)};
+    }
+
+    return {};
+  }
+
+  RefPtr<Value> ConsumeBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
+  {
+    // <'box-shadow'> = none | <shadow>#
+    // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
+
+    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state))
+    {
+      return BoxShadowPropertyValue::Create({krys::move(*property)});
+    }
+
+    return nullptr;
+  }
+}

@@ -1,0 +1,98 @@
+﻿/*
+ * Copyright (C) 2014 Gurpreet Kaur (k.gurpreet@samsung.com). All rights reserved.
+ * Copyright (C) 2016 Igalia S.L.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Web/MathML/Elements/MathMLRowElement.hpp"
+
+namespace krys::web
+{
+  /// @brief The `<menclose>` element: a row drawn with the notations its `notation` attribute lists.
+  /// @see https://www.w3.org/TR/MathML3/chapter3.html#presm.menclose
+  class MathMLMencloseElement final : public MathMLRowElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(MathMLMencloseElement);
+
+  public:
+    enum MencloseNotationFlag : uint16
+    {
+      LongDiv = 1 << 1,
+      RoundedBox = 1 << 2,
+      Circle = 1 << 3,
+      Left = 1 << 4,
+      Right = 1 << 5,
+      Top = 1 << 6,
+      Bottom = 1 << 7,
+      UpDiagonalStrike = 1 << 8,
+      DownDiagonalStrike = 1 << 9,
+      VerticalStrike = 1 << 10,
+      HorizontalStrike = 1 << 11,
+      UpDiagonalArrow = 1 << 12, // FIXME: updiagonalarrow is not implemented. See http://wkb.ug/127466
+      PhasorAngle = 1 << 13,     // FIXME: phasorangle is not implemented. See http://wkb.ug/127466
+      // We do not implement the Radical notation. Authors should instead use the <msqrt> element.
+    };
+
+  private:
+    Maybe<uint16> _notationFlags;
+
+  public:
+    explicit MathMLMencloseElement(Document &document) noexcept;
+
+    KRYS_NODISCARD bool HasNotation(MencloseNotationFlag notationFlag) noexcept;
+
+  private:
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
+
+    void ParseNotationAttribute() noexcept;
+
+    void ClearNotations() noexcept
+    {
+      _notationFlags = 0;
+    }
+
+    void AddNotation(MencloseNotationFlag notationFlag) noexcept
+    {
+      *_notationFlags = static_cast<uint16>(*_notationFlags | notationFlag);
+    }
+
+    void AddNotationFlags(DOMStringView notation) noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::web::MathMLMencloseElement)
+  KRYS_NODISCARD static bool IsType(const krys::web::MathMLElement &element) noexcept
+  {
+    return element.Interface() == krys::web::MathMLElementInterface::Menclose;
+  }
+  KRYS_NODISCARD static bool IsType(const krys::web::Node &node) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::web::MathMLElement>(node);
+    return element && IsType(*element);
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

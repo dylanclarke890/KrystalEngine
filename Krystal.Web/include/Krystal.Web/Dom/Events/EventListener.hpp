@@ -1,0 +1,127 @@
+﻿#pragma once
+
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Move.hpp"
+#include "Krystal.Core/Types/BoolOr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Abort/AbortAlgorithmHandle.hpp"
+#include "Krystal.Web/Dom/Types/DOMString.hpp"
+
+namespace krys::web::dom
+{
+  class EventTargetAlgorithms;
+}
+
+namespace krys::web
+{
+  class AbortSignal;
+  class Event;
+
+  /// @see https://dom.spec.whatwg.org/#dictdef-eventlisteneroptions
+  struct EventListenerOptions
+  {
+    bool Capture = false;
+  };
+
+  using EventListenerOptionsOrBool = BoolOr<EventListenerOptions>;
+
+  /// @see https://dom.spec.whatwg.org/#dictdef-addeventlisteneroptions
+  struct AddEventListenerOptions : public EventListenerOptions
+  {
+    bool Once = false;
+    Maybe<bool> Passive;
+    /// @note A plain pointer: the options are only read while the listener is added, which takes its own
+    /// reference, so code that passes them around doesn't need the signal's definition.
+    AbortSignal *Signal {nullptr};
+  };
+
+  using AddEventListenerOptionsOrBool = BoolOr<AddEventListenerOptions>;
+
+  /// @see https://dom.spec.whatwg.org/#callbackdef-eventlistener
+  class EventListenerCallback : public RefCounted<EventListenerCallback>,
+                                public CanMakeWeakPtr<EventListenerCallback>
+  {
+  public:
+    virtual ~EventListenerCallback() noexcept = default;
+
+#pragma region Event Listener Callback - https://dom.spec.whatwg.org/#callbackdef-eventlistener
+
+    /// @see https://dom.spec.whatwg.org/#dom-eventlistener-handleevent
+    virtual void HandleEvent(Event &event) noexcept = 0;
+
+#pragma endregion
+
+    virtual bool operator==(const EventListenerCallback &other) const noexcept
+    {
+      return this == &other;
+    }
+  };
+
+  /// @see https://dom.spec.whatwg.org/#concept-event-listener
+  class EventListener : public RefCounted<EventListener>, public CanMakeWeakPtr<EventListener>
+  {
+    friend class dom::EventTargetAlgorithms;
+
+  private:
+    const DOMStringAtom _type;
+    const RefPtr<EventListenerCallback> _callback;
+    RefPtr<AbortSignal> _signal {nullptr};
+    /// @brief The abort steps the listener added to its signal, which go with it.
+    AbortAlgorithmHandle _signalAlgorithm;
+    bool _removed {false};
+    bool _capture {false};
+    Maybe<bool> _passive;
+    bool _once {false};
+
+  public:
+    EventListener(DOMStringAtom type, RefPtr<EventListenerCallback> &&callback,
+                  AddEventListenerOptions &&options) noexcept;
+
+    ~EventListener() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-type
+    KRYS_NODISCARD const DOMStringAtom &Type() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return _type;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-callback
+    KRYS_NODISCARD EventListenerCallback *Callback() const noexcept
+    {
+      return _callback.get();
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-capture
+    KRYS_NODISCARD bool Capture() const noexcept
+    {
+      return _capture;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-passive
+    KRYS_NODISCARD Maybe<bool> Passive() const noexcept
+    {
+      return _passive;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-once
+    KRYS_NODISCARD bool Once() const noexcept
+    {
+      return _once;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-signal
+    KRYS_NODISCARD AbortSignal *Signal() const noexcept
+    {
+      return _signal.get();
+    }
+
+    /// @see https://dom.spec.whatwg.org/#event-listener-removed
+    KRYS_NODISCARD bool Removed() const noexcept
+    {
+      return _removed;
+    }
+  };
+}
