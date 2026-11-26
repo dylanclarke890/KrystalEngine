@@ -23,7 +23,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Platform/Pasteboard/StaticPasteboard.hpp"
+#include "Krystal.Web/Html/DragAndDrop/StaticPasteboard.hpp"
 #include <utility>
 
 namespace krys::web

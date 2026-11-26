@@ -30,7 +30,7 @@
 #include "Krystal.Core/Strings/String.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
-#include "Krystal.Web/Page/Drag/DragActions.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragActions.hpp"
 #include "Krystal.Web/Platform/Pasteboard/DragImage.hpp"
 
 namespace krys::web

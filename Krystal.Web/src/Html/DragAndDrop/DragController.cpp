@@ -23,7 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Page/Drag/DragController.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragController.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Nodes/Algorithms/ElementAlgorithms.hpp"
@@ -42,6 +42,7 @@
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragState.hpp"
 #include "Krystal.Web/Html/Elements/HTMLAnchorElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLImageElement.hpp"
@@ -53,7 +54,6 @@
 #include "Krystal.Web/Input/UIEvents/TextEvent.hpp"
 #include "Krystal.Web/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Web/Loader/FrameLoader.hpp"
-#include "Krystal.Web/Page/Drag/DragState.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"

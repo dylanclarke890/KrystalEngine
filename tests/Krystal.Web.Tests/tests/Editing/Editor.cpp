@@ -17,6 +17,7 @@
 #include "Krystal.Web/FileApi/FileList.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Web/Html/DragAndDrop/PasteboardCustomData.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Window.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
@@ -29,7 +30,6 @@
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
 #include "Krystal.Web/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Web/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Web/Platform/Pasteboard/PasteboardStrategy.hpp"
 #include "Krystal.Web/Platform/PlatformStrategies.hpp"
 

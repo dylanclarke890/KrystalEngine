@@ -5,11 +5,11 @@
 #include "Krystal.Web/FileApi/FileList.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransferItem.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransferItemList.hpp"
+#include "Krystal.Web/Html/DragAndDrop/PasteboardCustomData.hpp"
+#include "Krystal.Web/Html/DragAndDrop/StaticPasteboard.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Web/Platform/Pasteboard/PasteboardCustomData.hpp"
 #include "Krystal.Web/Platform/Pasteboard/SelectionData.hpp"
-#include "Krystal.Web/Platform/Pasteboard/StaticPasteboard.hpp"
 
 namespace krys::web::tests
 {

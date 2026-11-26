@@ -11,8 +11,8 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Web/Dom/Types/DOMString.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragActions.hpp"
 #include "Krystal.Web/Loader/Cache/CachedResourceHandle.hpp"
-#include "Krystal.Web/Page/Drag/DragActions.hpp"
 #include "Krystal.Web/Platform/Pasteboard/DragImage.hpp"
 
 namespace krys::web

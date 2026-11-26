@@ -44,7 +44,7 @@
 #include "Krystal.Web/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Web/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusOptions.hpp"
-#include "Krystal.Web/Page/Drag/DragActions.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragActions.hpp"
 #include "Krystal.Web/Platform/Cursor.hpp"
 #include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"

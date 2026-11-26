@@ -34,12 +34,12 @@
 #include "Krystal.Web/FileApi/FileList.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransferItem.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransferItemList.hpp"
+#include "Krystal.Web/Html/DragAndDrop/StaticPasteboard.hpp"
 #include "Krystal.Web/Html/Elements/HTMLImageElement.hpp"
 #include "Krystal.Web/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Web/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Platform/Pasteboard/Pasteboard.hpp"
-#include "Krystal.Web/Platform/Pasteboard/StaticPasteboard.hpp"
 #include <algorithm>
 
 namespace krys::web

@@ -552,6 +552,7 @@ set(KRYSTAL_WEB_TESTS_HTML_SOURCES
   tests/Html/CustomElement/CustomElementRegistry.cpp
   tests/Html/CustomElement/ElementInternals.cpp
   tests/Html/DragAndDrop/DataTransfer.cpp
+  tests/Html/DragAndDrop/DragController.cpp
   tests/Html/Events/SimulatedClick.cpp
   tests/Html/Events/ToggleEvent.cpp
   tests/Html/Elements/HTMLAnchorElement.cpp
@@ -701,7 +702,6 @@ set(KRYSTAL_WEB_TESTS_MATHML_SOURCES
 )
 
 set(KRYSTAL_WEB_TESTS_PAGE_SOURCES
-  tests/Page/Drag/DragController.cpp
   tests/Page/Scrolling/ScrollAnchoringController.cpp
   tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
   tests/Page/DOMSelection.cpp

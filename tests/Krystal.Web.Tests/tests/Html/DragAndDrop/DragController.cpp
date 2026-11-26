@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Page/Drag/DragController.hpp"
+﻿#include "Krystal.Web/Html/DragAndDrop/DragController.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Css/ValueTestUtils.hpp"
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
@@ -6,10 +6,10 @@
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/FileApi/FileList.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragClient.hpp"
 #include "Krystal.Web/Html/DragAndDrop/DragEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Input/Internals/EventHandler.hpp"
-#include "Krystal.Web/Page/Clients/DragClient.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Platform/Pasteboard/DragData.hpp"
 #include <algorithm>

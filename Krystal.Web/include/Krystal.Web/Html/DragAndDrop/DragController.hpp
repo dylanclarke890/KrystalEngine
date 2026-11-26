@@ -34,8 +34,8 @@
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Net/Url.hpp"
-#include "Krystal.Web/Page/Clients/DragClient.hpp"
-#include "Krystal.Web/Page/Drag/DragActions.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragActions.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragClient.hpp"
 
 namespace krys::web
 {

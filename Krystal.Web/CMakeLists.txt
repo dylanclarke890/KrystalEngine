@@ -1833,7 +1833,14 @@ set(KRYSTAL_WEB_HTML_HEADERS
   include/Krystal.Web/Html/DragAndDrop/DataTransfer.hpp
   include/Krystal.Web/Html/DragAndDrop/DataTransferItem.hpp
   include/Krystal.Web/Html/DragAndDrop/DataTransferItemList.hpp
+  include/Krystal.Web/Html/DragAndDrop/DragActions.hpp
+  include/Krystal.Web/Html/DragAndDrop/DragClient.hpp
+  include/Krystal.Web/Html/DragAndDrop/DragController.hpp
   include/Krystal.Web/Html/DragAndDrop/DragEvent.hpp
+  include/Krystal.Web/Html/DragAndDrop/DragItem.hpp
+  include/Krystal.Web/Html/DragAndDrop/DragState.hpp
+  include/Krystal.Web/Html/DragAndDrop/PasteboardCustomData.hpp
+  include/Krystal.Web/Html/DragAndDrop/StaticPasteboard.hpp
   include/Krystal.Web/Html/Events/CommandEvent.hpp
   include/Krystal.Web/Html/Events/FormDataEvent.hpp
   include/Krystal.Web/Html/Events/PageTransitionEvent.hpp
@@ -2060,7 +2067,10 @@ set(KRYSTAL_WEB_HTML_SOURCES
   src/Html/DragAndDrop/DataTransfer.cpp
   src/Html/DragAndDrop/DataTransferItem.cpp
   src/Html/DragAndDrop/DataTransferItemList.cpp
+  src/Html/DragAndDrop/DragController.cpp
   src/Html/DragAndDrop/DragEvent.cpp
+  src/Html/DragAndDrop/PasteboardCustomData.cpp
+  src/Html/DragAndDrop/StaticPasteboard.cpp
   src/Html/Events/CommandEvent.cpp
   src/Html/Events/FormDataEvent.cpp
   src/Html/Events/PageTransitionEvent.cpp
@@ -2551,13 +2561,8 @@ set(KRYSTAL_WEB_MATHML_SOURCES
 
 set(KRYSTAL_WEB_PAGE_HEADERS
   include/Krystal.Web/Page/Clients/WebClient.hpp
-  include/Krystal.Web/Page/Clients/DragClient.hpp
   include/Krystal.Web/Page/Clients/EditorClient.hpp
   include/Krystal.Web/Page/DOMSelection.hpp
-  include/Krystal.Web/Page/Drag/DragActions.hpp
-  include/Krystal.Web/Page/Drag/DragController.hpp
-  include/Krystal.Web/Page/Drag/DragItem.hpp
-  include/Krystal.Web/Page/Drag/DragState.hpp
   include/Krystal.Web/Page/Frame.hpp
   include/Krystal.Web/Page/FrameSnapshotting.hpp
   include/Krystal.Web/Page/FrameView.hpp
@@ -2575,7 +2580,6 @@ set(KRYSTAL_WEB_PAGE_HEADERS
 
 set(KRYSTAL_WEB_PAGE_SOURCES
   src/Page/DOMSelection.cpp
-  src/Page/Drag/DragController.cpp
   src/Page/Frame.cpp
   src/Page/FrameSnapshotting.cpp
   src/Page/FrameView.cpp
@@ -2614,10 +2618,8 @@ set(KRYSTAL_WEB_PLATFORM_HEADERS
   include/Krystal.Web/Platform/Pasteboard/DragData.hpp
   include/Krystal.Web/Platform/Pasteboard/DragImage.hpp
   include/Krystal.Web/Platform/Pasteboard/Pasteboard.hpp
-  include/Krystal.Web/Platform/Pasteboard/PasteboardCustomData.hpp
   include/Krystal.Web/Platform/Pasteboard/PasteboardStrategy.hpp
   include/Krystal.Web/Platform/Pasteboard/SelectionData.hpp
-  include/Krystal.Web/Platform/Pasteboard/StaticPasteboard.hpp
   include/Krystal.Web/Platform/PathStrokeStrategy.hpp
   include/Krystal.Web/Platform/PlatformStrategies.hpp
   include/Krystal.Web/Platform/Scrolling/ScrollableArea.hpp
@@ -2640,9 +2642,7 @@ set(KRYSTAL_WEB_PLATFORM_SOURCES
   src/Platform/Pasteboard/DragData.cpp
   src/Platform/Pasteboard/DragImage.cpp
   src/Platform/Pasteboard/Pasteboard.cpp
-  src/Platform/Pasteboard/PasteboardCustomData.cpp
   src/Platform/Pasteboard/SelectionData.cpp
-  src/Platform/Pasteboard/StaticPasteboard.cpp
   src/Platform/PlatformStrategies.cpp
   src/Platform/Scrolling/ScrollableArea.cpp
   src/Platform/Scrolling/ScrollAnimator.cpp

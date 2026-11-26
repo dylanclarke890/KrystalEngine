@@ -29,8 +29,8 @@
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
-#include "Krystal.Web/Page/Drag/DragActions.hpp"
-#include "Krystal.Web/Page/Drag/DragItem.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragActions.hpp"
+#include "Krystal.Web/Html/DragAndDrop/DragItem.hpp"
 
 namespace krys::web
 {
