@@ -41,7 +41,7 @@ namespace krys::web
     /// @see https://w3c.github.io/IntersectionObserver/#dictdef-intersectionobserverentryinit
     struct Init
     {
-      double Time {0};
+      DOMHighResTimeStamp Time {0};
       Maybe<DOMRectInit> RootBounds;
       DOMRectInit BoundingClientRect;
       DOMRectInit IntersectionRect;
@@ -51,7 +51,7 @@ namespace krys::web
     };
 
   private:
-    double _time {0};
+    DOMHighResTimeStamp _time {0};
     RefPtr<DOMRectReadOnly> _rootBounds;
     RefPtr<DOMRectReadOnly> _boundingClientRect;
     RefPtr<DOMRectReadOnly> _intersectionRect;
@@ -68,7 +68,7 @@ namespace krys::web
     }
 
     /// @see https://w3c.github.io/IntersectionObserver/#dom-intersectionobserverentry-time
-    KRYS_NODISCARD double Time() const noexcept
+    KRYS_NODISCARD DOMHighResTimeStamp Time() const noexcept
     {
       return _time;
     }

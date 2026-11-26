@@ -751,7 +751,7 @@ namespace krys::web
     return needNotify;
   }
 
-  Maybe<double> IntersectionObserver::NowTimestamp() const noexcept
+  Maybe<DOMHighResTimeStamp> IntersectionObserver::NowTimestamp() const noexcept
   {
     if (!_callback || !_document)
     {

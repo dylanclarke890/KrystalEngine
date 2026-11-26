@@ -214,7 +214,7 @@ namespace krys::web
     /// @see https://w3c.github.io/IntersectionObserver/#update-intersection-observations-algo
     KRYS_NODISCARD NeedNotify UpdateObservations(const Frame &hostFrame) noexcept;
 
-    KRYS_NODISCARD Maybe<double> NowTimestamp() const noexcept;
+    KRYS_NODISCARD Maybe<DOMHighResTimeStamp> NowTimestamp() const noexcept;
 
     void AppendQueuedEntry(Ref<IntersectionObserverEntry> &&entry) noexcept;
 

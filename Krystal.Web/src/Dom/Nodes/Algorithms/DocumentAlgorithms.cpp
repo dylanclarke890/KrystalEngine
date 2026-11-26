@@ -248,11 +248,12 @@ namespace krys::web::dom
       //     set document's load timing info's DOM complete time to now.
       // 3c. Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive
       //     time is 0, then set document's load timing info's DOM interactive time to now.
-      if (readiness == html::DocumentReadyState::Complete && !document._loadTiming.DOMCompleteTime)
+      if (readiness == html::DocumentReadyState::Complete && document._loadTiming.DOMCompleteTime == 0ms)
       {
         document._loadTiming.DOMCompleteTime = now;
       }
-      else if (readiness == html::DocumentReadyState::Interactive && !document._loadTiming.DOMInteractiveTime)
+      else if (readiness == html::DocumentReadyState::Interactive
+               && document._loadTiming.DOMInteractiveTime == 0ms)
       {
         document._loadTiming.DOMInteractiveTime = now;
       }

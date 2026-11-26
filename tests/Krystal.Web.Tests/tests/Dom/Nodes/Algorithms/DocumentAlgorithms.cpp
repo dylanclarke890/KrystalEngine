@@ -247,6 +247,6 @@ namespace krys::web::dom::tests
                                              html::DocumentReadyState::Interactive});
 
     // Not parsed in a frame, so no load timing is recorded.
-    CHECK(document->LoadTiming().DOMInteractiveTime == 0);
+    CHECK(document->LoadTiming().DOMInteractiveTime == 0ms);
   }
 }

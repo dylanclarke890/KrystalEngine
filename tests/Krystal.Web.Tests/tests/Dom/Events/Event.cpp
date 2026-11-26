@@ -361,7 +361,7 @@ namespace krys::web::dom::tests
       REQUIRE(window);
       loop.Run(window->TimeOrigin() + 2'500us);
       auto event = CreateRef<Event>(event_names::Click);
-      CHECK(event->TimeStampForBindings(*fixture.Document) == 2.5);
+      CHECK(event->TimeStampForBindings(*fixture.Document) == 2.5ms);
     }
 
     SECTION("Never before the time origin")
@@ -370,7 +370,7 @@ namespace krys::web::dom::tests
       loop.Run(loop.Now() + 10ms);
       web::tests::PaintFixture fixture(u8"<!DOCTYPE html>");
       REQUIRE(fixture.Document->Window());
-      CHECK(event->TimeStampForBindings(*fixture.Document) == 0);
+      CHECK(event->TimeStampForBindings(*fixture.Document) == 0ms);
     }
 
     SECTION("Zero without a window")
@@ -378,7 +378,7 @@ namespace krys::web::dom::tests
       loop.Run(loop.Now() + 10ms);
       auto document = CreateRef<Document>();
       auto event = CreateRef<Event>(event_names::Click);
-      CHECK(event->TimeStampForBindings(*document) == 0);
+      CHECK(event->TimeStampForBindings(*document) == 0ms);
     }
   }
 

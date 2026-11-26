@@ -175,12 +175,12 @@ namespace krys::web::dom
   /// @see https://html.spec.whatwg.org/multipage/dom.html#load-timing-info
   struct DocumentLoadTimingInfo
   {
-    double DOMInteractiveTime {0};
-    double DOMContentLoadedEventStartTime {0};
-    double DOMContentLoadedEventEndTime {0};
-    double DOMCompleteTime {0};
-    double LoadEventStartTime {0};
-    double LoadEventEndTime {0};
+    DOMHighResTimeStamp DOMInteractiveTime {0};
+    DOMHighResTimeStamp DOMContentLoadedEventStartTime {0};
+    DOMHighResTimeStamp DOMContentLoadedEventEndTime {0};
+    DOMHighResTimeStamp DOMCompleteTime {0};
+    DOMHighResTimeStamp LoadEventStartTime {0};
+    DOMHighResTimeStamp LoadEventEndTime {0};
   };
 
   /// @see https://dom.spec.whatwg.org/#dictdef-elementcreationoptions

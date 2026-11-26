@@ -110,7 +110,7 @@ namespace krys::web::html
     // FIXME: Throttling the callbacks below the page's rendering rate
     // (shouldRescheduleRequestAnimationFrame), once there's throttling.
 
-    auto highResNowMs = std::round(timestamp);
+    auto highResNowMs = DOMHighResTimeStamp(std::round(timestamp.count()));
 
     // https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
     // 1. Let callbacks be target's map of animation frame callbacks.

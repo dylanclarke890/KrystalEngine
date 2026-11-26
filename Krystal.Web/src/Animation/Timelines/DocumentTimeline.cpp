@@ -56,7 +56,7 @@ namespace krys::web
   Ref<DocumentTimeline> DocumentTimeline::Create(web::Document &document,
                                                  DocumentTimelineOptions options) noexcept
   {
-    return AdoptRef(*new DocumentTimeline(document, Seconds {options.OriginTime / 1'000}));
+    return AdoptRef(*new DocumentTimeline(document, Seconds {options.OriginTime}));
   }
 
   DocumentTimeline::DocumentTimeline(web::Document &document, Seconds originTime) noexcept

@@ -36,7 +36,7 @@ namespace krys::web
     KRYS_NODISCARD int64 Now() noexcept
     {
       using namespace std::chrono;
-      return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+      return duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()).count();
     }
   }
 
@@ -108,7 +108,9 @@ namespace krys::web
       return Now();
     }
     using namespace std::chrono;
-    return duration_cast<milliseconds>(clock_cast<system_clock>(modificationTime).time_since_epoch()).count();
+    return duration_cast<std::chrono::milliseconds>(
+             clock_cast<system_clock>(modificationTime).time_since_epoch())
+      .count();
   }
 
   void File::ComputeNameAndContentType(utf8_stringview path, utf8_stringview nameOverride,

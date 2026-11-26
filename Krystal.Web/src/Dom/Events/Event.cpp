@@ -38,10 +38,9 @@ namespace krys::web
     auto *window = document.Window();
     if (!window)
     {
-      return 0;
+      return {};
     }
-    return std::max(std::chrono::duration<double, std::milli>(_createTime - window->TimeOrigin()).count(),
-                    0.);
+    return std::max<DOMHighResTimeStamp>(_createTime - window->TimeOrigin(), {});
   }
 
   List<Ref<EventTarget>> Event::ComposedPath() const noexcept

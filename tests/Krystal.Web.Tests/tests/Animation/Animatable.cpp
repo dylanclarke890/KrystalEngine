@@ -249,7 +249,8 @@ namespace krys::web::tests
                    "[Animation][Animatable]")
   {
     AnimationPageFixture fixture {u8"<!DOCTYPE html><div id=box></div>"};
-    auto timeline = DocumentTimeline::Create(*fixture.Document, DocumentTimelineOptions {.OriginTime = 100});
+    auto timeline =
+      DocumentTimeline::Create(*fixture.Document, DocumentTimelineOptions {.OriginTime = 100ms});
     auto defaultTime = fixture.Document->Timeline().CurrentTime();
     auto time = timeline->CurrentTime();
     REQUIRE(defaultTime);
@@ -258,8 +259,9 @@ namespace krys::web::tests
     timeline->DetachFromDocument();
   }
 
-  TEST_CASE("Animatable: DOMHighResTimeStamp is a double", "[Animation][Animatable]")
+  TEST_CASE("Animatable: DOMHighResTimeStamp is a duration of fractional milliseconds",
+            "[Animation][Animatable]")
   {
-    CHECK(FloatingPoint<DOMHighResTimeStamp>);
+    CHECK(SameType<DOMHighResTimeStamp, std::chrono::duration<double, std::milli>>);
   }
 }

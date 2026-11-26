@@ -434,17 +434,19 @@ namespace krys::web::tests
     auto &window = fixture.Window();
     auto &page = *fixture.Frame;
 
-    List<double> timestamps;
+    List<DOMHighResTimeStamp> timestamps;
     int32 nested = 0;
     auto first = window.RequestAnimationFrame(
-      [&](double timestamp)
+      [&](DOMHighResTimeStamp timestamp)
       {
         timestamps.push_back(timestamp);
         // Callbacks requested during a frame run in the next one.
-        (void)window.RequestAnimationFrame([&](double) { ++nested; });
+        (void)window.RequestAnimationFrame([&](DOMHighResTimeStamp) { ++nested; });
       });
-    auto second = window.RequestAnimationFrame([&](double timestamp) { timestamps.push_back(timestamp); });
-    auto cancelled = window.RequestAnimationFrame([&](double) { timestamps.push_back(-1); });
+    auto second =
+      window.RequestAnimationFrame([&](DOMHighResTimeStamp timestamp) { timestamps.push_back(timestamp); });
+    auto cancelled = window.RequestAnimationFrame([&](DOMHighResTimeStamp)
+                                                  { timestamps.push_back(DOMHighResTimeStamp(-1)); });
     CHECK(first > 0);
     CHECK(second == first + 1);
     window.CancelAnimationFrame(cancelled);
@@ -455,7 +457,7 @@ namespace krys::web::tests
     REQUIRE(timestamps.size() == 2);
     // Both see the frame's frozen timestamp: milliseconds since the window's time origin.
     CHECK(timestamps[0] == timestamps[1]);
-    CHECK(timestamps[0] >= 16);
+    CHECK(timestamps[0] >= 16ms);
     CHECK(nested == 0);
     CHECK(page.IsRenderingUpdateScheduled());
 

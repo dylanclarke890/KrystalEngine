@@ -109,7 +109,7 @@ namespace krys::web::tests
     REQUIRE(window);
     auto timelineTime = fixture.Document->Timeline().CurrentTime();
     REQUIRE(timelineTime);
-    CHECK(timelineTime->Time()->count() == Catch::Approx(window->NowTimestamp() / 1'000));
+    CHECK(timelineTime->Time()->count() == Catch::Approx(Seconds(window->NowTimestamp()).count()));
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture,

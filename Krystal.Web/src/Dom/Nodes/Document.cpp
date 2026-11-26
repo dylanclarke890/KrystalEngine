@@ -3622,12 +3622,14 @@ namespace krys::web
       // Update the current document readiness to "interactive", then fire DOMContentLoaded at the Document,
       // with its bubbles attribute initialized to true.
       dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*this, html::DocumentReadyState::Interactive);
-      if (!_loadTiming.DOMContentLoadedEventStartTime)
+      if (_loadTiming.DOMContentLoadedEventStartTime == 0ms)
       {
-        _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
+        _loadTiming.DOMContentLoadedEventStartTime =
+          _domWindow ? _domWindow->NowTimestamp() : DOMHighResTimeStamp {};
         auto event = Event::Create(event_names::DOMContentLoaded, true, false);
         (void)dom::EventDispatcher::DispatchToTarget(*event, this);
-        _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
+        _loadTiming.DOMContentLoadedEventEndTime =
+          _domWindow ? _domWindow->NowTimestamp() : DOMHighResTimeStamp {};
       }
     }
 
@@ -3730,12 +3732,12 @@ namespace krys::web
     }
 
     // Fire an event named load at window, with legacy target override flag set.
-    if (!_loadTiming.LoadEventStartTime)
+    if (_loadTiming.LoadEventStartTime == 0ms)
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
     (void)dom::EventDispatcher::FireEvent<Event>(event_names::Load, *window, {}, true);
-    if (!_loadTiming.LoadEventEndTime)
+    if (_loadTiming.LoadEventEndTime == 0ms)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();
     }
@@ -4276,8 +4278,7 @@ namespace krys::web
 
     if (auto *timelinesController = TimelinesController())
     {
-      timelinesController->UpdateAnimationsAndSendEvents(
-        Seconds {std::chrono::duration<double, std::milli>(window->FrozenNowTimestamp())});
+      timelinesController->UpdateAnimationsAndSendEvents(Seconds {window->FrozenNowTimestamp()});
     }
   }
 

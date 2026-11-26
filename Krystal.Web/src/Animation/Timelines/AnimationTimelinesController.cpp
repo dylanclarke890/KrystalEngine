@@ -314,7 +314,7 @@ namespace krys::web
   {
     // The window's high-resolution time: the host's time since its time origin.
     auto *window = _document.Window();
-    return window ? Seconds {std::chrono::duration<double, std::milli>(window->NowTimestamp())} : Seconds {0};
+    return window ? Seconds {window->NowTimestamp()} : Seconds {0};
   }
 
   Maybe<Seconds> AnimationTimelinesController::CurrentTime(UseCachedCurrentTime useCachedCurrentTime) noexcept

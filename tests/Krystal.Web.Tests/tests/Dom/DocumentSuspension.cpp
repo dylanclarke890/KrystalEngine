@@ -233,7 +233,7 @@ namespace krys::web::tests
     SuspensionFixture fixture;
     auto &document = fixture.Document();
     uint32 frames = 0;
-    (void)fixture.Window().RequestAnimationFrame([&](double) { ++frames; });
+    (void)fixture.Window().RequestAnimationFrame([&](DOMHighResTimeStamp) { ++frames; });
 
     document.Suspend(Reason);
     fixture.Frame().UpdateRendering();

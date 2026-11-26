@@ -235,9 +235,9 @@ namespace krys::web
 #pragma region User activation - https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation
 
     /// @brief How long an activation is transient: 5s.
-    KRYS_NODISCARD static double TransientActivationDuration() noexcept
+    KRYS_NODISCARD static DOMHighResTimeStamp TransientActivationDuration() noexcept
     {
-      return 5'000;
+      return 5s;
     }
 
     /// @brief The user activated the window just now (a press, a key): its activation notification.

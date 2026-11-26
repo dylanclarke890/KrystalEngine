@@ -526,7 +526,7 @@ namespace krys::web::tests
     {
       fixture.LoadUrl(url);
       RunNetworkingTasks();
-      auto before = floor<seconds>(system_clock::now());
+      auto before = floor<std::chrono::seconds>(system_clock::now());
       auto value = fixture.Document().LastModified();
       CHECK(
         (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));

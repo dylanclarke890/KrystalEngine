@@ -145,7 +145,7 @@ namespace krys::editor
         return;
       }
       _frameRequest = window->RequestAnimationFrame(
-        [this](double)
+        [this](web::DOMHighResTimeStamp)
         {
           _frameRequest = 0;
           ShowTime();

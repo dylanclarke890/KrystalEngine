@@ -59,8 +59,8 @@ namespace krys::web
   web::Window::Window(web::Document &document) noexcept
       : EventTarget(dom::EventTargetFlag::IsWindow), _document(CreateWeakPtr(&document)),
         _timeOrigin(html::EventLoop::Current().Now()),
-        _lastActivationTimestamp(std::numeric_limits<DOMHighResTimeStamp>::infinity()),
-        _lastHistoryActionActivationTimestamp(std::numeric_limits<DOMHighResTimeStamp>::infinity())
+        _lastActivationTimestamp(std::numeric_limits<double>::infinity()),
+        _lastHistoryActionActivationTimestamp(std::numeric_limits<double>::infinity())
   {
     krys_assert(document.Frame());
     AllWindows().push_back(this);
@@ -512,9 +512,9 @@ namespace krys::web
     // (There are no other frames, so windows is this window.)
     // 5. For each window in windows, if window's last activation timestamp is not positive infinity, then set
     //    window's last activation timestamp to negative infinity.
-    if (_lastActivationTimestamp != std::numeric_limits<DOMHighResTimeStamp>::infinity())
+    if (_lastActivationTimestamp != DOMHighResTimeStamp(std::numeric_limits<double>::infinity()))
     {
-      _lastActivationTimestamp = -std::numeric_limits<DOMHighResTimeStamp>::infinity();
+      _lastActivationTimestamp = DOMHighResTimeStamp(-std::numeric_limits<double>::infinity());
     }
     return true;
   }
@@ -562,7 +562,7 @@ namespace krys::web
 
   DOMHighResTimeStamp web::Window::NowTimestamp() const noexcept
   {
-    return std::chrono::duration<double, std::milli>(html::EventLoop::Current().Now() - _timeOrigin).count();
+    return html::EventLoop::Current().Now() - _timeOrigin;
   }
 
   void web::Window::FreezeNowTimestamp() noexcept
