@@ -2,11 +2,11 @@
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/Forms/DOMFormData.hpp"
 #include "Krystal.Web/Html/InputTypes/ButtonInputType.hpp"
@@ -771,7 +771,7 @@ namespace krys::web::html
     bool wasInRange = IsInRange(element->Value());
     bool inRange = IsInRange(sanitizedValue);
 
-    auto oldDirection = dom::ComputeTextDirectionIfDirIsAuto(*element);
+    auto oldDirection = html::ComputeTextDirectionIfDirIsAuto(*element);
 
     Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
     if (wasInRange != inRange)
@@ -785,7 +785,7 @@ namespace krys::web::html
     element->SetValueInternal(sanitizedValue, eventBehavior);
 
     if (oldDirection.value_or(text::TextDirection::LTR)
-        != dom::ComputeTextDirectionIfDirIsAuto(*element).value_or(text::TextDirection::LTR))
+        != html::ComputeTextDirectionIfDirIsAuto(*element).value_or(text::TextDirection::LTR))
     {
       element->InvalidateStyleInternal();
     }

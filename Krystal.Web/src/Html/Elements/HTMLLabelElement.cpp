@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLLabelElement.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
@@ -180,7 +181,7 @@ namespace krys::web
       return false;
     }
 
-    for (auto *it = node; it && it != this; it = dom::TreeQueries::ParentOrShadowHostElement(*it))
+    for (auto *it = node; it && it != this; it = dom::TreeTraversal::ParentOrShadowHostElement(*it))
     {
       auto *element = DynamicDowncast<HTMLElement>(*it);
       if (element && element->IsInteractiveContent())

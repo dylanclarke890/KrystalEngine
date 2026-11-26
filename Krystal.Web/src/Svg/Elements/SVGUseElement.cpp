@@ -31,6 +31,7 @@
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -499,7 +500,7 @@ namespace krys::web
         if (element && predicate(*element))
         {
           elements.push_back(ShareRef(*element));
-          node = dom::TreeQueries::NextSkippingChildren(*node, &subtree);
+          node = dom::TreeTraversal::NextSkippingChildren(*node, &subtree);
           continue;
         }
         node = dom::TreeQueries::Next(*node, &subtree);

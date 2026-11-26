@@ -1,9 +1,10 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -162,7 +163,7 @@ namespace krys::web::dom
     }
 
     // 2. Let shadow be slottable's parent's shadow root.
-    RefPtr<ShadowRoot> shadow = ShareRefPtr(TreeQueries::GetShadowRoot(*parent));
+    RefPtr<ShadowRoot> shadow = ShareRefPtr(TreeTraversal::GetShadowRoot(*parent));
 
     // 3. If shadow is null, then return null.
     if (shadow == nullptr)
@@ -375,7 +376,7 @@ namespace krys::web::dom
       }
 
       // The composed tree changed under the host.
-      if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(slot))
+      if (auto *shadowRoot = TreeTraversal::ContainingShadowRoot(slot))
       {
         if (auto host = ShareRefPtr(shadowRoot->Host()))
         {

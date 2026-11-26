@@ -26,8 +26,8 @@
 
 #include "Krystal.Web/Html/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
@@ -69,7 +69,7 @@ namespace krys::web::html
     if (shadowHostStyle)
     {
       RenderTheme::Singleton().AdjustTextControlInnerContainerStyle(*style.Style, *shadowHostStyle,
-                                                                    dom::TreeQueries::ShadowHost(*this));
+                                                                    dom::TreeTraversal::ShadowHost(*this));
     }
     return style;
   }
@@ -144,7 +144,7 @@ namespace krys::web::html
       // cause events to be sent to the TextControlInnerTextElement. To
       // prevent an infinite loop, we must check for this case before sending
       // the event up the chain.
-      if (RefPtr<Element> host = ShareRefPtr(dom::TreeQueries::ShadowHost(*this)))
+      if (RefPtr<Element> host = ShareRefPtr(dom::TreeTraversal::ShadowHost(*this)))
       {
         host->DefaultEventHandler(event);
       }
@@ -169,7 +169,7 @@ namespace krys::web::html
     TextControlInnerTextElement::ResolveCustomStyle(const style::ResolutionContext &,
                                                     const RenderStyle *shadowHostStyle) noexcept
   {
-    auto &shadowHost = *dom::TreeQueries::ShadowHost(*this);
+    auto &shadowHost = *dom::TreeTraversal::ShadowHost(*this);
     auto style = Downcast<HTMLTextFormControlElement>(shadowHost).CreateInnerTextStyle(*shadowHostStyle);
 
     RenderTheme::Singleton().AdjustTextControlInnerTextStyle(style, *shadowHostStyle, &shadowHost);
@@ -200,7 +200,7 @@ namespace krys::web::html
     auto style = ResolveStyle(resolutionContext);
 
     auto &controlElement =
-      Downcast<HTMLTextFormControlElement>(*dom::TreeQueries::ContainingShadowRoot(*this)->Host());
+      Downcast<HTMLTextFormControlElement>(*dom::TreeTraversal::ContainingShadowRoot(*this)->Host());
     auto &styleStyle = *style.Style;
     styleStyle.SetDisplay(controlElement.IsPlaceholderVisible() ? DisplayType::Block : DisplayType::None);
     // The user agent sheet can't say this (`-webkit-text-security` isn't parsed), so a password field's mask
@@ -279,7 +279,7 @@ namespace krys::web::html
   {
     // A press focuses the field and selects its text.
     if (RefPtr<HTMLInputElement> input =
-          ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this))))
+          ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this))))
     {
       auto *mouseEvent = DynamicDowncast<MouseEvent>(event);
       if (event.Type() == event_names::MouseDown && mouseEvent && mouseEvent->Button() == 0)
@@ -319,7 +319,7 @@ namespace krys::web::html
                                                        const RenderStyle *shadowHostStyle) noexcept
   {
     auto elementStyle = ResolveStyle(resolutionContext);
-    auto &inputElement = Downcast<HTMLInputElement>(*dom::TreeQueries::ShadowHost(*this));
+    auto &inputElement = Downcast<HTMLInputElement>(*dom::TreeTraversal::ShadowHost(*this));
     elementStyle.Style->SetVisibility(elementStyle.Style->UsedVisibility() == Visibility::Hidden
                                           || inputElement.Value().empty()
                                         ? Visibility::Hidden
@@ -336,7 +336,7 @@ namespace krys::web::html
   void SearchFieldCancelButtonElement::DefaultEventHandler(Event &event) noexcept
   {
     RefPtr<HTMLInputElement> input =
-      ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+      ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this)));
     if (!input || !input->IsMutable())
     {
       if (!event.DefaultHandled())

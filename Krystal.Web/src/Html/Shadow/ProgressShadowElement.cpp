@@ -31,7 +31,7 @@
 #include "Krystal.Web/Html/Shadow/ProgressShadowElement.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Css/Values/Units.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Web/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -44,7 +44,7 @@ namespace krys::web::html
 
   HTMLProgressElement *ProgressShadowElement::ProgressElement() const noexcept
   {
-    return Downcast<HTMLProgressElement>(dom::TreeQueries::ShadowHost(*this));
+    return Downcast<HTMLProgressElement>(dom::TreeTraversal::ShadowHost(*this));
   }
 
   bool ProgressShadowElement::RendererIsNeeded(const RenderStyle &style) noexcept

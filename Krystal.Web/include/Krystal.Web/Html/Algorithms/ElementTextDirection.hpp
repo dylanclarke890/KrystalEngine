@@ -39,7 +39,7 @@ namespace krys::web
   class Element;
 }
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   /// @brief @p element's auto directionality: from its value if it's a form control whose value decides it,
   /// otherwise from the first of its text with a strong character. Null if nothing decides it.
@@ -51,12 +51,12 @@ namespace krys::web::dom
 
   /// @brief Updates the directionality of @p element and of what it decides after its `dir` attribute
   /// changed to @p textDirectionState.
-  void TextDirectionStateChanged(Element &element, TextDirectionState textDirectionState) noexcept;
+  void TextDirectionStateChanged(Element &element, dom::TextDirectionState textDirectionState) noexcept;
 
   /// @brief Updates the directionality of @p element, its descendants and, if it decides theirs, its
   /// ancestors whose directionality is auto.
   /// @param initiator The element whose change led here, which is left as it is.
-  void UpdateEffectiveTextDirectionState(Element &element, TextDirectionState textDirectionState,
+  void UpdateEffectiveTextDirectionState(Element &element, dom::TextDirectionState textDirectionState,
                                          Element *initiator = nullptr) noexcept;
 
   /// @brief Gives @p direction to @p element's descendants (and their shadow trees) that take their

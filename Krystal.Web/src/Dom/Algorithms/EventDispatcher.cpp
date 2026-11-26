@@ -9,6 +9,7 @@
 #include "Krystal.Web/Dom/Nodes/Node.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Html/Window.hpp"
 #include <ranges>
 

@@ -26,9 +26,10 @@
 #pragma once
 
 #include "Krystal.Core/Containers/List.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ElementAndTextDescendantIterator.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ElementAndTextDescendantIterator.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include <limits>
@@ -210,7 +211,7 @@ namespace krys::web::dom
     KRYS_NODISCARD static ShadowRoot *ShadowRootOf(const Node &node) noexcept
     {
       auto *element = DynamicDowncast<Element>(node);
-      return element ? TreeQueries::GetShadowRoot(*element) : nullptr;
+      return element ? TreeTraversal::GetShadowRoot(*element) : nullptr;
     }
 
     KRYS_NODISCARD Context &GetContext() noexcept

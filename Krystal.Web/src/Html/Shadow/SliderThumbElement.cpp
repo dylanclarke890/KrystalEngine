@@ -32,8 +32,8 @@
 #include "Krystal.Web/Html/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Events/Touch/Touch.hpp"
@@ -84,8 +84,8 @@ namespace krys::web::html
       KRYS_NODISCARD LogicalExtentComputedValues
         ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override
       {
-        krys_debug_assert(dom::TreeQueries::ShadowHost(*GetElement()));
-        auto &input = Downcast<HTMLInputElement>(*dom::TreeQueries::ShadowHost(*GetElement()));
+        krys_debug_assert(dom::TreeTraversal::ShadowHost(*GetElement()));
+        auto &input = Downcast<HTMLInputElement>(*dom::TreeTraversal::ShadowHost(*GetElement()));
         bool isVertical = HasVerticalAppearance(input);
 
         // A horizontal slider with ticks is tall enough for them.
@@ -107,8 +107,8 @@ namespace krys::web::html
     private:
       void Layout() noexcept override
       {
-        krys_debug_assert(dom::TreeQueries::ShadowHost(*GetElement()));
-        auto &input = Downcast<HTMLInputElement>(*dom::TreeQueries::ShadowHost(*GetElement()));
+        krys_debug_assert(dom::TreeTraversal::ShadowHost(*GetElement()));
+        auto &input = Downcast<HTMLInputElement>(*dom::TreeTraversal::ShadowHost(*GetElement()));
         bool isVertical = HasVerticalAppearance(input);
 
         auto &mutableStyle = MutableStyle();
@@ -422,7 +422,7 @@ namespace krys::web::html
   {
     // Only HTMLInputElement creates SliderThumbElement instances as its shadow nodes.
     // So, shadowHost() must be an HTMLInputElement.
-    return DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this));
+    return DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this));
   }
 
   Maybe<style::UnadjustedStyle>
@@ -481,7 +481,7 @@ namespace krys::web::html
 
   void SliderContainerElement::HandleTouchEvent(TouchEvent &event) noexcept
   {
-    RefPtr input = ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+    RefPtr input = ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this)));
     if (!input || input->IsDisabledFormControl())
     {
       return;
@@ -552,7 +552,7 @@ namespace krys::web::html
 
   bool SliderContainerElement::CanSlide() const noexcept
   {
-    auto *input = DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this));
+    auto *input = DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this));
     if (!input || !input->Renderer())
     {
       return false;

@@ -23,7 +23,7 @@
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Css/Values/Color/ContrastColorResolver.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/FileApi/FileList.hpp"
@@ -727,7 +727,7 @@ namespace krys::web
       if (type == StyleAppearance::SearchFieldCancelButton)
       {
         auto *element = renderer->GetElement();
-        Node *input = dom::TreeQueries::ShadowHost(*element);
+        Node *input = dom::TreeTraversal::ShadowHost(*element);
         if (!input)
         {
           input = element;

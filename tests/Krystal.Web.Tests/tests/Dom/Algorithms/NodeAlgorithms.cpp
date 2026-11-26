@@ -2,9 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Web.Tests/Dom/TestElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationObserver.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
@@ -163,7 +163,7 @@ namespace krys::web::dom::tests
       auto copyNode = NodeAlgorithms::CloneNode(*host).ReleaseValue();
       auto *copy = Downcast<Element>(copyNode.get());
       CHECK_FALSE(copy->HasChildNodes());
-      auto *copyShadow = TreeQueries::GetShadowRoot(*copy);
+      auto *copyShadow = TreeTraversal::GetShadowRoot(*copy);
       REQUIRE(copyShadow != nullptr);
       CHECK(copyShadow->Mode() == mode);
       CHECK(copyShadow->DelegatesFocus());
@@ -182,7 +182,7 @@ namespace krys::web::dom::tests
       (void)host->AttachShadow({}).ReleaseValue();
       auto copyNode = NodeAlgorithms::CloneNode(*host, nullptr, true).ReleaseValue();
       auto *copy = Downcast<Element>(copyNode.get());
-      CHECK(TreeQueries::GetShadowRoot(*copy) == nullptr);
+      CHECK(TreeTraversal::GetShadowRoot(*copy) == nullptr);
     }
   }
 

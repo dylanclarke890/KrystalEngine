@@ -21,7 +21,7 @@
 
 #include "Krystal.Web/Svg/SVGURIReference.hpp"
 #include "Krystal.Net/Url.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
@@ -178,7 +178,7 @@ namespace krys::web
       return {nullptr, krys::move(id)};
     }
 
-    auto *shadowHost = dom::TreeQueries::ShadowHost(treeScope.RootNode());
+    auto *shadowHost = dom::TreeTraversal::ShadowHost(treeScope.RootNode());
     if (auto *svgHost = DynamicDowncast<SVGElement>(shadowHost); svgHost && Is<SVGUseElement>(*svgHost))
     {
       return {

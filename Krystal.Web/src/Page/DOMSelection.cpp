@@ -29,6 +29,7 @@
 
 #include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -507,9 +508,9 @@ namespace krys::web
 
     Ref<Node> startNode = range->Start.Container;
     uint32 startOffset = static_cast<uint32>(range->Start.Offset);
-    while (startNode->IsInShadowTree() && !isListed(dom::TreeQueries::ContainingShadowRoot(*startNode)))
+    while (startNode->IsInShadowTree() && !isListed(dom::TreeTraversal::ContainingShadowRoot(*startNode)))
     {
-      auto *host = dom::TreeQueries::ShadowHost(*startNode);
+      auto *host = dom::TreeTraversal::ShadowHost(*startNode);
       krys_debug_assert(host && host->ParentNode());
       startNode = ShareRef(*host->ParentNode());
       startOffset = host->ComputeNodeIndex();
@@ -517,9 +518,9 @@ namespace krys::web
 
     Ref<Node> endNode = range->End.Container;
     uint32 endOffset = static_cast<uint32>(range->End.Offset);
-    while (endNode->IsInShadowTree() && !isListed(dom::TreeQueries::ContainingShadowRoot(*endNode)))
+    while (endNode->IsInShadowTree() && !isListed(dom::TreeTraversal::ContainingShadowRoot(*endNode)))
     {
-      auto *host = dom::TreeQueries::ShadowHost(*endNode);
+      auto *host = dom::TreeTraversal::ShadowHost(*endNode);
       krys_debug_assert(host && host->ParentNode());
       endNode = ShareRef(*host->ParentNode());
       endOffset = host->ComputeNodeIndex() + 1;

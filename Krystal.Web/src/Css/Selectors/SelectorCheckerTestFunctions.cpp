@@ -27,7 +27,7 @@
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
@@ -66,7 +66,7 @@ namespace krys::web::css
   {
     KRYS_NODISCARD bool DoesShadowTreeContainFocusedElement(const Element &element) noexcept
     {
-      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
       return shadowRoot && shadowRoot->ContainsFocusedElement();
     }
   }
@@ -293,7 +293,7 @@ namespace krys::web::css
     // list:
     DOMStringAtom xmlNamespace(infra::namespaces::XML);
     for (auto *ancestor = &element; ancestor;
-         ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
+         ancestor = dom::TreeTraversal::ParentOrShadowHostElement(*ancestor))
     {
       // If the node is an element that has a lang attribute in the XML namespace set: Use the value of that
       // attribute.

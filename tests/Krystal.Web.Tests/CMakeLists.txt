@@ -61,7 +61,7 @@ target_precompile_headers(Krystal.Web.Tests
     <catch2/catch_test_macros.hpp>
     <catch2/matchers/catch_matchers_floating_point.hpp>
 
-    <Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp>
+    <Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp>
     <Krystal.Web/Dom/Nodes/Attr.hpp>
     <Krystal.Web/Dom/Nodes/Document.hpp>
     <Krystal.Web/Dom/Events/EventTarget.hpp>
@@ -382,20 +382,15 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Algorithms/AbortAlgorithms.cpp
   tests/Dom/Algorithms/DocumentAlgorithms.cpp
   tests/Dom/Algorithms/ElementAlgorithms.cpp
-  tests/Dom/Algorithms/ElementTextDirection.cpp
   tests/Dom/Algorithms/EventDispatcher.cpp
   tests/Dom/Algorithms/EventTargetAlgorithms.cpp
   tests/Dom/Algorithms/IteratorAlgorithms.cpp
-  tests/Dom/Algorithms/Iterators/ComposedTreeIterator.cpp
-  tests/Dom/Algorithms/Iterators/HTMLElementRanges.cpp
-  tests/Dom/Algorithms/LiveRangeUpdater.cpp
   tests/Dom/Algorithms/Mixins.cpp
   tests/Dom/Algorithms/MutationAlgorithms.cpp
   tests/Dom/Algorithms/MutationObserverAlgorithms.cpp
   tests/Dom/Algorithms/NameValidation.cpp
   tests/Dom/Algorithms/NodeAlgorithms.cpp
   tests/Dom/Algorithms/OrderedSet.cpp
-  tests/Dom/Algorithms/SelectorQuery.cpp
   tests/Dom/Algorithms/SlotAlgorithms.cpp
   tests/Dom/Algorithms/TextAlgorithms.cpp
   tests/Dom/Algorithms/TreeQueries.cpp
@@ -410,8 +405,13 @@ set(KRYSTAL_WEB_TESTS_DOM_SOURCES
   tests/Dom/Events/EventTarget.cpp
   tests/Dom/Internals/ElementFactory.cpp
   tests/Dom/Internals/EventFactory.cpp
+  tests/Dom/Internals/Iterators/ComposedTreeIterator.cpp
+  tests/Dom/Internals/Iterators/HTMLElementRanges.cpp
+  tests/Dom/Internals/LiveRangeUpdater.cpp
   tests/Dom/Internals/QualifiedNameCache.cpp
+  tests/Dom/Internals/SelectorQuery.cpp
   tests/Dom/Internals/TreeScopeOrderedMap.cpp
+  tests/Dom/Internals/TreeTraversal.cpp
   tests/Dom/Mixins/ChildNode.cpp
   tests/Dom/Mixins/DocumentOrShadowRoot.cpp
   tests/Dom/Mixins/NonDocumentTypeChildNode.cpp
@@ -544,6 +544,7 @@ set(KRYSTAL_WEB_TESTS_HTML_HEADERS
 )
 
 set(KRYSTAL_WEB_TESTS_HTML_SOURCES
+  tests/Html/Algorithms/ElementTextDirection.cpp
   tests/Html/Algorithms/FocusAlgorithms.cpp
   tests/Html/Algorithms/HyperlinkAlgorithms.cpp
   tests/Html/Algorithms/RenderBlocking.cpp

@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Css/UserAgentStyleSheets.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -118,8 +119,8 @@ namespace krys::web
     // Only the first summary child goes in the summary slot.
     if (Is<HTMLSummaryElement>(child))
     {
-      for (auto *element = dom::TreeQueries::FirstElementChild(*this); element;
-           element = dom::TreeQueries::NextElementSibling(*element))
+      for (auto *element = dom::TreeTraversal::FirstElementChild(*this); element;
+           element = dom::TreeTraversal::NextElementSibling(*element))
       {
         if (Is<HTMLSummaryElement>(*element))
         {

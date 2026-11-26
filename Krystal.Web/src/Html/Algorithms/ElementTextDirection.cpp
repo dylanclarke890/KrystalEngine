@@ -23,9 +23,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
+#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -39,7 +40,7 @@
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Web/Text/WritingMode.hpp"
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   namespace
   {
@@ -49,35 +50,35 @@ namespace krys::web::dom
       return element && element->TagQualifiedName().TagName() == tagName;
     }
 
-    void UpdateHasDirAutoFlagForSubtree(Element &firstNode, TextDirectionState textDirectionState) noexcept
+    void UpdateHasDirAutoFlagForSubtree(Element &firstNode, dom::TextDirectionState textDirectionState) noexcept
     {
-      bool dirIsAuto = textDirectionState == TextDirectionState::Auto;
+      bool dirIsAuto = textDirectionState == dom::TextDirectionState::Auto;
       firstNode.SetSelfOrPrecedingNodesAffectDirAuto(dirIsAuto);
 
       for (auto *node = firstNode.FirstChild(); node;)
       {
         auto *element = DynamicDowncast<Element>(*node);
 
-        if (element && (Is<HTMLBDIElement>(*element) || ElementHasValidTextDirectionState(*element)))
+        if (element && (Is<HTMLBDIElement>(*element) || dom::ElementHasValidTextDirectionState(*element)))
         {
-          node = TreeQueries::NextSkippingChildren(*node, &firstNode);
+          node = dom::TreeTraversal::NextSkippingChildren(*node, &firstNode);
           continue;
         }
 
         node->SetSelfOrPrecedingNodesAffectDirAuto(dirIsAuto);
-        node = TreeQueries::Next(*node, &firstNode);
+        node = dom::TreeQueries::Next(*node, &firstNode);
       }
     }
 
-    void UpdateElementHasDirAutoFlag(Element &element, TextDirectionState textDirectionState) noexcept
+    void UpdateElementHasDirAutoFlag(Element &element, dom::TextDirectionState textDirectionState) noexcept
     {
-      auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+      auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(element);
       element.NodeDocument().SetIsDirAttributeDirty();
 
       switch (textDirectionState)
       {
-        case TextDirectionState::LTR:
-        case TextDirectionState::RTL:
+        case dom::TextDirectionState::LTR:
+        case dom::TextDirectionState::RTL:
           if (element.SelfOrPrecedingNodesAffectDirAuto()
               || (parent && parent->SelfOrPrecedingNodesAffectDirAuto()))
           {
@@ -85,9 +86,9 @@ namespace krys::web::dom
           }
           break;
 
-        case TextDirectionState::Auto: UpdateHasDirAutoFlagForSubtree(element, textDirectionState); break;
+        case dom::TextDirectionState::Auto: UpdateHasDirAutoFlagForSubtree(element, textDirectionState); break;
 
-        case TextDirectionState::Undefined:
+        case dom::TextDirectionState::Undefined:
           if (element.SelfOrPrecedingNodesAffectDirAuto()
               && !(parent && parent->SelfOrPrecedingNodesAffectDirAuto()) && !Is<HTMLBDIElement>(element))
           {
@@ -114,25 +115,25 @@ namespace krys::web::dom
     /// @see https://html.spec.whatwg.org/multipage/dom.html#the-directionality
     /// @see https://html.spec.whatwg.org/multipage/dom.html#parent-directionality
     KRYS_NODISCARD Maybe<text::TextDirection>
-      ComputeTextDirection(const Element &element, TextDirectionState textDirectionState) noexcept
+      ComputeTextDirection(const Element &element, dom::TextDirectionState textDirectionState) noexcept
     {
       switch (textDirectionState)
       {
         // LTR: Return 'ltr'.
-        case TextDirectionState::LTR: return text::TextDirection::LTR;
+        case dom::TextDirectionState::LTR: return text::TextDirection::LTR;
 
         // RTL: Return 'rtl'.
-        case TextDirectionState::RTL: return text::TextDirection::RTL;
+        case dom::TextDirectionState::RTL: return text::TextDirection::RTL;
 
         // Auto:
         // 1. Let result be the auto directionality of element.
         // 2. If result is null, then return 'ltr'.
         // 3. Return result.
-        case TextDirectionState::Auto:
+        case dom::TextDirectionState::Auto:
           return ComputeAutoDirectionality(element).value_or(text::TextDirection::LTR);
 
         // Undefined:
-        case TextDirectionState::Undefined:
+        case dom::TextDirectionState::Undefined:
         {
           // If element is a bdi element:
           // 1. Let result be the auto directionality of element.
@@ -153,9 +154,9 @@ namespace krys::web::dom
           // 1. Let parentNode be element's parent node.
           // 2. If parentNode is a shadow root, then return the directionality of parentNode's host.
           // 3. If parentNode is an element, then return the directionality of parentNode.
-          if (auto *parent = TreeQueries::ParentOrShadowHostElement(element))
+          if (auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(element))
           {
-            return ComputeTextDirection(*parent, ElementTextDirectionState(*parent));
+            return ComputeTextDirection(*parent, dom::ElementTextDirectionState(*parent));
           }
 
           // 4. Return 'ltr'.
@@ -177,7 +178,7 @@ namespace krys::web::dom
         return true;
       }
       auto *element = DynamicDowncast<Element>(node);
-      return element && ElementHasValidTextDirectionState(*element);
+      return element && dom::ElementHasValidTextDirectionState(*element);
     }
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#contained-text-auto-directionality
@@ -198,7 +199,7 @@ namespace krys::web::dom
         //     textarea element; an element whose dir attribute is not in the Undefined state then continue.
         if (IsExcludedFromContainedTextAutoDirection(*descendant))
         {
-          descendant = TreeQueries::NextSkippingChildren(*descendant, &element);
+          descendant = dom::TreeTraversal::NextSkippingChildren(*descendant, &element);
           continue;
         }
 
@@ -206,9 +207,9 @@ namespace krys::web::dom
         //     that shadow root's host.
         if (auto *slot = DynamicDowncast<HTMLSlotElement>(*descendant))
         {
-          if (auto *host = TreeQueries::ShadowHost(*slot))
+          if (auto *host = dom::TreeTraversal::ShadowHost(*slot))
           {
-            return ComputeTextDirection(*host, ElementTextDirectionState(*host));
+            return ComputeTextDirection(*host, dom::ElementTextDirectionState(*host));
           }
         }
 
@@ -223,7 +224,7 @@ namespace krys::web::dom
           }
         }
 
-        descendant = TreeQueries::Next(*descendant, &element);
+        descendant = dom::TreeQueries::Next(*descendant, &element);
       }
 
       // 2. Return null.
@@ -296,7 +297,7 @@ namespace krys::web::dom
     {
       return null;
     }
-    return ComputeTextDirection(element, ElementTextDirectionState(element));
+    return ComputeTextDirection(element, dom::ElementTextDirectionState(element));
   }
 
   namespace
@@ -313,7 +314,7 @@ namespace krys::web::dom
       element.SetUsesEffectiveTextDirection(usesEffectiveTextDirection);
       element.SetEffectiveTextDirection(effectiveDirection);
 
-      if (auto *shadowRoot = TreeQueries::GetShadowRoot(element))
+      if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element))
       {
         for (auto *node = shadowRoot->FirstChild(); node; node = node->NextSibling())
         {
@@ -336,7 +337,7 @@ namespace krys::web::dom
     }
 
     Maybe<text::TextDirection> UpdateEffectiveTextDirectionOfElementAndDescendants(
-      Element &element, TextDirectionState textDirectionState, Element *initiator = nullptr) noexcept
+      Element &element, dom::TextDirectionState textDirectionState, Element *initiator = nullptr) noexcept
     {
       UpdateElementHasDirAutoFlag(element, textDirectionState);
 
@@ -349,11 +350,11 @@ namespace krys::web::dom
     }
   }
 
-  void TextDirectionStateChanged(Element &element, TextDirectionState textDirectionState) noexcept
+  void TextDirectionStateChanged(Element &element, dom::TextDirectionState textDirectionState) noexcept
   {
     (void)UpdateEffectiveTextDirectionOfElementAndDescendants(element, textDirectionState);
 
-    auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(element);
     if (!parent)
     {
       return;
@@ -365,13 +366,13 @@ namespace krys::web::dom
     }
   }
 
-  void UpdateEffectiveTextDirectionState(Element &element, TextDirectionState textDirectionState,
+  void UpdateEffectiveTextDirectionState(Element &element, dom::TextDirectionState textDirectionState,
                                          Element *initiator) noexcept
   {
     auto direction =
       UpdateEffectiveTextDirectionOfElementAndDescendants(element, textDirectionState, initiator);
 
-    auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(element);
     if (!parent)
     {
       return;
@@ -398,18 +399,18 @@ namespace krys::web::dom
       auto *child = DynamicDowncast<Element>(*node);
       if (!child)
       {
-        node = TreeQueries::Next(*node, &element);
+        node = dom::TreeQueries::Next(*node, &element);
         continue;
       }
 
-      if (child == initiator || ElementHasValidTextDirectionState(*child))
+      if (child == initiator || dom::ElementHasValidTextDirectionState(*child))
       {
-        node = TreeQueries::NextSkippingChildren(*child, &element);
+        node = dom::TreeTraversal::NextSkippingChildren(*child, &element);
         continue;
       }
 
       UpdateEffectiveTextDirectionOfElementAndShadowTree(*child, direction);
-      node = TreeQueries::Next(*child, &element);
+      node = dom::TreeQueries::Next(*child, &element);
     }
   }
 
@@ -418,11 +419,11 @@ namespace krys::web::dom
     krys_debug_assert(element.SelfOrPrecedingNodesAffectDirAuto());
     for (auto *ancestor = &element; ancestor; ancestor = ancestor->ParentElement())
     {
-      if (!ElementHasAutoTextDirectionState(*ancestor))
+      if (!dom::ElementHasAutoTextDirectionState(*ancestor))
       {
         continue;
       }
-      UpdateEffectiveTextDirectionState(*ancestor, TextDirectionState::Auto, initiator);
+      UpdateEffectiveTextDirectionState(*ancestor, dom::TextDirectionState::Auto, initiator);
       break;
     }
   }

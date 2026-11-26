@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Algorithms/SelectorQuery.hpp"
+﻿#include "Krystal.Web/Dom/Internals/SelectorQuery.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"

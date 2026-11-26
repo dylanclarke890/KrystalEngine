@@ -26,6 +26,7 @@
 #include "Krystal.Web/Editing/Commands/DeleteSelectionCommand.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
@@ -43,6 +44,7 @@
 namespace krys::web
 {
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -728,7 +730,7 @@ namespace krys::web
           child = ShareRefPtr(TreeQueries::Next(*child, &*protectedNode));
           continue;
         }
-        RefPtr<web::Node> nextChild = ShareRefPtr(TreeQueries::NextSkippingChildren(*child, &*protectedNode));
+        RefPtr<web::Node> nextChild = ShareRefPtr(TreeTraversal::NextSkippingChildren(*child, &*protectedNode));
         RemoveNodeUpdatingStates(*child, shouldAssumeContentIsAlwaysEditable);
         child = krys::move(nextChild);
       }
@@ -839,7 +841,7 @@ namespace krys::web
 
     if (startOffset >= LastOffsetForEditing(*startNode))
     {
-      startNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*startNode));
+      startNode = ShareRefPtr(TreeTraversal::NextSkippingChildren(*startNode));
       startOffset = 0;
     }
 
@@ -923,7 +925,7 @@ namespace krys::web
           auto *parentNode = node->ParentNode();
           if (!parentNode || CanHaveChildrenForEditing(*parentNode))
           {
-            RefPtr<web::Node> nextNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+            RefPtr<web::Node> nextNode = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
             // if we just removed a node from the end container, update end position so the
             // check above will work
             UpdatePositionForNodeRemoval(_downstreamEnd, *node);
@@ -933,7 +935,7 @@ namespace krys::web
           }
         }
 
-        auto *lastDescendant = TreeQueries::DeepLastChild(*node);
+        auto *lastDescendant = TreeTraversal::DeepLastChild(*node);
         if (_downstreamEnd.DeprecatedNode() == lastDescendant
             && _downstreamEnd.DeprecatedEditingOffset() >= CaretMaxOffset(*lastDescendant))
         {

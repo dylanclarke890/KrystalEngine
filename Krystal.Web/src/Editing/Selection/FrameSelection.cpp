@@ -29,6 +29,7 @@
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -1999,7 +2000,7 @@ namespace krys::web
       root = HighestEditableRoot(_selection.Start());
       if (auto *shadowRoot = _selection.NonBoundaryShadowTreeRootNode())
       {
-        selectStartTarget = ShareRefPtr<Node>(dom::TreeQueries::ShadowHost(*shadowRoot));
+        selectStartTarget = ShareRefPtr<Node>(dom::TreeTraversal::ShadowHost(*shadowRoot));
       }
       else
       {
@@ -2024,7 +2025,7 @@ namespace krys::web
 
       if (root)
       {
-        selectStartTarget = ShareRefPtr<Node>(dom::TreeQueries::ShadowHost(*root));
+        selectStartTarget = ShareRefPtr<Node>(dom::TreeTraversal::ShadowHost(*root));
       }
       else
       {

@@ -6,6 +6,7 @@
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserver.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Editing/Editor.hpp"
@@ -2137,7 +2138,7 @@ namespace krys::web
     if (IsInUserAgentShadowTree() && UserAgentPart() == css::user_agent_parts::FileSelectorButton())
     {
       if (RefPtr<HTMLInputElement> host =
-            ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this)));
+            ShareRefPtr(DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this)));
           host && host->IsFileUpload())
       {
         host->ActivationBehavior(event);

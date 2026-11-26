@@ -1,7 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Html/CustomElementTestUtils.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationObserver.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
@@ -656,7 +656,7 @@ namespace krys::web::dom::tests
     auto host = result.Value()->GetElementById(u8"d");
     REQUIRE(host);
     CHECK_FALSE(host->HasChildNodes());
-    auto *closedShadow = TreeQueries::GetShadowRoot(*host);
+    auto *closedShadow = TreeTraversal::GetShadowRoot(*host);
     REQUIRE(closedShadow);
     CHECK(closedShadow->Mode() == ShadowRootMode::Closed);
   }

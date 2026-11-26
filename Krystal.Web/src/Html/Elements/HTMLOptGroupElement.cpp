@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLOptGroupElement.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDivElement.hpp"
@@ -77,7 +77,7 @@ namespace krys::web
   HTMLSlotElement *HTMLOptGroupElement::SlotForHostChild(const Node &child) const noexcept
   {
     krys_debug_assert(child.ParentNode() == this);
-    if (Is<HTMLLegendElement>(child) && dom::TreeQueries::FirstElementChild(*this) == &child)
+    if (Is<HTMLLegendElement>(child) && dom::TreeTraversal::FirstElementChild(*this) == &child)
     {
       return _legendSlot.get();
     }
@@ -87,7 +87,7 @@ namespace krys::web
   void HTMLOptGroupElement::OnChildrenChanged() noexcept
   {
     // Only for what the slots can't tell from the insertion or removal of the other children.
-    auto *firstChild = dom::TreeQueries::FirstElementChild(*this);
+    auto *firstChild = dom::TreeTraversal::FirstElementChild(*this);
     auto *legend = firstChild && Is<HTMLLegendElement>(*firstChild) ? firstChild : nullptr;
     if (legend != _slottedLegend.get())
     {

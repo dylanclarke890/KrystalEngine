@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Algorithms/Iterators/HTMLElementRanges.hpp"
+﻿#include "Krystal.Web/Dom/Internals/Iterators/HTMLElementRanges.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"

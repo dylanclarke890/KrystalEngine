@@ -32,6 +32,7 @@
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
@@ -4004,7 +4005,7 @@ namespace krys::web::html
     //    inclusive ancestor of targetParent; or targetParent is a Document node that already has an element
     //    child, then return.
     if (element.ParentNode() || dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(element, *parent)
-        || (Is<Document>(*parent) && dom::TreeQueries::FirstElementChild(*parent)))
+        || (Is<Document>(*parent) && dom::TreeTraversal::FirstElementChild(*parent)))
     {
       return;
     }
@@ -4257,7 +4258,7 @@ namespace krys::web::html
     }
 
     // 13a.x.3. Let shadow be declarativeShadowHostElement's shadow root.
-    auto *shadow = dom::TreeQueries::GetShadowRoot(*declarativeShadowHostElement);
+    auto *shadow = dom::TreeTraversal::GetShadowRoot(*declarativeShadowHostElement);
 
     // 13a.x.4. Set shadow's available to element internals to true.
     shadow->_availableToElementInternals = true;
@@ -5278,7 +5279,7 @@ namespace krys::web::html
       //     target before refNode.
       if (lastNode && !lastNode->ParentNode()
           && !dom::TreeQueries::IsHostIncludingInclusiveAncestorOf(*lastNode, *target)
-          && (!Is<Document>(*target) || !dom::TreeQueries::FirstElementChild(*target))
+          && (!Is<Document>(*target) || !dom::TreeTraversal::FirstElementChild(*target))
           && (!refNode || refNode->ParentNode() == target))
       {
         (void)dom::MutationAlgorithms::Insert(*lastNode, *target, refNode);

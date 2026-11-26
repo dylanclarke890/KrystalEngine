@@ -32,9 +32,9 @@
 #include "Krystal.Web/Accessibility/AXSVGObject.hpp"
 #include "Krystal.Web/Accessibility/AXTableHelpers.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -909,7 +909,7 @@ namespace krys::web
     if (IsGenericFocusableElement() && node && node->FirstChild())
     {
       // The generic div a user agent renders within a text input is still ignored.
-      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*node);
+      auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*node);
       if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent
           && Is<HTMLInputElement>(shadowRoot->Host()))
       {

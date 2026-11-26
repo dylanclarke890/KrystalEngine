@@ -3,7 +3,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/TypeCast.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"

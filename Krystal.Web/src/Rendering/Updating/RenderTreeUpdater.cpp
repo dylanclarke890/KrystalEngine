@@ -26,9 +26,9 @@
 #include "Krystal.Web/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -882,13 +882,13 @@ namespace krys::web
 
   void RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(web::Element &host) noexcept
   {
-    krys_debug_assert(!dom::TreeQueries::GetShadowRoot(host));
+    krys_debug_assert(!dom::TreeTraversal::GetShadowRoot(host));
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
   void RenderTreeUpdater::TearDownRenderersAfterSlotChange(web::Element &host) noexcept
   {
-    krys_debug_assert(dom::TreeQueries::GetShadowRoot(host));
+    krys_debug_assert(dom::TreeTraversal::GetShadowRoot(host));
     TearDownRenderers(host, TeardownType::FullAfterSlotOrShadowRootChange);
   }
 
@@ -1058,7 +1058,7 @@ namespace krys::web
 
         // Make sure we don't leave any renderers behind in nodes outside the composed tree.
         // See ComposedTreeIterator::ComposedTreeIterator().
-        if (Is<HTMLSlotElement>(element) || dom::TreeQueries::GetShadowRoot(element))
+        if (Is<HTMLSlotElement>(element) || dom::TreeTraversal::GetShadowRoot(element))
         {
           TearDownLeftoverChildrenOfComposedTree(element, builder);
         }

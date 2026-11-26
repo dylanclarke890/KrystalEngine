@@ -36,6 +36,7 @@
 #include "Krystal.Web/Css/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ProcessingInstruction.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -337,7 +338,7 @@ namespace krys::web::style
     }
     if (ordinal == ScopeOrdinal::Shadow)
     {
-      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
       return shadowRoot ? &shadowRoot->StyleScope() : nullptr;
     }
     if (ordinal <= ScopeOrdinal::ContainingHost)
@@ -738,8 +739,8 @@ namespace krys::web::style
       {
         return false;
       }
-      for (auto *child = dom::TreeQueries::FirstElementChild(*documentElement); child;
-           child = dom::TreeQueries::NextElementSibling(*child))
+      for (auto *child = dom::TreeTraversal::FirstElementChild(*documentElement); child;
+           child = dom::TreeTraversal::NextElementSibling(*child))
       {
         if (isHTMLElement(*child, html::TagName::body) || isHTMLElement(*child, html::TagName::frameset))
         {
@@ -1202,10 +1203,10 @@ namespace krys::web::style
   Element *HostForScopeOrdinal(const Element &element, ScopeOrdinal scopeOrdinal) noexcept
   {
     krys_debug_assert(scopeOrdinal <= ScopeOrdinal::ContainingHost);
-    auto *host = dom::TreeQueries::ShadowHost(element);
+    auto *host = dom::TreeTraversal::ShadowHost(element);
     for (auto scopeDepth = ScopeOrdinal::ContainingHost; host && scopeDepth != scopeOrdinal; --scopeDepth)
     {
-      host = dom::TreeQueries::ShadowHost(*host);
+      host = dom::TreeTraversal::ShadowHost(*host);
     }
     return host;
   }

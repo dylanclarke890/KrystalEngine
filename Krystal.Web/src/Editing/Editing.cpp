@@ -33,6 +33,7 @@
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
@@ -312,7 +313,7 @@ namespace krys::web
         {
           return current;
         }
-        current = dom::TreeQueries::ShadowHost(*current);
+        current = dom::TreeTraversal::ShadowHost(*current);
       }
       return nullptr;
     }
@@ -429,7 +430,7 @@ namespace krys::web
 
   Node *AncestorNodeInThisScope(const Node &scopeRoot, Node *node) noexcept
   {
-    for (; node; node = dom::TreeQueries::ShadowHost(*node))
+    for (; node; node = dom::TreeTraversal::ShadowHost(*node))
     {
       if (&dom::TreeQueries::Root(*node) == &scopeRoot)
       {
@@ -958,7 +959,7 @@ namespace krys::web
       if (position.GetContainerNode()->IsInShadowTree())
       {
         scope =
-          ShareRefPtr<ContainerNode>(dom::TreeQueries::ContainingShadowRoot(*position.GetContainerNode()));
+          ShareRefPtr<ContainerNode>(dom::TreeTraversal::ContainingShadowRoot(*position.GetContainerNode()));
       }
       else
       {
@@ -1254,7 +1255,7 @@ namespace krys::web
       {
         if (n == excludedNode)
         {
-          n = dom::TreeQueries::NextSkippingChildren(*n, node);
+          n = dom::TreeTraversal::NextSkippingChildren(*n, node);
           continue;
         }
         if (n->Renderer())

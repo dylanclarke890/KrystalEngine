@@ -7,8 +7,8 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Css/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Web/Css/Queries/MediaQuery.hpp"
-#include "Krystal.Web/Dom/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
@@ -19,6 +19,7 @@
 #include "Krystal.Web/Graphics/GraphicsContext.hpp"
 #include "Krystal.Web/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Web/Graphics/Layers/GraphicsLayer.hpp"
+#include "Krystal.Web/Html/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLHtmlElement.hpp"
@@ -3084,7 +3085,7 @@ namespace krys::web
     // 3d. Run the ancestor revealing algorithm on target.
     if (anchorElement)
     {
-      (void)dom::RevealClosedDetailsAndHiddenUntilFoundAncestors(*anchorElement);
+      (void)html::RevealClosedDetailsAndHiddenUntilFoundAncestors(*anchorElement);
     }
 
     // 2. Otherwise, if document's indicated part is top of the document:
@@ -3357,7 +3358,7 @@ namespace krys::web
     // Get the scroll-margin of the shadow host when we're inside a user agent shadow root.
     if (updateTarget->IsInUserAgentShadowTree())
     {
-      updateTarget = ShareRefPtr(dom::TreeQueries::ShadowHost(*updateTarget));
+      updateTarget = ShareRefPtr(dom::TreeTraversal::ShadowHost(*updateTarget));
     }
 
     auto *renderer = updateTarget->Renderer();

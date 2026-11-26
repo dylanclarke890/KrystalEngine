@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Web/Html/Collections/LabelsNodeList.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Html/Elements/HTMLLabelElement.hpp"
 
 namespace krys::web::html

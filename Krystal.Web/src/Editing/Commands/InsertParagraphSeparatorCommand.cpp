@@ -25,6 +25,7 @@
 
 #include "Krystal.Web/Editing/Commands/InsertParagraphSeparatorCommand.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Editing/Commands/InsertLineBreakCommand.hpp"
@@ -39,6 +40,7 @@
 namespace krys::web
 {
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -441,7 +443,7 @@ namespace krys::web
       }
       else if (insertionPosition.GetContainerNode() == startBlock && nestNewBlock)
       {
-        refNode = ShareRefPtr(TreeQueries::ChildAt(
+        refNode = ShareRefPtr(TreeTraversal::ChildAt(
           *startBlock, static_cast<size_t>(insertionPosition.ComputeOffsetInContainerNode())));
         krys_debug_assert(refNode); // must be true or we'd be in the end of block case
       }

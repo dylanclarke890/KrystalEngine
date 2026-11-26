@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Style/Resolver.hpp"
@@ -38,7 +38,7 @@ namespace krys::web::style
   template <typename TFunction>
   inline void TraverseRuleFeaturesInShadowTree(Element &element, TFunction function) noexcept
   {
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
     if (!shadowRoot)
     {
       return;
@@ -87,7 +87,7 @@ namespace krys::web::style
 
     auto mayAffectShadowTree = [&]
     {
-      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
       if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
       {
         if (ruleSets.HasMatchingUserOrAuthorStyle([](RuleSet &style)
@@ -109,7 +109,7 @@ namespace krys::web::style
     // invalidation.
     if (element.IsInShadowTree())
     {
-      if (auto *containingShadowRoot = dom::TreeQueries::ContainingShadowRoot(element))
+      if (auto *containingShadowRoot = dom::TreeTraversal::ContainingShadowRoot(element))
       {
         auto &host = *containingShadowRoot->Host();
         if (host.IsConnected())

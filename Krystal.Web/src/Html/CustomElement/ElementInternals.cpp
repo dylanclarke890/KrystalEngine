@@ -27,6 +27,7 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomStateSet.hpp"
 #include "Krystal.Web/Html/CustomElement/FormAssociatedCustomElement.hpp"
@@ -65,7 +66,7 @@ namespace krys::web::html
     // 2. If target is not a shadow host, then return null.
     // 3. Let shadow be target's shadow root.
     // 4. If shadow's available to element internals is false, then return null.
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*element);
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*element);
     if (!shadowRoot || !shadowRoot->IsAvailableToElementInternals())
     {
       return nullptr;

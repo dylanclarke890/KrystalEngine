@@ -1,12 +1,13 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Text/CharacterProperties.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -158,7 +159,7 @@ namespace krys::web
     {
       return _selectListBoxSlot.get();
     }
-    if (Is<HTMLButtonElement>(child) && dom::TreeQueries::FirstElementChild(*this) == &child)
+    if (Is<HTMLButtonElement>(child) && dom::TreeTraversal::FirstElementChild(*this) == &child)
     {
       return _selectButtonSlot.get();
     }
@@ -170,7 +171,7 @@ namespace krys::web
     // Only for what the slots' names can't say. Inserting and removing other children assigns them already,
     // and reassigning during a removal would walk the composed tree through a slot that's still to hear of
     // it.
-    auto *firstChild = dom::TreeQueries::FirstElementChild(*this);
+    auto *firstChild = dom::TreeTraversal::FirstElementChild(*this);
     auto *selectButton =
       UsesMenuList() && firstChild && Is<HTMLButtonElement>(*firstChild) ? firstChild : nullptr;
     if (selectButton == _selectButton.get() && UsesMenuList() == _slotsAreForMenuList)
@@ -1418,7 +1419,7 @@ namespace krys::web
       if (auto *option = DynamicDowncast<HTMLOptionElement>(*descendant))
       {
         handleOptionElement(*option);
-        node = dom::TreeQueries::NextSkippingChildren(*node, &select);
+        node = dom::TreeTraversal::NextSkippingChildren(*node, &select);
         continue;
       }
       if (Is<HTMLOptGroupElement>(*descendant))
@@ -1435,29 +1436,29 @@ namespace krys::web
           if (auto *option = DynamicDowncast<HTMLOptionElement>(*optGroupDescendant))
           {
             handleOptionElement(*option);
-            optGroupNode = dom::TreeQueries::NextSkippingChildren(*optGroupNode, descendant);
+            optGroupNode = dom::TreeTraversal::NextSkippingChildren(*optGroupNode, descendant);
             continue;
           }
           if (Is<HTMLOptGroupElement>(*optGroupDescendant) || Is<HTMLDataListElement>(*optGroupDescendant)
               || Is<HTMLSelectElement>(*optGroupDescendant) || Is<HTMLHRElement>(*optGroupDescendant))
           {
-            optGroupNode = dom::TreeQueries::NextSkippingChildren(*optGroupNode, descendant);
+            optGroupNode = dom::TreeTraversal::NextSkippingChildren(*optGroupNode, descendant);
             continue;
           }
           optGroupNode = dom::TreeQueries::Next(*optGroupNode, descendant);
         }
-        node = dom::TreeQueries::NextSkippingChildren(*node, &select);
+        node = dom::TreeTraversal::NextSkippingChildren(*node, &select);
         continue;
       }
       if (Is<HTMLHRElement>(*descendant))
       {
         _listItems.push_back(CreateWeakPtr(descendant));
-        node = dom::TreeQueries::NextSkippingChildren(*node, &select);
+        node = dom::TreeTraversal::NextSkippingChildren(*node, &select);
         continue;
       }
       if (Is<HTMLDataListElement>(*descendant) || Is<HTMLSelectElement>(*descendant))
       {
-        node = dom::TreeQueries::NextSkippingChildren(*node, &select);
+        node = dom::TreeTraversal::NextSkippingChildren(*node, &select);
         continue;
       }
       node = dom::TreeQueries::Next(*node, &select);

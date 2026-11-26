@@ -32,7 +32,7 @@ namespace krys::web
   class Node;
 }
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   /// @brief Opens the closed `details` elements and reveals the `hidden=until-found` elements that hide
   /// @p node (firing `beforematch` at each of the latter), so a fragment or text fragment can scroll to it.

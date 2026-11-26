@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLTextFormControlElement.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -17,6 +17,7 @@
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
+#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBRElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
@@ -993,7 +994,7 @@ namespace krys::web
     {
       return nullptr;
     }
-    auto *ancestor = dom::TreeQueries::ShadowHost(*container);
+    auto *ancestor = dom::TreeTraversal::ShadowHost(*container);
     if (!ancestor)
     {
       return nullptr;
@@ -1061,7 +1062,7 @@ namespace krys::web
           case dom::TextDirectionState::RTL: return text::TextDirection::RTL;
           case dom::TextDirectionState::LTR: return text::TextDirection::LTR;
           case dom::TextDirectionState::Auto:
-            return dom::ComputeAutoDirectionality(*element).value_or(text::TextDirection::LTR);
+            return html::ComputeAutoDirectionality(*element).value_or(text::TextDirection::LTR);
           case dom::TextDirectionState::Undefined: break;
         }
       }

@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 
 namespace krys::web::dom::detail
 {
@@ -14,12 +15,12 @@ namespace krys::web::dom::detail
     /// @brief The first child of @p parent that's an HTML element, where a children range starts.
     KRYS_NODISCARD static TNode *FirstChild(match_constness_t<TNode, ContainerNode> &parent) noexcept
     {
-      return TreeQueries::FirstHTMLElementChild(parent);
+      return TreeTraversal::FirstHTMLElementChild(parent);
     }
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      return TreeQueries::NextHTMLElementSibling(*current);
+      return TreeTraversal::NextHTMLElementSibling(*current);
     }
 
     KRYS_NODISCARD static TNode *ScopedAdvance(match_constness_t<TNode, Node> *current,
@@ -38,7 +39,7 @@ namespace krys::web::dom::detail
 
     KRYS_NODISCARD static TNode *Advance(match_constness_t<TNode, Node> *current) noexcept
     {
-      return TreeQueries::PreviousHTMLElementSibling(*current);
+      return TreeTraversal::PreviousHTMLElementSibling(*current);
     }
 
     KRYS_NODISCARD static TNode *ScopedAdvance(match_constness_t<TNode, Node> *current,

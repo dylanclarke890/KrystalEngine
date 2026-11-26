@@ -1084,24 +1084,15 @@ set(KRYSTAL_WEB_DOM_HEADERS
   include/Krystal.Web/Dom/Algorithms/AbortAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp
-  include/Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp
   include/Krystal.Web/Dom/Algorithms/EventDispatcher.hpp
   include/Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/ExtensibilityHooks.hpp
-  include/Krystal.Web/Dom/Algorithms/FindRevealAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/IteratorAlgorithms.hpp
-  include/Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp
-  include/Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp
-  include/Krystal.Web/Dom/Algorithms/Iterators/ElementAndTextDescendantIterator.hpp
-  include/Krystal.Web/Dom/Algorithms/Iterators/HTMLElementRanges.hpp
-  include/Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp
-  include/Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp
   include/Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/NameValidation.hpp
   include/Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/OrderedSet.hpp
-  include/Krystal.Web/Dom/Algorithms/SelectorQuery.hpp
   include/Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp
   include/Krystal.Web/Dom/Algorithms/TreeQueries.hpp
@@ -1128,10 +1119,18 @@ set(KRYSTAL_WEB_DOM_HEADERS
   include/Krystal.Web/Dom/Internals/EventFactory.hpp
   include/Krystal.Web/Dom/Internals/IdTargetObserver.hpp
   include/Krystal.Web/Dom/Internals/IdTargetObserverRegistry.hpp
+  include/Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp
+  include/Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp
+  include/Krystal.Web/Dom/Internals/Iterators/ElementAndTextDescendantIterator.hpp
+  include/Krystal.Web/Dom/Internals/Iterators/HTMLElementRanges.hpp
+  include/Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp
+  include/Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp
+  include/Krystal.Web/Dom/Internals/SelectorQuery.hpp
   include/Krystal.Web/Dom/Internals/TreeScopeOrderedMap.hpp
   include/Krystal.Web/Dom/Internals/NodeRareData.hpp
   include/Krystal.Web/Dom/Internals/QualifiedNameCache.hpp
   include/Krystal.Web/Dom/Internals/SmallNodeList.hpp
+  include/Krystal.Web/Dom/Internals/TreeTraversal.hpp
   include/Krystal.Web/Dom/Mixins/ChildNode.hpp
   include/Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp
   include/Krystal.Web/Dom/Mixins/NonDocumentTypeChildNode.hpp
@@ -1195,20 +1194,15 @@ set(KRYSTAL_WEB_DOM_SOURCES
   src/Dom/Algorithms/AbortAlgorithms.cpp
   src/Dom/Algorithms/DocumentAlgorithms.cpp
   src/Dom/Algorithms/ElementAlgorithms.cpp
-  src/Dom/Algorithms/ElementTextDirection.cpp
   src/Dom/Algorithms/EventDispatcher.cpp
   src/Dom/Algorithms/EventTargetAlgorithms.cpp
   src/Dom/Algorithms/ExtensibilityHooks.cpp
-  src/Dom/Algorithms/FindRevealAlgorithms.cpp
   src/Dom/Algorithms/IteratorAlgorithms.cpp
-  src/Dom/Algorithms/Iterators/ComposedTreeIterator.cpp
-  src/Dom/Algorithms/LiveRangeUpdater.cpp
   src/Dom/Algorithms/MutationAlgorithms.cpp
   src/Dom/Algorithms/MutationObserverAlgorithms.cpp
   src/Dom/Algorithms/NameValidation.cpp
   src/Dom/Algorithms/NodeAlgorithms.cpp
   src/Dom/Algorithms/OrderedSet.cpp
-  src/Dom/Algorithms/SelectorQuery.cpp
   src/Dom/Algorithms/SlotAlgorithms.cpp
   src/Dom/Algorithms/TextAlgorithms.cpp
   src/Dom/Algorithms/TreeQueries.cpp
@@ -1228,9 +1222,13 @@ set(KRYSTAL_WEB_DOM_SOURCES
   src/Dom/Internals/ElementRareData.cpp
   src/Dom/Internals/IdTargetObserver.cpp
   src/Dom/Internals/IdTargetObserverRegistry.cpp
+  src/Dom/Internals/Iterators/ComposedTreeIterator.cpp
+  src/Dom/Internals/LiveRangeUpdater.cpp
+  src/Dom/Internals/SelectorQuery.cpp
   src/Dom/Internals/TreeScopeOrderedMap.cpp
   src/Dom/Internals/NodeRareData.cpp
   src/Dom/Internals/QualifiedNameCache.cpp
+  src/Dom/Internals/TreeTraversal.cpp
   src/Dom/Mixins/ChildNode.cpp
   src/Dom/Mixins/DocumentOrShadowRoot.cpp
   src/Dom/Mixins/NonDocumentTypeChildNode.cpp
@@ -1810,6 +1808,8 @@ set(KRYSTAL_WEB_HISTORY_SOURCES
 set(KRYSTAL_WEB_HTML_HEADERS
   include/Krystal.Web/Html/Algorithms/CustomElementAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/DOMTreeAccessors.hpp
+  include/Krystal.Web/Html/Algorithms/ElementTextDirection.hpp
+  include/Krystal.Web/Html/Algorithms/FindRevealAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/FormControlAlgorithms.hpp
   include/Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp
@@ -2052,6 +2052,8 @@ set(KRYSTAL_WEB_HTML_HEADERS
 
 set(KRYSTAL_WEB_HTML_SOURCES
   src/Html/Algorithms/CustomElementAlgorithms.cpp
+  src/Html/Algorithms/ElementTextDirection.cpp
+  src/Html/Algorithms/FindRevealAlgorithms.cpp
   src/Html/Algorithms/FocusAlgorithms.cpp
   src/Html/Algorithms/FormControlAlgorithms.cpp
   src/Html/Algorithms/HTMLInsertionAlgorithms.cpp
@@ -4197,7 +4199,7 @@ target_precompile_headers(Krystal.Web
     include/Krystal.Web/Css/Values/Primitives/PrimitiveNumeric.hpp
     include/Krystal.Web/Css/Values/Value.hpp
 
-    include/Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp
+    include/Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp
     include/Krystal.Web/Dom/Nodes/Attr.hpp
     include/Krystal.Web/Dom/Nodes/Document.hpp
     include/Krystal.Web/Dom/Nodes/Node.hpp

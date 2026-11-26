@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Html/Shadow/DataListButtonElement.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDataListElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
@@ -79,7 +79,7 @@ namespace krys::web::html
                                               const RenderStyle *) noexcept
   {
     auto elementStyle = ResolveStyle(resolutionContext);
-    auto *input = DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*this));
+    auto *input = DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*this));
     if (!input || !input->List())
     {
       elementStyle.Style->SetDisplay(DisplayType::None);
@@ -89,7 +89,7 @@ namespace krys::web::html
 
   bool DataListButtonElement::IsDisabledFormControl() const noexcept
   {
-    auto *host = dom::TreeQueries::ShadowHost(*this);
+    auto *host = dom::TreeTraversal::ShadowHost(*this);
     return host && host->IsDisabledFormControl();
   }
 }

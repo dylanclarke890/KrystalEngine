@@ -29,7 +29,7 @@
  */
 
 #include "Krystal.Web/Dom/Internals/TreeScopeOrderedMap.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 

@@ -26,7 +26,7 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Css/Containment/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -1786,11 +1786,11 @@ namespace krys::web
 
   RenderElement *RenderElement::RendererForPseudoStyleAcrossShadowBoundary() const noexcept
   {
-    if (auto *root = dom::TreeQueries::ContainingShadowRoot(*GetElement()))
+    if (auto *root = dom::TreeTraversal::ContainingShadowRoot(*GetElement()))
     {
       if (root->Mode() == dom::ShadowRootMode::UserAgent)
       {
-        auto *currentElement = dom::TreeQueries::ShadowHost(*GetElement());
+        auto *currentElement = dom::TreeTraversal::ShadowHost(*GetElement());
         // When an element has display: contents, this element doesn't have a renderer
         // and its children will render as children of the parent element.
         while (currentElement && currentElement->HasDisplayContents())

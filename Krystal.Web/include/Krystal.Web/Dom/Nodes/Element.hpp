@@ -84,6 +84,7 @@ namespace krys::web::dom
   class NodeAlgorithms;
   class SlotAlgorithms;
   class TreeQueries;
+  class TreeTraversal;
 
   struct GetHTMLOptions;
   struct ShadowRootInit;
@@ -186,6 +187,7 @@ namespace krys::web
     friend class dom::NodeAlgorithms;
     friend class dom::NamedNodeMap;
     friend class dom::TreeQueries;
+    friend class dom::TreeTraversal;
 
     friend class html::OpenElementStack;
     friend class html::TreeBuilder;

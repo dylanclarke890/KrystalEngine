@@ -44,8 +44,9 @@
 #include "Krystal.Web/Accessibility/AXTableColumn.hpp"
 #include "Krystal.Web/Accessibility/AXTableHeaderContainer.hpp"
 #include "Krystal.Web/Accessibility/AXTableHelpers.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -2734,7 +2735,7 @@ namespace krys::web
       node = ShareRefPtr(dom::TreeQueries::Next(*node, nullptr));
       while (node && !node->Renderer())
       {
-        node = ShareRefPtr(dom::TreeQueries::NextSkippingChildren(*node));
+        node = ShareRefPtr(dom::TreeTraversal::NextSkippingChildren(*node));
       }
       if (!node)
       {
@@ -2753,7 +2754,7 @@ namespace krys::web
     ChildrenChanged(Get(slot));
 
     // Which of a details element's summaries is its summary (the first) can change: their roles depend on it.
-    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(slot);
+    auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(slot);
     auto *details = shadowRoot ? shadowRoot->Host() : nullptr;
     if (!details || !IsHTMLElementNamed(*details, u8"details"))
     {

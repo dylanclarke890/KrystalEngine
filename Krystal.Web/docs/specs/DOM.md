@@ -39,7 +39,7 @@ Status: reviewed (2026-10-30)
 ### [1.3. Selectors](https://dom.spec.whatwg.org/#selectors)
 
 Status: reviewed (2026-10-30)
-> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/Dom/Algorithms/SelectorQuery.cpp`.
+> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/Dom/Internals/SelectorQuery.cpp`.
 > Known issue: `:scope` with a fragment or shadow root as the scoping root. Difference: a document's `:scope` is its document element.
 
 - [x] [scope-match a selectors string](https://dom.spec.whatwg.org/#scope-match-a-selectors-string) — To scope-match a selectors string given a string selectors against a node node:
@@ -887,7 +887,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.7. Mixin NonDocumentTypeChildNode](https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::NonDocumentTypeChildNode` over `TreeQueries::PreviousElementSibling`/`NextElementSibling`, which `Element` and `CharacterData` forward to; `DocumentType` doesn't have them. Tests: `tests/Dom/Mixins/NonDocumentTypeChildNode.cpp`.
+> Code: `mixins::NonDocumentTypeChildNode` over `TreeTraversal::PreviousElementSibling`/`NextElementSibling`, which `Element` and `CharacterData` forward to; `DocumentType` doesn't have them. Tests: `tests/Dom/Mixins/NonDocumentTypeChildNode.cpp`.
 
 - [x] [NonDocumentTypeChildNode.previousElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-previouselementsibling) — The previousElementSibling getter steps are to return the first preceding sibling that is an element; otherwise null.
 

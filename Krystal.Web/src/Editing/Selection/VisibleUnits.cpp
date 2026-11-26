@@ -29,6 +29,7 @@
 #include "Krystal.Text/TextBoundaries.hpp"
 #include "Krystal.Text/TextBreakIterator.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -1527,7 +1528,7 @@ namespace krys::web
       {
         while (n && n->HasEditableStyle() != startNodeIsEditable)
         {
-          n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+          n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
         }
         if (!n || !n->IsDescendantOf(highestRoot))
         {
@@ -1537,13 +1538,13 @@ namespace krys::web
       auto *r = n->Renderer();
       if (!r)
       {
-        n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+        n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
         continue;
       }
       const RenderStyle &style = r->Style();
       if (style.Visibility() != Visibility::Visible)
       {
-        n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+        n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
         continue;
       }
 
@@ -1576,17 +1577,17 @@ namespace krys::web
         }
         node = n;
         offset = 0;
-        n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+        n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
       }
       else if (EditingIgnoresContent(*n) || IsRenderedTable(n))
       {
         node = n;
         type = Position::AnchorType::PositionIsBeforeAnchor;
-        n = n->PreviousSibling() ? n->PreviousSibling() : dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+        n = n->PreviousSibling() ? n->PreviousSibling() : dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
       }
       else
       {
-        n = dom::TreeQueries::PreviousPostOrder(*n, startBlock);
+        n = dom::TreeTraversal::PreviousPostOrder(*n, startBlock);
       }
     }
 
@@ -1665,7 +1666,7 @@ namespace krys::web
       {
         node = n;
         type = Position::AnchorType::PositionIsAfterAnchor;
-        n = dom::TreeQueries::NextSkippingChildren(*n, stayInsideBlock);
+        n = dom::TreeTraversal::NextSkippingChildren(*n, stayInsideBlock);
       }
       else
       {

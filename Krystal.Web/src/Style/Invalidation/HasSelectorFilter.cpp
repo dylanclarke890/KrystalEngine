@@ -27,6 +27,7 @@
 #include "Krystal.Web/Css/Selectors/Selector.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorFilter.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Style/Rules/RuleFeature.hpp"
 
@@ -50,8 +51,8 @@ namespace krys::web::style
         }
         break;
       case Type::Children:
-        for (auto *child = dom::TreeQueries::FirstElementChild(element); child;
-             child = dom::TreeQueries::NextElementSibling(*child))
+        for (auto *child = dom::TreeTraversal::FirstElementChild(element); child;
+             child = dom::TreeTraversal::NextElementSibling(*child))
         {
           Add(*child);
         }

@@ -25,8 +25,8 @@
 
 #include "Krystal.Web/Html/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"

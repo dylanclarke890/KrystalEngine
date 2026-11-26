@@ -22,7 +22,7 @@
  */
 
 #include "Krystal.Web/Rendering/GeneratedContent/RenderListItem.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOListElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLUListElement.hpp"
@@ -78,11 +78,11 @@ namespace krys::web
       {
         if (!current->RenderOrDisplayContentsStyle())
         {
-          current = dom::TreeQueries::NextElementIncludingPseudoSkippingChildren(*current, &list);
+          current = dom::TreeTraversal::NextElementIncludingPseudoSkippingChildren(*current, &list);
         }
         else
         {
-          current = dom::TreeQueries::NextElementIncludingPseudo(*current, &list);
+          current = dom::TreeTraversal::NextElementIncludingPseudo(*current, &list);
         }
       };
       advance();
@@ -108,7 +108,7 @@ namespace krys::web
         }
 
         // We found ourself inside another list; skip the rest of its contents.
-        current = dom::TreeQueries::NextElementIncludingPseudoSkippingChildren(*current, &list);
+        current = dom::TreeTraversal::NextElementIncludingPseudoSkippingChildren(*current, &list);
       }
 
       return nullptr;
@@ -129,7 +129,7 @@ namespace krys::web
       const Element *current = item.GetElement();
       auto advance = [&]
       {
-        current = dom::TreeQueries::PreviousElementIncludingPseudo(*current, &list);
+        current = dom::TreeTraversal::PreviousElementIncludingPseudo(*current, &list);
       };
       advance();
       while (current)

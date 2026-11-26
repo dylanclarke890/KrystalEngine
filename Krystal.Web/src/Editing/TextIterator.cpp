@@ -28,6 +28,7 @@
 #include "Krystal.Web/Editing/TextIterator.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -315,7 +316,7 @@ namespace krys::web
       {
         return point.Container.get();
       }
-      return dom::TreeQueries::NextSkippingChildren(*point.Container);
+      return dom::TreeTraversal::NextSkippingChildren(*point.Container);
     }
   }
 
@@ -907,7 +908,7 @@ namespace krys::web
     {
       if (auto innerTextElement = renderTextControl->TextFormControlElement().InnerTextElement())
       {
-        _currentNode = ShareRefPtr<Node>(dom::TreeQueries::ContainingShadowRoot(*innerTextElement));
+        _currentNode = ShareRefPtr<Node>(dom::TreeTraversal::ContainingShadowRoot(*innerTextElement));
         PushFullyClippedState(_fullyClippedStack, *_currentNode, _behaviors);
         _offset = 0;
         return false;
@@ -1001,7 +1002,7 @@ namespace krys::web
       {
         return false;
       }
-      auto *shadowHost = dom::TreeQueries::ShadowHost(*node);
+      auto *shadowHost = dom::TreeTraversal::ShadowHost(*node);
       return emitsOriginalText
              || !(node->IsInShadowTree() && shadowHost
                   && IsHTMLElementOfType(*shadowHost, html::TagName::input));
@@ -1092,7 +1093,7 @@ namespace krys::web
         return true;
       }
       Node *subsequentNode = &node;
-      while ((subsequentNode = dom::TreeQueries::NextSkippingChildren(*subsequentNode)))
+      while ((subsequentNode = dom::TreeTraversal::NextSkippingChildren(*subsequentNode)))
       {
         if (subsequentNode->Renderer())
         {

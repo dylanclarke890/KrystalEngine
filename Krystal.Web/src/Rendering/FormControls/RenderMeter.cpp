@@ -19,7 +19,7 @@
  */
 
 #include "Krystal.Web/Rendering/FormControls/RenderMeter.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLMeterElement.hpp"
 #include "Krystal.Web/Rendering/RenderTheme.hpp"
 
@@ -42,8 +42,8 @@ namespace krys::web
       return meterElement;
     }
 
-    krys_debug_assert(dom::TreeQueries::ShadowHost(*GetElement()));
-    return Downcast<HTMLMeterElement>(dom::TreeQueries::ShadowHost(*GetElement()));
+    krys_debug_assert(dom::TreeTraversal::ShadowHost(*GetElement()));
+    return Downcast<HTMLMeterElement>(dom::TreeTraversal::ShadowHost(*GetElement()));
   }
 
   void RenderMeter::UpdateLogicalWidth() noexcept

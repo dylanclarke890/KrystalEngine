@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLSummaryElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Web/Svg/Elements/SVGAElement.hpp"
@@ -16,7 +16,7 @@ namespace krys::web
       auto isInInteractiveContent = false;
       auto *node = DynamicDowncast<Node>(target);
       for (auto *element = node ? DynamicDowncast<Element>(*node) : nullptr; element;
-           element = dom::TreeQueries::ParentOrShadowHostElement(*element))
+           element = dom::TreeTraversal::ParentOrShadowHostElement(*element))
       {
         if (Is<HTMLSummaryElement>(*element))
         {
@@ -47,7 +47,7 @@ namespace krys::web
       return ShareRefPtr(parent);
     }
     // The default summary is in the details' shadow tree.
-    if (auto *details = DynamicDowncast<HTMLDetailsElement>(dom::TreeQueries::ShadowHost(*this)))
+    if (auto *details = DynamicDowncast<HTMLDetailsElement>(dom::TreeTraversal::ShadowHost(*this)))
     {
       return ShareRefPtr(details);
     }

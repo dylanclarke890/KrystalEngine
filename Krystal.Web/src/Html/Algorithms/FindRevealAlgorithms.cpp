@@ -23,19 +23,19 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Algorithms/FindRevealAlgorithms.hpp"
+#include "Krystal.Web/Html/Algorithms/FindRevealAlgorithms.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/Elements/HTMLDetailsElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-namespace krys::web::dom
+namespace krys::web::html
 {
   namespace
   {
@@ -47,10 +47,10 @@ namespace krys::web::dom
 
     KRYS_NODISCARD RefPtr<HTMLDetailsElement> ClosedDetailsElementAncestor(const Node &node) noexcept
     {
-      auto *slot = SlotAlgorithms::GetAssignedSlot(node);
+      auto *slot = dom::SlotAlgorithms::GetAssignedSlot(node);
       if (slot && slot->UserAgentPart() == css::user_agent_parts::DetailsContent())
       {
-        if (auto *details = DynamicDowncast<HTMLDetailsElement>(TreeQueries::ShadowHost(*slot)))
+        if (auto *details = DynamicDowncast<HTMLDetailsElement>(dom::TreeTraversal::ShadowHost(*slot)))
         {
           if (!details->HasAttribute(u8"open"))
           {

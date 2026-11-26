@@ -29,6 +29,7 @@
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Style/Invalidation/InvalidationFunctions.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 
 namespace krys::web::style
 {
@@ -131,7 +132,7 @@ namespace krys::web::style
 
     collect(_element->StyleResolver().RuleSets());
 
-    if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*_element))
+    if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*_element))
     {
       collect(shadowRoot->StyleScope().GetResolver().RuleSets(), MatchElement::Host);
     }

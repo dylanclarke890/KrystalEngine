@@ -41,15 +41,15 @@
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorList.hpp"
 #include "Krystal.Web/Css/StyleSheets/StyleSheetContents.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Web/Style/ContainerQueryEvaluator.hpp"
@@ -221,7 +221,7 @@ namespace krys::web::style
     }
 
     auto *parent = Element().ParentElement();
-    if (parent && dom::TreeQueries::GetShadowRoot(*parent))
+    if (parent && dom::TreeTraversal::GetShadowRoot(*parent))
     {
       MatchSlottedPseudoElementRules(origin);
       if (IsFirstMatchModeAndHasMatchedAnyRules())
@@ -230,7 +230,7 @@ namespace krys::web::style
       }
     }
 
-    if (dom::TreeQueries::GetShadowRoot(Element()))
+    if (dom::TreeTraversal::GetShadowRoot(Element()))
     {
       MatchHostPseudoClassRules(origin);
       if (IsFirstMatchModeAndHasMatchedAnyRules())
@@ -239,7 +239,7 @@ namespace krys::web::style
       }
     }
 
-    if (dom::TreeQueries::ContainingShadowRoot(Element()))
+    if (dom::TreeTraversal::ContainingShadowRoot(Element()))
     {
       MatchUserAgentPartRules(origin);
       if (IsFirstMatchModeAndHasMatchedAnyRules())
@@ -272,7 +272,7 @@ namespace krys::web::style
       "the call site since matching a particular element should be unnecessary.");
 
     auto &element = Element();
-    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(element);
+    auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(element);
     if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
       CollectMatchingUserAgentPartRules(matchRequest);
@@ -406,7 +406,7 @@ namespace krys::web::style
   void ElementRuleCollector::MatchUserAgentPartRules(DeclarationOrigin origin) noexcept
   {
     krys_debug_assert(Element().IsInShadowTree());
-    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(Element());
+    auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(Element());
     if (!shadowRoot || shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
     {
       return;
@@ -426,7 +426,7 @@ namespace krys::web::style
 
   void ElementRuleCollector::MatchHostPseudoClassRules(DeclarationOrigin origin) noexcept
   {
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(Element());
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(Element());
     krys_debug_assert(shadowRoot);
 
     auto *shadowRules = shadowRoot->StyleScope().GetResolver().RuleSets().StyleForDeclarationOrigin(origin);
@@ -488,19 +488,19 @@ namespace krys::web::style
 
   void ElementRuleCollector::MatchPartPseudoElementRules(DeclarationOrigin origin) noexcept
   {
-    if (!dom::TreeQueries::ContainingShadowRoot(Element()))
+    if (!dom::TreeTraversal::ContainingShadowRoot(Element()))
     {
       return;
     }
 
     bool isUserAgentPart =
-      dom::TreeQueries::ContainingShadowRoot(Element())->Mode() == dom::ShadowRootMode::UserAgent
+      dom::TreeTraversal::ContainingShadowRoot(Element())->Mode() == dom::ShadowRootMode::UserAgent
       && Element().UserAgentPart() != null;
 
-    auto &partMatchingElement = isUserAgentPart ? *dom::TreeQueries::ShadowHost(Element()) : Element();
+    auto &partMatchingElement = isUserAgentPart ? *dom::TreeTraversal::ShadowHost(Element()) : Element();
     // An element without a part attribute has no part names.
     if (!partMatchingElement.HasAttribute(u8"part")
-        || !dom::TreeQueries::ContainingShadowRoot(partMatchingElement))
+        || !dom::TreeTraversal::ContainingShadowRoot(partMatchingElement))
     {
       return;
     }
@@ -514,7 +514,7 @@ namespace krys::web::style
     auto *element = &partMatchingElement;
     auto styleScopeOrdinal = ScopeOrdinal::Element;
 
-    for (; element; element = dom::TreeQueries::ShadowHost(*element), --styleScopeOrdinal)
+    for (; element; element = dom::TreeTraversal::ShadowHost(*element), --styleScopeOrdinal)
     {
       auto &styleScope = Scope::ForNode(const_cast<web::Element &>(*element));
       if (!styleScope.GetResolver().RuleSets().IsAuthorStyleDefined())
@@ -535,7 +535,7 @@ namespace krys::web::style
 
       // Element may only be exposed to styling from enclosing scopes via exportparts attributes.
       if (element != &partMatchingElement
-          && dom::TreeQueries::GetShadowRoot(*element)->GetPartMappings().empty())
+          && dom::TreeTraversal::GetShadowRoot(*element)->GetPartMappings().empty())
       {
         break;
       }
@@ -796,7 +796,7 @@ namespace krys::web::style
         while (ancestor && !shadowHostCrossed)
         {
           auto subContext = context;
-          if (dom::TreeQueries::GetShadowRoot(*ancestor))
+          if (dom::TreeTraversal::GetShadowRoot(*ancestor))
           {
             subContext.StyleScopeOrdinal = ScopeOrdinal::Shadow;
             shadowHostCrossed = true;
@@ -829,7 +829,7 @@ namespace krys::web::style
           }
 
           ++distance;
-          ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor);
+          ancestor = dom::TreeTraversal::ParentOrShadowHostElement(*ancestor);
         }
       };
 
@@ -854,7 +854,7 @@ namespace krys::web::style
               // The end of the scope can't be an ancestor of the start of the scope.
               return false;
             }
-            ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor);
+            ancestor = dom::TreeTraversal::ParentOrShadowHostElement(*ancestor);
           }
           return false;
         };
@@ -927,7 +927,7 @@ namespace krys::web::style
           {
             // Regular stylesheet with owner node (e.g., <style> element).
             // Find the parent node of the <style>.
-            auto *implicitParentNode = dom::TreeQueries::ParentOrShadowHostElement(*owner);
+            auto *implicitParentNode = dom::TreeTraversal::ParentOrShadowHostElement(*owner);
             if (!implicitParentNode)
             {
               return;
@@ -1057,7 +1057,7 @@ namespace krys::web::style
 
       if (auto *htmlElement = DynamicDowncast<HTMLElement>(*styledElement))
       {
-        if (auto textDirection = dom::ComputeTextDirectionIfDirIsAuto(*htmlElement))
+        if (auto textDirection = html::ComputeTextDirectionIfDirIsAuto(*htmlElement))
         {
           auto &properties =
             *textDirection == text::TextDirection::LTR ? LeftToRightDeclaration() : RightToLeftDeclaration();

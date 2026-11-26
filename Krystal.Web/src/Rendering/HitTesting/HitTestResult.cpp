@@ -22,7 +22,7 @@
 
 #include "Krystal.Web/Rendering/HitTesting/HitTestResult.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -121,7 +121,7 @@ namespace krys::web
     {
       if (node.IsInShadowTree())
       {
-        if (auto *root = dom::TreeQueries::ContainingShadowRoot(node))
+        if (auto *root = dom::TreeTraversal::ContainingShadowRoot(node))
         {
           if (root->Mode() == dom::ShadowRootMode::UserAgent)
           {

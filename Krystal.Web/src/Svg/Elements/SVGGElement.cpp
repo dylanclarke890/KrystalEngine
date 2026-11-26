@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Svg/Elements/SVGGElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGHiddenContainer.hpp"
 #include "Krystal.Web/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Web/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
@@ -30,7 +30,7 @@ namespace krys::web
   {
     // Unlike SVGElement::rendererIsNeeded(), we still create renderers, even if
     // display is set to 'none' - which is special to SVG <g> container elements.
-    auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(*this);
     return parent && Is<SVGElement>(*parent);
   }
 }

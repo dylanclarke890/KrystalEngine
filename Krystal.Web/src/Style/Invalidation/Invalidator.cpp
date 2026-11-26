@@ -30,6 +30,7 @@
 #include "Krystal.Web/Css/Rules/ImportRule.hpp"
 #include "Krystal.Web/Css/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -132,7 +133,7 @@ namespace krys::web::style
           continue;
         }
         if (auto *slotElement = DynamicDowncast<HTMLSlotElement>(*element);
-            slotElement && dom::TreeQueries::ContainingShadowRoot(*node))
+            slotElement && dom::TreeTraversal::ContainingShadowRoot(*node))
         {
           InvalidateAssignedElements(*slotElement);
           continue;
@@ -293,7 +294,7 @@ namespace krys::web::style
       }
       else
       {
-        it = FirstElementFrom(dom::TreeQueries::NextSkippingChildren(descendant, &root), root);
+        it = FirstElementFrom(dom::TreeTraversal::NextSkippingChildren(descendant, &root), root);
       }
     }
   }
@@ -338,8 +339,8 @@ namespace krys::web::style
       shadowRoot.Host()->InvalidateStyleInternal();
     }
 
-    for (auto *child = dom::TreeQueries::FirstElementChild(shadowRoot); child;
-         child = dom::TreeQueries::NextElementSibling(*child))
+    for (auto *child = dom::TreeTraversal::FirstElementChild(shadowRoot); child;
+         child = dom::TreeTraversal::NextElementSibling(*child))
     {
       SelectorMatchingState selectorMatchingState;
       InvalidateStyleForTree(*child, &selectorMatchingState);
@@ -359,8 +360,8 @@ namespace krys::web::style
   {
     auto forEachChild = [](ContainerNode &parent, auto &&function)
     {
-      for (auto *child = dom::TreeQueries::FirstElementChild(parent); child;
-           child = dom::TreeQueries::NextElementSibling(*child))
+      for (auto *child = dom::TreeTraversal::FirstElementChild(parent); child;
+           child = dom::TreeTraversal::NextElementSibling(*child))
       {
         function(*child);
       }
@@ -389,15 +390,15 @@ namespace krys::web::style
       }
       case MatchElement::DirectSibling:
         // .changed + .subject
-        if (auto *sibling = dom::TreeQueries::NextElementSibling(element))
+        if (auto *sibling = dom::TreeTraversal::NextElementSibling(element))
         {
           InvalidateIfNeeded(*sibling, nullptr);
         }
         break;
       case MatchElement::IndirectSibling:
         // .changed ~ .subject
-        for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-             sibling = dom::TreeQueries::NextElementSibling(*sibling))
+        for (auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+             sibling = dom::TreeTraversal::NextElementSibling(*sibling))
         {
           InvalidateIfNeeded(*sibling, nullptr);
         }
@@ -409,8 +410,8 @@ namespace krys::web::style
         break;
       case MatchElement::ParentSibling:
         // .changed ~ .a > .subject
-        for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-             sibling = dom::TreeQueries::NextElementSibling(*sibling))
+        for (auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+             sibling = dom::TreeTraversal::NextElementSibling(*sibling))
         {
           forEachChild(*sibling, [&](Element &siblingChild) { InvalidateIfNeeded(siblingChild, nullptr); });
         }
@@ -419,8 +420,8 @@ namespace krys::web::style
       {
         // .changed ~ .a .subject
         SelectorMatchingState selectorMatchingState;
-        for (auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-             sibling = dom::TreeQueries::NextElementSibling(*sibling))
+        for (auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+             sibling = dom::TreeTraversal::NextElementSibling(*sibling))
         {
           selectorMatchingState.SelectorFilter.PopParentsUntil(element.ParentElement());
           InvalidateStyleForDescendants(*sibling, &selectorMatchingState);
@@ -477,7 +478,7 @@ namespace krys::web::style
       }
       case MatchElement::HasSibling:
         // :has(~ .changed)
-        if (auto *sibling = dom::TreeQueries::PreviousElementSibling(element))
+        if (auto *sibling = dom::TreeTraversal::PreviousElementSibling(element))
         {
           SelectorMatchingState selectorMatchingState;
           if (auto *parent = element.ParentElement())
@@ -485,7 +486,7 @@ namespace krys::web::style
             selectorMatchingState.SelectorFilter.PushParentInitializingIfNeeded(*parent);
           }
 
-          for (; sibling; sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+          for (; sibling; sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
           {
             InvalidateIfNeeded(*sibling, &selectorMatchingState);
           }
@@ -520,8 +521,8 @@ namespace krys::web::style
         selectorMatchingState.SelectorFilter.ParentStackReserveInitialCapacity(elementAndAncestors.size());
         for (auto *elementOrAncestor : elementAndAncestors | std::views::reverse)
         {
-          for (auto *sibling = dom::TreeQueries::PreviousElementSibling(*elementOrAncestor); sibling;
-               sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+          for (auto *sibling = dom::TreeTraversal::PreviousElementSibling(*elementOrAncestor); sibling;
+               sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
           {
             InvalidateIfNeeded(*sibling, &selectorMatchingState);
           }
@@ -575,7 +576,7 @@ namespace krys::web::style
         break;
       case MatchElement::HostChild:
         // ::slotted(.changed)
-        if (auto *host = dom::TreeQueries::ShadowHost(element))
+        if (auto *host = dom::TreeTraversal::ShadowHost(element))
         {
           forEachChild(*host, [&](Element &hostChild) { InvalidateIfNeeded(hostChild, nullptr); });
         }
@@ -599,7 +600,7 @@ namespace krys::web::style
         descendant->InvalidateStyleInternal();
       }
 
-      auto *nestedShadowRoot = dom::TreeQueries::GetShadowRoot(*descendant);
+      auto *nestedShadowRoot = dom::TreeTraversal::GetShadowRoot(*descendant);
       if (auto exportParts = descendant->GetAttribute(u8"exportparts");
           nestedShadowRoot && exportParts && !exportParts->empty())
       {
@@ -635,7 +636,7 @@ namespace krys::web::style
 
   void Invalidator::InvalidateInShadowTreeIfNeeded(Element &element) noexcept
   {
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
     if (!shadowRoot)
     {
       return;
@@ -648,8 +649,8 @@ namespace krys::web::style
 
     if (_ruleInformation.HasHostPseudoClassRulesMatchingInShadowTree)
     {
-      for (auto *child = dom::TreeQueries::FirstElementChild(*shadowRoot); child;
-           child = dom::TreeQueries::NextElementSibling(*child))
+      for (auto *child = dom::TreeTraversal::FirstElementChild(*shadowRoot); child;
+           child = dom::TreeTraversal::NextElementSibling(*child))
       {
         SelectorMatchingState selectorMatchingState;
         InvalidateStyleForTree(*child, &selectorMatchingState);
@@ -704,8 +705,8 @@ namespace krys::web::style
   {
     if (auto *shadowRoot = scope.ShadowRoot())
     {
-      for (auto *shadowChild = dom::TreeQueries::FirstElementChild(*shadowRoot); shadowChild;
-           shadowChild = dom::TreeQueries::NextElementSibling(*shadowChild))
+      for (auto *shadowChild = dom::TreeTraversal::FirstElementChild(*shadowRoot); shadowChild;
+           shadowChild = dom::TreeTraversal::NextElementSibling(*shadowChild))
       {
         shadowChild->InvalidateStyleForSubtreeInternal();
       }
@@ -732,8 +733,8 @@ namespace krys::web::style
         || resolver->RuleSets().HasMatchingUserOrAuthorStyle(
           [](RuleSet &style) { return !style.SlottedPseudoElementRules().empty(); }))
     {
-      for (auto *shadowChild = dom::TreeQueries::FirstElementChild(host); shadowChild;
-           shadowChild = dom::TreeQueries::NextElementSibling(*shadowChild))
+      for (auto *shadowChild = dom::TreeTraversal::FirstElementChild(host); shadowChild;
+           shadowChild = dom::TreeTraversal::NextElementSibling(*shadowChild))
       {
         shadowChild->InvalidateStyleInternal();
       }

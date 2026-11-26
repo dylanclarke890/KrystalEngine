@@ -30,6 +30,7 @@
 #include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Web/Css/Values/SerialisationContext.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -55,6 +56,7 @@ namespace krys::web
   using css::PropertyId;
   using css::ValueId;
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -145,7 +147,7 @@ namespace krys::web
         return true;
       }
 
-      RefPtr<web::Node> sibling = ShareRefPtr(TreeQueries::NextSkippingChildren(node));
+      RefPtr<web::Node> sibling = ShareRefPtr(TreeTraversal::NextSkippingChildren(node));
       for (RefPtr<web::Node> descendant = ShareRefPtr(node.FirstChild()); descendant && descendant != sibling;
            descendant = ShareRefPtr(TreeQueries::Next(*descendant)))
       {
@@ -779,7 +781,7 @@ namespace krys::web
     RefPtr<web::Node> pastEndNode = ShareRefPtr(end.DeprecatedNode());
     if (end.DeprecatedEditingOffset() >= CaretMaxOffset(*pastEndNode))
     {
-      pastEndNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*pastEndNode));
+      pastEndNode = ShareRefPtr(TreeTraversal::NextSkippingChildren(*pastEndNode));
     }
 
     // FIXME: Callers should perform this operation on a Range that includes the br
@@ -847,7 +849,7 @@ namespace krys::web
             (void)inlineStyle->MergeAndOverrideOnConflict(*otherStyle);
           }
           SetNodeAttribute(*element, u8"style", inlineStyle->AsText(css::DefaultSerialisationContext()));
-          next = ShareRefPtr(TreeQueries::NextSkippingChildren(*element));
+          next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*element));
           continue;
         }
       }
@@ -866,7 +868,7 @@ namespace krys::web
         }
         if (EditingIgnoresContent(*node))
         {
-          next = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+          next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
           continue;
         }
       }
@@ -881,9 +883,9 @@ namespace krys::web
         runEnd = sibling;
         sibling = ShareRefPtr(runEnd->NextSibling());
       }
-      next = ShareRefPtr(TreeQueries::NextSkippingChildren(*runEnd));
+      next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*runEnd));
 
-      RefPtr<web::Node> runPastEndNode = ShareRefPtr(TreeQueries::NextSkippingChildren(*runEnd));
+      RefPtr<web::Node> runPastEndNode = ShareRefPtr(TreeTraversal::NextSkippingChildren(*runEnd));
       if (!ShouldApplyInlineStyleToRun(style, runStart.get(), runPastEndNode.get()))
       {
         continue;
@@ -970,7 +972,7 @@ namespace krys::web
       if (EditingIgnoresContent(*node))
       {
         krys_debug_assert(!node->Contains(pastEndNode));
-        next = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+        next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
       }
       else
       {
@@ -1332,7 +1334,7 @@ namespace krys::web
       if (EditingIgnoresContent(*node))
       {
         krys_debug_assert(node == end.DeprecatedNode() || !node->Contains(end.DeprecatedNode()));
-        next = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+        next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
       }
       else
       {
@@ -1342,7 +1344,7 @@ namespace krys::web
       if (RefPtr<HTMLElement> element = DynamicDowncast<HTMLElement>(node);
           element && NodeFullySelected(*element, start, end))
       {
-        RefPtr<web::Node> prev = ShareRefPtr(TreeQueries::PreviousPostOrder(*element));
+        RefPtr<web::Node> prev = ShareRefPtr(TreeTraversal::PreviousPostOrder(*element));
         RefPtr<web::Node> nextAfterElement = ShareRefPtr(TreeQueries::Next(*element));
         RefPtr<EditingStyle> styleToPushDown;
         RefPtr<web::Node> childNode;

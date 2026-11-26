@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/TypeTraits.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include <ranges>
 
@@ -243,13 +244,13 @@ namespace krys::web::dom::detail
 
     ScopedSubtreeRange(match_constness_t<TNode, ContainerNode> &root) noexcept
     requires(!IteratorPolicy::IsInclusive && SameType<match_constness_t<TNode, Element>, TNode>)
-        : _root(&root), _begin(TreeQueries::FirstElementChild(root))
+        : _root(&root), _begin(TreeTraversal::FirstElementChild(root))
     {
     }
 
     ScopedSubtreeRange(match_constness_t<TNode, ContainerNode> *root) noexcept
     requires(!IteratorPolicy::IsInclusive && SameType<match_constness_t<TNode, Element>, TNode>)
-        : _root(root), _begin(TreeQueries::FirstElementChild(*root))
+        : _root(root), _begin(TreeTraversal::FirstElementChild(*root))
     {
     }
 
@@ -290,7 +291,7 @@ namespace krys::web::dom::detail
     {
       if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
-        return TreeQueries::NextElementSibling(*current);
+        return TreeTraversal::NextElementSibling(*current);
       }
       else
       {
@@ -315,7 +316,7 @@ namespace krys::web::dom::detail
     {
       if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
-        return TreeQueries::PreviousElementSibling(*current);
+        return TreeTraversal::PreviousElementSibling(*current);
       }
       else
       {

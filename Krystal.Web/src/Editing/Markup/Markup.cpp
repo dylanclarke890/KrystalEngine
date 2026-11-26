@@ -34,6 +34,7 @@
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
@@ -73,6 +74,7 @@ namespace krys::web
   using css::PropertyId;
   using css::ValueId;
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -87,7 +89,7 @@ namespace krys::web
     {
       if (auto *element = DynamicDowncast<Element>(node))
       {
-        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*element);
+        if (auto *shadowRoot = TreeTraversal::GetShadowRoot(*element);
             shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
         {
           return shadowRoot->FirstChild();
@@ -366,7 +368,7 @@ namespace krys::web
         {
           return NextSkippingChildrenInComposedTree(node);
         }
-        return TreeQueries::NextSkippingChildren(node);
+        return TreeTraversal::NextSkippingChildren(node);
       }
 
       KRYS_NODISCARD bool HasChildNodes(Node &node) const noexcept

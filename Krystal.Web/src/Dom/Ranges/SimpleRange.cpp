@@ -25,6 +25,7 @@
 
 #include "Krystal.Web/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include <algorithm>
@@ -66,20 +67,20 @@ namespace krys::web::dom
       {
         return ShareRefPtr(child);
       }
-      return ShareRefPtr(TreeQueries::NextSkippingChildren(*range.Start.Container));
+      return ShareRefPtr(TreeTraversal::NextSkippingChildren(*range.Start.Container));
     }
 
     KRYS_NODISCARD RefPtr<Node> NodePastLastIntersectingNode(const SimpleRange &range) noexcept
     {
       if (Is<CharacterData>(*range.End.Container))
       {
-        return ShareRefPtr(TreeQueries::NextSkippingChildren(*range.End.Container));
+        return ShareRefPtr(TreeTraversal::NextSkippingChildren(*range.End.Container));
       }
       if (auto *child = range.End.Container->TraverseToChildAt(static_cast<uint32>(range.End.Offset)))
       {
         return ShareRefPtr(child);
       }
-      return ShareRefPtr(TreeQueries::NextSkippingChildren(*range.End.Container));
+      return ShareRefPtr(TreeTraversal::NextSkippingChildren(*range.End.Container));
     }
 
     KRYS_NODISCARD RefPtr<Node>
@@ -97,7 +98,7 @@ namespace krys::web::dom
       {
         return range.Start.Container;
       }
-      return ShareRefPtr(TreeQueries::NextSkippingChildren(*range.Start.Container));
+      return ShareRefPtr(TreeTraversal::NextSkippingChildren(*range.Start.Container));
     }
   }
 
@@ -125,7 +126,7 @@ namespace krys::web::dom
   {
     krys_debug_assert(_node);
     _node =
-      _node->Contains(_pastLastNode.get()) ? nullptr : ShareRefPtr(TreeQueries::NextSkippingChildren(*_node));
+      _node->Contains(_pastLastNode.get()) ? nullptr : ShareRefPtr(TreeTraversal::NextSkippingChildren(*_node));
     EnforceEndInvariant();
   }
 

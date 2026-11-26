@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Traversal/NodeIterator.hpp"
@@ -83,7 +84,7 @@ namespace krys::web::dom
       // 2a. Let next be toBeRemovedNode’s first following node that is an inclusive descendant of
       //     nodeIterator’s root and is not an inclusive descendant of toBeRemovedNode, if there is such a
       //     node; otherwise null.
-      Node *next = TreeQueries::NextSkippingChildren(toBeRemovedNode, &nodeIterator.Root());
+      Node *next = TreeTraversal::NextSkippingChildren(toBeRemovedNode, &nodeIterator.Root());
 
       // 2b. If next is non-null, then return (next, true).
       if (next)
@@ -95,7 +96,7 @@ namespace krys::web::dom
     // 3. Let newNode be toBeRemovedNode’s parent, if toBeRemovedNode’s previous sibling is null; otherwise
     //    the inclusive descendant of toBeRemovedNode’s previous sibling that appears last in tree order.
     Node *newNode = toBeRemovedNode.PreviousSibling()
-                      ? TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling())
+                      ? TreeTraversal::DeepLastChild(*toBeRemovedNode.PreviousSibling())
                       : toBeRemovedNode.ParentNode();
     krys_debug_assert(newNode);
 

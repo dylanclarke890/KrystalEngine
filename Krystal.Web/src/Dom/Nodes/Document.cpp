@@ -32,12 +32,9 @@
 #include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/SelectorQuery.hpp"
 #include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
@@ -48,6 +45,10 @@
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/SelectorQuery.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Mixins/ParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
@@ -887,8 +888,8 @@ namespace krys::web
     KRYS_NODISCARD auto *FirstSVGTitleChild(TElement &documentElement) noexcept
     {
       using Title = match_constness_t<TElement, SVGTitleElement>;
-      for (auto *child = dom::TreeQueries::FirstElementChild(documentElement); child;
-           child = dom::TreeQueries::NextElementSibling(*child))
+      for (auto *child = dom::TreeTraversal::FirstElementChild(documentElement); child;
+           child = dom::TreeTraversal::NextElementSibling(*child))
       {
         if (auto *svgChild = DynamicDowncast<SVGElement>(*child))
         {
@@ -1972,7 +1973,7 @@ namespace krys::web
       if (auto *element = DynamicDowncast<HTMLElement>(originalTarget);
           element && element->IsTextControlInnerTextElement())
       {
-        if (auto *shadowHost = dom::TreeQueries::ShadowHost(*element))
+        if (auto *shadowHost = dom::TreeTraversal::ShadowHost(*element))
         {
           return ShareRef<ContainerNode>(*shadowHost);
         }
@@ -4150,7 +4151,7 @@ namespace krys::web
   List<RefPtr<WebAnimation>> Document::GetAnimations() noexcept
   {
     return MatchingAnimations([](Element &target) -> bool
-                              { return !dom::TreeQueries::ContainingShadowRoot(target); });
+                              { return !dom::TreeTraversal::ContainingShadowRoot(target); });
   }
 
   List<RefPtr<WebAnimation>>

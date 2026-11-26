@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Web/Style/Invalidation/PseudoClassStateInvalidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
@@ -80,15 +80,15 @@ namespace krys::web::style
     {
       auto visitChildren = [&](this auto &self, ContainerNode &container) -> void
       {
-        for (auto *child = dom::TreeQueries::FirstElementChild(container); child;
-             child = dom::TreeQueries::NextElementSibling(*child))
+        for (auto *child = dom::TreeTraversal::FirstElementChild(container); child;
+             child = dom::TreeTraversal::NextElementSibling(*child))
         {
           if (stop(*child))
           {
             continue;
           }
           function(*child);
-          if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*child); shadowRoot && crossShadowBoundaries)
+          if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*child); shadowRoot && crossShadowBoundaries)
           {
             self(*shadowRoot);
           }
@@ -96,7 +96,7 @@ namespace krys::web::style
         }
       };
 
-      if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element); shadowRoot && crossShadowBoundaries)
+      if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element); shadowRoot && crossShadowBoundaries)
       {
         visitChildren(*shadowRoot);
       }
@@ -234,8 +234,8 @@ namespace krys::web::style
         case html::TagName::option: InvalidateDisabledStates(invalidations, element); break;
         case html::TagName::optgroup:
           InvalidateDisabledStates(invalidations, element);
-          for (auto *child = dom::TreeQueries::FirstElementChild(element); child;
-               child = dom::TreeQueries::NextElementSibling(*child))
+          for (auto *child = dom::TreeTraversal::FirstElementChild(element); child;
+               child = dom::TreeTraversal::NextElementSibling(*child))
           {
             if (IsHTMLElement(*child, html::TagName::option))
             {

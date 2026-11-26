@@ -6,10 +6,10 @@
 #include "Krystal.Web/Css/CSSOM/CSSStyleRule.hpp"
 #include "Krystal.Web/Css/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Web/Css/CSSOM/StyleSheetList.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/HTMLCollection.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Events/EventTarget.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Collections/HTMLOptionsCollection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOptGroupElement.hpp"
@@ -832,7 +832,7 @@ namespace krys::web::tests
     SECTION("removing a legend brings the label back")
     {
       auto &group = fixture.ById(u8"l");
-      REQUIRE_FALSE(group.RemoveChild(*dom::TreeQueries::FirstElementChild(group)).HasException());
+      REQUIRE_FALSE(group.RemoveChild(*dom::TreeTraversal::FirstElementChild(group)).HasException());
       CHECK(Dumps(fixture, u8"\"Hidden\""));
     }
   }

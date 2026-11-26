@@ -14,14 +14,11 @@
 #include "Krystal.Web/Css/TypedOM/ComputedStylePropertyMapReadOnly.hpp"
 #include "Krystal.Web/Css/TypedOM/StylePropertyMap.hpp"
 #include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/SelectorQuery.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
@@ -32,6 +29,9 @@
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementRareData.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/SelectorQuery.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Mixins/ChildNode.hpp"
 #include "Krystal.Web/Dom/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Web/Dom/Mixins/ParentNode.hpp"
@@ -53,6 +53,7 @@
 #include "Krystal.Web/Events/Pointer/PointerEvent.hpp"
 #include "Krystal.Web/Events/Pointer/WheelEvent.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Web/Html/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElement.hpp"
@@ -323,7 +324,7 @@ namespace krys::web
   void Element::UpdateEffectiveTextDirection() noexcept
   {
     auto textDirectionState = dom::ElementTextDirectionState(*this);
-    dom::UpdateEffectiveTextDirectionState(*this, textDirectionState);
+    html::UpdateEffectiveTextDirectionState(*this, textDirectionState);
   }
 
   void Element::UpdateEffectiveTextDirectionIfNeeded() noexcept
@@ -334,13 +335,13 @@ namespace krys::web
       return;
     }
 
-    auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(*this);
     if (!(parent && parent->UsesEffectiveTextDirection()))
     {
       return;
     }
 
-    if (HasAttribute(u8"dir") || dom::TreeQueries::GetShadowRoot(*this))
+    if (HasAttribute(u8"dir") || dom::TreeTraversal::GetShadowRoot(*this))
     {
       UpdateEffectiveTextDirection();
       return;
@@ -942,7 +943,7 @@ namespace krys::web
         return;
       }
 
-      dom::InvalidateForSiblingCombinators(dom::TreeQueries::NextElementSibling(element));
+      dom::InvalidateForSiblingCombinators(dom::TreeTraversal::NextElementSibling(element));
     }
   }
 
@@ -1234,7 +1235,7 @@ namespace krys::web
     Node *startNode = this;
     while (startNode && !startNode->Renderer())
     {
-      startNode = dom::TreeQueries::ParentOrShadowHostElement(*startNode);
+      startNode = dom::TreeTraversal::ParentOrShadowHostElement(*startNode);
     }
     if (startNode)
     {
@@ -1376,8 +1377,8 @@ namespace krys::web
 
     // Each shadow root above the element records that it holds the focused element, and its host restyles, as
     // the host's :focus depends on it.
-    for (auto *root = dom::TreeQueries::ContainingShadowRoot(*this); root;
-         root = dom::TreeQueries::ContainingShadowRoot(*root->Host()))
+    for (auto *root = dom::TreeTraversal::ContainingShadowRoot(*this); root;
+         root = dom::TreeTraversal::ContainingShadowRoot(*root->Host()))
     {
       root->SetContainsFocusedElement(value);
       root->Host()->InvalidateStyle();
@@ -1488,7 +1489,7 @@ namespace krys::web
 
   style::Resolver &Element::StyleResolver() noexcept
   {
-    if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this))
+    if (auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*this))
     {
       return shadowRoot->StyleScope().GetResolver();
     }
@@ -1520,7 +1521,7 @@ namespace krys::web
 
   void dom::InvalidateForSiblingCombinators(Element *sibling) noexcept
   {
-    for (auto *element = sibling; element; element = dom::TreeQueries::NextElementSibling(*element))
+    for (auto *element = sibling; element; element = dom::TreeTraversal::NextElementSibling(*element))
     {
       if (element->StyleIsAffectedByPreviousSibling())
       {
@@ -1528,8 +1529,8 @@ namespace krys::web
       }
       if (element->DescendantsAffectedByPreviousSibling())
       {
-        for (auto *siblingChild = dom::TreeQueries::FirstElementChild(*element); siblingChild;
-             siblingChild = dom::TreeQueries::NextElementSibling(*siblingChild))
+        for (auto *siblingChild = dom::TreeTraversal::FirstElementChild(*element); siblingChild;
+             siblingChild = dom::TreeTraversal::NextElementSibling(*siblingChild))
         {
           siblingChild->InvalidateStyleForSubtreeInternal();
         }
@@ -3149,7 +3150,7 @@ namespace krys::web
     }
     else if (localName == u8"dir")
     {
-      dom::TextDirectionStateChanged(*this, dom::ParseTextDirectionState(value));
+      html::TextDirectionStateChanged(*this, dom::ParseTextDirectionState(value));
     }
     else if (localName.View() == u8"part")
     {
@@ -3165,7 +3166,7 @@ namespace krys::web
     }
     else if (localName.View() == u8"exportparts")
     {
-      if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*this))
+      if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*this))
       {
         shadowRoot->InvalidatePartMappings();
         style::Invalidator::InvalidateShadowParts(*shadowRoot);
@@ -3580,7 +3581,7 @@ namespace krys::web
   {
     // 1. If element is not a shadow host, or element's shadow root's reference target is null, then return
     //    element.
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*this);
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*this);
     if (!shadowRoot || !shadowRoot->ReferenceTarget())
     {
       return ShareRefPtr(this);
@@ -4390,7 +4391,7 @@ namespace krys::web
 
     // Add the offsets of the offset parents in shadow trees the element isn't in.
     auto *parent = OffsetParentIgnoringShadowTrees();
-    if (!parent || !parent->IsInShadowTree() || dom::TreeQueries::SameRoot(*parent, *this))
+    if (!parent || !parent->IsInShadowTree() || dom::TreeTraversal::SameRoot(*parent, *this))
     {
       return offset;
     }
@@ -4421,7 +4422,7 @@ namespace krys::web
 
     // Add the offsets of the offset parents in shadow trees the element isn't in.
     auto *parent = OffsetParentIgnoringShadowTrees();
-    if (!parent || !parent->IsInShadowTree() || dom::TreeQueries::SameRoot(*parent, *this))
+    if (!parent || !parent->IsInShadowTree() || dom::TreeTraversal::SameRoot(*parent, *this))
     {
       return offset;
     }

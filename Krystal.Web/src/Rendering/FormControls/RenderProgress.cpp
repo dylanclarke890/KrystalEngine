@@ -19,7 +19,7 @@
  */
 
 #include "Krystal.Web/Rendering/FormControls/RenderProgress.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Web/Rendering/RenderTheme.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -143,7 +143,7 @@ namespace krys::web
       return progressElement;
     }
 
-    krys_debug_assert(dom::TreeQueries::ShadowHost(*element));
-    return Downcast<HTMLProgressElement>(dom::TreeQueries::ShadowHost(*element));
+    krys_debug_assert(dom::TreeTraversal::ShadowHost(*element));
+    return Downcast<HTMLProgressElement>(dom::TreeTraversal::ShadowHost(*element));
   }
 }

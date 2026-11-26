@@ -24,7 +24,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Algorithms/SelectorQuery.hpp"
+#include "Krystal.Web/Dom/Internals/SelectorQuery.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"

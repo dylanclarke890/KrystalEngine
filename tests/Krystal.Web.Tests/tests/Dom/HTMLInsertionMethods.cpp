@@ -1,5 +1,5 @@
 ﻿#include "catch2/catch_test_macros.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -212,7 +212,7 @@ namespace krys::web::dom::tests
     SECTION("the default configuration removes declarative shadow roots, as it removes templates")
     {
       REQUIRE_FALSE(div.SetHTML(u8"<p><template shadowrootmode=open><b>s</b></template></p>").HasException());
-      CHECK_FALSE(TreeQueries::GetShadowRoot(*div.FirstElementChild()));
+      CHECK_FALSE(TreeTraversal::GetShadowRoot(*div.FirstElementChild()));
       CHECK(data.Markup() == "<p></p>");
     }
 
@@ -225,7 +225,7 @@ namespace krys::web::dom::tests
                       .SetHTML(u8"<p><template shadowrootmode=open><b>s</b><script></script></template></p>",
                                WithConfig(krys::move(config)))
                       .HasException());
-      auto *shadow = TreeQueries::GetShadowRoot(*div.FirstElementChild());
+      auto *shadow = TreeTraversal::GetShadowRoot(*div.FirstElementChild());
       REQUIRE(shadow);
       CHECK(InsertedMarkup(shadow->InnerHTML().ReleaseValue()) == "<b>s</b>");
     }

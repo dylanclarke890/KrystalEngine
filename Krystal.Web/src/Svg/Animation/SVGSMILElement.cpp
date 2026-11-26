@@ -28,10 +28,10 @@
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/StringToIntegerConversion.hpp"
 #include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Mixins/DocumentOrShadowRoot.hpp"
 #include "Krystal.Web/Dom/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
@@ -307,7 +307,7 @@ namespace krys::web
     // Verify we are not in <use> instance tree.
     krys_debug_assert(
       !IsInShadowTree()
-      || !Is<SVGUseElement>(DynamicDowncast<SVGElement>(dom::TreeQueries::ShadowHost(*this))));
+      || !Is<SVGUseElement>(DynamicDowncast<SVGElement>(dom::TreeTraversal::ShadowHost(*this))));
 
     UpdateAttributeName();
 

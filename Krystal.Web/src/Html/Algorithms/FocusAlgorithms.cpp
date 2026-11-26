@@ -32,6 +32,7 @@
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -174,7 +175,7 @@ namespace krys::web::html
 
     KRYS_NODISCARD bool IsShadowHostThatDelegatesFocus(const Element &element) noexcept
     {
-      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element);
       return shadowRoot && shadowRoot->DelegatesFocus();
     }
 
@@ -197,7 +198,7 @@ namespace krys::web::html
       {
         return false;
       }
-      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+      auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(node);
       return shadowRoot && shadowRoot->DelegatesFocus();
     }
 
@@ -218,8 +219,8 @@ namespace krys::web::html
     /// control it's part of) is disabled.
     KRYS_NODISCARD bool IsPartOfDisabledControl(const Element &element) noexcept
     {
-      for (auto *host = dom::TreeQueries::ShadowHost(element); host;
-           host = host->IsInUserAgentShadowTree() ? dom::TreeQueries::ShadowHost(*host) : nullptr)
+      for (auto *host = dom::TreeTraversal::ShadowHost(element); host;
+           host = host->IsInUserAgentShadowTree() ? dom::TreeTraversal::ShadowHost(*host) : nullptr)
       {
         if (css::MatchesDisabledPseudoClass(*host))
         {
@@ -273,7 +274,7 @@ namespace krys::web::html
       // https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element
       // If a button element is the first child which is an element of a select element, then it is inert.
       if (Is<HTMLButtonElement>(*element) && Is<HTMLSelectElement>(element->ParentNode())
-          && dom::TreeQueries::FirstElementChild(*element->ParentNode()) == element)
+          && dom::TreeTraversal::FirstElementChild(*element->ParentNode()) == element)
       {
         return true;
       }
@@ -382,7 +383,7 @@ namespace krys::web::html
   Node *FocusAlgorithms::FocusDelegate(Element &focusTarget, dom::FocusTrigger focusTrigger) noexcept
   {
     // 1. If focusTarget is a shadow host and its shadow root's delegates focus is false, then return null.
-    auto *shadowRoot = dom::TreeQueries::GetShadowRoot(focusTarget);
+    auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(focusTarget);
     if (shadowRoot && !shadowRoot->DelegatesFocus())
     {
       return nullptr;
@@ -588,7 +589,7 @@ namespace krys::web::html
     auto *currentlyFocusedArea = CurrentlyFocusedArea(document);
     if (IsShadowHostThatDelegatesFocus(oldFocusTarget) && currentlyFocusedArea
         && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(
-          *dom::TreeQueries::GetShadowRoot(oldFocusTarget), *currentlyFocusedArea))
+          *dom::TreeTraversal::GetShadowRoot(oldFocusTarget), *currentlyFocusedArea))
     {
       target = currentlyFocusedArea;
     }
@@ -978,7 +979,7 @@ namespace krys::web::html
     }
     // Sequential navigation doesn't enter a control's user agent shadow tree, unless the control delegates
     // its focus to its parts.
-    if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*element);
+    if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*element);
         shadowRoot && (shadowRoot->Mode() != dom::ShadowRootMode::UserAgent || shadowRoot->DelegatesFocus()))
     {
       return true;
@@ -1346,7 +1347,7 @@ namespace krys::web::html
       auto next = [&](const Element &element) -> Element *
       {
         Node *node = CanScrollInDirection(element, direction)
-                       ? dom::TreeQueries::NextSkippingChildren(element, &container)
+                       ? dom::TreeTraversal::NextSkippingChildren(element, &container)
                        : dom::TreeQueries::Next(element, &container);
         while (node && !Is<Element>(*node))
         {

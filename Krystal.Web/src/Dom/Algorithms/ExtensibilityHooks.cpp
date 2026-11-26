@@ -1,8 +1,9 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/IdTargetObserverRegistry.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -45,7 +46,7 @@ namespace krys::web::dom
       {
         if (!element.HasValidTextDirectionState())
         {
-          if (auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+          if (auto *parent = TreeTraversal::ParentOrShadowHostElement(element);
               !(parent && parent->UsesEffectiveTextDirection()))
           {
             element.SetUsesEffectiveTextDirection(false);

@@ -29,7 +29,7 @@
 
 #include "Krystal.Web/Style/Adjuster.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Html/Elements/HTMLBodyElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLButtonElement.hpp"
@@ -798,7 +798,7 @@ namespace krys::web::style
     // If a button element is the first child which is an element of a select element, then it is inert.
     if (auto *button = DynamicDowncast<HTMLButtonElement>(_element.get());
         button && Is<HTMLSelectElement>(button->ParentNode())
-        && dom::TreeQueries::FirstElementChild(*button->ParentNode()) == button)
+        && dom::TreeTraversal::FirstElementChild(*button->ParentNode()) == button)
     {
       style.SetEffectiveInert(true);
     }

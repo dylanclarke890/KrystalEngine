@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Web/Dom/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/MutationObserver/MutationRecord.hpp"
 #include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -42,8 +43,8 @@ namespace krys::web::dom
       // The change to the parent's children that style invalidation sees.
       auto *parent = node.ParentNode();
       ContainerNode::ChildChange childChange {
-        ContainerNode::ChildChange::Type::TextChanged, TreeQueries::PreviousElementSibling(node),
-        TreeQueries::NextElementSibling(node), ContainerNode::ChildChange::Source::API};
+        ContainerNode::ChildChange::Type::TextChanged, TreeTraversal::PreviousElementSibling(node),
+        TreeTraversal::NextElementSibling(node), ContainerNode::ChildChange::Source::API};
       Maybe<style::ChildChangeInvalidation> styleInvalidation;
       if (parent)
       {

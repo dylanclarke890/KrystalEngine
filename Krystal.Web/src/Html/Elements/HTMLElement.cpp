@@ -16,6 +16,7 @@
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -1641,7 +1642,7 @@ namespace krys::web
       }
     }
 
-    auto *containingShadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+    auto *containingShadowRoot = dom::TreeTraversal::ContainingShadowRoot(node);
     if (containingShadowRoot && containingShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
       return Node::Editability::ReadOnly;

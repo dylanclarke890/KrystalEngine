@@ -26,8 +26,8 @@
 
 #include "Krystal.Web/Html/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Web/Css/Selectors/UserAgentParts.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Input/EventHandler.hpp"
@@ -59,7 +59,7 @@ namespace krys::web::html
 
   bool SpinButtonElement::IsDisabledFormControl() const noexcept
   {
-    auto *host = dom::TreeQueries::ShadowHost(*this);
+    auto *host = dom::TreeTraversal::ShadowHost(*this);
     return host && host->IsDisabledFormControl();
   }
 
@@ -226,7 +226,7 @@ namespace krys::web::html
 
   bool SpinButtonElement::MatchesReadWritePseudoClass() const noexcept
   {
-    return dom::TreeQueries::ShadowHost(*this)->MatchesReadWritePseudoClass();
+    return dom::TreeTraversal::ShadowHost(*this)->MatchesReadWritePseudoClass();
   }
 
   void SpinButtonElement::StartRepeatingTimer() noexcept

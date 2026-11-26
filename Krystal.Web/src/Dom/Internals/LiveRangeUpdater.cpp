@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp"
+﻿#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"

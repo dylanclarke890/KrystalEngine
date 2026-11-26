@@ -4,7 +4,7 @@
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Web.Tests/Style/StyleTestUtils.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Graphics/Fonts/Font.hpp"

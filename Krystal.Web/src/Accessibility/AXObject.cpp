@@ -59,6 +59,7 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -1709,7 +1710,7 @@ namespace krys::web
                               result);
       if (auto *innerNode = result.InnerNode())
       {
-        if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*innerNode))
+        if (auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*innerNode))
         {
           hitTestElement = ShareRefPtr(shadowRoot->Host());
         }

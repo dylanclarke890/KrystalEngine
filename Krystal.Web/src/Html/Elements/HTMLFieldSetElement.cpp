@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLFieldSetElement.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Web/Html/Elements/HTMLLegendElement.hpp"
@@ -34,7 +35,7 @@ namespace krys::web
         // A disabled fieldset's subtree follows that fieldset instead.
         if (Is<HTMLFieldSetElement>(*element) && element->HasAttribute(u8"disabled"))
         {
-          node = dom::TreeQueries::NextSkippingChildren(*node, &startNode);
+          node = dom::TreeTraversal::NextSkippingChildren(*node, &startNode);
         }
         else
         {
@@ -77,8 +78,8 @@ namespace krys::web
 
     bool thisFieldsetIsDisabled = HasAttribute(u8"disabled");
     bool hasSeenFirstLegendElement = false;
-    for (auto *child = dom::TreeQueries::FirstElementChild(*this); child;
-         child = dom::TreeQueries::NextElementSibling(*child))
+    for (auto *child = dom::TreeTraversal::FirstElementChild(*this); child;
+         child = dom::TreeTraversal::NextElementSibling(*child))
     {
       auto *control = DynamicDowncast<HTMLElement>(*child);
       if (!control)
@@ -112,8 +113,8 @@ namespace krys::web
     // We only care about the first legend element (in which form controls are not disabled by this element)
     // changing here.
     UpdateFromControlElementsAncestorDisabledStateUnder(*legend, false /* isDisabled */);
-    for (auto *sibling = dom::TreeQueries::NextElementSibling(*legend); sibling;
-         sibling = dom::TreeQueries::NextElementSibling(*sibling))
+    for (auto *sibling = dom::TreeTraversal::NextElementSibling(*legend); sibling;
+         sibling = dom::TreeTraversal::NextElementSibling(*sibling))
     {
       if (auto *otherLegend = DynamicDowncast<HTMLLegendElement>(*sibling))
       {
@@ -142,8 +143,8 @@ namespace krys::web
 
   HTMLLegendElement *HTMLFieldSetElement::Legend() const noexcept
   {
-    for (auto *child = dom::TreeQueries::FirstElementChild(*this); child;
-         child = dom::TreeQueries::NextElementSibling(*child))
+    for (auto *child = dom::TreeTraversal::FirstElementChild(*this); child;
+         child = dom::TreeTraversal::NextElementSibling(*child))
     {
       if (auto *legend = DynamicDowncast<HTMLLegendElement>(*child))
       {

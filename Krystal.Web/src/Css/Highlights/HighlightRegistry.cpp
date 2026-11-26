@@ -26,7 +26,7 @@
 #include "Krystal.Web/Css/Highlights/HighlightRegistry.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Web/Css/Geometry/DOMRectList.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
@@ -128,7 +128,7 @@ namespace krys::web
     {
       return {};
     }
-    if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*hitNode);
+    if (auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*hitNode);
         shadowRoot
         && std::ranges::none_of(options.ShadowRoots,
                                 [&](const Ref<ShadowRoot> &allowed) { return allowed.get() == shadowRoot; }))

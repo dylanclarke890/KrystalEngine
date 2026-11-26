@@ -2,12 +2,13 @@
 #include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.Web/Dom/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
 #include "Krystal.Web/Dom/Internals/SmallNodeList.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -84,10 +85,10 @@ namespace krys::web::dom
 
       auto *beforeChildElement = DynamicDowncast<Element>(beforeChild);
       return {changeType,
-              beforeChild ? TreeQueries::PreviousElementSibling(*beforeChild)
-                          : TreeQueries::LastElementChild(parent),
+              beforeChild ? TreeTraversal::PreviousElementSibling(*beforeChild)
+                          : TreeTraversal::LastElementChild(parent),
               !beforeChild || beforeChildElement ? beforeChildElement
-                                                 : TreeQueries::NextElementSibling(*beforeChild),
+                                                 : TreeTraversal::NextElementSibling(*beforeChild),
               ChildChangeSource(parent)};
     }
 
@@ -106,8 +107,8 @@ namespace krys::web::dom
         return ChildChange::Type::NonContentsChildRemoved;
       }();
 
-      return {changeType, TreeQueries::PreviousElementSibling(childToRemove),
-              TreeQueries::NextElementSibling(childToRemove), ChildChangeSource(parent)};
+      return {changeType, TreeTraversal::PreviousElementSibling(childToRemove),
+              TreeTraversal::NextElementSibling(childToRemove), ChildChangeSource(parent)};
     }
 
     /// @brief Invalidates the style that inserting or removing @p child affects, before the change (when
@@ -133,7 +134,7 @@ namespace krys::web::dom
     void RebuildSVGExtensionsElementsIfNecessary(ContainerNode &parent) noexcept
     {
       auto *extensions = parent.NodeDocument().SVGExtensionsIfExists();
-      auto *svgHost = DynamicDowncast<SVGElement>(TreeQueries::ShadowHost(parent));
+      auto *svgHost = DynamicDowncast<SVGElement>(TreeTraversal::ShadowHost(parent));
       if (extensions && !(svgHost && Is<SVGUseElement>(*svgHost)))
       {
         extensions->RebuildElements();

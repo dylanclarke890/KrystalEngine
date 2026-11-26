@@ -24,7 +24,7 @@
 
 #include "Krystal.Web/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Html/Elements/HTMLSlotElement.hpp"
@@ -179,8 +179,8 @@ namespace krys::web::style
                                      // Names from :host rules are allowed when the candidate is the host
                                      // element.
                                      auto *host = originatingElement
-                                                    ? dom::TreeQueries::ShadowHost(*originatingElement)
-                                                    : dom::TreeQueries::ShadowHost(element);
+                                                    ? dom::TreeTraversal::ShadowHost(*originatingElement)
+                                                    : dom::TreeTraversal::ShadowHost(element);
                                      auto isHost = host == &candidateElement;
                                      if (scopedName.ScopeOrdinal == ScopeOrdinal::Shadow && isHost)
                                      {

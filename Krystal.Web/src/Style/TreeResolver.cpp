@@ -29,8 +29,9 @@
 #include "Krystal.Web/Animation/Timelines/DocumentTimeline.hpp"
 #include "Krystal.Web/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Web/Css/Rules/PositionTryRule.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -1321,7 +1322,7 @@ namespace krys::web::style
 
     Parent parent(element, style, changes, descendantsToResolve, isInDisplayNoneTree);
 
-    if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element))
+    if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(element))
     {
       PushScope(*shadowRoot);
       parent.DidPushScope = true;
@@ -1551,7 +1552,7 @@ namespace krys::web::style
       auto &parent = GetParent();
 
       krys_debug_assert(node.IsConnected());
-      krys_debug_assert(dom::TreeQueries::ContainingShadowRoot(node) == GetScope().ShadowRoot.get());
+      krys_debug_assert(dom::TreeTraversal::ContainingShadowRoot(node) == GetScope().ShadowRoot.get());
 
       if (auto text = ShareRefPtr(DynamicDowncast<Text>(node)))
       {

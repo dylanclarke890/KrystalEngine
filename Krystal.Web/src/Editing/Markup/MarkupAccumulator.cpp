@@ -27,6 +27,7 @@
 #include "Krystal.Web/Editing/Markup/MarkupAccumulator.hpp"
 #include "Krystal.Web/Dom/Algorithms/NameValidation.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
@@ -48,7 +49,7 @@
 
 namespace krys::web
 {
-  using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -502,7 +503,7 @@ namespace krys::web
         if (ShouldIncludeShadowRoots())
         {
           auto *element = DynamicDowncast<Element>(*current);
-          auto *shadowRoot = element ? TreeQueries::GetShadowRoot(*element) : nullptr;
+          auto *shadowRoot = element ? TreeTraversal::GetShadowRoot(*element) : nullptr;
           if (shadowRoot && IncludeShadowRoot(*shadowRoot))
           {
             current = ShareRefPtr<const Node>(shadowRoot);

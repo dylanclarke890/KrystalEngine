@@ -32,6 +32,7 @@
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/HTMLDocument.hpp"
@@ -190,8 +191,8 @@ namespace krys::web
         }
       }
 
-      auto *mouseReleaseShadowHost = dom::TreeQueries::ShadowHost(*mouseReleaseNode);
-      if (mouseReleaseShadowHost && mouseReleaseShadowHost == dom::TreeQueries::ShadowHost(*mousePressNode))
+      auto *mouseReleaseShadowHost = dom::TreeTraversal::ShadowHost(*mouseReleaseNode);
+      if (mouseReleaseShadowHost && mouseReleaseShadowHost == dom::TreeTraversal::ShadowHost(*mousePressNode))
       {
         // We want to dispatch the click to the shadow tree host element to give listeners the illusion that
         // the shadow tree is a single element. For example, we want to give the illusion that <input
@@ -3456,7 +3457,7 @@ namespace krys::web
     RenderObject *renderer = targetNode->Renderer();
     if (!renderer)
     {
-      auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*targetNode);
+      auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(*targetNode);
       if (!parent)
       {
         return false;
@@ -3923,7 +3924,7 @@ namespace krys::web
       }
       else
       {
-        newTarget = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*targetNode));
+        newTarget = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*targetNode));
       }
     }
 

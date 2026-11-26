@@ -28,6 +28,7 @@
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -157,7 +158,7 @@ namespace krys::web
       // If this is a button inside of the a file input, move up to the file input.
       if (inputElement->IsTextButton())
       {
-        inputElement = DynamicDowncast<HTMLInputElement>(dom::TreeQueries::ShadowHost(*inputElement));
+        inputElement = DynamicDowncast<HTMLInputElement>(dom::TreeTraversal::ShadowHost(*inputElement));
       }
 
       return inputElement && inputElement->IsFileUpload() ? ShareRefPtr(inputElement) : nullptr;
@@ -185,7 +186,7 @@ namespace krys::web
       {
         element = node->ParentElement();
       }
-      auto *host = dom::TreeQueries::ShadowHost(*element);
+      auto *host = dom::TreeTraversal::ShadowHost(*element);
       return ShareRefPtr(host ? host : element);
     }
 
@@ -892,7 +893,7 @@ namespace krys::web
                                              : nullptr;
 
     for (auto *element = startElement; element;
-         element = dom::TreeQueries::ParentOrShadowHostElement(*element))
+         element = dom::TreeTraversal::ParentOrShadowHostElement(*element))
     {
       auto *renderer = element->Renderer();
       if (!renderer)

@@ -25,7 +25,7 @@
 
 #include "Krystal.Web/Rendering/Updating/RenderTreePosition.hpp"
 #include "Krystal.Core/Containers/List.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include <algorithm>

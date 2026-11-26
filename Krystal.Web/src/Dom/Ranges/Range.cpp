@@ -1,12 +1,13 @@
 ﻿#include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Web/Css/Geometry/DOMRectList.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
@@ -56,8 +57,8 @@ namespace krys::web::dom
     // 2. While container is not an inclusive ancestor of range's end node: set container to container's
     //    parent.
     // 3. Return container.
-    krys_debug_assert(TreeQueries::SameRoot(*_start.Container, *_end.Container));
-    return TreeQueries::CommonAncestor(*_start.Container, *_end.Container);
+    krys_debug_assert(TreeTraversal::SameRoot(*_start.Container, *_end.Container));
+    return TreeTraversal::CommonAncestor(*_start.Container, *_end.Container);
   }
 
   ExceptionOr<void> Range::SetStart(Node &node, uint64 offset) noexcept
@@ -224,7 +225,7 @@ namespace krys::web::dom
     }
 
     // 2. If this's root is not sourceRange's root, then throw a "WrongDocumentError" DOMException.
-    if (!TreeQueries::SameRoot(*_start.Container, *other._start.Container))
+    if (!TreeTraversal::SameRoot(*_start.Container, *other._start.Container))
     {
       return Exception(ExceptionCode::WrongDocumentError);
     }
@@ -296,7 +297,7 @@ namespace krys::web::dom
       if (IsContained(*current))
       {
         nodesToRemove.emplace_back(ShareRef(*current));
-        current = TreeQueries::NextSkippingChildren(*current, root);
+        current = TreeTraversal::NextSkippingChildren(*current, root);
       }
       else
       {
@@ -421,7 +422,7 @@ namespace krys::web::dom
 
     // 5. Let commonAncestor be the result of getting the common ancestor of range.
     Ref<Node> commonAncestorRef =
-      ShareRef(*TreeQueries::CommonAncestor(*originalStartNode, *originalEndNode));
+      ShareRef(*TreeTraversal::CommonAncestor(*originalStartNode, *originalEndNode));
     auto *commonAncestor = commonAncestorRef.get();
 
     // 6. Let firstPartiallyContainedChild be null.
@@ -633,7 +634,7 @@ namespace krys::web::dom
     }
 
     // 5. Let commonAncestor be the result of getting the common ancestor of range.
-    auto *commonAncestor = TreeQueries::CommonAncestor(*originalStartNode, *originalEndNode);
+    auto *commonAncestor = TreeTraversal::CommonAncestor(*originalStartNode, *originalEndNode);
     // 6.-7. Let firstPartiallyContainedChild be the first child of commonAncestor that is partially contained
     //       in range, if originalStartNode is not an inclusive ancestor of originalEndNode; otherwise null.
     auto *firstPartiallyContainedChild =
@@ -785,7 +786,7 @@ namespace krys::web::dom
     else
     {
       referenceNode =
-        ShareRefPtr(TreeQueries::ChildAt(Downcast<ContainerNode>(*_start.Container), _start.Offset));
+        ShareRefPtr(TreeTraversal::ChildAt(Downcast<ContainerNode>(*_start.Container), _start.Offset));
     }
 
     // 5. Let parent be range's start node if referenceNode is null; otherwise referenceNode's parent.
@@ -925,7 +926,7 @@ namespace krys::web::dom
   ExceptionOr<bool> Range::IsPointInRange(Node &node, uint64 offset) const noexcept
   {
     // 1. If node's root is not this's root, then return false.
-    if (!TreeQueries::SameRoot(node, *_start.Container))
+    if (!TreeTraversal::SameRoot(node, *_start.Container))
     {
       return false;
     }
@@ -957,7 +958,7 @@ namespace krys::web::dom
   ExceptionOr<std::strong_ordering> Range::ComparePoint(Node &node, uint64 offset) const noexcept
   {
     // 1. If node's root is not this's root, then throw a "WrongDocumentError" DOMException.
-    if (!TreeQueries::SameRoot(node, *_start.Container))
+    if (!TreeTraversal::SameRoot(node, *_start.Container))
     {
       return ExceptionCode::WrongDocumentError;
     }
@@ -994,7 +995,7 @@ namespace krys::web::dom
   bool Range::IntersectsNode(const Node &node) const noexcept
   {
     // 1. If node's root is not this's root, then return false.
-    if (!TreeQueries::SameRoot(node, *_start.Container))
+    if (!TreeTraversal::SameRoot(node, *_start.Container))
     {
       return false;
     }
@@ -1177,7 +1178,7 @@ namespace krys::web::dom
 
     // 4a. If range's root is not node's root or boundaryPoint is after range's end, then set range's end to
     //     boundaryPoint.
-    if (!TreeQueries::SameRoot(node, *_start.Container)
+    if (!TreeTraversal::SameRoot(node, *_start.Container)
         || boundaryPoint.ComparePositionTo(_end) == std::strong_ordering::greater)
     {
       _end = boundaryPoint;
@@ -1215,7 +1216,7 @@ namespace krys::web::dom
 
     // 4a. If range's root is not node's root or boundaryPoint is before range's start, then set range's start
     //     to boundaryPoint.
-    if (!TreeQueries::SameRoot(node, *_start.Container)
+    if (!TreeTraversal::SameRoot(node, *_start.Container)
         || boundaryPoint.ComparePositionTo(_start) == std::strong_ordering::less)
     {
       _start = boundaryPoint;

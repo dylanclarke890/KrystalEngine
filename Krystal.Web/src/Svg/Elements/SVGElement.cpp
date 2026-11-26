@@ -28,9 +28,9 @@
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Web/Css/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
@@ -204,7 +204,7 @@ namespace krys::web
     }
 
     // If we're inside the shadow tree of a <use> element, we're always an inner <svg> element.
-    if (IsInShadowTree() && DynamicDowncastSVG<SVGUseElement>(dom::TreeQueries::ShadowHost(*this)))
+    if (IsInShadowTree() && DynamicDowncastSVG<SVGUseElement>(dom::TreeTraversal::ShadowHost(*this)))
     {
       return false;
     }
@@ -404,7 +404,7 @@ namespace krys::web
 
   SVGUseElement *SVGElement::CorrespondingUseElement() const noexcept
   {
-    auto *root = dom::TreeQueries::ContainingShadowRoot(*this);
+    auto *root = dom::TreeTraversal::ContainingShadowRoot(*this);
     if (!root)
     {
       return nullptr;
@@ -607,7 +607,7 @@ namespace krys::web
     }
 
     const RenderStyle *parentStyle = nullptr;
-    if (RefPtr parent = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*this)))
+    if (RefPtr parent = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*this)))
     {
       if (auto *renderer = parent->Renderer())
       {
@@ -850,7 +850,7 @@ namespace krys::web
     // Spec: SVG allows inclusion of elements from foreign namespaces anywhere
     // with the SVG content. In general, the SVG user agent will include the unknown
     // elements in the DOM but will otherwise ignore unknown elements.
-    auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
+    auto *parent = dom::TreeTraversal::ParentOrShadowHostElement(*this);
     if (!parent || Is<SVGElement>(*parent))
     {
       return StyledElement::RendererIsNeeded(style);
@@ -1020,7 +1020,7 @@ namespace krys::web
   {
     StyledElement::DidAddEventListener(listener);
 
-    if (dom::TreeQueries::ContainingShadowRoot(*this))
+    if (dom::TreeTraversal::ContainingShadowRoot(*this))
     {
       return;
     }
@@ -1042,7 +1042,7 @@ namespace krys::web
   {
     StyledElement::DidRemoveEventListener(listener);
 
-    if (dom::TreeQueries::ContainingShadowRoot(*this))
+    if (dom::TreeTraversal::ContainingShadowRoot(*this))
     {
       return;
     }

@@ -28,6 +28,7 @@
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Editing/Editing.hpp"
@@ -42,7 +43,7 @@ namespace krys::web
   {
     KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(Node &node) noexcept
     {
-      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+      auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(node);
       if (!shadowRoot)
       {
         return false;
@@ -751,7 +752,7 @@ namespace krys::web
       if (endRoot || endEditableAncestor != baseEditableAncestor)
       {
         Position p = PreviousVisuallyDistinctCandidate(_end);
-        Element *shadowAncestor = endRoot ? dom::TreeQueries::ShadowHost(*endRoot) : nullptr;
+        Element *shadowAncestor = endRoot ? dom::TreeTraversal::ShadowHost(*endRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
           p = PositionAfterNode(shadowAncestor);
@@ -761,7 +762,7 @@ namespace krys::web
                     && !IsEditablePosition(p)))
         {
           auto *root = EditableRootForPosition(p);
-          shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
+          shadowAncestor = root ? dom::TreeTraversal::ShadowHost(*root) : nullptr;
           p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentBeforeNode(p.GetContainerNode())
                                                  : PreviousVisuallyDistinctCandidate(p);
           if (p.IsNull() && shadowAncestor)
@@ -786,7 +787,7 @@ namespace krys::web
       if (startRoot || startEditableAncestor != baseEditableAncestor)
       {
         Position p = NextVisuallyDistinctCandidate(_start);
-        Element *shadowAncestor = startRoot ? dom::TreeQueries::ShadowHost(*startRoot) : nullptr;
+        Element *shadowAncestor = startRoot ? dom::TreeTraversal::ShadowHost(*startRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
           p = PositionBeforeNode(shadowAncestor);
@@ -796,7 +797,7 @@ namespace krys::web
                     && !IsEditablePosition(p)))
         {
           auto *root = EditableRootForPosition(p);
-          shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
+          shadowAncestor = root ? dom::TreeTraversal::ShadowHost(*root) : nullptr;
           p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentAfterNode(p.GetContainerNode())
                                                  : NextVisuallyDistinctCandidate(p);
           if (p.IsNull() && shadowAncestor)

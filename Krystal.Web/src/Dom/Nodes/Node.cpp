@@ -1,8 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Nodes/Node.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
@@ -11,6 +9,9 @@
 #include "Krystal.Web/Dom/Collections/NodeList.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementRareData.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Internals/LiveRangeUpdater.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
@@ -155,7 +156,7 @@ namespace krys::web
 
   DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
   {
-    if (auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this);
+    if (auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*this);
         shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
       if (auto *host = DynamicDowncast<SVGElement>(shadowRoot->Host()); host && Is<SVGUseElement>(*host))
@@ -177,7 +178,7 @@ namespace krys::web
     {
       return false;
     }
-    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*this);
+    auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*this);
     return shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent;
   }
 
@@ -296,7 +297,7 @@ namespace krys::web
   {
     html::CEReactionsScope ceReactions;
     // Run these steps for each descendant exclusive Text node node of this:
-    RefPtr<Text> next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*this, this));
+    RefPtr<Text> next = ShareRefPtr(dom::TreeTraversal::NextExclusiveTextNode(*this, this));
     while (next != nullptr)
     {
       Ref<Text> node = next;
@@ -307,7 +308,7 @@ namespace krys::web
       // 2. If length is zero, then remove node and continue with the next exclusive Text node, if any.
       if (length == 0uz)
       {
-        next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*node, this));
+        next = ShareRefPtr(dom::TreeTraversal::NextExclusiveTextNode(*node, this));
         if (auto removeResult = dom::MutationAlgorithms::Remove(*node); removeResult.HasException())
         {
           return removeResult.ReleaseException();
@@ -367,7 +368,7 @@ namespace krys::web
         }
       }
 
-      next = ShareRefPtr(dom::TreeQueries::NextExclusiveTextNode(*node, this));
+      next = ShareRefPtr(dom::TreeTraversal::NextExclusiveTextNode(*node, this));
     }
 
     return {};
@@ -462,7 +463,7 @@ namespace krys::web
     //    DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, and either
     //    DOCUMENT_POSITION_PRECEDING or DOCUMENT_POSITION_FOLLOWING, with the constraint that this is to be
     //    consistent, together.
-    if (node1 == nullptr || node2 == nullptr || !dom::TreeQueries::SameRoot(*node1, *node2))
+    if (node1 == nullptr || node2 == nullptr || !dom::TreeTraversal::SameRoot(*node1, *node2))
     {
       // The nodes' addresses order them consistently, whichever is asked about the other.
       auto orderingFlag = &other < this ? dom::DocumentPosition::DOCUMENT_POSITION_PRECEDING
@@ -1046,7 +1047,7 @@ namespace krys::web
       for (; it != end; ++it)
       {
         // The composed tree ancestors skip shadow roots, so a host marks its own.
-        if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*it))
+        if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(*it))
         {
           shadowRoot->SetChildNeedsStyleRecalc();
         }

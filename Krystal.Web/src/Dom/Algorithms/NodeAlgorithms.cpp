@@ -1,14 +1,14 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/OrderedSet.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Collections/DOMTokenList.hpp"
 #include "Krystal.Web/Dom/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.Web/Dom/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/CDATASection.hpp"
 #include "Krystal.Web/Dom/Nodes/Comment.hpp"
@@ -96,12 +96,12 @@ namespace krys::web::dom
     // 6. If node is an element, node is a shadow host, and node's shadow root's clonable is true:
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      if (auto shadowRoot = ShareRefPtr(TreeQueries::GetShadowRoot(*element));
+      if (auto shadowRoot = ShareRefPtr(TreeTraversal::GetShadowRoot(*element));
           shadowRoot != nullptr && shadowRoot->Clonable())
       {
         // 6a. Assert: copy is not a shadow host.
         auto *elementCopy = Downcast<Element>(copy.get());
-        krys_debug_assert(TreeQueries::GetShadowRoot(*elementCopy) == nullptr);
+        krys_debug_assert(TreeTraversal::GetShadowRoot(*elementCopy) == nullptr);
 
         // 6b. Let shadowRootRegistry be node's shadow root's custom element registry.
         auto shadowRootRegistry = shadowRoot->CustomElementRegistry();
@@ -126,7 +126,7 @@ namespace krys::web::dom
         }
 
         // 6e. Set copy's shadow root's declarative to node's shadow root's declarative.
-        auto *shadowRootCopy = TreeQueries::GetShadowRoot(*elementCopy);
+        auto *shadowRootCopy = TreeTraversal::GetShadowRoot(*elementCopy);
         shadowRootCopy->_declarative = shadowRoot->_declarative;
 
         // 6f. Set copy's shadow root's keep custom element registry null to node's shadow root's keep custom

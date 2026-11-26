@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Algorithms/DocumentAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Dom/TestElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventListenerHandle.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"

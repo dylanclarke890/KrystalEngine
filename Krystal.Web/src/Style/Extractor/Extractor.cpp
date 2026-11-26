@@ -32,7 +32,7 @@
 #include "Krystal.Web/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Web/Css/Values/SerialisationContext.hpp"
 #include "Krystal.Web/Css/Values/ValuePool.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Rendering/Grid/RenderGrid.hpp"

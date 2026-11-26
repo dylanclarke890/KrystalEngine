@@ -26,6 +26,7 @@
 #include "Krystal.Web/Style/Invalidation/ChildChangeInvalidation.hpp"
 #include "Krystal.Web/Css/Selectors/SelectorChecker.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Web/Style/Resolver.hpp"
@@ -85,7 +86,7 @@ namespace krys::web::style
       }
 
       for (auto *sibling = elementAfterChange; sibling;
-           sibling = dom::TreeQueries::NextElementSibling(*sibling))
+           sibling = dom::TreeTraversal::NextElementSibling(*sibling))
       {
         if (childrenAffected)
         {
@@ -93,8 +94,8 @@ namespace krys::web::style
         }
         if (descendantsAffected)
         {
-          for (auto *siblingChild = dom::TreeQueries::FirstElementChild(*sibling); siblingChild;
-               siblingChild = dom::TreeQueries::NextElementSibling(*siblingChild))
+          for (auto *siblingChild = dom::TreeTraversal::FirstElementChild(*sibling); siblingChild;
+               siblingChild = dom::TreeTraversal::NextElementSibling(*siblingChild))
           {
             siblingChild->InvalidateStyleForSubtreeInternal();
           }
@@ -113,7 +114,7 @@ namespace krys::web::style
       }
 
       for (auto *sibling = elementBeforeChange; sibling;
-           sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+           sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
       {
         if (childrenAffected)
         {
@@ -121,8 +122,8 @@ namespace krys::web::style
         }
         if (descendantsAffected)
         {
-          for (auto *siblingChild = dom::TreeQueries::FirstElementChild(*sibling); siblingChild;
-               siblingChild = dom::TreeQueries::NextElementSibling(*siblingChild))
+          for (auto *siblingChild = dom::TreeTraversal::FirstElementChild(*sibling); siblingChild;
+               siblingChild = dom::TreeTraversal::NextElementSibling(*siblingChild))
           {
             siblingChild->InvalidateStyleForSubtreeInternal();
           }
@@ -179,7 +180,7 @@ namespace krys::web::style
 
     bool isFirst =
       isChild
-      && _childChange.PreviousSiblingElement == dom::TreeQueries::PreviousElementSibling(changedElement)
+      && _childChange.PreviousSiblingElement == dom::TreeTraversal::PreviousElementSibling(changedElement)
       && changedElementRelation == ChangedElementRelation::SelfOrDescendant;
 
     auto hasMatchingInvalidationSelector = [&](const InvalidationRuleSet &invalidationRuleSet)
@@ -291,7 +292,7 @@ namespace krys::web::style
       }
 
       if (_childChange.IsInsertion()
-          && !dom::TreeQueries::PreviousElementSibling(*_childChange.NextSiblingElement))
+          && !dom::TreeTraversal::PreviousElementSibling(*_childChange.NextSiblingElement))
       {
         return true;
       }
@@ -312,7 +313,7 @@ namespace krys::web::style
       }
 
       if (_childChange.IsInsertion()
-          && !dom::TreeQueries::NextElementSibling(*_childChange.PreviousSiblingElement))
+          && !dom::TreeTraversal::NextElementSibling(*_childChange.PreviousSiblingElement))
       {
         return true;
       }
@@ -378,7 +379,7 @@ namespace krys::web::style
         return false;
       }
 
-      if (!_childChange.IsInsertion() && !dom::TreeQueries::PreviousElementSibling(*elementAfterChange))
+      if (!_childChange.IsInsertion() && !dom::TreeTraversal::PreviousElementSibling(*elementAfterChange))
       {
         return true;
       }
@@ -398,7 +399,7 @@ namespace krys::web::style
         return false;
       }
 
-      if (!_childChange.IsInsertion() && !dom::TreeQueries::NextElementSibling(*elementBeforeChange))
+      if (!_childChange.IsInsertion() && !dom::TreeTraversal::NextElementSibling(*elementBeforeChange))
       {
         return true;
       }
@@ -443,11 +444,11 @@ namespace krys::web::style
 
     RefPtr<Element> firstToRemove =
       ShareRefPtr(_childChange.PreviousSiblingElement
-                    ? dom::TreeQueries::NextElementSibling(*_childChange.PreviousSiblingElement)
-                    : dom::TreeQueries::FirstElementChild(ParentElement()));
+                    ? dom::TreeTraversal::NextElementSibling(*_childChange.PreviousSiblingElement)
+                    : dom::TreeTraversal::FirstElementChild(ParentElement()));
 
     for (RefPtr<Element> toRemove = firstToRemove; toRemove.get() != _childChange.NextSiblingElement;
-         toRemove = ShareRefPtr(dom::TreeQueries::NextElementSibling(*toRemove)))
+         toRemove = ShareRefPtr(dom::TreeTraversal::NextElementSibling(*toRemove)))
     {
       function(*toRemove);
 
@@ -471,8 +472,8 @@ namespace krys::web::style
     RefPtr<Element> newElement = [&]
     {
       auto *previous = _childChange.PreviousSiblingElement;
-      auto *candidate = previous ? dom::TreeQueries::NextElementSibling(*previous)
-                                 : dom::TreeQueries::FirstElementChild(ParentElement());
+      auto *candidate = previous ? dom::TreeTraversal::NextElementSibling(*previous)
+                                 : dom::TreeTraversal::FirstElementChild(ParentElement());
       if (candidate == _childChange.NextSiblingElement)
       {
         candidate = nullptr;
@@ -500,13 +501,13 @@ namespace krys::web::style
   void ChildChangeInvalidation::TraverseRemainingExistingSiblings(TFunction function) noexcept
   {
     for (RefPtr<Element> child = ShareRefPtr(_childChange.PreviousSiblingElement); child;
-         child = ShareRefPtr(dom::TreeQueries::PreviousElementSibling(*child)))
+         child = ShareRefPtr(dom::TreeTraversal::PreviousElementSibling(*child)))
     {
       function(*child);
     }
 
     for (RefPtr<Element> child = ShareRefPtr(_childChange.NextSiblingElement); child;
-         child = ShareRefPtr(dom::TreeQueries::NextElementSibling(*child)))
+         child = ShareRefPtr(dom::TreeTraversal::NextElementSibling(*child)))
     {
       function(*child);
     }
@@ -533,7 +534,7 @@ namespace krys::web::style
 
     CheckForEmptyStyleChange(parent);
 
-    auto *lastChildElement = dom::TreeQueries::LastElementChild(parent);
+    auto *lastChildElement = dom::TreeTraversal::LastElementChild(parent);
     if (!lastChildElement)
     {
       return;
@@ -559,7 +560,7 @@ namespace krys::web::style
     if (parent.ChildrenAffectedByFirstChildRules() && elementAfterChange)
     {
       // Find our new first child.
-      auto *newFirstElement = dom::TreeQueries::FirstElementChild(parent);
+      auto *newFirstElement = dom::TreeTraversal::FirstElementChild(parent);
 
       // This is the insert/append case.
       if (newFirstElement != elementAfterChange)
@@ -580,7 +581,7 @@ namespace krys::web::style
     if (parent.ChildrenAffectedByLastChildRules() && elementBeforeChange)
     {
       // Find our new last child.
-      auto *newLastElement = dom::TreeQueries::LastElementChild(parent);
+      auto *newLastElement = dom::TreeTraversal::LastElementChild(parent);
 
       if (newLastElement != elementBeforeChange)
       {

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLHeadingElement.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Html/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Web/Html/MicroParsers/Numbers.hpp"
@@ -91,7 +91,7 @@ namespace krys::web
       // 3e. If inclusiveAncestor's parent is a shadow root, then set inclusiveAncestor to that shadow root's
       //     host and continue.
       // 3f. Set inclusiveAncestor to inclusiveAncestor's parent element.
-      inclusiveAncestor = dom::TreeQueries::ParentOrShadowHostElement(*inclusiveAncestor);
+      inclusiveAncestor = dom::TreeTraversal::ParentOrShadowHostElement(*inclusiveAncestor);
     }
 
     // 4. Return offset.

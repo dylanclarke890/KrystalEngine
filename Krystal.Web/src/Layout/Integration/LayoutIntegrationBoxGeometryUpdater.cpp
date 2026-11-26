@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Html/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Web/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Web/Layout/LayoutState.hpp"
@@ -432,7 +432,7 @@ namespace krys::web::layout_integration
 
       if (auto *element = renderBox.GetElement())
       {
-        if (Is<HTMLFormControlElement>(dom::TreeQueries::ShadowHost(*element)))
+        if (Is<HTMLFormControlElement>(dom::TreeTraversal::ShadowHost(*element)))
         {
           // Inside RenderTextControl's shadow DOM (e.g. strong-password text)
           auto lastBaseline = Maybe<LayoutUnit> {};

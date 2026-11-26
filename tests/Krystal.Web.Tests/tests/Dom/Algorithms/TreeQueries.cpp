@@ -822,20 +822,6 @@ namespace krys::web::dom::tests
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
-  TEST_CASE("TreeQueries::GetShadowRoot", "[HTML][TreeQueries]")
-  {
-    auto doc = CreateRef<HTMLDocument>();
-    auto host = doc->CreateElement(u8"div").ReleaseValue();
-    REQUIRE(TreeQueries::GetShadowRoot(*host) == nullptr);
-
-    auto mode = GENERATE(ShadowRootMode::Open, ShadowRootMode::Closed);
-    auto shadow = host->AttachShadow({.Mode = mode}).ReleaseValue();
-    REQUIRE(shadow->Mode() == mode);
-    REQUIRE(TreeQueries::GetShadowRoot(*host) == shadow.get());
-    // The web-exposed getter hides closed shadow roots.
-    REQUIRE((host->ShadowRoot().get() == shadow.get()) == (mode == ShadowRootMode::Open));
-  }
-
   TEST_CASE("Shadow-including tree order: a host's shadow tree comes just after it, before its children",
             "[DOM][TreeQueries][dom:concept-shadow-including-tree-order]"
             "[dom:shadow-including-preorder-depth-first-traversal]")
@@ -873,23 +859,6 @@ namespace krys::web::dom::tests
 
     // Staying within the shadow root.
     CHECK(TreeQueries::NextShadowIncluding(*inside, shadow.get()) == nullptr);
-  }
-
-  TEST_CASE("TreeQueries::ParentOrShadowHostElement", "[HTML][TreeQueries]")
-  {
-    auto doc = CreateRef<HTMLDocument>();
-    auto host = doc->CreateElement(u8"div").ReleaseValue();
-    auto child = doc->CreateElement(u8"span").ReleaseValue();
-    auto inner = doc->CreateElement(u8"span").ReleaseValue();
-    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
-    REQUIRE_FALSE(host->AppendChild(*child).HasException());
-    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
-    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
-
-    REQUIRE(TreeQueries::ParentOrShadowHostElement(*child) == host.get());
-    REQUIRE(TreeQueries::ParentOrShadowHostElement(*inner) == host.get());
-    REQUIRE(TreeQueries::ParentOrShadowHostElement(*host) == nullptr);
-    REQUIRE(TreeQueries::ParentOrShadowHostElement(*shadow) == nullptr);
   }
 
   TEST_CASE("Shadow-including descendants and ancestors, and retargeting",
@@ -959,58 +928,6 @@ namespace krys::web::dom::tests
 #pragma endregion
 
 #pragma region Pseudo-element aware traversal
-
-  TEST_CASE_METHOD(css::tests::ValueFixture, "TreeQueries: traversal including pseudo-elements",
-                   "[DOM][TreeQueries]")
-  {
-    style::tests::ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
-      #p::before, #p::after, #empty::before { content: "x" }
-    </style><div id=root><p id=p><b id=b></b></p><i id=empty></i><s id=s></s></div>)"};
-    fixture.Document->UpdateStyleIfNeeded();
-
-    auto &root = fixture.ById(u8"root");
-    auto &p = fixture.ById(u8"p");
-    auto &b = fixture.ById(u8"b");
-    auto &empty = fixture.ById(u8"empty");
-    auto *before = p.BeforePseudoElement();
-    auto *after = p.AfterPseudoElement();
-    auto *emptyBefore = empty.BeforePseudoElement();
-    REQUIRE(before);
-    REQUIRE(after);
-    REQUIRE(emptyBefore);
-
-    CHECK(TreeQueries::PseudoAwareFirstChild(p) == before);
-    CHECK(TreeQueries::PseudoAwareLastChild(p) == after);
-    CHECK(TreeQueries::PseudoAwareNextSibling(*before) == &b);
-    CHECK(TreeQueries::PseudoAwareNextSibling(b) == after);
-    CHECK(TreeQueries::PseudoAwarePreviousSibling(b) == before);
-    CHECK(TreeQueries::PseudoAwarePreviousSibling(*after) == &b);
-    CHECK_FALSE(TreeQueries::PseudoAwarePreviousSibling(*before));
-    // An element with only a ::before.
-    CHECK(TreeQueries::PseudoAwareFirstChild(empty) == emptyBefore);
-    CHECK(TreeQueries::PseudoAwareLastChild(empty) == emptyBefore);
-
-    // Tree order: root, p, ::before, b, ::after, empty, ::before, s.
-    List<Element *> order;
-    for (Element *element = &root; element;
-         element = TreeQueries::NextElementIncludingPseudo(*element, &root))
-    {
-      order.push_back(element);
-    }
-    CHECK(order == List<Element *> {&root, &p, before, &b, after, &empty, emptyBefore, &fixture.ById(u8"s")});
-
-    List<Element *> reversed;
-    for (Element *element = &fixture.ById(u8"s"); element;
-         element = TreeQueries::PreviousElementIncludingPseudo(*element, &root))
-    {
-      reversed.push_back(element);
-    }
-    CHECK(reversed
-          == List<Element *> {&fixture.ById(u8"s"), emptyBefore, &empty, after, &b, before, &p, &root});
-
-    CHECK(TreeQueries::NextElementIncludingPseudoSkippingChildren(p, &root) == &empty);
-    CHECK(TreeQueries::PseudoAwarePreviousElementSibling(empty) == &p);
-  }
 
   TEST_CASE("Host-including inclusive ancestor: an inclusive ancestor, or one of a root's host",
             "[DOM][TreeQueries][dom:concept-tree-host-including-inclusive-ancestor]")

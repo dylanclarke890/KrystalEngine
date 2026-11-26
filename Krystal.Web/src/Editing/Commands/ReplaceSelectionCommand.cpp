@@ -32,6 +32,7 @@
 #include "Krystal.Web/Css/Values/SerialisationContext.hpp"
 #include "Krystal.Web/Dom/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/StyledElement.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -56,6 +57,7 @@
 namespace krys::web
 {
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -439,7 +441,7 @@ namespace krys::web
       return;
     }
 
-    auto *shadowHost = dom::TreeQueries::ShadowHost(*editableRoot);
+    auto *shadowHost = dom::TreeTraversal::ShadowHost(*editableRoot);
     if (!(shadowHost && shadowHost->Renderer() && shadowHost->Renderer()->IsRenderTextControl())
         && editableRoot->HasRichlyEditableStyle())
     {
@@ -507,7 +509,7 @@ namespace krys::web
               || HasTagName(element, html::TagName::meta) || HasTagName(element, html::TagName::title)))
       {
         elementsToRemove.push_back(ShareRef(*element));
-        node = TreeQueries::NextSkippingChildren(*node, _fragment.get());
+        node = TreeTraversal::NextSkippingChildren(*node, _fragment.get());
         continue;
       }
       node = TreeQueries::Next(*node, _fragment.get());
@@ -589,7 +591,7 @@ namespace krys::web
       RefPtr<web::Node> next = ShareRefPtr(TreeQueries::Next(*node));
       if (IsInterchangeConvertedSpaceSpan(*node))
       {
-        next = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+        next = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
         RemoveNodePreservingChildren(*node);
       }
       node = krys::move(next);
@@ -599,13 +601,13 @@ namespace krys::web
   web::Node *ReplaceSelectionCommand::InsertedNodes::LastLeafInserted() const noexcept
   {
     krys_debug_assert(_lastNodeInserted);
-    return TreeQueries::DeepLastChild(*_lastNodeInserted);
+    return TreeTraversal::DeepLastChild(*_lastNodeInserted);
   }
 
   web::Node *ReplaceSelectionCommand::InsertedNodes::PastLastLeaf() const noexcept
   {
     krys_debug_assert(_lastNodeInserted);
-    return TreeQueries::Next(*TreeQueries::DeepLastChild(*_lastNodeInserted));
+    return TreeQueries::Next(*TreeTraversal::DeepLastChild(*_lastNodeInserted));
   }
 
   void ReplaceSelectionCommand::InsertedNodes::RespondToNodeInsertion(web::Node *node) noexcept
@@ -632,14 +634,14 @@ namespace krys::web
     if (_lastNodeInserted == node)
     {
       _lastNodeInserted =
-        ShareRefPtr(node->LastChild() ? node->LastChild() : TreeQueries::NextSkippingChildren(*node));
+        ShareRefPtr(node->LastChild() ? node->LastChild() : TreeTraversal::NextSkippingChildren(*node));
       if (!_lastNodeInserted && _firstNodeInserted)
       {
         // If the last inserted node is at the end of the document and doesn't have any children, look
         // backwards for the previous node as the last inserted node, clamping to the first inserted node if
         // needed to ensure that the document position of the last inserted node is not behind the first
         // inserted node.
-        RefPtr<web::Node> previousNode = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*node));
+        RefPtr<web::Node> previousNode = ShareRefPtr(TreeTraversal::PreviousSkippingChildren(*node));
         krys_debug_assert(previousNode);
         _lastNodeInserted = _firstNodeInserted->CompareDocumentPosition(*previousNode)
                                 .contains(dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING)
@@ -662,11 +664,11 @@ namespace krys::web
 
     if (containsLastNode)
     {
-      _lastNodeInserted = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*node));
+      _lastNodeInserted = ShareRefPtr(TreeTraversal::PreviousSkippingChildren(*node));
     }
     else if (containsFirstNode)
     {
-      _firstNodeInserted = ShareRefPtr(TreeQueries::NextSkippingChildren(*node));
+      _firstNodeInserted = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node));
     }
 
     if (!_lastNodeInserted)
@@ -695,11 +697,11 @@ namespace krys::web
     }
     else if (_firstNodeInserted == node)
     {
-      _firstNodeInserted = ShareRefPtr(TreeQueries::NextSkippingChildren(*_firstNodeInserted));
+      _firstNodeInserted = ShareRefPtr(TreeTraversal::NextSkippingChildren(*_firstNodeInserted));
     }
     else if (_lastNodeInserted == node)
     {
-      _lastNodeInserted = ShareRefPtr(TreeQueries::PreviousSkippingChildren(*_lastNodeInserted));
+      _lastNodeInserted = ShareRefPtr(TreeTraversal::PreviousSkippingChildren(*_lastNodeInserted));
       if (!_lastNodeInserted)
       {
         _lastNodeInserted = _firstNodeInserted;
@@ -2033,7 +2035,7 @@ namespace krys::web
       _startOfInsertedContent = FirstPositionInOrBeforeNode(node);
     }
 
-    _endOfInsertedContent = LastPositionInOrAfterNode(TreeQueries::DeepLastChild(*node));
+    _endOfInsertedContent = LastPositionInOrAfterNode(TreeTraversal::DeepLastChild(*node));
   }
 
   ReplacementFragment *ReplaceSelectionCommand::EnsureReplacementFragment() noexcept

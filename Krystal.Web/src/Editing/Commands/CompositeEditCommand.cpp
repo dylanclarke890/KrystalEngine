@@ -29,6 +29,7 @@
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Web/Dom/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/ContainerNode.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
@@ -76,6 +77,7 @@
 namespace krys::web
 {
   using dom::TreeQueries;
+  using dom::TreeTraversal;
 
   namespace
   {
@@ -1713,8 +1715,8 @@ namespace krys::web
 
       RefPtr<web::Node> startNode = ShareRefPtr(start.DeprecatedNode());
       for (RefPtr<web::Node> node =
-             ShareRefPtr(TreeQueries::NextSkippingChildren(*startNode, outerNode.get()));
-           node; node = ShareRefPtr(TreeQueries::NextSkippingChildren(*node, outerNode.get())))
+             ShareRefPtr(TreeTraversal::NextSkippingChildren(*startNode, outerNode.get()));
+           node; node = ShareRefPtr(TreeTraversal::NextSkippingChildren(*node, outerNode.get())))
       {
         // Move lastNode up in the tree as much as node was moved up in the
         // tree by NodeTraversal::nextSkippingChildren, so that the relative depth between
@@ -2110,10 +2112,10 @@ namespace krys::web
 
     RefPtr<web::Node> previousListNode =
       Is<Element>(*emptyListItem)
-        ? ShareRefPtr<web::Node>(TreeQueries::PreviousElementSibling(*emptyListItem))
+        ? ShareRefPtr<web::Node>(TreeTraversal::PreviousElementSibling(*emptyListItem))
         : ShareRefPtr(emptyListItem->PreviousSibling());
     RefPtr<web::Node> nextListNode =
-      Is<Element>(*emptyListItem) ? ShareRefPtr<web::Node>(TreeQueries::NextElementSibling(*emptyListItem))
+      Is<Element>(*emptyListItem) ? ShareRefPtr<web::Node>(TreeTraversal::NextElementSibling(*emptyListItem))
                                   : ShareRefPtr(emptyListItem->NextSibling());
     if ((nextListNode && IsListItem(*nextListNode)) || IsListHTMLElement(nextListNode.get()))
     {

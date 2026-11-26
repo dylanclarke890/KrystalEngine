@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Web/Style/Update.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"

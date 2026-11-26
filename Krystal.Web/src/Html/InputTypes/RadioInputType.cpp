@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Web/Html/InputTypes/RadioInputType.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Web/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Web/Html/Algorithms/FocusAlgorithms.hpp"
@@ -60,7 +61,7 @@ namespace krys::web::html
       if (Is<HTMLFormElement>(*node))
       {
         // A form's descendants have it as their form owner, and only buttons without one are wanted.
-        node = dom::TreeQueries::NextSkippingChildren(*node, &rootNode);
+        node = dom::TreeTraversal::NextSkippingChildren(*node, &rootNode);
         continue;
       }
       auto *input = DynamicDowncast<HTMLInputElement>(*node);

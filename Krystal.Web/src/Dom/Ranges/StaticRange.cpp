@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -27,7 +28,7 @@ namespace krys::web::dom
     Node &endContainer = *EndContainer();
 
     // Its start and end are in the same node tree.
-    if (!TreeQueries::SameRoot(startContainer, endContainer))
+    if (!TreeTraversal::SameRoot(startContainer, endContainer))
     {
       return false;
     }

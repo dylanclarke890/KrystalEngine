@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Dom/Algorithms/ElementTextDirection.hpp"
+﻿#include "Krystal.Web/Html/Algorithms/ElementTextDirection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
@@ -9,7 +9,7 @@
 #include "Krystal.Web/Html/Elements/HTMLTextAreaElement.hpp"
 #include "Krystal.Web/Text/WritingMode.hpp"
 
-namespace krys::web::dom::tests
+namespace krys::web::html::tests
 {
   using web::tests::ById;
 
@@ -48,20 +48,20 @@ namespace krys::web::dom::tests
   TEST_CASE("ElementTextDirection: the dir attribute's states",
             "[DOM][ElementTextDirection][html:attr-dir][html:attr-dir-undefined-state]")
   {
-    CHECK(ParseTextDirectionState(u8"ltr") == TextDirectionState::LTR);
-    CHECK(ParseTextDirectionState(u8"RTL") == TextDirectionState::RTL);
-    CHECK(ParseTextDirectionState(u8"Auto") == TextDirectionState::Auto);
-    CHECK(ParseTextDirectionState(u8"") == TextDirectionState::Undefined);
-    CHECK(ParseTextDirectionState(u8"up") == TextDirectionState::Undefined);
-    CHECK(ParseTextDirectionState(null) == TextDirectionState::Undefined);
+    CHECK(dom::ParseTextDirectionState(u8"ltr") == dom::TextDirectionState::LTR);
+    CHECK(dom::ParseTextDirectionState(u8"RTL") == dom::TextDirectionState::RTL);
+    CHECK(dom::ParseTextDirectionState(u8"Auto") == dom::TextDirectionState::Auto);
+    CHECK(dom::ParseTextDirectionState(u8"") == dom::TextDirectionState::Undefined);
+    CHECK(dom::ParseTextDirectionState(u8"up") == dom::TextDirectionState::Undefined);
+    CHECK(dom::ParseTextDirectionState(null) == dom::TextDirectionState::Undefined);
 
     auto document = Parse(u8"<!DOCTYPE html><p id=p dir=auto></p><bdi id=b></bdi><bdi id=c dir=ltr></bdi>");
     CHECK(Is<HTMLBDIElement>(ById(*document, u8"b")));
-    CHECK(ElementHasAutoTextDirectionState(ById(*document, u8"p")));
-    CHECK(ElementHasAutoTextDirectionState(ById(*document, u8"b")));
-    CHECK_FALSE(ElementHasAutoTextDirectionState(ById(*document, u8"c")));
-    CHECK(ElementHasValidTextDirectionState(ById(*document, u8"c")));
-    CHECK_FALSE(ElementHasValidTextDirectionState(ById(*document, u8"b")));
+    CHECK(dom::ElementHasAutoTextDirectionState(ById(*document, u8"p")));
+    CHECK(dom::ElementHasAutoTextDirectionState(ById(*document, u8"b")));
+    CHECK_FALSE(dom::ElementHasAutoTextDirectionState(ById(*document, u8"c")));
+    CHECK(dom::ElementHasValidTextDirectionState(ById(*document, u8"c")));
+    CHECK_FALSE(dom::ElementHasValidTextDirectionState(ById(*document, u8"b")));
   }
 
   TEST_CASE("ElementTextDirection: auto directionality from text",

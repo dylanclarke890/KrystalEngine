@@ -23,7 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include <format>
 
 namespace krys::web::dom
@@ -54,7 +55,7 @@ namespace krys::web::dom
       }
       auto &element = Downcast<Element>(*it);
       stream += element.LocalName().View();
-      if (TreeQueries::GetShadowRoot(element))
+      if (TreeTraversal::GetShadowRoot(element))
       {
         stream += u8" (shadow root)";
       }

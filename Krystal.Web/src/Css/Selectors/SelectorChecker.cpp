@@ -7,6 +7,7 @@
 #include "Krystal.Web/Css/Selectors/SelectorList.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/Element.hpp"
@@ -76,12 +77,12 @@ namespace krys::web::css
 
     KRYS_NODISCARD bool IsFirstChildElement(const Element &element) noexcept
     {
-      return !dom::TreeQueries::PreviousElementSibling(element);
+      return !dom::TreeTraversal::PreviousElementSibling(element);
     }
 
     KRYS_NODISCARD bool IsLastChildElement(const Element &element) noexcept
     {
-      return !dom::TreeQueries::NextElementSibling(element);
+      return !dom::TreeTraversal::NextElementSibling(element);
     }
 
     /// @brief How many of @p element's previous (or, if @p forward, next) element siblings satisfy
@@ -90,10 +91,10 @@ namespace krys::web::css
     KRYS_NODISCARD int32 CountSiblings(const Element &element, bool forward, TPredicate predicate) noexcept
     {
       int32 count = 0;
-      for (const auto *sibling = forward ? dom::TreeQueries::NextElementSibling(element)
-                                         : dom::TreeQueries::PreviousElementSibling(element);
-           sibling; sibling = forward ? dom::TreeQueries::NextElementSibling(*sibling)
-                                      : dom::TreeQueries::PreviousElementSibling(*sibling))
+      for (const auto *sibling = forward ? dom::TreeTraversal::NextElementSibling(element)
+                                         : dom::TreeTraversal::PreviousElementSibling(element);
+           sibling; sibling = forward ? dom::TreeTraversal::NextElementSibling(*sibling)
+                                      : dom::TreeTraversal::PreviousElementSibling(*sibling))
       {
         if (predicate(*sibling))
         {
@@ -105,8 +106,8 @@ namespace krys::web::css
 
     KRYS_NODISCARD bool IsFirstOfType(const Element &element, const QualifiedName &type) noexcept
     {
-      for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
-           sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+      for (const auto *sibling = dom::TreeTraversal::PreviousElementSibling(element); sibling;
+           sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
       {
         if (sibling->TagQualifiedName() == type)
         {
@@ -118,8 +119,8 @@ namespace krys::web::css
 
     KRYS_NODISCARD bool IsLastOfType(const Element &element, const QualifiedName &type) noexcept
     {
-      for (const auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-           sibling = dom::TreeQueries::NextElementSibling(*sibling))
+      for (const auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+           sibling = dom::TreeTraversal::NextElementSibling(*sibling))
       {
         if (sibling->TagQualifiedName() == type)
         {
@@ -132,8 +133,8 @@ namespace krys::web::css
     KRYS_NODISCARD int32 CountElementsBefore(const Element &element) noexcept
     {
       int32 count = 0;
-      for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
-           sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+      for (const auto *sibling = dom::TreeTraversal::PreviousElementSibling(element); sibling;
+           sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
       {
         // A sibling whose index style resolution has recorded saves counting the rest.
         if (auto index = sibling->ChildIndex())
@@ -458,7 +459,7 @@ namespace krys::web::css
       {
         auto &last = checkingContext.StyleRelations.back();
         if (last.RelationType == style::Relation::AffectsNextSibling
-            && last.Element == dom::TreeQueries::NextElementSibling(element))
+            && last.Element == dom::TreeTraversal::NextElementSibling(element))
         {
           ++last.Value;
           last.Element = &element;
@@ -482,7 +483,7 @@ namespace krys::web::css
     if (checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Shadow)
     {
       // A rule from the element's own shadow tree sees it as a featureless host.
-      krys_debug_assert(dom::TreeQueries::GetShadowRoot(element));
+      krys_debug_assert(dom::TreeTraversal::GetShadowRoot(element));
       context.MustMatchHostPseudoClass = true;
     }
 
@@ -511,7 +512,7 @@ namespace krys::web::css
   bool SelectorChecker::MatchHostPseudoClass(const Selector &selector, const Element &element,
                                              CheckingContext &checkingContext) const noexcept
   {
-    if (!dom::TreeQueries::GetShadowRoot(element))
+    if (!dom::TreeTraversal::GetShadowRoot(element))
     {
       return false;
     }
@@ -550,7 +551,7 @@ namespace krys::web::css
           return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
         }
         // A user agent part is an element in a user agent shadow tree, with that part name.
-        const auto *root = dom::TreeQueries::ContainingShadowRoot(*context.Element);
+        const auto *root = dom::TreeTraversal::ContainingShadowRoot(*context.Element);
         if (!root || root->Mode() != dom::ShadowRootMode::UserAgent
             || context.Element->UserAgentPart() != context.CurrentSelector->Value())
         {
@@ -660,7 +661,7 @@ namespace krys::web::css
         AddStyleRelation(checkingContext, *context.Element,
                          context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
                                                 : style::Relation::DescendantsAffectedByPreviousSibling);
-        auto *previousElement = dom::TreeQueries::PreviousElementSibling(*context.Element);
+        auto *previousElement = dom::TreeTraversal::PreviousElementSibling(*context.Element);
         if (!previousElement)
         {
           return MatchResult::Fails(MatchOutcome::SelectorFailsAllSiblings);
@@ -676,9 +677,9 @@ namespace krys::web::css
                          context.IsMatchElement ? style::Relation::AffectedByPreviousSibling
                                                 : style::Relation::DescendantsAffectedByPreviousSibling);
         // Try each previous sibling in turn, until one matches or none can.
-        for (nextContext.Element = dom::TreeQueries::PreviousElementSibling(*context.Element);
+        for (nextContext.Element = dom::TreeTraversal::PreviousElementSibling(*context.Element);
              nextContext.Element;
-             nextContext.Element = dom::TreeQueries::PreviousElementSibling(*nextContext.Element))
+             nextContext.Element = dom::TreeTraversal::PreviousElementSibling(*nextContext.Element))
         {
           AddStyleRelation(checkingContext, *nextContext.Element, style::Relation::AffectsNextSibling);
           if (auto result = matchLeft();
@@ -711,12 +712,12 @@ namespace krys::web::css
         const Element *next = nullptr;
         if (relation == SelectorRelation::ShadowDescendant)
         {
-          next = dom::TreeQueries::ShadowHost(*context.Element);
+          next = dom::TreeTraversal::ShadowHost(*context.Element);
         }
         else if (relation == SelectorRelation::ShadowPartDescendant)
         {
           next = checkingContext.StyleScopeOrdinal == style::ScopeOrdinal::Element
-                   ? dom::TreeQueries::ShadowHost(*context.Element)
+                   ? dom::TreeTraversal::ShadowHost(*context.Element)
                    : style::HostForScopeOrdinal(*context.Element, checkingContext.StyleScopeOrdinal);
           // ::part() rules from the element's own scope can only match if they apply to :host.
           nextContext.MustMatchHostPseudoClass =
@@ -959,9 +960,9 @@ namespace krys::web::css
       for (const auto &name : names)
       {
         List<CSSOMStringAtom> mapped {name};
-        for (const auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(element);
+        for (const auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(element);
              shadowRoot && shadowRoot->Host() != ruleScopeHost && !mapped.empty();
-             shadowRoot = dom::TreeQueries::ContainingShadowRoot(*shadowRoot->Host()))
+             shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*shadowRoot->Host()))
         {
           List<CSSOMStringAtom> next;
           const auto &partMappings = shadowRoot->GetPartMappings();
@@ -1136,8 +1137,8 @@ namespace krys::web::css
         int32 position = 1;
         if (selectorList)
         {
-          for (const auto *sibling = dom::TreeQueries::PreviousElementSibling(element); sibling;
-               sibling = dom::TreeQueries::PreviousElementSibling(*sibling))
+          for (const auto *sibling = dom::TreeTraversal::PreviousElementSibling(element); sibling;
+               sibling = dom::TreeTraversal::PreviousElementSibling(*sibling))
           {
             position += MatchSelectorList(checkingContext, context, *sibling, *selectorList);
           }
@@ -1178,8 +1179,8 @@ namespace krys::web::css
         int32 position = 1;
         if (selectorList)
         {
-          for (const auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-               sibling = dom::TreeQueries::NextElementSibling(*sibling))
+          for (const auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+               sibling = dom::TreeTraversal::NextElementSibling(*sibling))
           {
             position += MatchSelectorList(checkingContext, context, *sibling, *selectorList);
           }
@@ -1299,7 +1300,7 @@ namespace krys::web::css
           return false;
         }
         // A shadow host that is the scoping root is matched as if by :host.
-        if (dom::TreeQueries::GetShadowRoot(element))
+        if (dom::TreeTraversal::GetShadowRoot(element))
         {
           context.MatchedHostPseudoClass = true;
         }
@@ -1358,7 +1359,7 @@ namespace krys::web::css
       case SelectorPseudoElement::Slotted:
         // It matches the flattened tree, where a slot in a shadow tree has been replaced by what's in it.
         if (!dom::SlotAlgorithms::GetAssignedSlot(element)
-            || (Is<HTMLSlotElement>(element) && dom::TreeQueries::ContainingShadowRoot(element)))
+            || (Is<HTMLSlotElement>(element) && dom::TreeTraversal::ContainingShadowRoot(element)))
         {
           return false;
         }
@@ -1432,14 +1433,14 @@ namespace krys::web::css
     {
       case style::MatchElement::HasChild:
       case style::MatchElement::HasDescendant:
-        if (!dom::TreeQueries::FirstElementChild(element))
+        if (!dom::TreeTraversal::FirstElementChild(element))
         {
           return false;
         }
         break;
       case style::MatchElement::HasSibling:
       case style::MatchElement::HasSiblingDescendant:
-        if (!dom::TreeQueries::NextElementSibling(element))
+        if (!dom::TreeTraversal::NextElementSibling(element))
         {
           return false;
         }
@@ -1523,10 +1524,10 @@ namespace krys::web::css
           return true;
         }
         // Skip a subtree the cache says the selector can't match in.
-        if (cache && dom::TreeQueries::FirstElementChild(*descendant)
+        if (cache && dom::TreeTraversal::FirstElementChild(*descendant)
             && cachedMatch(*descendant) == style::HasPseudoClassMatch::FailsSubtree)
         {
-          node = dom::TreeQueries::NextSkippingChildren(*descendant, &root);
+          node = dom::TreeTraversal::NextSkippingChildren(*descendant, &root);
           continue;
         }
         node = dom::TreeQueries::Next(*descendant, &root);
@@ -1535,8 +1536,8 @@ namespace krys::web::css
     };
     const auto anyFollowingSibling = [&](auto check)
     {
-      for (const auto *sibling = dom::TreeQueries::NextElementSibling(element); sibling;
-           sibling = dom::TreeQueries::NextElementSibling(*sibling))
+      for (const auto *sibling = dom::TreeTraversal::NextElementSibling(element); sibling;
+           sibling = dom::TreeTraversal::NextElementSibling(*sibling))
       {
         if (check(*sibling))
         {
@@ -1552,8 +1553,8 @@ namespace krys::web::css
       {
         // :has(> a)
         case style::MatchElement::HasChild:
-          for (const auto *child = dom::TreeQueries::FirstElementChild(element); child;
-               child = dom::TreeQueries::NextElementSibling(*child))
+          for (const auto *child = dom::TreeTraversal::FirstElementChild(element); child;
+               child = dom::TreeTraversal::NextElementSibling(*child))
           {
             if (checkRelative(*child))
             {

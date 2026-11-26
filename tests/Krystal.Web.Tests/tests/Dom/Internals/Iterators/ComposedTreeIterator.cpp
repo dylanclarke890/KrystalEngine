@@ -1,8 +1,8 @@
-﻿#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+﻿#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeIterator.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Web.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/ComposedTreeAncestorIterator.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 
 namespace krys::web::dom::tests

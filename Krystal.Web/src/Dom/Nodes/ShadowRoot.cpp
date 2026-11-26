@@ -32,11 +32,12 @@
 #include "Krystal.Web/Animation/WebAnimation.hpp"
 #include "Krystal.Web/Css/CSSOM/CSSStyleSheet.hpp"
 #include "Krystal.Web/Css/CSSOM/StyleSheetList.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentFragment.hpp"
@@ -88,7 +89,7 @@ namespace krys::web
   List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
   {
     return NodeDocument().MatchingAnimations(
-      [&](Element &target) -> bool { return dom::TreeQueries::ContainingShadowRoot(target) == this; });
+      [&](Element &target) -> bool { return dom::TreeTraversal::ContainingShadowRoot(target) == this; });
   }
 
 #pragma endregion
@@ -425,7 +426,7 @@ namespace krys::web
     for (auto *slot = dom::SlotAlgorithms::GetAssignedSlot(node); slot;
          slot = dom::SlotAlgorithms::GetAssignedSlot(*slot))
     {
-      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(*slot);
+      auto *shadowRoot = dom::TreeTraversal::ContainingShadowRoot(*slot);
       krys_debug_assert(shadowRoot);
       result.push_back(ShareRef(*shadowRoot));
     }

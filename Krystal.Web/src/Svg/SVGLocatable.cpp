@@ -21,7 +21,7 @@
  */
 
 #include "Krystal.Web/Svg/SVGLocatable.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Rendering/RenderElement.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"
@@ -55,8 +55,8 @@ namespace krys::web
   SVGElement *SVGLocatable::NearestViewportElement(const SVGElement *element) noexcept
   {
     krys_debug_assert(element);
-    for (RefPtr<Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
-         current; current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*current)))
+    for (RefPtr<Element> current = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*element));
+         current; current = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*current)))
     {
       auto *svgElement = DynamicDowncast<SVGElement>(*current);
       if (IsViewportElement(svgElement))
@@ -72,8 +72,8 @@ namespace krys::web
   {
     krys_debug_assert(element);
     SVGElement *farthest = nullptr;
-    for (RefPtr<Element> current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*element));
-         current; current = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*current)))
+    for (RefPtr<Element> current = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*element));
+         current; current = ShareRefPtr(dom::TreeTraversal::ParentOrShadowHostElement(*current)))
     {
       auto *svgElement = DynamicDowncast<SVGElement>(*current);
       if (IsViewportElement(svgElement))
@@ -116,7 +116,7 @@ namespace krys::web
     AffineTransform ctm;
 
     for (Element *currentElement = element; currentElement;
-         currentElement = dom::TreeQueries::ParentOrShadowHostElement(*currentElement))
+         currentElement = dom::TreeTraversal::ParentOrShadowHostElement(*currentElement))
     {
       RefPtr<SVGElement> svgElement = ShareRefPtr(DynamicDowncast<SVGElement>(*currentElement));
       if (!svgElement)

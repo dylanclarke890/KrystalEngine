@@ -26,6 +26,7 @@
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Attr.hpp"
 #include "Krystal.Web/Style/Invalidation/InvalidationFunctions.hpp"
 
@@ -79,7 +80,7 @@ namespace krys::web::style
                            {
                              mayAffectStyleInShadowTree = true;
                            }
-                           if (dom::TreeQueries::GetShadowRoot(_element)
+                           if (dom::TreeTraversal::GetShadowRoot(_element)
                                && features.PseudoClassesAffectingHost.contains(pseudoClass))
                            {
                              shouldInvalidateCurrent = true;
@@ -162,7 +163,7 @@ namespace krys::web::style
 
     collect(_element.StyleResolver().RuleSets());
 
-    if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(_element))
+    if (auto *shadowRoot = dom::TreeTraversal::GetShadowRoot(_element))
     {
       collect(shadowRoot->StyleScope().GetResolver().RuleSets(), MatchElement::Host);
     }

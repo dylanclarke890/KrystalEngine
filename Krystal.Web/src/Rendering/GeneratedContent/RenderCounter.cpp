@@ -28,7 +28,7 @@
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Web/Css/Counter/CounterStyle.hpp"
 #include "Krystal.Web/Css/Counter/CounterStyleRegistry.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLOListElement.hpp"
@@ -102,14 +102,14 @@ namespace krys::web
       PreviousInPreOrderRespectingContainment(const RenderElement &renderer) noexcept
     {
       krys_debug_assert(renderer.GetElement());
-      Element *previous = dom::TreeQueries::PreviousElementIncludingPseudo(*renderer.GetElement());
+      Element *previous = dom::TreeTraversal::PreviousElementIncludingPseudo(*renderer.GetElement());
       Element *styleContainmentAncestor = AncestorStyleContainmentObject(*renderer.GetElement());
 
       while (previous)
       {
         while (previous && !previous->Renderer())
         {
-          previous = dom::TreeQueries::PreviousElementIncludingPseudo(*previous, styleContainmentAncestor);
+          previous = dom::TreeTraversal::PreviousElementIncludingPseudo(*previous, styleContainmentAncestor);
         }
         if (!previous)
         {
@@ -142,11 +142,11 @@ namespace krys::web
 
     KRYS_NODISCARD Element *PreviousSiblingOrParentElement(const Element &element) noexcept
     {
-      if (auto *previous = dom::TreeQueries::PseudoAwarePreviousElementSibling(element))
+      if (auto *previous = dom::TreeTraversal::PseudoAwarePreviousElementSibling(element))
       {
         while (previous && !previous->Renderer())
         {
-          previous = dom::TreeQueries::PseudoAwarePreviousElementSibling(*previous);
+          previous = dom::TreeTraversal::PseudoAwarePreviousElementSibling(*previous);
         }
 
         if (previous)
@@ -205,8 +205,8 @@ namespace krys::web
       auto advance = [&](const Element &current)
       {
         return skipDescendants
-                 ? dom::TreeQueries::NextElementIncludingPseudoSkippingChildren(current, stayWithin)
-                 : dom::TreeQueries::NextElementIncludingPseudo(current, stayWithin);
+                 ? dom::TreeTraversal::NextElementIncludingPseudoSkippingChildren(current, stayWithin)
+                 : dom::TreeTraversal::NextElementIncludingPseudo(current, stayWithin);
       };
       Element *next = advance(self);
       while (next && !next->Renderer())

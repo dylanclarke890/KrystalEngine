@@ -27,7 +27,7 @@
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
-#include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/CharacterData.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/PseudoElement.hpp"
@@ -316,7 +316,7 @@ namespace krys::web
     {
       return ShareRefPtr(container);
     }
-    return ShareRefPtr(dom::TreeQueries::NextSkippingChildren(*container));
+    return ShareRefPtr(dom::TreeTraversal::NextSkippingChildren(*container));
   }
 
   Node *Position::ComputeNodeBeforePosition() const noexcept

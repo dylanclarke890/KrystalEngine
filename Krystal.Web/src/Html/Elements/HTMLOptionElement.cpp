@@ -1,10 +1,11 @@
 ﻿#include "Krystal.Web/Html/Elements/HTMLOptionElement.hpp"
 #include "Krystal.Web/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Web/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
 #include "Krystal.Web/Dom/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Web/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Web/Dom/Events/EventNames.hpp"
 #include "Krystal.Web/Dom/Internals/ElementFactory.hpp"
+#include "Krystal.Web/Dom/Internals/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Web/Dom/Internals/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
@@ -569,7 +570,7 @@ namespace krys::web
     // 2d. If descendant is an img element, then continue skipping all descendants of descendant.
     // (img elements have no children.)
     for (auto *node = FirstChild(); node; node = IsScriptElement(*node)
-                                                   ? dom::TreeQueries::NextSkippingChildren(*node, this)
+                                                   ? dom::TreeTraversal::NextSkippingChildren(*node, this)
                                                    : dom::TreeQueries::Next(*node, this))
     {
       // 2b. If descendant is a Text node, then set text to the concatenation of text and descendant's data.
