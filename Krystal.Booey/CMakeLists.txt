@@ -1147,6 +1147,7 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Internals/NodeRareData.hpp
   include/Krystal.Booey/DOM/Internals/PopoverData.hpp
   include/Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp
+  include/Krystal.Booey/DOM/Internals/SmallNodeList.hpp
   include/Krystal.Booey/DOM/Internals/UserActionElementSet.hpp
   include/Krystal.Booey/DOM/Mixins/ChildNode.hpp
   include/Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp
@@ -1202,7 +1203,6 @@ set(KRYSTAL_BOOEY_DOM_HEADERS
   include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
   include/Krystal.Booey/DOM/Types/NodeOrString.hpp
   include/Krystal.Booey/DOM/Types/QualifiedName.hpp
-  include/Krystal.Booey/DOM/Types/SmallNodeList.hpp
   include/Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp
   include/Krystal.Booey/DOM/Types/USVString.hpp
 )

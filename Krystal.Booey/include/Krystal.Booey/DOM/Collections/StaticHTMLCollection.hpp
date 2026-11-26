@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Collections/HTMLCollection.hpp"
-#include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Booey/DOM/Internals/SmallNodeList.hpp"
 
 namespace krys::boo
 {

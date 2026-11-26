@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/DOM/Internals/SmallNodeList.hpp"
 #include "Krystal.Booey/DOM/Ranges/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/Ranges/BoundaryPoint.hpp"
-#include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include <compare>
 
