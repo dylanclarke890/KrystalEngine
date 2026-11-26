@@ -100,7 +100,7 @@ namespace krys::web::html
     }
   }
 
-  void AnimationFrameCallbacks::Run(dom::DOMHighResTimeStamp timestamp) noexcept
+  void AnimationFrameCallbacks::Run(DOMHighResTimeStamp timestamp) noexcept
   {
     if (_callbackDataList.empty() || _suspendCount)
     {

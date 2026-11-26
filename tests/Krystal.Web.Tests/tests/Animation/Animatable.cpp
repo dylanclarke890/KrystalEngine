@@ -260,6 +260,6 @@ namespace krys::web::tests
 
   TEST_CASE("Animatable: DOMHighResTimeStamp is a double", "[Animation][Animatable]")
   {
-    CHECK(FloatingPoint<dom::DOMHighResTimeStamp>);
+    CHECK(FloatingPoint<DOMHighResTimeStamp>);
   }
 }

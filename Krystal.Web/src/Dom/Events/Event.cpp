@@ -33,7 +33,7 @@ namespace krys::web
     // 3. Return event.
   }
 
-  dom::DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept
+  DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept
   {
     auto *window = document.Window();
     if (!window)

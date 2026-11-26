@@ -246,7 +246,7 @@ namespace krys::web
     /// @brief The event's creation time in milliseconds since the time origin of @p document's window; 0 if
     /// it has none.
     /// @see https://dom.spec.whatwg.org/#dom-event-timestamp
-    KRYS_NODISCARD dom::DOMHighResTimeStamp TimeStampForBindings(const Document &document) const noexcept;
+    KRYS_NODISCARD DOMHighResTimeStamp TimeStampForBindings(const Document &document) const noexcept;
 
     /// @note Legacy.
     /// @see https://dom.spec.whatwg.org/#dom-event-initevent

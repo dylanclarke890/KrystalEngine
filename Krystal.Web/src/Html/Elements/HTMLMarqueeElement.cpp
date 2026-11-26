@@ -251,7 +251,7 @@ namespace krys::web
       return;
     }
     _continueCallbackRequestId = NodeDocument().RequestAnimationFrame(
-      [weakThis = CreateWeakPtr(this)](dom::DOMHighResTimeStamp)
+      [weakThis = CreateWeakPtr(this)](DOMHighResTimeStamp)
       {
         if (RefPtr<HTMLMarqueeElement> marquee = ShareRefPtr(weakThis.get()))
         {

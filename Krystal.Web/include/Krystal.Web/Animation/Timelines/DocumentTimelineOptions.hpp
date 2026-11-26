@@ -8,6 +8,6 @@ namespace krys::web
   struct DocumentTimelineOptions
   {
     /// @brief The timeline's zero time, relative to the document's time origin, in milliseconds.
-    dom::DOMHighResTimeStamp OriginTime {0};
+    DOMHighResTimeStamp OriginTime {0};
   };
 }

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace krys::web::dom
+namespace krys::web
 {
   using DOMHighResTimeStamp = double;
 }

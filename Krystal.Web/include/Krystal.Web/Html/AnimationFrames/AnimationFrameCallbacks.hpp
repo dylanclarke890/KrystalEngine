@@ -41,7 +41,7 @@ namespace krys::web
 
   /// @brief Called with the frame's timestamp: milliseconds since the window's time origin.
   /// @see https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#framerequestcallback
-  using FrameRequestCallback = Func<void(dom::DOMHighResTimeStamp)>;
+  using FrameRequestCallback = Func<void(DOMHighResTimeStamp)>;
 }
 
 namespace krys::web::html
@@ -67,7 +67,7 @@ namespace krys::web::html
     List<CallbackData> _callbackDataList;
     CallbackId _nextCallbackId {0};
     uint32 _suspendCount {0};
-    dom::DOMHighResTimeStamp _lastAnimationFrameTimestamp {0};
+    DOMHighResTimeStamp _lastAnimationFrameTimestamp {0};
 
   public:
     explicit AnimationFrameCallbacks(Document &document) noexcept;
@@ -83,7 +83,7 @@ namespace krys::web::html
     /// window's time origin).
     /// @see
     /// https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#run-the-animation-frame-callbacks
-    void Run(dom::DOMHighResTimeStamp timestamp) noexcept;
+    void Run(DOMHighResTimeStamp timestamp) noexcept;
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.
     void Suspend() noexcept;

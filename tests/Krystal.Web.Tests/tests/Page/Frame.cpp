@@ -339,7 +339,7 @@ namespace krys::web::tests
     REQUIRE(html::RenderBlocking::IsRenderBlocked(*document));
 
     uint32 calls = 0;
-    (void)document->RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+    (void)document->RequestAnimationFrame([&](DOMHighResTimeStamp) { ++calls; });
     frame->UpdateRendering();
     CHECK(calls == 0);
     // The next rendering update tries again.
@@ -648,14 +648,14 @@ namespace krys::web::tests
     SECTION("A hidden page's animation frame callbacks wait for it to be shown")
     {
       uint32 calls = 0;
-      (void)document.RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+      (void)document.RequestAnimationFrame([&](DOMHighResTimeStamp) { ++calls; });
       frame.SetIsVisible(false);
       fixture.Frame(16ms);
       frame.UpdateRendering();
       CHECK(calls == 0);
 
       // A callback asked for while hidden waits too.
-      (void)document.RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+      (void)document.RequestAnimationFrame([&](DOMHighResTimeStamp) { ++calls; });
       frame.UpdateRendering();
       CHECK(calls == 0);
 
