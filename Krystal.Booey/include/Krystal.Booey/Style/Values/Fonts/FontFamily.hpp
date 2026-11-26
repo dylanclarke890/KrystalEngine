@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
+#include "Krystal.Booey/Css/Font/GenericFontFamilyNames.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamilyName.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Containers/List.hpp"

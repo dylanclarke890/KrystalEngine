@@ -34,7 +34,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGSubpathData.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGPathElement.hpp"
 
 namespace krys::boo
 {

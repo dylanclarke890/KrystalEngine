@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/DynamicRangeLimit.hpp"
-#include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimit.hpp"
-#include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimitMix.hpp"
-#include "Krystal.Booey/CSS/Values/DynamicRangeLimitValue.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/Color/DynamicRangeLimit.hpp"
+#include "Krystal.Booey/Css/Values/Color/DynamicRangeLimitMix.hpp"
+#include "Krystal.Booey/Css/Values/DynamicRangeLimitValue.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/PlatformDynamicRangeLimit.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"

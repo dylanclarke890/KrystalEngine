@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Events/Touch/Touch.hpp"
-#include "Krystal.Booey/DOM/Events/EventTarget.hpp"
+#include "Krystal.Booey/Dom/Events/EventTarget.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 

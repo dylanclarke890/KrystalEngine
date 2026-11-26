@@ -24,8 +24,8 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGMaskElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGMaskElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 
 namespace krys::boo
 {

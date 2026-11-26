@@ -27,9 +27,9 @@
 #include "Krystal.Booey/Style/Computed/ComputedStyle+SettersInlines.hpp"
 
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Values/CustomPropertyValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"

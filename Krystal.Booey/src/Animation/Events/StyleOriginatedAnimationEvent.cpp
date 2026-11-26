@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Animation/Events/StyleOriginatedAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/Dom/Nodes/Node.hpp"
 #include "Krystal.Core/Move.hpp"
 
 namespace krys::boo

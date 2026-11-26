@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
-#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
+#include "Krystal.Booey/Css/Values/NumberFormatting.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Colour/ColourNormalization.hpp"

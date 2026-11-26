@@ -24,12 +24,12 @@
  */
 
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
-#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
-#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
-#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
-#include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Booey/Css/Properties/StylePropertiesInlines.hpp"
+#include "Krystal.Booey/Css/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/Css/Values/CustomPropertyValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include <algorithm>
 

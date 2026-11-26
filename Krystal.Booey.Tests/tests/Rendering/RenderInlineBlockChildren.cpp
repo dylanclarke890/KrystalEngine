@@ -2,9 +2,9 @@
 #include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Css/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/Css/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 
 #include <format>
 

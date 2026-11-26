@@ -28,9 +28,9 @@
  */
 
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
-#include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Dom/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/Icons/IconLoader.hpp"

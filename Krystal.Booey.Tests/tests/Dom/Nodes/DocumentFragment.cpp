@@ -1,0 +1,90 @@
+﻿#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Dom/TestElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Attr.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
+
+namespace krys::boo::dom::tests
+{
+  namespace
+  {
+    struct DocumentFragmentTestData
+    {
+      Ref<boo::Document> Document;
+      Ref<DocumentFragment> Node;
+
+      DocumentFragmentTestData()
+          : Document(CreateRef<boo::Document>()), Node(CreateRef<DocumentFragment>(*Document))
+      {
+      }
+
+      ~DocumentFragmentTestData()
+      {
+        while (auto *firstChild = Node->FirstChild())
+        {
+          REQUIRE_FALSE(Node->RemoveChild(*firstChild).HasException());
+        }
+      }
+    };
+  }
+
+  TEST_CASE("Create a document fragment: an empty fragment in the document, without a host",
+            "[DOM][DocumentFragment][dom:interface-documentfragment][dom:create-a-document-fragment]"
+            "[dom:dom-documentfragment-documentfragment][dom:concept-documentfragment-host]")
+  {
+    DocumentFragmentTestData data;
+    CHECK(&data.Node->NodeDocument() == data.Document.get());
+    CHECK_FALSE(data.Node->HasChildNodes());
+    CHECK(data.Node->Host() == nullptr);
+    CHECK(&data.Document->CreateDocumentFragment()->NodeDocument() == data.Document.get());
+
+    // A shadow root's host is its element, as is a template's contents'.
+    auto host = CreateRef<TestElement>(*data.Document);
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    CHECK(shadow->Host() == host.get());
+    auto templateElement =
+      data.Document->CreateElementNS(infra::namespaces::HTML, u8"template").ReleaseValue();
+    CHECK(Downcast<HTMLTemplateElement>(*templateElement).TemplateContents().Host() == templateElement.get());
+  }
+
+  TEST_CASE("Node.nodeType: a DocumentFragment is a DOCUMENT_FRAGMENT_NODE",
+            "[DOM][DocumentFragment][dom:dom-node-nodetype][dom:dom-node-document_fragment_node]")
+  {
+    DocumentFragmentTestData data;
+    REQUIRE(data.Node->NodeType() == NodeType::DOCUMENT_FRAGMENT_NODE);
+  }
+
+  TEST_CASE("Node.nodeName: a DocumentFragment's is #document-fragment",
+            "[DOM][DocumentFragment][dom:dom-node-nodename]")
+  {
+    DocumentFragmentTestData data;
+    REQUIRE(data.Node->NodeName() == u8"#document-fragment");
+  }
+
+  TEST_CASE("Node.textContent: a DocumentFragment's is its descendant text, which setting it replaces",
+            "[DOM][DocumentFragment][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]["
+            "dom:string-replace-all]")
+  {
+    DocumentFragmentTestData data;
+    auto textNode1 = CreateRef<Text>(*data.Document, u8"Hello");
+    auto textNode2 = CreateRef<Text>(*data.Document, u8" world!");
+
+    REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*textNode2).HasException());
+
+    REQUIRE(data.Node->TextContent() == u8"Hello world!");
+
+    REQUIRE_FALSE(data.Node->TextContent(u8"New text content").HasException());
+    REQUIRE(data.Node->TextContent() == u8"New text content");
+
+    REQUIRE_FALSE(data.Node->TextContent(u8"").HasException());
+    REQUIRE_FALSE(data.Node->HasChildNodes());
+    REQUIRE(data.Node->TextContent() == u8"");
+  }
+}

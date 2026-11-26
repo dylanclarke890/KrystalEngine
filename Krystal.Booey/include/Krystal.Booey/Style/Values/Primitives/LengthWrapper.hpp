@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/PrimitiveKeywordList.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperData.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

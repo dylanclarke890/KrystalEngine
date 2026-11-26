@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/Platform/Pasteboard/DragImage.hpp"
-#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Font/GenericFontFamilyNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascadeDescription.hpp"
 #include "Krystal.Booey/Graphics/Geometry/FloatRoundedRect.hpp"

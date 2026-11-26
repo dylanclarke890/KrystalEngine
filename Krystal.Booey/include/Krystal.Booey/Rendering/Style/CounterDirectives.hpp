@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 
 namespace krys::boo

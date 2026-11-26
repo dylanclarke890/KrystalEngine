@@ -21,7 +21,7 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.hpp"
-#include "Krystal.Booey/SVG/RadialGradientAttributes.hpp"
+#include "Krystal.Booey/Svg/RadialGradientAttributes.hpp"
 
 namespace krys::boo
 {

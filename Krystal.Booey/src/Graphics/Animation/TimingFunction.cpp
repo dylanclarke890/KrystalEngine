@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
-#include "Krystal.Booey/CSS/Values/NumberFormatting.hpp"
+#include "Krystal.Booey/Css/Values/NumberFormatting.hpp"
 #include "Krystal.Core/Maths/SpringSolver.hpp"
 #include "Krystal.Core/Maths/UnitBezier.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

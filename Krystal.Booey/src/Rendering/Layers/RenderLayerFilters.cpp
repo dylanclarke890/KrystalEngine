@@ -29,8 +29,8 @@
  */
 
 #include "Krystal.Booey/Rendering/Layers/RenderLayerFilters.hpp"
-#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"

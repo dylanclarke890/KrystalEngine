@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/Style/Values/Fonts/FontFeatureSettings.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Values/FontFeatureValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Values/FontFeatureValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontOpentypeTag.hpp"

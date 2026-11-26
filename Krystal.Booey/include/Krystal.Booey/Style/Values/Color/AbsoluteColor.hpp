@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/AbsoluteColor.hpp"
-#include "Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp"
+#include "Krystal.Booey/Css/Values/Color/AbsoluteColor.hpp"
+#include "Krystal.Booey/Css/Values/Color/AbsoluteColorResolver.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"

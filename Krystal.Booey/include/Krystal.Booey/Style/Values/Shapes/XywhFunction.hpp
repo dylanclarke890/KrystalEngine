@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Shapes/XywhFunction.hpp"
+#include "Krystal.Booey/Css/Values/Shapes/XywhFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/InsetFunction.hpp"
 
 namespace krys::boo::style

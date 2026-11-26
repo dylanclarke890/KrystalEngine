@@ -26,8 +26,8 @@
 
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatableProperties.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyQueries.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Interpolation/ChangedAnimatablePropertiesGenerated.hpp"

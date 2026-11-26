@@ -30,11 +30,11 @@
  */
 
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
-#include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFormElement.hpp"
-#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/Dom/Events/Event.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFormElement.hpp"
+#include "Krystal.Booey/Html/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Core/Move.hpp"

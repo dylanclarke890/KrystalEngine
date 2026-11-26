@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Css/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Css/Parser/ParserContext.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
 #include <string>
 

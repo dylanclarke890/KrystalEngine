@@ -27,10 +27,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"

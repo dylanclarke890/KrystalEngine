@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Shapes/FillRule.hpp"
+#include "Krystal.Booey/Css/Values/Shapes/FillRule.hpp"
 
 namespace krys::boo::style
 {

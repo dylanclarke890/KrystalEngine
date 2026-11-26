@@ -1,0 +1,58 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Dom/Traversal/NodeFilter.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+
+namespace krys::boo
+{
+  class Node;
+  class NodeIterator;
+  class TreeWalker;
+}
+
+namespace krys::boo::dom
+{
+  struct NodePointer;
+  class Traverser;
+
+  enum class TraversalNextOrPrev
+  {
+    Next,
+    Previous,
+  };
+
+  enum class TraverseFirstOrLast
+  {
+    First,
+    Last,
+  };
+
+  class IteratorAlgorithms
+  {
+  public:
+    /// @see https://dom.spec.whatwg.org/#concept-node-filter
+    KRYS_NODISCARD static ExceptionOr<FilterResult> FilterNode(Traverser &traverser,
+                                                               const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps
+    static void PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#nodeiterator-adjust-a-node-pointer
+    KRYS_NODISCARD static NodePointer AdjustNodePointer(const NodePointer &nodePointer,
+                                                        const NodeIterator &nodeIterator,
+                                                        const Node &toBeRemovedNode) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-nodeiterator-traverse
+    KRYS_NODISCARD static ExceptionOr<RefPtr<Node>> Traverse(NodeIterator &iterator,
+                                                             TraversalNextOrPrev type) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-traverse-children
+    KRYS_NODISCARD static ExceptionOr<Node *> TraverseChildren(TreeWalker &walker,
+                                                               TraverseFirstOrLast type) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-traverse-siblings
+    KRYS_NODISCARD static ExceptionOr<Node *> TraverseSiblings(TreeWalker &walker,
+                                                               TraversalNextOrPrev type) noexcept;
+  };
+}

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Animation/Timing/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/DOM/Events/Event.hpp"
+#include "Krystal.Booey/Dom/Events/Event.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo

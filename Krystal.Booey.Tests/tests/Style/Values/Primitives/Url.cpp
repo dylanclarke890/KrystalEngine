@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/CSS/Values/UrlValue.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/UrlValue.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 
 namespace krys::boo::style::tests
 {

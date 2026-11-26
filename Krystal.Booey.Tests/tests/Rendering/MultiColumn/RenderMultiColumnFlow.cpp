@@ -1,10 +1,10 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRect.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Css/Geometry/DOMRect.hpp"
+#include "Krystal.Booey/Css/Geometry/DOMRectList.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 
 namespace krys::boo::layout::tests
 {

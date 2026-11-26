@@ -245,7 +245,7 @@ Status: unreviewed
 ### [4.2. The MediaQueryList Interface](https://drafts.csswg.org/cssom-view-1/#the-mediaquerylist-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/MediaQueryList.cpp; css::MediaQueryMatcher evaluates a document's lists in creation order. matches re-evaluates when the environment may have changed since the last evaluation, as browsers do.
+> Code: Krystal.Booey/src/Css/CSSOM/MediaQueryList.cpp; css::MediaQueryMatcher evaluates a document's lists in creation order. matches re-evaluates when the environment may have changed since the last evaluation, as browsers do.
 <!-- definitions: mediaquerylist-media-query-list mediaquerylist-document mediaquerylist-media mediaquerylist-matches-state -->
 
 - [x] [evaluate media queries and report changes](https://drafts.csswg.org/cssom-view-1/#evaluate-media-queries-and-report-changes) — When asked to evaluate media queries and report changes for a Document doc, run these steps:

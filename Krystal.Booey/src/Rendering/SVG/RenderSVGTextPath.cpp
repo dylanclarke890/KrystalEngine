@@ -20,8 +20,8 @@
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextPathElement.hpp"
 
 namespace krys::boo
 {

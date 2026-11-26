@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImage.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/Borders/BorderImage.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"

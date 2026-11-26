@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleInvalidImage.hpp"
-#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/Css/Values/ImageValue.hpp"
 
 namespace krys::boo
 {

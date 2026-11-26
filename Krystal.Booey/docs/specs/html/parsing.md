@@ -244,7 +244,7 @@ Status: reviewed (2026-11-02)
 #### [13.2.5 Tokenization](https://html.spec.whatwg.org/multipage/parsing.html#tokenization)
 
 Status: reviewed (2026-11-02)
-> `Tokenizer`, one state per spec state, tested state by state (`tests/HTML/Parser/Tokenizer.cpp`).
+> `Tokenizer`, one state per spec state, tested state by state (`tests/Html/Parser/Tokenizer.cpp`).
 > Fixed: a near-miss end tag in RCDATA, RAWTEXT or script data followed by whitespace or a solidus (`</scrip `) asserted, as the state switched before checking for an appropriate end tag; and a numeric character reference too large for 64 bits overflowed back into the Unicode range.
 <!-- definitions: reconsume temporary-buffer return-state force-quirks-flag self-closing-flag -->
 

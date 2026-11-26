@@ -1,0 +1,65 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo
+{
+  class ContainerNode;
+  class Document;
+  class Element;
+  class Node;
+}
+
+namespace krys::boo::dom
+{
+  /// @see https://dom.spec.whatwg.org/#other-applicable-specifications
+  class ExtensibilityHooks
+  {
+  public:
+    /// @param isSubtreeRoot Whether `insertedNode` is the node that was inserted, rather than one of its
+    /// shadow-including descendants.
+    /// @see https://dom.spec.whatwg.org/#concept-node-insert-ext
+    static void NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-post-connection-ext
+    static void NodePostConnection(Node &connectedNode) noexcept;
+
+    /// @param onlyReplacedElementsInserted Whether the change inserted replaced elements and nothing else,
+    /// which is neutral to the auto directionality of the node.
+    /// @see https://dom.spec.whatwg.org/#concept-node-children-changed-ext
+    static void NodeChildrenChanged(ContainerNode &node, bool onlyReplacedElementsInserted = false) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-move-ext
+    static void NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-remove-ext
+    static void NodeRemoved(Node &removedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
+
+    /// @brief Destroys the renderers of @p child, which is about to be removed or moved. It's still in the
+    /// tree, so renderers that depend on their place (list items, counters) can update their neighbours.
+    static void DestroyRenderTreeIfNeeded(Node &child) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-clone-ext
+    static void NodeCloned(Node &node, Node &copy, bool subtree) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-adopt-ext
+    static void NodeAdopted(Node &node, Document &oldDocument) noexcept;
+
+    /// @brief Adds the IDs of @p node and its descendants to @p parent's tree scope, if it's in one. Done
+    /// before their insertion steps, each of which may look up an ID.
+    static void SubtreeInserted(Node &node, ContainerNode &parent) noexcept;
+
+    /// @brief Removes the IDs of @p node and its descendants from @p parent's tree scope, if it's in one.
+    /// Done before their removing steps, each of which may look up an ID.
+    static void SubtreeRemoved(Node &node, ContainerNode &parent) noexcept;
+
+    /// @brief Moves the IDs of @p node and its descendants to their new tree scope, if it changed.
+    static void SubtreeMoved(Node &node, ContainerNode &oldParent, ContainerNode &newParent) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
+    static void ElementAttributeChanged(Element &element, const DOMStringAtom &localName,
+                                        Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
+                                        const DOMStringAtom &namespaceURI) noexcept;
+  };
+}

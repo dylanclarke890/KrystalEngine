@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Style/Values/Backgrounds/RepeatStyle.hpp"
 
-#include "Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp"
+#include "Krystal.Booey/Css/Values/BackgroundRepeatValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"

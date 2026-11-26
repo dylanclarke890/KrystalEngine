@@ -23,7 +23,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Primitives/Ratio.hpp"
-#include "Krystal.Booey/CSS/Values/RatioValue.hpp"
+#include "Krystal.Booey/Css/Values/RatioValue.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
 namespace krys::boo::style

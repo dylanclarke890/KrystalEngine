@@ -27,13 +27,13 @@
  */
 
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 

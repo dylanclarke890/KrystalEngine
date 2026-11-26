@@ -1,0 +1,46 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Dom/Events/EventListener.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Core/Attributes.hpp"
+
+namespace krys::boo
+{
+  class EventListener;
+  class EventTarget;
+}
+
+namespace krys::boo::dom
+{
+  /// @brief Implementations of the EventTarget interface algorithms.
+  /// @see https://dom.spec.whatwg.org/#eventtarget
+  class EventTargetAlgorithms
+  {
+  public:
+    /// @see https://dom.spec.whatwg.org/#concept-flatten-options
+    KRYS_NODISCARD static EventListenerOptions
+      FlattenOptions(const EventListenerOptionsOrBool &optionsOrBool) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#event-flatten-more
+    KRYS_NODISCARD static AddEventListenerOptions
+      FlattenMoreOptions(const AddEventListenerOptionsOrBool &optionsOrBool) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#default-passive-value
+    KRYS_NODISCARD static bool DefaultPassiveValue(const DOMStringAtom &type,
+                                                   const EventTarget &eventTarget) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#add-an-event-listener
+    /// @return Whether @p listener was added: not if its signal is aborted, it has no callback, or an equal
+    /// listener is already registered.
+    static bool AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#remove-an-event-listener
+    static void RemoveEventListener(EventTarget &eventTarget, EventListener &listener) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#remove-all-event-listeners
+    static void RemoveAllEventListeners(EventTarget &eventTarget) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD static EventTarget *Retarget(EventTarget *a, EventTarget &b) noexcept;
+  };
+}

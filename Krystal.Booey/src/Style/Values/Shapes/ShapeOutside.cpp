@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Style/Values/Shapes/ShapeOutside.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 
-#include "Krystal.Booey/CSS/Values/BasicShapeValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/BasicShapeValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

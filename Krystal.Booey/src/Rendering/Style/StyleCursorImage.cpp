@@ -23,9 +23,9 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
-#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/Values/CursorImageValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
 #include "Krystal.Core/Memory/PointerComparison.hpp"
 

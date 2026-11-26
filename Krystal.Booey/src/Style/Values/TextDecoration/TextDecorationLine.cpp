@@ -25,10 +25,10 @@
 
 #include "Krystal.Booey/Style/Values/TextDecoration/TextDecorationLine.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/CSS/CSSOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Css/CSSOMTestUtils.hpp"
 
 namespace krys::boo::style::tests
 {

@@ -46,7 +46,7 @@ def generate(args: argparse.Namespace):
 
     with open(os.path.join(output_hpp_dir, f"{FILE_NAME}.hpp"), "w") as output_file:
         writer = Writer(output_file)
-        writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Booey/CSS/Types/CSSOMString.hpp"])
+        writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Booey/Css/Types/CSSOMString.hpp"])
 
         with writer.namespace(namespace=NAMESPACE):
             for name in SHEETS:

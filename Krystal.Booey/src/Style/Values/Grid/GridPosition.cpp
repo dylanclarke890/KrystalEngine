@@ -30,8 +30,8 @@
  */
 
 #include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"
-#include "Krystal.Booey/CSS/Values/GridLineValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/GridLineValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Maths/Extras.hpp"

@@ -1,0 +1,169 @@
+﻿/*
+ * Copyright (C) 2006 Oliver Hunt <oliver@nerget.com>
+ * Copyright (C) 2018-2022 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Graphics/Filters/FEDisplacementMap.hpp"
+#include "Krystal.Booey/Svg/SVGFilterPrimitiveStandardAttributes.hpp"
+
+namespace krys::boo
+{
+  template <>
+  struct SVGPropertyTraits<ChannelSelectorType>
+  {
+    KRYS_NODISCARD static uint32 HighestEnumValue() noexcept
+    {
+      return static_cast<uint32>(ChannelSelectorType::CHANNEL_A);
+    }
+
+    KRYS_NODISCARD static DOMString ToString(ChannelSelectorType type) noexcept
+    {
+      switch (type)
+      {
+        case ChannelSelectorType::CHANNEL_UNKNOWN: return {};
+        case ChannelSelectorType::CHANNEL_R:       return u8"R";
+        case ChannelSelectorType::CHANNEL_G:       return u8"G";
+        case ChannelSelectorType::CHANNEL_B:       return u8"B";
+        case ChannelSelectorType::CHANNEL_A:       return u8"A";
+      }
+
+      krys_assert_msg(false, "Not reached");
+      return {};
+    }
+
+    KRYS_NODISCARD static ChannelSelectorType FromString(SVGElement &, DOMStringView value) noexcept
+    {
+      if (value == u8"R")
+      {
+        return ChannelSelectorType::CHANNEL_R;
+      }
+      if (value == u8"G")
+      {
+        return ChannelSelectorType::CHANNEL_G;
+      }
+      if (value == u8"B")
+      {
+        return ChannelSelectorType::CHANNEL_B;
+      }
+      if (value == u8"A")
+      {
+        return ChannelSelectorType::CHANNEL_A;
+      }
+      return ChannelSelectorType::CHANNEL_UNKNOWN;
+    }
+  };
+
+  /// @brief The `<feDisplacementMap>` element: its first input, displaced by its second's channels.
+  /// @see https://drafts.fxtf.org/filter-effects/#InterfaceSVGFEDisplacementMapElement
+  class SVGFEDisplacementMapElement final : public SVGFilterPrimitiveStandardAttributes
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGFEDisplacementMapElement);
+
+  private:
+    Ref<SVGAnimatedString> _in1;
+    Ref<SVGAnimatedString> _in2;
+    Ref<SVGAnimatedEnumeration> _xChannelSelector;
+    Ref<SVGAnimatedEnumeration> _yChannelSelector;
+    Ref<SVGAnimatedNumber> _scale;
+
+  public:
+    explicit SVGFEDisplacementMapElement(Document &document) noexcept;
+
+    KRYS_NODISCARD DOMString In1() const noexcept
+    {
+      return _in1->CurrentValue();
+    }
+
+    KRYS_NODISCARD DOMString In2() const noexcept
+    {
+      return _in2->CurrentValue();
+    }
+
+    KRYS_NODISCARD ChannelSelectorType XChannelSelector() const noexcept
+    {
+      return _xChannelSelector->CurrentValue<ChannelSelectorType>();
+    }
+
+    KRYS_NODISCARD ChannelSelectorType YChannelSelector() const noexcept
+    {
+      return _yChannelSelector->CurrentValue<ChannelSelectorType>();
+    }
+
+    KRYS_NODISCARD float Scale() const noexcept
+    {
+      return _scale->CurrentValue();
+    }
+
+    KRYS_NODISCARD SVGAnimatedString &In1Animated() noexcept
+    {
+      return *_in1;
+    }
+
+    KRYS_NODISCARD SVGAnimatedString &In2Animated() noexcept
+    {
+      return *_in2;
+    }
+
+    KRYS_NODISCARD SVGAnimatedEnumeration &XChannelSelectorAnimated() noexcept
+    {
+      return *_xChannelSelector;
+    }
+
+    KRYS_NODISCARD SVGAnimatedEnumeration &YChannelSelectorAnimated() noexcept
+    {
+      return *_yChannelSelector;
+    }
+
+    KRYS_NODISCARD SVGAnimatedNumber &ScaleAnimated() noexcept
+    {
+      return *_scale;
+    }
+
+    using PropertyRegistry =
+      SVGPropertyOwnerRegistry<SVGFEDisplacementMapElement, SVGFilterPrimitiveStandardAttributes>;
+
+  private:
+    void AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                          Maybe<DOMStringView> value) noexcept final;
+
+    void SVGAttributeChanged(const QualifiedName &attributeName) noexcept final;
+
+    bool SetFilterEffectAttribute(FilterEffect &effect, const QualifiedName &attributeName) noexcept final;
+
+    KRYS_NODISCARD List<DOMStringAtom> FilterEffectInputsNames() const noexcept final
+    {
+      return {DOMStringAtom(In1()), DOMStringAtom(In2())};
+    }
+
+    KRYS_NODISCARD IntOutsets Outsets(const RectF &targetBoundingBox,
+                                      SVGUnitTypes::SVGUnitType primitiveUnits) const noexcept final;
+
+    KRYS_NODISCARD RefPtr<FilterEffect>
+      CreateFilterEffect(const FilterEffectVector &inputs,
+                         const GraphicsContext &destinationContext) const noexcept final;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::SVGFEDisplacementMapElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::SVGElement &target) noexcept
+  {
+    return target.IsSVGFEDisplacementMapElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

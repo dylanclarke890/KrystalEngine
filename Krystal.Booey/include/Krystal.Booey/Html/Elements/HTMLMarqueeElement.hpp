@@ -1,0 +1,152 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class HTMLDivElement;
+  class WebAnimation;
+
+  /// @brief A marquee: its contents, in a mover in its shadow tree, scroll across it, bounce in it or slide
+  /// into it, as a Web Animation of the mover's transform, one loop at a time, as Chrome moves them.
+  /// @see https://html.spec.whatwg.org/multipage/obsolete.html#the-marquee-element
+  class HTMLMarqueeElement : public HTMLElement
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMarqueeElement);
+
+  private:
+    WeakPtr<HTMLDivElement> _mover;
+    /// @brief The current loop's animation.
+    RefPtr<WebAnimation> _player;
+    /// @brief The animation frame request that starts the next loop; 0 for none.
+    int32 _continueCallbackRequestId {0};
+    /// @brief The marquee current loop index.
+    int32 _currentLoopIndex {0};
+
+  public:
+    HTMLMarqueeElement(Document &document) noexcept;
+
+    ~HTMLMarqueeElement() noexcept override;
+
+    KRYS_NODISCARD static Ref<HTMLMarqueeElement> Create(Document &document) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-behavior
+    KRYS_NODISCARD DOMString Behavior() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-behavior
+    void Behavior(DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-bgcolor
+    KRYS_NODISCARD DOMString BgColor() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-bgcolor
+    void BgColor(DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-direction
+    KRYS_NODISCARD DOMString Direction() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-direction
+    void Direction(DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-height
+    KRYS_NODISCARD DOMString Height() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-height
+    void Height(DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-width
+    KRYS_NODISCARD DOMString Width() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-width
+    void Width(DOMString value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-hspace
+    KRYS_NODISCARD uint32 HSpace() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-hspace
+    void HSpace(uint32 value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-vspace
+    KRYS_NODISCARD uint32 VSpace() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-vspace
+    void VSpace(uint32 value) noexcept;
+
+    /// @brief The marquee loop count: -1 (the default) loops forever.
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-loop
+    KRYS_NODISCARD int32 Loop() const noexcept;
+
+    /// @brief Sets the loop count, if @p value is positive or -1; other values are ignored.
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-loop
+    void Loop(int32 value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrollamount
+    KRYS_NODISCARD uint32 ScrollAmount() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrollamount
+    void ScrollAmount(uint32 value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrolldelay
+    KRYS_NODISCARD uint32 ScrollDelay() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-scrolldelay
+    void ScrollDelay(uint32 value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-truespeed
+    KRYS_NODISCARD bool TrueSpeed() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-truespeed
+    void TrueSpeed(bool value) noexcept;
+
+    /// @brief Turns the marquee on: it moves again, from where it stopped.
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-start
+    void Start() noexcept;
+
+    /// @brief Turns the marquee off: it stops where it is.
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#dom-marquee-stop
+    void Stop() noexcept;
+
+    /// @brief The marquee scroll interval, in milliseconds.
+    /// @see https://html.spec.whatwg.org/multipage/obsolete.html#marquee-scroll-interval
+    KRYS_NODISCARD uint32 ScrollInterval() const noexcept;
+
+    /// @brief The shadow tree's element whose transform moves the contents.
+    KRYS_NODISCARD HTMLDivElement *Mover() const noexcept;
+
+  protected:
+    void DidAddUserAgentShadowRoot(boo::ShadowRoot &root) noexcept override;
+
+    void OnInsert() noexcept override;
+
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                         const DOMStringAtom &namespaceURI) const noexcept override;
+
+    void CollectPresentationalHintsForAttribute(const DOMStringAtom &localName,
+                                                const DOMStringAtom &namespaceURI, DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
+  private:
+    /// @brief Plays the next loop, if the marquee loops again, or plays on a paused one.
+    void ContinueAnimation() noexcept;
+
+    /// @brief Whether the marquee has loops left: a slide loops once unless it says otherwise.
+    KRYS_NODISCARD bool ShouldContinue() const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::HTMLMarqueeElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLMarqueeElement();
+  }
+  KRYS_NODISCARD static bool IsType(const krys::boo::Node &target) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::boo::HTMLElement>(target);
+    return element && element->IsHTMLMarqueeElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

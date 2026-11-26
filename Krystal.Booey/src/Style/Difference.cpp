@@ -23,8 +23,8 @@
  */
 
 #include "Krystal.Booey/Style/Difference.hpp"
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"

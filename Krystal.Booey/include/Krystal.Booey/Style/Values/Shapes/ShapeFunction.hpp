@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Shapes/ShapeFunction.hpp"
+#include "Krystal.Booey/Css/Values/Shapes/ShapeFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/FillRule.hpp"

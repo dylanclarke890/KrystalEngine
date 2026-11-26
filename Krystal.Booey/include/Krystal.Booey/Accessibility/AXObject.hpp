@@ -54,7 +54,7 @@
 #pragma once
 
 #include "Krystal.Booey/Accessibility/AXRole.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/CharacterRange.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"

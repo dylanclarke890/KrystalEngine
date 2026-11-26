@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLStyleElement.hpp"
+#include "Krystal.Booey.Tests/Dom/DOMTestUtils.hpp"
+#include "Krystal.Booey/Css/Parser/ParserContext.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLStyleElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 

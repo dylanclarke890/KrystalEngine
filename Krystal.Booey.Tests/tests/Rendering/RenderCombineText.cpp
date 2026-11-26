@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderCombineText.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 
 namespace krys::boo::tests

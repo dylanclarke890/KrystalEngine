@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/ImageValue.hpp"
+#include "Krystal.Booey/Css/Values/ImageValue.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 

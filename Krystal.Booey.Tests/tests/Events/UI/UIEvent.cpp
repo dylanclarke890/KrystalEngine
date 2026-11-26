@@ -6,9 +6,9 @@
 #include "Krystal.Booey/Events/UI/FocusEvent.hpp"
 #include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
 #include "Krystal.Booey/Events/UI/TextEvent.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include <map>
 #include <string>

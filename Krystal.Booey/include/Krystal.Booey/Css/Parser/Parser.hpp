@@ -1,0 +1,325 @@
+﻿// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright (C) 2016-2024 Apple Inc. All rights reserved.
+// Copyright (C) 2025 Samuel Weinig <sam@webkit.org>
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//    * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//    * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//    * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#pragma once
+
+#include "Krystal.Booey/Css/Parser/AtRuleId.hpp"
+#include "Krystal.Booey/Css/Parser/ParserEnum.hpp"
+#include "Krystal.Booey/Css/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/Css/Parser/TokenRange.hpp"
+#include "Krystal.Booey/Css/Properties/ParsedPropertyList.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Properties/Types/IsImportant.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Rules/RuleType.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Containers/EnumSet.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Containers/SmallList.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/UniquePtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::boo
+{
+  class Element;
+}
+
+namespace krys::boo::css
+{
+  class CounterStyleRule;
+  class FunctionRule;
+  class ImmutableStyleProperties;
+  class ImportRule;
+  class KeyframeRule;
+  class KeyframesRule;
+  class MutableStyleProperties;
+  struct ParserContext;
+  class PositionTryRule;
+  class StyleSheetContents;
+
+  /// @brief Parses style sheets, rules and declaration lists into the internal rule model.
+  /// @see https://drafts.csswg.org/css-syntax/#parsing
+  class Parser
+  {
+    KRYS_NON_COPYABLE(Parser);
+
+  public:
+    enum class ParseResult : uint8
+    {
+      Changed,
+      Unchanged,
+      Error,
+    };
+
+    enum class AllowedRules : uint8
+    {
+      // As per css-syntax, css-cascade and css-namespaces, @charset rules
+      // must come first, followed by @import then @namespace.
+      // AllowImportRules actually means we allow @import and any rules that
+      // may follow it, i.e. @namespace rules and regular rules.
+      // AllowCharsetRules and AllowNamespaceRules behave similarly.
+      CharsetRules,
+      LayerStatementRules,
+      ImportRules,
+      NamespaceRules,
+      RegularRules,
+      KeyframeRules,
+      FontFeatureValuesRules,
+      ConditionalGroupRules,
+      NoRules, // For parsing at-rules inside declaration lists (without nesting support)
+    };
+
+  private:
+    struct NestingContext
+    {
+      // FIXME: Can we build StylePropertySets directly?
+      // FIXME: Investigate using a smaller inline buffer
+      ParsedPropertyList ParsedProperties;
+      List<Ref<Rule>> ParsedRules;
+    };
+
+    enum class RuleList : uint8
+    {
+      TopLevel,
+      Regular,
+      Keyframes,
+      FontFeatureValues,
+    };
+
+    enum class BlockAllowedRule : uint8
+    {
+      QualifiedRules,
+      Declarations,
+      AtRules,
+    };
+
+    // FIXME: we could unify all those into a single stack data structure.
+    // https://bugs.webkit.org/show_bug.cgi?id=265566
+    uint32 _ruleListNestingLevel {0};
+    SmallList<NestedParserContextType, 16> _ancestorRuleTypeStack;
+    SmallList<NestingContext, 16> _nestingContextStack {NestingContext {}};
+
+    const ParserContext &_context;
+
+    RefPtr<StyleSheetContents> _styleSheet;
+    UniquePtr<Tokenizer> _tokenizer;
+
+  public:
+    Parser(const ParserContext &context, CSSOMStringView string, StyleSheetContents *styleSheet = nullptr,
+           NestedContext nestedContext = {}) noexcept;
+
+    ~Parser() noexcept;
+
+    KRYS_NODISCARD static ParseResult ParseValue(MutableStyleProperties &declaration, PropertyId property,
+                                                 CSSOMStringView string, IsImportant important,
+                                                 const ParserContext &context) noexcept;
+
+    KRYS_NODISCARD static ParseResult ParseCustomPropertyValue(MutableStyleProperties &declaration,
+                                                               const CSSOMStringAtom &propertyName,
+                                                               CSSOMStringView string, IsImportant important,
+                                                               const ParserContext &context) noexcept;
+
+    /// @brief Parses the value of an element's `style` attribute.
+    KRYS_NODISCARD static Ref<ImmutableStyleProperties>
+      ParseInlineStyleDeclaration(CSSOMStringView string, const Element &element) noexcept;
+
+    static bool ParseDeclarationList(MutableStyleProperties &declaration, CSSOMStringView string,
+                                     const ParserContext &context) noexcept;
+
+    KRYS_NODISCARD static RefPtr<Rule> ParseRule(CSSOMStringView string, const ParserContext &context,
+                                                 StyleSheetContents *styleSheet, AllowedRules allowedRules,
+                                                 NestedContext nestedContext = {}) noexcept;
+
+    KRYS_NODISCARD static RefPtr<KeyframeRule> ParseKeyframeRule(CSSOMStringView string,
+                                                                 const ParserContext &context) noexcept;
+
+    static void ParseStyleSheet(CSSOMStringView string, const ParserContext &context,
+                                StyleSheetContents &styleSheet) noexcept;
+
+    KRYS_NODISCARD bool SupportsDeclaration(TokenRange &tokens) noexcept;
+
+    KRYS_NODISCARD const ParserContext &Context() const noexcept
+    {
+      return _context;
+    }
+
+    // This function updates the range it's given.
+    KRYS_NODISCARD RefPtr<Rule> ConsumeAtRule(TokenRange &tokens, AllowedRules allowedRules) noexcept;
+
+    KRYS_NODISCARD static IsImportant ConsumeTrailingImportantAndWhitespace(TokenRange &tokens) noexcept;
+
+    KRYS_NODISCARD static RefPtr<NestedDeclarationsRule>
+      ParseNestedDeclarations(const ParserContext &context, CSSOMStringView string) noexcept;
+
+    KRYS_NODISCARD Tokenizer *GetTokenizer() const noexcept
+    {
+      return _tokenizer.get();
+    }
+
+  private:
+    Parser(const ParserContext &context, StyleSheetContents *styleSheet) noexcept;
+
+    // Returns whether the first encountered rule was valid
+    template <typename T>
+    bool ConsumeRuleList(TokenRange tokens, RuleList ruleListType, KRYS_NOESCAPE const T &callback) noexcept;
+
+    // This function updates the range it's given.
+    KRYS_NODISCARD RefPtr<Rule> ConsumeQualifiedRule(TokenRange &tokens, AllowedRules allowedRules) noexcept;
+
+    // This function is used for all the nested group rules (@media, @layer, @supports, @scope,
+    // @container,..etc) It handles potentially orphaned declarations (in the context of style nesting)
+    // https://drafts.csswg.org/css-nesting/#conditionals
+    KRYS_NODISCARD List<Ref<Rule>> ConsumeNestedGroupRules(TokenRange block) noexcept;
+
+    KRYS_NODISCARD static RefPtr<CharsetRule> ConsumeCharsetRule(TokenRange prelude) noexcept;
+
+    KRYS_NODISCARD RefPtr<ImportRule> ConsumeImportRule(TokenRange prelude) noexcept;
+
+    KRYS_NODISCARD static RefPtr<NamespaceRule> ConsumeNamespaceRule(TokenRange prelude) noexcept;
+
+    KRYS_NODISCARD RefPtr<MediaRule> ConsumeMediaRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<SupportsRule> ConsumeSupportsRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<FontFaceRule> ConsumeFontFaceRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<FontFeatureValuesBlockRule>
+      ConsumeFontFeatureValuesRuleBlock(AtRuleId id, TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<FontFeatureValuesRule> ConsumeFontFeatureValuesRule(TokenRange prelude,
+                                                                              TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<FontPaletteValuesRule> ConsumeFontPaletteValuesRule(TokenRange prelude,
+                                                                              TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<KeyframesRule> ConsumeKeyframesRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<CounterStyleRule> ConsumeCounterStyleRule(TokenRange prelude,
+                                                                    TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<LayerRule> ConsumeLayerRule(TokenRange prelude, Maybe<TokenRange> block) noexcept;
+
+    KRYS_NODISCARD RefPtr<ContainerRule> ConsumeContainerRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<PropertyRule> ConsumePropertyRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<ScopeRule> ConsumeScopeRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<StartingStyleRule> ConsumeStartingStyleRule(TokenRange prelude,
+                                                                      TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<PositionTryRule> ConsumePositionTryRule(TokenRange prelude,
+                                                                  TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<FunctionRule> ConsumeFunctionRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<KeyframeRule> ConsumeKeyframeStyleRule(TokenRange prelude,
+                                                                 TokenRange block) noexcept;
+
+    KRYS_NODISCARD RefPtr<Rule> ConsumeStyleRule(TokenRange prelude, TokenRange block) noexcept;
+
+    KRYS_NODISCARD ParsedPropertyList ConsumeDeclarationListInNewNestingContext(TokenRange tokens,
+                                                                                RuleType ruleType) noexcept;
+
+    KRYS_NODISCARD List<Ref<Rule>> ConsumeDeclarationRuleListInNewNestingContext(TokenRange tokens,
+                                                                                 RuleType ruleType) noexcept;
+
+    // FIXME: We should return value for all those functions instead of using class member attributes.
+    void ConsumeBlockContent(TokenRange tokens, RuleType ruleType,
+                             EnumSet<BlockAllowedRule> blockAllowedRules) noexcept;
+
+    void ConsumeDeclarationList(TokenRange tokens, RuleType ruleType) noexcept;
+
+    void ConsumeDeclarationRuleList(TokenRange tokens, RuleType ruleType) noexcept;
+
+    void ConsumeStyleBlock(TokenRange tokens, RuleType ruleType) noexcept;
+
+    bool ConsumeDeclaration(TokenRange tokens, RuleType ruleType) noexcept;
+
+    void ConsumeDeclarationValue(TokenRange tokens, PropertyId property, IsImportant important,
+                                 RuleType ruleType) noexcept;
+
+    void ConsumeCustomPropertyValue(TokenRange tokens, const CSSOMStringAtom &propertyName,
+                                    IsImportant important) noexcept;
+
+    KRYS_NODISCARD Ref<Rule> CreateNestedDeclarationsRule() noexcept;
+
+    void RunInNewNestingContext(auto &&run) noexcept
+    {
+      _nestingContextStack.push_back(NestingContext {});
+      run();
+      _nestingContextStack.pop_back();
+    }
+
+    KRYS_NODISCARD NestingContext &TopContext() noexcept
+    {
+      krys_debug_assert(!_nestingContextStack.empty());
+      return _nestingContextStack.back();
+    }
+
+    KRYS_NODISCARD bool IsStyleNestedContext() const noexcept
+    {
+      return !_ancestorRuleTypeStack.empty()
+             && _ancestorRuleTypeStack.back() != NestedParserContextType::Function;
+    }
+
+    KRYS_NODISCARD bool IsFunctionNestedContext() const noexcept
+    {
+      return !_ancestorRuleTypeStack.empty()
+             && _ancestorRuleTypeStack.back() == NestedParserContextType::Function;
+    }
+
+    KRYS_NODISCARD bool HasStyleRuleAncestor() const noexcept
+    {
+      for (auto type : _ancestorRuleTypeStack)
+      {
+        if (type == NestedParserContextType::Style)
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    KRYS_NODISCARD NestedContext LastAncestorRuleType() const noexcept
+    {
+      if (!_ancestorRuleTypeStack.empty())
+      {
+        return _ancestorRuleTypeStack.back();
+      }
+
+      return null;
+    }
+  };
+}

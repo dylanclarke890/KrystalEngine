@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/Style/Invalidation/AttributeChangeInvalidation.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Booey/Style/Invalidation/InvalidationFunctions.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 

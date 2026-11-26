@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
-#include "Krystal.Booey/CSS/Values/Color/ResolvedColor.hpp"
+#include "Krystal.Booey/Css/Values/Color/ResolvedColor.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Rendering/Painting/MarkedText.hpp"
-#include "Krystal.Booey/CSS/Highlights/HighlightRegistry.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
+#include "Krystal.Booey/Css/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Selection/RenderHighlight.hpp"

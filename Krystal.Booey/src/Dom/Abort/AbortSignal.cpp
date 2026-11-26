@@ -1,0 +1,120 @@
+﻿#include "Krystal.Booey/Dom/Abort/AbortSignal.hpp"
+#include "Krystal.Booey/Dom/Algorithms/AbortAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Events/EventListener.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include <algorithm>
+
+namespace krys::boo
+{
+  Ref<AbortSignal> AbortSignal::Abort(Maybe<Exception> reason) noexcept
+  {
+    // 1. Let signal be a new AbortSignal object.
+    auto signal = CreateRef<AbortSignal>();
+
+    // 2. Set signal's abort reason to reason if it is given; otherwise to a new "AbortError" DOMException.
+    signal->_reason = ReasonOrAbortError(krys::move(reason));
+
+    // 3. Return signal.
+    return signal;
+  }
+
+  Ref<AbortSignal> AbortSignal::Timeout(Document &document, size_t milliseconds) noexcept
+  {
+    // 1. Let signal be a new AbortSignal object.
+    auto signal = CreateRef<AbortSignal>();
+
+    // 2. Let global be signal's relevant global object.
+    // (The document stands in for its window.)
+
+    // 3. Run steps after a timeout given global, "AbortSignal-timeout", milliseconds, and the following step:
+    //   3a. Queue a global task on the timer task source given global to signal abort given signal and a new
+    //       "TimeoutError" DOMException.
+    // For the duration of this timeout, if signal has any event listeners registered for its abort event,
+    // there must be a strong reference from global to signal.
+    // The document's timer waits while the document is suspended, and fires as a task of the document; it
+    // holds the signal strongly whether or not it has listeners, and runs to completion on its own.
+    document
+      .StartTimer(std::chrono::milliseconds(milliseconds), [signal]
+                  { dom::AbortAlgorithms::SignalAbort(*signal, Exception {ExceptionCode::TimeoutError}); })
+      .Release();
+
+    // 4. Return signal.
+    return signal;
+  }
+
+  Ref<AbortSignal> AbortSignal::Any(const List<Ref<AbortSignal>> &signals) noexcept
+  {
+    return dom::AbortAlgorithms::CreateDependentAbortSignal(signals);
+  }
+
+  Exception AbortSignal::ReasonOrAbortError(Maybe<Exception> reason) noexcept
+  {
+    if (reason)
+    {
+      return krys::move(*reason);
+    }
+    return Exception {ExceptionCode::AbortError};
+  }
+
+  void AbortSignal::DidAddEventListener(const EventListener &listener) noexcept
+  {
+    if (listener.Type() == event_names::Abort)
+    {
+      ++_abortEventListenerCount;
+      UpdateHeldBySources();
+    }
+  }
+
+  bool AbortSignal::HasAbortAlgorithm(uint64 id) const noexcept
+  {
+    return std::ranges::any_of(_abortAlgorithms,
+                               [id](const AbortAlgorithm &algorithm) { return algorithm.Id == id; });
+  }
+
+  void AbortSignal::DidRemoveEventListener(const EventListener &listener) noexcept
+  {
+    if (listener.Type() == event_names::Abort && _abortEventListenerCount > 0)
+    {
+      --_abortEventListenerCount;
+      UpdateHeldBySources();
+    }
+  }
+
+  void AbortSignal::UpdateHeldBySources() noexcept
+  {
+    bool held = !Aborted() && (_abortEventListenerCount > 0 || !_abortAlgorithms.empty());
+
+    // A reference released here may be the signal's last; it goes once the caller is done with the signal.
+    List<RefPtr<AbortSignal>> released;
+    for (auto &weakSource : _sourceSignals)
+    {
+      auto *source = weakSource.get();
+      if (!source)
+      {
+        continue;
+      }
+      for (auto &dependent : source->_dependentSignals)
+      {
+        if (dependent.Weak.get() != this)
+        {
+          continue;
+        }
+        if (held)
+        {
+          dependent.Strong = ShareRefPtr(this);
+        }
+        else if (dependent.Strong)
+        {
+          released.push_back(krys::move(dependent.Strong));
+        }
+      }
+    }
+
+    if (!released.empty())
+    {
+      html::EventLoop::Current().QueueMicrotask([released = krys::move(released)] {});
+    }
+  }
+}

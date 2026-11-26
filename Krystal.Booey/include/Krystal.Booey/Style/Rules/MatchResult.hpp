@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Properties/StyleProperties.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
 #include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"

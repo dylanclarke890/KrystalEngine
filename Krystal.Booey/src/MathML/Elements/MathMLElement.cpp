@@ -27,11 +27,11 @@
  */
 
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
+#include "Krystal.Booey/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"

@@ -1,13 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGTSpan.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

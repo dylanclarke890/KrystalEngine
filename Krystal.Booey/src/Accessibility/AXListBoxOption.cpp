@@ -28,9 +28,9 @@
 
 #include "Krystal.Booey/Accessibility/AXListBoxOption.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"
 

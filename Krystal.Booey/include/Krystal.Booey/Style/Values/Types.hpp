@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
-#include "Krystal.Booey/CSS/Values/NoConversionDataRequiredTag.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/Css/Calc/SymbolTable.hpp"
+#include "Krystal.Booey/Css/Values/NoConversionDataRequiredTag.hpp"
+#include "Krystal.Booey/Css/Values/Types.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include "Krystal.Core/Types/Markable.hpp"

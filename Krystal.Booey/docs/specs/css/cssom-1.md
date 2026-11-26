@@ -26,7 +26,7 @@ Status: unreviewed
 ### [2.1. Common Serializing Idioms](https://drafts.csswg.org/cssom-1/#common-serializing-idioms)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/Markup.cpp (identifiers, strings, URLs; SerialiseName for unrestricted hash names); serialize a LOCAL in CSS/Values/FontFaceSrcValue.cpp; the list idioms are inline where lists are serialised.
+> Code: Krystal.Booey/src/Css/CSSOM/Markup.cpp (identifiers, strings, URLs; SerialiseName for unrestricted hash names); serialize a LOCAL in Css/Values/FontFaceSrcValue.cpp; the list idioms are inline where lists are serialised.
 <!-- definitions: css-serialize-a-function -->
 
 - [x] [escape a character](https://drafts.csswg.org/cssom-1/#escape-a-character) — To escape a character means to create a string of "\" (U+005C), followed by the character.
@@ -97,7 +97,7 @@ Status: unreviewed
 ### [4.4. The MediaList Interface](https://drafts.csswg.org/cssom-1/#the-medialist-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/MediaList.cpp; create a MediaList object is MediaList::Create plus SetMediaText.
+> Code: Krystal.Booey/src/Css/CSSOM/MediaList.cpp; create a MediaList object is MediaList::Create plus SetMediaText.
 <!-- definitions: medialist-collection-of-media-queries -->
 
 - [x] [create a MediaList object](https://drafts.csswg.org/cssom-1/#create-a-medialist-object) — To create a MediaList object with a string text, run the following steps:
@@ -176,7 +176,7 @@ Status: unreviewed
 #### [6.1.1. The StyleSheet Interface](https://drafts.csswg.org/cssom-1/#the-stylesheet-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/include/Krystal.Booey/CSS/CSSOM/StyleSheet.hpp, implemented by CSSStyleSheet.
+> Code: Krystal.Booey/include/Krystal.Booey/Css/CSSOM/StyleSheet.hpp, implemented by CSSStyleSheet.
 
 - [x] [StyleSheet.type](https://drafts.csswg.org/cssom-1/#dom-stylesheet-type) — The type attribute must return the type.
 
@@ -195,7 +195,7 @@ Status: reviewed (2026-11-22)
 #### [6.1.2. The CSSStyleSheet Interface](https://drafts.csswg.org/cssom-1/#the-cssstylesheet-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleSheet.cpp; there's no replace() (no promises), so the disallow modification flag is never set, and every sheet is origin-clean unless created otherwise (there are no origins).
+> Code: Krystal.Booey/src/Css/CSSOM/CSSStyleSheet.cpp; there's no replace() (no promises), so the disallow modification flag is never set, and every sheet is origin-clean unless created otherwise (there are no origins).
 
 - [x] [CSSStyleSheet.ownerRule](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-ownerrule) — The ownerRule attribute must return the owner CSS rule. If a value other than null is ever returned, then that same value must always be returned on each get access.
 
@@ -239,7 +239,7 @@ Status: reviewed (2026-11-22)
 ##### [6.1.2.1. Deprecated CSSStyleSheet members](https://drafts.csswg.org/cssom-1/#legacy-css-style-sheet-members)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleSheet.cpp.
+> Code: Krystal.Booey/src/Css/CSSOM/CSSStyleSheet.cpp.
 
 - [x] [CSSStyleSheet.rules](https://drafts.csswg.org/cssom-1/#dom-cssstylesheet-rules) — The rules attribute must follow the same steps as cssRules, and return the same object cssRules would return.
 
@@ -304,7 +304,7 @@ Status: unreviewed
 #### [6.2.2. The StyleSheetList Interface](https://drafts.csswg.org/cssom-1/#the-stylesheetlist-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/StyleSheetList.cpp; the sheets come from style::Scope, without adopted sheets.
+> Code: Krystal.Booey/src/Css/CSSOM/StyleSheetList.cpp; the sheets come from style::Scope, without adopted sheets.
 
 - [x] [StyleSheetList.item(index)](https://drafts.csswg.org/cssom-1/#dom-stylesheetlist-item) — The item(index) method must return the indexth CSS style sheet in the collection. If there is no indexth object in the collection, then the method must return null.
 
@@ -442,7 +442,7 @@ Status: unreviewed
 #### [6.4.1. The CSSRuleList Interface](https://drafts.csswg.org/cssom-1/#the-cssrulelist-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/include/Krystal.Booey/CSS/CSSOM/CSSRuleList.hpp (static and live lists).
+> Code: Krystal.Booey/include/Krystal.Booey/Css/CSSOM/CSSRuleList.hpp (static and live lists).
 
 - [x] [CSSRuleList.item(index)](https://drafts.csswg.org/cssom-1/#dom-cssrulelist-item) — The item(index) method must return the indexth CSSRule object in the collection. If there is no indexth object in the collection, then the method must return null.
 
@@ -451,7 +451,7 @@ Status: reviewed (2026-11-22)
 #### [6.4.2. The CSSRule Interface](https://drafts.csswg.org/cssom-1/#the-cssrule-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSRule.cpp.
+> Code: Krystal.Booey/src/Css/CSSOM/CSSRule.cpp.
 
 - [x] [CSSRule.cssText](https://drafts.csswg.org/cssom-1/#dom-cssrule-csstext) — The cssText attribute must return a serialization of the CSS rule. On setting the cssText attribute must do nothing.
 
@@ -477,7 +477,7 @@ Status: reviewed (2026-11-22)
 #### [6.4.3. The CSSStyleRule Interface](https://drafts.csswg.org/cssom-1/#the-cssstylerule-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSStyleRule.cpp, which also implements CSSGroupingRule's members for nested rules (insert and remove a CSS rule).
+> Code: Krystal.Booey/src/Css/CSSOM/CSSStyleRule.cpp, which also implements CSSGroupingRule's members for nested rules (insert and remove a CSS rule).
 <!-- definitions: concept-declarations-specified-order -->
 
 - [x] [CSSStyleRule.selectorText](https://drafts.csswg.org/cssom-1/#dom-cssstylerule-selectortext) — The selectorText attribute, on getting, must return the result of serializing the rule’s associated selector list. On setting the selectorText attribute these steps must be run:
@@ -495,7 +495,7 @@ Status: reviewed (2026-11-22)
 #### [6.4.4. The CSSImportRule Interface](https://drafts.csswg.org/cssom-1/#the-cssimportrule-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSImportRule.cpp; the imported sheet's media is the rule's MediaList (CSSStyleSheet::Media).
+> Code: Krystal.Booey/src/Css/CSSOM/CSSImportRule.cpp; the imported sheet's media is the rule's MediaList (CSSStyleSheet::Media).
 
 - [x] [CSSImportRule.href](https://drafts.csswg.org/cssom-1/#dom-cssimportrule-href) — The href attribute must return the URL specified by the @import at-rule.
 
@@ -520,7 +520,7 @@ Status: unreviewed
 #### [6.4.6. The CSSMediaRule Interface](https://drafts.csswg.org/cssom-1/#the-cssmediarule-interface)
 
 Status: reviewed (2026-11-22)
-> Code: Krystal.Booey/src/CSS/CSSOM/CSSMediaRule.cpp.
+> Code: Krystal.Booey/src/Css/CSSOM/CSSMediaRule.cpp.
 
 #### [6.4.7. The CSSPageRule Interface](https://drafts.csswg.org/cssom-1/#the-csspagerule-interface)
 

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Fonts/FontCustomPlatformData.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
+#include "Krystal.Booey/Css/Values/FontFaceSrcValue.hpp"
 
 namespace krys::boo::tests
 {

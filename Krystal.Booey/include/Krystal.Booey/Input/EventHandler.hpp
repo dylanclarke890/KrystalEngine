@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"

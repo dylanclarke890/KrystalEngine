@@ -25,9 +25,9 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
-#include "Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorLayersResolver.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 #include <algorithm>

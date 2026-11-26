@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Style/Values/Masking/MaskBorder.hpp"
-#include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
-#include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
-#include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/Values/BorderImageSliceValue.hpp"
+#include "Krystal.Booey/Css/Values/BorderImageWidthValue.hpp"
+#include "Krystal.Booey/Css/Values/Borders/BorderImage.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"

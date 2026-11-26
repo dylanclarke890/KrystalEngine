@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
-#include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/Html/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Layout/LayoutOptions.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"

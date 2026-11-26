@@ -24,11 +24,11 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Parser/Token.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
-#include "Krystal.Booey/CSS/Values/ValueSeparator.hpp"
-#include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Booey/Css/Parser/Token.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Values/Aggregates.hpp"
+#include "Krystal.Booey/Css/Values/ValueSeparator.hpp"
+#include "Krystal.Booey/Css/Values/VariableData.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"

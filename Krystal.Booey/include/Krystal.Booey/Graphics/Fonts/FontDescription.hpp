@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontPalette.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"

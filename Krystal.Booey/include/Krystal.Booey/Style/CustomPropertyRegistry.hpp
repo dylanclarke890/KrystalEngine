@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/RegisteredCustomProperty.hpp"
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Properties/RegisteredCustomProperty.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Macros.hpp"

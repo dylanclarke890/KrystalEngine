@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleGeneratedImage.hpp"
 
 namespace krys::boo::css

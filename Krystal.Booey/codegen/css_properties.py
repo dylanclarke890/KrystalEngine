@@ -363,19 +363,19 @@ class LogicalPropertyGroup:
 
     logical_property_group_resolvers = {
         "logical": {
-            # Order matches LogicalBoxAxis enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches LogicalBoxAxis enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "axis": ["inline", "block"],
-            # Order matches LogicalBoxSide enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches LogicalBoxSide enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "side": ["block-start", "inline-end", "block-end", "inline-start"],
-            # Order matches LogicalBoxCorner enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches LogicalBoxCorner enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "corner": ["start-start", "start-end", "end-start", "end-end"],
         },
         "physical": {
-            # Order matches BoxAxis enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches BoxAxis enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "axis": ["horizontal", "vertical"],
-            # Order matches BoxSide enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches BoxSide enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "side": ["top", "right", "bottom", "left"],
-            # Order matches BoxCorner enum in Krystal.Booey/CSS/Properties/Enums/BoxSides.hpp.
+            # Order matches BoxCorner enum in Krystal.Booey/Css/Properties/Enums/BoxSides.hpp.
             "corner": ["top-left", "top-right", "bottom-left", "bottom-right"],
         },
     }
@@ -7350,14 +7350,14 @@ class GenerateInitialValues:
         self.generation_context = generation_context
 
     def generate(self):
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/InitialValues.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/Css/Properties/InitialValues.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Booey/CSS/Values/Units.hpp",
-                    "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Values/Units.hpp",
+                    "Krystal.Booey/Css/Values/ValueId.hpp",
                     "Krystal.Core/Types/Variant.hpp",
                 ],
             )
@@ -7435,7 +7435,7 @@ class GeneratePropertyId:
         run_gperf(
             gperf_executable=self.generation_context.gperf_executable,
             filename="PropertyId",
-            output_cpp_dir=os.path.join(self.generation_context.output_cpp_dir, "CSS/Properties"),
+            output_cpp_dir=os.path.join(self.generation_context.output_cpp_dir, "Css/Properties"),
             remove_gperf_file=True,
         )
 
@@ -7449,14 +7449,14 @@ class GeneratePropertyId:
                 key=lambda x: x[0],
             )
         ]
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyQueries.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/Css/Properties/PropertyQueries.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Booey/CSS/Values/ValueId.hpp",
-                    "Krystal.Booey/CSS/Values/ValueSeparator.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Values/ValueId.hpp",
+                    "Krystal.Booey/Css/Values/ValueSeparator.hpp",
                     "Krystal.Core/Containers/Span.hpp",
                     "Krystal.Core/Types/Maybe.hpp",
                 ],
@@ -7554,13 +7554,13 @@ class GeneratePropertyId:
                     KRYS_NODISCARD bool IsKeywordValidForPropertyValues(PropertyId id, ValueId keyword, const ParserContext &context) noexcept;""")
 
     def _generate_property_queries_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyQueries.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Css/Properties/PropertyQueries.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Properties/PropertyQueries.hpp",
+                for_header="Krystal.Booey/Css/Properties/PropertyQueries.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
+                    "Krystal.Booey/Css/Parser/ParserContext.hpp",
                     "Krystal.Booey/Graphics/Geometry/BoxSides.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Booey/Text/WritingMode.hpp",
@@ -7704,12 +7704,12 @@ class GeneratePropertyId:
     # region PropertyId.hpp
 
     def _generate_property_id_hpp(self):
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyId.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/Css/Properties/PropertyId.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Types/CSSOMString.hpp",
+                    "Krystal.Booey/Css/Types/CSSOMString.hpp",
                     "Krystal.Core/Attributes.hpp",
                     "Krystal.Core/Containers/Array.hpp",
                     "Krystal.Core/Containers/Span.hpp",
@@ -8030,11 +8030,11 @@ class GeneratePropertyId:
     def _generate_gperf_prelude(self, *, to: Writer):
         with to.block(block_start="%{", block_end="%}", indent=False):
             to.cpp_prelude(
-                for_header="Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                for_header="Krystal.Booey/Css/Properties/PropertyId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/Css/Parser/ParserContext.hpp",
+                    "Krystal.Booey/Css/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
                     "Krystal.Core/Strings/ASCII.hpp",
                     "Krystal.Core/Containers/SmallList.hpp",
@@ -8682,13 +8682,13 @@ class GeneratePropertyParsing:
         self._generate_property_parsing_cpp()
 
     def _generate_property_parsing_hpp(self):
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyParsing.hpp"), "w") as output_file:
+        with open(self.generation_context.output_hpp_path("Krystal.Booey/Css/Properties/PropertyParsing.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Values/ValueId.hpp",
                     "Krystal.Core/Memory/RefPtr.hpp",
                 ],
             )
@@ -8745,21 +8745,21 @@ class GeneratePropertyParsing:
                                 consumer.generate_export_declaration(to=writer)
 
     def _generate_property_parsing_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyParsing.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Css/Properties/PropertyParsing.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Properties/PropertyParsing.hpp",
+                for_header="Krystal.Booey/Css/Properties/PropertyParsing.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Parser/ParserIdioms.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyParser.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyParserCustom.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyParserState.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                    "Krystal.Booey/CSS/Values/Color/ColorType.hpp",
-                    "Krystal.Booey/CSS/Values/FunctionValue.hpp",
-                    "Krystal.Booey/CSS/Values/ValuePair.hpp",
+                    "Krystal.Booey/Css/Parser/ParserContext.hpp",
+                    "Krystal.Booey/Css/Parser/ParserIdioms.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyParser.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyParserCustom.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyParserState.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyShorthand.hpp",
+                    "Krystal.Booey/Css/Values/Color/ColorType.hpp",
+                    "Krystal.Booey/Css/Values/FunctionValue.hpp",
+                    "Krystal.Booey/Css/Values/ValuePair.hpp",
                 ],
             )
 
@@ -8995,14 +8995,14 @@ class GeneratePropertyShorthandFunctions:
 
     def _generate_style_property_shorthand_functions_hpp(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Css/Properties/PropertyShorthandFunctions.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
                     "Krystal.Core/Attributes.hpp",
                     "Krystal.Core/Numeric.hpp",
                 ],
@@ -9039,13 +9039,13 @@ class GeneratePropertyShorthandFunctions:
         return max(counts.values())
 
     def _generate_style_property_shorthand_functions_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Css/Properties/PropertyShorthandFunctions.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
+                for_header="Krystal.Booey/Css/Properties/PropertyShorthandFunctions.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyShorthand.hpp",
                     "Krystal.Core/Containers/Array.hpp",
                 ],
             )
@@ -9375,8 +9375,8 @@ class GenerateStyleBuilderGenerated:
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/Style/Builder/BuilderGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Properties/Consumers/Font.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Properties/Consumers/Font.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp",
                     "Krystal.Booey/Style/Builder/BuilderCustom.hpp",
@@ -9648,9 +9648,9 @@ class GenerateStyleExtractorGenerated:
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/Style/Extractor/ExtractorGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
+                    "Krystal.Booey/Css/Properties/Property.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyShorthandFunctions.hpp",
                     "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp",
                     "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
                     "Krystal.Booey/Style/Extractor/ExtractorCustom.hpp",
@@ -9694,7 +9694,7 @@ class GenerateStyleInterpolationWrapperMap:
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyId.hpp",
                     "Krystal.Core/Containers/Array.hpp",
                     "Krystal.Core/Memory/NeverDestroyed.hpp",
                 ],
@@ -9712,7 +9712,7 @@ class GenerateStyleInterpolationWrapperMap:
                 generator_name=GENERATOR_NAME,
                 for_header="Krystal.Booey/Style/Interpolation/InterpolationWrapperMap.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
+                    "Krystal.Booey/Css/Properties/PropertyShorthand.hpp",
                     "Krystal.Core/Containers/List.hpp",
                 ],
             )

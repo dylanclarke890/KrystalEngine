@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Booey/Css/Values/Shapes/BasicShape.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/CircleFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/EllipseFunction.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/InsetFunction.hpp"

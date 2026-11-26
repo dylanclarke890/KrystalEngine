@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"

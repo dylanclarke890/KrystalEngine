@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 
 namespace krys::boo

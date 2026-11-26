@@ -1,0 +1,157 @@
+﻿/*
+ * Copyright (C) 2007-2022 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Url.hpp"
+#include "Krystal.Booey/Css/Values/Value.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+
+namespace krys::boo
+{
+  class CachedFont;
+  class Document;
+  class FontLoadRequest;
+}
+
+namespace krys::boo::css
+{
+  /// @brief A `local(<family-name>)` source in an `@font-face` rule's `src` descriptor.
+  class FontFaceSrcLocalValue final : public Value
+  {
+  private:
+    CSSOMStringAtom _fontFaceName;
+
+    explicit FontFaceSrcLocalValue(CSSOMStringAtom &&fontFaceName) noexcept;
+
+  public:
+    KRYS_NODISCARD static Ref<FontFaceSrcLocalValue> Create(CSSOMStringAtom fontFaceName) noexcept;
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return _fontFaceName.View().empty();
+    }
+
+    KRYS_NODISCARD const CSSOMStringAtom &FontFaceName() const noexcept
+    {
+      return _fontFaceName;
+    }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const FontFaceSrcLocalValue &other) const noexcept;
+  };
+
+  enum class FontTechnology : uint8
+  {
+    ColorColrv0,
+    ColorColrv1,
+    ColorCbdt,
+    ColorSbix,
+    ColorSvg,
+    FeaturesAat,
+    FeaturesGraphite,
+    FeaturesOpentype,
+    Incremental,
+    Palettes,
+    Variations,
+    // Reserved for invalid conversion result.
+    Invalid,
+  };
+
+  KRYS_NODISCARD constexpr CSSOMStringView CssTextFromFontTech(FontTechnology tech) noexcept
+  {
+    switch (tech)
+    {
+      case FontTechnology::ColorColrv0:      return u8"color-colrv0";
+      case FontTechnology::ColorColrv1:      return u8"color-colrv1";
+      case FontTechnology::ColorCbdt:        return u8"color-cbdt";
+      case FontTechnology::ColorSbix:        return u8"color-sbix";
+      case FontTechnology::ColorSvg:         return u8"color-svg";
+      case FontTechnology::FeaturesAat:      return u8"features-aat";
+      case FontTechnology::FeaturesGraphite: return u8"features-graphite";
+      case FontTechnology::FeaturesOpentype: return u8"features-opentype";
+      case FontTechnology::Incremental:      return u8"incremental";
+      case FontTechnology::Palettes:         return u8"palettes";
+      case FontTechnology::Variations:       return u8"variations";
+      default:                               return u8"";
+    }
+  }
+
+  /// @brief A `url()` source, with optional `format()` and `tech()`, in an `@font-face` rule's `src`
+  /// descriptor.
+  class FontFaceSrcResourceValue final : public Value
+  {
+  private:
+    Url _location;
+    CSSOMString _format;
+    List<FontTechnology> _technologies;
+    CachedResourceHandle<CachedFont> _cachedFont;
+
+    FontFaceSrcResourceValue(Url &&location, CSSOMString &&format,
+                             List<FontTechnology> &&technologies) noexcept;
+
+  public:
+    ~FontFaceSrcResourceValue() noexcept;
+
+    KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(Url location, CSSOMString format,
+                                                               List<FontTechnology> &&technologies) noexcept;
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return _location.Specified.empty();
+    }
+
+    /// @brief A request for the source's font file, or null if its format or technologies aren't supported.
+    KRYS_NODISCARD RefPtr<FontLoadRequest>
+      GetFontLoadRequest(boo::Document &context, bool isInitiatingElementInUserAgentShadowTree) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool CustomTraverseSubresources(
+      KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
+
+    KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
+
+    KRYS_NODISCARD bool Equals(const FontFaceSrcResourceValue &other) const noexcept;
+  };
+}
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontFaceSrcLocalValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
+  {
+    return value.Type() == krys::boo::css::ValueType::FontFaceSrcLocal;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::FontFaceSrcResourceValue)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::Value &value) noexcept
+  {
+    return value.Type() == krys::boo::css::ValueType::FontFaceSrcResource;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Booey/Events/Pointer/PointerEventTypeNames.hpp"
 #include "Krystal.Booey/Input/PointerId.hpp"

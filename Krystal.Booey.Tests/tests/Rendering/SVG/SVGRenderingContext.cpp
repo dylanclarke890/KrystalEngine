@@ -4,7 +4,7 @@
 #include "Krystal.Booey.Tests/StringTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 
 namespace krys::boo::tests
 {

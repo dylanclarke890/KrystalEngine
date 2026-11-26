@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
-#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/Css/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

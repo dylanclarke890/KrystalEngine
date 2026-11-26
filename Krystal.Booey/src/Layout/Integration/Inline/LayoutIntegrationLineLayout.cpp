@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockFormattingState.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Block/BlockLayoutState.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineContentCache.hpp"

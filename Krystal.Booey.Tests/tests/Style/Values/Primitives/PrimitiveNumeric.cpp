@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Style/Calc/Tree.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/ColorLayers.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

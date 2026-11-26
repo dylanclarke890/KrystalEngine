@@ -29,13 +29,13 @@ Status: n/a (heading only)
 ### [3.1. Creating Custom Highlights](https://drafts.csswg.org/css-highlight-api-1/#creation)
 
 Status: reviewed (2026-11-25)
-> Code: CSS/Highlights/Highlight.hpp. Highlight::Create adds the initial ranges as add() does, so a repeat is dropped; a range already in the set keeps its place.
+> Code: Css/Highlights/Highlight.hpp. Highlight::Create adds the initial ranges as add() does, so a repeat is dropped; a range already in the set keeps its place.
 <!-- definitions: custom-highlight highlight dom-highlight-highlight -->
 
 ### [3.2. Registering Custom Highlights](https://drafts.csswg.org/css-highlight-api-1/#registration)
 
 Status: reviewed (2026-11-25)
-> Code: CSS/Highlights/HighlightRegistry.hpp; Document::GetHighlightRegistry() is CSS.highlights (see DIFFERENCES.md). Names keep their registration order, which a replacement keeps.
+> Code: Css/Highlights/HighlightRegistry.hpp; Document::GetHighlightRegistry() is CSS.highlights (see DIFFERENCES.md). Names keep their registration order, which a replacement keeps.
 <!-- definitions: highlight-registry registered -->
 
 - [x] [custom highlight name](https://drafts.csswg.org/css-highlight-api-1/#custom-highlight-name) — The custom highlight name assigned to a custom highlight when it is registered is used to identify the highlight during styling (see § 4 Styling Custom Highlights).

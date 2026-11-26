@@ -22,8 +22,8 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 #include <ranges>

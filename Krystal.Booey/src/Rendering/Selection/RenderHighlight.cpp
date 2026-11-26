@@ -29,7 +29,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Selection/RenderHighlight.hpp"
-#include "Krystal.Booey/CSS/Highlights/Highlight.hpp"
+#include "Krystal.Booey/Css/Highlights/Highlight.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnSpannerPlaceholder.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include <limits>

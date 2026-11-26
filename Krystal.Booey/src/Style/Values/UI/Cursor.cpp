@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
 
-#include "Krystal.Booey/CSS/Values/CursorImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/CursorImageValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCursorImage.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleInvalidImage.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"

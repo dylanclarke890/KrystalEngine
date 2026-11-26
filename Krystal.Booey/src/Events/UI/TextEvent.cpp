@@ -25,8 +25,8 @@
  */
 
 #include "Krystal.Booey/Events/UI/TextEvent.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 
 namespace krys::boo

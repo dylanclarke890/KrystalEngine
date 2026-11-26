@@ -21,10 +21,10 @@
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGUseElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 
 namespace krys::boo
 {

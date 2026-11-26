@@ -13,20 +13,20 @@ Status: n/a (front matter)
 ## [1. Infrastructure](https://dom.spec.whatwg.org/#infrastructure)
 
 Status: reviewed (2026-10-31)
-> Other applicable specifications hook in through `ExtensibilityHooks` (`DOM/Algorithms/ExtensibilityHooks.hpp`), whose hooks the DOM algorithms call; each hook is reviewed with its algorithm.
+> Other applicable specifications hook in through `ExtensibilityHooks` (`Dom/Algorithms/ExtensibilityHooks.hpp`), whose hooks the DOM algorithms call; each hook is reviewed with its algorithm.
 <!-- definitions: other-applicable-specifications -->
 
 ### [1.1. Trees](https://dom.spec.whatwg.org/#trees)
 
 Status: reviewed (2026-10-30)
-> Code: `TreeQueries`'s Trees region (`IsParent`, `IsChild`, `Root`, `IsDescendant` and the rest, `Index`), `TreeQueries::Next`/`Previous` for tree order, and `Node::ParentNode`, `FirstChild`, `LastChild`, `PreviousSibling` and `NextSibling`. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`.
+> Code: `TreeQueries`'s Trees region (`IsParent`, `IsChild`, `Root`, `IsDescendant` and the rest, `Index`), `TreeQueries::Next`/`Previous` for tree order, and `Node::ParentNode`, `FirstChild`, `LastChild`, `PreviousSibling` and `NextSibling`. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`.
 > `IsSibling` excludes the node itself, as "inclusive sibling" implies, though the definition alone doesn't.
 <!-- definitions: concept-tree concept-tree-order concept-tree-participate concept-tree-parent concept-tree-child concept-tree-root concept-tree-descendant concept-tree-inclusive-descendant concept-tree-ancestor concept-tree-inclusive-ancestor concept-tree-sibling concept-tree-inclusive-sibling concept-tree-preceding concept-tree-following concept-tree-first-child concept-tree-last-child concept-tree-previous-sibling concept-tree-next-sibling concept-tree-index -->
 
 ### [1.2. Ordered sets](https://dom.spec.whatwg.org/#ordered-sets)
 
 Status: reviewed (2026-10-30)
-> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/DOM/Algorithms/OrderedSet.cpp`.
+> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/Dom/Algorithms/OrderedSet.cpp`.
 
 - [x] [ordered set parser](https://dom.spec.whatwg.org/#concept-ordered-set-parser) — The ordered set parser takes a string input and then runs these steps:
   - 1. Let inputTokens be the result of splitting input on ASCII whitespace.
@@ -39,7 +39,7 @@ Status: reviewed (2026-10-30)
 ### [1.3. Selectors](https://dom.spec.whatwg.org/#selectors)
 
 Status: reviewed (2026-10-30)
-> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/DOM/Algorithms/SelectorQuery.cpp`.
+> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/Dom/Algorithms/SelectorQuery.cpp`.
 > Known issue: `:scope` with a fragment or shadow root as the scoping root. Difference: a document's `:scope` is its document element.
 
 - [x] [scope-match a selectors string](https://dom.spec.whatwg.org/#scope-match-a-selectors-string) — To scope-match a selectors string given a string selectors against a node node:
@@ -50,7 +50,7 @@ Status: reviewed (2026-10-30)
 ### [1.4. Name validation](https://dom.spec.whatwg.org/#namespaces)
 
 Status: reviewed (2026-10-30)
-> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/DOM/Algorithms/NameValidation.cpp`.
+> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/Dom/Algorithms/NameValidation.cpp`.
 <!-- definitions: valid-doctype-name -->
 
 - [x] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
@@ -90,12 +90,12 @@ Status: n/a (heading only)
 ### [2.1. Introduction to "DOM Events"](https://dom.spec.whatwg.org/#introduction-to-dom-events)
 
 Status: reviewed (2026-10-31)
-> The examples are tested in `tests/DOM/Events/EventTarget.cpp`: adding and removing listeners, removing them with a signal, a synthetic `CustomEvent`, `dispatchEvent()`'s return value and the capture and bubble order.
+> The examples are tested in `tests/Dom/Events/EventTarget.cpp`: adding and removing listeners, removing them with a signal, a synthetic `CustomEvent`, `dispatchEvent()`'s return value and the capture and bubble order.
 
 ### [2.2. Interface Event](https://dom.spec.whatwg.org/#interface-event)
 
 Status: reviewed (2026-10-30)
-> Code: `Event` (`Event.hpp`/`Event.cpp`), with the path in `EventPathItem` and the phases in `EventPhaseType`. The flags are `Event`'s data members. Tests: `tests/DOM/Events/Event.cpp`.
+> Code: `Event` (`Event.hpp`/`Event.cpp`), with the path in `EventPathItem` and the phases in `EventPhaseType`. The flags are `Event`'s data members. Tests: `tests/Dom/Events/Event.cpp`.
 <!-- definitions: concept-event potential-event-target event-target event-relatedtarget event-touch-target-list event-path event-path-item event-path-invocation-target event-path-invocation-target-in-shadow-tree event-path-shadow-adjusted-target event-path-relatedtarget event-path-touch-target-list event-path-root-of-closed-tree event-path-slot-in-closed-tree dom-event-none dom-event-capturing_phase dom-event-at_target dom-event-bubbling_phase stop-propagation-flag stop-immediate-propagation-flag canceled-flag in-passive-listener-flag composed-flag initialized-flag dispatch-flag dom-event-cancelable -->
 
 - [x] [Event.type](https://dom.spec.whatwg.org/#dom-event-type) — The type attribute must return the value it was initialized to. When an event is created the attribute must be initialized to the empty string.
@@ -189,7 +189,7 @@ Status: reviewed (2026-10-30)
 ### [2.3. Legacy extensions to the Window interface](https://dom.spec.whatwg.org/#interface-window-extensions)
 
 Status: reviewed (2026-10-30)
-> Code: `Window::CurrentEvent` and its `_currentEvent`, which the dispatcher's inner invoke sets (reviewed with 2.9). Tests: `tests/HTML/Window.cpp`.
+> Code: `Window::CurrentEvent` and its `_currentEvent`, which the dispatcher's inner invoke sets (reviewed with 2.9). Tests: `tests/Html/Window.cpp`.
 <!-- definitions: window-current-event -->
 
 - [x] [Window.event](https://dom.spec.whatwg.org/#dom-window-event) — The event getter steps are to return this’s current event.
@@ -197,7 +197,7 @@ Status: reviewed (2026-10-30)
 ### [2.4. Interface CustomEvent](https://dom.spec.whatwg.org/#interface-customevent)
 
 Status: reviewed (2026-10-30)
-> Code: `CustomEvent<T>` (`CustomEvent.hpp`); its `any` detail is a `Maybe<T>` (`DIFFERENCES.md`). Tests: `tests/DOM/Events/CustomEvent.cpp`.
+> Code: `CustomEvent<T>` (`CustomEvent.hpp`); its `any` detail is a `Maybe<T>` (`DIFFERENCES.md`). Tests: `tests/Dom/Events/CustomEvent.cpp`.
 
 - [x] [CustomEvent.detail](https://dom.spec.whatwg.org/#dom-customevent-detail) — The detail attribute must return the value it was initialized to.
 
@@ -209,7 +209,7 @@ Status: reviewed (2026-10-30)
 ### [2.5. Constructing events](https://dom.spec.whatwg.org/#constructing-events)
 
 Status: reviewed (2026-10-30)
-> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/DOM/Events/Event.cpp`, `tests/DOM/Internals/EventFactory.cpp`.
+> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/Dom/Events/Event.cpp`, `tests/Dom/Internals/EventFactory.cpp`.
 <!-- definitions: concept-event-constructor-ext -->
 
 - [x] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:
@@ -240,7 +240,7 @@ Status: n/a (guidance for specification authors)
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
 Status: reviewed (2026-10-30)
-> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/DOM/Events/EventTarget.cpp`, `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`.
+> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/Dom/Events/EventTarget.cpp`, `tests/Dom/Algorithms/EventTargetAlgorithms.cpp`.
 <!-- definitions: eventtarget-event-listener-list concept-event-listener event-listener-type event-listener-callback event-listener-capture event-listener-passive event-listener-once event-listener-signal event-listener-removed get-the-parent eventtarget-activation-behavior eventtarget-legacy-pre-activation-behavior eventtarget-legacy-canceled-activation-behavior -->
 
 - [x] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
@@ -305,7 +305,7 @@ Status: n/a (service workers)
 ### [2.9. Dispatching events](https://dom.spec.whatwg.org/#dispatching-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Events/Event.cpp` and the window in `tests/HTML/Window.cpp`.
+> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/Dom/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/Dom/Events/Event.cpp` and the window in `tests/Html/Window.cpp`.
 
 - [x] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
   - 1. Set event’s dispatch flag.
@@ -419,7 +419,7 @@ Status: reviewed (2026-10-30)
 ### [2.10. Firing events](https://dom.spec.whatwg.org/#firing-events)
 
 Status: reviewed (2026-10-30)
-> Code: `EventDispatcher::FireEvent<TEvent>`, which takes the event's other IDL attributes as the dictionary its constructor takes and gives it to `EventFactory::Create`. Known issue: no task timing (steps 1 and 7). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`.
+> Code: `EventDispatcher::FireEvent<TEvent>`, which takes the event's other IDL attributes as the dictionary its constructor takes and gives it to `EventFactory::Create`. Known issue: no task timing (steps 1 and 7). Tests: `tests/Dom/Algorithms/EventDispatcher.cpp`.
 
 - [x] [fire an event](https://dom.spec.whatwg.org/#concept-event-fire) — To fire an event named e at target, optionally using an eventConstructor, with a description of how IDL attributes are to be initialized, and a legacy target override flag, run these steps:
   - 1. Let recordingTimingAsTask be the result of calling start recording task time if needed given target’s relevant settings object.
@@ -436,17 +436,17 @@ Status: reviewed (2026-10-30)
 ### [2.11. Action versus occurrence](https://dom.spec.whatwg.org/#action-versus-occurrence)
 
 Status: reviewed (2026-10-30)
-> Booey's default event handlers (`DIFFERENCES.md`, from upstream) are the "default actions" model the section warns against, but they only act on the events the user agent dispatches for an ongoing action: keyboard events a script dispatches don't type or move focus, as in Chrome. Test: `tests/DOM/Algorithms/EventDispatcher.cpp` (`[dom:action-versus-occurrence]`).
+> Booey's default event handlers (`DIFFERENCES.md`, from upstream) are the "default actions" model the section warns against, but they only act on the events the user agent dispatches for an ongoing action: keyboard events a script dispatches don't type or move focus, as in Chrome. Test: `tests/Dom/Algorithms/EventDispatcher.cpp` (`[dom:action-versus-occurrence]`).
 
 ## [3. Aborting ongoing activities](https://dom.spec.whatwg.org/#aborting-ongoing-activities)
 
 Status: reviewed (2026-10-31)
-> The example API is tested in `tests/DOM/Abort/AbortSignal.cpp`. Without promises, an API reacts to the abort event and the signal's reason, and `ThrowIfAborted` throws the reason as a C++ exception.
+> The example API is tested in `tests/Dom/Abort/AbortSignal.cpp`. Without promises, an API reacts to the abort event and the signal's reason, and `ThrowIfAborted` throws the reason as a C++ exception.
 
 ### [3.1. Interface AbortController](https://dom.spec.whatwg.org/#interface-abortcontroller)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortController`, with signal abort on a controller in `AbortAlgorithms::SignalAbort`. Tests: `tests/DOM/Abort/AbortController.cpp`.
+> Code: `AbortController`, with signal abort on a controller in `AbortAlgorithms::SignalAbort`. Tests: `tests/Dom/Abort/AbortController.cpp`.
 <!-- definitions: abortcontroller-signal -->
 
 - [x] [AbortController.new AbortController()](https://dom.spec.whatwg.org/#dom-abortcontroller-abortcontroller) — The new AbortController() constructor steps are:
@@ -462,7 +462,7 @@ Status: reviewed (2026-10-30)
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
 Status: reviewed (2026-10-30)
-> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/Abort/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`. `AbortSignal::Timeout` takes the document standing in for the global, and waits on one of its timers, which is held while the document is suspended.
+> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/Dom/Abort/AbortSignal.cpp` and `tests/Dom/Algorithms/AbortAlgorithms.cpp`. `AbortSignal::Timeout` takes the document standing in for the global, and waits on one of its timers, which is held while the document is suspended.
 <!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
 - [x] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
@@ -524,12 +524,12 @@ Status: reviewed (2026-10-30)
 #### [3.2.1. Garbage collection](https://dom.spec.whatwg.org/#abort-signal-garbage-collection)
 
 Status: reviewed (2026-10-31)
-> Kept with references (`DIFFERENCES.md`): each source holds its dependents weakly, and strongly while one isn't aborted and has `abort` listeners (handlers included) or abort algorithms (`AbortSignal::UpdateHeldBySources`). A source that's freed lets go of its dependents. Tests: `tests/DOM/Abort/AbortSignal.cpp`.
+> Kept with references (`DIFFERENCES.md`): each source holds its dependents weakly, and strongly while one isn't aborted and has `abort` listeners (handlers included) or abort algorithms (`AbortSignal::UpdateHeldBySources`). A source that's freed lets go of its dependents. Tests: `tests/Dom/Abort/AbortSignal.cpp`.
 
 ### [3.3. Using AbortController and AbortSignal objects in APIs](https://dom.spec.whatwg.org/#abortcontroller-api-integration)
 
 Status: reviewed (2026-10-31)
-> Guidance for APIs that take a signal; none of Booey's promise-like APIs takes one. The APIs that take a signal follow it: `addEventListener()` adds nothing for an aborted signal and otherwise removes the listener from an abort algorithm (`EventTargetAlgorithms::AddEventListener`), and `CloseWatcher` starts inactive for an aborted signal and is destroyed from an abort algorithm (`CloseWatcher::Create`). Each adds its own algorithm, so observers don't clash. Tests: `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`, `tests/HTML/CloseWatcher/CloseWatcher.cpp`.
+> Guidance for APIs that take a signal; none of Booey's promise-like APIs takes one. The APIs that take a signal follow it: `addEventListener()` adds nothing for an aborted signal and otherwise removes the listener from an abort algorithm (`EventTargetAlgorithms::AddEventListener`), and `CloseWatcher` starts inactive for an aborted signal and is destroyed from an abort algorithm (`CloseWatcher::Create`). Each adds its own algorithm, so observers don't clash. Tests: `tests/Dom/Algorithms/EventTargetAlgorithms.cpp`, `tests/Html/CloseWatcher/CloseWatcher.cpp`.
 
 ## [4. Nodes](https://dom.spec.whatwg.org/#nodes)
 
@@ -538,12 +538,12 @@ Status: n/a (heading only)
 ### [4.1. Introduction to "The DOM"](https://dom.spec.whatwg.org/#introduction-to-the-dom)
 
 Status: reviewed (2026-10-31)
-> Informative. The example document parses to the tree shown. Test: `tests/DOM/Nodes/Node.cpp`.
+> Informative. The example document parses to the tree shown. Test: `tests/Dom/Nodes/Node.cpp`.
 
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
 Status: reviewed (2026-10-31)
-> Nodes are `Node`, with the same interfaces beneath it; `Attr` derives from `Node` rather than `ContainerNode`, so it never has children. The node tree's constraints are kept by ensure pre-insert validity and replace (`MutationAlgorithms`). Length and empty are `TreeQueries::Length`/`IsEmpty` (`Node::Length` forwards); character data's length counts UTF-8 code units (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Algorithms/MutationAlgorithms.cpp`.
+> Nodes are `Node`, with the same interfaces beneath it; `Attr` derives from `Node` rather than `ContainerNode`, so it never has children. The node tree's constraints are kept by ensure pre-insert validity and replace (`MutationAlgorithms`). Length and empty are `TreeQueries::Length`/`IsEmpty` (`Node::Length` forwards); character data's length counts UTF-8 code units (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/TreeQueries.cpp`, `tests/Dom/Algorithms/MutationAlgorithms.cpp`.
 <!-- definitions: concept-node concept-node-tree concept-node-empty -->
 
 - [x] [length (Node)](https://dom.spec.whatwg.org/#concept-node-length) — To determine the length of a node node, run these steps:
@@ -554,19 +554,19 @@ Status: reviewed (2026-10-31)
 #### [4.2.1. Document tree](https://dom.spec.whatwg.org/#document-trees)
 
 Status: reviewed (2026-10-31)
-> In a document tree is `Node::IsInDocumentTree` (connected and not in a shadow tree, which together mean the root is a document), with `TreeQueries::IsInDocumentTree` forwarding. The document element is the document's first element child (`Document::DocumentElement`, `TreeQueries::DocumentElement`). The deprecated "in a document" has no code of its own. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`.
+> In a document tree is `Node::IsInDocumentTree` (connected and not in a shadow tree, which together mean the root is a document), with `TreeQueries::IsInDocumentTree` forwarding. The document element is the document's first element child (`Document::DocumentElement`, `TreeQueries::DocumentElement`). The deprecated "in a document" has no code of its own. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`.
 <!-- definitions: concept-document-tree document-element in-a-document-tree in-a-document -->
 
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)
 
 Status: reviewed (2026-10-31)
-> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Nodes/Node.cpp`.
+> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/Dom/Algorithms/TreeQueries.cpp`, `tests/Dom/Nodes/Node.cpp`.
 <!-- definitions: concept-shadow-tree concept-light-tree connected -->
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
 
 Status: reviewed (2026-10-31)
-> Slots are `HTMLSlotElement`. A slot's name isn't stored: `HTMLSlotElement::Name()` reads the `name` attribute in no namespace, which gives the same value the attribute change steps would set. The default slot has no code of its own: find a slot takes the first slot named the empty string. Assigned nodes are `HTMLSlotElement::AssignedNodes()`. Tests: `tests/HTML/Elements/HTMLSlotElement.cpp`.
+> Slots are `HTMLSlotElement`. A slot's name isn't stored: `HTMLSlotElement::Name()` reads the `name` attribute in no namespace, which gives the same value the attribute change steps would set. The default slot has no code of its own: find a slot takes the first slot named the empty string. Assigned nodes are `HTMLSlotElement::AssignedNodes()`. Tests: `tests/Html/Elements/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slot slot-assigned-nodes -->
 
 - [x] [Use these attribute change steps to update a slot’s name](https://dom.spec.whatwg.org/#slot-name) — Use these attribute change steps to update a slot’s name:
@@ -581,7 +581,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
 Status: reviewed (2026-10-31)
-> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Nodes/Element.cpp`, `tests/HTML/Elements/HTMLSlotElement.cpp`.
+> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`, `tests/Dom/Nodes/Element.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
 - [x] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
@@ -597,7 +597,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.3. Finding slots and slottables](https://dom.spec.whatwg.org/#finding-slots-and-slotables)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/HTML/Elements/HTMLSlotElement.cpp`.
+> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`, `tests/Html/Elements/HTMLSlotElement.cpp`.
 
 - [x] [find a slot](https://dom.spec.whatwg.org/#find-a-slot) — To find a slot for a given slottable slottable and an optional boolean open (default false):
   - 1. If slottable’s parent is null, then return null.
@@ -634,7 +634,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.4. Assigning slottables and slots](https://dom.spec.whatwg.org/#assigning-slotables-and-slots)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::AssignSlottables`, `AssignSlottablesForTree` and `AssignSlot`. Assign slottables also clears the assigned slot of a slottable the slot no longer finds (`DIFFERENCES.md`), and when the assigned nodes change it rebuilds the host's renderers and updates the slot's directionality. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`.
+> Code: `SlotAlgorithms::AssignSlottables`, `AssignSlottablesForTree` and `AssignSlot`. Assign slottables also clears the assigned slot of a slottable the slot no longer finds (`DIFFERENCES.md`), and when the assigned nodes change it rebuilds the host's renderers and updates the slot's directionality. Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`.
 
 - [x] [assign slottables](https://dom.spec.whatwg.org/#assign-slotables) — To assign slottables for a slot slot:
   - 1. Let slottables be the result of finding slottables for slot.
@@ -651,7 +651,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.2.5. Signaling slot change](https://dom.spec.whatwg.org/#signaling-slot-change)
 
 Status: reviewed (2026-10-31)
-> Code: `SlotAlgorithms::SignalSlotChange`; the signal slots are a set in `MutationObserverAlgorithms`, process-wide rather than per agent (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`.
+> Code: `SlotAlgorithms::SignalSlotChange`; the signal slots are a set in `MutationObserverAlgorithms`, process-wide rather than per agent (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/SlotAlgorithms.cpp`.
 <!-- definitions: signal-slot-list -->
 
 - [x] [signal a slot change](https://dom.spec.whatwg.org/#signal-a-slot-change) — To signal a slot change, for a slot slot:
@@ -661,7 +661,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.3. Mutation algorithms](https://dom.spec.whatwg.org/#mutation-algorithms)
 
 Status: reviewed (2026-10-31)
-> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/MutationAlgorithms.cpp`, `tests/DOM/Traversal/NodeIterator.cpp`.
+> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/Dom/Algorithms/MutationAlgorithms.cpp`, `tests/Dom/Traversal/NodeIterator.cpp`.
 <!-- definitions: insert-suppressobservers remove-suppressobservers -->
 
 - [x] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:
@@ -826,7 +826,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.4. Mixin NonElementParentNode](https://dom.spec.whatwg.org/#interface-nonelementparentnode)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::NonElementParentNode::GetElementById` (get an element by ID), which `Document` and `DocumentFragment` forward to. It walks the descendants rather than keeping an ID map. Tests: `tests/DOM/Mixins/NonElementParentNode.cpp`.
+> Code: `mixins::NonElementParentNode::GetElementById` (get an element by ID), which `Document` and `DocumentFragment` forward to. It walks the descendants rather than keeping an ID map. Tests: `tests/Dom/Mixins/NonElementParentNode.cpp`.
 
 - [x] [get an element by ID](https://dom.spec.whatwg.org/#get-an-element-by-id) — To get an element by ID, given a node node and a string elementId, return the first element, in tree order, within node’s descendants, whose ID is elementId; otherwise, if there is no such element, null.
 
@@ -835,7 +835,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.5. Mixin DocumentOrShadowRoot](https://dom.spec.whatwg.org/#mixin-documentorshadowroot)
 
 Status: reviewed (2026-10-31)
-> Code: `DocumentOrShadowRoot`, a base of `Document` and `ShadowRoot` that keeps either's custom element registry. Tests: `tests/DOM/Mixins/DocumentOrShadowRoot.cpp`.
+> Code: `DocumentOrShadowRoot`, a base of `Document` and `ShadowRoot` that keeps either's custom element registry. Tests: `tests/Dom/Mixins/DocumentOrShadowRoot.cpp`.
 
 - [x] [DocumentOrShadowRoot.customElementRegistry](https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry) — The customElementRegistry getter steps are:
   - 1. If this is a document, then return this’s custom element registry.
@@ -845,7 +845,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.6. Mixin ParentNode](https://dom.spec.whatwg.org/#interface-parentnode)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::ParentNode`, which `Document`, `DocumentFragment` and `Element` forward to; `children` is each one's cached `HTMLCollection`. Tests: `tests/DOM/Mixins/ParentNode.cpp`.
+> Code: `mixins::ParentNode`, which `Document`, `DocumentFragment` and `Element` forward to; `children` is each one's cached `HTMLCollection`. Tests: `tests/Dom/Mixins/ParentNode.cpp`.
 
 - [x] [convert nodes into a node](https://dom.spec.whatwg.org/#convert-nodes-into-a-node) — To convert nodes into a node, given a list of nodes and strings nodes, and document document:
   - 1. Replace each string in nodes with the result of creating a text node given document and the string.
@@ -887,7 +887,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.7. Mixin NonDocumentTypeChildNode](https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::NonDocumentTypeChildNode` over `TreeQueries::PreviousElementSibling`/`NextElementSibling`, which `Element` and `CharacterData` forward to; `DocumentType` doesn't have them. Tests: `tests/DOM/Mixins/NonDocumentTypeChildNode.cpp`.
+> Code: `mixins::NonDocumentTypeChildNode` over `TreeQueries::PreviousElementSibling`/`NextElementSibling`, which `Element` and `CharacterData` forward to; `DocumentType` doesn't have them. Tests: `tests/Dom/Mixins/NonDocumentTypeChildNode.cpp`.
 
 - [x] [NonDocumentTypeChildNode.previousElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-previouselementsibling) — The previousElementSibling getter steps are to return the first preceding sibling that is an element; otherwise null.
 
@@ -896,7 +896,7 @@ Status: reviewed (2026-10-31)
 #### [4.2.8. Mixin ChildNode](https://dom.spec.whatwg.org/#interface-childnode)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::ChildNode`, which `CharacterData`, `DocumentType` and `Element` forward to. Tests: `tests/DOM/Mixins/ChildNode.cpp`.
+> Code: `mixins::ChildNode`, which `CharacterData`, `DocumentType` and `Element` forward to. Tests: `tests/Dom/Mixins/ChildNode.cpp`.
 
 - [x] [ChildNode.before(nodes)](https://dom.spec.whatwg.org/#dom-childnode-before) — The before(nodes) method steps are:
   - 1. Let parent be this’s parent.
@@ -928,20 +928,20 @@ Status: reviewed (2026-10-31)
 #### [4.2.9. Mixin Slottable](https://dom.spec.whatwg.org/#mixin-slotable)
 
 Status: reviewed (2026-10-31)
-> Code: `mixins::Slottable::AssignedSlot` (find a slot with open true), which `Element` and `Text` forward to. Tests: `tests/DOM/Mixins/Slottable.cpp`.
+> Code: `mixins::Slottable::AssignedSlot` (find a slot with open true), which `Element` and `Text` forward to. Tests: `tests/Dom/Mixins/Slottable.cpp`.
 
 - [x] [Slottable.assignedSlot](https://dom.spec.whatwg.org/#dom-slotable-assignedslot) — The assignedSlot getter steps are to return the result of find a slot given this and true.
 
 #### [4.2.10. Old-style collections: NodeList and HTMLCollection](https://dom.spec.whatwg.org/#old-style-collections)
 
 Status: reviewed (2026-10-31)
-> Live collections are `LiveNodeList` and `LiveHTMLCollection`, which walk the root's descendants with their filter on each access; static ones are `StaticNodeList` and `StaticHTMLCollection`. Tests: `tests/DOM/Collections/NodeList.cpp`.
+> Live collections are `LiveNodeList` and `LiveHTMLCollection`, which walk the root's descendants with their filter on each access; static ones are `StaticNodeList` and `StaticHTMLCollection`. Tests: `tests/Dom/Collections/NodeList.cpp`.
 <!-- definitions: concept-collection concept-collection-live concept-collection-static represented-by-the-collection -->
 
 ##### [4.2.10.1. Interface NodeList](https://dom.spec.whatwg.org/#interface-nodelist)
 
 Status: reviewed (2026-10-31)
-> Code: `NodeList`, with `LiveNodeList` and `StaticNodeList` (`LabelsNodeList` and `RadioNodeList` are HTML's). Its supported property indices are `IsSupportedPropertyIndex`, and `begin()`/`end()` make it iterable. Tests: `tests/DOM/Collections/NodeList.cpp`.
+> Code: `NodeList`, with `LiveNodeList` and `StaticNodeList` (`LabelsNodeList` and `RadioNodeList` are HTML's). Its supported property indices are `IsSupportedPropertyIndex`, and `begin()`/`end()` make it iterable. Tests: `tests/Dom/Collections/NodeList.cpp`.
 
 - [x] [NodeList.length](https://dom.spec.whatwg.org/#dom-nodelist-length) — The length attribute must return the number of nodes represented by the collection.
 
@@ -950,7 +950,7 @@ Status: reviewed (2026-10-31)
 ##### [4.2.10.2. Interface HTMLCollection](https://dom.spec.whatwg.org/#interface-htmlcollection)
 
 Status: reviewed (2026-10-31)
-> Code: `HTMLCollection`, with `LiveHTMLCollection` and `StaticHTMLCollection` (`HTMLFormControlsCollection` and `HTMLTableRowsCollection` are HTML's). Tests: `tests/DOM/Collections/HTMLCollection.cpp`.
+> Code: `HTMLCollection`, with `LiveHTMLCollection` and `StaticHTMLCollection` (`HTMLFormControlsCollection` and `HTMLTableRowsCollection` are HTML's). Tests: `tests/Dom/Collections/HTMLCollection.cpp`.
 
 - [x] [HTMLCollection.length](https://dom.spec.whatwg.org/#dom-htmlcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
 
@@ -1074,7 +1074,7 @@ Status: reviewed (2026-10-31)
 #### [4.3.3. Interface MutationRecord](https://dom.spec.whatwg.org/#interface-mutationrecord)
 
 Status: reviewed (2026-10-31)
-> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `DOM/MutationObserver/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
+> `MutationRecord` (`MutationRecord.hpp`) has a subclass per type in `Dom/MutationObserver/`; attribute and character data records create their empty `addedNodes` and `removedNodes` lists when first asked, and keep them.
 <!-- definitions: dom-mutationrecord-target dom-mutationrecord-addednodes dom-mutationrecord-removednodes dom-mutationrecord-previoussibling dom-mutationrecord-nextsibling dom-mutationrecord-attributename dom-mutationrecord-attributenamespace dom-mutationrecord-oldvalue -->
 
 - [x] [MutationRecord.type](https://dom.spec.whatwg.org/#dom-mutationrecord-type) — The type, target, addedNodes, removedNodes, previousSibling, nextSibling, attributeName, attributeNamespace, and oldValue attributes must return the values they were initialized to.
@@ -2090,7 +2090,7 @@ Status: reviewed (2026-10-31)
 ### [5.1. Introduction to "DOM Ranges"](https://dom.spec.whatwg.org/#introduction-to-dom-ranges)
 
 Status: reviewed (2026-10-31)
-> Non-normative. Its example is a test in `tests/DOM/Ranges/Range.cpp`; live ranges are updated by insert, remove, `normalize()`, replace data and split (reviewed in 4.2.3, 4.4, 4.10 and 4.11), static ranges are not.
+> Non-normative. Its example is a test in `tests/Dom/Ranges/Range.cpp`; live ranges are updated by insert, remove, `normalize()`, replace data and split (reviewed in 4.2.3, 4.4, 4.10 and 4.11), static ranges are not.
 
 ### [5.2. Boundary points](https://dom.spec.whatwg.org/#boundary-points)
 
@@ -2140,7 +2140,7 @@ Status: reviewed (2026-10-31)
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
 Status: reviewed (2026-10-31)
-> Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Ranges/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
+> Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `Dom/Ranges/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
 <!-- definitions: concept-live-range concept-range-root contained partially-contained -->
 
 - [x] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
@@ -2395,7 +2395,7 @@ Status: reviewed (2026-10-31)
 ## [6. Traversal](https://dom.spec.whatwg.org/#traversal)
 
 Status: reviewed (2026-10-31)
-> NodeIterator and TreeWalker share `Traverser` (`DOM/Traversal/Traverser.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
+> NodeIterator and TreeWalker share `Traverser` (`Dom/Traversal/Traverser.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
 <!-- definitions: concept-traversal-active concept-traversal-root concept-traversal-whattoshow concept-traversal-filter -->
 
 - [x] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
@@ -2411,7 +2411,7 @@ Status: reviewed (2026-10-31)
 ### [6.1. Interface NodeIterator](https://dom.spec.whatwg.org/#interface-nodeiterator)
 
 Status: reviewed (2026-10-31)
-> NodeIterator is `DOM/Traversal/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
+> NodeIterator is `Dom/Traversal/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
 <!-- definitions: iterator-collection node-pointer node-pointer-node node-pointer-pointer-before nodeiterator-reference nodeiterator-candidate-reference -->
 
 - [x] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
@@ -2468,7 +2468,7 @@ Status: reviewed (2026-10-31)
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 
 Status: reviewed (2026-10-31)
-> TreeWalker is `DOM/Traversal/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s.
+> TreeWalker is `Dom/Traversal/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `Traverser`'s.
 <!-- definitions: treewalker-current -->
 
 - [x] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.
@@ -2568,7 +2568,7 @@ Status: reviewed (2026-10-31)
 ### [6.3. Interface NodeFilter](https://dom.spec.whatwg.org/#interface-nodefilter)
 
 Status: reviewed (2026-10-31)
-> NodeFilter is `DOM/Traversal/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/Traversal/NodeFilter.hpp`) and `WhatToShow` (`DOM/Traversal/NodeFilter.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
+> NodeFilter is `Dom/Traversal/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`Dom/Traversal/NodeFilter.hpp`) and `WhatToShow` (`Dom/Traversal/NodeFilter.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
 <!-- definitions: dom-nodefilter-filter_accept dom-nodefilter-filter_reject dom-nodefilter-filter_skip dom-nodefilter-show_all dom-nodefilter-show_element dom-nodefilter-show_attribute dom-nodefilter-show_text dom-nodefilter-show_cdata_section dom-nodefilter-show_processing_instruction dom-nodefilter-show_comment dom-nodefilter-show_document dom-nodefilter-show_document_type dom-nodefilter-show_document_fragment -->
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)
@@ -2579,7 +2579,7 @@ Status: reviewed (2026-10-31)
 ### [7.1. Interface DOMTokenList](https://dom.spec.whatwg.org/#interface-domtokenlist)
 
 Status: reviewed (2026-10-31)
-> DOMTokenList is `DOM/Collections/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `DOMTokenList::Create`, empty when its attribute defines none.
+> DOMTokenList is `Dom/Collections/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `DOMTokenList::Create`, empty when its attribute defines none.
 <!-- definitions: concept-dtl-tokens domtokenlist-element domtokenlist-attribute-name concept-supported-tokens -->
 
 - [x] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:

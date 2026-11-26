@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/Style/Invalidation/ChildChangeInvalidation.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/StyleTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::style::tests

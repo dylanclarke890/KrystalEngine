@@ -29,9 +29,9 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
-#include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
+#include "Krystal.Booey/Css/Parser/ParserContext.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Easing.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSNumericFactory.hpp"
 #include <cmath>
 
 namespace krys::boo

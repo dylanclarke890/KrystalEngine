@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Style/Invalidation/ChildChangeInvalidation.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"

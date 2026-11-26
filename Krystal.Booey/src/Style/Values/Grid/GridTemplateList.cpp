@@ -24,11 +24,11 @@
 
 #include "Krystal.Booey/Style/Values/Grid/GridTemplateList.hpp"
 
-#include "Krystal.Booey/CSS/Values/GridAutoRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/GridIntegerRepeatValue.hpp"
-#include "Krystal.Booey/CSS/Values/GridLineNamesValue.hpp"
-#include "Krystal.Booey/CSS/Values/SubgridValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/GridAutoRepeatValue.hpp"
+#include "Krystal.Booey/Css/Values/GridIntegerRepeatValue.hpp"
+#include "Krystal.Booey/Css/Values/GridLineNamesValue.hpp"
+#include "Krystal.Booey/Css/Values/SubgridValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridPosition.hpp"

@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementInterface.hpp"
+#include "Krystal.Booey/Html/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"

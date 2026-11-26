@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Accessibility/AXProgressIndicator.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
 namespace krys::boo

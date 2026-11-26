@@ -24,8 +24,8 @@
 
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
-#include "Krystal.Booey/CSS/Values/FilterValue.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/FilterValue.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"

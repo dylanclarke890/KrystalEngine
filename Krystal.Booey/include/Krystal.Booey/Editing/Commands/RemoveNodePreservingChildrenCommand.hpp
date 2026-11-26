@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/Node.hpp"
+#include "Krystal.Booey/Dom/Nodes/Node.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 
 namespace krys::boo

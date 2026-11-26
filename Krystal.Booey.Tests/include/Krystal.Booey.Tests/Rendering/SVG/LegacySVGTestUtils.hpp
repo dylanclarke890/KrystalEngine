@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"

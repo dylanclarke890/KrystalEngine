@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/ColorMix.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorMix.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorInterpolationMethod.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

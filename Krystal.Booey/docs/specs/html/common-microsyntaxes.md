@@ -9,7 +9,7 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 ### [2.3 Common microsyntaxes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#common-microsyntaxes)
 
 Status: reviewed (2026-11-01)
-> Headings only. The parsers are `HTML/MicroParsers/` (`Numbers`, `Dimensions`), `Platform/DateComponents` and `HTMLElement::ParseLegacyColorValue`.
+> Headings only. The parsers are `Html/MicroParsers/` (`Numbers`, `Dimensions`), `Platform/DateComponents` and `HTMLElement::ParseLegacyColorValue`.
 
 #### [2.3.1 Common parser idioms](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#common-parser-idioms)
 
@@ -25,7 +25,7 @@ Status: reviewed (2026-11-01)
 #### [2.3.3 Keywords and enumerated attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#keywords-and-enumerated-attributes)
 
 Status: reviewed (2026-11-01)
-> `EnumeratedAttribute`, with `EnumeratedAttributeTraits` per attribute (`HTML/Attributes/EnumeratedAttributes.hpp`). An empty keyword is written as an empty value default, which gives the same states and canonical keywords.
+> `EnumeratedAttribute`, with `EnumeratedAttributeTraits` per attribute (`Html/Attributes/EnumeratedAttributes.hpp`). An empty keyword is written as an empty value default, which gives the same states and canonical keywords.
 > Fixed: the `crossorigin` traits had a third, empty keyword that matched the empty string, and an attribute with a missing value default and an empty value default but no invalid value default couldn't be in no state.
 <!-- definitions: enumerated-attribute invalid-value-default missing-value-default -->
 
@@ -90,7 +90,7 @@ Status: reviewed (2026-11-01)
 ##### [2.3.4.3 Floating-point numbers](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#floating-point-numbers)
 
 Status: reviewed (2026-11-01)
-> `Numbers::ParseFloatingPoint`, rewritten to the steps: it keeps the digits and rounds the exact value once in conversion (`std::from_chars`). `IsValidFloatingPointNumber` and `ParseValidFloatingPoint`; the best representation is `SerializeForNumberType(double)` (`HTML/Parser/ParserIdioms`).
+> `Numbers::ParseFloatingPoint`, rewritten to the steps: it keeps the digits and rounds the exact value once in conversion (`std::from_chars`). `IsValidFloatingPointNumber` and `ParseValidFloatingPoint`; the best representation is `SerializeForNumberType(double)` (`Html/Parser/ParserIdioms`).
 > Fixed: `+-1` and `--1` parsed, values too small for a double were errors rather than zero, negative zero was returned, and `1.e5` was valid. The number input types' own parsers are upstream's (DIFFERENCES.md).
 
 - [x] [valid floating-point number](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-floating-point-number) — A string is a valid floating-point number if it consists of:

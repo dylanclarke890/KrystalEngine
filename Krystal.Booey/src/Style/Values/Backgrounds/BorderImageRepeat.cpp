@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageRepeat.hpp"
 
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
 

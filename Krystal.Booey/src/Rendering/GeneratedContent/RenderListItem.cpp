@@ -22,10 +22,10 @@
  */
 
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListItem.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOListElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLUListElement.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOListElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLUListElement.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

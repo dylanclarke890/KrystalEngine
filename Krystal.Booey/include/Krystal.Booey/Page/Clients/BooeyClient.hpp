@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Input/PointerCharacteristics.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/Choosers/ColorChooser.hpp"

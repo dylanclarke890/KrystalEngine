@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/StyleAppearance.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignContent.hpp"
 #include "Krystal.Booey/Style/Values/Align/AlignItems.hpp"

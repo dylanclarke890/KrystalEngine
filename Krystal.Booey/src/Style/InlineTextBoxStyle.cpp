@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Style/InlineTextBoxStyle.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/Types/TagName.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Html/Types/TagName.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"

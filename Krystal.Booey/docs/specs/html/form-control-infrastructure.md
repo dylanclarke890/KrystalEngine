@@ -137,7 +137,7 @@ Status: reviewed (2026-11-01)
 ###### [4.10.19.7.2 Processing model](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-processing-model)
 
 Status: reviewed (2026-11-01)
-> `AutofillData::Create` (`HTML/Forms/Autofill.cpp`).
+> `AutofillData::Create` (`Html/Forms/Autofill.cpp`).
 > Fixed: `autocomplete` returned the attribute's value.
 <!-- definitions: autofill-hint-set autofill-scope autofill-field-name non-autofill-credential-type concept-fe-autofill -->
 

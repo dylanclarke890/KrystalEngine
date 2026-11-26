@@ -25,10 +25,10 @@
  */
 
 #include "Krystal.Booey/Rendering/Tables/RenderTableSection.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"

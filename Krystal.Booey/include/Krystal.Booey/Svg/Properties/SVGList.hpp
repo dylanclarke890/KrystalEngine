@@ -1,0 +1,267 @@
+﻿/*
+ * Copyright (C) 2019 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGProperty.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+
+namespace krys::boo
+{
+  /// @brief The list interface the SVG DOM's lists share (`SVGLengthList`, `SVGStringList`, ...).
+  /// @see https://svgwg.org/svg2-draft/types.html#ListInterfaces
+  template <typename TItem>
+  class SVGList : public SVGProperty
+  {
+  protected:
+    List<TItem> _items;
+
+  public:
+    KRYS_NODISCARD uint32 Length() const noexcept
+    {
+      return NumberOfItems();
+    }
+
+    KRYS_NODISCARD uint32 NumberOfItems() const noexcept
+    {
+      return static_cast<uint32>(_items.size());
+    }
+
+    ExceptionOr<void> Clear() noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      ClearItems();
+      CommitChange();
+      return {};
+    }
+
+    ExceptionOr<TItem> GetItem(uint32 index) noexcept
+    {
+      auto result = CanGetItem(index);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      return At(index);
+    }
+
+    ExceptionOr<TItem> Initialize(TItem &&newItem) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+
+      // Spec: Clears all existing current items from the list.
+      ClearItems();
+
+      auto item = Append(krys::move(newItem));
+      CommitChange();
+      return item;
+    }
+
+    ExceptionOr<TItem> InsertItemBefore(TItem &&newItem, uint32 index) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      // Spec: If the index is greater than or equal to numberOfItems,
+      // then the new item is appended to the end of the list.
+      if (index > NumberOfItems())
+      {
+        index = NumberOfItems();
+      }
+
+      auto item = InsertAt(index, krys::move(newItem));
+      CommitChange();
+      return item;
+    }
+
+    ExceptionOr<TItem> ReplaceItem(TItem &&newItem, uint32 index) noexcept
+    {
+      auto result = CanReplaceItem(index);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      auto item = ReplaceAt(index, krys::move(newItem));
+      CommitChange();
+      return item;
+    }
+
+    ExceptionOr<TItem> RemoveItem(uint32 index) noexcept
+    {
+      auto result = CanRemoveItem(index);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      auto item = RemoveAt(index);
+      CommitChange();
+      return item;
+    }
+
+    ExceptionOr<TItem> AppendItem(TItem &&newItem) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      auto item = Append(krys::move(newItem));
+      CommitChange();
+      return item;
+    }
+
+    ExceptionOr<void> SetItem(uint32 index, TItem &&newItem) noexcept
+    {
+      auto result = ReplaceItem(krys::move(newItem), index);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      return {};
+    }
+
+    KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
+    {
+      return index < _items.size();
+    }
+
+    // Parsers and animators need to have a direct access to the items.
+    KRYS_NODISCARD List<TItem> &Items() noexcept
+    {
+      return _items;
+    }
+
+    KRYS_NODISCARD const List<TItem> &Items() const noexcept
+    {
+      return _items;
+    }
+
+    KRYS_NODISCARD size_t Size() const noexcept
+    {
+      return _items.size();
+    }
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return _items.empty();
+    }
+
+    void ClearItems() noexcept
+    {
+      DetachItems();
+      _items.clear();
+    }
+
+  protected:
+    using SVGProperty::SVGProperty;
+
+    KRYS_NODISCARD ExceptionOr<bool> CanAlterList() const noexcept
+    {
+      if (IsReadOnly())
+      {
+        return Exception {ExceptionCode::NoModificationAllowedError};
+      }
+      return true;
+    }
+
+    KRYS_NODISCARD ExceptionOr<bool> CanGetItem(uint32 index) noexcept
+    {
+      if (index >= _items.size())
+      {
+        return Exception {ExceptionCode::IndexSizeError};
+      }
+      return true;
+    }
+
+    KRYS_NODISCARD ExceptionOr<bool> CanReplaceItem(uint32 index) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      if (index >= _items.size())
+      {
+        return Exception {ExceptionCode::IndexSizeError};
+      }
+      return true;
+    }
+
+    KRYS_NODISCARD ExceptionOr<bool> CanRemoveItem(uint32 index) noexcept
+    {
+      auto result = CanAlterList();
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      krys_assert(result.ReleaseValue());
+
+      if (index >= _items.size())
+      {
+        return Exception {ExceptionCode::IndexSizeError};
+      }
+      return true;
+    }
+
+    virtual void DetachItems() noexcept
+    {
+    }
+
+    KRYS_NODISCARD virtual TItem At(uint32 index) const noexcept = 0;
+
+    virtual TItem InsertAt(uint32 index, TItem &&) noexcept = 0;
+
+    virtual TItem ReplaceAt(uint32 index, TItem &&) noexcept = 0;
+
+    virtual TItem RemoveAt(uint32 index) noexcept = 0;
+
+    virtual TItem Append(TItem &&) noexcept = 0;
+  };
+}

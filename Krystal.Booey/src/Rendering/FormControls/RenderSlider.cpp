@@ -19,8 +19,8 @@
  */
 
 #include "Krystal.Booey/Rendering/FormControls/RenderSlider.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLDataListElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLDataListElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 

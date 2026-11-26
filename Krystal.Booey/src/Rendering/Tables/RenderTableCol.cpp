@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Tables/RenderTableCol.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableColElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableColElement.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"

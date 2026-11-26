@@ -28,9 +28,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/Html/Attributes/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/Html/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Enum.hpp"
 
 namespace krys::boo

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.UI/View.hpp"

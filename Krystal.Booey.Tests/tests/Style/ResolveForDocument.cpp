@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
-#include "Krystal.Booey/SVG/SVGDocument.hpp"
+#include "Krystal.Booey/Css/Font/GenericFontFamilyNames.hpp"
+#include "Krystal.Booey/Svg/SVGDocument.hpp"
 
 namespace krys::boo::style::tests
 {

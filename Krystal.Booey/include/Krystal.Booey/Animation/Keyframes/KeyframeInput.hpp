@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/Animation/Keyframes/CompositeOperationOrAuto.hpp"
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/Variant.hpp"

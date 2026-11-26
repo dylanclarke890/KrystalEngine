@@ -7,7 +7,7 @@
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
-#include "Krystal.Booey/SVG/PatternAttributes.hpp"
+#include "Krystal.Booey/Svg/PatternAttributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests

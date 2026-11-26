@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Easing/LinearEasingFunction.hpp"
+#include "Krystal.Booey/Css/Values/Easing/LinearEasingFunction.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 

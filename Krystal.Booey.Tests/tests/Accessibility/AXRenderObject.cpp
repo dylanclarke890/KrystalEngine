@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Accessibility/AXRenderObject.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 
 namespace krys::boo::ax::tests
 {

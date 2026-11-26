@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/Style/Rules/PropertyAllowlist.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"

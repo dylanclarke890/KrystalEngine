@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/ClipboardApi/ClipboardEvent.hpp"
-#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DataTransfer.hpp"
 
 namespace krys::boo
 {

@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/HexColor.hpp"
-#include "Krystal.Booey/CSS/Values/Color/HexColor.hpp"
+#include "Krystal.Booey/Css/Values/Color/HexColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"
 

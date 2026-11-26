@@ -25,15 +25,15 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleCrossfadeImage.hpp"
-#include "Krystal.Booey/CSS/Values/CrossFadeValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/Values/CrossFadeValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Images/CrossfadeGeneratedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImageForContainer.hpp"
 #include "Krystal.Core/Memory/PointerComparison.hpp"
 
 namespace krys::boo

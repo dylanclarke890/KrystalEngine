@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 
 namespace krys::boo::tests
 {

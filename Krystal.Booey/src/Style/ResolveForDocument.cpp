@@ -27,9 +27,9 @@
  */
 
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
-#include "Krystal.Booey/CSS/Font/CSSFontSelector.hpp"
-#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/Css/Font/GenericFontFamilyNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -37,7 +37,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
-#include "Krystal.Booey/SVG/SVGDocument.hpp"
+#include "Krystal.Booey/Svg/SVGDocument.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::style

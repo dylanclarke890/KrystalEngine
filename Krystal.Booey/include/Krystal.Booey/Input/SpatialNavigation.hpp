@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/Dom/Nodes/FocusOptions.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Mixins/DocumentOrShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGHiddenContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Core/Containers/HashSet.hpp"

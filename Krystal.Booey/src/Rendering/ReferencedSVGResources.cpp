@@ -25,17 +25,17 @@
  */
 
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
-#include "Krystal.Booey/DOM/Mixins/DocumentOrShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Mixins/DocumentOrShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Mixins/NonElementParentNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
-#include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Booey/Svg/SVGResourceElementClient.hpp"
 #include "Krystal.Core/Containers/HashSet.hpp"
 
 namespace krys::boo

@@ -1,12 +1,12 @@
 ﻿#include "Krystal.Booey/Style/Adjuster.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/CSS/RuleTestUtils.hpp"
-#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
-#include "Krystal.Booey.Tests/DOM/DOMTestUtils.hpp"
+#include "Krystal.Booey.Tests/Css/RuleTestUtils.hpp"
+#include "Krystal.Booey.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Dom/DOMTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -15,7 +15,7 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 
 namespace krys::boo::style::tests
 {

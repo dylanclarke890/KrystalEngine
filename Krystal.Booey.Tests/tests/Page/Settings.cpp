@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Page/Settings.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
-#include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
+#include "Krystal.Booey/Css/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/Css/Parser/ParserContext.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorParserContext.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Dom/Nodes/DOMImplementation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 

@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Accessibility/AXSpinButton.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
 #include "Krystal.Booey/Accessibility/AXSpinButtonPart.hpp"
-#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
+#include "Krystal.Booey/Html/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo

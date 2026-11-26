@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/Accessibility/AXNodeObject.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Accessibility/AXTestUtils.hpp"
-#include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey.Tests/Html/CustomElementTestUtils.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Html/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
 
 namespace krys::boo::ax::tests
 {

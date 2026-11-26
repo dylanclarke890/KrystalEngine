@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/ContrastColor.hpp"
+#include "Krystal.Booey/Css/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 

@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Style/Values/Motion/OffsetRotate.hpp"
 
-#include "Krystal.Booey/CSS/Values/OffsetRotateValue.hpp"
+#include "Krystal.Booey/Css/Values/OffsetRotateValue.hpp"
 
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"

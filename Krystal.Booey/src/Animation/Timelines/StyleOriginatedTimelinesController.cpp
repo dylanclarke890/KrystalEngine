@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include <algorithm>
 
 namespace krys::boo

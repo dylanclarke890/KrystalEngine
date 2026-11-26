@@ -5,7 +5,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Images/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Image.Tests/AnimatedImages.hpp"
 #include "Krystal.Image.Tests/EXIFImages.hpp"
 #include "Krystal.Image.Tests/TestImages.hpp"

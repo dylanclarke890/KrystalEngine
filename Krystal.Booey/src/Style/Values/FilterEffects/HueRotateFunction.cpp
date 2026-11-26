@@ -24,8 +24,8 @@
 
 #include "Krystal.Booey/Style/Values/FilterEffects/HueRotateFunction.hpp"
 
-#include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
-#include "Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp"
+#include "Krystal.Booey/Css/Values/FilterEffects/FilterFunctionDescriptor.hpp"
+#include "Krystal.Booey/Css/Values/FilterEffects/HueRotateFunction.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

@@ -27,7 +27,7 @@
 
 #include "Krystal.Booey/Accessibility/AXMathMLElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"

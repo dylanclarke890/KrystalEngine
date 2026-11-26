@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeIdentifier.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"

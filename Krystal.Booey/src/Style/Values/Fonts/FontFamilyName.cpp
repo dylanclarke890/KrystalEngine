@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/Style/Values/Fonts/FontFamilyName.hpp"
 
-#include "Krystal.Booey/CSS/CSSOM/Markup.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/CSSOM/Markup.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
 
 namespace krys::boo::style

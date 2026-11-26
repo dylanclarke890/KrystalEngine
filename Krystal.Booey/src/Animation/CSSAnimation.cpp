@@ -30,7 +30,7 @@
 #include "Krystal.Booey/Animation/Timelines/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/Timelines/ViewTimeline.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include <limits>

@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Events/UI/InputEvent.hpp"
-#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
-#include "Krystal.Booey/HTML/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/Dom/Ranges/StaticRange.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DataTransfer.hpp"
 
 namespace krys::boo
 {

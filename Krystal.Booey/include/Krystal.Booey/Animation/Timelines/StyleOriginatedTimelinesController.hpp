@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/Scope/NameScope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"

@@ -3,16 +3,16 @@
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
-#include "Krystal.Booey/CSS/Geometry/DOMPointReadOnly.hpp"
+#include "Krystal.Booey/Css/Geometry/DOMPointReadOnly.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextContentElement.hpp"
-#include "Krystal.Booey/SVG/SVGRect.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextContentElement.hpp"
+#include "Krystal.Booey/Svg/SVGRect.hpp"
 #include <string>
 
 namespace krys::boo::layout_integration::tests

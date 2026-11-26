@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Accessibility/ARIAMixin.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Html/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/Html/CustomElement/ElementInternals.hpp"
 
 namespace krys::boo::ax::mixins
 {

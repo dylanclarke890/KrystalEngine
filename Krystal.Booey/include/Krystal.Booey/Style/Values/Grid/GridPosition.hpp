@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridPositionSide.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

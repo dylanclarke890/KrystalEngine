@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Easing/SpringEasingFunction.hpp"
+#include "Krystal.Booey/Css/Values/Easing/SpringEasingFunction.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 

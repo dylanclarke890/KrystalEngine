@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGPathElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGPathElement.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

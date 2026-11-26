@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Calc/Tree.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/Style/Calc/TreeCopy.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Calc/TreeTraversal.hpp"

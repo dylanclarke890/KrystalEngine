@@ -28,7 +28,7 @@
 #include "Krystal.Booey/Animation/Timelines/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
 #include "Krystal.Booey/Animation/Timelines/ScrollTimelineOptions.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Attributes.hpp"

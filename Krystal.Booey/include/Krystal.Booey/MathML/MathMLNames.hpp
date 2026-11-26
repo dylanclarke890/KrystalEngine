@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Dom/Types/QualifiedName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo

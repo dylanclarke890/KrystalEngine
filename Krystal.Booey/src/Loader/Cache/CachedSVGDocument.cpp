@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Booey/Xml/XMLDocumentParser.hpp"
 #include "Krystal.Core/Types/SharedBuffer.hpp"
 #include "Krystal.Text/Encodings/Decode.hpp"
 #include "Krystal.Text/Encodings/Encode.hpp"

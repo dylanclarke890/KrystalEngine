@@ -1,0 +1,142 @@
+﻿/*
+ * Copyright (C) 2004, 2005, 2006, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ * Copyright (C) 2004, 2005, 2006, 2007 Rob Buis <buis@kde.org>
+ * Copyright (C) 2005 Alexander Kellett <lypanov@kde.org>
+ * Copyright (C) 2009 Dirk Schulze <krit@webkit.org>
+ * Copyright (C) Research In Motion Limited 2009-2010. All rights reserved.
+ * Copyright (C) 2014 Adobe Systems Incorporated. All rights reserved.
+ * Copyright (C) 2018-2025 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+
+#include "Krystal.Booey/Svg/Elements/SVGMaskElement.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Booey/Svg/SVGNames.hpp"
+
+namespace krys::boo
+{
+  SVGMaskElement::SVGMaskElement(Document &document) noexcept
+      : SVGElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Mask),
+        SVGTests(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"-10%")),
+        _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"-10%")),
+        _width(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"120%")),
+        _height(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"120%")),
+        _maskUnits(SVGAnimatedEnumeration::Create(this, SVGUnitTypes::SVG_UNIT_TYPE_OBJECTBOUNDINGBOX)),
+        _maskContentUnits(SVGAnimatedEnumeration::Create(this, SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE))
+  {
+    // Spec: If the x/y attribute is not specified, the effect is as if a value of "-10%" were specified.
+    // Spec: If the width/height attribute is not specified, the effect is as if a value of "120%" were
+    // specified.
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGMaskElement::_x>(SVGNames::XAttr());
+      PropertyRegistry::RegisterProperty<&SVGMaskElement::_y>(SVGNames::YAttr());
+      PropertyRegistry::RegisterProperty<&SVGMaskElement::_width>(SVGNames::WidthAttr());
+      PropertyRegistry::RegisterProperty<&SVGMaskElement::_height>(SVGNames::HeightAttr());
+      PropertyRegistry::RegisterProperty<SVGUnitTypes::SVGUnitType, &SVGMaskElement::_maskUnits>(
+        SVGNames::MaskUnitsAttr());
+      PropertyRegistry::RegisterProperty<SVGUnitTypes::SVGUnitType, &SVGMaskElement::_maskContentUnits>(
+        SVGNames::MaskContentUnitsAttr());
+    }
+  }
+
+  void SVGMaskElement::AttributeChanged(const QualifiedName &name, Maybe<DOMStringView> oldValue,
+                                        Maybe<DOMStringView> value) noexcept
+  {
+    auto parseError = SVGParsingError::None;
+    auto string = value.value_or(DOMStringView {});
+
+    if (name == SVGNames::MaskUnitsAttr())
+    {
+      auto propertyValue = SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::FromString(*this, string);
+      if (propertyValue > 0)
+      {
+        _maskUnits->SetBaseValInternal<SVGUnitTypes::SVGUnitType>(propertyValue);
+      }
+    }
+    else if (name == SVGNames::MaskContentUnitsAttr())
+    {
+      auto propertyValue = SVGPropertyTraits<SVGUnitTypes::SVGUnitType>::FromString(*this, string);
+      if (propertyValue > 0)
+      {
+        _maskContentUnits->SetBaseValInternal<SVGUnitTypes::SVGUnitType>(propertyValue);
+      }
+    }
+    else if (name == SVGNames::XAttr())
+    {
+      _x->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Width, string, parseError,
+                                                       SVGLengthNegativeValuesMode::Allow, u8"-10%"));
+    }
+    else if (name == SVGNames::YAttr())
+    {
+      _y->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Height, string, parseError,
+                                                       SVGLengthNegativeValuesMode::Allow, u8"-10%"));
+    }
+    else if (name == SVGNames::WidthAttr())
+    {
+      _width->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Width, string, parseError,
+                                                           SVGLengthNegativeValuesMode::Allow, u8"120%"));
+    }
+    else if (name == SVGNames::HeightAttr())
+    {
+      _height->SetBaseValInternal(SVGLengthValue::Construct(SVGLengthMode::Height, string, parseError,
+                                                            SVGLengthNegativeValuesMode::Allow, u8"120%"));
+    }
+    ReportAttributeParsingError(parseError, name, string);
+
+    SVGTests::ParseAttribute(name, value);
+    SVGElement::AttributeChanged(name, oldValue, value);
+  }
+
+  void SVGMaskElement::SVGAttributeChanged(const QualifiedName &attributeName) noexcept
+  {
+    if (PropertyRegistry::IsAnimatedLengthAttribute(attributeName))
+    {
+      InstanceInvalidationGuard guard(*this);
+      SetPresentationalHintStyleIsDirty();
+      return;
+    }
+
+    if (PropertyRegistry::IsKnownAttribute(attributeName))
+    {
+      UpdateSVGRendererForElementChange();
+      return;
+    }
+
+    SVGElement::SVGAttributeChanged(attributeName);
+  }
+
+  void SVGMaskElement::OnChildrenChanged() noexcept
+  {
+    SVGElement::OnChildrenChanged();
+
+    if (!IsFinishedParsingChildren())
+    {
+      return;
+    }
+
+    UpdateSVGRendererForElementChange();
+  }
+
+  RenderPtr<RenderElement> SVGMaskElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<LegacyRenderSVGResourceMasker>(*this, krys::move(style));
+  }
+}

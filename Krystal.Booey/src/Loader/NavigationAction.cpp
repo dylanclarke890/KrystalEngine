@@ -27,7 +27,7 @@
  */
 
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 #include "Krystal.Core/Move.hpp"
 

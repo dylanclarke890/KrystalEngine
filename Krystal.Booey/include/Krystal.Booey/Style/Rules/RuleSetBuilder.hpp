@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Parser/ParserEnum.hpp"
-#include "Krystal.Booey/CSS/Queries/GenericMediaQueryTypes.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/Css/Parser/ParserEnum.hpp"
+#include "Krystal.Booey/Css/Queries/GenericMediaQueryTypes.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Containers/HashSet.hpp"

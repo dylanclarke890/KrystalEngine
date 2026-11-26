@@ -1,0 +1,197 @@
+﻿/*
+ * Copyright (C) 2018-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGAnimatedProperty.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGSharedPrimitiveProperty.hpp"
+
+namespace krys::boo
+{
+  /// @brief An animated boolean, integer, number or string.
+  template <typename TProperty>
+  class SVGAnimatedPrimitiveProperty : public SVGAnimatedProperty
+  {
+  protected:
+    const Ref<SVGSharedPrimitiveProperty<TProperty>> _baseVal;
+    mutable RefPtr<SVGSharedPrimitiveProperty<TProperty>> _animVal;
+
+  public:
+    using ValueType = TProperty;
+
+    KRYS_NODISCARD static Ref<SVGAnimatedPrimitiveProperty> Create(SVGElement *contextElement) noexcept
+    {
+      return AdoptRef(*new SVGAnimatedPrimitiveProperty(contextElement));
+    }
+
+    KRYS_NODISCARD static Ref<SVGAnimatedPrimitiveProperty> Create(SVGElement *contextElement,
+                                                                   const TProperty &value) noexcept
+    {
+      return AdoptRef(*new SVGAnimatedPrimitiveProperty(contextElement, value));
+    }
+
+    // Used by the DOM.
+    ExceptionOr<void> SetBaseVal(const TProperty &baseVal) noexcept
+    {
+      _baseVal->SetValue(baseVal);
+      CommitPropertyChange(nullptr);
+      return {};
+    }
+
+    // Used by SVGElement::AttributeChanged().
+    void SetBaseValInternal(const TProperty &baseVal) noexcept
+    {
+      _baseVal->SetValue(baseVal);
+    }
+
+    KRYS_NODISCARD const TProperty &BaseVal() const noexcept
+    {
+      return _baseVal->Value();
+    }
+
+    // Used by SVGAttributeAnimator::progress.
+    void SetAnimVal(const TProperty &animVal) noexcept
+    {
+      krys_assert(IsAnimating() && _animVal);
+      _animVal->SetValue(animVal);
+    }
+
+    KRYS_NODISCARD const TProperty &AnimVal() const noexcept
+    {
+      krys_assert(!IsAnimating() || _animVal);
+      return IsAnimating() ? _animVal->Value() : _baseVal->Value();
+    }
+
+    KRYS_NODISCARD TProperty &AnimVal() noexcept
+    {
+      krys_assert(!IsAnimating() || _animVal);
+      return IsAnimating() ? _animVal->Value() : _baseVal->Value();
+    }
+
+    // Used when committing a change from the SVGAnimatedProperty to the attribute.
+    KRYS_NODISCARD DOMString BaseValAsString() const noexcept override
+    {
+      return _baseVal->ValueAsString();
+    }
+
+    // Used to apply the SVGAttributeAnimator change to the target element.
+    KRYS_NODISCARD DOMString AnimValAsString() const noexcept override
+    {
+      krys_assert(IsAnimating() && _animVal);
+      return _animVal->ValueAsString();
+    }
+
+    // Managing the relationship with the owner.
+    void SetDirty() noexcept override
+    {
+      _baseVal->SetDirty();
+    }
+
+    KRYS_NODISCARD bool IsDirty() const noexcept override
+    {
+      return _baseVal->IsDirty();
+    }
+
+    Maybe<DOMString> Synchronize() noexcept override
+    {
+      return _baseVal->Synchronize();
+    }
+
+    // Used by RenderSVGElements.
+    KRYS_NODISCARD const TProperty &CurrentValue() const noexcept
+    {
+      krys_assert(!IsAnimating() || _animVal);
+      return IsAnimating() ? _animVal->Value() : _baseVal->Value();
+    }
+
+    // Controlling the animation.
+    void StartAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      if (_animVal)
+      {
+        _animVal->SetValue(_baseVal->Value());
+      }
+      else
+      {
+        EnsureAnimVal();
+      }
+      SVGAnimatedProperty::StartAnimation(animator);
+    }
+
+    void StopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::StopAnimation(animator);
+      if (!IsAnimating())
+      {
+        _animVal = nullptr;
+      }
+      else if (_animVal)
+      {
+        _animVal->SetValue(_baseVal->Value());
+      }
+    }
+
+    // Controlling the instance animation.
+    void InstanceStartAnimation(SVGAttributeAnimator &animator,
+                                SVGAnimatedProperty &animated) noexcept override
+    {
+      if (!IsAnimating())
+      {
+        _animVal = static_cast<SVGAnimatedPrimitiveProperty &>(animated)._animVal;
+      }
+      SVGAnimatedProperty::InstanceStartAnimation(animator, animated);
+    }
+
+    void InstanceStopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::InstanceStopAnimation(animator);
+      if (!IsAnimating())
+      {
+        _animVal = nullptr;
+      }
+    }
+
+  protected:
+    SVGAnimatedPrimitiveProperty(SVGElement *contextElement) noexcept
+        : SVGAnimatedProperty(contextElement), _baseVal(SVGSharedPrimitiveProperty<TProperty>::Create())
+    {
+    }
+
+    SVGAnimatedPrimitiveProperty(SVGElement *contextElement, const TProperty &value) noexcept
+        : SVGAnimatedProperty(contextElement), _baseVal(SVGSharedPrimitiveProperty<TProperty>::Create(value))
+    {
+    }
+
+    RefPtr<SVGSharedPrimitiveProperty<TProperty>> &EnsureAnimVal() noexcept
+    {
+      if (!_animVal)
+      {
+        _animVal = SVGSharedPrimitiveProperty<TProperty>::Create(_baseVal->Value());
+      }
+      return _animVal;
+    }
+  };
+}

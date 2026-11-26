@@ -27,12 +27,12 @@
  */
 
 #include "Krystal.Booey/Style/Rules/ScopeRuleSets.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
-#include "Krystal.Booey/CSS/Queries/ContainerQuery.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/Css/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/Css/Queries/ContainerQuery.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSetBuilder.hpp"

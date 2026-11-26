@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/TextInsertionBaseCommand.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/Internals/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/Html/Internals/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 
 namespace krys::boo

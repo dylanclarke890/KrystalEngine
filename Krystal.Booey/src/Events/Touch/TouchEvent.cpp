@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
 #include "Krystal.Booey/Events/Pointer/MouseEvent.hpp"
 
 namespace krys::boo

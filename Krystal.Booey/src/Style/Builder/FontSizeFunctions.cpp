@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontMetrics.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSizeAdjust.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"

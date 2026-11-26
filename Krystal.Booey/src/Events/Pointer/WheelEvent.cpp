@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Events/Pointer/WheelEvent.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
 
 namespace krys::boo
 {

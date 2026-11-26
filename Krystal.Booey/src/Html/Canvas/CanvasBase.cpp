@@ -1,0 +1,168 @@
+﻿/*
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Booey/Html/Canvas/CanvasBase.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffers/ImageBuffer.hpp"
+#include "Krystal.Booey/Html/Canvas/CanvasRenderingContext.hpp"
+
+namespace krys::boo::html
+{
+  namespace
+  {
+    // Matches the 2D context's default image smoothing quality (`low`).
+    constexpr InterpolationQuality DefaultInterpolationQuality = InterpolationQuality::Low;
+
+    KRYS_NODISCARD constexpr uint64 MaxCanvasArea() noexcept
+    {
+      // Firefox limits width/height to 32767 pixels, but slows down dramatically before it
+      // reaches that limit. We limit by area instead, giving us larger maximum dimensions,
+      // in exchange for a smaller maximum canvas size. The maximum canvas size is in device pixels.
+      return 16'384 * 16'384;
+    }
+  }
+
+  CanvasBase::CanvasBase(SizeI size) noexcept : _size(size)
+  {
+  }
+
+  CanvasBase::~CanvasBase() noexcept = default;
+
+  ImageBuffer *CanvasBase::Buffer() const noexcept
+  {
+    if (!HasCreatedImageBuffer())
+    {
+      CreateImageBuffer();
+    }
+    return _imageBuffer.get();
+  }
+
+  RefPtr<ImageBuffer> CanvasBase::MakeRenderingResultsAvailable() noexcept
+  {
+    if (auto *context = RenderingContext())
+    {
+      return context->SurfaceBufferToImageBuffer(CanvasRenderingContext::SurfaceBuffer::DrawingBuffer);
+    }
+    return ShareRefPtr(Buffer());
+  }
+
+  void CanvasBase::DidDraw(const Maybe<RectF> &) noexcept
+  {
+    AddCanvasNeedingPreparationForDisplayOrFlush();
+  }
+
+  void CanvasBase::AddCanvasNeedingPreparationForDisplayOrFlush() noexcept
+  {
+    auto *context = RenderingContext();
+    if (!context || context->IsInPreparationForDisplayOrFlush())
+    {
+      return;
+    }
+    if (auto *document = CanvasDocument())
+    {
+      document->AddCanvasNeedingPreparationForDisplayOrFlush(*context);
+    }
+  }
+
+  void CanvasBase::RemoveCanvasNeedingPreparationForDisplayOrFlush() noexcept
+  {
+    auto *context = RenderingContext();
+    if (!context || !context->IsInPreparationForDisplayOrFlush())
+    {
+      return;
+    }
+    if (auto *document = CanvasDocument())
+    {
+      document->RemoveCanvasNeedingPreparationForDisplayOrFlush(*context);
+    }
+  }
+
+  bool CanvasBase::ShouldAccelerate(uint64 area) noexcept
+  {
+    // Accelerated drawing is on, and there's no minimum area: the host's backend draws every canvas, there
+    // being no unaccelerated one.
+    return area > 0;
+  }
+
+  void CanvasBase::SetSize(const SizeI &size) noexcept
+  {
+    _size = size;
+  }
+
+  RefPtr<ImageBuffer> CanvasBase::SetImageBuffer(RefPtr<ImageBuffer> &&buffer) const noexcept
+  {
+    _contextStateSaver = nullptr;
+    auto returnBuffer = std::exchange(_imageBuffer, krys::move(buffer));
+
+    if (_imageBuffer)
+    {
+      _size = _imageBuffer->TruncatedLogicalSize();
+      auto &context = _imageBuffer->Context();
+      context.SetShadowsIgnoreTransforms(true);
+      context.SetImageInterpolationQuality(DefaultInterpolationQuality);
+      context.SetStrokeThickness(1);
+      _contextStateSaver = CreateUnique<GraphicsContextStateSaver>(context);
+    }
+    return returnBuffer;
+  }
+
+  RefPtr<ImageBuffer> CanvasBase::AllocateImageBuffer() const noexcept
+  {
+    const uint64 area = static_cast<uint64>(_size.Width()) * static_cast<uint64>(_size.Height());
+    if (!area)
+    {
+      return nullptr;
+    }
+    if (area > MaxCanvasArea())
+    {
+      return nullptr;
+    }
+
+    auto *context = RenderingContext();
+    // FIXME: A context that will read frequently draws unaccelerated, once there's an unaccelerated backend
+    // to read from.
+    const auto renderingMode =
+      ShouldAccelerate(area) ? RenderingMode::Accelerated : RenderingMode::Unaccelerated;
+    // FIXME: The context's pixel format (sRGB, 8 bits a channel).
+    auto colorSpace = context ? context->ColorSpace() : DestinationColorSpace::SRGB();
+
+    auto *document = CanvasDocument();
+    return ImageBuffer::Create(SizeF(_size), renderingMode, RenderingPurpose::Canvas, 1, colorSpace,
+                               document ? document->GetGraphicsClient() : nullptr);
+  }
+
+  void CanvasBase::ResetGraphicsContextState() const noexcept
+  {
+    if (_contextStateSaver)
+    {
+      // Reset to the initial graphics context state.
+      _contextStateSaver->Restore();
+      _contextStateSaver->Save();
+    }
+  }
+}

@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/MoveSelectionCommand.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"

@@ -4,7 +4,7 @@
 #include "Krystal.Booey/Events/UI/CompositionEvent.hpp"
 #include "Krystal.Booey/Events/UI/InputEvent.hpp"
 #include "Krystal.Booey/Events/UI/TextEvent.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformKeyboardEvent.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"

@@ -27,10 +27,10 @@
  */
 
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Css/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Enum.hpp"

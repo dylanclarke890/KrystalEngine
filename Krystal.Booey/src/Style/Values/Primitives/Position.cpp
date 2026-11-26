@@ -23,7 +23,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
-#include "Krystal.Booey/CSS/Values/PositionValue.hpp"
+#include "Krystal.Booey/Css/Values/PositionValue.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

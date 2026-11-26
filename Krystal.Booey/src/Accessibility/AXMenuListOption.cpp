@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Accessibility/AXMenuListOption.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
 
 namespace krys::boo
 {

@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Position.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"

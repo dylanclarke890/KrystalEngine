@@ -26,7 +26,7 @@
  */
 
 #include "Krystal.Booey/MathML/Elements/MathMLTokenElement.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp"

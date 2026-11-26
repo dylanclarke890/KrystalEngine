@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
-#include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Calc/SymbolTable.hpp"
+#include "Krystal.Booey/Css/Calc/Value.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Units.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

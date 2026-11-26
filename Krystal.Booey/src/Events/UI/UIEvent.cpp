@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/Events/UI/UIEvent.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 
 namespace krys::boo
 {

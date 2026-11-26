@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
+#include "Krystal.Booey/Css/Values/TextShadowPropertyValue.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

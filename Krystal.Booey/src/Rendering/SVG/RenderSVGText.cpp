@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
@@ -51,9 +51,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutEngine.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextPathElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextPathElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <algorithm>

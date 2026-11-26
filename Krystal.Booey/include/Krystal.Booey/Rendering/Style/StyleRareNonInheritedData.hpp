@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/CounterDirectives.hpp"
 #include "Krystal.Booey/Style/Scope/NameScope.hpp"

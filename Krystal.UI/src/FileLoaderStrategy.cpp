@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/FileLoaderStrategy.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Threading/WorkQueue.hpp"
 #include "Krystal.Net/MimeTypeRegistry.hpp"

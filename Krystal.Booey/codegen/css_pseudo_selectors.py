@@ -32,7 +32,7 @@ from utils import run_gperf, Writer
 GENERATOR_NAME = "codegen/css_pseudo_selectors.py"
 
 NAMESPACE = "krys::boo::css"
-SELECTORS_DIR = "Krystal.Booey/CSS/Selectors"
+SELECTORS_DIR = "Krystal.Booey/Css/Selectors"
 
 PSEUDO_CLASS_TYPE = "SelectorPseudoClass"
 PSEUDO_ELEMENT_TYPE = "SelectorPseudoElement"
@@ -51,7 +51,7 @@ def generate(args: argparse.Namespace):
     InputValidator(data)
 
     output_hpp_dir = os.path.join(args.output_headers_dir, SELECTORS_DIR)
-    output_cpp_dir = os.path.join(args.output_sources_dir, "CSS/Selectors")
+    output_cpp_dir = os.path.join(args.output_sources_dir, "Css/Selectors")
     os.makedirs(output_hpp_dir, exist_ok=True)
     os.makedirs(output_cpp_dir, exist_ok=True)
 
@@ -388,7 +388,7 @@ def generate_user_agent_parts(hpp_path, cpp_path, pseudo_elements):
 
     with open(hpp_path, "w") as output_file:
         writer = Writer(output_file)
-        writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Booey/CSS/Types/CSSOMString.hpp"])
+        writer.hpp_prelude(generator_name=GENERATOR_NAME, headers=["Krystal.Booey/Css/Types/CSSOMString.hpp"])
 
         with writer.namespace(namespace=f"{NAMESPACE}::user_agent_parts"):
             for part_name in user_agent_parts:

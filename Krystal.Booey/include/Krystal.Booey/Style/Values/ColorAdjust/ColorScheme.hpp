@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
+#include "Krystal.Booey/Css/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"

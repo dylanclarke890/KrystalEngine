@@ -25,8 +25,8 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StylePaintImage.hpp"
-#include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
-#include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Booey/Css/Values/PaintImageValue.hpp"
+#include "Krystal.Booey/Css/Values/VariableData.hpp"
 
 namespace krys::boo
 {

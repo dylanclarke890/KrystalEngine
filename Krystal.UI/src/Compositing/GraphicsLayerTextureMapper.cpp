@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"

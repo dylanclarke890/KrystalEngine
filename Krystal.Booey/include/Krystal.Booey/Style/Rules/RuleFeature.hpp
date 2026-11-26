@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorEnums.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/Array.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
