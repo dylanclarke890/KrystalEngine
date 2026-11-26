@@ -24,9 +24,9 @@
  */
 
 #include "Krystal.Booey/Style/Values/Fonts/FontVariationSettings.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Values/FontVariationValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Values/FontVariationValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

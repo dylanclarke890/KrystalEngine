@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"

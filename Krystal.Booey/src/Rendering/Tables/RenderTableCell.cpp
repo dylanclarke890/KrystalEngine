@@ -25,11 +25,11 @@
  */
 
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
-#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/FrameViewLayoutContext.hpp"
@@ -51,7 +51,7 @@ namespace krys::boo
   namespace
   {
     // The largest rowspan, which rowspan=0 stands for.
-    // https://html.spec.whatwg.org/#attr-tdth-rowspan
+    // https://html.spec.whatwg.org/multipage/tables.html#attr-tdth-rowspan
     constexpr uint32 MaxRowspan = 65'534;
 
     KRYS_NODISCARD CollapsedBorderValue MakeCollapsedBorder(const RenderElement &renderer,

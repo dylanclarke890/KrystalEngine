@@ -32,10 +32,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
-#include "Krystal.Booey/CSS/Values/Color/ColorType.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Values/Color/Color.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorDescriptors.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorType.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/Style/Values/Color/CurrentColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/ResolvedColor.hpp"

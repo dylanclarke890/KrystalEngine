@@ -30,8 +30,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Events/Event.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
@@ -59,7 +59,7 @@ namespace krys::boo
 
   /// @brief A form's submission: its method, action, target, encoding type and entry list, which the host
   /// handles. Booey doesn't encode the entries: the host turns them into a request if it wants one.
-  /// @see https://html.spec.whatwg.org/#form-submission-algorithm
+  /// @see https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#form-submission-algorithm
   class FormSubmission : public RefCounted<FormSubmission>, public CanMakeWeakPtr<FormSubmission>
   {
   public:

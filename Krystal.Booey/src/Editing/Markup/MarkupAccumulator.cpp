@@ -25,21 +25,21 @@
  */
 
 #include "Krystal.Booey/Editing/Markup/MarkupAccumulator.hpp"
-#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
-#include "Krystal.Booey/DOM/Nodes/CDATASection.hpp"
-#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Nodes/ProcessingInstruction.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/Dom/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Attr.hpp"
+#include "Krystal.Booey/Dom/Nodes/CDATASection.hpp"
+#include "Krystal.Booey/Dom/Nodes/Comment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ProcessingInstruction.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -86,7 +86,7 @@ namespace krys::boo
 
       switch (element->TagQualifiedName().TagName())
       {
-        // https://html.spec.whatwg.org/#void-elements
+        // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
         case html::TagName::area:
         case html::TagName::base:
         case html::TagName::br:
@@ -100,7 +100,7 @@ namespace krys::boo
         case html::TagName::source:
         case html::TagName::track:
         case html::TagName::wbr:
-        // https://html.spec.whatwg.org/#serializes-as-void
+        // https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void
         case html::TagName::basefont:
         case html::TagName::bgsound:
         case html::TagName::frame:
@@ -134,7 +134,7 @@ namespace krys::boo
       return true;
     }
 
-    // https://html.spec.whatwg.org/#html-fragment-serialisation-algorithm
+    // https://html.spec.whatwg.org/multipage/parsing.html#html-fragment-serialisation-algorithm
     KRYS_NODISCARD utf8_string TagQName(const Element &element, bool inXMLFragmentSerialization) noexcept
     {
       // If current node is an element in the HTML namespace, the MathML namespace, or the SVG namespace, then

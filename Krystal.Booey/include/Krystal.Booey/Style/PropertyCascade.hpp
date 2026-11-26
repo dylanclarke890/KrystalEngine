@@ -26,9 +26,9 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
-#include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Properties/StyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/Types/IsImportant.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"

@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Concepts.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumericForward.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/UnevaluatedCalc.hpp"

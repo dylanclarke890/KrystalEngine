@@ -21,7 +21,7 @@
  */
 
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderQuote.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"

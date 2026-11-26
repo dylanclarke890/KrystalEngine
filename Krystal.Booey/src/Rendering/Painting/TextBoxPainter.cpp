@@ -23,14 +23,14 @@
  */
 
 #include "Krystal.Booey/Rendering/Painting/TextBoxPainter.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/Types/TagName.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Html/Types/TagName.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"

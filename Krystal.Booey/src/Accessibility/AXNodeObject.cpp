@@ -32,39 +32,39 @@
 #include "Krystal.Booey/Accessibility/AXTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Collections/NodeList.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Internals/PopoverData.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/Dom/Collections/NodeList.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLButtonElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLDetailsElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHeadingElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableRowElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLButtonElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHeadingElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableRowElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Html/Internals/PopoverData.hpp"
+#include "Krystal.Booey/Html/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
@@ -77,8 +77,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/SVGURIReference.hpp"
 #include "Krystal.Core/Containers/HashSet.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include "Krystal.I18n/Locale.hpp"
@@ -1083,7 +1083,7 @@ namespace krys::boo
       case TagName::label:    return AXRole::Label;
       case TagName::dfn:
         // The dfn element represents a term being defined, the "term" role rather than "definition".
-        // https://html.spec.whatwg.org/#the-dfn-element
+        // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-dfn-element
         return AXRole::Term;
       case TagName::div:     return AXRole::Generic;
       case TagName::form:    return AXRole::Form;
@@ -2018,7 +2018,7 @@ namespace krys::boo
             case dom::CommandType::ShowPopover:
             case dom::CommandType::HidePopover:
             case dom::CommandType::TogglePopover:
-              if (target->GetPopoverState() != dom::PopoverState::None)
+              if (target->GetPopoverState() != html::PopoverState::None)
               {
                 return target;
               }
@@ -3297,8 +3297,8 @@ namespace krys::boo
       }
     };
 
-    // The forming a table algorithm (https://html.spec.whatwg.org/#forming-a-table), working out where each
-    // cell is and how far it spans.
+    // The forming a table algorithm (https://html.spec.whatwg.org/multipage/tables.html#forming-a-table),
+    // working out where each cell is and how far it spans.
 
     // Step 1.
     uint32 xWidth = 0;
@@ -3322,7 +3322,7 @@ namespace krys::boo
 
     List<DownwardGrowingCell> downwardGrowingCells;
 
-    // https://html.spec.whatwg.org/#algorithm-for-growing-downward-growing-cells
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-growing-downward-growing-cells
     auto growDownwardsCells = [&]
     {
       // Extend each downward-growing cell so it also covers the slots (x, yCurrent), where
@@ -3344,7 +3344,7 @@ namespace krys::boo
     };
 
     HashSet<const AXObject *> processedRows;
-    // https://html.spec.whatwg.org/#algorithm-for-processing-rows
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-processing-rows
     auto processRow = [&](AXNodeObject *row)
     {
       if (!row || processedRows.contains(row))
@@ -3470,7 +3470,7 @@ namespace krys::boo
         processRow(DynamicDowncast<AXNodeObject>(object));
       }
     };
-    // https://html.spec.whatwg.org/#algorithm-for-ending-a-row-group
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-ending-a-row-group
     auto endRowGroup = [&]
     {
       // Step 1: While ycurrent is less than yheight, grow the downward-growing cells and increase ycurrent.
@@ -3482,7 +3482,7 @@ namespace krys::boo
       // Step 2: Empty the list of downward-growing cells.
       downwardGrowingCells.clear();
     };
-    // https://html.spec.whatwg.org/#algorithm-for-processing-row-groups
+    // https://html.spec.whatwg.org/multipage/tables.html#algorithm-for-processing-row-groups
     auto processRowGroup = [&](Element &sectionElement)
     {
       // Step 1 (ystart) is only needed for step 3, which isn't implemented.
@@ -3833,7 +3833,7 @@ namespace krys::boo
       return 1;
     }
     // "If colspan is greater than 1000, let it be 1000 instead"
-    // (https://html.spec.whatwg.org/#attr-tdth-colspan).
+    // (https://html.spec.whatwg.org/multipage/tables.html#attr-tdth-colspan).
     for (auto name : {u8"colspan", u8"aria-colspan"})
     {
       auto span = html::Numbers::ParseInteger(GetAttribute(name));

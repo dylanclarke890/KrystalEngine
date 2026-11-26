@@ -45,10 +45,10 @@
  */
 
 #include "Krystal.Booey/Rendering/Layers/RenderLayerScrollableArea.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"

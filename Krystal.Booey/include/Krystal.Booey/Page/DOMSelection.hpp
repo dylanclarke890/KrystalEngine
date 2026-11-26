@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -41,7 +41,6 @@
 
 namespace krys::boo::dom
 {
-  class Position;
   class Range;
   struct SimpleRange;
   class StaticRange;
@@ -52,6 +51,7 @@ namespace krys::boo
   class Document;
   class Frame;
   class Node;
+  class Position;
   class ShadowRoot;
 
   /// @brief A document's `Selection`: the script's view of the frame's selection, which is the range it
@@ -127,12 +127,12 @@ namespace krys::boo
 
     KRYS_NODISCARD Maybe<dom::SimpleRange> GetRange() const noexcept;
 
-    KRYS_NODISCARD dom::Position AnchorPosition() const noexcept;
+    KRYS_NODISCARD Position AnchorPosition() const noexcept;
 
-    KRYS_NODISCARD dom::Position FocusPosition() const noexcept;
+    KRYS_NODISCARD Position FocusPosition() const noexcept;
 
-    KRYS_NODISCARD RefPtr<Node> ShadowAdjustedNode(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD RefPtr<Node> ShadowAdjustedNode(const Position &position) const noexcept;
 
-    KRYS_NODISCARD uint32 ShadowAdjustedOffset(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD uint32 ShadowAdjustedOffset(const Position &position) const noexcept;
   };
 }

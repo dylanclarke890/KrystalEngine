@@ -23,7 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Painting/EllipsisBoxPainter.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"

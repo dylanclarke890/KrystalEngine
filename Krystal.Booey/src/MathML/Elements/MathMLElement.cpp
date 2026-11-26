@@ -27,11 +27,11 @@
  */
 
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
+#include "Krystal.Booey/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
 #include "Krystal.Booey/Rendering/Tables/RenderTableCell.hpp"
@@ -44,7 +44,7 @@ namespace krys::boo
   namespace
   {
     // The largest value a non-negative integer reflects as.
-    // https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:idl-unsigned-long
+    // https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes:idl-unsigned-long
     constexpr uint32 MaxHTMLNonNegativeInteger = 2'147'483'647;
     // The largest rowspan a table cell takes, as HTML's.
     constexpr uint32 MaxMathMLRowspan = 65'534;

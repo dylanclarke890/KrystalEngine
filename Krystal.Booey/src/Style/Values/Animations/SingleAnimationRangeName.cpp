@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::style

@@ -26,7 +26,7 @@
  */
 
 #include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/Font.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLOperatorElement.hpp"

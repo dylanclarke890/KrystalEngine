@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/DOM/Algorithms/FindRevealAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Highlights/HighlightRegistry.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Highlights/HighlightRegistry.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/Dom/Algorithms/FindRevealAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
@@ -14,12 +14,12 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayer.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Images/ImageDocument.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -48,8 +48,8 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/SVGDocument.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/Svg/SVGDocument.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -2997,7 +2997,7 @@ namespace krys::boo
   {
     krys_assert(Frame().Document());
 
-    // https://html.spec.whatwg.org/#the-indicated-part-of-the-document
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#the-indicated-part-of-the-document
     // 1. If document's URL does not equal url with exclude fragments set to true, then return null.
     // (url is the document's.)
     // 2. Let fragment be url's fragment.
@@ -3047,7 +3047,7 @@ namespace krys::boo
 
     RefPtr<Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
 
-    // https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#scroll-to-the-fragment-identifier
     // 1. If document's indicated part is null, then set document's target element to null.
     // 2a. Set document's target element to null.
     // 3a. Assert: document's indicated part is an element.

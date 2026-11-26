@@ -24,9 +24,9 @@
 
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 
-#include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Units.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

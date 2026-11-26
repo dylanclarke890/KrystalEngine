@@ -22,12 +22,12 @@
  */
 
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControlSingleLine.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"

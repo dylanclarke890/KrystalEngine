@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/Events/AnimationEventBase.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 
 namespace krys::boo

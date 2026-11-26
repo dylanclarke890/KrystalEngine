@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp"
@@ -101,9 +101,8 @@ namespace krys::boo
       return FloatLinesBoundingBox();
     }
 
-    KRYS_NODISCARD dom::PositionWithAffinity
-      PositionForPoint(const LayoutPoint &, HitTestSource,
-                       const RenderFragmentContainer * = nullptr) noexcept override;
+    KRYS_NODISCARD PositionWithAffinity PositionForPoint(
+      const LayoutPoint &, HitTestSource, const RenderFragmentContainer * = nullptr) noexcept override;
 
     KRYS_NODISCARD RectI LinesBoundingBox() const noexcept override;
 

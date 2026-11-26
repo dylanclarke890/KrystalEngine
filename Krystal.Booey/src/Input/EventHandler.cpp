@@ -28,34 +28,34 @@
 
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/DragEvent.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Events/KeyboardEvent.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
-#include "Krystal.Booey/DOM/Events/TouchEvent.hpp"
-#include "Krystal.Booey/DOM/Events/WheelEvent.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Events/Pointer/WheelEvent.hpp"
+#include "Krystal.Booey/Events/Touch/TouchEvent.hpp"
+#include "Krystal.Booey/Events/UI/KeyboardEvent.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DragEvent.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Input/AutoscrollController.hpp"
 #include "Krystal.Booey/Input/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
@@ -114,7 +114,7 @@ namespace krys::boo
 
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video, once there is one.
-    // https://html.spec.whatwg.org/#focus-processing-model
+    // https://html.spec.whatwg.org/multipage/interaction.html#focus-processing-model
     // (The target node of a routed key event.)
     KRYS_NODISCARD Element *EventTargetElementForDocument(Document *document) noexcept
     {
@@ -478,7 +478,7 @@ namespace krys::boo
     // FIXME: Page overlays and synthetic touch events.
 
     // A press is an activation-triggering input event: the window is notified before the event is dispatched.
-    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (auto *window = frame->Window())
     {
       window->NotifyActivated();
@@ -1271,7 +1271,8 @@ namespace krys::boo
     }
 
     // A key press other than Escape is an activation-triggering input event: the window is notified before
-    // the event is dispatched. https://html.spec.whatwg.org/#activation-triggering-input-event
+    // the event is dispatched.
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (initialKeyEvent.GetType() != Type::KeyUp && initialKeyEvent.GetType() != Type::Char
         && initialKeyEvent.Key() != u8"Escape")
     {
@@ -1413,7 +1414,7 @@ namespace krys::boo
   }
 
   bool EventHandler::HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
-                                          dom::TextEventInputType inputType) noexcept
+                                          ui_events::TextEventInputType inputType) noexcept
   {
     // Platforms should differentiate real commands like selectAll from text input in disguise (like
     // insertNewline), and avoid dispatching text input events from keydown default handlers.
@@ -2533,7 +2534,7 @@ namespace krys::boo
     // image overlays; see DIFFERENCES.md.)
     KRYS_NODISCARD RefPtr<Node> NodeToSelectOnMouseDownForNode(Node &targetNode) noexcept
     {
-      return dom::Position::RootUserSelectAllForNode(&targetNode);
+      return Position::RootUserSelectAllForNode(&targetNode);
     }
 
     KRYS_NODISCARD VisibleSelection
@@ -2546,9 +2547,9 @@ namespace krys::boo
       }
 
       VisibleSelection newSelection(selection);
-      newSelection.SetAnchor(dom::PositionBeforeNode(nodeToSelect.get())
+      newSelection.SetAnchor(PositionBeforeNode(nodeToSelect.get())
                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetFocus(dom::PositionAfterNode(nodeToSelect.get())
+      newSelection.SetFocus(PositionAfterNode(nodeToSelect.get())
                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
 
       return newSelection;
@@ -2589,9 +2590,9 @@ namespace krys::boo
       return true;
     }
 
-    KRYS_NODISCARD uint64 TextDistance(const dom::Position &start, const dom::Position &end) noexcept
+    KRYS_NODISCARD uint64 TextDistance(const Position &start, const Position &end) noexcept
     {
-      auto range = dom::MakeSimpleRange({start, end});
+      auto range = CreateSimpleRange(PositionRange {start, end});
       if (!range)
       {
         return 0;
@@ -2628,7 +2629,7 @@ namespace krys::boo
                                                                        const VisibleSelection &selection,
                                                                        TextGranularity granularity) noexcept
   {
-    if (dom::Position::NodeIsUserSelectNone(targetNode))
+    if (Position::NodeIsUserSelectNone(targetNode))
     {
       return false;
     }
@@ -2882,7 +2883,7 @@ namespace krys::boo
 
     // The end of a touch is an activation-triggering input event: the window is notified before the event
     // is dispatched.
-    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    // https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event
     if (event.GetType() == PlatformEvent::Type::TouchEnd)
     {
       if (auto *window = frame->Window())
@@ -3218,7 +3219,7 @@ namespace krys::boo
     {
       visiblePosition = VisiblePosition(FirstPositionInOrBeforeNode(targetNode.get()));
     }
-    dom::Position pos = visiblePosition.DeepEquivalent();
+    Position pos = visiblePosition.DeepEquivalent();
 
     VisibleSelection newSelection = selection.Selection();
     TextGranularity granularity = TextGranularity::CharacterGranularity;
@@ -3244,8 +3245,8 @@ namespace krys::boo
           && pos.IsNotNull())
       {
         // Shift-click shouldn't deselect a selection that was made right-to-left.
-        dom::Position start = newSelection.Start();
-        dom::Position end = newSelection.End();
+        Position start = newSelection.Start();
+        Position end = newSelection.End();
         auto distanceToStart = TextDistance(start, pos);
         auto distanceToEnd = TextDistance(pos, end);
         if (distanceToStart <= distanceToEnd)
@@ -3315,7 +3316,7 @@ namespace krys::boo
       return true;
     }
 
-    return node->CanStartSelection() || dom::Position::NodeIsUserSelectAll(node);
+    return node->CanStartSelection() || Position::NodeIsUserSelectAll(node);
   }
 
   bool EventHandler::MouseDownMayStartSelect() const noexcept
@@ -3574,13 +3575,13 @@ namespace krys::boo
     }
 
     RefPtr<Node> rootUserSelectAllForMousePressNode =
-      dom::Position::RootUserSelectAllForNode(_mousePressNode.get());
+      Position::RootUserSelectAllForNode(_mousePressNode.get());
     if (rootUserSelectAllForMousePressNode
-        && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
+        && rootUserSelectAllForMousePressNode == Position::RootUserSelectAllForNode(target.get()))
     {
-      newSelection.SetAnchor(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
+      newSelection.SetAnchor(PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
                                .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
-      newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+      newSelection.SetFocus(PositionAfterNode(rootUserSelectAllForMousePressNode.get())
                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
     }
     else
@@ -3598,19 +3599,19 @@ namespace krys::boo
       // Reset base for user select all when base is inside user-select-all area and extent < base.
       if (rootUserSelectAllForMousePressNode && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetAnchor(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+        newSelection.SetAnchor(PositionAfterNode(rootUserSelectAllForMousePressNode.get())
                                  .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
 
-      RefPtr<Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
+      RefPtr<Node> rootUserSelectAllForTarget = Position::RootUserSelectAllForNode(target.get());
       if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
       {
-        newSelection.SetFocus(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
+        newSelection.SetFocus(PositionBeforeNode(rootUserSelectAllForTarget.get())
                                 .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else if (rootUserSelectAllForTarget && _mousePressNode->Renderer())
       {
-        newSelection.SetFocus(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
+        newSelection.SetFocus(PositionAfterNode(rootUserSelectAllForTarget.get())
                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
       }
       else
@@ -3827,8 +3828,7 @@ namespace krys::boo
   }
 
   bool EventHandler::DispatchDragEvent(DOMStringAtom eventType, Element &dragTarget,
-                                       const PlatformMouseEvent &event,
-                                       dom::DataTransfer &dataTransfer) noexcept
+                                       const PlatformMouseEvent &event, DataTransfer &dataTransfer) noexcept
   {
     Ref<Frame> frame = ShareRef(_frame);
     RefPtr<FrameView> view = ShareRefPtr(frame->View());
@@ -3887,7 +3887,7 @@ namespace krys::boo
     UniquePtr<Pasteboard> &&pasteboard, EnumSet<DragOperation> sourceOperationMask,
     bool draggingFiles) noexcept
   {
-    auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+    auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
       target.NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
     bool accept = DispatchDragEvent(krys::move(eventType), target, event, *dataTransfer);
     dataTransfer->MakeInvalidForSecurity();
@@ -3945,7 +3945,7 @@ namespace krys::boo
 
       if (RefPtr<Element> dragTarget = _dragTarget)
       {
-        auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+        auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
           dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
         (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
         dataTransfer->MakeInvalidForSecurity();
@@ -3985,7 +3985,7 @@ namespace krys::boo
     {
       DispatchEventToDragSourceElement(event_names::Drag, event);
 
-      auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+      auto dataTransfer = DataTransfer::CreateForUpdatingDropTarget(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
       (void)DispatchDragEvent(event_names::DragLeave, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
@@ -4002,7 +4002,7 @@ namespace krys::boo
     bool preventedDefault = false;
     if (RefPtr<Element> dragTarget = _dragTarget)
     {
-      Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
+      Ref<DataTransfer> dataTransfer = DataTransfer::CreateForDrop(
         dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
       preventedDefault = DispatchDragEvent(event_names::Drop, *dragTarget, event, *dataTransfer);
       dataTransfer->MakeInvalidForSecurity();
@@ -4122,7 +4122,7 @@ namespace krys::boo
     }
   }
 
-  bool EventHandler::DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept
+  bool EventHandler::DispatchDragStartEventOnSourceElement(DataTransfer &dataTransfer) noexcept
   {
     Ref<Element> draggedElement = ShareRef(*DraggedElement());
     _frame.GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement, dataTransfer,
@@ -4243,14 +4243,13 @@ namespace krys::boo
       return false;
     }
 
-    dragState.DataTransfer = dom::DataTransfer::CreateForDrag(*document);
+    dragState.DataTransfer = DataTransfer::CreateForDrag(*document);
     auto hasNonDefaultPasteboardData = HasNonDefaultPasteboardData::No;
 
     if (dragState.ShouldDispatchEvents)
     {
       krys_debug_assert(DraggedElement());
-      auto dragStartDataTransfer =
-        dom::DataTransfer::CreateForDragStartEvent(DraggedElement()->NodeDocument());
+      auto dragStartDataTransfer = DataTransfer::CreateForDragStartEvent(DraggedElement()->NodeDocument());
       _mouseDownMayStartDrag = DispatchDragStartEventOnSourceElement(*dragStartDataTransfer);
       if (Downcast<StaticPasteboard>(dragStartDataTransfer->GetPasteboard()).HasNonDefaultData())
       {

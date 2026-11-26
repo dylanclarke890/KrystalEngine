@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Images/Gradient.hpp"
+#include "Krystal.Booey/Css/Values/Images/Gradient.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"

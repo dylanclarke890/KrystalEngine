@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
 #include "Krystal.Booey/Graphics/Images/SourceImage.hpp"
-#include "Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp"
+#include "Krystal.Booey/Svg/SVGPreserveAspectRatioValue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 

@@ -1,0 +1,153 @@
+﻿/*
+ * Copyright (C) 2021 Metrological Group B.V.
+ * Copyright (C) 2021 Igalia S.L.
+ * Copyright (C) 2007-2025 Apple Inc. All rights reserved.
+ *           (C) 2007, 2008 Nikolas Zimmermann <zimmermann@kde.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1.  Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Booey/Css/Font/DocumentFontLoader.hpp"
+#include "Krystal.Booey/Css/Font/CSSFontSelector.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
+
+namespace krys::boo::css
+{
+  DocumentFontLoader::DocumentFontLoader(Document &document) noexcept
+      : _document(document), _fontLoadingTimer(*this, &DocumentFontLoader::FontLoadingTimerFired)
+  {
+  }
+
+  DocumentFontLoader::~DocumentFontLoader() noexcept
+  {
+    StopLoadingAndClearFonts();
+  }
+
+  CachedFont *DocumentFontLoader::GetCachedFont(net::Url url,
+                                                bool isInitiatingElementInUserAgentShadowTree) noexcept
+  {
+    ResourceLoaderOptions options = CachedResourceLoader::DefaultCachedResourceOptions();
+    options.ContentSecurityPolicy = isInitiatingElementInUserAgentShadowTree
+                                      ? ContentSecurityPolicyImposition::SkipPolicyCheck
+                                      : ContentSecurityPolicyImposition::DoPolicyCheck;
+
+    CachedResourceRequest request(net::ResourceRequest(krys::move(url)), options);
+    request.SetInitiatorType(CachedResourceRequestInitiatorTypes::CSS);
+    auto font = _document.GetCachedResourceLoader().RequestFont(krys::move(request));
+    return font ? font->get() : nullptr;
+  }
+
+  void DocumentFontLoader::BeginLoadingFontSoon(CachedFont &font) noexcept
+  {
+    if (_isStopped)
+    {
+      return;
+    }
+
+    _fontsToBeginLoading.emplace_back(font);
+    // Increment the request count now, in order to prevent didFinishLoad from being dispatched after this
+    // font has been requested but before it began loading. Balanced by DecrementRequestCount() in
+    // LoadPendingFonts() and in StopLoadingAndClearFonts().
+    _document.GetCachedResourceLoader().IncrementRequestCount(font);
+    if (!_isFontLoadingSuspended && !_fontLoadingTimer.IsActive())
+    {
+      _fontLoadingTimer.StartOneShot({});
+    }
+  }
+
+  void DocumentFontLoader::LoadPendingFonts() noexcept
+  {
+    if (_isFontLoadingSuspended)
+    {
+      return;
+    }
+
+    List<CachedResourceHandle<CachedFont>> fontsToBeginLoading;
+    fontsToBeginLoading.swap(_fontsToBeginLoading);
+
+    Ref<CachedResourceLoader> cachedResourceLoader = ShareRef(_document.GetCachedResourceLoader());
+    for (auto &fontHandle : fontsToBeginLoading)
+    {
+      fontHandle->BeginLoadIfNeeded(*cachedResourceLoader);
+      // Balances IncrementRequestCount() in BeginLoadingFontSoon().
+      cachedResourceLoader->DecrementRequestCount(*fontHandle);
+    }
+  }
+
+  void DocumentFontLoader::FontLoadingTimerFired() noexcept
+  {
+    LoadPendingFonts();
+    // FIXME: Call this on the next frame instead of the next run loop, as ResourceLoader would.
+    _document.GetCachedResourceLoader().LoadDone();
+  }
+
+  void DocumentFontLoader::StopLoadingAndClearFonts() noexcept
+  {
+    if (_isStopped)
+    {
+      return;
+    }
+
+    _fontLoadingTimer.Stop();
+    auto &cachedResourceLoader = _document.GetCachedResourceLoader();
+    for (auto &fontHandle : _fontsToBeginLoading)
+    {
+      // Balances IncrementRequestCount() in BeginLoadingFontSoon().
+      cachedResourceLoader.DecrementRequestCount(*fontHandle);
+    }
+    _fontsToBeginLoading.clear();
+    if (auto *fontSelector = _document.FontSelectorIfExists())
+    {
+      fontSelector->ClearFonts();
+    }
+
+    _isFontLoadingSuspended = true;
+    _isStopped = true;
+  }
+
+  void DocumentFontLoader::SuspendFontLoading() noexcept
+  {
+    if (_isFontLoadingSuspended)
+    {
+      return;
+    }
+
+    _fontLoadingTimer.Stop();
+    _isFontLoadingSuspended = true;
+  }
+
+  void DocumentFontLoader::ResumeFontLoading() noexcept
+  {
+    if (!_isFontLoadingSuspended || _isStopped)
+    {
+      return;
+    }
+
+    _isFontLoadingSuspended = false;
+    if (!_fontsToBeginLoading.empty())
+    {
+      _fontLoadingTimer.StartOneShot({});
+    }
+  }
+}

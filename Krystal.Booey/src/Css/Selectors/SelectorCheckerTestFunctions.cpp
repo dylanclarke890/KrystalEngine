@@ -1,0 +1,326 @@
+﻿/*
+ * Copyright (C) 2014-2016 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Dhi Aurrahman <diorahman@rockybars.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Attr.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Core/Strings/ASCII.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include <algorithm>
+
+namespace krys::boo::css
+{
+  namespace
+  {
+    template <typename T>
+    KRYS_NODISCARD const T *DynamicDowncastHTML(const Element &element) noexcept
+    {
+      auto *htmlElement = DynamicDowncast<HTMLElement>(element);
+      return htmlElement ? DynamicDowncast<T>(*htmlElement) : nullptr;
+    }
+
+    KRYS_NODISCARD bool IsHTMLElement(const Element &element, html::TagName tagName) noexcept
+    {
+      return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+    }
+  }
+
+  bool IsFrameFocused(const Element &element) noexcept
+  {
+    return element.NodeDocument().IsFocusedAndActive();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool DoesShadowTreeContainFocusedElement(const Element &element) noexcept
+    {
+      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      return shadowRoot && shadowRoot->ContainsFocusedElement();
+    }
+  }
+
+  bool MatchesFocusPseudoClass(const Element &element) noexcept
+  {
+    return (element.Focused() || DoesShadowTreeContainFocusedElement(element)) && IsFrameFocused(element);
+  }
+
+  bool MatchesFocusVisiblePseudoClass(const Element &element) noexcept
+  {
+    return element.HasFocusVisible() && IsFrameFocused(element);
+  }
+
+  bool MatchesFocusWithinPseudoClass(const Element &element) noexcept
+  {
+    return element.HasFocusWithin() && IsFrameFocused(element);
+  }
+
+  bool IsLink(const Element &element) noexcept
+  {
+    // Links in SVG images aren't links (shouldProhibitLinks).
+    if (IsHTMLElement(element, html::TagName::a) || IsHTMLElement(element, html::TagName::area))
+    {
+      return element.HasAttribute(u8"href") && !svg::IsInSVGImage(&element);
+    }
+    if (element.NamespaceURI().View() == infra::namespaces::SVG && element.LocalName().View() == u8"a")
+    {
+      return (element.HasAttribute(u8"href") || element.HasAttributeNS(infra::namespaces::XLink, u8"href"))
+             && !svg::IsInSVGImage(&element);
+    }
+    return false;
+  }
+
+  bool MatchesDefaultPseudoClass(const Element &element) noexcept
+  {
+    return element.MatchesDefaultPseudoClass();
+  }
+
+  bool MatchesDisabledPseudoClass(const Element &element) noexcept
+  {
+    auto *htmlElement = DynamicDowncast<HTMLElement>(element);
+    return htmlElement && htmlElement->IsActuallyDisabled();
+  }
+
+  bool MatchesEnabledPseudoClass(const Element &element) noexcept
+  {
+    auto *htmlElement = DynamicDowncast<HTMLElement>(element);
+    return htmlElement && htmlElement->CanBeActuallyDisabled() && !htmlElement->IsActuallyDisabled();
+  }
+
+  bool IsDefinedElement(const Element &element) noexcept
+  {
+    auto state = element.GetCustomElementState();
+    return state == dom::CustomElementState::Custom || state == dom::CustomElementState::Uncustomized;
+  }
+
+  bool IsChecked(const Element &element) noexcept
+  {
+    // Even though WinIE allows checked and indeterminate to co-exist, the CSS selector spec says that you
+    // can't be both checked and indeterminate. We will behave like WinIE behind the scenes and just obey the
+    // CSS spec here in the test for matching the pseudo.
+    if (auto *input = DynamicDowncastHTML<HTMLInputElement>(element))
+    {
+      return input->MatchesCheckedPseudoClass();
+    }
+    if (auto *option = DynamicDowncastHTML<HTMLOptionElement>(element))
+    {
+      return option->Selected(html::AllowStyleInvalidation::No);
+    }
+    return false;
+  }
+
+  bool IsOptionalFormControl(const Element &element) noexcept
+  {
+    return element.IsOptionalFormControl();
+  }
+
+  bool IsRequiredFormControl(const Element &element) noexcept
+  {
+    return element.IsRequiredFormControl();
+  }
+
+  bool IsPlaceholderShown(const Element &element) noexcept
+  {
+    auto *formControl = DynamicDowncastHTML<HTMLTextFormControlElement>(element);
+    return formControl && formControl->IsPlaceholderVisible();
+  }
+
+  bool ContainsLanguageSubtagMatchingRange(DOMStringView language, DOMStringView range, uint32 languageLength,
+                                           uint32 &position) noexcept
+  {
+    uint32 languageSubtagsStartIndex = position;
+    uint32 languageSubtagsEndIndex = languageLength;
+    bool isAsteriskRange = range == u8"*";
+    do
+    {
+      if (languageSubtagsStartIndex > 0)
+      {
+        languageSubtagsStartIndex += 1;
+      }
+
+      languageSubtagsEndIndex = static_cast<uint32>(
+        std::min<size_t>(language.find(u8'-', languageSubtagsStartIndex), languageLength));
+
+      if (languageSubtagsStartIndex > languageSubtagsEndIndex)
+      {
+        return false;
+      }
+
+      auto languageSubtag =
+        language.substr(languageSubtagsStartIndex, languageSubtagsEndIndex - languageSubtagsStartIndex);
+      bool isEqual = text::IsASCIICaselessEqual(range, languageSubtag);
+      if (!isAsteriskRange)
+      {
+        if ((!isEqual && !languageSubtagsStartIndex)
+            || (languageSubtag.size() == 1 && languageSubtagsStartIndex > 0))
+        {
+          return false;
+        }
+      }
+      languageSubtagsStartIndex = languageSubtagsEndIndex;
+      if (isEqual || isAsteriskRange)
+      {
+        position = languageSubtagsStartIndex;
+        return true;
+      }
+
+    } while (languageSubtagsStartIndex < languageLength);
+    return false;
+  }
+
+  bool MatchesLangPseudoClass(const Element &element,
+                              const FixedList<PossiblyQuotedIdentifier> &langList) noexcept
+  {
+    // FIXME: WebVTT elements use their cue's language.
+    auto language = EffectiveLang(element);
+
+    if (language.empty())
+    {
+      return false;
+    }
+
+    // Implement basic and extended filterings of given language tags as specified in
+    // www.ietf.org/rfc/rfc4647.txt.
+    DOMStringView languageStringView = language;
+    auto languageLength = static_cast<uint32>(language.size());
+    for (auto &range : langList)
+    {
+      auto rangeStringView = range.Identifier.View();
+      if (rangeStringView.empty())
+      {
+        continue;
+      }
+      if (rangeStringView == u8"*")
+      {
+        return true;
+      }
+      if (text::IsASCIICaselessEqual(languageStringView, rangeStringView)
+          && !languageStringView.contains(u8'-'))
+      {
+        return true;
+      }
+
+      auto rangeLength = static_cast<uint32>(rangeStringView.size());
+      uint32 rangeSubtagsStartIndex = 0;
+      uint32 lastMatchedLanguageSubtagIndex = 0;
+
+      bool matchedRange = true;
+      do
+      {
+        if (rangeSubtagsStartIndex > 0)
+        {
+          rangeSubtagsStartIndex += 1;
+        }
+        if (rangeSubtagsStartIndex > languageLength)
+        {
+          return false;
+        }
+        auto rangeSubtagsEndIndex = static_cast<uint32>(
+          std::min<size_t>(rangeStringView.find(u8'-', rangeSubtagsStartIndex), rangeLength));
+        auto rangeSubtag =
+          rangeStringView.substr(rangeSubtagsStartIndex, rangeSubtagsEndIndex - rangeSubtagsStartIndex);
+        if (!ContainsLanguageSubtagMatchingRange(languageStringView, rangeSubtag, languageLength,
+                                                 lastMatchedLanguageSubtagIndex))
+        {
+          matchedRange = false;
+          break;
+        }
+        rangeSubtagsStartIndex = rangeSubtagsEndIndex;
+      } while (rangeSubtagsStartIndex < rangeLength);
+      if (matchedRange)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool MatchesDirPseudoClass(const Element &element, const CSSOMStringAtom &argument) noexcept
+  {
+    switch (element.EffectiveTextDirection())
+    {
+      case text::TextDirection::LTR: return text::IsASCIICaselessEqual(argument.View(), u8"ltr");
+      case text::TextDirection::RTL: return text::IsASCIICaselessEqual(argument.View(), u8"rtl");
+    }
+
+    return false;
+  }
+
+  bool MatchesReadWritePseudoClass(const Element &element) noexcept
+  {
+    return element.MatchesReadWritePseudoClass();
+  }
+
+  bool MatchesIndeterminatePseudoClass(const Element &element) noexcept
+  {
+    return element.MatchesIndeterminatePseudoClass();
+  }
+
+  DOMString EffectiveLang(const Element &element) noexcept
+  {
+    // To determine the language of a node, user agents must use the first appropriate step in the following
+    // list:
+    DOMStringAtom xmlNamespace(infra::namespaces::XML);
+    for (auto *ancestor = &element; ancestor;
+         ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
+    {
+      // If the node is an element that has a lang attribute in the XML namespace set: Use the value of that
+      // attribute.
+      if (auto lang = ancestor->GetAttributeNS(xmlNamespace, u8"lang"))
+      {
+        return *lang;
+      }
+
+      // If the node is an HTML element or an element in the SVG namespace, and it has a lang in no namespace
+      // attribute set: Use the value of that attribute.
+      if (ancestor->NamespaceURI() == infra::namespaces::HTML
+          || ancestor->NamespaceURI() == infra::namespaces::SVG)
+      {
+        if (auto lang = ancestor->GetAttributeNS(null, u8"lang"))
+        {
+          return *lang;
+        }
+      }
+
+      // If the node's parent is a shadow root: Use the language of that shadow root's host.
+      // If the node's parent element is not null: Use the language of that parent element.
+    }
+
+    // Otherwise: If there is a pragma-set default language set, then that is the language of the node. If
+    // there is no pragma-set default language set, then language information from a higher-level protocol
+    // (such as HTTP), if any, must be used as the final fallback language instead.
+    // (The document's content language is the pragma's, or else the Content-Language header's.)
+    return element.NodeDocument().ContentLanguage();
+  }
+}

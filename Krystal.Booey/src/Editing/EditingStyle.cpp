@@ -25,36 +25,36 @@
  */
 
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Font/GenericFontFamilyNames.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
-#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
-#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
-#include "Krystal.Booey/CSS/Values/FontStyleWithAngleValue.hpp"
-#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Css/CSSOM/CSSStyleProperties.hpp"
+#include "Krystal.Booey/Css/Font/GenericFontFamilyNames.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyShorthand.hpp"
+#include "Krystal.Booey/Css/Properties/StylePropertiesInlines.hpp"
+#include "Krystal.Booey/Css/Values/ColorValue.hpp"
+#include "Krystal.Booey/Css/Values/FontStyleWithAngleValue.hpp"
+#include "Krystal.Booey/Css/Values/GlobalKeyword.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Markup/HTMLInterchange.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontSelectionAlgorithm.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFontElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFontElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Builder/FontSizeFunctions.hpp"
 #include "Krystal.Booey/Style/Extractor/Extractor.hpp"
@@ -529,7 +529,7 @@ namespace krys::boo
     return CreateRef<EditingStyle>(node, propertiesToInclude);
   }
 
-  Ref<EditingStyle> EditingStyle::Create(const dom::Position &position,
+  Ref<EditingStyle> EditingStyle::Create(const Position &position,
                                          PropertiesToInclude propertiesToInclude) noexcept
   {
     return CreateRef<EditingStyle>(position, propertiesToInclude);
@@ -562,7 +562,7 @@ namespace krys::boo
     Init(node, propertiesToInclude);
   }
 
-  EditingStyle::EditingStyle(const dom::Position &position, PropertiesToInclude propertiesToInclude) noexcept
+  EditingStyle::EditingStyle(const Position &position, PropertiesToInclude propertiesToInclude) noexcept
   {
     Init(position.DeprecatedNode(), propertiesToInclude);
   }
@@ -834,7 +834,7 @@ namespace krys::boo
     }
   }
 
-  void EditingStyle::OverrideTypingStyleAt(const EditingStyle &style, const dom::Position &position) noexcept
+  void EditingStyle::OverrideTypingStyleAt(const EditingStyle &style, const Position &position) noexcept
   {
     MergeStyle(style._mutableStyle.get(), CSSPropertyOverrideMode::OverrideValues);
 
@@ -1481,7 +1481,7 @@ namespace krys::boo
     return matchedAttributes >= attributeCount;
   }
 
-  void EditingStyle::PrepareToApplyAt(const dom::Position &position,
+  void EditingStyle::PrepareToApplyAt(const Position &position,
                                       ShouldPreserveWritingDirection shouldPreserveWritingDirection) noexcept
   {
     if (!_mutableStyle)
@@ -2202,7 +2202,7 @@ namespace krys::boo
       return nullptr;
     }
 
-    dom::Position position = AdjustedSelectionStartForStyleComputation(selection);
+    Position position = AdjustedSelectionStartForStyleComputation(selection);
 
     // If the pos is at the end of a text node, then this node is not fully selected.
     // Move it to the next deep equivalent position to avoid removing the style from this node.
@@ -2254,7 +2254,7 @@ namespace krys::boo
       return WritingDirection::Natural;
     }
 
-    dom::Position position = selection.Start().Downstream();
+    Position position = selection.Start().Downstream();
 
     RefPtr<Node> node = ShareRefPtr(position.DeprecatedNode());
     if (!node)
@@ -2262,11 +2262,11 @@ namespace krys::boo
       return WritingDirection::Natural;
     }
 
-    dom::Position end;
+    Position end;
     if (selection.IsRange())
     {
       end = selection.End().Upstream();
-      auto range = dom::MakeSimpleRange(position, end);
+      auto range = dom::CreateSimpleRange(position, end);
       for (auto &intersectingNode : dom::IntersectingNodes(*range))
       {
         if (!Is<StyledElement>(intersectingNode))
@@ -2386,7 +2386,7 @@ namespace krys::boo
 
   // FIXME: Styling with CSS (the editor's styleWithCSS), with rich editing commands; until then elements
   // express the styles they can, as is upstream's default.
-  StyleChange::StyleChange(EditingStyle *style, const dom::Position &position) noexcept
+  StyleChange::StyleChange(EditingStyle *style, const Position &position) noexcept
   {
     auto *document = position.DeprecatedNode() ? &position.DeprecatedNode()->NodeDocument() : nullptr;
     if (!style || style->IsEmpty() || !document || !document->Frame())

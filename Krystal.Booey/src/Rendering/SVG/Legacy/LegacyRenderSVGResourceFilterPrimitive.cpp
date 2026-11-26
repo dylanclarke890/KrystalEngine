@@ -29,12 +29,12 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilterPrimitive.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFEDiffuseLightingElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFEDropShadowElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFEFloodElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFESpecularLightingElement.hpp"
-#include "Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp"
-#include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFEDiffuseLightingElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFEDropShadowElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFEFloodElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFESpecularLightingElement.hpp"
+#include "Krystal.Booey/Svg/SVGFilterPrimitiveStandardAttributes.hpp"
+#include "Krystal.Booey/Svg/SVGNames.hpp"
 
 namespace krys::boo
 {

@@ -33,8 +33,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGForeignObjectElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGForeignObjectElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 
 namespace krys::boo
 {

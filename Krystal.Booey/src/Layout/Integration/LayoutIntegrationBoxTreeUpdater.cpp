@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxTreeUpdater.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/FormattingContextBoxIterator.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"

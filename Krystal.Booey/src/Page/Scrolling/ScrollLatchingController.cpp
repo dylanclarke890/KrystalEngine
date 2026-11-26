@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Page/Scrolling/ScrollLatchingController.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Platform/Scrolling/ScrollableArea.hpp"

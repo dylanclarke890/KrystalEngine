@@ -24,7 +24,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 #include "Krystal.Core/Geometry/Rect.hpp"
 

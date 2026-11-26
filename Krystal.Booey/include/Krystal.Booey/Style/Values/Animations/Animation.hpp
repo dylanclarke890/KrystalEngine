@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationDelay.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationDuration.hpp"

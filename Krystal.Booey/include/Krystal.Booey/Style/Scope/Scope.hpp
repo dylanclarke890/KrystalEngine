@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
@@ -54,6 +54,7 @@ namespace krys::boo
 {
   class CSSStyleSheet;
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class HTMLSlotElement;
   class Node;
@@ -69,11 +70,6 @@ namespace krys::boo::css
 {
   class CounterStyleRegistry;
   class StyleSheetContents;
-}
-
-namespace krys::boo::dom
-{
-  class DocumentOrShadowRoot;
 }
 
 namespace krys::boo::style
@@ -405,7 +401,7 @@ namespace krys::boo::style
 
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
 
-    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScope() noexcept;
 
     void DidRemovePendingStylesheet() noexcept;
 

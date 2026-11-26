@@ -6,30 +6,30 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-#### [4.8.15 MathML](https://html.spec.whatwg.org/#mathml)
+#### [4.8.15 MathML](https://html.spec.whatwg.org/multipage/embedded-content-other.html#mathml)
 
 Status: reviewed (2026-11-01)
 > MathML elements in HTML are parsed as foreign content and rendered with MathML Core (`OVERVIEW.md`).
 
-#### [4.8.16 SVG](https://html.spec.whatwg.org/#svg-0)
+#### [4.8.16 SVG](https://html.spec.whatwg.org/multipage/embedded-content-other.html#svg-0)
 
 Status: reviewed (2026-11-01)
 > SVG elements in HTML are parsed as foreign content and rendered with the legacy SVG render tree. There's no `getSVGDocument()`: there are no content documents without a frame tree.
 
-- [x] [HTMLIFrameElement,HTMLEmbedElement,HTMLObjectElement.getSVGDocument()](https://html.spec.whatwg.org/#dom-media-getsvgdocument) — The getSVGDocument() method steps are:
+- [x] [HTMLIFrameElement,HTMLEmbedElement,HTMLObjectElement.getSVGDocument()](https://html.spec.whatwg.org/multipage/embedded-content-other.html#dom-media-getsvgdocument) — The getSVGDocument() method steps are:
   - 1. Let document be this's content document.
   - 2. If document is non-null and was created by the page load processing model for XML files section because the computed type of the resource in the navigate algorithm was image/svg+xml, then return document.
   - 3. Return null.
   > n/a: there's no frame tree, so no content documents.
 
-#### [4.8.17 Dimension attributes](https://html.spec.whatwg.org/#dimension-attributes)
+#### [4.8.17 Dimension attributes](https://html.spec.whatwg.org/multipage/embedded-content-other.html#dimension-attributes)
 
 Status: reviewed (2026-11-01)
 > `width` and `height` are presentational hints (Rendering). The dimensions are `HTMLImageElement::Width` and `Height`, and `ImageInputType::Width` and `Height`.
 > Fixed: `<input>`'s `width` and `height` returned the attribute for every type; they're now an image button's dimensions and 0 otherwise. An image button doesn't load its image yet (FIXME in `ImageInputType.cpp`).
 <!-- definitions: attr-dim-width attr-dim-height -->
 
-- [x] [determine the dimensions](https://html.spec.whatwg.org/#determine-dimensions) — To determine the dimensions of an img or input element element given a struct consisting of a width and a height, or null, naturalDimensions:
+- [x] [determine the dimensions](https://html.spec.whatwg.org/multipage/embedded-content-other.html#determine-dimensions) — To determine the dimensions of an img or input element element given a struct consisting of a width and a height, or null, naturalDimensions:
   - 1. If element is being rendered, then return the width and height of element's content box, in CSS pixels. [CSS]
   - 2. Let width and height be 0.
   - 3. If naturalDimensions is not null, then set width to naturalDimensions's width and height to naturalDimensions's height.

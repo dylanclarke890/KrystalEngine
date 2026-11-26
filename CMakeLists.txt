@@ -41,12 +41,14 @@ add_subdirectory(Krystal.UI)
 # Krystal Editor
 add_subdirectory(Krystal.Editor)
 
-# Krystal Engine tests
-add_subdirectory(Krystal.Core.Tests)
-add_subdirectory(Krystal.Text.Tests)
-add_subdirectory(Krystal.I18n.Tests)
-add_subdirectory(Krystal.Net.Tests)
-add_subdirectory(Krystal.Image.Tests)
-add_subdirectory(Krystal.Booey.Tests)
-add_subdirectory(Krystal.Gfx.Tests)
-add_subdirectory(Krystal.UI.Tests)
+# Krystal Engine tests, grouped in a Tests folder in Visual Studio's solution
+set(CMAKE_FOLDER Tests)
+add_subdirectory(tests/Krystal.Core.Tests Krystal.Core.Tests)
+add_subdirectory(tests/Krystal.Text.Tests Krystal.Text.Tests)
+add_subdirectory(tests/Krystal.I18n.Tests Krystal.I18n.Tests)
+add_subdirectory(tests/Krystal.Net.Tests Krystal.Net.Tests)
+add_subdirectory(tests/Krystal.Image.Tests Krystal.Image.Tests)
+add_subdirectory(tests/Krystal.Booey.Tests Krystal.Booey.Tests)
+add_subdirectory(tests/Krystal.Gfx.Tests Krystal.Gfx.Tests)
+add_subdirectory(tests/Krystal.UI.Tests Krystal.UI.Tests)
+unset(CMAKE_FOLDER)

@@ -26,9 +26,9 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
-#include "Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp"
-#include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSKeywordValue.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSNumericValue.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo

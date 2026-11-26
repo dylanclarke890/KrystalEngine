@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidation/Invalidator.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Core/Attributes.hpp"

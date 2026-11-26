@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderHTMLCanvas.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Rendering/Layers/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/Painting/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"

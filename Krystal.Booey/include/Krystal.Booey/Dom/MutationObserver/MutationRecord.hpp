@@ -1,0 +1,81 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Memory/RefCounted.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+
+namespace krys::boo::dom
+{
+  /// @brief The type of a mutation record, which is used to indicate what type of mutation occurred in the
+  /// DOM.
+  enum class MutationRecordType : uint8
+  {
+    ChildList,
+    Attributes,
+    CharacterData,
+  };
+
+  consteval MutationRecordType MaxEnumValue(MutationRecordType) noexcept
+  {
+    return MutationRecordType::CharacterData;
+  }
+}
+
+namespace krys::boo
+{
+  class Node;
+  class NodeList;
+}
+
+namespace krys::boo::dom
+{
+  /// @brief A change to a node, as delivered to a mutation observer.
+  /// @see https://dom.spec.whatwg.org/#interface-mutationrecord
+  class MutationRecord : public RefCounted<MutationRecord>
+  {
+  public:
+    virtual ~MutationRecord() noexcept = default;
+
+#pragma region MutationRecord - https://dom.spec.whatwg.org/#mutationrecord
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-type
+    KRYS_NODISCARD virtual const DOMStringAtom &Type() const noexcept = 0;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-target
+    KRYS_NODISCARD virtual Ref<Node> Target() const noexcept = 0;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-addednodes
+    KRYS_NODISCARD virtual RefPtr<NodeList> AddedNodes() const noexcept = 0;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-removednodes
+    KRYS_NODISCARD virtual RefPtr<NodeList> RemovedNodes() const noexcept = 0;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
+    KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
+    KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeName() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return DOMStringAtom::Null();
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
+    KRYS_NODISCARD virtual const DOMStringAtom &AttributeNamespace() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return DOMStringAtom::Null();
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
+    KRYS_NODISCARD virtual const DOMStringAtom &OldValue() const noexcept KRYS_LIFETIME_BOUND
+    {
+      return DOMStringAtom::Null();
+    }
+
+#pragma endregion
+  };
+}

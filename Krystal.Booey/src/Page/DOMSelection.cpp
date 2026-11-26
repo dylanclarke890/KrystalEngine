@@ -28,18 +28,18 @@
  */
 
 #include "Krystal.Booey/Page/DOMSelection.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/DOM/Ranges/Range.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Ranges/Range.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include <algorithm>
@@ -112,7 +112,7 @@ namespace krys::boo
     return range;
   }
 
-  dom::Position DOMSelection::AnchorPosition() const noexcept
+  Position DOMSelection::AnchorPosition() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -122,7 +122,7 @@ namespace krys::boo
     return frame->Document()->Selection().Selection().Anchor();
   }
 
-  dom::Position DOMSelection::FocusPosition() const noexcept
+  Position DOMSelection::FocusPosition() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -238,7 +238,7 @@ namespace krys::boo
     }
     auto &selection = frame->Document()->Selection();
     selection.DisassociateLiveRange();
-    selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(node), offset), Affinity::Downstream);
+    selection.MoveTo(CreateContainerOffsetPosition(ShareRefPtr(node), offset), Affinity::Downstream);
     return {};
   }
 
@@ -305,8 +305,8 @@ namespace krys::boo
     }
     auto &selection = document.Selection();
     selection.DisassociateLiveRange();
-    selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&anchorNode), anchorOffset),
-                     dom::MakeContainerOffsetPosition(ShareRefPtr(&focusNode), focusOffset),
+    selection.MoveTo(CreateContainerOffsetPosition(ShareRefPtr(&anchorNode), anchorOffset),
+                     CreateContainerOffsetPosition(ShareRefPtr(&focusNode), focusOffset),
                      Affinity::Downstream);
     return {};
   }
@@ -428,7 +428,7 @@ namespace krys::boo
     }
     auto &selection = frame->Document()->Selection();
     auto newSelection = selection.Selection();
-    newSelection.SetFocus(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), offset));
+    newSelection.SetFocus(CreateContainerOffsetPosition(ShareRefPtr(&node), offset));
     selection.DisassociateLiveRange();
     selection.SetSelection(newSelection);
     return {};
@@ -573,7 +573,7 @@ namespace krys::boo
     return range ? PlainText(*range, options) : DOMString();
   }
 
-  RefPtr<Node> DOMSelection::ShadowAdjustedNode(const dom::Position &position) const noexcept
+  RefPtr<Node> DOMSelection::ShadowAdjustedNode(const Position &position) const noexcept
   {
     if (position.IsNull())
     {
@@ -595,7 +595,7 @@ namespace krys::boo
     return ShareRefPtr(adjustedNode->ParentNode());
   }
 
-  uint32 DOMSelection::ShadowAdjustedOffset(const dom::Position &position) const noexcept
+  uint32 DOMSelection::ShadowAdjustedOffset(const Position &position) const noexcept
   {
     if (position.IsNull())
     {

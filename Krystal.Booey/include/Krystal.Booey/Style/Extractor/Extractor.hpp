@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/Extractor/ExtractorState.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Containers/Span.hpp"

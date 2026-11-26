@@ -32,7 +32,7 @@
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInput.hpp"
 #include "Krystal.Booey/Animation/Keyframes/KeyframeInterpolation.hpp"
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeOffset.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Layers/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Style/Interpolation/InterpolationClient.hpp"

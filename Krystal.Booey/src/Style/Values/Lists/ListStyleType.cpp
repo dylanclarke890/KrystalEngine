@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Style/Values/Lists/ListStyleType.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

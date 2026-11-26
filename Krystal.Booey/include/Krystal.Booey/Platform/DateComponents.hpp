@@ -148,31 +148,31 @@ namespace krys::boo
 
     /// @brief An ISO 8601 representation; @p format applies to the DateTimeLocal and Time types. With
     /// `SecondFormat::None`, a DateTimeLocal is a valid normalized local date and time string.
-    /// @see https://html.spec.whatwg.org/#valid-month-string
-    /// @see https://html.spec.whatwg.org/#valid-date-string
-    /// @see https://html.spec.whatwg.org/#valid-week-string
-    /// @see https://html.spec.whatwg.org/#valid-time-string
-    /// @see https://html.spec.whatwg.org/#valid-normalised-local-date-and-time-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-month-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-date-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-week-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-time-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#valid-normalised-local-date-and-time-string
     KRYS_NODISCARD utf8_string ToString(SecondFormat format = SecondFormat::None) const noexcept;
 
     /// @brief Sets year and month.
-    /// @see https://html.spec.whatwg.org/#parse-a-month-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-month-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingMonth(utf8_stringview source) noexcept;
 
     /// @brief Sets year, month and monthDay.
-    /// @see https://html.spec.whatwg.org/#parse-a-date-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-date-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingDate(utf8_stringview source) noexcept;
 
     /// @brief Sets year and week.
-    /// @see https://html.spec.whatwg.org/#parse-a-week-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-week-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingWeek(utf8_stringview source) noexcept;
 
     /// @brief Sets hour, minute, second and millisecond.
-    /// @see https://html.spec.whatwg.org/#parse-a-time-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-time-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingTime(utf8_stringview source) noexcept;
 
     /// @brief Sets year, month, monthDay, hour, minute, second and millisecond.
-    /// @see https://html.spec.whatwg.org/#parse-a-local-date-and-time-string
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-local-date-and-time-string
     KRYS_NODISCARD static Maybe<DateComponents> FromParsingDateTimeLocal(utf8_stringview source) noexcept;
 
     /// @brief For the Date type: sets the year, month and monthDay.
@@ -275,15 +275,15 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ParseTimeZone(detail::DateParsingBuffer &buffer) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#parse-a-month-component
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-month-component
     KRYS_NODISCARD bool ParseMonth(detail::DateParsingBuffer &buffer) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#parse-a-date-component
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-date-component
     KRYS_NODISCARD bool ParseDate(detail::DateParsingBuffer &buffer) noexcept;
 
     KRYS_NODISCARD bool ParseWeek(detail::DateParsingBuffer &buffer) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#parse-a-time-component
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#parse-a-time-component
     KRYS_NODISCARD bool ParseTime(detail::DateParsingBuffer &buffer) noexcept;
 
     KRYS_NODISCARD bool ParseDateTimeLocal(detail::DateParsingBuffer &buffer) noexcept;
@@ -307,7 +307,7 @@ namespace krys::boo
     void SetMillisecondsSinceMidnightInternal(double msInDay) noexcept;
 
     /// @brief The maximum week number in the year: 52 or 53.
-    /// @see https://html.spec.whatwg.org/#week-number-of-the-last-day
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#week-number-of-the-last-day
     KRYS_NODISCARD int MaxWeekNumberInYear() const noexcept;
 
     KRYS_NODISCARD bool AddDay(int dayDiff) noexcept;

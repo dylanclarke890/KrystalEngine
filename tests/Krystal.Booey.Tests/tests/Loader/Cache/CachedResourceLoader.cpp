@@ -1,0 +1,284 @@
+﻿#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include "Krystal.Image.Tests/TestImages.hpp"
+
+namespace krys::boo::tests
+{
+  namespace
+  {
+    KRYS_NODISCARD StyleImage *BackgroundImage(Element &element) noexcept
+    {
+      auto *renderer = element.Renderer();
+      REQUIRE(renderer);
+      auto image = renderer->Style().BackgroundLayers().UsedValues().begin()->GetImage().TryStyleImage();
+      return image.get();
+    }
+  }
+
+  TEST_CASE("CachedResourceLoader: a url() image loads once its renderer has style, and paints once it has",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///images/a.png"] = img::tests::images::PNG;
+    loader.Strategy.Defer = true;
+
+    PaintFixture fixture(u8"<!DOCTYPE html><div id=box style='width: 30px; height: 20px; background: "
+                         u8"url(file:///images/a.png)'>");
+    auto painted = fixture.Painted();
+    auto &box = *fixture.Document->GetElementById(u8"box");
+
+    REQUIRE(loader.Strategy.Requests == List<utf8_string> {u8"file:///images/a.png"});
+    auto *image = BackgroundImage(box);
+    REQUIRE(image);
+    CHECK_FALSE(image->IsPending());
+    REQUIRE(image->GetCachedImage());
+    CHECK(image->GetCachedImage()->IsLoading());
+    CHECK_FALSE(Contains(painted, u8"native-image"));
+
+    loader.Strategy.CompleteDeferred();
+    // The completion is a networking task.
+    CHECK(image->GetCachedImage()->IsLoading());
+    RunNetworkingTasks();
+
+    CHECK_FALSE(image->GetCachedImage()->IsLoading());
+    CHECK(image->GetCachedImage()->GetStatus() == CachedResource::Cached);
+    CHECK(image->HasImage());
+    CHECK(image->ImageSize(box.Renderer(), 1) == SizeF(3, 2));
+    CHECK(Contains(fixture.Painted(), u8"draw-pattern-native-image"));
+  }
+
+  TEST_CASE("CachedResourceLoader: images are shared through the memory cache",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///images/shared.png"] = img::tests::images::PNG;
+
+    PaintFixture fixture(
+      u8"<!DOCTYPE html>"
+      u8"<div id=a style='height: 10px; background: url(file:///images/shared.png)'></div>"
+      u8"<div id=b style='height: 10px; background: url(file:///images/shared.png)'></div>");
+    (void)fixture.Painted();
+    RunNetworkingTasks();
+
+    CHECK(loader.Strategy.Requests.size() == 1u);
+    auto *a = BackgroundImage(*fixture.Document->GetElementById(u8"a"));
+    auto *b = BackgroundImage(*fixture.Document->GetElementById(u8"b"));
+    REQUIRE(a);
+    REQUIRE(b);
+    CHECK(a->GetCachedImage() == b->GetCachedImage());
+    CHECK(a->GetCachedImage()->NumberOfClients() == 2u);
+    CHECK(MemoryCache::Singleton().ResourceForRequest(
+            net::ResourceRequest(net::Url(u8"file:///images/shared.png")))
+          == a->GetCachedImage());
+  }
+
+  TEST_CASE("CachedResourceLoader: failed loads and data that isn't an image",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    const uint8 text[] = "not an image";
+    loader.Strategy.Resources[u8"file:///images/text.png"] = Span<const uint8>(text);
+
+    PaintFixture fixture(
+      u8"<!DOCTYPE html>"
+      u8"<div id=missing style='height: 10px; background: url(file:///images/missing.png)'></div>"
+      u8"<div id=text style='height: 10px; background: url(file:///images/text.png)'></div>");
+    (void)fixture.Painted();
+    RunNetworkingTasks();
+
+    auto *missing = BackgroundImage(*fixture.Document->GetElementById(u8"missing"));
+    REQUIRE(missing);
+    CHECK(missing->ErrorOccurred());
+    REQUIRE(missing->GetCachedImage());
+    CHECK(missing->GetCachedImage()->GetStatus() == CachedResource::LoadError);
+    CHECK(missing->GetCachedImage()->GetResourceError().ErrorCode() == 404);
+
+    auto *notAnImage = BackgroundImage(*fixture.Document->GetElementById(u8"text"));
+    REQUIRE(notAnImage);
+    CHECK(notAnImage->ErrorOccurred());
+    CHECK(notAnImage->GetCachedImage()->GetStatus() == CachedResource::DecodeError);
+
+    CHECK_FALSE(Contains(fixture.Painted(), u8"native-image"));
+  }
+
+  TEST_CASE("CachedCSSStyleSheet: a response is a sheet only if its type is CSS or missing",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    auto serve = [&](utf8_stringview url, utf8_stringview mimeType, bool nosniff)
+    {
+      loader.Strategy.AddText(url, u8"p { color: red }", mimeType);
+      if (nosniff)
+      {
+        loader.Strategy.Headers[utf8_string(url)] = {{u8"X-Content-Type-Options", u8"nosniff"}};
+      }
+    };
+    serve(u8"https://example.com/plain.css", u8"text/plain", false);
+    serve(u8"https://example.com/nosniff-plain.css", u8"text/plain", true);
+    serve(u8"https://example.com/nosniff.css", u8"text/css", true);
+    serve(u8"https://example.com/upper.css", u8"TEXT/CSS", false);
+    serve(u8"https://example.com/untyped.css", u8"", false);
+
+    PaintFixture fixture(u8"<!DOCTYPE html>");
+    auto isSheet = [&](utf8_stringview url)
+    {
+      auto sheet = fixture.Document->GetCachedResourceLoader().RequestCSSStyleSheet(
+        CachedResourceRequest(net::ResourceRequest(net::Url(url))));
+      REQUIRE(sheet);
+      RunNetworkingTasks();
+      return (*sheet)->SheetText().has_value();
+    };
+
+    CHECK_FALSE(isSheet(u8"https://example.com/plain.css"));
+    CHECK_FALSE(isSheet(u8"https://example.com/nosniff-plain.css"));
+    CHECK(isSheet(u8"https://example.com/nosniff.css"));
+    CHECK(isSheet(u8"https://example.com/upper.css"));
+    CHECK(isSheet(u8"https://example.com/untyped.css"));
+  }
+
+  TEST_CASE("CachedResourceLoader: data URLs load without the host", "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+
+    PaintFixture fixture(
+      u8"<!DOCTYPE html><div id=box style='width: 6px; height: 4px; background: url(data:image/png;base64,"
+      + utf8_string(img::tests::images::PNGBase64) + u8")'>");
+    (void)fixture.Painted();
+    RunNetworkingTasks();
+
+    CHECK(loader.Strategy.Requests.empty());
+    auto *image = BackgroundImage(*fixture.Document->GetElementById(u8"box"));
+    REQUIRE(image);
+    CHECK(image->HasImage());
+    CHECK(image->UsesDataProtocol());
+    CHECK(Contains(fixture.Painted(), u8"draw-pattern-native-image"));
+  }
+
+  TEST_CASE("CachedResourceLoader: without a loader strategy, loads fail", "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    PlatformStrategies::Singleton().SetLoaderStrategy(nullptr);
+
+    PaintFixture fixture(
+      u8"<!DOCTYPE html><div id=box style='height: 10px; background: url(file:///images/nowhere.png)'>");
+    (void)fixture.Painted();
+
+    auto *image = BackgroundImage(*fixture.Document->GetElementById(u8"box"));
+    REQUIRE(image);
+    CHECK_FALSE(image->IsPending());
+    // The request fails before it starts, so there's no cached image.
+    CHECK_FALSE(image->GetCachedImage());
+  }
+
+  TEST_CASE("CachedResourceLoader: a load schedules a rendering update", "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///images/update.png"] = img::tests::images::PNG;
+
+    auto page = boo::Frame::Create();
+    auto &frame = *page;
+    frame.CreateView({200, 100});
+    auto document = CreateRef<HTMLDocument>();
+    frame.SetDocument(ShareRefPtr<boo::Document>(document.get()));
+    auto parser = CreateRef<html::DocumentParser>(*document);
+    parser->InputStream().Append(
+      u8"<!DOCTYPE html><div style='height: 10px; background: url(file:///images/update.png)'></div>",
+      IsEOF::Yes);
+    parser->PumpTokenizer();
+    document->StyleScope().FlushPendingUpdate();
+    page->UpdateRendering();
+    CHECK_FALSE(page->IsRenderingUpdateScheduled());
+
+    RunNetworkingTasks();
+    CHECK(page->IsRenderingUpdateScheduled());
+  }
+
+  TEST_CASE("MemoryCache: prunes resources nothing uses when it's over capacity", "[Loader][MemoryCache]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///images/dead.png"] = img::tests::images::PNG;
+
+    PaintFixture fixture(u8"<!DOCTYPE html>");
+    auto &resourceLoader = fixture.Document->GetCachedResourceLoader();
+    {
+      auto image = resourceLoader.RequestImage(
+        CachedResourceRequest(net::ResourceRequest(net::Url(u8"file:///images/dead.png")),
+                              CachedResourceLoader::DefaultCachedResourceOptions()));
+      REQUIRE(image);
+      RunNetworkingTasks();
+      CHECK((*image)->InCache());
+    }
+    resourceLoader.GarbageCollectDocumentResources();
+
+    auto &memoryCache = MemoryCache::Singleton();
+    const net::ResourceRequest request(net::Url(u8"file:///images/dead.png"));
+    REQUIRE(memoryCache.ResourceForRequest(request));
+    CHECK(memoryCache.DeadSize() > 0u);
+
+    memoryCache.SetCapacities(0, 0, 0);
+    CHECK_FALSE(memoryCache.ResourceForRequest(request));
+    CHECK(memoryCache.Size() == 0u);
+    memoryCache.SetCapacities(0, 8'192 * 1'024, 8'192 * 1'024);
+  }
+
+  TEST_CASE("CachedResourceLoader: a list marker image is laid out at its size once it loads",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///images/marker.png"] = img::tests::images::PNG;
+
+    PaintFixture fixture(u8"<!DOCTYPE html><ul style='list-style: url(file:///images/marker.png) inside'><li "
+                         u8"id=item style='height: "
+                         u8"24px'></li></ul>");
+    CHECK_FALSE(Contains(fixture.Painted(), u8"native-image"));
+    RunNetworkingTasks();
+
+    auto painted = fixture.Painted();
+    CHECK(Contains(painted, u8"draw-native-image"));
+    CHECK(Contains(painted, u8"(dest-rect at (48,"));
+    CHECK(Contains(painted, u8"size 3x2)"));
+  }
+
+  TEST_CASE("CachedResourceLoader: the frame's cache policy reloads cached resources once per document",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 10px }");
+    constexpr utf8_stringview markup = u8"<link rel=stylesheet href='file:///a.css'>"
+                                       u8"<style>@import 'file:///a.css';</style><div id=box></div>";
+
+    {
+      PageInFrameFixture first {utf8_string(markup)};
+      RunNetworkingTasks();
+      CHECK(first.RendererSize(u8"box") == SizeI(10, 0));
+    }
+    // A document uses what's in the memory cache.
+    {
+      PageInFrameFixture second {utf8_string(markup)};
+      RunNetworkingTasks();
+      CHECK(loader.Strategy.Requests.size() == 1u);
+    }
+    // Reloading loads it again, once for the document.
+    loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 20px }");
+    {
+      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Reload};
+      RunNetworkingTasks();
+      CHECK(loader.Strategy.Requests.size() == 2u);
+      CHECK(reloaded.RendererSize(u8"box") == SizeI(20, 0));
+    }
+  }
+}

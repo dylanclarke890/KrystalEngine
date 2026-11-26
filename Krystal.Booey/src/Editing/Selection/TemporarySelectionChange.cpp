@@ -26,7 +26,7 @@
  */
 
 #include "Krystal.Booey/Editing/Selection/TemporarySelectionChange.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include <utility>

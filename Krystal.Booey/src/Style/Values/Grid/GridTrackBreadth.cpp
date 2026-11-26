@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Style/Values/Grid/GridTrackBreadth.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"

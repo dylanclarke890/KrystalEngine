@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Style/Values/Fonts/FontVariantEastAsian.hpp"
 
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 

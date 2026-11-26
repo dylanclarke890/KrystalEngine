@@ -456,10 +456,10 @@ namespace krys::ui
     }
 
     // Repeat the array to ensure even number of dash array elements, see e.g. 'stroke-dasharray' spec.
-    const size_t count = dashArray.size() % 2 == 1 ? dashArray.size() * 2 : dashArray.size();
-    for (size_t i = 0; i < count; ++i)
+    const size_t repeats = dashArray.size() % 2 == 1 ? 2 : 1;
+    for (size_t i = 0; i < repeats; ++i)
     {
-      _stroke.Dashes.push_back(dashArray[i % dashArray.size()]);
+      _stroke.Dashes.append_range(dashArray);
     }
     _stroke.DashOffset = dashOffset;
   }

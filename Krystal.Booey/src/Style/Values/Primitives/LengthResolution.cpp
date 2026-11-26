@@ -23,12 +23,12 @@
  */
 
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/Units.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/CSS/Values/Units.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Units.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Css/Values/Units.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Rendering/Grid/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"

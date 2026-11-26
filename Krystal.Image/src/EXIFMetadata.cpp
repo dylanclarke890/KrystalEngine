@@ -168,7 +168,7 @@ namespace krys::img
 
     // The preferred density-corrected dimensions are the pixel dimensions in the EXIF directory, when the
     // resolution (in inches) scales the image's physical size to exactly them. See
-    // https://html.spec.whatwg.org/#preparing-an-image-for-presentation.
+    // https://html.spec.whatwg.org/multipage/images.html#preparing-an-image-for-presentation.
     auto exifDirectoryOffset = integerOf(firstDirectory, Tag::EXIFDirectory);
     if (!exifDirectoryOffset || *exifDirectoryOffset == *firstDirectoryOffset
         || integerOf(firstDirectory, Tag::ResolutionUnit) != ResolutionUnitInches)

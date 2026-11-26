@@ -6,7 +6,7 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-### [13.5 Named character references](https://html.spec.whatwg.org/#named-character-references)
+### [13.5 Named character references](https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references)
 
 Status: reviewed (2026-11-02)
 > `NamedCharacterReferences` in `CharacterReference.hpp`: all 2,231 names with their code points, checked against the specification's JSON, kept sorted for searching (a `static_assert` checks the order).

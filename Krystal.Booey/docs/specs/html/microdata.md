@@ -6,65 +6,65 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [5 Microdata](https://html.spec.whatwg.org/#microdata)
+## [5 Microdata](https://html.spec.whatwg.org/multipage/microdata.html#microdata)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-### [5.1 Introduction](https://html.spec.whatwg.org/#introduction-7)
+### [5.1 Introduction](https://html.spec.whatwg.org/multipage/microdata.html#introduction-7)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.1.1 Overview](https://html.spec.whatwg.org/#overview)
+#### [5.1.1 Overview](https://html.spec.whatwg.org/multipage/microdata.html#overview)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.1.2 The basic syntax](https://html.spec.whatwg.org/#the-basic-syntax)
+#### [5.1.2 The basic syntax](https://html.spec.whatwg.org/multipage/microdata.html#the-basic-syntax)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.1.3 Typed items](https://html.spec.whatwg.org/#typed-items)
+#### [5.1.3 Typed items](https://html.spec.whatwg.org/multipage/microdata.html#typed-items)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.1.4 Global identifiers for items](https://html.spec.whatwg.org/#global-identifiers-for-items)
+#### [5.1.4 Global identifiers for items](https://html.spec.whatwg.org/multipage/microdata.html#global-identifiers-for-items)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.1.5 Selecting names when defining vocabularies](https://html.spec.whatwg.org/#selecting-names-when-defining-vocabularies)
+#### [5.1.5 Selecting names when defining vocabularies](https://html.spec.whatwg.org/multipage/microdata.html#selecting-names-when-defining-vocabularies)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-### [5.2 Encoding microdata](https://html.spec.whatwg.org/#encoding-microdata)
+### [5.2 Encoding microdata](https://html.spec.whatwg.org/multipage/microdata.html#encoding-microdata)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.2.1 The microdata model](https://html.spec.whatwg.org/#the-microdata-model)
+#### [5.2.1 The microdata model](https://html.spec.whatwg.org/multipage/microdata.html#the-microdata-model)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.2.2 Items](https://html.spec.whatwg.org/#items)
+#### [5.2.2 Items](https://html.spec.whatwg.org/multipage/microdata.html#items)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: attr-itemscope concept-item attr-itemtype relevant-types support-global-identifiers-for-items attr-itemid attr-itemref -->
 
-- [x] [item types](https://html.spec.whatwg.org/#item-types) — The item types of an item are the tokens obtained by splitting the element's itemtype attribute's value on ASCII whitespace. If the itemtype attribute is missing or parsing it in this way finds no tokens, the item is said to have no item types.
+- [x] [item types](https://html.spec.whatwg.org/multipage/microdata.html#item-types) — The item types of an item are the tokens obtained by splitting the element's itemtype attribute's value on ASCII whitespace. If the itemtype attribute is missing or parsing it in this way finds no tokens, the item is said to have no item types.
 
-- [x] [typed item](https://html.spec.whatwg.org/#typed-item) — An item is said to be a typed item when either it has an item type, or it is the value of a property of a typed item. The relevant types for a typed item is the item's item types, if it has any, or else is the relevant types of the item for which it is a property's value.
+- [x] [typed item](https://html.spec.whatwg.org/multipage/microdata.html#typed-item) — An item is said to be a typed item when either it has an item type, or it is the value of a property of a typed item. The relevant types for a typed item is the item's item types, if it has any, or else is the relevant types of the item for which it is a property's value.
 
-- [x] [global identifier](https://html.spec.whatwg.org/#global-identifier) — The global identifier of an item is the value of its element's itemid attribute, if it has one, parsed relative to the node document of the element on which the attribute is specified. If the itemid attribute is missing or if parsing it returns failure, it is said to have no global identifier.
+- [x] [global identifier](https://html.spec.whatwg.org/multipage/microdata.html#global-identifier) — The global identifier of an item is the value of its element's itemid attribute, if it has one, parsed relative to the node document of the element on which the attribute is specified. If the itemid attribute is missing or if parsing it returns failure, it is said to have no global identifier.
 
-#### [5.2.3 Names: the itemprop attribute](https://html.spec.whatwg.org/#names:-the-itemprop-attribute)
+#### [5.2.3 Names: the itemprop attribute](https://html.spec.whatwg.org/multipage/microdata.html#names:-the-itemprop-attribute)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: defined-property-name -->
 
-- [x] [property names](https://html.spec.whatwg.org/#property-names) — The property names of an element are the tokens that the element's itemprop attribute is found to contain when its value is split on ASCII whitespace, with the order preserved but with duplicates removed (leaving only the first occurrence of each name).
+- [x] [property names](https://html.spec.whatwg.org/multipage/microdata.html#property-names) — The property names of an element are the tokens that the element's itemprop attribute is found to contain when its value is split on ASCII whitespace, with the order preserved but with duplicates removed (leaving only the first occurrence of each name).
 
-#### [5.2.4 Values](https://html.spec.whatwg.org/#values)
+#### [5.2.4 Values](https://html.spec.whatwg.org/multipage/microdata.html#values)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-- [x] [property value](https://html.spec.whatwg.org/#concept-property-value) — The property value of a name-value pair added by an element with an itemprop attribute is as given for the first matching case in the following list:
+- [x] [property value](https://html.spec.whatwg.org/multipage/microdata.html#concept-property-value) — The property value of a name-value pair added by an element with an itemprop attribute is as given for the first matching case in the following list:
   - • If the element also has an itemscope attribute: The value is the item created by the element.
   - • If the element is a meta element: The value is the value of the element's content attribute, if any, or the empty string if there is no such attribute.
   - • If the element is an audio, embed, iframe, img, source, track, or video element: The value is the result of encoding-parsing-and-serializing a URL given the element's src attribute's value, relative to the element's node document, at the time the attribute is set, or the empty string if there is no such attribute or the result is failure.
@@ -75,14 +75,14 @@ Status: n/a (microdata isn't processed, as in browsers)
   - • If the element is a time element: The value is the element's datetime value.
   - • Otherwise: The value is the element's descendant text content.
 
-- [x] [URL property elements](https://html.spec.whatwg.org/#url-property-elements) — The URL property elements are the a, area, audio, embed, iframe, img, link, object, source, track, and video elements.
+- [x] [URL property elements](https://html.spec.whatwg.org/multipage/microdata.html#url-property-elements) — The URL property elements are the a, area, audio, embed, iframe, img, link, object, source, track, and video elements.
 
-#### [5.2.5 Associating names with items](https://html.spec.whatwg.org/#associating-names-with-items)
+#### [5.2.5 Associating names with items](https://html.spec.whatwg.org/multipage/microdata.html#associating-names-with-items)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: microdata-error -->
 
-- [x] [the properties of an item](https://html.spec.whatwg.org/#the-properties-of-an-item) — To find the properties of an item defined by the element root, the user agent must run the following steps. These steps are also used to flag microdata errors.
+- [x] [the properties of an item](https://html.spec.whatwg.org/multipage/microdata.html#the-properties-of-an-item) — To find the properties of an item defined by the element root, the user agent must run the following steps. These steps are also used to flag microdata errors.
   - 1. Let results, memory, and pending be empty lists of elements.
   - 2. Add the element root to memory.
   - 3. Add the child elements of root, if any, to pending.
@@ -96,28 +96,28 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 6. Sort results in tree order.
   - 7. Return results.
 
-- [x] [top-level microdata item](https://html.spec.whatwg.org/#top-level-microdata-items) — An item is a top-level microdata item if its element does not have an itemprop attribute.
+- [x] [top-level microdata item](https://html.spec.whatwg.org/multipage/microdata.html#top-level-microdata-items) — An item is a top-level microdata item if its element does not have an itemprop attribute.
 
-#### [5.2.6 Microdata and other namespaces](https://html.spec.whatwg.org/#microdata-and-other-namespaces)
-
-Status: n/a (microdata isn't processed, as in browsers)
-
-### [5.3 Sample microdata vocabularies](https://html.spec.whatwg.org/#mdvocabs)
+#### [5.2.6 Microdata and other namespaces](https://html.spec.whatwg.org/multipage/microdata.html#microdata-and-other-namespaces)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.3.1 vCard](https://html.spec.whatwg.org/#vcard)
+### [5.3 Sample microdata vocabularies](https://html.spec.whatwg.org/multipage/microdata.html#mdvocabs)
+
+Status: n/a (microdata isn't processed, as in browsers)
+
+#### [5.3.1 vCard](https://html.spec.whatwg.org/multipage/microdata.html#vcard)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: md-vcard md-vcard-kind md-vcard-fn md-vcard-n md-vcard-n-family-name md-vcard-n-given-name md-vcard-n-additional-name md-vcard-n-honorific-prefix md-vcard-n-honorific-suffix md-vcard-nickname md-vcard-photo md-vcard-bday md-vcard-anniversary md-vcard-sex md-vcard-gender-identity md-vcard-adr md-vcard-adr-type md-vcard-adr-post-office-box md-vcard-adr-extended-address md-vcard-adr-street-address md-vcard-adr-locality md-vcard-adr-region md-vcard-adr-postal-code md-vcard-adr-country-name md-vcard-tel md-vcard-tel-type md-vcard-tel-value md-vcard-email md-vcard-impp md-vcard-lang md-vcard-tz md-vcard-geo md-vcard-title md-vcard-role md-vcard-logo md-vcard-agent md-vcard-org md-vcard-org-organization-name md-vcard-org-organization-unit md-vcard-member md-vcard-related md-vcard-related-url md-vcard-related-rel md-vcard-categories md-vcard-note md-vcard-rev md-vcard-sound md-vcard-uid md-vcard-url kind-strings md-vcard-kind-individual md-vcard-kind-group md-vcard-kind-org md-vcard-kind-location address-type-strings md-vcard-type-adr-home md-vcard-type-adr-work telephone-type-strings md-vcard-type-tel-home md-vcard-type-tel-work md-vcard-type-tel-text md-vcard-type-tel-voice md-vcard-type-tel-fax md-vcard-type-tel-cell md-vcard-type-tel-video md-vcard-type-tel-pager md-vcard-type-tel-textphone relationship-strings md-vcard-rel-emergency md-vcard-rel-agent md-vcard-rel-contact md-vcard-rel-acquaintance md-vcard-rel-friend md-vcard-rel-met md-vcard-rel-co-worker md-vcard-rel-colleague md-vcard-rel-co-resident md-vcard-rel-neighbor md-vcard-rel-child md-vcard-rel-parent md-vcard-rel-sibling md-vcard-rel-spouse md-vcard-rel-kin md-vcard-rel-muse md-vcard-rel-crush md-vcard-rel-date md-vcard-rel-sweetheart md-vcard-rel-me -->
 
-- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/#concept-property-value) — The value must be text and must match the following syntax:
+- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/multipage/microdata.html#concept-property-value) — The value must be text and must match the following syntax:
   - 1. Either a U+002B PLUS SIGN character (+) or a U+002D HYPHEN-MINUS character (-).
   - 2. A valid non-negative integer that is exactly two digits long and that represents a number in the range 00..23.
   - 3. A U+003A COLON character (:).
   - 4. A valid non-negative integer that is exactly two digits long and that represents a number in the range 00..59.
 
-- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/#concept-property-value) — The value must be text and must match the following syntax:
+- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/multipage/microdata.html#concept-property-value) — The value must be text and must match the following syntax:
   - 1. Optionally, either a U+002B PLUS SIGN character (+) or a U+002D HYPHEN-MINUS character (-).
   - 2. One or more ASCII digits.
   - 3. Optionally*, a U+002E FULL STOP character (.) followed by one or more ASCII digits.
@@ -126,11 +126,11 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 6. One or more ASCII digits.
   - 7. Optionally*, a U+002E FULL STOP character (.) followed by one or more ASCII digits.
 
-##### [5.3.1.1 Conversion to vCard](https://html.spec.whatwg.org/#conversion-to-vcard)
+##### [5.3.1.1 Conversion to vCard](https://html.spec.whatwg.org/multipage/microdata.html#conversion-to-vcard)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-- [x] [extract any vCard data represented by those nodes](https://html.spec.whatwg.org/#extracting-a-vcard) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract any vCard data represented by those nodes (only the first vCard is returned):
+- [x] [extract any vCard data represented by those nodes](https://html.spec.whatwg.org/multipage/microdata.html#extracting-a-vcard) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract any vCard data represented by those nodes (only the first vCard is returned):
   - 1. If none of the nodes in nodes are items with the item type http://microformats.org/profile/hcard, then there is no vCard. Abort the algorithm, returning nothing.
   - 2. Let node be the first node in nodes that is an item with the item type http://microformats.org/profile/hcard.
   - 3. Let output be an empty string.
@@ -193,7 +193,7 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 12. If either sex or gender-identity has a value that is not the empty string, add a vCard line with the type "GENDER" and the value consisting of the concatenation of sex, a U+003B SEMICOLON character (;), and gender-identity to output.
   - 13. Add a vCard line with the type "END" and the value "VCARD" to output.
 
-- [x] [add a vCard line](https://html.spec.whatwg.org/#add-a-vcard-line) — When the above algorithm says that the user agent is to add a vCard line consisting of a type type, optionally some parameters, and a value value to a string output, it must run the following steps:
+- [x] [add a vCard line](https://html.spec.whatwg.org/multipage/microdata.html#add-a-vcard-line) — When the above algorithm says that the user agent is to add a vCard line consisting of a type type, optionally some parameters, and a value value to a string output, it must run the following steps:
   - 1. Let line be an empty string.
   - 2. Append type, converted to ASCII uppercase, to line.
   - 3. If there are any parameters, then for each parameter, in the order that they were added, run these substeps:
@@ -215,7 +215,7 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 9. Append a U+000D CARRIAGE RETURN character (CR) to output.
   - 10. Append a U+000A LINE FEED character (LF) to output.
 
-- [x] [collecting vCard subproperties](https://html.spec.whatwg.org/#collecting-vcard-subproperties) — When the steps above require the user agent to obtain the result of collecting vCard subproperties named subname in subitem, the user agent must run the following steps:
+- [x] [collecting vCard subproperties](https://html.spec.whatwg.org/multipage/microdata.html#collecting-vcard-subproperties) — When the steps above require the user agent to obtain the result of collecting vCard subproperties named subname in subitem, the user agent must run the following steps:
   - 1. Let value be the empty string.
   - 2. For each property named subname in the item subitem, run the following substeps:
     - 2a. If the value of the property is itself an item, then skip this property.
@@ -223,12 +223,12 @@ Status: n/a (microdata isn't processed, as in browsers)
     - 2c. Append the result of escaping the vCard text string given by the value of the property to value.
   - 3. Return value.
 
-- [x] [collecting the first vCard subproperty](https://html.spec.whatwg.org/#collecting-the-first-vcard-subproperty) — When the steps above require the user agent to obtain the result of collecting the first vCard subproperty named subname in subitem, the user agent must run the following steps:
+- [x] [collecting the first vCard subproperty](https://html.spec.whatwg.org/multipage/microdata.html#collecting-the-first-vcard-subproperty) — When the steps above require the user agent to obtain the result of collecting the first vCard subproperty named subname in subitem, the user agent must run the following steps:
   - 1. If there are no properties named subname in subitem, then return the empty string.
   - 2. If the value of the first property named subname in subitem is an item, then return the empty string.
   - 3. Return the result of escaping the vCard text string given by the value of the first property named subname in subitem.
 
-- [x] [escape the vCard text string](https://html.spec.whatwg.org/#escaping-the-vcard-text-string) — When the above algorithms say the user agent is to escape the vCard text string value, the user agent must use the following steps:
+- [x] [escape the vCard text string](https://html.spec.whatwg.org/multipage/microdata.html#escaping-the-vcard-text-string) — When the above algorithms say the user agent is to escape the vCard text string value, the user agent must use the following steps:
   - 1. Prefix every U+005C REVERSE SOLIDUS character (\) in value with another U+005C REVERSE SOLIDUS character (\).
   - 2. Prefix every U+002C COMMA character (,) in value with a U+005C REVERSE SOLIDUS character (\).
   - 3. Prefix every U+003B SEMICOLON character (;) in value with a U+005C REVERSE SOLIDUS character (\).
@@ -236,16 +236,16 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 5. Replace every remaining U+000D CARRIAGE RETURN (CR) or U+000A LINE FEED (LF) character in value with a U+005C REVERSE SOLIDUS character (\) followed by a U+006E LATIN SMALL LETTER N character (n).
   - 6. Return the mutated value.
 
-##### [5.3.1.2 Examples](https://html.spec.whatwg.org/#examples-2)
+##### [5.3.1.2 Examples](https://html.spec.whatwg.org/multipage/microdata.html#examples-2)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.3.2 vEvent](https://html.spec.whatwg.org/#vevent)
+#### [5.3.2 vEvent](https://html.spec.whatwg.org/multipage/microdata.html#vevent)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: md-vevent md-vevent-attach md-vevent-categories md-vevent-class md-vevent-comment md-vevent-description md-vevent-geo md-vevent-location md-vevent-resources md-vevent-status md-vevent-summary md-vevent-dtend md-vevent-dtstart md-vevent-duration md-vevent-transp md-vevent-contact md-vevent-url md-vevent-uid md-vevent-exdate md-vevent-rdate md-vevent-rrule md-vevent-created md-vevent-last-modified md-vevent-sequence -->
 
-- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/#concept-property-value) — The value must be text and must match the following syntax:
+- [x] [The value must be text and must match the following syntax](https://html.spec.whatwg.org/multipage/microdata.html#concept-property-value) — The value must be text and must match the following syntax:
   - 1. Optionally, either a U+002B PLUS SIGN character (+) or a U+002D HYPHEN-MINUS character (-).
   - 2. One or more ASCII digits.
   - 3. Optionally*, a U+002E FULL STOP character (.) followed by one or more ASCII digits.
@@ -254,7 +254,7 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 6. One or more ASCII digits.
   - 7. Optionally*, a U+002E FULL STOP character (.) followed by one or more ASCII digits.
 
-- [x] [valid vevent duration string](https://html.spec.whatwg.org/#valid-vevent-duration-string) — A string is a valid vevent duration string if it matches the following pattern:
+- [x] [valid vevent duration string](https://html.spec.whatwg.org/multipage/microdata.html#valid-vevent-duration-string) — A string is a valid vevent duration string if it matches the following pattern:
   - 1. A U+0050 LATIN CAPITAL LETTER P character (P).
   - 2. One of the following: A valid non-negative integer followed by a U+0057 LATIN CAPITAL LETTER W character (W). The integer represents a duration of that number of weeks.; At least one, and possible both in this order, of the following:
     - 2a. A valid non-negative integer followed by a U+0044 LATIN CAPITAL LETTER D character (D). The integer represents a duration of that number of days.
@@ -263,11 +263,11 @@ Status: n/a (microdata isn't processed, as in browsers)
       - 2b.ii. A valid non-negative integer followed by a U+004D LATIN CAPITAL LETTER M character (M). The integer represents a duration of that number of minutes.
       - 2b.iii. A valid non-negative integer followed by a U+0053 LATIN CAPITAL LETTER S character (S). The integer represents a duration of that number of seconds.
 
-##### [5.3.2.1 Conversion to iCalendar](https://html.spec.whatwg.org/#conversion-to-icalendar)
+##### [5.3.2.1 Conversion to iCalendar](https://html.spec.whatwg.org/multipage/microdata.html#conversion-to-icalendar)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-- [x] [extract any vEvent data represented by those nodes](https://html.spec.whatwg.org/#extracting-vevent-data) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract any vEvent data represented by those nodes:
+- [x] [extract any vEvent data represented by those nodes](https://html.spec.whatwg.org/multipage/microdata.html#extracting-vevent-data) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract any vEvent data represented by those nodes:
   - 1. If none of the nodes in nodes are items with the type http://microformats.org/profile/hcalendar#vevent, then there is no vEvent data. Abort the algorithm, returning nothing.
   - 2. Let output be an empty string.
   - 3. Add an iCalendar line with the type "BEGIN" and the value "VCALENDAR" to output.
@@ -280,7 +280,7 @@ Status: n/a (microdata isn't processed, as in browsers)
     - 6d. Add an iCalendar line with the type "END" and the value "VEVENT" to output.
   - 7. Add an iCalendar line with the type "END" and the value "VCALENDAR" to output.
 
-- [x] [add an iCalendar line](https://html.spec.whatwg.org/#add-an-icalendar-line) — When the above algorithm says that the user agent is to add an iCalendar line consisting of a type type, a value value, and optionally an annotation, to a string output, it must run the following steps:
+- [x] [add an iCalendar line](https://html.spec.whatwg.org/multipage/microdata.html#add-an-icalendar-line) — When the above algorithm says that the user agent is to add an iCalendar line consisting of a type type, a value value, and optionally an annotation, to a string output, it must run the following steps:
   - 1. Let line be an empty string.
   - 2. Append type, converted to ASCII uppercase, to line.
   - 3. If there is an annotation:
@@ -305,35 +305,35 @@ Status: n/a (microdata isn't processed, as in browsers)
   - 14. Append a U+000D CARRIAGE RETURN character (CR) to output.
   - 15. Append a U+000A LINE FEED character (LF) to output.
 
-##### [5.3.2.2 Examples](https://html.spec.whatwg.org/#examples-3)
+##### [5.3.2.2 Examples](https://html.spec.whatwg.org/multipage/microdata.html#examples-3)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.3.3 Licensing works](https://html.spec.whatwg.org/#licensing-works)
+#### [5.3.3 Licensing works](https://html.spec.whatwg.org/multipage/microdata.html#licensing-works)
 
 Status: n/a (microdata isn't processed, as in browsers)
 <!-- definitions: md-work md-work-work md-work-title md-work-author md-work-license -->
 
-##### [5.3.3.1 Examples](https://html.spec.whatwg.org/#examples-4)
+##### [5.3.3.1 Examples](https://html.spec.whatwg.org/multipage/microdata.html#examples-4)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-### [5.4 Converting HTML to other formats](https://html.spec.whatwg.org/#converting-html-to-other-formats)
+### [5.4 Converting HTML to other formats](https://html.spec.whatwg.org/multipage/microdata.html#converting-html-to-other-formats)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-#### [5.4.1 JSON](https://html.spec.whatwg.org/#json)
+#### [5.4.1 JSON](https://html.spec.whatwg.org/multipage/microdata.html#json)
 
 Status: n/a (microdata isn't processed, as in browsers)
 
-- [x] [extract the microdata from those nodes into a JSON form](https://html.spec.whatwg.org/#extracting-json) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract the microdata from those nodes into a JSON form:
+- [x] [extract the microdata from those nodes into a JSON form](https://html.spec.whatwg.org/multipage/microdata.html#extracting-json) — Given a list of nodes nodes in a Document, a user agent must run the following algorithm to extract the microdata from those nodes into a JSON form:
   - 1. Let result be an empty object.
   - 2. Let items be an empty array.
   - 3. For each node in nodes, check if the element is a top-level microdata item, and if it is then get the object for that element and add it to items.
   - 4. Add an entry to result called "items" whose value is the array items.
   - 5. Return the result of serializing result to JSON in the shortest possible way (meaning no whitespace between tokens, no unnecessary zero digits in numbers, and only using Unicode escapes in strings for characters that do not have a dedicated escape sequence), and with a lowercase "e" used, when appropriate, in the representation of any numbers. [JSON]
 
-- [x] [get the object](https://html.spec.whatwg.org/#get-the-object) — When the user agent is to get the object for an item item, optionally with a list of elements memory, it must run the following substeps:
+- [x] [get the object](https://html.spec.whatwg.org/multipage/microdata.html#get-the-object) — When the user agent is to get the object for an item item, optionally with a list of elements memory, it must run the following substeps:
   - 1. Let result be an empty object.
   - 2. If no memory was passed to the algorithm, let memory be an empty list.
   - 3. Add item to memory.

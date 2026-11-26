@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
 #include "Krystal.Booey/Loader/Icons/LinkIcon.hpp"
 #include "Krystal.Core/Attributes.hpp"

@@ -47,13 +47,13 @@ namespace krys::boo
 
     // This data is transient and should be cleared at the end of the doApply function.
     VisibleSelection _selectionToDelete;
-    dom::Position _upstreamStart;
-    dom::Position _downstreamStart;
-    dom::Position _upstreamEnd;
-    dom::Position _downstreamEnd;
-    dom::Position _endingPosition;
-    dom::Position _leadingWhitespace;
-    dom::Position _trailingWhitespace;
+    Position _upstreamStart;
+    Position _downstreamStart;
+    Position _upstreamEnd;
+    Position _downstreamEnd;
+    Position _endingPosition;
+    Position _leadingWhitespace;
+    Position _trailingWhitespace;
     RefPtr<boo::Node> _startBlock;
     RefPtr<boo::Node> _endBlock;
     RefPtr<EditingStyle> _typingStyle;
@@ -89,9 +89,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool PreservesTypingStyle() const noexcept override;
 
-    void InitializeStartEnd(dom::Position &start, dom::Position &end) noexcept;
+    void InitializeStartEnd(Position &start, Position &end) noexcept;
 
-    void SetStartingSelectionOnSmartDelete(const dom::Position &start, const dom::Position &end) noexcept;
+    void SetStartingSelectionOnSmartDelete(const Position &start, const Position &end) noexcept;
 
     bool InitializePositionData() noexcept;
 

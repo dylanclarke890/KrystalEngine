@@ -22,15 +22,15 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGResourceImage.hpp"
-#include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGResourceImage.hpp"
+#include "Krystal.Booey/Svg/SVGURIReference.hpp"
 
 namespace krys::boo
 {
@@ -114,7 +114,7 @@ namespace krys::boo
   }
 
   LegacyRenderSVGResourceContainer *
-    StyleCachedImage::UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &treeScope,
+    StyleCachedImage::UncheckedRenderSVGResource(DocumentOrShadowRoot &treeScope,
                                                  const DOMStringAtom &fragment) const noexcept
   {
     auto *renderSVGResource = ReferencedSVGResources::ReferencedRenderResource(treeScope, fragment);

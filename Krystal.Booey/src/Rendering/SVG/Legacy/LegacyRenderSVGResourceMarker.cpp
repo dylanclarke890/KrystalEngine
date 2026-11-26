@@ -26,9 +26,9 @@
 #include "Krystal.Booey/Rendering/Painting/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGMarkerElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
-#include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGMarkerElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/SVGNames.hpp"
 
 namespace krys::boo
 {

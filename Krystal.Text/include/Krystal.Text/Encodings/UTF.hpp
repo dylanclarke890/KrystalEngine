@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Endian.hpp"
 #include "Krystal.Text/Encodings/Base.hpp"
 
 namespace krys::text

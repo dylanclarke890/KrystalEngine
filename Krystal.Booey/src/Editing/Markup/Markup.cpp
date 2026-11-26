@@ -27,34 +27,34 @@
  */
 
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
-#include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
-#include "Krystal.Booey/DOM/Nodes/Comment.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentType.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/Dom/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Attr.hpp"
+#include "Krystal.Booey/Dom/Nodes/Comment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Markup/MarkupAccumulator.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
@@ -62,7 +62,7 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Booey/Xml/XMLDocumentParser.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
 #include <algorithm>
@@ -184,8 +184,8 @@ namespace krys::boo
         DoNotEmitString,
       };
 
-      dom::Position _start;
-      dom::Position _end;
+      Position _start;
+      Position _end;
       List<utf8_string> _reversedPrecedingMarkup;
       const AnnotateForInterchange _annotate;
       RefPtr<Node> _highestNodeToBeSerialized;
@@ -202,7 +202,7 @@ namespace krys::boo
       bool _hasAppendedAnyText {false};
 
     public:
-      StyledMarkupAccumulator(const dom::Position &start, dom::Position end, List<Ref<Node>> *nodes,
+      StyledMarkupAccumulator(const Position &start, Position end, List<Ref<Node>> *nodes,
                               ResolveUrls resolveUrls, SerializeComposedTree serializeComposedTree,
                               IgnoreUserSelectNone ignoreUserSelectNone, AnnotateForInterchange annotate,
                               StandardFontFamilySerializationMode standardFontFamilySerializationMode,
@@ -222,7 +222,7 @@ namespace krys::boo
       {
       }
 
-      RefPtr<Node> SerializeNodes(const dom::Position &start, const dom::Position &end) noexcept;
+      RefPtr<Node> SerializeNodes(const Position &start, const Position &end) noexcept;
 
       void WrapWithNode(Node &node, bool convertBlocksToInlines = false,
                         RangeFullySelectsNode rangeFullySelectsNode = DoesFullySelectNode) noexcept;
@@ -519,7 +519,7 @@ namespace krys::boo
                                  }
 
                                  auto enclosingBlockDirection = DirectionOfEnclosingBlock(
-                                   dom::Position(ShareRefPtr(const_cast<Text *>(&text)), 0));
+                                   Position(ShareRefPtr(const_cast<Text *>(&text)), 0));
                                  if (enclosingBlockDirection == directionFromText)
                                  {
                                    return null;
@@ -536,8 +536,8 @@ namespace krys::boo
       }
       else
       {
-        const bool useRenderedText = !EnclosingElementWithTag(
-          dom::FirstPositionInNode(const_cast<Text *>(&text)), html::TagName::select);
+        const bool useRenderedText =
+          !EnclosingElementWithTag(FirstPositionInNode(const_cast<Text *>(&text)), html::TagName::select);
         utf8_string content =
           useRenderedText ? RenderedTextRespectingRange(text) : TextContentRespectingRange(text);
         utf8_string buffer;
@@ -557,16 +557,15 @@ namespace krys::boo
     {
       TextIteratorBehaviors behaviors;
       auto *mutableText = const_cast<Text *>(&text);
-      dom::Position start =
-        &text == _start.GetContainerNode() ? _start : dom::FirstPositionInNode(mutableText);
-      dom::Position end;
+      Position start = &text == _start.GetContainerNode() ? _start : FirstPositionInNode(mutableText);
+      Position end;
       if (&text == _end.GetContainerNode())
       {
         end = _end;
       }
       else
       {
-        end = dom::LastPositionInNode(mutableText);
+        end = LastPositionInNode(mutableText);
         if (!_end.IsNull())
         {
           behaviors.Add(TextIteratorBehavior::BehavesAsIfNodesFollowing);
@@ -577,7 +576,7 @@ namespace krys::boo
         behaviors.Add(TextIteratorBehavior::IgnoresUserSelectNone);
       }
 
-      auto range = dom::MakeSimpleRange(dom::PositionRange {start, end});
+      auto range = CreateSimpleRange(PositionRange {start, end});
       return range ? PlainText(*range, behaviors) : utf8_string();
     }
 
@@ -745,8 +744,7 @@ namespace krys::boo
       }
     }
 
-    RefPtr<Node> StyledMarkupAccumulator::SerializeNodes(const dom::Position &start,
-                                                         const dom::Position &end) noexcept
+    RefPtr<Node> StyledMarkupAccumulator::SerializeNodes(const Position &start, const Position &end) noexcept
     {
       krys_debug_assert(start <= end);
       RefPtr<Node> startNode = start.FirstNode();
@@ -1054,8 +1052,8 @@ namespace krys::boo
              || HasTagName(node, html::TagName::strong);
     }
 
-    KRYS_NODISCARD RefPtr<Node> HighestAncestorToWrapMarkup(const dom::Position &start,
-                                                            const dom::Position &end, Node &commonAncestor,
+    KRYS_NODISCARD RefPtr<Node> HighestAncestorToWrapMarkup(const Position &start, const Position &end,
+                                                            Node &commonAncestor,
                                                             AnnotateForInterchange annotate) noexcept
     {
       RefPtr<Node> specialCommonAncestor;
@@ -1085,7 +1083,7 @@ namespace krys::boo
       if (checkAncestor->Renderer() && checkAncestor->Renderer()->ContainingBlock())
       {
         auto newSpecialCommonAncestor =
-          HighestEnclosingNodeOfType(dom::FirstPositionInNode(checkAncestor.get()), &IsElementPresentational,
+          HighestEnclosingNodeOfType(FirstPositionInNode(checkAncestor.get()), &IsElementPresentational,
                                      EditingBoundaryCrossingRule::CanCrossEditingBoundary,
                                      checkAncestor->Renderer()->ContainingBlock()->GetElement());
         if (newSpecialCommonAncestor)
@@ -1108,14 +1106,14 @@ namespace krys::boo
       }
 
       if (auto *enclosingAnchor = EnclosingElementWithTag(
-            dom::FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
+            FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
             html::TagName::a))
       {
         specialCommonAncestor = ShareRefPtr<Node>(enclosingAnchor);
       }
 
       if (auto *enclosingPicture = EnclosingElementWithTag(
-            dom::FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
+            FirstPositionInNode(specialCommonAncestor ? specialCommonAncestor.get() : &commonAncestor),
             html::TagName::picture))
       {
         specialCommonAncestor = ShareRefPtr<Node>(enclosingPicture);
@@ -1134,7 +1132,7 @@ namespace krys::boo
 
     // FIXME: The document's first `base` element (firstBaseElement), with base URLs.
     KRYS_NODISCARD utf8_string SerializePreservingVisualAppearanceInternal(
-      const dom::Position &start, const dom::Position &end, List<Ref<Node>> *nodes, ResolveUrls resolveUrls,
+      const Position &start, const Position &end, List<Ref<Node>> *nodes, ResolveUrls resolveUrls,
       SerializeComposedTree serializeComposedTree, IgnoreUserSelectNone ignoreUserSelectNone,
       AnnotateForInterchange annotate, ConvertBlocksToInlines convertBlocksToInlines,
       StandardFontFamilySerializationMode standardFontFamilySerializationMode, MSOListMode msoListMode,
@@ -1148,7 +1146,7 @@ namespace krys::boo
         return {};
       }
 
-      RefPtr<Node> commonAncestor = ShareRefPtr(dom::CommonInclusiveAncestor(start, end));
+      RefPtr<Node> commonAncestor = ShareRefPtr(CommonInclusiveAncestor(start, end));
       if (!commonAncestor)
       {
         return {};
@@ -1160,12 +1158,12 @@ namespace krys::boo
       VisiblePosition visibleStart {start};
       VisiblePosition visibleEnd {end};
 
-      RefPtr<Element> body = ShareRefPtr(
-        EnclosingElementWithTag(dom::FirstPositionInNode(commonAncestor.get()), html::TagName::body));
+      RefPtr<Element> body =
+        ShareRefPtr(EnclosingElementWithTag(FirstPositionInNode(commonAncestor.get()), html::TagName::body));
       RefPtr<Element> fullySelectedRoot;
       // FIXME: Do this for all fully selected blocks, not just the body.
-      if (body && VisiblePosition(dom::FirstPositionInNode(body.get())) == visibleStart
-          && VisiblePosition(dom::LastPositionInNode(body.get())) == visibleEnd)
+      if (body && VisiblePosition(FirstPositionInNode(body.get())) == visibleStart
+          && VisiblePosition(LastPositionInNode(body.get())) == visibleEnd)
       {
         fullySelectedRoot = body;
       }
@@ -1179,11 +1177,11 @@ namespace krys::boo
                                           msoListMode, needsPositionStyleConversion,
                                           preserveDirectionForInlineText, specialCommonAncestor.get());
 
-      dom::Position adjustedStart = start;
+      Position adjustedStart = start;
 
       if (auto *pictureElement = EnclosingElementWithTag(adjustedStart, html::TagName::picture))
       {
-        adjustedStart = dom::FirstPositionInNode(pictureElement);
+        adjustedStart = FirstPositionInNode(pictureElement);
       }
 
       if (annotate == AnnotateForInterchange::Yes && NeedInterchangeNewlineAfter(visibleStart))
@@ -1353,7 +1351,7 @@ namespace krys::boo
     KRYS_NODISCARD bool ContextPreservesNewline(const dom::SimpleRange &context) noexcept
     {
       auto *container =
-        VisiblePosition(dom::MakeDeprecatedLegacyPosition(context.Start)).DeepEquivalent().GetContainerNode();
+        VisiblePosition(CreateDeprecatedLegacyPosition(context.Start)).DeepEquivalent().GetContainerNode();
       return container && container->Renderer() && container->Renderer()->Style().PreserveNewline();
     }
 
@@ -1394,26 +1392,20 @@ namespace krys::boo
       (void)fragment.RemoveChild(element);
     }
 
-    KRYS_NODISCARD Ref<DocumentFragment>
-      ParseHTMLIntoFragment(utf8_stringview markup, Element &contextElement,
-                            bool allowDeclarativeShadowRoots = false) noexcept
+    KRYS_NODISCARD Ref<DocumentFragment> ParseHTMLIntoFragment(utf8_stringview markup,
+                                                               Element &contextElement) noexcept
     {
-      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup),
-                                                 allowDeclarativeShadowRoots);
+      return html::DocumentParser::ParseFragment(contextElement, utf8_string(markup));
     }
 
     // FIXME: The template document for contexts that are templates.
-    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>>
-      CreateFragmentForMarkup(Element &contextElement, utf8_stringview markup,
-                              EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> CreateFragmentForMarkup(Element &contextElement,
+                                                                              utf8_stringview markup) noexcept
     {
       auto &document = contextElement.NodeDocument();
-      if (Is<HTMLDocument>(document)
-          || parserContentPolicy.contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
+      if (Is<HTMLDocument>(document))
       {
-        return ParseHTMLIntoFragment(
-          markup, contextElement,
-          parserContentPolicy.contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
+        return ParseHTMLIntoFragment(markup, contextElement);
       }
 
       Ref<DocumentFragment> fragment = document.CreateDocumentFragment();
@@ -1464,7 +1456,7 @@ namespace krys::boo
     {
       return it->second;
     }
-    if (!dom::Position::NodeIsUserSelectNone(&targetNode))
+    if (!Position::NodeIsUserSelectNone(&targetNode))
     {
       return State::NotUserSelectNone;
     }
@@ -1473,7 +1465,7 @@ namespace krys::boo
     bool foundMixed = false;
     while (currentNode)
     {
-      if (!dom::Position::NodeIsUserSelectNone(currentNode))
+      if (!Position::NodeIsUserSelectNone(currentNode))
       {
         state = State::Mixed;
         // Only traverse upward once any mixed content is found
@@ -1524,7 +1516,7 @@ namespace krys::boo
                                                   ResolveUrls resolveUrls) noexcept
   {
     return SerializePreservingVisualAppearanceInternal(
-      dom::MakeDeprecatedLegacyPosition(range.Start), dom::MakeDeprecatedLegacyPosition(range.End), nodes,
+      CreateDeprecatedLegacyPosition(range.Start), CreateDeprecatedLegacyPosition(range.End), nodes,
       resolveUrls, SerializeComposedTree::No, IgnoreUserSelectNone::No, annotate, convertBlocksToInlines,
       StandardFontFamilySerializationMode::Keep, MSOListMode::DoNotPreserve, PreserveBaseElement::No,
       PreserveDirectionForInlineText::No);
@@ -1620,7 +1612,7 @@ namespace krys::boo
 
     // SerializeComposedTree::No because there can't be a shadow tree in the pasted fragment.
     auto result = SerializePreservingVisualAppearanceInternal(
-      dom::FirstPositionInNode(bodyElement.get()), dom::LastPositionInNode(bodyElement.get()), nullptr,
+      FirstPositionInNode(bodyElement.get()), LastPositionInNode(bodyElement.get()), nullptr,
       ResolveUrls::YesExcludingUrlsForPrivacy, SerializeComposedTree::No, IgnoreUserSelectNone::No,
       AnnotateForInterchange::Yes, ConvertBlocksToInlines::No, StandardFontFamilySerializationMode::Strip,
       msoListMode, PreserveBaseElement::No, PreserveDirectionForInlineText::No);
@@ -1761,7 +1753,7 @@ namespace krys::boo
     }
 
     // Break string into paragraphs. Extra line breaks turn into empty paragraphs.
-    auto start = dom::MakeDeprecatedLegacyPosition(context.Start);
+    auto start = CreateDeprecatedLegacyPosition(context.Start);
     auto block = EnclosingBlock(start.FirstNode());
     bool useClonesOfEnclosingBlock = block && !HasTagName(*block, html::TagName::body)
                                      && !HasTagName(*block, html::TagName::html)
@@ -1829,17 +1821,16 @@ namespace krys::boo
     return markup;
   }
 
-  ExceptionOr<Ref<DocumentFragment>>
-    CreateFragmentForInnerOuterHTML(Element &contextElement, utf8_stringview markup,
-                                    EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+  ExceptionOr<Ref<DocumentFragment>> CreateFragmentForInnerOuterHTML(Element &contextElement,
+                                                                     utf8_stringview markup) noexcept
   {
-    return CreateFragmentForMarkup(contextElement, markup, parserContentPolicy);
+    return CreateFragmentForMarkup(contextElement, markup);
   }
 
   ExceptionOr<Ref<DocumentFragment>> CreateContextualFragment(Element &element,
                                                               utf8_stringview markup) noexcept
   {
-    auto result = CreateFragmentForMarkup(element, markup, {});
+    auto result = CreateFragmentForMarkup(element, markup);
     if (result.HasException())
     {
       return result.ReleaseException();

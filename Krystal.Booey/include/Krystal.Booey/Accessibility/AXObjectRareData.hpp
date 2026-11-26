@@ -39,7 +39,7 @@ namespace krys::boo
     // Tables.
     AXObject::AXChildrenVector _tableRows;
     AXObject::AXChildrenVector _tableColumns;
-    // The cell covering each slot (https://html.spec.whatwg.org/#concept-slots), by row then column.
+    // The cell covering each slot (https://html.spec.whatwg.org/multipage/tables.html#concept-slots), by row then column.
     List<List<Maybe<AXId>>> _cellSlots;
     RefPtr<AXObject> _tableHeaderContainer;
     bool _isExposableTable {false};

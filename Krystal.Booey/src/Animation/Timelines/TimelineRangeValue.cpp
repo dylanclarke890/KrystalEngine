@@ -24,10 +24,10 @@
  */
 
 #include "Krystal.Booey/Animation/Timelines/TimelineRangeValue.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/Timeline.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Timeline.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Core/Visitor.hpp"
 

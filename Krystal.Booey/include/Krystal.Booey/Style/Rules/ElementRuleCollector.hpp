@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Selectors/SelectorChecker.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorChecker.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
 #include "Krystal.Booey/Style/Rules/MatchResult.hpp"

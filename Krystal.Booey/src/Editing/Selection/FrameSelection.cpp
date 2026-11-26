@@ -26,13 +26,13 @@
 
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/CharacterData.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Ranges/Range.hpp"
+#include "Krystal.Booey/Dom/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/CharacterData.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Ranges/Range.hpp"
 #include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
@@ -41,11 +41,11 @@
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -202,7 +202,7 @@ namespace krys::boo
       }
     }
 
-    KRYS_NODISCARD bool RemovingNodeRemovesPosition(Node &node, const dom::Position &position) noexcept
+    KRYS_NODISCARD bool RemovingNodeRemovesPosition(Node &node, const Position &position) noexcept
     {
       if (!position.AnchorNode())
       {
@@ -218,7 +218,7 @@ namespace krys::boo
              && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(node, *position.AnchorNode());
     }
 
-    void SetNodeContainsSelectionEndPoint(const dom::Position &position, bool value) noexcept
+    void SetNodeContainsSelectionEndPoint(const Position &position, bool value) noexcept
     {
       // We use AnchorNode instead of GetContainerNode() because NodeWillBeRemoved must update position when
       // anchored node is removed.
@@ -233,12 +233,11 @@ namespace krys::boo
       }
     }
 
-    void UpdatePositionAfterAdoptingTextReplacement(dom::Position &position, CharacterData &node,
-                                                    uint32 offset, uint32 oldLength,
-                                                    uint32 newLength) noexcept
+    void UpdatePositionAfterAdoptingTextReplacement(Position &position, CharacterData &node, uint32 offset,
+                                                    uint32 oldLength, uint32 newLength) noexcept
     {
       if (position.AnchorNode() != &node
-          || position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor)
+          || position.GetAnchorType() != Position::AnchorType::PositionIsOffsetInAnchor)
       {
         return;
       }
@@ -314,21 +313,21 @@ namespace krys::boo
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  void FrameSelection::MoveTo(const dom::Position &position, Affinity affinity,
+  void FrameSelection::MoveTo(const Position &position, Affinity affinity,
                               UserTriggered userTriggered) noexcept
   {
     SetSelection(VisibleSelection(position, affinity, _selection.GetDirectionality()),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  void FrameSelection::MoveTo(const dom::Position &base, const dom::Position &extent, Affinity affinity,
+  void FrameSelection::MoveTo(const Position &base, const Position &extent, Affinity affinity,
                               UserTriggered userTriggered) noexcept
   {
     SetSelection(VisibleSelection(base, extent, affinity, Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  void FrameSelection::MoveWithoutValidationTo(const dom::Position &base, const dom::Position &extent,
+  void FrameSelection::MoveWithoutValidationTo(const Position &base, const Position &extent,
                                                bool selectionHasDirection,
                                                EnumSet<SetSelectionOption> options) noexcept
   {
@@ -533,7 +532,7 @@ namespace krys::boo
 
     _pendingSelectionUpdate = true;
 
-    document->ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Selected);
+    document->ScheduleContentRelevancyUpdate(css::ContentRelevancy::Selected);
 
     // The rendering update brings the render tree's selection up to date; schedule one.
     if (auto *view = document->View())
@@ -673,7 +672,7 @@ namespace krys::boo
                : LayoutRect(EnclosingRectI(SelectionBounds(ClipToVisibleContent::No)));
     }
 
-    dom::Position start = _selection.Start();
+    Position start = _selection.Start();
     krys_debug_assert(start.DeprecatedNode());
     if (!start.DeprecatedNode() || !start.DeprecatedNode()->Renderer())
     {
@@ -755,8 +754,8 @@ namespace krys::boo
 
     if (anchorRemoved || focusRemoved)
     {
-      dom::Position anchor = _selection.Anchor();
-      dom::Position focus = _selection.Focus();
+      Position anchor = _selection.Anchor();
+      Position focus = _selection.Focus();
       if (anchorRemoved)
       {
         UpdatePositionForNodeRemoval(anchor, node);
@@ -781,8 +780,8 @@ namespace krys::boo
     }
     if (startRemoved || endRemoved)
     {
-      dom::Position start = _selection.Start();
-      dom::Position end = _selection.End();
+      Position start = _selection.Start();
+      Position end = _selection.End();
       if (startRemoved)
       {
         UpdatePositionForNodeRemoval(start, node);
@@ -868,12 +867,12 @@ namespace krys::boo
       return;
     }
 
-    dom::Position anchor = _selection.Anchor();
-    dom::Position focus = _selection.Focus();
-    dom::Position base = _selection.CanonicalAnchor();
-    dom::Position extent = _selection.CanonicalFocus();
-    dom::Position start = _selection.Start();
-    dom::Position end = _selection.End();
+    Position anchor = _selection.Anchor();
+    Position focus = _selection.Focus();
+    Position base = _selection.CanonicalAnchor();
+    Position extent = _selection.CanonicalFocus();
+    Position start = _selection.Start();
+    Position end = _selection.End();
     UpdatePositionAfterAdoptingTextReplacement(anchor, node, offset, oldLength, newLength);
     UpdatePositionAfterAdoptingTextReplacement(focus, node, offset, oldLength, newLength);
     UpdatePositionAfterAdoptingTextReplacement(base, node, offset, oldLength, newLength);
@@ -943,8 +942,8 @@ namespace krys::boo
       return;
     }
 
-    dom::Position start = _selection.Start();
-    dom::Position end = _selection.End();
+    Position start = _selection.Start();
+    Position end = _selection.End();
 
     bool baseIsStart = true;
 
@@ -1042,12 +1041,12 @@ namespace krys::boo
                                                      UserTriggered) noexcept
   {
     if (RefPtr<Node> rootUserSelectAll =
-          dom::Position::RootUserSelectAllForNode(extent.DeepEquivalent().AnchorNode()))
+          Position::RootUserSelectAllForNode(extent.DeepEquivalent().AnchorNode()))
     {
       extent = isForward
-                 ? VisiblePosition(dom::PositionAfterNode(rootUserSelectAll.get())
+                 ? VisiblePosition(PositionAfterNode(rootUserSelectAll.get())
                                      .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary))
-                 : VisiblePosition(dom::PositionBeforeNode(rootUserSelectAll.get())
+                 : VisiblePosition(PositionBeforeNode(rootUserSelectAll.get())
                                      .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
     }
   }
@@ -1598,7 +1597,7 @@ namespace krys::boo
 
     bool reachedBoundary = false;
     bool wasRange = _selection.IsRange();
-    dom::Position originalStartPosition = _selection.Start();
+    Position originalStartPosition = _selection.Start();
     VisiblePosition position;
     switch (direction)
     {
@@ -1854,7 +1853,7 @@ namespace krys::boo
     }
 
     // FIXME: Can we use VisibleStart/End/Extent?
-    dom::Position position;
+    Position position;
     switch (type)
     {
       case PositionType::Start:  position = _selection.Start(); break;
@@ -1934,14 +1933,14 @@ namespace krys::boo
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  void FrameSelection::SetBase(const dom::Position &position, Affinity affinity,
+  void FrameSelection::SetBase(const Position &position, Affinity affinity,
                                UserTriggered userTriggered) noexcept
   {
     SetSelection(VisibleSelection(position, _selection.CanonicalFocus(), affinity, Directionality::Strong),
                  DefaultSetSelectionOptions(userTriggered));
   }
 
-  void FrameSelection::SetExtent(const dom::Position &position, Affinity affinity,
+  void FrameSelection::SetExtent(const Position &position, Affinity affinity,
                                  UserTriggered userTriggered) noexcept
   {
     SetSelection(VisibleSelection(_selection.CanonicalAnchor(), position, affinity, Directionality::Strong),
@@ -1977,7 +1976,7 @@ namespace krys::boo
       return false;
     }
 
-    return dom::Contains(*range, MakeBoundaryPoint(innerNode->Renderer()->VisiblePositionForPoint(
+    return dom::Contains(*range, CreateBoundaryPoint(innerNode->Renderer()->VisiblePositionForPoint(
                                    result.LocalPoint(), HitTestSource::User)));
   }
 
@@ -2188,13 +2187,13 @@ namespace krys::boo
     // the selection. Example: foo <a>bar</a>.  Imagine that a line wrap occurs after 'foo', and that 'bar' is
     // selected.   If we pass [foo, 3] as the start of the selection, the selection painting code will think
     // that content on the line containing 'foo' is selected and will fill the gap before 'bar'.
-    dom::Position startPos = selection.Start();
-    dom::Position candidate = startPos.Downstream();
+    Position startPos = selection.Start();
+    Position candidate = startPos.Downstream();
     if (candidate.IsCandidate())
     {
       startPos = candidate;
     }
-    dom::Position endPos = selection.End();
+    Position endPos = selection.End();
     candidate = endPos.Upstream();
     if (candidate.IsCandidate())
     {
@@ -2767,11 +2766,11 @@ namespace krys::boo
     else
     {
       // Don't use VisibleSelection's constructor that takes a SimpleRange, because it uses
-      // MakeDeprecatedLegacyPosition instead of MakeContainerOffsetPosition.
-      auto start = dom::MakeContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->StartContainer()),
-                                                    static_cast<uint32>(_associatedLiveRange->StartOffset()));
-      auto end = dom::MakeContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->EndContainer()),
-                                                  static_cast<uint32>(_associatedLiveRange->EndOffset()));
+      // CreateDeprecatedLegacyPosition instead of CreateContainerOffsetPosition.
+      auto start = CreateContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->StartContainer()),
+                                                 static_cast<uint32>(_associatedLiveRange->StartOffset()));
+      auto end = CreateContainerOffsetPosition(ShareRefPtr(_associatedLiveRange->EndContainer()),
+                                               static_cast<uint32>(_associatedLiveRange->EndOffset()));
       auto options = DefaultSetSelectionOptions();
       options.Add(SetSelectionOption::MaintainLiveRange);
       SetSelection(VisibleSelection(start, end), options);

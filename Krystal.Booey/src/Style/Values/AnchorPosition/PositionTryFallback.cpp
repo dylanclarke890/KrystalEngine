@@ -25,10 +25,10 @@
  */
 
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallback.hpp"
-#include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
-#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Parser/ParserMode.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"

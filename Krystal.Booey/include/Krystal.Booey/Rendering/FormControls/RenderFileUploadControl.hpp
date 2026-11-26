@@ -68,9 +68,8 @@ namespace krys::boo
 
     KRYS_NODISCARD int32 MaxFilenameLogicalWidth() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity
-      PositionForPoint(const LayoutPoint &, HitTestSource,
-                       const RenderFragmentContainer * = nullptr) noexcept override;
+    KRYS_NODISCARD PositionWithAffinity PositionForPoint(
+      const LayoutPoint &, HitTestSource, const RenderFragmentContainer * = nullptr) noexcept override;
 
     KRYS_NODISCARD HTMLInputElement *UploadButton() const noexcept;
   };

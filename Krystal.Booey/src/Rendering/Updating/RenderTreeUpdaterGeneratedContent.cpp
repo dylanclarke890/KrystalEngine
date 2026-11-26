@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderQuote.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderDescendantIterator.hpp"

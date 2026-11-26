@@ -26,15 +26,15 @@
  */
 
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
@@ -46,7 +46,7 @@
 
 namespace krys::boo
 {
-  VisiblePosition::VisiblePosition(const dom::Position &position, Affinity affinity) noexcept
+  VisiblePosition::VisiblePosition(const Position &position, Affinity affinity) noexcept
       : _deepPosition {CanonicalPosition(position)}
   {
     if (affinity == Affinity::Upstream && !IsNull())
@@ -91,7 +91,7 @@ namespace krys::boo
     krys_debug_assert(rule == EditingBoundaryCrossingRule::CanCrossEditingBoundary
                       || rule == EditingBoundaryCrossingRule::CannotCrossEditingBoundary);
     // find first previous DOM position that is visible
-    dom::Position pos = PreviousVisuallyDistinctCandidate(_deepPosition);
+    Position pos = PreviousVisuallyDistinctCandidate(_deepPosition);
 
     // return null visible position if there is no previous visible position
     if (pos.AtStartOfTree())
@@ -114,15 +114,15 @@ namespace krys::boo
     return HonorEditingBoundaryAtOrBefore(prev, reachedBoundary);
   }
 
-  dom::Position VisiblePosition::LeftVisuallyDistinctCandidate() const noexcept
+  Position VisiblePosition::LeftVisuallyDistinctCandidate() const noexcept
   {
-    dom::Position p = _deepPosition;
+    Position p = _deepPosition;
     if (p.IsNull())
     {
-      return dom::Position();
+      return Position();
     }
 
-    dom::Position downstreamStart = p.Downstream();
+    Position downstreamStart = p.Downstream();
     text::TextDirection primaryDirection = p.PrimaryDirection();
 
     inline_iterator::LineLogicalOrderCache orderCache;
@@ -180,13 +180,13 @@ namespace krys::boo
           auto previousBox = box->NextLineLeftwardOnLineIgnoringLineBreak();
           if (!previousBox)
           {
-            dom::Position positionOnLeft = primaryDirection == text::TextDirection::LTR
-                                             ? PreviousVisuallyDistinctCandidate(_deepPosition)
-                                             : NextVisuallyDistinctCandidate(_deepPosition);
+            Position positionOnLeft = primaryDirection == text::TextDirection::LTR
+                                        ? PreviousVisuallyDistinctCandidate(_deepPosition)
+                                        : NextVisuallyDistinctCandidate(_deepPosition);
             auto boxOnLeft = positionOnLeft.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
             if (boxOnLeft && boxOnLeft->GetLineBox() == box->GetLineBox())
             {
-              return dom::Position();
+              return Position();
             }
             return positionOnLeft;
           }
@@ -309,7 +309,7 @@ namespace krys::boo
         break;
       }
 
-      p = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+      p = CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
 
       if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
       {
@@ -326,7 +326,7 @@ namespace krys::boo
     {
       *reachedBoundary = false;
     }
-    dom::Position pos = LeftVisuallyDistinctCandidate();
+    Position pos = LeftVisuallyDistinctCandidate();
     // FIXME: Why can't we move left from the last position in a tree?
     if (pos.AtStartOfTree() || pos.AtEndOfTree())
     {
@@ -350,15 +350,15 @@ namespace krys::boo
              : HonorEditingBoundaryAtOrAfter(left, reachedBoundary);
   }
 
-  dom::Position VisiblePosition::RightVisuallyDistinctCandidate() const noexcept
+  Position VisiblePosition::RightVisuallyDistinctCandidate() const noexcept
   {
-    dom::Position p = _deepPosition;
+    Position p = _deepPosition;
     if (p.IsNull())
     {
-      return dom::Position();
+      return Position();
     }
 
-    dom::Position downstreamStart = p.Downstream();
+    Position downstreamStart = p.Downstream();
     text::TextDirection primaryDirection = p.PrimaryDirection();
 
     inline_iterator::LineLogicalOrderCache orderCache;
@@ -417,13 +417,13 @@ namespace krys::boo
           auto nextBox = box->NextLineRightwardOnLineIgnoringLineBreak();
           if (!nextBox)
           {
-            dom::Position positionOnRight = primaryDirection == text::TextDirection::LTR
-                                              ? NextVisuallyDistinctCandidate(_deepPosition)
-                                              : PreviousVisuallyDistinctCandidate(_deepPosition);
+            Position positionOnRight = primaryDirection == text::TextDirection::LTR
+                                         ? NextVisuallyDistinctCandidate(_deepPosition)
+                                         : PreviousVisuallyDistinctCandidate(_deepPosition);
             auto boxOnRight = positionOnRight.GetInlineBoxAndOffset(_affinity, primaryDirection).Box;
             if (boxOnRight && boxOnRight->GetLineBox() == box->GetLineBox())
             {
-              return dom::Position();
+              return Position();
             }
             return positionOnRight;
           }
@@ -550,7 +550,7 @@ namespace krys::boo
         break;
       }
 
-      p = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
+      p = CreateDeprecatedLegacyPosition(ShareRefPtr(renderer->GetNode()), offset);
 
       if ((p.IsCandidate() && p.Downstream() != downstreamStart) || p.AtStartOfTree() || p.AtEndOfTree())
       {
@@ -567,7 +567,7 @@ namespace krys::boo
     {
       *reachedBoundary = false;
     }
-    dom::Position pos = RightVisuallyDistinctCandidate();
+    Position pos = RightVisuallyDistinctCandidate();
     // FIXME: Why can't we move left from the last position in a tree?
     if (pos.AtStartOfTree() || pos.AtEndOfTree())
     {
@@ -696,14 +696,14 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Position CanonicalizeCandidate(const dom::Position &candidate) noexcept
+    KRYS_NODISCARD Position CanonicalizeCandidate(const Position &candidate) noexcept
     {
       if (candidate.IsNull())
       {
-        return dom::Position();
+        return Position();
       }
       krys_debug_assert(candidate.IsCandidate());
-      dom::Position upstream = candidate.Upstream();
+      Position upstream = candidate.Upstream();
       if (upstream.IsCandidate())
       {
         return upstream;
@@ -712,12 +712,12 @@ namespace krys::boo
     }
   }
 
-  dom::Position VisiblePosition::CanonicalPosition(const dom::Position &passedPosition) noexcept
+  Position VisiblePosition::CanonicalPosition(const Position &passedPosition) noexcept
   {
     // The updateLayout call below can do so much that even the position passed
     // in to us might get changed as a side effect. Specifically, there are code
     // paths that pass selection endpoints, and updateLayout can change the selection.
-    dom::Position position = passedPosition;
+    Position position = passedPosition;
 
     // FIXME (9535):  Canonicalizing to the leftmost candidate means that if we're at a line wrap, we will
     // ask renderers to paint downstream carets for other renderers.
@@ -726,7 +726,7 @@ namespace krys::boo
     // candidate unless the affinity is upstream.
     if (position.IsNull())
     {
-      return dom::Position();
+      return Position();
     }
 
     krys_debug_assert(position.GetDocument());
@@ -734,7 +734,7 @@ namespace krys::boo
 
     auto *node = position.GetContainerNode();
 
-    dom::Position candidate = position.Upstream();
+    Position candidate = position.Upstream();
     if (candidate.IsCandidate())
     {
       return candidate;
@@ -747,8 +747,8 @@ namespace krys::boo
 
     // When neither upstream or downstream gets us to a candidate (upstream/downstream won't leave
     // blocks or enter new ones), we search forward and backward until we find one.
-    dom::Position next = CanonicalizeCandidate(NextCandidate(position));
-    dom::Position prev = CanonicalizeCandidate(PreviousCandidate(position));
+    Position next = CanonicalizeCandidate(NextCandidate(position));
+    Position prev = CanonicalizeCandidate(PreviousCandidate(position));
     auto *nextNode = next.DeprecatedNode();
     auto *prevNode = prev.DeprecatedNode();
 
@@ -787,7 +787,7 @@ namespace krys::boo
 
     if (!nextIsInSameEditableElement && !prevIsInSameEditableElement)
     {
-      return dom::Position();
+      return Position();
     }
 
     // The new position should be in the same block flow element. Favor that.
@@ -806,18 +806,18 @@ namespace krys::boo
   {
     // We canonicalize to the first of two equivalent candidates, but the second of the two candidates
     // is the one that will be inside the text node containing the character after this visible position.
-    dom::Position pos = _deepPosition.Downstream();
+    Position pos = _deepPosition.Downstream();
     if (!pos.GetContainerNode() || !Is<Text>(*pos.GetContainerNode()))
     {
       return 0;
     }
     switch (pos.GetAnchorType())
     {
-      case dom::Position::AnchorType::PositionIsAfterChildren:
-      case dom::Position::AnchorType::PositionIsAfterAnchor:
-      case dom::Position::AnchorType::PositionIsBeforeAnchor:
-      case dom::Position::AnchorType::PositionIsBeforeChildren: return 0;
-      case dom::Position::AnchorType::PositionIsOffsetInAnchor: break;
+      case Position::AnchorType::PositionIsAfterChildren:
+      case Position::AnchorType::PositionIsAfterAnchor:
+      case Position::AnchorType::PositionIsBeforeAnchor:
+      case Position::AnchorType::PositionIsBeforeChildren: return 0;
+      case Position::AnchorType::PositionIsOffsetInAnchor: break;
     }
     int32 offset = pos.OffsetInContainerNode();
     auto *textNode = pos.ContainerText();
@@ -962,19 +962,19 @@ namespace krys::boo
     return _affinity == other._affinity && _deepPosition.Equals(other._deepPosition);
   }
 
-  Maybe<dom::BoundaryPoint> MakeBoundaryPoint(const VisiblePosition &position) noexcept
+  Maybe<dom::BoundaryPoint> CreateBoundaryPoint(const VisiblePosition &position) noexcept
   {
-    return dom::MakeBoundaryPoint(position.DeepEquivalent());
+    return CreateBoundaryPoint(position.DeepEquivalent());
   }
 
   Node *CommonInclusiveAncestor(const VisiblePosition &a, const VisiblePosition &b) noexcept
   {
-    return dom::CommonInclusiveAncestor(a.DeepEquivalent(), b.DeepEquivalent());
+    return CommonInclusiveAncestor(a.DeepEquivalent(), b.DeepEquivalent());
   }
 
-  Maybe<dom::SimpleRange> MakeSimpleRange(const VisiblePositionRange &range) noexcept
+  Maybe<dom::SimpleRange> CreateSimpleRange(const VisiblePositionRange &range) noexcept
   {
-    return dom::MakeSimpleRange(range.Start, range.End);
+    return dom::CreateSimpleRange(range.Start, range.End);
   }
 
   VisiblePositionRange MakeVisiblePositionRange(const Maybe<dom::SimpleRange> &range) noexcept
@@ -983,13 +983,13 @@ namespace krys::boo
     {
       return {};
     }
-    return {dom::MakeContainerOffsetPosition(range->Start), dom::MakeContainerOffsetPosition(range->End)};
+    return {CreateContainerOffsetPosition(range->Start), CreateContainerOffsetPosition(range->End)};
   }
 
   std::partial_ordering operator<=>(const VisiblePosition &a, const VisiblePosition &b) noexcept
   {
     // FIXME: Should two positions with different affinity be considered equivalent or not?
-    return dom::TreeOrder<dom::TreeType::ComposedTree>(a.DeepEquivalent(), b.DeepEquivalent());
+    return TreeOrder<dom::TreeType::ComposedTree>(a.DeepEquivalent(), b.DeepEquivalent());
   }
 
   bool Intersects(const VisiblePositionRange &a, const VisiblePositionRange &b) noexcept
@@ -1028,9 +1028,9 @@ namespace krys::boo
     {
       return {};
     }
-    auto scope = dom::MakeRangeSelectingNodeContents(*rootContainerNode);
-    auto characterRange = GetCharacterRange(scope, *dom::MakeSimpleRange(range.Start, range.End));
-    return dom::MakeContainerOffsetPosition(
+    auto scope = dom::CreateRangeSelectingNodeContents(*rootContainerNode);
+    auto characterRange = GetCharacterRange(scope, *dom::CreateSimpleRange(range.Start, range.End));
+    return CreateContainerOffsetPosition(
       ResolveCharacterLocation(scope, characterRange.Location + characterRange.Length / 2));
   }
 }

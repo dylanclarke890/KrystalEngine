@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Booey/Style/Rules/RuleSet.hpp"
 #include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"

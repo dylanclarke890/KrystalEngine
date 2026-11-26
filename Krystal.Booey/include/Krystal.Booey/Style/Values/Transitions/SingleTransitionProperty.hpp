@@ -26,7 +26,7 @@
 
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
-#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/Css/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 
 namespace krys::boo::style

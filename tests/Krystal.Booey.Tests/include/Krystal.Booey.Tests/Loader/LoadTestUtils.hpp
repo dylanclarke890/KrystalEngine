@@ -1,0 +1,134 @@
+﻿#pragma once
+
+#include "Krystal.Booey.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey.Tests/StringTestUtils.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
+#include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
+#include "Krystal.Booey/Loader/NavigationAction.hpp"
+#include "Krystal.Booey/Loader/SubstituteData.hpp"
+#include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Core/Containers/List.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Net/ResourceError.hpp"
+#include <string>
+
+namespace krys::boo::tests
+{
+  /// @brief Records what the loader tells the host.
+  class LoadRecordingClient final : public FrameLoaderClient
+  {
+  public:
+    List<std::string> &Events;
+
+    explicit LoadRecordingClient(List<std::string> &events) noexcept : Events(events)
+    {
+    }
+
+    void DispatchNavigationRequested(const NavigationAction &, const net::ResourceRequest &request,
+                                     const FormSubmission *) noexcept override
+    {
+      Events.push_back("navigation to " + Narrow(request.Url().String()));
+    }
+
+    void DispatchDidStartProvisionalLoad() noexcept override
+    {
+      Events.emplace_back("start");
+    }
+
+    void DispatchDidFailProvisionalLoad(const net::ResourceError &error) noexcept override
+    {
+      Events.emplace_back(error.IsCancellation() ? "fail provisional (cancelled)" : "fail provisional");
+    }
+
+    void DispatchDidCommitLoad() noexcept override
+    {
+      Events.emplace_back("commit");
+    }
+
+    /// @brief Called with each new document, before it's parsed.
+    Func<void()> OnClearWindowObject;
+
+    void DispatchDidClearWindowObject() noexcept override
+    {
+      Events.emplace_back("window");
+      if (OnClearWindowObject)
+      {
+        OnClearWindowObject();
+      }
+    }
+
+    void DispatchDidFinishDocumentLoad() noexcept override
+    {
+      Events.emplace_back("document loaded");
+    }
+
+    void DispatchDidFinishLoad() noexcept override
+    {
+      Events.emplace_back("finish");
+    }
+
+    /// @brief Each time the client is asked about icons, the icons, with their identifiers.
+    List<List<Pair<LinkIcon, uint64>>> IconDecisions;
+
+    void GetLoadDecisionForIcons(Span<const LinkIconLoadDecision> icons) noexcept override
+    {
+      auto &decisions = IconDecisions.emplace_back();
+      for (const auto &icon : icons)
+      {
+        decisions.emplace_back(icon.Icon, icon.Identifier);
+      }
+    }
+  };
+
+  /// @brief A frame that starts with its initial empty document, and whose loads come from a
+  /// test strategy.
+  struct LoadFixture : css::tests::ValueFixture, LoaderFixture
+  {
+    List<std::string> Events;
+    LoadRecordingClient *Client {nullptr};
+    Ref<boo::Frame> TestFrame {CreateFrame()};
+
+    LoadFixture() noexcept
+    {
+      Frame().CreateView({200, 100});
+      Frame().Loader().Init();
+      Events.clear();
+    }
+
+    KRYS_NODISCARD Ref<boo::Frame> CreateFrame() noexcept
+    {
+      auto client = CreateUnique<LoadRecordingClient>(Events);
+      Client = client.get();
+      return boo::Frame::Create(CreateUnique<EmptyBooeyClient>(), nullptr, krys::move(client));
+    }
+
+    KRYS_NODISCARD boo::Frame &Frame() const noexcept
+    {
+      return *TestFrame;
+    }
+
+    KRYS_NODISCARD boo::Document &Document() const noexcept
+    {
+      return *Frame().Document();
+    }
+
+    /// @brief Loads @p markup at @p url, as the host does.
+    void LoadMarkup(utf8_string &&markup, utf8_stringview url) noexcept
+    {
+      FrameLoadRequest request(ShareRef(Document()), net::ResourceRequest(net::Url(url)), null);
+      request.SetSubstituteData(SubstituteData(krys::move(markup), u8"text/html", net::Url(url)));
+      Frame().Loader().Load(krys::move(request));
+    }
+
+    /// @brief Loads @p url through the strategy, as the host does.
+    void LoadUrl(utf8_stringview url) noexcept
+    {
+      Frame().Loader().Load(
+        FrameLoadRequest(ShareRef(Document()), net::ResourceRequest(net::Url(url)), null));
+    }
+  };
+}

@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Commands/CompositeEditCommand.hpp"
 #include "Krystal.Core/Containers/EnumSet.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
@@ -92,8 +92,8 @@ namespace krys::boo
     };
 
     VisibleSelection _visibleSelectionForInsertedText;
-    dom::Position _startOfInsertedContent;
-    dom::Position _endOfInsertedContent;
+    Position _startOfInsertedContent;
+    Position _endOfInsertedContent;
     RefPtr<EditingStyle> _insertionStyle;
     bool _selectReplacement;
     bool _smartReplace;
@@ -132,14 +132,14 @@ namespace krys::boo
   private:
     KRYS_NODISCARD DOMString InputEventData() const noexcept final;
 
-    KRYS_NODISCARD RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept final;
+    KRYS_NODISCARD RefPtr<DataTransfer> InputEventDataTransfer() const noexcept final;
 
     bool WillApplyCommand() noexcept final;
 
     void DoApply() noexcept override;
 
     RefPtr<boo::Node> InsertAsListItems(Element &listElement, boo::Node *insertionBlock,
-                                        const dom::Position &position, InsertedNodes &insertedNodes) noexcept;
+                                        const Position &position, InsertedNodes &insertedNodes) noexcept;
 
     void UpdateNodesInserted(boo::Node *node) noexcept;
 
@@ -176,10 +176,9 @@ namespace krys::boo
 
     void AddNewLinesForSmartReplace() noexcept;
 
-    void CompleteHTMLReplacement(const dom::Position &lastPositionToSelect) noexcept;
+    void CompleteHTMLReplacement(const Position &lastPositionToSelect) noexcept;
 
-    void MergeTextNodesAroundPosition(dom::Position &position,
-                                      dom::Position &positionOnlyToBeUpdated) noexcept;
+    void MergeTextNodesAroundPosition(Position &position, Position &positionOnlyToBeUpdated) noexcept;
 
     ReplacementFragment *EnsureReplacementFragment() noexcept;
 

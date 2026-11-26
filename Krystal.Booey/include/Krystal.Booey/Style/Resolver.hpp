@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/Rules/KeyframesRule.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorEnums.hpp"
+#include "Krystal.Booey/Css/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/Rules/MatchedDeclarationsCache.hpp"

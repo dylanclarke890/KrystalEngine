@@ -63,7 +63,7 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool ShouldRespectZeroIntrinsicWidth() const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity
+    KRYS_NODISCARD PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept final;
 

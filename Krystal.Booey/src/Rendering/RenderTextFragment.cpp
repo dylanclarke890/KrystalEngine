@@ -21,8 +21,8 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/MultiColumn/RenderMultiColumnFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"

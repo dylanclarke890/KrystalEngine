@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Range.hpp"
 
 namespace krys::boo::style
 {

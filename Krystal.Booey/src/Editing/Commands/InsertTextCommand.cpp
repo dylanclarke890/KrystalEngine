@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/InsertTextCommand.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -69,14 +69,14 @@ namespace krys::boo
   }
 
   // FIXME: An editing text node (createEditingTextNode, which echoes passwords).
-  dom::Position InsertTextCommand::PositionInsideTextNode(const dom::Position &position) noexcept
+  Position InsertTextCommand::PositionInsideTextNode(const Position &position) noexcept
   {
-    dom::Position pos = position;
+    Position pos = position;
     if (ParentTabSpanNode(pos.AnchorNode()))
     {
       auto textNode = GetDocument().CreateTextNode(utf8_string());
       InsertNodeAtTabSpanPosition(*textNode, pos);
-      return dom::FirstPositionInNode(textNode.get());
+      return FirstPositionInNode(textNode.get());
     }
 
     // Prepare for text input by looking at the specified position.
@@ -85,14 +85,14 @@ namespace krys::boo
     {
       auto textNode = GetDocument().CreateTextNode(utf8_string());
       InsertNodeAt(*textNode, pos);
-      return dom::FirstPositionInNode(textNode.get());
+      return FirstPositionInNode(textNode.get());
     }
 
     return pos;
   }
 
-  void InsertTextCommand::SetEndingSelectionWithoutValidation(const dom::Position &startPosition,
-                                                              const dom::Position &endPosition) noexcept
+  void InsertTextCommand::SetEndingSelectionWithoutValidation(const Position &startPosition,
+                                                              const Position &endPosition) noexcept
   {
     // We could have inserted a part of composed character sequence,
     // so we are basically treating ending selection as a range to avoid validation.
@@ -117,8 +117,8 @@ namespace krys::boo
       return false;
     }
 
-    dom::Position start = EndingSelection().Start();
-    dom::Position endPosition = ReplaceSelectedTextInNode(text);
+    Position start = EndingSelection().Start();
+    Position endPosition = ReplaceSelectedTextInNode(text);
     if (endPosition.IsNull())
     {
       return false;
@@ -136,7 +136,7 @@ namespace krys::boo
 
   bool InsertTextCommand::PerformOverwrite(utf8_stringview text, bool selectInsertedText) noexcept
   {
-    dom::Position start = EndingSelection().Start();
+    Position start = EndingSelection().Start();
     RefPtr<Text> textNode = ShareRefPtr(start.ContainerText());
     if (!textNode)
     {
@@ -152,9 +152,8 @@ namespace krys::boo
 
     ReplaceTextInNode(*textNode, static_cast<uint32>(start.OffsetInContainerNode()), count, text);
 
-    dom::Position endPosition =
-      dom::Position(RefPtr<Text>(textNode),
-                    static_cast<uint32>(start.OffsetInContainerNode()) + static_cast<uint32>(text.size()));
+    Position endPosition = Position(RefPtr<Text>(textNode), static_cast<uint32>(start.OffsetInContainerNode())
+                                                              + static_cast<uint32>(text.size()));
     SetEndingSelectionWithoutValidation(start, endPosition);
     if (!selectInsertedText)
     {
@@ -201,14 +200,14 @@ namespace krys::boo
       }
     }
 
-    dom::Position startPosition(EndingSelection().Start());
+    Position startPosition(EndingSelection().Start());
 
-    dom::Position placeholder;
+    Position placeholder;
     // We want to remove preserved newlines and brs that will collapse (and thus become unnecessary) when
     // content is inserted just before them.
     // FIXME: We shouldn't really have to do this, but removing placeholders is a workaround for 9661.
     // If the caret is just before a placeholder, downstream will normalize the caret to it.
-    dom::Position downstream(startPosition.Downstream());
+    Position downstream(startPosition.Downstream());
     if (LineBreakExistsAtPosition(downstream))
     {
       // FIXME: This doesn't handle placeholders at the end of anonymous blocks.
@@ -228,7 +227,7 @@ namespace krys::boo
     // It is possible for the node that contains startPosition to contain only unrendered whitespace,
     // and so deleteInsignificantText could remove it.  Save the position before the node in case that
     // happens.
-    dom::Position positionBeforeStartNode(dom::PositionInParentBeforeNode(startPosition.GetContainerNode()));
+    Position positionBeforeStartNode(PositionInParentBeforeNode(startPosition.GetContainerNode()));
 
     DeleteInsignificantText(startPosition, startPosition.Downstream());
 
@@ -247,7 +246,7 @@ namespace krys::boo
       return;
     }
 
-    dom::Position endPosition;
+    Position endPosition;
 
     if (_text == u8"\t")
     {
@@ -262,7 +261,7 @@ namespace krys::boo
     {
       // Make sure the document is set up to receive _text
       startPosition = PositionInsideTextNode(startPosition);
-      krys_debug_assert(startPosition.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor);
+      krys_debug_assert(startPosition.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor);
       krys_debug_assert(startPosition.GetContainerNode());
       krys_debug_assert(Is<Text>(*startPosition.GetContainerNode()));
       if (placeholder.IsNotNull())
@@ -273,7 +272,7 @@ namespace krys::boo
       const auto offset = static_cast<uint32>(startPosition.OffsetInContainerNode());
 
       InsertTextIntoNode(*textNode, offset, _text, _allowPasswordEcho);
-      endPosition = dom::Position(RefPtr<Text>(textNode), offset + static_cast<uint32>(_text.size()));
+      endPosition = Position(RefPtr<Text>(textNode), offset + static_cast<uint32>(_text.size()));
       if (_markerSupplier)
       {
         _markerSupplier->AddMarkersToTextNode(*textNode, offset, _text);
@@ -331,9 +330,9 @@ namespace krys::boo
     }
   }
 
-  dom::Position InsertTextCommand::InsertTab(const dom::Position &position) noexcept
+  Position InsertTextCommand::InsertTab(const Position &position) noexcept
   {
-    dom::Position insertPos = VisiblePosition(position).DeepEquivalent();
+    Position insertPos = VisiblePosition(position).DeepEquivalent();
     if (insertPos.IsNull())
     {
       return position;
@@ -347,7 +346,7 @@ namespace krys::boo
     {
       auto &textNode = Downcast<Text>(*node);
       InsertTextIntoNode(textNode, offset, u8"\t");
-      return dom::Position(ShareRefPtr(&textNode), offset + 1);
+      return Position(ShareRefPtr(&textNode), offset + 1);
     }
 
     // create new tab span
@@ -379,6 +378,6 @@ namespace krys::boo
     }
 
     // return the position following the new tab
-    return dom::LastPositionInNode(spanNode.get());
+    return LastPositionInNode(spanNode.get());
   }
 }

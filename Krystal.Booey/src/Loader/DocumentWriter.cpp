@@ -28,16 +28,16 @@
  */
 
 #include "Krystal.Booey/Loader/DocumentWriter.hpp"
-#include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Nodes/DOMImplementation.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/Images/ImageDocument.hpp"
-#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Dom/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Nodes/DOMImplementation.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Html/Images/ImageDocument.hpp"
+#include "Krystal.Booey/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
 #include "Krystal.Booey/Text/EncodingRegistry.hpp"
-#include "Krystal.Booey/XML/XMLDocumentParser.hpp"
+#include "Krystal.Booey/Xml/XMLDocumentParser.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"
@@ -72,7 +72,7 @@ namespace krys::boo
     /// @brief Whether a response of the MIME type @p mimeType (an essence) is loaded as a text document: a
     /// JavaScript MIME type, a JSON MIME type that isn't an XML MIME type, `text/css`, `text/plain` or
     /// `text/vtt`.
-    /// @see https://html.spec.whatwg.org/#navigate-text
+    /// @see https://html.spec.whatwg.org/multipage/document-lifecycle.html#navigate-text
     KRYS_NODISCARD bool IsTextDocumentMimeType(utf8_stringview mimeType) noexcept
     {
       // https://mimesniff.spec.whatwg.org/#javascript-mime-type

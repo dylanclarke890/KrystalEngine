@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/ContainerQuery.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Queries/ContainerQuery.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/Css/Rules/PositionTryRule.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Core/Attributes.hpp"

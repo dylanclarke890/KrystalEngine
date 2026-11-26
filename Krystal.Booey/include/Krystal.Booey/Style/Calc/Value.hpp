@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/Style/Calc/Tree.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"

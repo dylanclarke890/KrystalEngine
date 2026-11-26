@@ -26,7 +26,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
-#include "Krystal.Booey/CSS/Properties/Consumers/Anchor.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Anchor.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleSelfAlignmentData.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"

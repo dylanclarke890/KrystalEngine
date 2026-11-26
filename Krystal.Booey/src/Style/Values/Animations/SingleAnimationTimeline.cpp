@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationTimeline.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/CSS/Values/ScrollValue.hpp"
-#include "Krystal.Booey/CSS/Values/ViewValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/ScrollValue.hpp"
+#include "Krystal.Booey/Css/Values/ViewValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/CSSValueConversion.hpp"

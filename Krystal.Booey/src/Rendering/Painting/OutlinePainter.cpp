@@ -24,11 +24,11 @@
  */
 
 #include "Krystal.Booey/Rendering/Painting/OutlinePainter.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderListBox.hpp"

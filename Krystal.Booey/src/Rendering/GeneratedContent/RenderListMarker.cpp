@@ -23,9 +23,9 @@
  */
 
 #include "Krystal.Booey/Rendering/GeneratedContent/RenderListMarker.hpp"
-#include "Krystal.Booey/CSS/Counter/CounterStyle.hpp"
-#include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Counter/CounterStyle.hpp"
+#include "Krystal.Booey/Css/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/TextRuns/TextRun.hpp"

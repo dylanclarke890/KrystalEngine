@@ -1,0 +1,197 @@
+﻿/*
+ * Copyright (C) 2018-2025 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGAnimatedProperty.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGDecoratedProperty.hpp"
+#include "Krystal.Booey/Svg/Properties/SVGProperty.hpp"
+
+namespace krys::boo
+{
+  /// @brief An animated decorated property: an enumeration the DOM sees as an integer.
+  template <template <typename, typename> class TDecoratedProperty, typename TDecoration>
+  class SVGAnimatedDecoratedProperty : public SVGAnimatedProperty
+  {
+  protected:
+    const Ref<SVGDecoratedProperty<TDecoration>> _baseVal;
+    RefPtr<SVGDecoratedProperty<TDecoration>> _animVal;
+    SVGPropertyState _state {SVGPropertyState::Clean};
+
+  public:
+    template <typename TProperty, typename TAnimatedProperty = SVGAnimatedDecoratedProperty>
+    KRYS_NODISCARD static Ref<TAnimatedProperty> Create(SVGElement *contextElement) noexcept
+    {
+      return AdoptRef(
+        *new TAnimatedProperty(contextElement, AdoptRef(*new TDecoratedProperty<TDecoration, TProperty>())));
+    }
+
+    template <typename TProperty, typename TAnimatedProperty = SVGAnimatedDecoratedProperty>
+    KRYS_NODISCARD static Ref<TAnimatedProperty> Create(SVGElement *contextElement,
+                                                        const TProperty &value) noexcept
+    {
+      return AdoptRef(
+        *new TAnimatedProperty(contextElement, TDecoratedProperty<TDecoration, TProperty>::Create(value)));
+    }
+
+    SVGAnimatedDecoratedProperty(SVGElement *contextElement,
+                                 Ref<SVGDecoratedProperty<TDecoration>> &&baseVal) noexcept
+        : SVGAnimatedProperty(contextElement), _baseVal(krys::move(baseVal))
+    {
+    }
+
+    // Used by the DOM.
+    ExceptionOr<void> SetBaseVal(const TDecoration &baseVal) noexcept
+    {
+      if (!_baseVal->SetValue(baseVal))
+      {
+        return Exception {ExceptionCode::TypeError};
+      }
+      CommitPropertyChange(nullptr);
+      return {};
+    }
+
+    // Used by SVGElement::AttributeChanged().
+    template <typename TProperty>
+    void SetBaseValInternal(const TProperty &baseVal) noexcept
+    {
+      _baseVal->SetValueInternal(static_cast<TDecoration>(baseVal));
+      if (_animVal)
+      {
+        _animVal->SetValueInternal(static_cast<TDecoration>(baseVal));
+      }
+    }
+
+    KRYS_NODISCARD TDecoration BaseVal() const noexcept
+    {
+      return _baseVal->Value();
+    }
+
+    // Used by SVGAnimator::progress.
+    template <typename TProperty>
+    void SetAnimVal(const TProperty &animVal) noexcept
+    {
+      krys_assert(IsAnimating() && _animVal);
+      _animVal->SetValueInternal(static_cast<TDecoration>(animVal));
+    }
+
+    template <typename TProperty = TDecoration>
+    KRYS_NODISCARD TProperty AnimVal() const noexcept
+    {
+      krys_assert(!IsAnimating() || _animVal);
+      return static_cast<TProperty>((IsAnimating() ? *_animVal : *_baseVal).Value());
+    }
+
+    // Used when committing a change from the SVGAnimatedProperty to the attribute.
+    KRYS_NODISCARD DOMString BaseValAsString() const noexcept override
+    {
+      return _baseVal->ValueAsString();
+    }
+
+    // Used to apply the SVGAnimator change to the target element.
+    KRYS_NODISCARD DOMString AnimValAsString() const noexcept override
+    {
+      krys_assert(IsAnimating() && !!_animVal);
+      return _animVal->ValueAsString();
+    }
+
+    // Managing the relationship with the owner.
+    void SetDirty() noexcept override
+    {
+      _state = SVGPropertyState::Dirty;
+    }
+
+    KRYS_NODISCARD bool IsDirty() const noexcept override
+    {
+      return _state == SVGPropertyState::Dirty;
+    }
+
+    Maybe<DOMString> Synchronize() noexcept override
+    {
+      if (_state == SVGPropertyState::Clean)
+      {
+        return {};
+      }
+      _state = SVGPropertyState::Clean;
+      return BaseValAsString();
+    }
+
+    // Used by RenderSVGElements.
+    template <typename TProperty>
+    KRYS_NODISCARD TProperty CurrentValue() const noexcept
+    {
+      krys_assert(!IsAnimating() || _animVal);
+      return static_cast<TProperty>((IsAnimating() ? *_animVal : *_baseVal).ValueInternal());
+    }
+
+    // Controlling the animation.
+    void StartAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      if (_animVal)
+      {
+        _animVal->SetValue(_baseVal->Value());
+      }
+      else
+      {
+        _animVal = _baseVal->Clone();
+      }
+      SVGAnimatedProperty::StartAnimation(animator);
+    }
+
+    void StopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::StopAnimation(animator);
+      if (!IsAnimating())
+      {
+        _animVal = nullptr;
+      }
+      else if (_animVal)
+      {
+        _animVal->SetValue(_baseVal->Value());
+      }
+    }
+
+    // Controlling the instance animation.
+    void InstanceStartAnimation(SVGAttributeAnimator &animator,
+                                SVGAnimatedProperty &animated) noexcept override
+    {
+      if (!IsAnimating())
+      {
+        _animVal = static_cast<SVGAnimatedDecoratedProperty &>(animated)._animVal;
+      }
+      SVGAnimatedProperty::InstanceStartAnimation(animator, animated);
+    }
+
+    void InstanceStopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::InstanceStopAnimation(animator);
+      if (!IsAnimating())
+      {
+        _animVal = nullptr;
+      }
+    }
+  };
+}

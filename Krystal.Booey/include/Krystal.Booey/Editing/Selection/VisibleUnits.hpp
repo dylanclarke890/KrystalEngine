@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutUnit.hpp"
@@ -218,10 +218,10 @@ namespace krys::boo
                                              BoundarySearchFunction searchFunction) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> FindStartOfParagraph(Node *startNode, Node *highestRoot, Node *startBlock,
-                                                   int32 &offset, dom::Position::AnchorType &type,
+                                                   int32 &offset, Position::AnchorType &type,
                                                    EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 
   KRYS_NODISCARD RefPtr<Node> FindEndOfParagraph(Node *startNode, Node *highestRoot, Node *stayInsideBlock,
-                                                 int32 &offset, dom::Position::AnchorType &type,
+                                                 int32 &offset, Position::AnchorType &type,
                                                  EditingBoundaryCrossingRule boundaryCrossingRule) noexcept;
 }

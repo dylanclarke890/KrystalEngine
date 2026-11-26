@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Events/EventSender.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Dom/Events/EventSender.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
@@ -24,7 +24,7 @@ namespace krys::boo
 
   /// @brief Whether the update comes from a relevant mutation, which restarts the image's events even for
   /// the same image.
-  /// @see https://html.spec.whatwg.org/#relevant-mutations
+  /// @see https://html.spec.whatwg.org/multipage/images.html#relevant-mutations
   enum class RelevantMutation : bool
   {
     No,
@@ -118,7 +118,7 @@ namespace krys::boo
     /// @brief Calls @p promise, as a microtask, once the image has loaded and decoded, so it can be drawn
     /// without decoding. It's rejected with an `EncodingError` if the document isn't fully active, the
     /// element has no source, or the image fails to load or decode, or its source changes first.
-    /// @see https://html.spec.whatwg.org/#dom-img-decode
+    /// @see https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-decode
     void Decode(DecodePromise promise) noexcept;
 
     /// @brief Drops the image, canceling its pending events.

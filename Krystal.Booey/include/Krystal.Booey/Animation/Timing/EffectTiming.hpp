@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Animation/Timing/FillMode.hpp"
 #include "Krystal.Booey/Animation/Timing/PlaybackDirection.hpp"
-#include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSNumericValue.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include "Krystal.Core/Visitor.hpp"

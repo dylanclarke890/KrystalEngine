@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Accessibility/AXProgressIndicator.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
 namespace krys::boo
@@ -31,7 +31,7 @@ namespace krys::boo
 
   bool AXProgressIndicator::IsIndeterminate() const noexcept
   {
-    // A progress bar with no value is indeterminate (https://html.spec.whatwg.org/#the-progress-element).
+    // A progress bar with no value is indeterminate (https://html.spec.whatwg.org/multipage/form-elements.html#the-progress-element).
     auto *progress = ProgressElement();
     return progress && !progress->HasAttribute(u8"value");
   }
@@ -39,7 +39,7 @@ namespace krys::boo
   float AXProgressIndicator::ValueForRange() const noexcept
   {
     // An indeterminate progress bar has a position of -1
-    // (https://html.spec.whatwg.org/#dom-progress-position).
+    // (https://html.spec.whatwg.org/multipage/form-elements.html#dom-progress-position).
     if (auto *progress = ProgressElement())
     {
       return progress->Position() >= 0 ? static_cast<float>(progress->Value()) : 0;

@@ -27,7 +27,7 @@
 #pragma once
 
 #include "Krystal.Booey/Animation/Timelines/ScrollAxis.hpp"
-#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/Css/Values/Aggregates.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutGeometryForward.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"

@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Easing/CubicBezierEasingFunction.hpp"
+#include "Krystal.Booey/Css/Values/Easing/CubicBezierEasingFunction.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 

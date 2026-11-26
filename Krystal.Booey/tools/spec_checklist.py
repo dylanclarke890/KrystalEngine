@@ -77,7 +77,7 @@ def GetSpec(name: str) -> Spec:
     if name in WHATWG_SPECS:
         return WHATWG_SPECS[name]
     if re.fullmatch(r"(css|selectors|mediaqueries|cssom|compositing|filter-effects|motion|fill-stroke|"
-                    r"scroll-animations|web-animations|resize-observer|pointerevents|uievents)[a-z0-9-]*", name):
+                    r"scroll-animations|web-animations|resize-observer|pointerevents|uievents|geometry)[a-z0-9-]*", name):
         unversioned = re.sub(r"-\d+$", "", name)
         return Spec(name, name, f"https://drafts.csswg.org/{name}/", REPO_ROOT / f"Krystal.Booey/docs/specs/css/{name}.md",
                     (f"https://drafts.csswg.org/{name}/", f"https://drafts.csswg.org/{unversioned}/",
@@ -491,7 +491,8 @@ def WriteSteps(lines: list[str], steps: list[Step], indent: int):
         WriteSteps(lines, step.children, indent + 1)
 
 
-def Render(spec: Spec, sections: list[Section], kept: Kept, page: str | None = None) -> str:
+def Render(spec: Spec, sections: list[Section], kept: Kept, page: str | None = None,
+           fragment_links: dict[str, str] | None = None) -> str:
     total = sum(len(section.algorithms) for section in sections)
     title = f"{spec.title} review checklist" + (f": {sections[0].title}" if page else "")
     status = f"`python Krystal.Booey/tools/spec_status.py {spec.name}{' ' + page if page else ''}`"
@@ -517,9 +518,17 @@ def Render(spec: Spec, sections: list[Section], kept: Kept, page: str | None = N
         "status.",
     ]
     sections = [section for section in sections if section.anchor]
+    def Link(anchor: str) -> str:
+        """A link to @p anchor: for a paged specification, on its page of the multipage edition, which loads
+        faster than the single page."""
+        if not page:
+            return f"{spec.url}#{EncodeAnchor(anchor)}"
+        anchor_page = (fragment_links or {}).get(anchor, page) or "index"
+        return f"{spec.url}multipage/{anchor_page}.html#{EncodeAnchor(anchor)}"
+
     keys = Keys(algorithm.anchor for section in sections for algorithm in section.algorithms)
     for section in sections:
-        lines += ["", f"{'#' * section.depth} [{section.title}]({spec.url}#{EncodeAnchor(section.anchor)})", ""]
+        lines += ["", f"{'#' * section.depth} [{section.title}]({Link(section.anchor)})", ""]
         lines.append(kept.statuses.get(section.anchor, DEFAULT_STATUS))
         lines += kept.section_notes.get(section.anchor, [])
         algorithm_anchors = {algorithm.anchor for algorithm in section.algorithms}
@@ -529,7 +538,7 @@ def Render(spec: Spec, sections: list[Section], kept: Kept, page: str | None = N
         for algorithm in section.algorithms:
             key = next(keys)
             box = "x" if kept.checked.get(key) else " "
-            lines += ["", f"- [{box}] [{algorithm.name}]({spec.url}#{EncodeAnchor(algorithm.anchor)}) — "
+            lines += ["", f"- [{box}] [{algorithm.name}]({Link(algorithm.anchor)}) — "
                           f"{algorithm.intro}"]
             lines += kept.notes.get(key, [])
             WriteSteps(lines, algorithm.steps, 1)
@@ -586,7 +595,7 @@ def GeneratePaged(spec: Spec, sections: list[Section], fragment_links_source: st
     rows = []
     for page, page_sections in pages.items():
         path = spec.page_dir / f"{page}.md"
-        path.write_text(Render(spec, page_sections, kept, page), encoding="utf-8-sig", newline="\n")
+        path.write_text(Render(spec, page_sections, kept, page, links), encoding="utf-8-sig", newline="\n")
         count = sum(len(section.algorithms) for section in page_sections)
         rows.append(f"| [{page_sections[0].title}]({spec.name}/{page}.md) | {len(page_sections)} | {count} |")
     for path in existing:

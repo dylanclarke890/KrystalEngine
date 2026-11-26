@@ -24,8 +24,8 @@
 
 #include "Krystal.Booey/Style/Values/ScrollAnimations/ViewFunction.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
-#include "Krystal.Booey/CSS/Values/ViewValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/ViewValue.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"

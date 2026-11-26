@@ -53,7 +53,7 @@ def generate(args: argparse.Namespace):
     run_gperf(
         gperf_executable=args.gperf_executable,
         filename="ValueId",
-        output_cpp_dir=os.path.join(output_cpp_dir, "CSS/Values"),
+        output_cpp_dir=os.path.join(output_cpp_dir, "Css/Values"),
         remove_gperf_file=True,
     )
 
@@ -181,13 +181,13 @@ class GenerationContext:
     number_of_predefined_values = 1
 
     def generate_css_value_id_hpp(self):
-        with open(os.path.join(self.output_hpp_dir, "Krystal.Booey/CSS/Values/ValueId.hpp"), "w") as output_file:
+        with open(os.path.join(self.output_hpp_dir, "Krystal.Booey/Css/Values/ValueId.hpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Types/CSSOMString.hpp",
+                    "Krystal.Booey/Css/Parser/ParserContext.hpp",
+                    "Krystal.Booey/Css/Types/CSSOMString.hpp",
                 ],
             )
 
@@ -302,7 +302,7 @@ class GenerationContext:
     def _generate_gperf_prelude(self, *, to: Writer):
         with to.block(block_start="%{", block_end="%}", indent=False):
             to.cpp_prelude(
-                for_header="Krystal.Booey/CSS/Values/ValueId.hpp",
+                for_header="Krystal.Booey/Css/Values/ValueId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
                     "Krystal.Core/Containers/SmallList.hpp",

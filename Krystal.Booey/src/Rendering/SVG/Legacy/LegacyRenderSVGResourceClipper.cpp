@@ -35,9 +35,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGClipPathElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGUseElement.hpp"
-#include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGClipPathElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGUseElement.hpp"
+#include "Krystal.Booey/Svg/SVGNames.hpp"
 
 namespace krys::boo
 {

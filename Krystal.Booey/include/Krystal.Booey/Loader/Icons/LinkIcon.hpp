@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -35,7 +35,7 @@ namespace krys::boo
 {
   /// @brief An icon a document names with `<link rel=icon>`: where it is, and what its `type` and `sizes`
   /// say about it.
-  /// @see https://html.spec.whatwg.org/#rel-icon
+  /// @see https://html.spec.whatwg.org/multipage/links.html#rel-icon
   struct LinkIcon
   {
     net::Url Url;

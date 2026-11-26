@@ -26,17 +26,17 @@
  */
 
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Html/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -1235,9 +1235,9 @@ namespace krys::boo
     // The currPos.isNotNull() check is needed because positions in non-HTML content
     // (like SVG) do not have visible positions, and we don't want to emit for them either.
     VisiblePosition startPos =
-      VisiblePosition(dom::Position(RefPtr<Node>(_startContainer), static_cast<uint32>(_startOffset),
-                                    dom::Position::AnchorType::PositionIsOffsetInAnchor));
-    VisiblePosition currPos = VisiblePosition(dom::PositionBeforeNode(&currentNode));
+      VisiblePosition(Position(RefPtr<Node>(_startContainer), static_cast<uint32>(_startOffset),
+                               Position::AnchorType::PositionIsOffsetInAnchor));
+    VisiblePosition currPos = VisiblePosition(PositionBeforeNode(&currentNode));
     return startPos.IsNotNull() && currPos.IsNotNull() && !InSameLine(startPos, currPos);
   }
 
@@ -2092,10 +2092,10 @@ namespace krys::boo
           }
           else
           {
-            if (auto end = dom::MakeBoundaryPoint(
-                  VisiblePosition(dom::MakeDeprecatedLegacyPosition(textRunRange.Start))
-                    .Next()
-                    .DeepEquivalent()))
+            if (auto end =
+                  CreateBoundaryPoint(VisiblePosition(CreateDeprecatedLegacyPosition(textRunRange.Start))
+                                        .Next()
+                                        .DeepEquivalent()))
             {
               textRunRange.End = *end;
             }

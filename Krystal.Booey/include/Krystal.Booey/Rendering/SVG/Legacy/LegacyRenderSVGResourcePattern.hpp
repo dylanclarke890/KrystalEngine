@@ -23,7 +23,7 @@
 
 #include "Krystal.Booey/Graphics/Pattern.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
-#include "Krystal.Booey/SVG/PatternAttributes.hpp"
+#include "Krystal.Booey/Svg/PatternAttributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 

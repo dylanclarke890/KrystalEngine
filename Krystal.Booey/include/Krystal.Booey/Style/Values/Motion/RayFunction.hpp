@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Motion/RayFunction.hpp"
+#include "Krystal.Booey/Css/Values/Motion/RayFunction.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/Position.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

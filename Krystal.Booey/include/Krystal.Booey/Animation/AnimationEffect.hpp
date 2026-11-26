@@ -29,7 +29,7 @@
 #include "Krystal.Booey/Animation/Timing/ComputedEffectTiming.hpp"
 #include "Krystal.Booey/Animation/Timing/EffectTiming.hpp"
 #include "Krystal.Booey/Animation/Timing/OptionalEffectTiming.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Core/Memory/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Memory/RefCounted.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"

@@ -25,7 +25,7 @@
 
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageSource.hpp"
 
-#include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Css/Values/Value.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 

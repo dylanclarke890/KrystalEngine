@@ -28,9 +28,9 @@
  */
 
 #include "Krystal.Booey/Loader/DocumentLoader.hpp"
-#include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Dom/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
 #include "Krystal.Booey/Loader/Icons/IconLoader.hpp"
@@ -354,7 +354,7 @@ namespace krys::boo
     }
     _writer.End();
 
-    // https://html.spec.whatwg.org/#creating-a-new-browsing-context
+    // https://html.spec.whatwg.org/multipage/document-sequences.html#creating-a-new-browsing-context
     // 26. Completely finish loading document.
     // (The document is never parsed, so its readiness is "complete", and it gets no load event.)
     if (RefPtr<boo::Document> document = ShareRefPtr(_frame ? _frame->Document() : nullptr))

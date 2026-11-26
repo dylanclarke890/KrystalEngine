@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorFilter.hpp"
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Invalidation/HasSelectorFilter.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"

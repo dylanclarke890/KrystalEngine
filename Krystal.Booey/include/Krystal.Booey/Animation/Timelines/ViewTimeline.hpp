@@ -27,8 +27,8 @@
 
 #include "Krystal.Booey/Animation/Timelines/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/Timelines/ViewTimelineOptions.hpp"
-#include "Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSNumericValue.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp"
 
 namespace krys::boo

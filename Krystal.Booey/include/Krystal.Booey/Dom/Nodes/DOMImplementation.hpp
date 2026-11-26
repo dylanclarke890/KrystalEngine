@@ -1,0 +1,77 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Memory/RefPtr.hpp"
+#include "Krystal.Core/Memory/WeakPtr.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys::net
+{
+  class Url;
+}
+
+namespace krys::boo
+{
+  class Document;
+  class DocumentType;
+  class XMLDocument;
+}
+
+namespace krys::boo::dom
+{
+  /// @see https://dom.spec.whatwg.org/#interface-domimplementation
+  class DOMImplementation
+  {
+    friend class boo::Document;
+
+  private:
+    WeakRef<Document> _document;
+
+  private:
+    explicit DOMImplementation(Document &document) noexcept;
+
+  public:
+#pragma region DOMImplementation - https://dom.spec.whatwg.org/#interface-domimplementation
+
+    /// @brief Returns a doctype, with the given `name`, `publicId`, and `systemId`.
+    /// @throws InvalidCharacterError if `name` is not a valid doctype name.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createdocumenttype
+    KRYS_NODISCARD ExceptionOr<Ref<DocumentType>> CreateDocumentType(const DOMString &name,
+                                                                     const DOMString &publicId,
+                                                                     const DOMString &systemId) noexcept;
+
+    /// @brief Returns an XMLDocument, with a document element whose local name is `qualifiedName` and whose
+    /// namespace is `namespaceUri` (unless `qualifiedName` is the empty string), and with `doctype`, if it is
+    /// given, as its doctype.
+    /// @throws This method throws the same exceptions as the createElementNS() method, when invoked with
+    /// `namespaceUri` and `qualifiedName`. A null `qualifiedName` is the empty string.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createdocument
+    KRYS_NODISCARD ExceptionOr<Ref<XMLDocument>>
+      CreateDocument(DOMStringAtom namespaceUri, const DOMStringAtom &qualifiedName = DOMStringAtom::Empty(),
+                     DocumentType *doctype = nullptr) noexcept;
+
+    /// @brief Returns a document, with a basic tree already constructed including a title element, unless the
+    /// `title` is omitted.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument
+    KRYS_NODISCARD ExceptionOr<Ref<Document>>
+      CreateHTMLDocument(const Maybe<DOMString> &title = null) noexcept;
+
+    /// @note Useless; always returns true.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-hasfeature
+    KRYS_NODISCARD static bool HasFeature() noexcept
+    {
+      return true;
+    }
+
+#pragma endregion
+
+    /// @brief Makes the document a load of @p contentType at @p url shows: XHTML, SVG and other XML
+    /// documents for their types, an image document for a supported image type, and an HTML document of the
+    /// type for the rest (a text document's, whose parser the writer starts in plain text).
+    // FIXME: Media documents, once there are media elements.
+    KRYS_NODISCARD static Ref<Document> CreateDocument(utf8_stringview contentType,
+                                                       const net::Url &url) noexcept;
+  };
+}

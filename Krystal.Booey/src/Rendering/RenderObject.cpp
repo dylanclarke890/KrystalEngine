@@ -26,21 +26,21 @@
 
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLBodyElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLFieldSetElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLHRElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLLegendElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLHRElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -571,8 +571,8 @@ namespace krys::boo
 
 #pragma region Editing
 
-  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource,
-                                                           const RenderFragmentContainer *) noexcept
+  PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource,
+                                                      const RenderFragmentContainer *) noexcept
   {
     return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
   }
@@ -617,8 +617,8 @@ namespace krys::boo
     return current + 1;
   }
 
-  dom::PositionWithAffinity RenderObject::CreatePositionWithAffinity(int32 offset,
-                                                                     Affinity affinity) const noexcept
+  PositionWithAffinity RenderObject::CreatePositionWithAffinity(int32 offset,
+                                                                Affinity affinity) const noexcept
   {
     // If this is a non-anonymous renderer in an editable area, then it's simple.
     if (auto *node = NonPseudoNode())
@@ -626,21 +626,21 @@ namespace krys::boo
       if (!node->HasEditableStyle())
       {
         // If it can be found, we prefer a visually equivalent position that is editable.
-        auto position = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset));
+        auto position = CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset));
         auto candidate = position.Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary);
         if (candidate.DeprecatedNode()->HasEditableStyle())
         {
-          return dom::PositionWithAffinity(candidate, affinity);
+          return PositionWithAffinity(candidate, affinity);
         }
         candidate = position.Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary);
         if (candidate.DeprecatedNode()->HasEditableStyle())
         {
-          return dom::PositionWithAffinity(candidate, affinity);
+          return PositionWithAffinity(candidate, affinity);
         }
       }
       // FIXME: Eliminate legacy editing positions
-      return dom::PositionWithAffinity(
-        dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset)), affinity);
+      return PositionWithAffinity(
+        CreateDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset)), affinity);
     }
 
     // We don't want to cross the boundary between editable and non-editable
@@ -658,7 +658,7 @@ namespace krys::boo
       {
         if (auto *node = renderer->NonPseudoNode())
         {
-          return dom::PositionWithAffinity(FirstPositionInOrBeforeNode(node));
+          return PositionWithAffinity(FirstPositionInOrBeforeNode(node));
         }
       }
 
@@ -672,14 +672,14 @@ namespace krys::boo
         }
         if (auto *node = renderer->NonPseudoNode())
         {
-          return dom::PositionWithAffinity(LastPositionInOrAfterNode(node));
+          return PositionWithAffinity(LastPositionInOrAfterNode(node));
         }
       }
 
       // Use the parent itself unless it too is anonymous.
       if (auto *element = parent->NonPseudoElement())
       {
-        return dom::PositionWithAffinity(FirstPositionInOrBeforeNode(element));
+        return PositionWithAffinity(FirstPositionInOrBeforeNode(element));
       }
 
       // Repeat at the next level up.
@@ -690,12 +690,11 @@ namespace krys::boo
     return {};
   }
 
-  dom::PositionWithAffinity
-    RenderObject::CreatePositionWithAffinity(const dom::Position &position) const noexcept
+  PositionWithAffinity RenderObject::CreatePositionWithAffinity(const Position &position) const noexcept
   {
     if (position.IsNotNull())
     {
-      return dom::PositionWithAffinity(position);
+      return PositionWithAffinity(position);
     }
 
     krys_debug_assert(!GetNode());
@@ -2207,7 +2206,7 @@ namespace krys::boo
     return _node.NodeDocument();
   }
 
-  dom::DocumentOrShadowRoot &RenderObject::TreeScopeForSVGReferences() const noexcept
+  DocumentOrShadowRoot &RenderObject::TreeScopeForSVGReferences() const noexcept
   {
     return _node.TreeScopeForSVGReferences();
   }

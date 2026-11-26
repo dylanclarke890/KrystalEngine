@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorEnums.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Invalidation/Invalidator.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Attributes.hpp"

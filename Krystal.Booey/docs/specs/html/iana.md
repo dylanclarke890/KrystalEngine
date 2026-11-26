@@ -6,38 +6,38 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-## [17 IANA considerations](https://html.spec.whatwg.org/#iana)
+## [17 IANA considerations](https://html.spec.whatwg.org/multipage/iana.html#iana)
 
 Status: n/a (back matter)
 
-### [17.1 text/html](https://html.spec.whatwg.org/#text/html)
+### [17.1 text/html](https://html.spec.whatwg.org/multipage/infrastructure.html#text/html)
 
 Status: n/a (back matter)
 
-### [17.2 multipart/x-mixed-replace](https://html.spec.whatwg.org/#multipart/x-mixed-replace)
+### [17.2 multipart/x-mixed-replace](https://html.spec.whatwg.org/multipage/iana.html#multipart/x-mixed-replace)
 
 Status: n/a (back matter)
 
-### [17.3 application/xhtml+xml](https://html.spec.whatwg.org/#application/xhtml+xml)
+### [17.3 application/xhtml+xml](https://html.spec.whatwg.org/multipage/iana.html#application/xhtml+xml)
 
 Status: n/a (back matter)
 
-### [17.4 text/ping](https://html.spec.whatwg.org/#text/ping)
+### [17.4 text/ping](https://html.spec.whatwg.org/multipage/infrastructure.html#text/ping)
 
 Status: n/a (back matter)
 
-### [17.5 application/microdata+json](https://html.spec.whatwg.org/#application/microdata+json)
+### [17.5 application/microdata+json](https://html.spec.whatwg.org/multipage/iana.html#application/microdata+json)
 
 Status: n/a (back matter)
 
-### [17.6 application/speculationrules+json](https://html.spec.whatwg.org/#application/speculationrules+json)
+### [17.6 application/speculationrules+json](https://html.spec.whatwg.org/multipage/iana.html#application/speculationrules+json)
 
 Status: n/a (back matter)
 
-### [17.7 text/event-stream](https://html.spec.whatwg.org/#text/event-stream)
+### [17.7 text/event-stream](https://html.spec.whatwg.org/multipage/infrastructure.html#text/event-stream)
 
 Status: n/a (back matter)
 
-### [17.8 web+ scheme prefix](https://html.spec.whatwg.org/#web+-scheme-prefix)
+### [17.8 web+ scheme prefix](https://html.spec.whatwg.org/multipage/iana.html#web+-scheme-prefix)
 
 Status: n/a (back matter)

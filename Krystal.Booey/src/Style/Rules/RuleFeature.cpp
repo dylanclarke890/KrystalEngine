@@ -27,10 +27,10 @@
  */
 
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Style/Rules/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"

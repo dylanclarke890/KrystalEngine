@@ -39,8 +39,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/SVGResourceElementClient.hpp"
 
 namespace krys::boo
 {

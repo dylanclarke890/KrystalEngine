@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/RemoveNodePreservingChildrenCommand.hpp"
-#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 
 namespace krys::boo

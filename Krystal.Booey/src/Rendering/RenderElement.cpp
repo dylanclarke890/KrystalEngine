@@ -24,18 +24,18 @@
 
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/ContentVisibility/ContentVisibilityDocumentState.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Css/Containment/ContentVisibilityDocumentState.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMarqueeElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableCellElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMarqueeElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
@@ -85,9 +85,9 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 
 namespace krys::boo
 {
@@ -1057,20 +1057,20 @@ namespace krys::boo
       {
         if (oldStyle->ContentVisibility() == ContentVisibility::Auto)
         {
-          dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+          css::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
         }
         auto wasSkippedContent = oldStyle->ContentVisibility() == ContentVisibility::Hidden
-                                   ? dom::IsSkippedContent::Yes
-                                   : dom::IsSkippedContent::No;
+                                   ? css::IsSkippedContent::Yes
+                                   : css::IsSkippedContent::No;
         auto isSkippedContent = newStyle.ContentVisibility() == ContentVisibility::Hidden
-                                  ? dom::IsSkippedContent::Yes
-                                  : dom::IsSkippedContent::No;
-        dom::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
+                                  ? css::IsSkippedContent::Yes
+                                  : css::IsSkippedContent::No;
+        css::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
                                                               isSkippedContent);
       }
       if ((contentVisibilityChanged || !oldStyle) && newStyle.ContentVisibility() == ContentVisibility::Auto)
       {
-        dom::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
+        css::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
       }
     };
     if (oldStyle)
@@ -2809,7 +2809,7 @@ namespace krys::boo
 
     if (Style().ContentVisibility() == ContentVisibility::Auto && GetElement())
     {
-      dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+      css::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
     }
   }
 

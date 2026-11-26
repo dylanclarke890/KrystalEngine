@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Ratio.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Ratio.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 

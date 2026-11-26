@@ -24,13 +24,13 @@
 
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
@@ -5885,8 +5885,8 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD dom::Position PositionForRun(const RenderBlockFlow &flow,
-                                                inline_iterator::LeafBoxIterator box, bool start) noexcept
+    KRYS_NODISCARD Position PositionForRun(const RenderBlockFlow &flow, inline_iterator::LeafBoxIterator box,
+                                           bool start) noexcept
     {
       if (!box)
       {
@@ -5895,25 +5895,25 @@ namespace krys::boo
 
       if (!box->Renderer().NonPseudoNode())
       {
-        return dom::MakeDeprecatedLegacyPosition(
+        return CreateDeprecatedLegacyPosition(
           ShareRefPtr<Node>(flow.NonPseudoElement()),
           static_cast<uint32>(start ? flow.CaretMinOffset() : flow.CaretMaxOffset()));
       }
 
       if (!box->IsText())
       {
-        return dom::MakeDeprecatedLegacyPosition(
+        return CreateDeprecatedLegacyPosition(
           ShareRefPtr(box->Renderer().NonPseudoNode()),
           static_cast<uint32>(start ? box->Renderer().CaretMinOffset() : box->Renderer().CaretMaxOffset()));
       }
 
       inline_iterator::TextBoxIterator textBox(*box);
-      return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(textBox->Renderer().NonPseudoNode()),
-                                               start ? textBox->Start() : textBox->End());
+      return CreateDeprecatedLegacyPosition(ShareRefPtr(textBox->Renderer().NonPseudoNode()),
+                                            start ? textBox->Start() : textBox->End());
     }
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     RenderBlockFlow::PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
                                                         HitTestSource source) noexcept
   {

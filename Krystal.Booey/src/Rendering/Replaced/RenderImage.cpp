@@ -27,16 +27,16 @@
 
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Images/Image.hpp"
 #include "Krystal.Booey/Graphics/Images/ImagePaintingOptions.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMapElement.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTesting/HitTestResult.hpp"
@@ -46,8 +46,8 @@
 #include "Krystal.Booey/Rendering/Replaced/RenderImageResourceStyleImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/GeometryUtilities.hpp"
 #include "Krystal.Text/UnicodeHelpers.hpp"
@@ -666,7 +666,7 @@ namespace krys::boo
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});
           // With dir=auto, the text has the directionality of its attribute: its first strong character's, or
-          // ltr. https://html.spec.whatwg.org/#directionality-of-the-attribute
+          // ltr. https://html.spec.whatwg.org/multipage/dom.html#directionality-of-the-attribute
           if (auto *element = GetElement();
               _altTextIsFromAttribute && element && element->HasAutoTextDirectionState())
           {

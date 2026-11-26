@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Queries/ContainerQuery.hpp"
-#include "Krystal.Booey/CSS/Queries/GenericMediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/Queries/ContainerQuery.hpp"
+#include "Krystal.Booey/Css/Queries/GenericMediaQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/Scope/ScopeOrdinal.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Core/Containers/List.hpp"

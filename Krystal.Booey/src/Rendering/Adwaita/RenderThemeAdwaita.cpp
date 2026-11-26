@@ -25,11 +25,11 @@
  */
 
 #include "Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp"
-#include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/UserAgentStyleSheets.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Adwaita/Adwaita.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCascade.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"

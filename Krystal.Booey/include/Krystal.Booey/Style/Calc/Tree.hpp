@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Calc/Operator.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Calc/Operator.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"

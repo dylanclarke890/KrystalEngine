@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Calc/SymbolTable.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Css/Calc/SymbolTable.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Range.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

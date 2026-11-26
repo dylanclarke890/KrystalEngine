@@ -37,9 +37,9 @@
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Booey/Svg/Graphics/Filters/SVGFilterRenderer.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
 #include "Krystal.Core/Strings/TextStream.hpp"
 

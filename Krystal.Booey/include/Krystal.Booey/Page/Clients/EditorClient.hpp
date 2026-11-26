@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"

@@ -22,7 +22,7 @@
 #pragma once
 
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextPositioningElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextPositioningElement.hpp"
 
 namespace krys::boo
 {

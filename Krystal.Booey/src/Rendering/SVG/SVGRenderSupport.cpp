@@ -51,9 +51,9 @@
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGeometryElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGeometryElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Geometry/AffineTransform.hpp"
 #include "Krystal.Core/Geometry/TransformationMatrix.hpp"
 

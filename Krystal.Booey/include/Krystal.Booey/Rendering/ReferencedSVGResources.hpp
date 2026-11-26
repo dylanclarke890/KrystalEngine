@@ -25,19 +25,14 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/HTML/Types/TagName.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Booey/Html/Types/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Containers/HashMap.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/RefPtr.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 #include <utility>
-
-namespace krys::boo::dom
-{
-  class DocumentOrShadowRoot;
-}
 
 namespace krys::boo::style
 {
@@ -49,6 +44,7 @@ namespace krys::boo
 {
   class CSSSVGResourceElementClient;
   class Document;
+  class DocumentOrShadowRoot;
   class LegacyRenderSVGResourceClipper;
   class LegacyRenderSVGResourceContainer;
   class RenderElement;
@@ -78,30 +74,28 @@ namespace krys::boo
     KRYS_NODISCARD static SVGElementIdentifierAndTagPairs ReferencedSVGResourceIDs(const RenderStyle &,
                                                                                    const Document &) noexcept;
 
-    void UpdateReferencedResources(dom::DocumentOrShadowRoot &,
-                                   const SVGElementIdentifierAndTagPairs &) noexcept;
+    void UpdateReferencedResources(DocumentOrShadowRoot &, const SVGElementIdentifierAndTagPairs &) noexcept;
 
     // Legacy: Clipping needs a renderer, filters use an element.
     KRYS_NODISCARD static LegacyRenderSVGResourceClipper *
-      ReferencedClipperRenderer(dom::DocumentOrShadowRoot &, const style::ReferencePath &) noexcept;
+      ReferencedClipperRenderer(DocumentOrShadowRoot &, const style::ReferencePath &) noexcept;
 
     KRYS_NODISCARD static RefPtr<SVGFilterElement>
-      ReferencedFilterElement(dom::DocumentOrShadowRoot &, const style::ReferenceFilterOperation &) noexcept;
+      ReferencedFilterElement(DocumentOrShadowRoot &, const style::ReferenceFilterOperation &) noexcept;
 
     KRYS_NODISCARD static LegacyRenderSVGResourceContainer *
-      ReferencedRenderResource(dom::DocumentOrShadowRoot &, const DOMStringAtom &fragment) noexcept;
+      ReferencedRenderResource(DocumentOrShadowRoot &, const DOMStringAtom &fragment) noexcept;
 
   private:
-    KRYS_NODISCARD static RefPtr<SVGElement> ElementForResourceID(dom::DocumentOrShadowRoot &,
-                                                                  const DOMStringAtom &resourceID,
-                                                                  html::TagName) noexcept;
+    KRYS_NODISCARD static RefPtr<SVGElement>
+      ElementForResourceID(DocumentOrShadowRoot &, const DOMStringAtom &resourceID, html::TagName) noexcept;
 
-    KRYS_NODISCARD static RefPtr<SVGElement> ElementForResourceIDs(dom::DocumentOrShadowRoot &,
+    KRYS_NODISCARD static RefPtr<SVGElement> ElementForResourceIDs(DocumentOrShadowRoot &,
                                                                    const DOMStringAtom &resourceID,
                                                                    const SVGQualifiedNames &) noexcept;
 
     void AddClientForTarget(SVGElement &targetElement, const DOMStringAtom &) noexcept;
 
-    void RemoveClientForTarget(dom::DocumentOrShadowRoot &, const DOMStringAtom &) noexcept;
+    void RemoveClientForTarget(DocumentOrShadowRoot &, const DOMStringAtom &) noexcept;
   };
 }

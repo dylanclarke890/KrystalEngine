@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/Css/Values/TextDecoration/TextShadow.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"

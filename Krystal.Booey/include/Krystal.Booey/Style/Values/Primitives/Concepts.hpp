@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Concepts.hpp"
 
 namespace krys::boo::style
 {

@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"

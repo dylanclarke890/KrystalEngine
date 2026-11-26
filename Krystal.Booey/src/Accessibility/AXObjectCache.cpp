@@ -43,28 +43,28 @@
 #include "Krystal.Booey/Accessibility/AXTableColumn.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHeaderContainer.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
-#include "Krystal.Booey/HTML/CustomElement/ElementInternals.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMeterElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptGroupElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/Html/CustomElement/ElementInternals.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLDialogElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLLabelElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMeterElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptGroupElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/MathML/Elements/MathMLElement.hpp"
 #include "Krystal.Booey/Page/Clients/BooeyClient.hpp"
@@ -79,7 +79,7 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Values/Color/Opacity.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <utility>
 
@@ -2865,7 +2865,7 @@ namespace krys::boo
     }
   }
 
-  void AXObjectCache::PostTextSelectionChangeNotification(const dom::Position &start) noexcept
+  void AXObjectCache::PostTextSelectionChangeNotification(const Position &start) noexcept
   {
     auto *node = start.DeprecatedNode();
     if (!node)

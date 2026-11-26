@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Aggregates.hpp"
+#include "Krystal.Booey/Css/Values/Aggregates.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"
 

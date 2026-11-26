@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordValueRepresentationNeeded.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

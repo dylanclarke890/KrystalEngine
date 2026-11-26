@@ -6,14 +6,14 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-#### [4.8.5 The iframe element](https://html.spec.whatwg.org/#the-iframe-element)
+#### [4.8.5 The iframe element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLIFrameElement`: its attributes are reflected, `sandbox` is a token list and its presentational hints are Rendering's. There's no frame tree, so iframes navigate nothing and have no content document or window (see `KNOWN-ISSUES.md`).
 > Fixed: `loading` wasn't limited to its known values; its keywords are now shared with `<img>` (`EnumeratedAttributeTraits<"loading", HTMLElement>`).
 <!-- definitions: attr-iframe-src an-iframe-srcdoc-document process-iframe-initial-insertion iframe-load-in-progress mute-iframe-load current-navigation-was-lazy-loaded iframe-pending-resource-timing-start-time iframe-pending-resource-timing-url attr-iframe-name attr-iframe-sandbox attr-iframe-allow attr-iframe-allowfullscreen attr-iframe-referrerpolicy -->
 
-- [x] [The srcdoc attribute, if present, must have a value using the HTML syntax that…](https://html.spec.whatwg.org/#attr-iframe-srcdoc) — The srcdoc attribute, if present, must have a value using the HTML syntax that consists of the following syntactic components, in the given order:
+- [x] [The srcdoc attribute, if present, must have a value using the HTML syntax that…](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-srcdoc) — The srcdoc attribute, if present, must have a value using the HTML syntax that consists of the following syntactic components, in the given order:
   - 1. Any number of comments and ASCII whitespace.
   - 2. Optionally, a DOCTYPE.
   - 3. Any number of comments and ASCII whitespace.
@@ -21,14 +21,14 @@ Status: reviewed (2026-11-01)
   - 5. Any number of comments and ASCII whitespace.
   > n/a: author conformance.
 
-- [x] [The iframe HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#the-iframe-element) — The iframe HTML element post-connection steps, given insertedNode, are:
+- [x] [The iframe HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element) — The iframe HTML element post-connection steps, given insertedNode, are:
   - 1. If insertedNode's node document's browsing context is null, then return.
   - 2. If insertedNode has a sandbox attribute, then parse the sandboxing directive given the attribute's value and insertedNode's iframe sandboxing flag set.
   - 3. Create a new child navigable for insertedNode.
   - 4. Process the iframe attributes for insertedNode, with initialInsertion set to true.
   > n/a: there's no frame tree.
 
-- [x] [process the iframe attributes](https://html.spec.whatwg.org/#process-the-iframe-attributes) — To process the iframe attributes for an element element, with an optional boolean initialInsertion (default false):
+- [x] [process the iframe attributes](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#process-the-iframe-attributes) — To process the iframe attributes for an element element, with an optional boolean initialInsertion (default false):
   - 1. If element's srcdoc attribute is specified:
     - 1a. Set element's current navigation was lazy loaded boolean to false.
     - 1b. If the will lazy load element steps given element return true:
@@ -53,7 +53,7 @@ Status: reviewed (2026-11-01)
     - 2g. Navigate: Navigate an iframe or frame given element, url, referrerPolicy, null, and initialInsertion.
   > n/a: there's no frame tree.
 
-- [x] [shared attribute processing steps for iframe and frame elements](https://html.spec.whatwg.org/#shared-attribute-processing-steps-for-iframe-and-frame-elements) — The shared attribute processing steps for iframe and frame elements, given an element element and a boolean initialInsertion, are:
+- [x] [shared attribute processing steps for iframe and frame elements](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#shared-attribute-processing-steps-for-iframe-and-frame-elements) — The shared attribute processing steps for iframe and frame elements, given an element element and a boolean initialInsertion, are:
   - 1. Let url be the URL record about:blank.
   - 2. If element has a src attribute specified, and its value is not the empty string:
     - 2a. Let maybeURL be the result of encoding-parsing a URL given that attribute's value, relative to element's node document.
@@ -63,7 +63,7 @@ Status: reviewed (2026-11-01)
   - 5. Return url.
   > n/a: there's no frame tree.
 
-- [x] [navigate an iframe or frame](https://html.spec.whatwg.org/#navigate-an-iframe-or-frame) — To navigate an iframe or frame given an element element, a URL url, a referrer policy referrerPolicy, an optional string-or-null srcdocString (default null), and an optional boolean initialInsertion (default false):
+- [x] [navigate an iframe or frame](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#navigate-an-iframe-or-frame) — To navigate an iframe or frame given an element element, a URL url, a referrer policy referrerPolicy, an optional string-or-null srcdocString (default null), and an optional boolean initialInsertion (default false):
   - 1. Let historyHandling be "auto".
   - 2. If element's content navigable's active document is not completely loaded, then set historyHandling to "replace".
   - 3. If element is an iframe:
@@ -72,7 +72,7 @@ Status: reviewed (2026-11-01)
   - 4. Navigate element's content navigable to url using element's node document, with historyHandling set to historyHandling, referrerPolicy set to referrerPolicy, documentResource set to srcdocString, and initialInsertion set to initialInsertion.
   > n/a: there's no frame tree.
 
-- [x] [iframe load event steps](https://html.spec.whatwg.org/#iframe-load-event-steps) — To run the iframe load event steps, given an iframe element element:
+- [x] [iframe load event steps](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#iframe-load-event-steps) — To run the iframe load event steps, given an iframe element element:
   - 1. Assert: element's content navigable is not null.
   - 2. Let childDocument be element's content navigable's active document.
   - 3. If childDocument has its mute iframe load flag set, then return.
@@ -88,56 +88,56 @@ Status: reviewed (2026-11-01)
   - 7. Unset childDocument's iframe load in progress flag.
   > n/a: there's no frame tree.
 
-- [x] [potentially delays the load event](https://html.spec.whatwg.org/#potentially-delays-the-load-event) — If an element type potentially delays the load event, then for each element element of that type, the user agent must delay the load event of element's node document if element's content navigable is non-null and any of the following are true:
+- [x] [potentially delays the load event](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#potentially-delays-the-load-event) — If an element type potentially delays the load event, then for each element element of that type, the user agent must delay the load event of element's node document if element's content navigable is non-null and any of the following are true:
   > n/a: there's no frame tree.
 
-- [x] [allowed to use](https://html.spec.whatwg.org/#allowed-to-use) — To determine whether a Document object document is allowed to use the policy-controlled-feature feature, run these steps:
+- [x] [allowed to use](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use) — To determine whether a Document object document is allowed to use the policy-controlled-feature feature, run these steps:
   - 1. If document's browsing context is null, then return false.
   - 2. If document is not fully active, then return false.
   - 3. If the result of running is feature enabled in document for origin on feature, document, and document's origin is "Enabled", then return true.
   - 4. Return false.
   > n/a: no permissions policy.
 
-- [x] [When the loading attribute's state is changed to the Eager state, the user agen…](https://html.spec.whatwg.org/#attr-iframe-loading) — When the loading attribute's state is changed to the Eager state, the user agent must run these steps:
+- [x] [When the loading attribute's state is changed to the Eager state, the user agen…](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-loading) — When the loading attribute's state is changed to the Eager state, the user agent must run these steps:
   - 1. Let resumptionSteps be the iframe element's lazy load resumption steps.
   - 2. If resumptionSteps is null, then return.
   - 3. Set the iframe's lazy load resumption steps to null.
   - 4. Invoke resumptionSteps.
   > n/a: there's no frame tree.
 
-- [x] [HTMLIFrameElement.srcdoc](https://html.spec.whatwg.org/#dom-iframe-srcdoc) — The srcdoc getter steps are:
+- [x] [HTMLIFrameElement.srcdoc](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-srcdoc) — The srcdoc getter steps are:
   - 1. Let attribute be the result of getting an attribute by namespace and local name given null, srcdoc's local name, and this.
   - 2. If attribute is null, then return the empty string.
   - 3. Return attribute's value.
   > `HTMLIFrameElement::SrcDoc`; there are no Trusted Types.
 
-- [x] [The srcdoc setter steps](https://html.spec.whatwg.org/#dom-iframe-srcdoc) — The srcdoc setter steps are:
+- [x] [The srcdoc setter steps](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-srcdoc) — The srcdoc setter steps are:
   - 1. Let compliantString be the result of invoking the get trusted type compliant string algorithm with TrustedHTML, this's relevant global object, the given value, "HTMLIFrameElement srcdoc", and "script".
   - 2. Set an attribute value given this, srcdoc's local name, and compliantString.
 
-- [x] [HTMLIFrameElement.referrerPolicy](https://html.spec.whatwg.org/#dom-iframe-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
+- [x] [HTMLIFrameElement.referrerPolicy](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
 
-- [x] [HTMLIFrameElement.loading](https://html.spec.whatwg.org/#dom-iframe-loading) — The loading IDL attribute must reflect the loading content attribute, limited to only known values.
+- [x] [HTMLIFrameElement.loading](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-loading) — The loading IDL attribute must reflect the loading content attribute, limited to only known values.
 
-- [x] [HTMLIFrameElement.contentDocument](https://html.spec.whatwg.org/#dom-iframe-contentdocument) — The contentDocument getter steps are to return this's content document.
+- [x] [HTMLIFrameElement.contentDocument](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-contentdocument) — The contentDocument getter steps are to return this's content document.
   > n/a: there's no frame tree.
 
-- [x] [HTMLIFrameElement.contentWindow](https://html.spec.whatwg.org/#dom-iframe-contentwindow) — The contentWindow getter steps are to return this's content window.
+- [x] [HTMLIFrameElement.contentWindow](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-iframe-contentwindow) — The contentWindow getter steps are to return this's content window.
   > n/a: there's no frame tree.
 
-#### [4.8.6 The embed element](https://html.spec.whatwg.org/#the-embed-element)
+#### [4.8.6 The embed element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLEmbedElement`: its attributes are reflected and its presentational hints are `HTMLPlugInElement`'s. There are no plugins, and it doesn't display its resource (see `KNOWN-ISSUES.md`).
 <!-- definitions: attr-embed-src attr-embed-type -->
 
-- [x] [potentially active](https://html.spec.whatwg.org/#concept-embed-active) — An embed element is said to be potentially active when the following conditions are all met simultaneously:
+- [x] [potentially active](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#concept-embed-active) — An embed element is said to be potentially active when the following conditions are all met simultaneously:
   > n/a: embed doesn't load its resource.
 
-- [x] [embed task source](https://html.spec.whatwg.org/#embed-task-source) — Whenever an embed element that was not potentially active becomes potentially active, and whenever a potentially active embed element that is remaining potentially active has its src attribute set, changed, or removed or its type attribute set, changed, or removed, the user agent must queue an element task on the embed task source given the element to run the embed element setup steps for that element.
+- [x] [embed task source](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#embed-task-source) — Whenever an embed element that was not potentially active becomes potentially active, and whenever a potentially active embed element that is remaining potentially active has its src attribute set, changed, or removed or its type attribute set, changed, or removed, the user agent must queue an element task on the embed task source given the element to run the embed element setup steps for that element.
   > n/a: embed doesn't load its resource.
 
-- [x] [The embed element setup steps](https://html.spec.whatwg.org/#the-embed-element-setup-steps) — The embed element setup steps for a given embed element element are as follows:
+- [x] [The embed element setup steps](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element-setup-steps) — The embed element setup steps for a given embed element element are as follows:
   - 1. If another task has since been queued to run the embed element setup steps for element, then return.
   - 2. If element has a src attribute set:
     - 2a. Let url be the result of encoding-parsing a URL given element's src attribute's value, relative to element's node document.
@@ -155,27 +155,27 @@ Status: reviewed (2026-11-01)
   - 3. Otherwise, display no plugin for element.
   > n/a: embed doesn't load its resource.
 
-- [x] [type of the content](https://html.spec.whatwg.org/#concept-embed-type) — To determine the type of the content given an embed element element and a response response, run the following steps:
+- [x] [type of the content](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#concept-embed-type) — To determine the type of the content given an embed element element and a response response, run the following steps:
   - 1. If element has a type attribute, and that attribute's value is a type that a plugin supports, then return the value of the type attribute.
   - 2. If the path component of response's URL matches a pattern that a plugin supports, then return the type that that plugin can handle.
   - 3. If response has explicit Content-Type metadata, and that value is a type that a plugin supports, then return that value.
   - 4. Return null.
   > n/a: embed doesn't load its resource.
 
-- [x] [display no plugin](https://html.spec.whatwg.org/#display-no-plugin) — To display no plugin for an embed element element:
+- [x] [display no plugin](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#display-no-plugin) — To display no plugin for an embed element element:
   - 1. Destroy a child navigable given element.
   - 2. Display an indication that no plugin could be found for element, as the contents of element.
   - 3. element now represents nothing.
   > n/a: there are no plugins; nothing is displayed.
 
-#### [4.8.7 The object element](https://html.spec.whatwg.org/#the-object-element)
+#### [4.8.7 The object element](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLObjectElement`: a form-associated element whose attributes are reflected. It doesn't display its resource, so it always shows its fallback content (see `KNOWN-ISSUES.md`).
 <!-- definitions: attr-object-data attr-object-type attr-object-name -->
 
-- [x] [HTMLObjectElement.contentDocument](https://html.spec.whatwg.org/#dom-object-contentdocument) — The contentDocument getter steps are to return this's content document.
+- [x] [HTMLObjectElement.contentDocument](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-contentdocument) — The contentDocument getter steps are to return this's content document.
   > n/a: there's no frame tree.
 
-- [x] [HTMLObjectElement.contentWindow](https://html.spec.whatwg.org/#dom-object-contentwindow) — The contentWindow getter steps are to return this's content window.
+- [x] [HTMLObjectElement.contentWindow](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#dom-object-contentwindow) — The contentWindow getter steps are to return this's content window.
   > n/a: there's no frame tree.

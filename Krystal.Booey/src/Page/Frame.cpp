@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Animation/Timelines/AnimationTimelinesController.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
-#include "Krystal.Booey/DOM/Events/EventNames.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQuery.hpp"
+#include "Krystal.Booey/Dom/Events/EventNames.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Algorithms/RenderBlocking.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
@@ -29,8 +29,8 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
@@ -302,7 +302,8 @@ namespace krys::boo
     {
       if (frameView && frameView->GetScrollPosition() != origin)
       {
-        (void)document->UpdateLayoutIgnorePendingStylesheets({dom::LayoutOptions::UpdateCompositingLayers});
+        (void)document->UpdateLayoutIgnorePendingStylesheets(
+          {layout::LayoutOptions::UpdateCompositingLayers});
       }
     }
     else
@@ -428,7 +429,7 @@ namespace krys::boo
       std::chrono::duration<double>(1.0 / _displayNominalFramesPerSecond));
   }
 
-  // https://html.spec.whatwg.org/#update-the-rendering
+  // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
   void Frame::UpdateRendering() noexcept
   {
     Ref protectedThis = ShareRef(*this);
@@ -436,7 +437,7 @@ namespace krys::boo
     // An update asked for during one (from an animation frame callback, say) only brings layout up to date.
     if (_renderingUpdateDepth)
     {
-      LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
+      LayoutIfNeeded({layout::LayoutOptions::UpdateCompositingLayers});
       return;
     }
 
@@ -484,7 +485,7 @@ namespace krys::boo
                       [](boo::Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks,
-                      [](boo::Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
+                      [](boo::Document &document) { document.RunAnimationFrameCallbacks(); });
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
                       [](boo::Document &document) { document.ServiceCaretAnimation(); });
@@ -512,7 +513,7 @@ namespace krys::boo
     // https://drafts.csswg.org/scroll-animations-1/#event-loop
     ForEachDocument([](boo::Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
 
-    // https://html.spec.whatwg.org/#focus-fixup-rule
+    // https://html.spec.whatwg.org/multipage/webappapis.html#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
                       [](boo::Document &document)
                       {
@@ -544,7 +545,7 @@ namespace krys::boo
                         }
                       });
 
-    LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
+    LayoutIfNeeded({layout::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();
 
     RunProcessingStep(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
@@ -623,7 +624,7 @@ namespace krys::boo
     }
   }
 
-  void Frame::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
+  void Frame::LayoutIfNeeded(EnumSet<layout::LayoutOptions> layoutOptions) noexcept
   {
     if (RefPtr<boo::Document> document = _document; document && _view)
     {
@@ -712,13 +713,13 @@ namespace krys::boo
   void Frame::SuspendScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = true;
-    ForEachDocument([](boo::Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.SuspendAnimationFrameCallbacks(); });
   }
 
   void Frame::ResumeScriptedAnimations() noexcept
   {
     _scriptedAnimationsSuspended = false;
-    ForEachDocument([](boo::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
+    ForEachDocument([](boo::Document &document) { document.ResumeAnimationFrameCallbacks(); });
   }
 
   void Frame::ResumeAnimatingImages() noexcept
@@ -732,7 +733,7 @@ namespace krys::boo
 
   void Frame::ForEachRenderableDocument(const Func<void(boo::Document &)> &functor) const noexcept
   {
-    // https://html.spec.whatwg.org/#update-the-rendering
+    // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
     // Remove from docs any Document doc for which doc is render-blocked.
     List<Ref<boo::Document>> documents;
     ForEachDocument(

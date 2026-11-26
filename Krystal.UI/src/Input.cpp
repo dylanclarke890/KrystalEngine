@@ -1,5 +1,5 @@
 ﻿#include "Krystal.UI/Input.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Input/LegacyKeyCodes.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
 #include <format>

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Internals/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
-#include "Krystal.Booey/HTML/Types/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/Html/Types/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
+#include "Krystal.Booey/Layout/LayoutOptions.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
@@ -54,7 +54,7 @@ namespace krys::boo
   /// at its next rendering opportunity.
   /// @note FIXME: Only what layout, style and navigation within a document need: no frame tree, scripting or
   /// printing, focus controller or page overlays.
-  /// @see https://html.spec.whatwg.org/#update-the-rendering
+  /// @see https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
   class Frame final : public RefCounted<Frame>, public CanMakeWeakPtr<Frame>
   {
     KRYS_NON_COPY_MOVABLE(Frame);
@@ -261,7 +261,7 @@ namespace krys::boo
     }
 
     /// @brief The visibility state of the frame's document.
-    /// @see https://html.spec.whatwg.org/#visibility-state
+    /// @see https://html.spec.whatwg.org/multipage/interaction.html#visibility-state
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept
     {
       return _isVisible ? html::DocumentVisibilityState::Visible : html::DocumentVisibilityState::Hidden;
@@ -393,7 +393,7 @@ namespace krys::boo
     void UpdateRendering() noexcept;
 
     /// @brief Brings the style and layout of the frame's document up to date.
-    void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
+    void LayoutIfNeeded(EnumSet<layout::LayoutOptions> layoutOptions = {}) noexcept;
 
     /// @brief Restyles every frame's document (UpdateStyleAfterChangeInEnvironment), after a change in the
     /// environment they all share, such as the theme's colours.

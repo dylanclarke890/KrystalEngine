@@ -24,13 +24,13 @@
  */
 
 #include "Krystal.Booey/Editing/Selection/VisibleSelection.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"
 #include "Krystal.Core/Move.hpp"
 #include "Krystal.Core/Strings/CodePointIterator.hpp"
@@ -64,7 +64,7 @@ namespace krys::boo
     }
   }
 
-  VisibleSelection::VisibleSelection(dom::Position anchor, dom::Position focus, Affinity affinity,
+  VisibleSelection::VisibleSelection(Position anchor, Position focus, Affinity affinity,
                                      boo::Directionality directionality) noexcept
       : _anchor(krys::move(anchor)), _focus(krys::move(focus)), _affinity(affinity),
         _directionality(directionality)
@@ -72,7 +72,7 @@ namespace krys::boo
     Validate();
   }
 
-  VisibleSelection::VisibleSelection(const dom::Position &position, Affinity affinity,
+  VisibleSelection::VisibleSelection(const Position &position, Affinity affinity,
                                      boo::Directionality directionality) noexcept
       : VisibleSelection(position, position, affinity, directionality)
   {
@@ -97,8 +97,8 @@ namespace krys::boo
 
   VisibleSelection::VisibleSelection(const dom::SimpleRange &range, Affinity affinity,
                                      boo::Directionality directionality) noexcept
-      : VisibleSelection(dom::MakeDeprecatedLegacyPosition(range.Start),
-                         dom::MakeDeprecatedLegacyPosition(range.End), affinity, directionality)
+      : VisibleSelection(CreateDeprecatedLegacyPosition(range.Start),
+                         CreateDeprecatedLegacyPosition(range.End), affinity, directionality)
   {
   }
 
@@ -111,16 +111,16 @@ namespace krys::boo
   VisibleSelection VisibleSelection::SelectionFromContentsOfNode(Node *node) noexcept
   {
     krys_debug_assert(!EditingIgnoresContent(*node));
-    return VisibleSelection(VisiblePosition {dom::FirstPositionInNode(node)},
-                            VisiblePosition {dom::LastPositionInNode(node)});
+    return VisibleSelection(VisiblePosition {FirstPositionInNode(node)},
+                            VisiblePosition {LastPositionInNode(node)});
   }
 
-  const dom::Position &VisibleSelection::UncanonicalizedStart() const noexcept
+  const Position &VisibleSelection::UncanonicalizedStart() const noexcept
   {
     return _anchorIsBeforeFocus ? _anchor : _focus;
   }
 
-  const dom::Position &VisibleSelection::UncanonicalizedEnd() const noexcept
+  const Position &VisibleSelection::UncanonicalizedEnd() const noexcept
   {
     return _anchorIsBeforeFocus ? _focus : _anchor;
   }
@@ -131,12 +131,13 @@ namespace krys::boo
     const auto &end = UncanonicalizedEnd();
     if (start.GetDocument())
     {
-      return dom::MakeSimpleRange({start, end});
+      return CreateSimpleRange(PositionRange {start, end});
     }
-    return dom::MakeSimpleRange({start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
+    return CreateSimpleRange(
+      PositionRange {start.ParentAnchoredEquivalent(), end.ParentAnchoredEquivalent()});
   }
 
-  void VisibleSelection::SetAnchor(const dom::Position &position) noexcept
+  void VisibleSelection::SetAnchor(const Position &position) noexcept
   {
     _anchor = position;
     Validate();
@@ -147,7 +148,7 @@ namespace krys::boo
     SetAnchor(visiblePosition.DeepEquivalent());
   }
 
-  void VisibleSelection::SetFocus(const dom::Position &position) noexcept
+  void VisibleSelection::SetFocus(const Position &position) noexcept
   {
     _focus = position;
     Validate();
@@ -208,7 +209,8 @@ namespace krys::boo
       return {};
     }
     // FIXME: Seems likely we don't need to call ParentAnchoredEquivalent here.
-    return dom::MakeSimpleRange({_start.ParentAnchoredEquivalent(), _end.ParentAnchoredEquivalent()});
+    return CreateSimpleRange(
+      PositionRange {_start.ParentAnchoredEquivalent(), _end.ParentAnchoredEquivalent()});
   }
 
   Maybe<dom::SimpleRange> VisibleSelection::ToNormalizedRange() const noexcept
@@ -230,8 +232,8 @@ namespace krys::boo
       return {};
     }
 
-    dom::Position s;
-    dom::Position e;
+    Position s;
+    Position e;
     if (IsCaret())
     {
       // If the selection is a caret, move the range start upstream. This helps us match
@@ -264,7 +266,7 @@ namespace krys::boo
       }
     }
 
-    return dom::MakeSimpleRange({s, e});
+    return CreateSimpleRange(PositionRange {s, e});
   }
 
   bool VisibleSelection::ExpandUsingGranularity(TextGranularity granularity) noexcept
@@ -292,12 +294,12 @@ namespace krys::boo
       return;
     }
 
-    auto start = dom::MakeBoundaryPoint(_end);
+    auto start = CreateBoundaryPoint(_end);
     if (!start)
     {
       return;
     }
-    CharacterIterator charIt(dom::SimpleRange {*start, dom::MakeBoundaryPointAfterNodeContents(*scope)},
+    CharacterIterator charIt(dom::SimpleRange {*start, dom::CreateBoundaryPointAfterNodeContents(*scope)},
                              TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
     for (; !charIt.AtEnd() && !charIt.Text().empty(); charIt.Advance(1))
     {
@@ -306,7 +308,7 @@ namespace krys::boo
       {
         break;
       }
-      _end = dom::MakeDeprecatedLegacyPosition(charIt.Range().End);
+      _end = CreateDeprecatedLegacyPosition(charIt.Range().End);
       if (_anchorIsBeforeFocus)
       {
         _focus = _end;
@@ -331,7 +333,7 @@ namespace krys::boo
       _focus = _anchor;
     }
 
-    _anchorIsBeforeFocus = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+    _anchorIsBeforeFocus = std::is_lteq(TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
 
     _canonicalAnchor = VisiblePosition(_anchor, _affinity).DeepEquivalent();
     if (_anchor == _focus)
@@ -586,14 +588,13 @@ namespace krys::boo
   // invalid, will be valid once the changes are undone. This is a design problem.
   // The best fix is likely to get rid of canonicalization from VisibleSelection entirely,
   // and then remove this function.
-  void VisibleSelection::SetWithoutValidation(const dom::Position &anchor,
-                                              const dom::Position &focus) noexcept
+  void VisibleSelection::SetWithoutValidation(const Position &anchor, const Position &focus) noexcept
   {
     krys_debug_assert(anchor.IsNull() == focus.IsNull());
     krys_debug_assert(_affinity == Affinity::Downstream);
     _anchor = anchor;
     _focus = focus;
-    _anchorIsBeforeFocus = std::is_lteq(dom::TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
+    _anchorIsBeforeFocus = std::is_lteq(TreeOrder<dom::TreeType::ShadowIncludingTree>(_anchor, _focus));
     _canonicalAnchor = anchor;
     _canonicalFocus = focus;
     _start = _anchorIsBeforeFocus ? anchor : focus;
@@ -601,8 +602,8 @@ namespace krys::boo
     _type = anchor == focus ? Type::Caret : Type::Range;
   }
 
-  dom::Position VisibleSelection::AdjustPositionForEnd(const dom::Position &currentPosition,
-                                                       Node *startContainerNode) noexcept
+  Position VisibleSelection::AdjustPositionForEnd(const Position &currentPosition,
+                                                  Node *startContainerNode) noexcept
   {
     auto &scopeRoot = dom::TreeQueries::Root(*startContainerNode);
 
@@ -612,21 +613,21 @@ namespace krys::boo
     {
       if (ancestor->Contains(startContainerNode))
       {
-        return dom::PositionAfterNode(ancestor);
+        return PositionAfterNode(ancestor);
       }
-      return dom::PositionBeforeNode(ancestor);
+      return PositionBeforeNode(ancestor);
     }
 
     if (auto *lastChild = scopeRoot.LastChild())
     {
-      return dom::PositionAfterNode(lastChild);
+      return PositionAfterNode(lastChild);
     }
 
     return {};
   }
 
-  dom::Position VisibleSelection::AdjustPositionForStart(const dom::Position &currentPosition,
-                                                         Node *endContainerNode) noexcept
+  Position VisibleSelection::AdjustPositionForStart(const Position &currentPosition,
+                                                    Node *endContainerNode) noexcept
   {
     auto &scopeRoot = dom::TreeQueries::Root(*endContainerNode);
 
@@ -636,14 +637,14 @@ namespace krys::boo
     {
       if (ancestor->Contains(endContainerNode))
       {
-        return dom::PositionBeforeNode(ancestor);
+        return PositionBeforeNode(ancestor);
       }
-      return dom::PositionAfterNode(ancestor);
+      return PositionAfterNode(ancestor);
     }
 
     if (auto *firstChild = scopeRoot.FirstChild())
     {
-      return dom::PositionBeforeNode(firstChild);
+      return PositionBeforeNode(firstChild);
     }
 
     return {};
@@ -749,11 +750,11 @@ namespace krys::boo
       auto *endEditableAncestor = LowestEditableAncestor(_end.GetContainerNode());
       if (endRoot || endEditableAncestor != baseEditableAncestor)
       {
-        dom::Position p = PreviousVisuallyDistinctCandidate(_end);
+        Position p = PreviousVisuallyDistinctCandidate(_end);
         Element *shadowAncestor = endRoot ? dom::TreeQueries::ShadowHost(*endRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
-          p = dom::PositionAfterNode(shadowAncestor);
+          p = PositionAfterNode(shadowAncestor);
         }
         while (p.IsNotNull()
                && !(LowestEditableAncestor(p.GetContainerNode()) == baseEditableAncestor
@@ -761,11 +762,11 @@ namespace krys::boo
         {
           auto *root = EditableRootForPosition(p);
           shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
-          p = IsAtomicNode(p.GetContainerNode()) ? dom::PositionInParentBeforeNode(p.GetContainerNode())
+          p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentBeforeNode(p.GetContainerNode())
                                                  : PreviousVisuallyDistinctCandidate(p);
           if (p.IsNull() && shadowAncestor)
           {
-            p = dom::PositionAfterNode(shadowAncestor);
+            p = PositionAfterNode(shadowAncestor);
           }
         }
         VisiblePosition previous(p);
@@ -784,11 +785,11 @@ namespace krys::boo
       auto *startEditableAncestor = LowestEditableAncestor(_start.GetContainerNode());
       if (startRoot || startEditableAncestor != baseEditableAncestor)
       {
-        dom::Position p = NextVisuallyDistinctCandidate(_start);
+        Position p = NextVisuallyDistinctCandidate(_start);
         Element *shadowAncestor = startRoot ? dom::TreeQueries::ShadowHost(*startRoot) : nullptr;
         if (p.IsNull() && shadowAncestor)
         {
-          p = dom::PositionBeforeNode(shadowAncestor);
+          p = PositionBeforeNode(shadowAncestor);
         }
         while (p.IsNotNull()
                && !(LowestEditableAncestor(p.GetContainerNode()) == baseEditableAncestor
@@ -796,11 +797,11 @@ namespace krys::boo
         {
           auto *root = EditableRootForPosition(p);
           shadowAncestor = root ? dom::TreeQueries::ShadowHost(*root) : nullptr;
-          p = IsAtomicNode(p.GetContainerNode()) ? dom::PositionInParentAfterNode(p.GetContainerNode())
+          p = IsAtomicNode(p.GetContainerNode()) ? PositionInParentAfterNode(p.GetContainerNode())
                                                  : NextVisuallyDistinctCandidate(p);
           if (p.IsNull() && shadowAncestor)
           {
-            p = dom::PositionBeforeNode(shadowAncestor);
+            p = PositionBeforeNode(shadowAncestor);
           }
         }
         VisiblePosition next(p);

@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGraphicsElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGraphicsElement.hpp"
 #include "Krystal.Core/Geometry/Quad.hpp"
 
 namespace krys::boo

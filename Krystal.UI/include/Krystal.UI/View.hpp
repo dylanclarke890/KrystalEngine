@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
-#include "Krystal.Booey/HTML/Forms/DOMFormData.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementInterface.hpp"
+#include "Krystal.Booey/Html/Forms/DOMFormData.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Input/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
@@ -783,7 +783,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
 
     /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
-    void DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept;
+    void DragStarted(boo::DragItem item, boo::DataTransfer &dataTransfer) noexcept;
 
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.

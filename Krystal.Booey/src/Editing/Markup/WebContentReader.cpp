@@ -24,8 +24,8 @@
  */
 
 #include "Krystal.Booey/Editing/Markup/WebContentReader.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Core/Move.hpp"

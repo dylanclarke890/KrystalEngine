@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Style/Values/Borders/BoxShadow.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
+#include "Krystal.Booey/Css/Values/BoxShadowPropertyValue.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

@@ -26,7 +26,7 @@
 #pragma once
 
 #include "Krystal.Booey/Accessibility/AXRole.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 
 namespace krys::boo
 {

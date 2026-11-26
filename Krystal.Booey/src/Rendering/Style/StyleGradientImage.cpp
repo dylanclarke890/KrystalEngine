@@ -25,7 +25,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleGradientImage.hpp"
-#include "Krystal.Booey/CSS/Values/GradientValue.hpp"
+#include "Krystal.Booey/Css/Values/GradientValue.hpp"
 #include "Krystal.Booey/Graphics/Images/GradientImage.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

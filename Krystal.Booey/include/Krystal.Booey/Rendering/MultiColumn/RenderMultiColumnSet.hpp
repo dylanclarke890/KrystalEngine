@@ -298,7 +298,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContentRectSpansFragments(const LayoutRect &rect) const noexcept final;
 
-    KRYS_NODISCARD dom::PositionWithAffinity
+    KRYS_NODISCARD PositionWithAffinity
       PositionForPoint(const LayoutPoint &logicalPoint, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept override;
 

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
 #include "Krystal.Booey/Platform/Pasteboard/Pasteboard.hpp"
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <utility>

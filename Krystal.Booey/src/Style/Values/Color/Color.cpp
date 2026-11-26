@@ -31,12 +31,12 @@
  */
 
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
-#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Css/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/Css/Values/ColorValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"

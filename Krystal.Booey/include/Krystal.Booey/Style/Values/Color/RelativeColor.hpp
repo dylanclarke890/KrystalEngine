@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp"
-#include "Krystal.Booey/CSS/Values/Color/RelativeColor.hpp"
-#include "Krystal.Booey/CSS/Values/Color/RelativeColorResolver.hpp"
+#include "Krystal.Booey/Css/Values/Color/ColorDescriptors.hpp"
+#include "Krystal.Booey/Css/Values/Color/RelativeColor.hpp"
+#include "Krystal.Booey/Css/Values/Color/RelativeColorResolver.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"

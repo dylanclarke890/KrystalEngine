@@ -25,8 +25,8 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGTextPositioningElement.hpp"
-#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGTextPositioningElement.hpp"
+#include "Krystal.Booey/Svg/SVGLengthContext.hpp"
 #include "Krystal.Core/Strings/Unicode.hpp"
 #include <algorithm>
 

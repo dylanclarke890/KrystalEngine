@@ -24,13 +24,13 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Calc/Value.hpp"
-#include "Krystal.Booey/CSS/Values/ComputedStyleDependencies.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/Symbol.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Css/Calc/Value.hpp"
+#include "Krystal.Booey/Css/Values/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericTypesCanonicalization.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/Symbol.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"

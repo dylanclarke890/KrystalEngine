@@ -70,7 +70,7 @@ namespace krys::boo
     _uriList = utf8_string(uriListString);
 
     // The URL is the list's first valid one, which getData("url") gives
-    // (https://html.spec.whatwg.org/#dom-datatransfer-getdata), and every file URL's path is a file name.
+    // (https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata), and every file URL's path is a file name.
     // Lines end in CRLF (RFC 2483), but a lone LF is accepted too; lines starting with `#` are comments.
     bool setUrl = HasUrl();
     utf8_stringview rest = uriListString;

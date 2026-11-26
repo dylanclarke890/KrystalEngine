@@ -1,0 +1,92 @@
+﻿/*
+ * Copyright (C) 2018-2023 Apple Inc. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#pragma once
+
+#include "Krystal.Booey/Css/Parser/ParserMode.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Rules/RuleType.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Hashing/FastHash.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Utils/Tags.hpp"
+#include "Krystal.Net/Url.hpp"
+#include "Krystal.Net/UrlHash.hpp"
+#include <memory>
+
+namespace krys::boo
+{
+  class Document;
+}
+
+namespace krys::boo::css
+{
+  /// @brief The document state and settings that affect how CSS is parsed.
+  struct ParserContext
+  {
+    net::Url BaseUrl;
+    utf8_stringview Charset;
+    ParserMode Mode {ParserMode::HTMLStandard};
+    Maybe<RuleType> EnclosingRuleType;
+    bool IsHTMLDocument : 1 {false};
+
+    bool useSystemAppearance : 1 {false};
+    bool shouldIgnoreImportRules : 1 {false};
+
+    // Settings (`boo::Settings`), excluding those affecting properties. Standard features are always on.
+    bool springTimingFunctionEnabled : 1 {false};
+    bool cssTransformStyleSeparatedEnabled : 1 {false};
+    bool thumbAndTrackPseudoElementsEnabled : 1 {false};
+    bool colorLayersEnabled : 1 {false};
+    // User agent sheets only.
+    bool cssInternalAutoBaseParsingEnabled : 1 {false};
+    // A document quirk.
+    bool webkitMediaTextTrackDisplayQuirkEnabled : 1 {false};
+
+    // Settings, those affecting properties.
+    css::PropertySettings PropertySettings;
+
+    /// @brief Creates a context for @p mode, with every setting at its default.
+    /// @note Initialises the static value pool.
+    explicit ParserContext(ParserMode mode, net::Url baseUrl = {}) noexcept;
+
+    /// @brief The document's context (`Document::CssParserContext()`).
+    explicit ParserContext(const Document &document) noexcept;
+
+    /// @brief A context for a sheet in @p document: @p sheetBaseURL (or the document base URL if it's null),
+    /// the document's mode and settings.
+    ParserContext(const Document &document, const net::Url &sheetBaseUrl, utf8_stringview charset) noexcept;
+
+    /// @brief Switches to the UA sheet mode and enables the features UA sheets rely on.
+    void SetUASheetMode() noexcept;
+
+    KRYS_NODISCARD bool operator==(const ParserContext &) const noexcept = default;
+
+    KRYS_NODISCARD size_t Hash() const noexcept;
+  };
+
+  /// @brief A standards-mode context with every setting at its default.
+  KRYS_NODISCARD const ParserContext &StrictParserContext() noexcept;
+}

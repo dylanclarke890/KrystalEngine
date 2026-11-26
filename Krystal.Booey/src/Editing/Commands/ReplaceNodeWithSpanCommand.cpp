@@ -29,11 +29,11 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/ReplaceNodeWithSpanCommand.hpp"
-#include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Dom/Mixins/ChildNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Commands/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 

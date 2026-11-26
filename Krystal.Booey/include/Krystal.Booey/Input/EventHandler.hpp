@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Nodes/FocusOptions.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Nodes/FocusOptions.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutSize.hpp"
@@ -54,15 +54,15 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
-namespace krys::boo::dom
+namespace krys::boo::ui_events
 {
-  class DataTransfer;
   enum class TextEventInputType : uint8;
 }
 
 namespace krys::boo
 {
   class AutoscrollController;
+  class DataTransfer;
   class Element;
   class Event;
   class Frame;
@@ -546,7 +546,7 @@ namespace krys::boo
     /// target, or else the focused element, and has the editor insert it unless a listener cancels it.
     /// @return Whether the editor handled it.
     bool HandleTextInputEvent(utf8_stringview text, Event *underlyingEvent,
-                              dom::TextEventInputType inputType) noexcept;
+                              ui_events::TextEventInputType inputType) noexcept;
 
     /// @brief Scrolls the box of @p startingNode (the focused element, or else the last pressed node, if
     /// null), or else its nearest containing block that scrolls, by a step of @p granularity.
@@ -612,7 +612,7 @@ namespace krys::boo
     KRYS_NODISCARD static bool ShouldAllowMouseDownToStartDrag() noexcept;
 
     bool DispatchDragEvent(DOMStringAtom eventType, Element &target, const PlatformMouseEvent &event,
-                           dom::DataTransfer &dataTransfer) noexcept;
+                           DataTransfer &dataTransfer) noexcept;
 
     DragTargetResponse DispatchDragEnterOrDragOverEvent(DOMStringAtom eventType, Element &target,
                                                         const PlatformMouseEvent &event,
@@ -629,7 +629,7 @@ namespace krys::boo
 
     void DispatchEventToDragSourceElement(DOMStringAtom eventType, const PlatformMouseEvent &event) noexcept;
 
-    bool DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept;
+    bool DispatchDragStartEventOnSourceElement(DataTransfer &dataTransfer) noexcept;
 
     KRYS_NODISCARD bool DragHysteresisExceeded(const PointF &dragViewportLocation) const noexcept;
 

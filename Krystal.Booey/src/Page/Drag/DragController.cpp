@@ -24,16 +24,14 @@
  */
 
 #include "Krystal.Booey/Page/Drag/DragController.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/TextEvent.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/Text.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Dom/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/Text.hpp"
 #include "Krystal.Booey/Editing/Commands/MoveSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
@@ -41,12 +39,14 @@
 #include "Krystal.Booey/Editing/Markup/Markup.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAnchorElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLImageElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Events/UI/TextEvent.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLImageElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Input/EventHandler.hpp"
 #include "Krystal.Booey/Input/PlatformMouseEvent.hpp"
@@ -258,7 +258,7 @@ namespace krys::boo
     {
       if (element.NodeDocument().Frame())
       {
-        if (auto range = dom::MakeRangeSelectingNode(element))
+        if (auto range = dom::CreateRangeSelectingNode(element))
         {
           element.NodeDocument().Selection().SetSelection(VisibleSelection(*range));
         }
@@ -928,7 +928,7 @@ namespace krys::boo
   }
 
   void DragController::PrepareForDragStart(Frame &source, EnumSet<boo::DragSourceAction> actionMask,
-                                           Element &element, dom::DataTransfer &dataTransfer,
+                                           Element &element, DataTransfer &dataTransfer,
                                            const PointI &dragOrigin) const noexcept
   {
     Ref protectedSource = ShareRef(source);
@@ -1027,7 +1027,7 @@ namespace krys::boo
 
     krys_debug_assert(state.DataTransfer);
 
-    Ref<dom::DataTransfer> dataTransfer = ShareRef(*state.DataTransfer);
+    Ref<DataTransfer> dataTransfer = ShareRef(*state.DataTransfer);
     if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
     {
       dragImage = DragImage {dataTransfer->CreateDragImage(src.Document(), dragImageOffset)};
@@ -1140,7 +1140,7 @@ namespace krys::boo
         // a user can initiate a drag on a link without having any text
         // selected.  In this case, we should expand the selection to
         // the enclosing anchor element
-        dom::Position pos = sourceSelection.CanonicalAnchor();
+        Position pos = sourceSelection.CanonicalAnchor();
         if (RefPtr<Element> node = EnclosingAnchorElement(pos))
         {
           selection.SetSelection(VisibleSelection::SelectionFromContentsOfNode(node.get()));
@@ -1310,7 +1310,7 @@ namespace krys::boo
     return image.Size().Height() * image.Size().Width() <= MaxOriginalImageArea;
   }
 
-  void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, Element &element,
+  void DragController::DeclareAndWriteDragImage(DataTransfer &dataTransfer, Element &element,
                                                 const net::Url &url, utf8_stringview label) noexcept
   {
     auto *frame = element.NodeDocument().Frame();

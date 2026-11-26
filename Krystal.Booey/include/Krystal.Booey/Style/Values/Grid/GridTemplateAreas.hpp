@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp"
+#include "Krystal.Booey/Css/Values/Grid/GridTemplateAreas.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridNamedAreaMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridNamedLinesMap.hpp"
 #include "Krystal.Booey/Style/Values/Grid/GridTrackSizingDirection.hpp"

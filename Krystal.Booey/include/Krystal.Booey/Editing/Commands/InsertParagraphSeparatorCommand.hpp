@@ -50,7 +50,7 @@ namespace krys::boo
   private:
     void DoApply() noexcept override;
 
-    void CalculateStyleBeforeInsertion(const dom::Position &position) noexcept;
+    void CalculateStyleBeforeInsertion(const Position &position) noexcept;
 
     void ApplyStyleAfterInsertion(boo::Node *originalEnclosingBlock) noexcept;
 

@@ -31,25 +31,25 @@
 #include "Krystal.Booey/Accessibility/AXSpinButton.hpp"
 #include "Krystal.Booey/Accessibility/AXSVGObject.hpp"
 #include "Krystal.Booey/Accessibility/AXTableHelpers.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
-#include "Krystal.Booey/DOM/Iterators/SubtreeRanges.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/PseudoElement.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Dom/Algorithms/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/Dom/Algorithms/Iterators/SubtreeRanges.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/PseudoElement.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLAreaElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLLabelElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLMapElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLOptionElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSelectElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSummaryElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLTextAreaElement.hpp"
-#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLAreaElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLInputElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLLabelElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLMapElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSelectElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSummaryElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Html/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/FrameView.hpp"
@@ -68,9 +68,9 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Replaced/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGSvgElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGSvgElement.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
 
 namespace krys::boo
 {
@@ -95,7 +95,7 @@ namespace krys::boo
       {
         return AXObjectInclusion::IncludeObject;
       }
-      // An image with an empty alt is decorative (https://html.spec.whatwg.org/#alt).
+      // An image with an empty alt is decorative (https://html.spec.whatwg.org/multipage/images.html#alt).
       return AXObjectInclusion::IgnoreObject;
     }
   }

@@ -1,0 +1,572 @@
+﻿#include "Krystal.Booey/Loader/DocumentLoader.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
+#include "Krystal.Booey.Tests/Css/ValueTestUtils.hpp"
+#include "Krystal.Booey.Tests/Loader/LoadTestUtils.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
+#include "Krystal.Booey/Dom/Events/EventListenerHandle.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Events/PageTransitionEvent.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/DocumentWriter.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoaderClient.hpp"
+#include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
+#include "Krystal.Booey/Loader/NavigationAction.hpp"
+#include "Krystal.Booey/Page/Frame.hpp"
+#include "Krystal.Booey/Page/FrameView.hpp"
+#include "Krystal.Booey/Style/Scope/Scope.hpp"
+#include <chrono>
+#include <format>
+
+namespace krys::boo::tests
+{
+  TEST_CASE("A frame starts with its initial empty document",
+            "[Loader][DocumentLoader][html:creating-a-new-browsing-context]"
+            "[html:creating-a-new-top-level-browsing-context][html:creating-a-new-top-level-traversable]"
+            "[html:initialize-the-navigable][html:fully-active][html:node-navigable][html:nav-document]")
+  {
+    LoadFixture fixture;
+    auto &loader = fixture.Frame().Loader();
+
+    CHECK(loader.IsDisplayingInitialEmptyDocument());
+    CHECK(fixture.Document().GetUrl().String() == u8"about:blank");
+    CHECK(fixture.Document().Window() != nullptr);
+    CHECK(fixture.Document().DocumentElement() != nullptr);
+    // An HTML document in quirks mode, with a head and a body, that's completely loaded and fully active.
+    CHECK(fixture.Document().ContentType() == u8"text/html");
+    CHECK(fixture.Document().InQuirksMode());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK(fixture.Document().ReadyState() == html::DocumentReadyState::Complete);
+    // It gets no load event.
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Events.empty());
+    CHECK(fixture.Document().IsFullyActive());
+    CHECK(fixture.Document().Frame() == &fixture.Frame());
+    CHECK_FALSE(loader.IsLoading());
+    REQUIRE(loader.GetDocumentLoader());
+    CHECK(loader.GetDocumentLoader()->IsCommitted());
+  }
+
+  TEST_CASE("A document loaded from about:blank has html, head and body elements",
+            "[Loader][DocumentLoader][html:navigate-html][html:populate-with-html/head/body]"
+            "[html:initialise-the-document-object]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>First</p>", u8"https://example.com/first.html");
+    html::EventLoop::Current().RunUntilIdle();
+    RefPtr<Window> firstWindow = ShareRefPtr(fixture.Document().Window());
+
+    fixture.LoadUrl(u8"about:blank");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Document().GetUrl().String() == u8"about:blank");
+    CHECK_FALSE(fixture.Frame().Loader().IsDisplayingInitialEmptyDocument());
+    REQUIRE(fixture.Document().DocumentElement());
+    CHECK(fixture.Document().Head());
+    CHECK(fixture.Document().Body());
+    CHECK_FALSE(fixture.Document().Body()->HasChildNodes());
+    // A new document gets a new window.
+    CHECK(fixture.Document().Window() != firstWindow.get());
+  }
+
+  TEST_CASE("A text document's content is the text of a pre element",
+            "[Loader][DocumentLoader][html:read-text][html:navigate-text]")
+  {
+    auto mimeType = GENERATE(u8"text/plain", u8"text/css", u8"application/json", u8"application/ld+json",
+                             u8"text/javascript");
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/notes", u8"<b>bold</b>\n& more", mimeType);
+    fixture.LoadUrl(u8"https://example.com/notes");
+    html::EventLoop::Current().RunUntilIdle();
+
+    auto body = fixture.Document().Body();
+    REQUIRE(body);
+    auto *pre = DynamicDowncast<HTMLElement>(body->FirstChild());
+    REQUIRE(pre);
+    CHECK(pre->LocalName() == u8"pre");
+    CHECK(pre->TextContent() == u8"<b>bold</b>\n& more");
+    CHECK(fixture.Document().ContentType() == DOMString(mimeType));
+  }
+
+  TEST_CASE("A document loads on a later task, and commits", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    auto &loader = fixture.Frame().Loader();
+    RefPtr<boo::Document> initial = ShareRefPtr(&fixture.Document());
+    auto *initialWindow = initial->Window();
+
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p id=text>Hello</p>", u8"https://example.com/page.html");
+
+    // Provisionally: the frame still shows its old document.
+    CHECK(loader.IsLoading());
+    CHECK(loader.State() == FrameState::Provisional);
+    CHECK(loader.ProvisionalDocumentLoader() != nullptr);
+    CHECK(&fixture.Document() == initial.get());
+    CHECK(fixture.Events == List<std::string> {"start"});
+
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK_FALSE(loader.IsLoading());
+    CHECK(&fixture.Document() != initial.get());
+    CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/page.html");
+    CHECK(fixture.Document().GetElementById(u8"text"));
+    CHECK(fixture.Document().Window() != initialWindow);
+    CHECK_FALSE(loader.IsDisplayingInitialEmptyDocument());
+    CHECK(fixture.Events == List<std::string> {"start", "window", "commit", "document loaded", "finish"});
+  }
+
+  TEST_CASE("A loaded document attaches declarative shadow roots", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(
+      u8"<!DOCTYPE html><div id=host><template shadowrootmode=open><b>s</b></template></div>",
+      u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+
+    auto host = fixture.Document().GetElementById(u8"host");
+    REQUIRE(host);
+    CHECK_FALSE(host->HasChildNodes());
+    auto shadow = host->ShadowRoot();
+    REQUIRE(shadow);
+    CHECK(shadow->InnerHTML().ReleaseValue() == u8"<b>s</b>");
+  }
+
+  TEST_CASE("Documents load from the loader strategy and data: URLs", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/served.html", u8"<!DOCTYPE html><p id=served>Served</p>",
+                             u8"text/html");
+
+    SECTION("the strategy's")
+    {
+      fixture.LoadUrl(u8"https://example.com/served.html");
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document().GetElementById(u8"served"));
+      CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/served.html");
+    }
+
+    SECTION("a data: URL's")
+    {
+      fixture.LoadUrl(u8"data:text/html,<p id=data>Data</p>");
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document().GetElementById(u8"data"));
+    }
+
+    SECTION("a failure keeps the old document")
+    {
+      RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
+      fixture.LoadUrl(u8"https://example.com/missing.html");
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(&fixture.Document() == before.get());
+      CHECK_FALSE(fixture.Frame().Loader().IsLoading());
+      CHECK(fixture.Events == List<std::string> {"start", "fail provisional"});
+    }
+  }
+
+  TEST_CASE("Stopping and replacing provisional loads", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.Defer = true;
+    fixture.Strategy.AddText(u8"https://example.com/a.html", u8"<p id=a>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/b.html", u8"<p id=b>", u8"text/html");
+    RefPtr<boo::Document> before = ShareRefPtr(&fixture.Document());
+
+    SECTION("a stopped load's data is dropped")
+    {
+      fixture.LoadUrl(u8"https://example.com/a.html");
+      fixture.Frame().Loader().StopAllLoaders();
+      CHECK_FALSE(fixture.Frame().Loader().IsLoading());
+      fixture.Strategy.CompleteDeferred();
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(&fixture.Document() == before.get());
+      CHECK(fixture.Events == List<std::string> {"start", "fail provisional (cancelled)"});
+    }
+
+    SECTION("a new load replaces a provisional one")
+    {
+      fixture.LoadUrl(u8"https://example.com/a.html");
+      fixture.LoadUrl(u8"https://example.com/b.html");
+      fixture.Strategy.CompleteDeferred();
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document().GetElementById(u8"b"));
+      CHECK_FALSE(fixture.Document().GetElementById(u8"a"));
+    }
+  }
+
+  TEST_CASE("A link to another document goes to the host, which loads it if it wants",
+            "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/next.html", u8"<!DOCTYPE html><p id=next>Next</p>",
+                             u8"text/html");
+    fixture.LoadMarkup(u8"<!DOCTYPE html><a id=link href=next.html>Next</a>",
+                       u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+    fixture.Events.clear();
+
+    auto link = fixture.Document().GetElementById(u8"link");
+    REQUIRE(link);
+    link->DispatchSimulatedClick(nullptr);
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK_FALSE(fixture.Document().GetElementById(u8"next"));
+    CHECK(fixture.Events == List<std::string> {"navigation to https://example.com/next.html"});
+
+    fixture.LoadUrl(u8"https://example.com/next.html");
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(fixture.Document().GetElementById(u8"next"));
+  }
+
+  TEST_CASE("The document writer decodes UTF-8 across chunks", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    DocumentWriter writer;
+    writer.SetFrame(fixture.Frame());
+    REQUIRE(writer.Begin(net::Url(u8"about:blank")));
+
+    // A byte order mark, then é split between two chunks, then an invalid byte.
+    const uint8 first[] = {0xEF, 0xBB, 0xBF, '<', 'p', ' ', 'i', 'd', '=', 't', '>', 0xC3};
+    const uint8 second[] = {0xA9, 0xFF};
+    writer.AddData(Span<const uint8>(first));
+    writer.AddData(Span<const uint8>(second));
+    writer.End();
+
+    auto paragraph = fixture.Document().GetElementById(u8"t");
+    REQUIRE(paragraph);
+    CHECK(Narrow(paragraph->TextContent().value_or(u8"")) == "\xC3\xA9\xEF\xBF\xBD");
+  }
+
+  TEST_CASE("A loading document's scrollbars stay as they are until its first layout",
+            "[Loader][DocumentLoader][Scrolling]")
+  {
+    LoadFixture fixture;
+    auto *view = fixture.Frame().View();
+    REQUIRE(view);
+    DocumentWriter writer;
+    writer.SetFrame(fixture.Frame());
+    REQUIRE(writer.Begin(net::Url(u8"about:blank")));
+    CHECK(view->ScrollbarsSuppressed());
+
+    SECTION("a tall page is laid out with its vertical scrollbar from the start")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5000px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      REQUIRE(view->VerticalScrollbar());
+      CHECK_FALSE(view->HorizontalScrollbar());
+    }
+
+    SECTION("a short page loses the vertical scrollbar its first layout starts with")
+    {
+      const char markup[] = "<body style=margin:0><div id=d style=height:5px></div>";
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup), sizeof(markup) - 1));
+      (void)fixture.Document().UpdateLayout();
+      CHECK_FALSE(view->ScrollbarsSuppressed());
+      CHECK_FALSE(view->VerticalScrollbar());
+    }
+
+    writer.End();
+    CHECK_FALSE(view->ScrollbarsSuppressed());
+  }
+
+  namespace
+  {
+    /// @brief Records the end of loading's events, on each new document and its window.
+    struct EndRecorder
+    {
+      List<std::string> Events;
+      List<EventListenerHandle> Handles;
+
+      void Attach(LoadFixture &fixture) noexcept
+      {
+        fixture.Client->OnClearWindowObject = [this, &fixture]
+        {
+          Handles.clear();
+          auto &document = fixture.Document();
+          auto *window = document.Window();
+          Handles.push_back(document.AddEventListener(u8"readystatechange",
+                                                      [this, &document](Event &)
+                                                      {
+                                                        switch (document.ReadyState())
+                                                        {
+                                                          case html::DocumentReadyState::Loading:
+                                                            Events.emplace_back("loading");
+                                                            break;
+                                                          case html::DocumentReadyState::Interactive:
+                                                            Events.emplace_back("interactive");
+                                                            break;
+                                                          case html::DocumentReadyState::Complete:
+                                                            Events.emplace_back("complete");
+                                                            break;
+                                                        }
+                                                      }));
+          Handles.push_back(document.AddEventListener(u8"DOMContentLoaded",
+                                                      [this](Event &event)
+                                                      {
+                                                        CHECK(event.Bubbles());
+                                                        Events.emplace_back("DOMContentLoaded");
+                                                      }));
+          Handles.push_back(window->AddEventListener(u8"load",
+                                                     [this, &document, window](Event &event)
+                                                     {
+                                                       CHECK(event.Target().get() == &document);
+                                                       CHECK(event.CurrentTarget().get() == window);
+                                                       Events.emplace_back("load");
+                                                     }));
+          Handles.push_back(window->AddEventListener<PageTransitionEvent>(u8"pageshow",
+                                                                          [this](PageTransitionEvent &event)
+                                                                          {
+                                                                            CHECK_FALSE(event.Persisted());
+                                                                            CHECK(event.Bubbles());
+                                                                            CHECK(event.Cancelable());
+                                                                            Events.emplace_back("pageshow");
+                                                                          }));
+          // load doesn't reach the window from the document's own listeners, and DOMContentLoaded does.
+          Handles.push_back(window->AddEventListener(u8"DOMContentLoaded", [this](Event &)
+                                                     { Events.emplace_back("window heard"); }));
+        };
+      }
+    };
+  }
+
+  TEST_CASE(
+    "The end of parsing and the load event",
+    "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:fire-a-page-transition-event]")
+  {
+    LoadFixture fixture;
+    EndRecorder recorder;
+    recorder.Attach(fixture);
+
+    SECTION("in order, with the readiness and the timing")
+    {
+      fixture.LoadMarkup(u8"<!DOCTYPE html><p>Hi</p>", u8"https://example.com/page.html");
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(recorder.Events
+            == List<std::string> {"loading", "interactive", "DOMContentLoaded", "window heard", "complete",
+                                  "load", "pageshow"});
+      CHECK(fixture.Document().ReadyState() == html::DocumentReadyState::Complete);
+      CHECK(fixture.Document().LoadEventFinished());
+      CHECK(fixture.Document().PageShowing());
+      auto &timing = fixture.Document().LoadTiming();
+      CHECK(timing.DOMContentLoadedEventStartTime <= timing.DOMContentLoadedEventEndTime);
+      CHECK(timing.LoadEventStartTime <= timing.LoadEventEndTime);
+      CHECK(fixture.Events.back() == "finish");
+    }
+
+    SECTION("the load event waits for images and style sheets")
+    {
+      fixture.Strategy.Defer = true;
+      fixture.Strategy.AddText(u8"https://example.com/style.css", u8"p { color: green }");
+      fixture.Strategy.AddFile(u8"https://example.com/missing.png", __FILE__, u8"image/png");
+      fixture.LoadMarkup(
+        u8"<!DOCTYPE html><link rel=stylesheet href=style.css><img src=picture.png><p>Hi</p>",
+        u8"https://example.com/page.html");
+
+      // The document arrives; its subresources don't yet.
+      while (fixture.Strategy.Deferred.empty() || fixture.Frame().Loader().ProvisionalDocumentLoader())
+      {
+        fixture.Strategy.CompleteDeferred();
+        if (!html::EventLoop::Current().RunNextTask())
+        {
+          break;
+        }
+      }
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document().GetCachedResourceLoader().RequestCount() > 0);
+      CHECK(std::ranges::find(recorder.Events, "DOMContentLoaded") != recorder.Events.end());
+      CHECK(std::ranges::find(recorder.Events, "load") == recorder.Events.end());
+      CHECK(fixture.Frame().Loader().IsLoading());
+
+      // Once they're done (the image failing), the document has loaded.
+      fixture.Strategy.CompleteDeferred();
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(fixture.Document().GetCachedResourceLoader().RequestCount() == 0);
+      CHECK(recorder.Events.back() == "pageshow");
+      CHECK_FALSE(fixture.Frame().Loader().IsLoading());
+    }
+  }
+
+  TEST_CASE(
+    "Leaving a document: pagehide and unload",
+    "[Loader][DocumentLoader][html:the-pagetransitionevent-interface][html:dom-pagetransitionevent-persisted]"
+    "[html:fire-a-page-transition-event][html:navigate][html:update-the-visibility-state]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(u8"<!DOCTYPE html><body><p>First</p></body>", u8"https://example.com/first.html");
+    html::EventLoop::Current().RunUntilIdle();
+    RefPtr<boo::Document> first = ShareRefPtr(&fixture.Document());
+    auto *window = first->Window();
+    fixture.Events.clear();
+
+    List<std::string> events;
+    // Navigating from the events does nothing.
+    auto tryToNavigate = [&]
+    {
+      fixture.Frame().Loader().ChangeLocation(net::Url(u8"https://example.com/elsewhere.html"),
+                                              DOMStringAtom::Empty(), nullptr, ReferrerPolicy::EmptyString,
+                                              null);
+    };
+    auto pageHide = window->AddEventListener<PageTransitionEvent>(u8"pagehide",
+                                                                  [&](PageTransitionEvent &event)
+                                                                  {
+                                                                    CHECK_FALSE(event.Persisted());
+                                                                    CHECK(event.Bubbles());
+                                                                    CHECK(event.Cancelable());
+                                                                    events.emplace_back("pagehide");
+                                                                    tryToNavigate();
+                                                                  });
+    auto unload = window->AddEventListener(u8"unload",
+                                           [&](Event &event)
+                                           {
+                                             CHECK(event.Target().get() == first.get());
+                                             events.emplace_back("unload");
+                                             tryToNavigate();
+                                           });
+
+    RefPtr<Element> paragraph = first->QuerySelector(u8"p").ReleaseValue();
+    REQUIRE(paragraph);
+    auto onDocument = first->AddEventListener(u8"click", [](Event &) {});
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Visible);
+    auto visibilityChange = first->AddEventListener(u8"visibilitychange",
+                                                    [&](Event &event)
+                                                    {
+                                                      CHECK(event.Bubbles());
+                                                      CHECK(first->Hidden());
+                                                      events.emplace_back("visibilitychange");
+                                                    });
+    auto onParagraph = paragraph->AddEventListener(u8"click", [](Event &) {});
+
+    // A document is unloaded as the next one commits.
+    fixture.LoadMarkup(u8"<!DOCTYPE html><p>Second</p>", u8"https://example.com/second.html");
+    CHECK(events.empty());
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(events == List<std::string> {"pagehide", "visibilitychange", "unload"});
+    CHECK(fixture.Document().GetUrl().String() == u8"https://example.com/second.html");
+    CHECK(first->VisibilityState() == html::DocumentVisibilityState::Hidden);
+    CHECK(fixture.Document().VisibilityState() == html::DocumentVisibilityState::Visible);
+
+    // The unloaded document drops its listeners, and its window's and nodes'.
+    CHECK_FALSE(window->HasEventListener(u8"pagehide"));
+    CHECK_FALSE(window->HasEventListener(u8"unload"));
+    CHECK_FALSE(first->HasEventListener(u8"click"));
+    CHECK_FALSE(paragraph->HasEventListener(u8"click"));
+    CHECK_FALSE(first->PageShowing());
+    CHECK(std::ranges::find(fixture.Events, "navigation to https://example.com/elsewhere.html")
+          == fixture.Events.end());
+  }
+
+  TEST_CASE("Meta refresh is ignored", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(u8"<!DOCTYPE html><meta http-equiv=refresh content='0; url=next.html'><p id=here>",
+                       u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+    fixture.Events.clear();
+    auto &eventLoop = html::EventLoop::Current();
+    eventLoop.Run(eventLoop.Now() + std::chrono::seconds(1));
+    eventLoop.RunUntilIdle();
+    CHECK(fixture.Document().GetElementById(u8"here"));
+    CHECK(fixture.Events.empty());
+  }
+
+  TEST_CASE(
+    "The content-language and default-style pragmas",
+    "[Loader][DocumentLoader][html:pragma-set-default-language][html:attr-meta-http-equiv-default-style]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(
+      u8"<!DOCTYPE html><meta http-equiv=content-language content=' fr-CA '>"
+      u8"<meta http-equiv=default-style content=Night><p id=p>Bonjour</p><p id=en lang=en>Hi</p>",
+      u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+
+    CHECK(fixture.Document().ContentLanguage() == u8"fr-CA");
+    auto paragraph = fixture.Document().GetElementById(u8"p");
+    REQUIRE(paragraph);
+    CHECK(paragraph->Matches(u8":lang(fr)").Value());
+    CHECK_FALSE(fixture.Document().GetElementById(u8"en")->Matches(u8":lang(fr)").Value());
+
+    // A list of languages isn't a language.
+    fixture.Document().ProcessMetaHttpEquiv(u8"Content-Language", u8"de, en");
+    CHECK(fixture.Document().ContentLanguage() == u8"fr-CA");
+    fixture.Document().ProcessMetaHttpEquiv(u8"content-language", u8"de");
+    CHECK(fixture.Document().ContentLanguage() == u8"de");
+    CHECK(paragraph->Matches(u8":lang(de)").Value());
+  }
+
+  TEST_CASE("A document's lastModified is its response's Last-Modified date, in local time",
+            "[Loader][DocumentLoader][html:dom-document-lastmodified]")
+  {
+    LoadFixture fixture;
+    fixture.Strategy.AddText(u8"https://example.com/dated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/undated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.AddText(u8"https://example.com/misdated.html", u8"<!DOCTYPE html>", u8"text/html");
+    fixture.Strategy.Headers[u8"https://example.com/dated.html"] = {
+      {u8"Last-Modified", u8"Sun, 06 Nov 1994 08:49:37 GMT"}};
+    fixture.Strategy.Headers[u8"https://example.com/misdated.html"] = {{u8"Last-Modified", u8"yesterday"}};
+
+    using namespace std::chrono;
+    auto localText = [](sys_seconds time)
+    {
+      auto text = std::format("{:%m/%d/%Y %H:%M:%S}", current_zone()->to_local(time));
+      return utf8_string(text.begin(), text.end());
+    };
+
+    fixture.LoadUrl(u8"https://example.com/dated.html");
+    RunNetworkingTasks();
+    CHECK(fixture.Document().LastModified() == localText(sys_days(1'994y / November / 6) + 8h + 49min + 37s));
+
+    // Without a valid date, it's the current time.
+    for (auto url : {u8"https://example.com/undated.html", u8"https://example.com/misdated.html"})
+    {
+      fixture.LoadUrl(url);
+      RunNetworkingTasks();
+      auto before = floor<seconds>(system_clock::now());
+      auto value = fixture.Document().LastModified();
+      CHECK(
+        (value == localText(before) || value == localText(before - 1s) || value == localText(before + 1s)));
+    }
+  }
+
+  TEST_CASE("A document's language falls back to its Content-Language header's first language",
+            "[Loader][DocumentLoader][html:pragma-set-default-language]")
+  {
+    LoadFixture fixture;
+    auto serve = [&](utf8_stringview name, utf8_stringview header, utf8_stringview markup)
+    {
+      auto url = utf8_string(u8"https://example.com/") + utf8_string(name);
+      fixture.Strategy.AddText(url, markup, u8"text/html");
+      fixture.Strategy.Headers[url] = {{u8"Content-Language", utf8_string(header)}};
+      fixture.LoadUrl(url);
+      RunNetworkingTasks();
+      return fixture.Document().GetElementById(u8"p");
+    };
+
+    auto paragraph = serve(u8"one", u8"fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK(paragraph->Matches(u8":lang(fr)").Value());
+
+    // A list gives its first language, without the whitespace around it.
+    paragraph = serve(u8"list", u8"  fr , de", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"fr");
+    CHECK_FALSE(paragraph->Matches(u8":lang(de)").Value());
+
+    // The pragma comes first.
+    paragraph = serve(u8"pragma", u8"fr",
+                      u8"<!DOCTYPE html><meta http-equiv=content-language content=de><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage() == u8"de");
+    CHECK(paragraph->Matches(u8":lang(de)").Value());
+
+    paragraph = serve(u8"empty", u8" , fr", u8"<!DOCTYPE html><p id=p>x</p>");
+    REQUIRE(paragraph);
+    CHECK(fixture.Document().ContentLanguage().empty());
+  }
+}

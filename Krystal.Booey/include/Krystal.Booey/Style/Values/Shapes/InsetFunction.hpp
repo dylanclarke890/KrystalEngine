@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Shapes/InsetFunction.hpp"
+#include "Krystal.Booey/Css/Values/Shapes/InsetFunction.hpp"
 #include "Krystal.Booey/Style/Values/Borders/BorderRadius.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"

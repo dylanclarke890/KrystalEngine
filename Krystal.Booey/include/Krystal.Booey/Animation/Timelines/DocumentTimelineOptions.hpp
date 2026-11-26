@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
+#include "Krystal.Booey/Dom/Types/DOMHighResTimeStamp.hpp"
 
 namespace krys::boo
 {

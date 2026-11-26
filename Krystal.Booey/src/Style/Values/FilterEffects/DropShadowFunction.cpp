@@ -26,9 +26,9 @@
 #include "Krystal.Booey/Style/Values/FilterEffects/DropShadowFunction.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
-#include "Krystal.Booey/CSS/Values/FilterEffects/DropShadowFunction.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/FilterEffects/DropShadowFunction.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

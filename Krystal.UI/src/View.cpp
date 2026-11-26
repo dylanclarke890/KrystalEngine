@@ -1,23 +1,23 @@
 ﻿#include "Krystal.UI/View.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
-#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.Booey/DOM/DataTransfer/DataTransfer.hpp"
-#include "Krystal.Booey/DOM/Events/PointerEvent.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
+#include "Krystal.Booey/Dom/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/Html/DragAndDrop/DataTransfer.hpp"
+#include "Krystal.Booey/Events/Pointer/PointerEvent.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Color/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontCache.hpp"
 #include "Krystal.Booey/Graphics/Fonts/FontDatabase.hpp"
-#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
-#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/DocumentParser.hpp"
-#include "Krystal.Booey/HTML/Window.hpp"
+#include "Krystal.Booey/Html/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Html/Algorithms/RenderBlocking.hpp"
+#include "Krystal.Booey/Html/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/Html/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/Parser/DocumentParser.hpp"
+#include "Krystal.Booey/Html/Window.hpp"
 #include "Krystal.Booey/Input/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Input/PointerCaptureController.hpp"
 #include "Krystal.Booey/Input/PointerLockController.hpp"
@@ -375,7 +375,7 @@ namespace krys::ui
     }
 
     void WillPerformDragSourceAction(boo::DragSourceAction, const PointI &,
-                                     boo::dom::DataTransfer &) noexcept override
+                                     boo::DataTransfer &) noexcept override
     {
     }
 
@@ -385,7 +385,7 @@ namespace krys::ui
       return boo::AnyDragSourceAction();
     }
 
-    void StartDrag(boo::DragItem item, boo::dom::DataTransfer &dataTransfer, boo::Frame &) noexcept override
+    void StartDrag(boo::DragItem item, boo::DataTransfer &dataTransfer, boo::Frame &) noexcept override
     {
       if (_view)
       {
@@ -912,7 +912,7 @@ namespace krys::ui
   void View::PerformMicrotaskCheckpoint() noexcept
   {
     // Input is dispatched as a task would be, so a microtask checkpoint follows it.
-    // https://html.spec.whatwg.org/#event-loop-processing-model
+    // https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model
     boo::html::EventLoop::Current().PerformMicrotaskCheckpoint();
   }
 
@@ -1009,7 +1009,7 @@ namespace krys::ui
     }
 
     // The rendering update runs in Update; painting only needs the layout and the layers up to date.
-    (void)Document().UpdateLayout({boo::dom::LayoutOptions::UpdateCompositingLayers});
+    (void)Document().UpdateLayout({boo::layout::LayoutOptions::UpdateCompositingLayers});
     (void)view->FlushCompositingState();
 
     // What the view repaints is in its layers: the damage it tracks for a page that isn't composited is
@@ -1875,7 +1875,7 @@ namespace krys::ui
       return boo::PlatformMouseEvent(PointD(point), PointD(ToScreen(point)), button, type, count, {},
                                      boo::html::EventLoop::Current().Now(), buttons, {}, 0,
                                      boo::SyntheticClickType::OneFingerTap, pointerId,
-                                     boo::dom::TouchPointerEventType());
+                                     boo::pointer_events::TouchPointerEventType());
     };
 
     auto &handler = _frame->GetEventHandler();
@@ -1905,7 +1905,7 @@ namespace krys::ui
     boo::PlatformMouseEvent event(
       PointD(point), PointD(ToScreen(point)), boo::MouseButton::Right, boo::PlatformEvent::Type::MousePressed,
       1, {}, boo::html::EventLoop::Current().Now(), 0, {}, 0, boo::SyntheticClickType::NoTap,
-      boo::PointerEvent::PointerIdForTouch(touchPoint), boo::dom::TouchPointerEventType());
+      boo::PointerEvent::PointerIdForTouch(touchPoint), boo::pointer_events::TouchPointerEventType());
     (void)_frame->GetEventHandler().SendContextMenuEvent(event);
     PerformMicrotaskCheckpoint();
   }
@@ -2298,7 +2298,7 @@ namespace krys::ui
       if (RefPtr<boo::Element> element = ShareRefPtr(Document().FocusedElement()))
       {
         (void)element->DispatchSimulatedClick(
-          nullptr, boo::dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
+          nullptr, boo::html::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
       }
       PerformMicrotaskCheckpoint();
     }
@@ -2594,7 +2594,7 @@ namespace krys::ui
     }
   }
 
-  void View::DragStarted(boo::DragItem item, boo::dom::DataTransfer &dataTransfer) noexcept
+  void View::DragStarted(boo::DragItem item, boo::DataTransfer &dataTransfer) noexcept
   {
     ActiveDrag drag;
     drag.Data = dataTransfer.GetPasteboard().GetSelectionData();
@@ -2776,7 +2776,7 @@ namespace krys::ui
     boo::PlatformMouseEvent event(point, ToScreen(point), button, type, clickCount,
                                   input::ToBooey(input.Modifiers), boo::html::EventLoop::Current().Now(),
                                   _penButtons, {}, force, boo::SyntheticClickType::NoTap, boo::PenPointerId,
-                                  boo::dom::PenPointerEventType());
+                                  boo::pointer_events::PenPointerEventType());
     event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),
                              static_cast<int32>(std::round(input.TiltY)),
                              static_cast<int32>(std::round(input.Twist))});

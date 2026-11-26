@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BrokenImageIcon.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
@@ -9,8 +9,8 @@
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
-#include "Krystal.Booey/SVG/Graphics/SVGImageCache.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/Svg/Graphics/SVGImageCache.hpp"
 
 namespace krys::boo
 {

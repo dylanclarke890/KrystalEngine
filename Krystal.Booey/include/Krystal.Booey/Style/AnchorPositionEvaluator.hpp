@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/Property.hpp"
-#include "Krystal.Booey/CSS/Properties/PropertyQueries.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Properties/Property.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyQueries.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Graphics/Geometry/BoxSides.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/Geometry/LayoutRect.hpp"

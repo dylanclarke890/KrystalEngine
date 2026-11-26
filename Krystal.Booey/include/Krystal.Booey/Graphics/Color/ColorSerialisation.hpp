@@ -43,7 +43,7 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string SerialisationForCSS(const Color &color) noexcept;
 
   /// @brief Returns the color serialised according to HTML5.
-  /// @see https://html.spec.whatwg.org/multipage/scripting.html#fill-and-stroke-styles (10 September 2015).
+  /// @see https://html.spec.whatwg.org/multipage/canvas.html#fill-and-stroke-styles (10 September 2015).
   KRYS_NODISCARD utf8_string SerialisationForHTML(const Color &color) noexcept;
 
   /// @brief Returns the color serialised for DumpRenderTree: #RRGGBB, #RRGGBBAA or the CSS serialisation.

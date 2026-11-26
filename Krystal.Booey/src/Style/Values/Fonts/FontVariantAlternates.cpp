@@ -25,9 +25,9 @@
 
 #include "Krystal.Booey/Style/Values/Fonts/FontVariantAlternates.hpp"
 
-#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
-#include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/Css/Values/FunctionValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

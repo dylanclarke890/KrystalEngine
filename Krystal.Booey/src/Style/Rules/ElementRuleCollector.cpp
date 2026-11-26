@@ -27,28 +27,28 @@
  */
 
 #include "Krystal.Booey/Style/Rules/ElementRuleCollector.hpp"
-#include "Krystal.Booey/CSS/CSSOM/CSSStyleSheet.hpp"
-#include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
-#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
-#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
-#include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
-#include "Krystal.Booey/CSS/Rules/Rule.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
-#include "Krystal.Booey/DOM/Algorithms/ElementTextDirection.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Attr.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
-#include "Krystal.Booey/DOM/Nodes/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Nodes/ShadowRoot.hpp"
-#include "Krystal.Booey/DOM/Nodes/StyledElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Css/CSSOM/CSSStyleSheet.hpp"
+#include "Krystal.Booey/Css/Properties/ImmutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/StylePropertiesInlines.hpp"
+#include "Krystal.Booey/Css/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/Css/Rules/KeyframeRule.hpp"
+#include "Krystal.Booey/Css/Rules/Rule.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorList.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Dom/Algorithms/ElementTextDirection.hpp"
+#include "Krystal.Booey/Dom/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Attr.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
+#include "Krystal.Booey/Dom/Nodes/HTMLDocument.hpp"
+#include "Krystal.Booey/Dom/Nodes/ShadowRoot.hpp"
+#include "Krystal.Booey/Dom/Nodes/StyledElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/ContainerQueryEvaluator.hpp"
 #include "Krystal.Booey/Style/DeclarationOrigin.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -56,7 +56,7 @@
 #include "Krystal.Booey/Style/Rules/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Rules/UserAgentStyle.hpp"
 #include "Krystal.Booey/Style/Scope/Scope.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGElement.hpp"
 #include "Krystal.Booey/Text/WritingMode.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
@@ -1035,7 +1035,7 @@ namespace krys::boo::style
     {
       if (auto *presentationalHintStyle = styledElement->PresentationalHintStyle())
       {
-        // https://html.spec.whatwg.org/#presentational-hints
+        // https://html.spec.whatwg.org/multipage/rendering.html#presentational-hints
 
         // Presentation attributes in SVG elements tend to be unique and not restyled often. Avoid bloating
         // the cache.

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
+#include "Krystal.Booey/Css/Properties/PropertyId.hpp"
 
 namespace krys::boo::css
 {

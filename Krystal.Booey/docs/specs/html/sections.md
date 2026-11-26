@@ -6,69 +6,69 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-### [4.3 Sections](https://html.spec.whatwg.org/#sections)
+### [4.3 Sections](https://html.spec.whatwg.org/multipage/sections.html#sections)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-#### [4.3.1 The body element](https://html.spec.whatwg.org/#the-body-element)
+#### [4.3.1 The body element](https://html.spec.whatwg.org/multipage/sections.html#the-body-element)
 
 Status: reviewed (2026-11-01)
 > `HTMLBodyElement`; its event handlers forwarded to the window are reviewed with event handlers, and its presentational attributes with Rendering.
 
-#### [4.3.2 The article element](https://html.spec.whatwg.org/#the-article-element)
+#### [4.3.2 The article element](https://html.spec.whatwg.org/multipage/sections.html#the-article-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.3 The section element](https://html.spec.whatwg.org/#the-section-element)
+#### [4.3.3 The section element](https://html.spec.whatwg.org/multipage/sections.html#the-section-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.4 The nav element](https://html.spec.whatwg.org/#the-nav-element)
+#### [4.3.4 The nav element](https://html.spec.whatwg.org/multipage/sections.html#the-nav-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.5 The aside element](https://html.spec.whatwg.org/#the-aside-element)
+#### [4.3.5 The aside element](https://html.spec.whatwg.org/multipage/sections.html#the-aside-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.6 The h1, h2, h3, h4, h5, and h6 elements](https://html.spec.whatwg.org/#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements)
+#### [4.3.6 The h1, h2, h3, h4, h5, and h6 elements](https://html.spec.whatwg.org/multipage/sections.html#the-h1,-h2,-h3,-h4,-h5,-and-h6-elements)
 
 Status: reviewed (2026-11-01)
 > `HTMLHeadingElement`; its levels are 4.3.11.1's.
 
-#### [4.3.7 The hgroup element](https://html.spec.whatwg.org/#the-hgroup-element)
+#### [4.3.7 The hgroup element](https://html.spec.whatwg.org/multipage/sections.html#the-hgroup-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.8 The header element](https://html.spec.whatwg.org/#the-header-element)
+#### [4.3.8 The header element](https://html.spec.whatwg.org/multipage/sections.html#the-header-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.9 The footer element](https://html.spec.whatwg.org/#the-footer-element)
+#### [4.3.9 The footer element](https://html.spec.whatwg.org/multipage/sections.html#the-footer-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.10 The address element](https://html.spec.whatwg.org/#the-address-element)
+#### [4.3.10 The address element](https://html.spec.whatwg.org/multipage/sections.html#the-address-element)
 
 Status: n/a (author conformance)
 
-#### [4.3.11 Headings and outlines](https://html.spec.whatwg.org/#headings-and-outlines-2)
+#### [4.3.11 Headings and outlines](https://html.spec.whatwg.org/multipage/sections.html#headings-and-outlines-2)
 
 Status: reviewed (2026-11-01)
 > A heading's level is `HTMLHeadingElement::ComputedHeadingLevel`. The outline is only for exposing to users, which Booey doesn't do.
 <!-- definitions: heading-level concept-heading -->
 
-- [x] [outline](https://html.spec.whatwg.org/#outline) — The outline is all headings in a document, in tree order.
+- [x] [outline](https://html.spec.whatwg.org/multipage/sections.html#outline) — The outline is all headings in a document, in tree order.
   > n/a: only for exposing outlines to users.
 
-##### [4.3.11.1 Heading levels & offsets](https://html.spec.whatwg.org/#heading-levels-&-offsets)
+##### [4.3.11.1 Heading levels & offsets](https://html.spec.whatwg.org/multipage/sections.html#heading-levels-&-offsets)
 
 Status: reviewed (2026-11-01)
 > `HTMLHeadingElement::ComputedHeadingLevel` and `ComputedHeadingOffset`, with `headingoffset` and `headingreset` reflected by `HTMLElement`. New: the computed heading level and offset weren't implemented (nothing uses them yet: there's no `:heading()` and no accessibility).
 <!-- definitions: attr-headingoffset attr-headingreset -->
 
-- [x] [get an element's computed heading level](https://html.spec.whatwg.org/#get-an-element's-computed-heading-level) — To get an element's computed heading level, given an element element:
+- [x] [get an element's computed heading level](https://html.spec.whatwg.org/multipage/sections.html#get-an-element's-computed-heading-level) — To get an element's computed heading level, given an element element:
   - 1. Let level be 0.
   - 2. If element's local name is h1, then set level to 1.
   - 3. If element's local name is h2, then set level to 2.
@@ -81,7 +81,7 @@ Status: reviewed (2026-11-01)
   - 10. If level is greater than 9, then return 9.
   - 11. Return level.
 
-- [x] [get an element's computed heading offset](https://html.spec.whatwg.org/#get-an-element's-computed-heading-offset) — To get an element's computed heading offset, given an element element, perform the following steps. They return a non-negative integer.
+- [x] [get an element's computed heading offset](https://html.spec.whatwg.org/multipage/sections.html#get-an-element's-computed-heading-offset) — To get an element's computed heading offset, given an element element, perform the following steps. They return a non-negative integer.
   - 1. Let offset be 0.
   - 2. Let inclusiveAncestor be element.
   - 3. While inclusiveAncestor is not null:
@@ -93,18 +93,18 @@ Status: reviewed (2026-11-01)
     - 3f. Set inclusiveAncestor to inclusiveAncestor's parent element.
   - 4. Return offset.
 
-##### [4.3.11.2 Sample outlines](https://html.spec.whatwg.org/#sample-outlines)
+##### [4.3.11.2 Sample outlines](https://html.spec.whatwg.org/multipage/sections.html#sample-outlines)
 
 Status: n/a (examples)
 
-##### [4.3.11.3 Exposing outlines to users](https://html.spec.whatwg.org/#exposing-outlines-to-users)
+##### [4.3.11.3 Exposing outlines to users](https://html.spec.whatwg.org/multipage/sections.html#exposing-outlines-to-users)
 
 Status: n/a (Booey has no browser user interface)
 
-#### [4.3.12 Usage summary](https://html.spec.whatwg.org/#usage-summary-2)
+#### [4.3.12 Usage summary](https://html.spec.whatwg.org/multipage/sections.html#usage-summary-2)
 
 Status: n/a (author conformance)
 
-##### [4.3.12.1 Article or section?](https://html.spec.whatwg.org/#article-or-section)
+##### [4.3.12.1 Article or section?](https://html.spec.whatwg.org/multipage/sections.html#article-or-section)
 
 Status: n/a (author conformance)

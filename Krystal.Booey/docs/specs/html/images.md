@@ -6,32 +6,32 @@ Reviewing a section: find each algorithm's implementation (its `@see` link), lab
 
 Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. `python Krystal.Booey/tools/spec_status.py html --tick <section anchor>` ticks a section's algorithms and sets its status.
 
-#### [4.8.4 Images](https://html.spec.whatwg.org/#images)
+#### [4.8.4 Images](https://html.spec.whatwg.org/multipage/images.html#images)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-##### [4.8.4.1 Introduction](https://html.spec.whatwg.org/#introduction-3)
+##### [4.8.4.1 Introduction](https://html.spec.whatwg.org/multipage/images.html#introduction-3)
 
 Status: n/a (introduction)
 <!-- definitions: device-pixel-ratio viewport-based-selection art-direction image-format-based-selection -->
 
-###### [4.8.4.1.1 Adaptive images](https://html.spec.whatwg.org/#adaptive-images)
+###### [4.8.4.1.1 Adaptive images](https://html.spec.whatwg.org/multipage/images.html#adaptive-images)
 
 Status: n/a (examples)
 
-##### [4.8.4.2 Attributes common to source, img, and link elements](https://html.spec.whatwg.org/#attributes-common-to-source-and-img-elements)
+##### [4.8.4.2 Attributes common to source, img, and link elements](https://html.spec.whatwg.org/multipage/images.html#attributes-common-to-source-and-img-elements)
 
 Status: reviewed (2026-11-01)
 > Headings only.
 
-###### [4.8.4.2.1 Srcset attributes](https://html.spec.whatwg.org/#srcset-attributes)
+###### [4.8.4.2.1 Srcset attributes](https://html.spec.whatwg.org/multipage/images.html#srcset-attributes)
 
 Status: reviewed (2026-11-01)
 > `ParseImageCandidatesFromSrcsetAttribute` (`SrcsetParser.cpp`) reads image candidate strings; their validity is author conformance.
 <!-- definitions: srcset-attribute width-descriptor width-descriptor-value pixel-density-descriptor pixel-density-descriptor-value -->
 
-- [x] [image candidate string](https://html.spec.whatwg.org/#image-candidate-string) — An image candidate string consists of the following components, in order, with the further restrictions described below this list:
+- [x] [image candidate string](https://html.spec.whatwg.org/multipage/images.html#image-candidate-string) — An image candidate string consists of the following components, in order, with the further restrictions described below this list:
   - 1. Zero or more ASCII whitespace.
   - 2. A valid non-empty URL that does not start or end with a U+002C COMMA character (,), referencing a non-interactive, optionally animated, image resource that is neither paged nor scripted.
   - 3. Zero or more ASCII whitespace.
@@ -39,31 +39,31 @@ Status: reviewed (2026-11-01)
   - 5. Zero or more ASCII whitespace.
   > `ParseImageCandidatesFromSrcsetAttribute`.
 
-###### [4.8.4.2.2 Sizes attributes](https://html.spec.whatwg.org/#sizes-attributes)
+###### [4.8.4.2.2 Sizes attributes](https://html.spec.whatwg.org/multipage/images.html#sizes-attributes)
 
 Status: reviewed (2026-11-01)
 > `css::SizesAttributeParser`; a valid source size list's grammar is what it parses.
 <!-- definitions: sizes-attribute valdef-sizes-auto -->
 
-- [x] [valid source size list](https://html.spec.whatwg.org/#valid-source-size-list) — A valid source size list is a string that matches the following grammar: [CSSVALUES] [MQ]
+- [x] [valid source size list](https://html.spec.whatwg.org/multipage/images.html#valid-source-size-list) — A valid source size list is a string that matches the following grammar: [CSSVALUES] [MQ]
   > `css::SizesAttributeParser`.
 
-##### [4.8.4.3 Processing model](https://html.spec.whatwg.org/#images-processing-model)
+##### [4.8.4.3 Processing model](https://html.spec.whatwg.org/multipage/images.html#images-processing-model)
 
 Status: reviewed (2026-11-01)
 > `HTMLImageElement` with `ImageLoader`: `UsesSrcsetOrPicture`, `Complete` (available and fully decodable), and the density-corrected size from the image decoder.
 <!-- definitions: current-request pending-request image-request img-req-state img-req-url img-req-data img-none img-inc img-all img-error last-selected-source last-auto-sizes-width current-pixel-density preferred-density-corrected-dimensions source-set image-source source-size-2 concept-microsyntax-parse-error -->
 
-- [x] [available](https://html.spec.whatwg.org/#img-available) — When an image request's state is either partially available or completely available, the image request is said to be available.
+- [x] [available](https://html.spec.whatwg.org/multipage/images.html#img-available) — When an image request's state is either partially available or completely available, the image request is said to be available.
   > `ImageLoader::Image()` with its image loaded.
 
-- [x] [fully decodable](https://html.spec.whatwg.org/#img-good) — When an img element's current request's state is completely available and the user agent can decode the media data without errors, then the img element is said to be fully decodable.
+- [x] [fully decodable](https://html.spec.whatwg.org/multipage/images.html#img-good) — When an img element's current request's state is completely available and the user agent can decode the media data without errors, then the img element is said to be fully decodable.
   > `HTMLImageElement::Complete` without an error.
 
-- [x] [use srcset or picture](https://html.spec.whatwg.org/#use-srcset-or-picture) — An img element is said to use srcset or picture if it has a srcset attribute specified or if it has a parent that is a picture element.
+- [x] [use srcset or picture](https://html.spec.whatwg.org/multipage/images.html#use-srcset-or-picture) — An img element is said to use srcset or picture if it has a srcset attribute specified or if it has a parent that is a picture element.
   > `HTMLImageElement::UsesSrcsetOrPicture`.
 
-- [x] [density-corrected natural width and height](https://html.spec.whatwg.org/#density-corrected-intrinsic-width-and-height) — To determine the density-corrected natural width and height of an img element img:
+- [x] [density-corrected natural width and height](https://html.spec.whatwg.org/multipage/images.html#density-corrected-intrinsic-width-and-height) — To determine the density-corrected natural width and height of an img element img:
   - 1. Let density be img's current request's current pixel density.
   - 2. Let dimensions be img's current request's preferred density-corrected dimensions.
   - 3. If dimensions is not null, then set dimensions's width to dimensions's width divided by density, set dimensions's height to dimensions's height divided by density, and return dimensions.
@@ -73,38 +73,38 @@ Status: reviewed (2026-11-01)
   - 7. Return the result of applying the default sizing algorithm with intrinsicWidth, intrinsicHeight, and intrinsicRatio, using a default object size of 300 by 150.
   > `NaturalWidth` and `NaturalHeight`: the image's size for the selected density (`EffectiveImageDevicePixelRatio`).
 
-###### [4.8.4.3.1 When to obtain images](https://html.spec.whatwg.org/#when-to-obtain-images)
+###### [4.8.4.3.1 When to obtain images](https://html.spec.whatwg.org/multipage/images.html#when-to-obtain-images)
 
 Status: reviewed (2026-11-01)
 > Images are obtained immediately, or when visible for lazy images (`LazyLoadImageObserver`).
 
-###### [4.8.4.3.2 Reacting to DOM mutations](https://html.spec.whatwg.org/#reacting-to-dom-mutations)
+###### [4.8.4.3.2 Reacting to DOM mutations](https://html.spec.whatwg.org/multipage/images.html#reacting-to-dom-mutations)
 
 Status: reviewed (2026-11-01)
 > `HTMLImageElement::SelectImageSource(RelevantMutation::Yes)` on `src`, `srcset`, `sizes`, `crossorigin` and `referrerpolicy` changes, picture insertions, removals and moves (4.8.2, 4.8.3), and adoption.
 
-- [x] [relevant mutations](https://html.spec.whatwg.org/#relevant-mutations) — The relevant mutations for an img element are as follows:
+- [x] [relevant mutations](https://html.spec.whatwg.org/multipage/images.html#relevant-mutations) — The relevant mutations for an img element are as follows:
   > `SelectImageSource(RelevantMutation::Yes)`.
 
-###### [4.8.4.3.3 The list of available images](https://html.spec.whatwg.org/#the-list-of-available-images)
+###### [4.8.4.3.3 The list of available images](https://html.spec.whatwg.org/multipage/images.html#the-list-of-available-images)
 
 Status: reviewed (2026-11-01)
 > The memory cache stands in for it (see `DIFFERENCES.md`).
 <!-- definitions: list-of-available-images ignore-higher-layer-caching -->
 
-###### [4.8.4.3.4 Decoding images](https://html.spec.whatwg.org/#decoding-images)
+###### [4.8.4.3.4 Decoding images](https://html.spec.whatwg.org/multipage/images.html#decoding-images)
 
 Status: reviewed (2026-11-01)
 > Images are decoded when painted; the `decoding` hint isn't used (FIXME in `RenderImage.cpp`).
 <!-- definitions: img-decoding-process image-decoding-hint -->
 
-###### [4.8.4.3.5 Updating the image data](https://html.spec.whatwg.org/#updating-the-image-data)
+###### [4.8.4.3.5 Updating the image data](https://html.spec.whatwg.org/multipage/images.html#updating-the-image-data)
 
 Status: reviewed (2026-11-01)
 > `HTMLImageElement::SelectImageSource` and `ImageLoader::UpdateFromElement`, which follow upstream rather than these steps (see `DIFFERENCES.md`).
 > Fixed: an image that uses srcset or picture without a selected source didn't fire error (step 11b.ii).
 
-- [x] [update the image data](https://html.spec.whatwg.org/#update-the-image-data) — When the user agent is to update the image data of an img element element, optionally with the restart animation flag set, optionally with the maybe omit events flag set, it must run the following steps:
+- [x] [update the image data](https://html.spec.whatwg.org/multipage/images.html#update-the-image-data) — When the user agent is to update the image data of an img element element, optionally with the restart animation flag set, optionally with the maybe omit events flag set, it must run the following steps:
   - 1. If element's node document is not fully active:
     - 1a. Continue running this algorithm in parallel.
     - 1b. Wait until element's node document is fully active.
@@ -190,23 +190,23 @@ Status: reviewed (2026-11-01)
     - 27c. Add the image to the list of available images using the key key, with the ignore higher-layer caching flag set.
     - 27d. If maybe omit events is not set or previousURL is not equal to urlString, then fire an event named load at element.
 
-- [x] [abort the image request](https://html.spec.whatwg.org/#abort-the-image-request) — To abort the image request for an image request or null image request means to run the following steps:
+- [x] [abort the image request](https://html.spec.whatwg.org/multipage/images.html#abort-the-image-request) — To abort the image request for an image request or null image request means to run the following steps:
   - 1. If image request is null, then return.
   - 2. Forget image request's image data, if any.
   - 3. Abort any instance of the fetching algorithm for image request, discarding any pending tasks generated by that algorithm.
   > Replacing the `CachedImage` in `ImageLoader::DidUpdateCachedImage`.
 
-- [x] [upgrade the pending request to the current request](https://html.spec.whatwg.org/#upgrade-the-pending-request-to-the-current-request) — To upgrade the pending request to the current request for an img element means to run the following steps:
+- [x] [upgrade the pending request to the current request](https://html.spec.whatwg.org/multipage/images.html#upgrade-the-pending-request-to-the-current-request) — To upgrade the pending request to the current request for an img element means to run the following steps:
   - 1. Set the img element's current request to the pending request.
   - 2. Set the img element's pending request to null.
   > n/a: there's no pending request (see `DIFFERENCES.md`).
 
-###### [4.8.4.3.6 Preparing an image for presentation](https://html.spec.whatwg.org/#preparing-an-image-for-presentation)
+###### [4.8.4.3.6 Preparing an image for presentation](https://html.spec.whatwg.org/multipage/images.html#preparing-an-image-for-presentation)
 
 Status: reviewed (2026-11-01)
 > The image decoder's density-corrected size (`ImageDecoder::FrameDensityCorrectedSizeAtIndex`), from a JPEG's EXIF resolution (`EXIFMetadata::Read`); PNG and WebP EXIF are ignored, as in Chrome. There are no cross-origin images.
 
-- [x] [prepare an image for presentation](https://html.spec.whatwg.org/#prepare-an-image-for-presentation) — To prepare an image for presentation for an image request req given image element img:
+- [x] [prepare an image for presentation](https://html.spec.whatwg.org/multipage/images.html#prepare-an-image-for-presentation) — To prepare an image for presentation for an image request req given image element img:
   - 1. Let exifTagMap be the EXIF tags obtained from req's image data, as defined by the relevant codec. [EXIF]
   - 2. Let physicalWidth and physicalHeight be the width and height obtained from req's image data, as defined by the relevant codec.
   - 3. Let dimX be the value of exifTagMap's tag 0xA002 (PixelXDimension).
@@ -219,27 +219,27 @@ Status: reviewed (2026-11-01)
     - 8b. Otherwise, set req's preferred density-corrected dimensions to a struct with its width set to dimX and its height set to dimY.
   - 9. Update req's img element's presentation appropriately.
 
-###### [4.8.4.3.7 Selecting an image source](https://html.spec.whatwg.org/#selecting-an-image-source)
+###### [4.8.4.3.7 Selecting an image source](https://html.spec.whatwg.org/multipage/images.html#selecting-an-image-source)
 
 Status: reviewed (2026-11-01)
 > `HTMLImageElement::SelectImageSource`, and `PickBestImageCandidate` in `SrcsetParser.cpp`: the lowest density at least the device scale factor, else the highest.
 
-- [x] [select an image source](https://html.spec.whatwg.org/#select-an-image-source) — To select an image source given an img element el:
+- [x] [select an image source](https://html.spec.whatwg.org/multipage/images.html#select-an-image-source) — To select an image source given an img element el:
   - 1. Update the source set for el.
   - 2. If el's source set is empty, return null as the URL and undefined as the pixel density.
   - 3. Return the result of selecting an image from el's source set.
 
-- [x] [select an image source from a source set](https://html.spec.whatwg.org/#select-an-image-source-from-a-source-set) — To select an image source from a source set given a source set sourceSet:
+- [x] [select an image source from a source set](https://html.spec.whatwg.org/multipage/images.html#select-an-image-source-from-a-source-set) — To select an image source from a source set given a source set sourceSet:
   - 1. If an entry b in sourceSet has the same associated pixel density descriptor as an earlier entry a in sourceSet, then remove entry b. Repeat this step until none of the entries in sourceSet have the same associated pixel density descriptor as an earlier entry.
   - 2. In an implementation-defined manner, choose one image source from sourceSet. Let selectedSource be this choice.
   - 3. Return selectedSource and its associated pixel density.
 
-###### [4.8.4.3.8 Creating a source set from attributes](https://html.spec.whatwg.org/#creating-a-source-set-from-attributes)
+###### [4.8.4.3.8 Creating a source set from attributes](https://html.spec.whatwg.org/multipage/images.html#creating-a-source-set-from-attributes)
 
 Status: reviewed (2026-11-01)
 > `BestFitSourceForImageAttributes`: the default source is always added, but loses to an earlier 1x entry and is ignored with widths.
 
-- [x] [create a source set](https://html.spec.whatwg.org/#create-a-source-set) — When asked to create a source set given a string default source, a string srcset, a string sizes, and an element or null img:
+- [x] [create a source set](https://html.spec.whatwg.org/multipage/images.html#create-a-source-set) — When asked to create a source set given a string default source, a string srcset, a string sizes, and an element or null img:
   - 1. Let source set be an empty source set.
   - 2. If srcset is not an empty string, then set source set to the result of parsing srcset.
   - 3. Set source set's source size to the result of parsing sizes with img.
@@ -247,12 +247,12 @@ Status: reviewed (2026-11-01)
   - 5. Normalize the source densities of source set.
   - 6. Return source set.
 
-###### [4.8.4.3.9 Updating the source set](https://html.spec.whatwg.org/#updating-the-source-set)
+###### [4.8.4.3.9 Updating the source set](https://html.spec.whatwg.org/multipage/images.html#updating-the-source-set)
 
 Status: reviewed (2026-11-01)
 > `HTMLImageElement::BestFitSourceFromPictureElement` and `SelectImageSource`. `<link imagesrcset>` is for preloads, which aren't supported (see `KNOWN-ISSUES.md`).
 
-- [x] [update the source set](https://html.spec.whatwg.org/#update-the-source-set) — When asked to update the source set for a given img or link element el, user agents must do the following:
+- [x] [update the source set](https://html.spec.whatwg.org/multipage/images.html#update-the-source-set) — When asked to update the source set for a given img or link element el, user agents must do the following:
   - 1. Set el's source set to an empty source set.
   - 2. Let elements be « el ».
   - 3. If el is an img element whose parent node is a picture element, then replace the contents of elements with el's parent node's child elements, retaining relative order.
@@ -282,12 +282,12 @@ Status: reviewed (2026-11-01)
     - 5k. Set el's source set to source set.
     - 5l. Return.
 
-###### [4.8.4.3.10 Parsing a srcset attribute](https://html.spec.whatwg.org/#parsing-a-srcset-attribute)
+###### [4.8.4.3.10 Parsing a srcset attribute](https://html.spec.whatwg.org/multipage/images.html#parsing-a-srcset-attribute)
 
 Status: reviewed (2026-11-01)
 > `ParseImageCandidatesFromSrcsetAttribute`, with `TokenizeDescriptors` and `ParseDescriptors`.
 
-- [x] [parse a srcset attribute](https://html.spec.whatwg.org/#parse-a-srcset-attribute) — When asked to parse a srcset attribute from an element, parse the value of the element's srcset attribute as follows:
+- [x] [parse a srcset attribute](https://html.spec.whatwg.org/multipage/images.html#parse-a-srcset-attribute) — When asked to parse a srcset attribute from an element, parse the value of the element's srcset attribute as follows:
   - 1. Let input be the value passed to this algorithm.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Let candidates be an initially empty source set.
@@ -317,12 +317,12 @@ Status: reviewed (2026-11-01)
   - 15. If error is still no, then append a new image source to candidates whose URL is url, associated with a width width if not absent and a pixel density density if not absent. Otherwise, there is a parse error.
   - 16. Return to the step labeled splitting loop.
 
-###### [4.8.4.3.11 Parsing a sizes attribute](https://html.spec.whatwg.org/#parsing-a-sizes-attribute)
+###### [4.8.4.3.11 Parsing a sizes attribute](https://html.spec.whatwg.org/multipage/images.html#parsing-a-sizes-attribute)
 
 Status: reviewed (2026-11-01)
 > `css::SizesAttributeParser::Parse`; `100vw` is truncated to whole pixels (see `DIFFERENCES.md`), and there's no `auto` (see `KNOWN-ISSUES.md`).
 
-- [x] [parse a sizes attribute](https://html.spec.whatwg.org/#parse-a-sizes-attribute) — When asked to parse a sizes attribute from an element element, with an img element or null img:
+- [x] [parse a sizes attribute](https://html.spec.whatwg.org/multipage/images.html#parse-a-sizes-attribute) — When asked to parse a sizes attribute from an element element, with an img element or null img:
   - 1. Let unparsed sizes list be the result of parsing a comma-separated list of component values from the value of element's sizes attribute (or the empty string, if the attribute is absent). [CSSSYNTAX]
   - 2. Let size be null.
   - 3. For each unparsed size in unparsed sizes list:
@@ -338,23 +338,23 @@ Status: reviewed (2026-11-01)
     - 3f. If size is not auto, then return size. Otherwise, continue.
   - 4. Return 100vw.
 
-###### [4.8.4.3.12 Normalizing the source densities](https://html.spec.whatwg.org/#normalizing-the-source-densities)
+###### [4.8.4.3.12 Normalizing the source densities](https://html.spec.whatwg.org/multipage/images.html#normalizing-the-source-densities)
 
 Status: reviewed (2026-11-01)
 > `PickBestImageCandidate` in `SrcsetParser.cpp`.
 
-- [x] [normalize the source densities](https://html.spec.whatwg.org/#normalise-the-source-densities) — When asked to normalize the source densities of a source set source set, the user agent must do the following:
+- [x] [normalize the source densities](https://html.spec.whatwg.org/multipage/images.html#normalise-the-source-densities) — When asked to normalize the source densities of a source set source set, the user agent must do the following:
   - 1. Let source size be source set's source size.
   - 2. For each image source in source set:
     - 2a. If the image source has a pixel density descriptor, continue to the next image source.
     - 2b. Otherwise, if the image source has a width descriptor, replace the width descriptor with a pixel density descriptor with a value of the width descriptor value divided by source size and a unit of x.
     - 2c. Otherwise, give the image source a pixel density descriptor of 1x.
 
-###### [4.8.4.3.13 Reacting to environment changes](https://html.spec.whatwg.org/#reacting-to-environment-changes)
+###### [4.8.4.3.13 Reacting to environment changes](https://html.spec.whatwg.org/multipage/images.html#reacting-to-environment-changes)
 
 Status: n/a (not implemented: images don't select a source again when the environment changes; see `KNOWN-ISSUES.md`)
 
-- [x] [react to changes in the environment](https://html.spec.whatwg.org/#img-environment-changes) — The user agent may at any time run the following algorithm to update an img element's image in order to react to changes in the environment. (User agents are not required to ever run this algorithm; for example, if the user is not looking at the page any more, the user agent might want to wait unti…
+- [x] [react to changes in the environment](https://html.spec.whatwg.org/multipage/images.html#img-environment-changes) — The user agent may at any time run the following algorithm to update an img element's image in order to react to changes in the environment. (User agents are not required to ever run this algorithm; for example, if the user is not looking at the page any more, the user agent might want to wait unti…
   - 1. Await a stable state. The synchronous section consists of all the remaining steps of this algorithm until the algorithm says the synchronous section has ended. (Steps in synchronous sections are marked with ⌛.)
   - 2. ⌛ If the img element does not use srcset or picture, its node document is not fully active, it has image data whose resource type is multipart/x-mixed-replace, or its pending request is not null, then return.
   - 3. ⌛ Let selected source and selected pixel density be the URL and pixel density that results from selecting an image source, respectively.
@@ -391,67 +391,67 @@ Status: n/a (not implemented: images don't select a source again when the enviro
       - 17e.iii. Queue an element task on the DOM manipulation task source given the img element and finishUpdate.
   > n/a: not implemented (see `KNOWN-ISSUES.md`).
 
-##### [4.8.4.4 Requirements for providing text to act as an alternative for images](https://html.spec.whatwg.org/#alt)
+##### [4.8.4.4 Requirements for providing text to act as an alternative for images](https://html.spec.whatwg.org/multipage/images.html#alt)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.1 General guidelines](https://html.spec.whatwg.org/#general-guidelines)
+###### [4.8.4.4.1 General guidelines](https://html.spec.whatwg.org/multipage/images.html#general-guidelines)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.2 A link or button containing nothing but the image](https://html.spec.whatwg.org/#a-link-or-button-containing-nothing-but-the-image)
+###### [4.8.4.4.2 A link or button containing nothing but the image](https://html.spec.whatwg.org/multipage/images.html#a-link-or-button-containing-nothing-but-the-image)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.3 A phrase or paragraph with an alternative graphical representation: charts, diagrams, graphs, maps, illustrations](https://html.spec.whatwg.org/#a-phrase-or-paragraph-with-an-alternative-graphical-representation:-charts,-diagrams,-graphs,-maps,-illustrations)
+###### [4.8.4.4.3 A phrase or paragraph with an alternative graphical representation: charts, diagrams, graphs, maps, illustrations](https://html.spec.whatwg.org/multipage/images.html#a-phrase-or-paragraph-with-an-alternative-graphical-representation:-charts,-diagrams,-graphs,-maps,-illustrations)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.4 A short phrase or label with an alternative graphical representation: icons, logos](https://html.spec.whatwg.org/#a-short-phrase-or-label-with-an-alternative-graphical-representation:-icons,-logos)
+###### [4.8.4.4.4 A short phrase or label with an alternative graphical representation: icons, logos](https://html.spec.whatwg.org/multipage/images.html#a-short-phrase-or-label-with-an-alternative-graphical-representation:-icons,-logos)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.5 Text that has been rendered to a graphic for typographical effect](https://html.spec.whatwg.org/#text-that-has-been-rendered-to-a-graphic-for-typographical-effect)
+###### [4.8.4.4.5 Text that has been rendered to a graphic for typographical effect](https://html.spec.whatwg.org/multipage/images.html#text-that-has-been-rendered-to-a-graphic-for-typographical-effect)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.6 A graphical representation of some of the surrounding text](https://html.spec.whatwg.org/#a-graphical-representation-of-some-of-the-surrounding-text)
+###### [4.8.4.4.6 A graphical representation of some of the surrounding text](https://html.spec.whatwg.org/multipage/images.html#a-graphical-representation-of-some-of-the-surrounding-text)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.7 Ancillary images](https://html.spec.whatwg.org/#ancillary-images)
+###### [4.8.4.4.7 Ancillary images](https://html.spec.whatwg.org/multipage/images.html#ancillary-images)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.8 A purely decorative image that doesn't add any information](https://html.spec.whatwg.org/#a-purely-decorative-image-that-doesn't-add-any-information)
+###### [4.8.4.4.8 A purely decorative image that doesn't add any information](https://html.spec.whatwg.org/multipage/images.html#a-purely-decorative-image-that-doesn't-add-any-information)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.9 A group of images that form a single larger picture with no links](https://html.spec.whatwg.org/#a-group-of-images-that-form-a-single-larger-picture-with-no-links)
+###### [4.8.4.4.9 A group of images that form a single larger picture with no links](https://html.spec.whatwg.org/multipage/images.html#a-group-of-images-that-form-a-single-larger-picture-with-no-links)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.10 A group of images that form a single larger picture with links](https://html.spec.whatwg.org/#a-group-of-images-that-form-a-single-larger-picture-with-links)
+###### [4.8.4.4.10 A group of images that form a single larger picture with links](https://html.spec.whatwg.org/multipage/images.html#a-group-of-images-that-form-a-single-larger-picture-with-links)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.11 A key part of the content](https://html.spec.whatwg.org/#a-key-part-of-the-content)
+###### [4.8.4.4.11 A key part of the content](https://html.spec.whatwg.org/multipage/images.html#a-key-part-of-the-content)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.12 An image not intended for the user](https://html.spec.whatwg.org/#an-image-not-intended-for-the-user)
+###### [4.8.4.4.12 An image not intended for the user](https://html.spec.whatwg.org/multipage/images.html#an-image-not-intended-for-the-user)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.13 An image in an email or private document intended for a specific person who is known to be able to view images](https://html.spec.whatwg.org/#an-image-in-an-e-mail-or-private-document-intended-for-a-specific-person-who-is-known-to-be-able-to-view-images)
+###### [4.8.4.4.13 An image in an email or private document intended for a specific person who is known to be able to view images](https://html.spec.whatwg.org/multipage/images.html#an-image-in-an-e-mail-or-private-document-intended-for-a-specific-person-who-is-known-to-be-able-to-view-images)
 
 Status: n/a (author conformance)
 
-###### [4.8.4.4.14 Guidance for markup generators](https://html.spec.whatwg.org/#guidance-for-markup-generators)
+###### [4.8.4.4.14 Guidance for markup generators](https://html.spec.whatwg.org/multipage/images.html#guidance-for-markup-generators)
 
 Status: n/a (author conformance)
 <!-- definitions: attr-img-generator-unable-to-provide-required-alt -->
 
-###### [4.8.4.4.15 Guidance for conformance checkers](https://html.spec.whatwg.org/#guidance-for-conformance-checkers)
+###### [4.8.4.4.15 Guidance for conformance checkers](https://html.spec.whatwg.org/multipage/images.html#guidance-for-conformance-checkers)
 
 Status: n/a (author conformance)

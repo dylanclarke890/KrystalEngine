@@ -23,9 +23,9 @@
  */
 
 #include "Krystal.Booey/Style/Values/ColorAdjust/ColorScheme.hpp"
-#include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
-#include "Krystal.Booey/CSS/Values/ToLengthConversionData.hpp"
-#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Css/Values/ColorSchemeValue.hpp"
+#include "Krystal.Booey/Css/Values/ToLengthConversionData.hpp"
+#include "Krystal.Booey/Css/Values/ValueId.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"

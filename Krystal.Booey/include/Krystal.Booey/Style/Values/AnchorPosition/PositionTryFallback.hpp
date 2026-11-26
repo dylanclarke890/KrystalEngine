@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Properties/ImmutableStyleProperties.hpp"
+#include "Krystal.Booey/Css/Properties/ImmutableStyleProperties.hpp"
 #include "Krystal.Booey/Style/Scope/ScopedName.hpp"
 #include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallbackTactic.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"

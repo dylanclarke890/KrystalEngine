@@ -254,7 +254,7 @@ namespace krys::boo
     constexpr std::array<int, 12> DaysInMonth {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     /// @brief The number of days in @p month (0-based) of @p year.
-    /// @see https://html.spec.whatwg.org/#number-of-days-in-month-month-of-year-year
+    /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#number-of-days-in-month-month-of-year-year
     KRYS_NODISCARD int MaxDayOfMonth(int year, int month) noexcept
     {
       if (month != 1) // February?

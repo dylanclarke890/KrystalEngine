@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Style/Values/Backgrounds/BorderImageWidth.hpp"
 
-#include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/BorderImageWidthValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"

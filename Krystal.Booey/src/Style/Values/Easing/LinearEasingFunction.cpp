@@ -24,7 +24,7 @@
 
 #include "Krystal.Booey/Style/Values/Easing/LinearEasingFunction.hpp"
 
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/NumericTypesComputedStyleDependencies.hpp"
 #include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"

@@ -32,13 +32,9 @@
 #include "Krystal.Core/Geometry/Point.hpp"
 #include "Krystal.Core/Macros.hpp"
 
-namespace krys::boo::dom
-{
-  class DataTransfer;
-}
-
 namespace krys::boo
 {
+  class DataTransfer;
   class DragData;
   class Frame;
 
@@ -57,7 +53,7 @@ namespace krys::boo
                                                   const DragData &dragData) noexcept = 0;
 
     virtual void WillPerformDragSourceAction(DragSourceAction action, const PointI &point,
-                                             dom::DataTransfer &dataTransfer) noexcept = 0;
+                                             DataTransfer &dataTransfer) noexcept = 0;
 
     virtual void DidConcludeEditDrag() noexcept
     {
@@ -68,7 +64,7 @@ namespace krys::boo
       DragSourceActionMaskForPoint(const PointI &rootViewPoint) noexcept = 0;
 
     /// @brief Runs a drag of @p dataTransfer's data from @p frame, as @p dragItem describes.
-    virtual void StartDrag(DragItem dragItem, dom::DataTransfer &dataTransfer, Frame &frame) noexcept = 0;
+    virtual void StartDrag(DragItem dragItem, DataTransfer &dataTransfer, Frame &frame) noexcept = 0;
 
     virtual void DragEnded() noexcept
     {
@@ -83,7 +79,7 @@ namespace krys::boo
     {
     }
 
-    void WillPerformDragSourceAction(DragSourceAction, const PointI &, dom::DataTransfer &) noexcept final
+    void WillPerformDragSourceAction(DragSourceAction, const PointI &, DataTransfer &) noexcept final
     {
     }
 
@@ -92,7 +88,7 @@ namespace krys::boo
       return {};
     }
 
-    void StartDrag(DragItem, dom::DataTransfer &, Frame &) noexcept final
+    void StartDrag(DragItem, DataTransfer &, Frame &) noexcept final
     {
     }
   };

@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Style/Rules/StyleSheetContentsCache.hpp"
-#include "Krystal.Booey/CSS/StyleSheets/StyleSheetContents.hpp"
+#include "Krystal.Booey/Css/StyleSheets/StyleSheetContents.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hashing/FastHash.hpp"
 #include "Krystal.Core/Memory/NeverDestroyed.hpp"

@@ -23,10 +23,10 @@
  */
 
 #include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
-#include "Krystal.Booey/CSS/Values/ImageSetOptionValue.hpp"
-#include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Css/Values/ImageSetOptionValue.hpp"
+#include "Krystal.Booey/Css/Values/ImageSetValue.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValuePool.hpp"
 #include "Krystal.Core/Strings/ASCII.hpp"
 #include "Krystal.Image/ImageDecoder.hpp"
 

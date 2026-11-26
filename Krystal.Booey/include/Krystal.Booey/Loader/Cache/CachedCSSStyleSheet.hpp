@@ -30,7 +30,7 @@ namespace krys::boo
     ~CachedCSSStyleSheet() noexcept override;
 
     /// @brief The sheet's text, or null if the response isn't a [usable style
-    /// sheet](https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource): the load
+    /// sheet](https://html.spec.whatwg.org/multipage/links.html#link-type-stylesheet:process-the-linked-resource): the load
     /// failed, the HTTP status isn't OK, or the type isn't CSS.
     KRYS_NODISCARD Maybe<utf8_string> SheetText() const noexcept;
 

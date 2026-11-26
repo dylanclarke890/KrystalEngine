@@ -27,7 +27,7 @@
 #include "Krystal.Booey/Graphics/Images/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Images/BitmapImageSource.hpp"
 #include "Krystal.Booey/Graphics/Images/NativeImage.hpp"
-#include "Krystal.Booey/HTML/EventLoop/EventLoop.hpp"
+#include "Krystal.Booey/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Threading/MainThread.hpp"

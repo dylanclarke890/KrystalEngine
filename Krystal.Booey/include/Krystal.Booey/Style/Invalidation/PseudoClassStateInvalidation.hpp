@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Nodes/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/Dom/Nodes/ContainerNode.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Containers/List.hpp"
 #include "Krystal.Core/Memory/UniquePtr.hpp"

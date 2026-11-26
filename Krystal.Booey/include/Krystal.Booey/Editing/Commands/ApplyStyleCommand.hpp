@@ -63,8 +63,8 @@ namespace krys::boo
   private:
     RefPtr<EditingStyle> _style;
     ApplyStylePropertyLevel _propertyLevel {ApplyStylePropertyLevel::Default};
-    dom::Position _start;
-    dom::Position _end;
+    Position _start;
+    Position _end;
     bool _useEndingSelection;
     RefPtr<Element> _styledInlineElement;
     bool _removeOnly;
@@ -74,7 +74,7 @@ namespace krys::boo
     ApplyStyleCommand(Document &document, const EditingStyle *style, EditAction action,
                       ApplyStylePropertyLevel level) noexcept;
 
-    ApplyStyleCommand(Document &document, const EditingStyle *style, dom::Position start, dom::Position end,
+    ApplyStyleCommand(Document &document, const EditingStyle *style, Position start, Position end,
                       EditAction action, ApplyStylePropertyLevel level) noexcept;
 
     ApplyStyleCommand(Element &element, bool removeOnly, EditAction action) noexcept;
@@ -87,8 +87,8 @@ namespace krys::boo
              ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
-      Create(Document &document, const EditingStyle *style, const dom::Position &start,
-             const dom::Position &end, EditAction action = EditAction::ChangeAttributes,
+      Create(Document &document, const EditingStyle *style, const Position &start, const Position &end,
+             EditAction action = EditAction::ChangeAttributes,
              ApplyStylePropertyLevel level = ApplyStylePropertyLevel::Default) noexcept;
 
     KRYS_NODISCARD static Ref<ApplyStyleCommand>
@@ -142,19 +142,18 @@ namespace krys::boo
 
     void PushDownInlineStyleAroundNode(EditingStyle &style, boo::Node *targetNode) noexcept;
 
-    void RemoveInlineStyle(EditingStyle &style, const dom::Position &start,
-                           const dom::Position &end) noexcept;
+    void RemoveInlineStyle(EditingStyle &style, const Position &start, const Position &end) noexcept;
 
-    KRYS_NODISCARD static bool NodeFullySelected(Element &element, const dom::Position &start,
-                                                 const dom::Position &end) noexcept;
+    KRYS_NODISCARD static bool NodeFullySelected(Element &element, const Position &start,
+                                                 const Position &end) noexcept;
 
     // style-application helpers
     void ApplyBlockStyle(EditingStyle &style) noexcept;
 
     void ApplyInlineStyle(EditingStyle &style) noexcept;
 
-    void FixRangeAndApplyInlineStyle(EditingStyle &style, const dom::Position &start,
-                                     const dom::Position &end) noexcept;
+    void FixRangeAndApplyInlineStyle(EditingStyle &style, const Position &start,
+                                     const Position &end) noexcept;
 
     void ApplyInlineStyleToNodeRange(EditingStyle &style, boo::Node &startNode,
                                      boo::Node *pastEndNode) noexcept;
@@ -164,27 +163,27 @@ namespace krys::boo
     void AddInlineStyleIfNeeded(EditingStyle *style, boo::Node &start, boo::Node &end,
                                 AddStyledElement addStyledElement = AddStyledElement::Yes) noexcept;
 
-    dom::Position PositionToComputeInlineStyleChange(boo::Node &startNode,
-                                                     RefPtr<boo::Node> &dummyElement) noexcept;
+    Position PositionToComputeInlineStyleChange(boo::Node &startNode,
+                                                RefPtr<boo::Node> &dummyElement) noexcept;
 
     void ApplyInlineStyleChange(boo::Node &passedStart, boo::Node &passedEnd, StyleChange &styleChange,
                                 AddStyledElement addStyledElement) noexcept;
 
-    void SplitTextAtStart(const dom::Position &start, const dom::Position &end) noexcept;
+    void SplitTextAtStart(const Position &start, const Position &end) noexcept;
 
-    void SplitTextAtEnd(const dom::Position &start, const dom::Position &end) noexcept;
+    void SplitTextAtEnd(const Position &start, const Position &end) noexcept;
 
-    void SplitTextElementAtStart(const dom::Position &start, const dom::Position &end) noexcept;
+    void SplitTextElementAtStart(const Position &start, const Position &end) noexcept;
 
-    void SplitTextElementAtEnd(const dom::Position &start, const dom::Position &end) noexcept;
+    void SplitTextElementAtEnd(const Position &start, const Position &end) noexcept;
 
     KRYS_NODISCARD bool ShouldSplitTextElement(Element *element, EditingStyle &style) noexcept;
 
-    KRYS_NODISCARD static bool IsValidCaretPositionInTextNode(const dom::Position &position) noexcept;
+    KRYS_NODISCARD static bool IsValidCaretPositionInTextNode(const Position &position) noexcept;
 
-    bool MergeStartWithPreviousIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
+    bool MergeStartWithPreviousIfIdentical(const Position &start, const Position &end) noexcept;
 
-    bool MergeEndWithNextIfIdentical(const dom::Position &start, const dom::Position &end) noexcept;
+    bool MergeEndWithNextIfIdentical(const Position &start, const Position &end) noexcept;
 
     void CleanupUnstyledStyleSpans(ContainerNode *dummySpanAncestor) noexcept;
 
@@ -195,11 +194,11 @@ namespace krys::boo
 
     void RemoveEmbeddingUpToEnclosingBlock(boo::Node *node, boo::Node *unsplitAncestor) noexcept;
 
-    void UpdateStartEnd(const dom::Position &newStart, const dom::Position &newEnd) noexcept;
+    void UpdateStartEnd(const Position &newStart, const Position &newEnd) noexcept;
 
-    KRYS_NODISCARD dom::Position StartPosition() noexcept;
+    KRYS_NODISCARD Position StartPosition() noexcept;
 
-    KRYS_NODISCARD dom::Position EndPosition() noexcept;
+    KRYS_NODISCARD Position EndPosition() noexcept;
   };
 
   enum ShouldStyleAttributeBeEmpty : bool

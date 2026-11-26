@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumericOrKeyword.hpp"
+#include "Krystal.Booey/Css/Values/Primitives/PrimitiveNumericOrKeyword.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/PrimitiveNumeric.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/CompactVariant.hpp"

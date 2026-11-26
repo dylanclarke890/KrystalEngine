@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Dom/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/Commands/EditCommand.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 

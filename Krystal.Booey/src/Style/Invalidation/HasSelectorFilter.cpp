@@ -23,10 +23,10 @@
  */
 
 #include "Krystal.Booey/Style/Invalidation/HasSelectorFilter.hpp"
-#include "Krystal.Booey/CSS/Selectors/Selector.hpp"
-#include "Krystal.Booey/CSS/Selectors/SelectorFilter.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/DOM/Nodes/Element.hpp"
+#include "Krystal.Booey/Css/Selectors/Selector.hpp"
+#include "Krystal.Booey/Css/Selectors/SelectorFilter.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Dom/Nodes/Element.hpp"
 #include "Krystal.Booey/Style/Rules/RuleFeature.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

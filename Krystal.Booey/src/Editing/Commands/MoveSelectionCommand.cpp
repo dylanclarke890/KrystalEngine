@@ -24,15 +24,15 @@
  */
 
 #include "Krystal.Booey/Editing/Commands/MoveSelectionCommand.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Nodes/DocumentFragment.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/DocumentFragment.hpp"
 #include "Krystal.Booey/Editing/Commands/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Selection/VisiblePosition.hpp"
 
 namespace krys::boo
 {
-  MoveSelectionCommand::MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const dom::Position &position,
+  MoveSelectionCommand::MoveSelectionCommand(Ref<DocumentFragment> &&fragment, const Position &position,
                                              bool smartInsert, bool smartDelete) noexcept
       : CompositeEditCommand(position.AnchorNode()->NodeDocument()), _fragment(krys::move(fragment)),
         _position(position), _smartInsert(smartInsert), _smartDelete(smartDelete)
@@ -40,7 +40,7 @@ namespace krys::boo
   }
 
   Ref<MoveSelectionCommand> MoveSelectionCommand::Create(Ref<DocumentFragment> &&fragment,
-                                                         const dom::Position &position, bool smartInsert,
+                                                         const Position &position, bool smartInsert,
                                                          bool smartDelete) noexcept
   {
     return CreateRef<MoveSelectionCommand>(krys::move(fragment), position, smartInsert, smartDelete);
@@ -50,24 +50,24 @@ namespace krys::boo
   {
     krys_debug_assert(EndingSelection().IsNonOrphanedRange());
 
-    dom::Position pos = _position;
+    Position pos = _position;
     if (pos.IsNull())
     {
       return;
     }
 
     // Update the position otherwise it may become invalid after the selection is deleted.
-    dom::Position selectionEnd = EndingSelection().End();
-    if (pos.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
-        && selectionEnd.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
+    Position selectionEnd = EndingSelection().End();
+    if (pos.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor
+        && selectionEnd.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor
         && selectionEnd.GetContainerNode() == pos.GetContainerNode()
         && selectionEnd.OffsetInContainerNode() < pos.OffsetInContainerNode())
     {
       pos.MoveToOffset(
         static_cast<uint32>(pos.OffsetInContainerNode() - selectionEnd.OffsetInContainerNode()));
 
-      dom::Position selectionStart = EndingSelection().Start();
-      if (selectionStart.GetAnchorType() == dom::Position::AnchorType::PositionIsOffsetInAnchor
+      Position selectionStart = EndingSelection().Start();
+      if (selectionStart.GetAnchorType() == Position::AnchorType::PositionIsOffsetInAnchor
           && selectionStart.GetContainerNode() == pos.GetContainerNode())
       {
         pos.MoveToOffset(

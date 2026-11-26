@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
-#include "Krystal.Booey/DOM/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Dom/Ranges/SimpleRange.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Editing/Selection/TextGranularity.hpp"
@@ -74,12 +74,12 @@ namespace krys::boo
 
     // FIXME: Consider doing canonicalization only as part of editing operations, and keeping all selection
     // endpoints non-canonical outside of that code.
-    dom::Position _anchor;          // Where the first click happened.
-    dom::Position _focus;           // Where the end click/release happened.
-    dom::Position _canonicalAnchor; // Anchor, canonical, not yet expended to respect granularity.
-    dom::Position _canonicalFocus;  // Focus, canonical, but not expended to respect granularity.
-    dom::Position _start; // First of anchor and focus, caonicalized and expanded to respect granularity.
-    dom::Position _end;   // Last of anchor and focus, caonicalized and expanded to respect granularity.
+    Position _anchor;          // Where the first click happened.
+    Position _focus;           // Where the end click/release happened.
+    Position _canonicalAnchor; // Anchor, canonical, not yet expended to respect granularity.
+    Position _canonicalFocus;  // Focus, canonical, but not expended to respect granularity.
+    Position _start;           // First of anchor and focus, caonicalized and expanded to respect granularity.
+    Position _end;             // Last of anchor and focus, caonicalized and expanded to respect granularity.
 
     Affinity _affinity {DefaultAffinity};
 
@@ -94,12 +94,12 @@ namespace krys::boo
 
     VisibleSelection() noexcept = default;
 
-    VisibleSelection(dom::Position anchor, dom::Position focus, Affinity affinity = DefaultAffinity,
+    VisibleSelection(Position anchor, Position focus, Affinity affinity = DefaultAffinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
 
     // FIXME: A caret selection never has direction so we should remove the Directionality argument from this
     // function.
-    VisibleSelection(const dom::Position &position, Affinity affinity,
+    VisibleSelection(const Position &position, Affinity affinity,
                      boo::Directionality directionality = boo::Directionality::None) noexcept;
 
     explicit VisibleSelection(const dom::SimpleRange &range, Affinity affinity = DefaultAffinity,
@@ -127,11 +127,11 @@ namespace krys::boo
       return _affinity;
     }
 
-    void SetAnchor(const dom::Position &position) noexcept;
+    void SetAnchor(const Position &position) noexcept;
 
     void SetAnchor(const VisiblePosition &visiblePosition) noexcept;
 
-    void SetFocus(const dom::Position &position) noexcept;
+    void SetFocus(const Position &position) noexcept;
 
     void SetFocus(const VisiblePosition &visiblePosition) noexcept;
 
@@ -140,38 +140,38 @@ namespace krys::boo
     // FIXME: When we expand granularity, we canonicalize as a side effect, so expanded values have been made
     // canonical.
     // FIXME: Replace start/range/base/end/firstRange with these, renaming these to the shorter names.
-    KRYS_NODISCARD const dom::Position &UncanonicalizedStart() const noexcept;
+    KRYS_NODISCARD const Position &UncanonicalizedStart() const noexcept;
 
-    KRYS_NODISCARD const dom::Position &UncanonicalizedEnd() const noexcept;
+    KRYS_NODISCARD const Position &UncanonicalizedEnd() const noexcept;
 
-    KRYS_NODISCARD const dom::Position &Anchor() const noexcept
+    KRYS_NODISCARD const Position &Anchor() const noexcept
     {
       return _anchor;
     }
 
-    KRYS_NODISCARD const dom::Position &Focus() const noexcept
+    KRYS_NODISCARD const Position &Focus() const noexcept
     {
       return _focus;
     }
 
     KRYS_NODISCARD Maybe<dom::SimpleRange> Range() const noexcept;
 
-    KRYS_NODISCARD const dom::Position &CanonicalAnchor() const noexcept
+    KRYS_NODISCARD const Position &CanonicalAnchor() const noexcept
     {
       return _canonicalAnchor;
     }
 
-    KRYS_NODISCARD const dom::Position &CanonicalFocus() const noexcept
+    KRYS_NODISCARD const Position &CanonicalFocus() const noexcept
     {
       return _canonicalFocus;
     }
 
-    KRYS_NODISCARD const dom::Position &Start() const noexcept
+    KRYS_NODISCARD const Position &Start() const noexcept
     {
       return _start;
     }
 
-    KRYS_NODISCARD const dom::Position &End() const noexcept
+    KRYS_NODISCARD const Position &End() const noexcept
     {
       return _end;
     }
@@ -287,13 +287,13 @@ namespace krys::boo
     // Returns a child of the ShadowRoot node for shadow trees, or null for non-shadow trees.
     KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() const noexcept;
 
-    KRYS_NODISCARD static dom::Position AdjustPositionForEnd(const dom::Position &currentPosition,
-                                                             Node *startContainerNode) noexcept;
+    KRYS_NODISCARD static Position AdjustPositionForEnd(const Position &currentPosition,
+                                                        Node *startContainerNode) noexcept;
 
-    KRYS_NODISCARD static dom::Position AdjustPositionForStart(const dom::Position &currentPosition,
-                                                               Node *endContainerNode) noexcept;
+    KRYS_NODISCARD static Position AdjustPositionForStart(const Position &currentPosition,
+                                                          Node *endContainerNode) noexcept;
 
-    void SetWithoutValidation(const dom::Position &anchor, const dom::Position &focus) noexcept;
+    void SetWithoutValidation(const Position &anchor, const Position &focus) noexcept;
 
     KRYS_NODISCARD friend bool operator==(const VisibleSelection &a, const VisibleSelection &b) noexcept
     {

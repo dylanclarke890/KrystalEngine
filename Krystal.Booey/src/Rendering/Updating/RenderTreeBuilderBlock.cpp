@@ -24,7 +24,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/FormControls/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Iterators/RenderChildIterator.hpp"

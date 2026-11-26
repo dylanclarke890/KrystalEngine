@@ -25,10 +25,9 @@
 
 #include "Krystal.Booey/Editing/Commands/TypingCommand.hpp"
 #include "Krystal.Booey/Accessibility/AXObjectCache.hpp"
-#include "Krystal.Booey/DOM/Events/Event.hpp"
-#include "Krystal.Booey/DOM/Events/ScopedEventQueue.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Ranges/StaticRange.hpp"
+#include "Krystal.Booey/Dom/Events/Event.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertLineBreakCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertParagraphSeparatorCommand.hpp"
 #include "Krystal.Booey/Editing/Commands/InsertTextCommand.hpp"
@@ -36,7 +35,8 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/VisibleUnits.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLElement.hpp"
+#include "Krystal.Booey/Html/Internals/ScopedEventQueue.hpp"
 #include "Krystal.Booey/Page/Frame.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
@@ -202,7 +202,7 @@ namespace krys::boo
 
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(compositionType);
       lastTypingCommand->SetShouldPreventSpellChecking(options.contains(Option::PreventSpellChecking));
@@ -220,7 +220,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
-        dom::EventQueueScope eventQueue;
+        html::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -241,7 +241,7 @@ namespace krys::boo
     {
       if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
       {
-        dom::EventQueueScope eventQueue;
+        html::EventQueueScope eventQueue;
         UpdateSelectionIfDifferentFromCurrentSelection(lastTypingCommand.get(), document);
         lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
         lastTypingCommand->SetCompositionType(TextCompositionType::None);
@@ -293,7 +293,7 @@ namespace krys::boo
     // to deal with custom selections in a general way that can be used by all of the commands.
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       if (lastTypingCommand->EndingSelection() != selectionForInsertion)
       {
         lastTypingCommand->SetStartingSelection(selectionForInsertion);
@@ -321,7 +321,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
@@ -337,7 +337,7 @@ namespace krys::boo
   {
     if (auto lastTypingCommand = LastTypingCommandIfStillOpenForTyping(document))
     {
-      dom::EventQueueScope eventQueue;
+      html::EventQueueScope eventQueue;
       lastTypingCommand->SetIsAutocompletion(options.contains(Option::IsAutocompletion));
       lastTypingCommand->SetCompositionType(TextCompositionType::None);
       lastTypingCommand->SetShouldRetainAutocorrectionIndicator(
@@ -625,7 +625,7 @@ namespace krys::boo
     }
 
     (void)AddBlockPlaceholderIfNeeded(root.get());
-    SetEndingSelection(VisibleSelection(dom::FirstPositionInNode(root.get()), Affinity::Downstream,
+    SetEndingSelection(VisibleSelection(FirstPositionInNode(root.get()), Affinity::Downstream,
                                         EndingSelection().GetDirectionality()));
 
     return true;
@@ -694,7 +694,7 @@ namespace krys::boo
 
       // If we have a caret selection at the beginning of a cell, we have nothing to do.
       if (enclosingTableCell
-          && visibleStart == VisiblePosition(dom::FirstPositionInNode(enclosingTableCell.get())))
+          && visibleStart == VisiblePosition(FirstPositionInNode(enclosingTableCell.get())))
       {
         return;
       }
@@ -715,7 +715,7 @@ namespace krys::boo
       }
       else if (auto table = IsFirstPositionAfterTable(visibleStart))
       {
-        SetEndingSelection(VisibleSelection(dom::PositionBeforeNode(table.get()), EndingSelection().Start(),
+        SetEndingSelection(VisibleSelection(PositionBeforeNode(table.get()), EndingSelection().Start(),
                                             Affinity::Downstream, EndingSelection().GetDirectionality()));
         TypingAddedToOpenCommand(Type::DeleteKey);
         return;
@@ -732,7 +732,7 @@ namespace krys::boo
         // If there are multiple Unicode code points to be deleted, adjust the range to match platform
         // conventions.
         selectionToDelete.SetWithoutValidation(
-          selectionToDelete.End(), selectionToDelete.End().Previous(dom::PositionMoveType::BackwardDeletion));
+          selectionToDelete.End(), selectionToDelete.End().Previous(PositionMoveType::BackwardDeletion));
       }
 
       if (!StartingSelection().IsRange()
@@ -821,11 +821,10 @@ namespace krys::boo
                                TextGranularity::CharacterGranularity);
       }
 
-      dom::Position downstreamEnd = EndingSelection().End().Downstream();
+      Position downstreamEnd = EndingSelection().End().Downstream();
       VisiblePosition visibleEnd = EndingSelection().VisibleEnd();
       auto enclosingTableCell = EnclosingNodeOfType(visibleEnd.DeepEquivalent(), &IsTableCell);
-      if (enclosingTableCell
-          && visibleEnd == VisiblePosition(dom::LastPositionInNode(enclosingTableCell.get())))
+      if (enclosingTableCell && visibleEnd == VisiblePosition(LastPositionInNode(enclosingTableCell.get())))
       {
         return;
       }
@@ -842,7 +841,7 @@ namespace krys::boo
                <= CaretMinOffset(*downstreamEnd.GetContainerNode()))
       {
         SetEndingSelection(VisibleSelection(EndingSelection().End(),
-                                            dom::PositionAfterNode(downstreamEnd.GetContainerNode()),
+                                            PositionAfterNode(downstreamEnd.GetContainerNode()),
                                             Affinity::Downstream, EndingSelection().GetDirectionality()));
         TypingAddedToOpenCommand(Type::ForwardDeleteKey);
         return;
@@ -867,7 +866,7 @@ namespace krys::boo
         // It's a little tricky to compute what the starting selection would have been in the original
         // document. We can't let the VisibleSelection class's validation kick in or it'll adjust for us based
         // on the current state of the document and we'll get the wrong result.
-        dom::Position extent = StartingSelection().End();
+        Position extent = StartingSelection().End();
         if (extent.GetContainerNode() != selectionToDelete.End().GetContainerNode())
         {
           extent = selectionToDelete.CanonicalFocus();
@@ -884,9 +883,9 @@ namespace krys::boo
           {
             extraCharacters = selectionToDelete.End().ComputeOffsetInContainerNode();
           }
-          extent = dom::Position(ShareRefPtr(extent.GetContainerNode()),
-                                 static_cast<uint32>(extent.ComputeOffsetInContainerNode() + extraCharacters),
-                                 dom::Position::AnchorType::PositionIsOffsetInAnchor);
+          extent = Position(ShareRefPtr(extent.GetContainerNode()),
+                            static_cast<uint32>(extent.ComputeOffsetInContainerNode() + extraCharacters),
+                            Position::AnchorType::PositionIsOffsetInAnchor);
         }
         selectionAfterUndo.SetWithoutValidation(StartingSelection().Start(), extent);
       }

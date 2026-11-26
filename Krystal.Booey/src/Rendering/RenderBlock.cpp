@@ -22,9 +22,9 @@
  */
 
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
@@ -2991,7 +2991,7 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     PositionForPointRespectingEditingBoundaries(RenderBlock &parent, RenderBox &child,
                                                 const LayoutPoint &pointInParentCoordinates,
                                                 HitTestSource source) noexcept
@@ -3040,8 +3040,8 @@ namespace krys::boo
                                                 Affinity::Upstream);
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,
-                                                                            HitTestSource) noexcept
+  PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,
+                                                                       HitTestSource) noexcept
   {
     krys_unreachable();
   }
@@ -3077,8 +3077,8 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
-                                                          const RenderFragmentContainer *fragment) noexcept
+  PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                     const RenderFragmentContainer *fragment) noexcept
   {
     if (IsRenderTable())
     {

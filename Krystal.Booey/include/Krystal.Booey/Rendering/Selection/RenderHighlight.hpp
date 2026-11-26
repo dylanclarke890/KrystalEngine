@@ -37,7 +37,7 @@
 #include "Krystal.Core/Memory/WeakPtr.hpp"
 #include <utility>
 
-namespace krys::boo::dom
+namespace krys::boo::css
 {
   class HighlightRange;
 }
@@ -144,7 +144,7 @@ namespace krys::boo
 
     /// @brief The render range a highlight range's positions cover.
     /// @return Whether it has one: both positions are set and their containers have renderers.
-    bool SetRenderRange(const dom::HighlightRange &highlightRange) noexcept;
+    bool SetRenderRange(const css::HighlightRange &highlightRange) noexcept;
 
     KRYS_NODISCARD const RenderRange &Get() const noexcept
     {

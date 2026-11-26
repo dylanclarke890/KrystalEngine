@@ -23,8 +23,8 @@
  */
 
 #include "Krystal.Booey/Style/Values/Primitives/Url.hpp"
-#include "Krystal.Booey/CSS/Values/UrlValue.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Css/Values/UrlValue.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Core/Strings/StringBuilder.hpp"

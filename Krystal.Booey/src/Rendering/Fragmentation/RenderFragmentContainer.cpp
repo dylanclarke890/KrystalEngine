@@ -30,7 +30,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentContainer.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Graphics/Transforms/LayoutTransforms.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderBoxFragmentInfo.hpp"
 #include "Krystal.Booey/Rendering/Fragmentation/RenderFragmentedFlow.hpp"
@@ -111,7 +111,7 @@ namespace krys::boo
       LayoutPoint(pointLogicalLeft + fragmentedFlowLogicalLeft, pointLogicalTop + fragmentedFlowLogicalTop));
   }
 
-  dom::PositionWithAffinity
+  PositionWithAffinity
     RenderFragmentContainer::PositionForPoint(const LayoutPoint &point, HitTestSource source,
                                               const RenderFragmentContainer *fragment) noexcept
   {

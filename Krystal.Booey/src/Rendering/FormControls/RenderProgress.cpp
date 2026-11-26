@@ -19,8 +19,8 @@
  */
 
 #include "Krystal.Booey/Rendering/FormControls/RenderProgress.hpp"
-#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.Booey/HTML/Elements/HTMLProgressElement.hpp"
+#include "Krystal.Booey/Dom/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/Html/Elements/HTMLProgressElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <cmath>

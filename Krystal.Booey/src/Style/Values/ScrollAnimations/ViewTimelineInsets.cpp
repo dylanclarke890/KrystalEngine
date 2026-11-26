@@ -24,9 +24,9 @@
 
 #include "Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp"
 
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Css/Values/ValueList.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"

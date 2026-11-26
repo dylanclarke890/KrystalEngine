@@ -25,8 +25,8 @@
 
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
-#include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
-#include "Krystal.Booey/CSS/Values/ValuePair.hpp"
+#include "Krystal.Booey/Css/TypedOM/CSSNumericFactory.hpp"
+#include "Krystal.Booey/Css/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/Builder/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperCSSValueConversion.hpp"

@@ -408,7 +408,7 @@ namespace krys::boo
 
     /// @brief The selection (starting at @p start) changed: `SelectedTextChanged` is posted for the object
     /// that tells the host about the changes where it is (the web area's if none does).
-    void PostTextSelectionChangeNotification(const dom::Position &start) noexcept;
+    void PostTextSelectionChangeNotification(const Position &start) noexcept;
 
     // Notifications.
 

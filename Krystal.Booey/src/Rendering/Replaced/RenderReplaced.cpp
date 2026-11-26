@@ -23,7 +23,7 @@
  */
 
 #include "Krystal.Booey/Rendering/Replaced/RenderReplaced.hpp"
-#include "Krystal.Booey/DOM/Ranges/Position.hpp"
+#include "Krystal.Booey/Editing/Position.hpp"
 #include "Krystal.Booey/Editing/Selection/TextAffinity.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
@@ -561,9 +561,8 @@ namespace krys::boo
     }
   }
 
-  dom::PositionWithAffinity
-    RenderReplaced::PositionForPoint(const LayoutPoint &point, HitTestSource source,
-                                     const RenderFragmentContainer * /*fragment*/) noexcept
+  PositionWithAffinity RenderReplaced::PositionForPoint(const LayoutPoint &point, HitTestSource source,
+                                                        const RenderFragmentContainer * /*fragment*/) noexcept
   {
     auto [top, bottom] = [&]() -> std::pair<float, float>
     {

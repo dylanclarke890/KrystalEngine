@@ -59,9 +59,6 @@ namespace krys
 
 namespace krys::boo::dom
 {
-  class DocumentOrShadowRoot;
-  class Position;
-  class PositionWithAffinity;
   struct SimpleRange;
 }
 
@@ -74,12 +71,15 @@ namespace krys::boo
 {
   class ControlPart;
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class FrameViewLayoutContext;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
   class Node;
+  class Position;
+  class PositionWithAffinity;
   class ReferencedSVGResources;
   class RenderBlock;
   class RenderBlockFlow;
@@ -1822,7 +1822,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Document &GetDocument() const noexcept;
 
-    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
@@ -1832,7 +1832,7 @@ namespace krys::boo
 #pragma region Editing
 
     /// @brief The position nearest @p point (in this renderer's coordinates), for hit testing to positions.
-    KRYS_NODISCARD virtual dom::PositionWithAffinity
+    KRYS_NODISCARD virtual PositionWithAffinity
       PositionForPoint(const LayoutPoint &point, HitTestSource source,
                        const RenderFragmentContainer *fragment = nullptr) noexcept;
 
@@ -1842,11 +1842,10 @@ namespace krys::boo
 
     /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
     /// visually equivalent editable position is preferred.
-    KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,
-                                                                        Affinity affinity) const noexcept;
+    KRYS_NODISCARD PositionWithAffinity CreatePositionWithAffinity(int32 offset,
+                                                                   Affinity affinity) const noexcept;
 
-    KRYS_NODISCARD dom::PositionWithAffinity
-      CreatePositionWithAffinity(const dom::Position &position) const noexcept;
+    KRYS_NODISCARD PositionWithAffinity CreatePositionWithAffinity(const Position &position) const noexcept;
 
     KRYS_NODISCARD bool IsHR() const noexcept;
 

@@ -18,7 +18,7 @@
  */
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
-#include "Krystal.Booey/DOM/Nodes/Document.hpp"
+#include "Krystal.Booey/Dom/Nodes/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -31,11 +31,11 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGFilterElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGGradientElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGMarkerElement.hpp"
-#include "Krystal.Booey/SVG/Elements/SVGPatternElement.hpp"
-#include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGFilterElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGGradientElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGMarkerElement.hpp"
+#include "Krystal.Booey/Svg/Elements/SVGPatternElement.hpp"
+#include "Krystal.Booey/Svg/SVGURIReference.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
@@ -209,7 +209,7 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *
-      PaintingResourceFromSVGPaint(dom::DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
+      PaintingResourceFromSVGPaint(DocumentOrShadowRoot &treeScope, const style::SVGPaint &paint,
                                    DOMStringAtom &id, bool &hasPendingResource) noexcept
     {
       auto paintUrl = paint.TryAnyUrl();
