@@ -124,60 +124,6 @@ namespace krys::web
 
 #pragma endregion
 
-#pragma region NonDocumentTypeChildNode (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
-
-    /// @brief Inserts before the node @p html, parsed as HTML in its parent's context, sanitized by @p
-    /// options (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
-    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> BeforeHTML(DOMStringView html) noexcept;
-
-    /// @brief Inserts after the node @p html, parsed as HTML in its parent's context, sanitized by @p options
-    /// (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
-    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> AfterHTML(DOMStringView html) noexcept;
-
-    /// @brief Replaces the node with @p html, parsed as HTML in its parent's context, sanitized by @p options
-    /// (the default configuration if it gives none) with unsafe content removed.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> ReplaceWithHTML(DOMStringView html) noexcept;
-
-    /// @brief Inserts before the node @p html, parsed as HTML in its parent's context; sanitized only if @p
-    /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
-    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
-                                       const html::SetHTMLUnsafeOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html) noexcept;
-
-    /// @brief Inserts after the node @p html, parsed as HTML in its parent's context; sanitized only if @p
-    /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html) noexcept;
-
-    /// @brief Replaces the node with @p html, parsed as HTML in its parent's context; sanitized only if @p
-    /// options gives a sanitizer.
-    /// @see https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
-    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
-                                            const html::SetHTMLUnsafeOptions &options) noexcept;
-
-    /// @brief The same, with default options.
-    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html) noexcept;
-
-#pragma endregion
-
 #pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
 
     /// @brief Returns the first preceding sibling that is an element; otherwise null.
@@ -195,6 +141,66 @@ namespace krys::web
     /// @brief Returns the first following sibling that is an element; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-nextelementsibling
     KRYS_NODISCARD RefPtr<Element> NextElementSibling() noexcept;
+
+#pragma endregion
+
+#pragma region NonDocumentTypeChildNode Mixin (HTML extensions) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
+
+    /// @brief Inserts before the node @p html, parsed as HTML in its parent's context, sanitized by @p
+    /// options (the default configuration if it gives none) with unsafe content removed.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtml
+    ExceptionOr<void> BeforeHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTML(DOMStringView html) noexcept;
+
+    /// @brief Inserts after the node @p html, parsed as HTML in its parent's context, sanitized by @p options
+    /// (the default configuration if it gives none) with unsafe content removed.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtml
+    ExceptionOr<void> AfterHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTML(DOMStringView html) noexcept;
+
+    /// @brief Replaces the node with @p html, parsed as HTML in its parent's context, sanitized by @p options
+    /// (the default configuration if it gives none) with unsafe content removed.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtml
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, const html::SetHTMLOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html) noexcept;
+
+    /// @brief Inserts before the node @p html, parsed as HTML in its parent's context; sanitized only if @p
+    /// options gives a sanitizer.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-beforehtmlunsafe
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
+                                       const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html) noexcept;
+
+    /// @brief Inserts after the node @p html, parsed as HTML in its parent's context; sanitized only if @p
+    /// options gives a sanitizer.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-afterhtmlunsafe
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html) noexcept;
+
+    /// @brief Replaces the node with @p html, parsed as HTML in its parent's context; sanitized only if @p
+    /// options gives a sanitizer.
+    /// @see
+    /// https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-nondocumenttypechildnode-replacewithhtmlunsafe
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
+                                            const html::SetHTMLUnsafeOptions &options) noexcept;
+
+    /// @brief The same, with default options.
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html) noexcept;
 
 #pragma endregion
 
