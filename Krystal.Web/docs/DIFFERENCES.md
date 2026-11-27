@@ -314,6 +314,7 @@ Record a difference here when you make one, and remove it when Krystal.Web comes
 - There are no mail blockquotes: a `<blockquote type=cite>` is edited like any other block (no breaking out of quotes on Enter or paste, no `InsertNewlineInQuotedContent` command), and pasted `Apple-style-span` and `Apple-paste-as-quotation` markup gets no special treatment.
 - Chrome's `getClientRects` reports an inline box's pieces separately around bidi-reordered content; Krystal.Web reports one rect where they're on one line.
 - There are no `beforecopy`, `beforecut` or `beforepaste` events, which aren't standard (Internet Explorer's, kept by Chrome): whether the Copy, Cut and Paste commands are enabled depends on the selection alone, so a page can't enable them for content with no selection.
+- `getSelection()` reports a selection in a shadow tree as the specification says, not retargeted to the shadow host as Chrome does: its `anchorNode` and `focusNode` are null, `rangeCount` is 0, `type` is "None" and `getRangeAt` throws, while `isCollapsed` and `toString()` describe the selection itself and `getComposedRanges()` finds it in the shadow roots it's given. So while a text field has focus, the selection in it is read from the field (`selectionStart`, `selectionEnd`, `selectionDirection`), not from `getSelection()`.
 
 ## Input and events
 

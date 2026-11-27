@@ -151,8 +151,12 @@ namespace krys::web
 
     KRYS_NODISCARD Position FocusPosition() const noexcept;
 
-    KRYS_NODISCARD RefPtr<Node> ShadowAdjustedNode(const Position &position) const noexcept;
+    /// @brief Whether @p node is in the document tree: its root is the document.
+    KRYS_NODISCARD bool IsInDocumentTree(const Node &node) const noexcept;
 
-    KRYS_NODISCARD uint32 ShadowAdjustedOffset(const Position &position) const noexcept;
+    /// @brief Whether @p position is non-null and in the document tree.
+    KRYS_NODISCARD bool IsInDocumentTree(const Position &position) const noexcept;
+
+    KRYS_NODISCARD bool AreAnchorAndFocusInDocumentTree() const noexcept;
   };
 }

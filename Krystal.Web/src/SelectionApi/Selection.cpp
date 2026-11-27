@@ -36,7 +36,6 @@
 #include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Web/Dom/Traversal/TreeTraversal.hpp"
 #include "Krystal.Web/Dom/Trees/TreeQueries.hpp"
-#include "Krystal.Web/Editing/Editing.hpp"
 #include "Krystal.Web/Editing/Position.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Editing/TextIterator.hpp"
@@ -64,28 +63,6 @@ namespace krys::web
       }
       return {};
     }
-
-    KRYS_NODISCARD RefPtr<Node> SelectionShadowAncestor(web::Frame &frame) noexcept
-    {
-      auto *node = frame.Document()->Selection().Selection().CanonicalAnchor().AnchorNode();
-      if (!node || !node->IsInShadowTree())
-      {
-        return nullptr;
-      }
-      return ShareRefPtr(AncestorNodeInThisScope(node->NodeDocument(), node));
-    }
-
-    KRYS_NODISCARD RefPtr<dom::Range> CreateLiveRangeBeforeShadowHostWithSelection(web::Frame &frame) noexcept
-    {
-      if (RefPtr<Node> shadowAncestor = SelectionShadowAncestor(frame))
-      {
-        auto *parent = shadowAncestor->ParentNode();
-        dom::BoundaryPoint point {ShareRef(*parent), dom::TreeQueries::Index(*shadowAncestor)};
-        return CreateRef<dom::Range>(point, point);
-      }
-
-      return nullptr;
-    }
   }
 
   Selection::Selection(Document &document) noexcept : _document(CreateWeakPtr(&document))
@@ -106,11 +83,27 @@ namespace krys::web
       return null;
     }
     auto range = frame->Document()->Selection().Selection().Range();
-    if (!range || range->Start.Container->IsInShadowTree())
+    if (!range || !IsInDocumentTree(*range->Start.Container) || !IsInDocumentTree(*range->End.Container))
     {
       return null;
     }
     return range;
+  }
+
+  bool Selection::IsInDocumentTree(const Node &node) const noexcept
+  {
+    return &dom::TreeQueries::Root(node) == _document.get();
+  }
+
+  bool Selection::IsInDocumentTree(const Position &position) const noexcept
+  {
+    auto *node = position.GetContainerNode();
+    return node && IsInDocumentTree(*node);
+  }
+
+  bool Selection::AreAnchorAndFocusInDocumentTree() const noexcept
+  {
+    return IsInDocumentTree(AnchorPosition()) && IsInDocumentTree(FocusPosition());
   }
 
   Position Selection::AnchorPosition() const noexcept
@@ -135,32 +128,39 @@ namespace krys::web
 
   RefPtr<Node> Selection::AnchorNode() const noexcept
   {
-    return ShadowAdjustedNode(AnchorPosition());
+    auto anchor = AnchorPosition();
+    return IsInDocumentTree(anchor) ? ShareRefPtr(anchor.GetContainerNode()) : nullptr;
   }
 
   uint32 Selection::AnchorOffset() const noexcept
   {
-    return ShadowAdjustedOffset(AnchorPosition());
+    auto anchor = AnchorPosition();
+    return IsInDocumentTree(anchor) ? static_cast<uint32>(anchor.ComputeOffsetInContainerNode()) : 0;
   }
 
   RefPtr<Node> Selection::FocusNode() const noexcept
   {
-    return ShadowAdjustedNode(FocusPosition());
+    auto focus = FocusPosition();
+    return IsInDocumentTree(focus) ? ShareRefPtr(focus.GetContainerNode()) : nullptr;
   }
 
   uint32 Selection::FocusOffset() const noexcept
   {
-    return ShadowAdjustedOffset(FocusPosition());
+    auto focus = FocusPosition();
+    return IsInDocumentTree(focus) ? static_cast<uint32>(focus.ComputeOffsetInContainerNode()) : 0;
   }
 
   bool Selection::IsCollapsed() const noexcept
   {
-    if (!Frame())
+    // Wherever they are: in a shadow tree too.
+    auto anchor = AnchorPosition();
+    auto focus = FocusPosition();
+    if (anchor.IsNull() || focus.IsNull())
     {
-      return true;
+      return anchor.IsNull() && focus.IsNull();
     }
-    auto range = GetRange();
-    return !range || range->Collapsed();
+    return anchor.GetContainerNode() == focus.GetContainerNode()
+           && anchor.ComputeOffsetInContainerNode() == focus.ComputeOffsetInContainerNode();
   }
 
   DOMString Selection::Type() const noexcept
@@ -171,7 +171,7 @@ namespace krys::web
       return u8"None";
     }
     auto range = frame->Document()->Selection().Selection().Range();
-    if (!range)
+    if (!range || !AreAnchorAndFocusInDocumentTree())
     {
       return u8"None";
     }
@@ -205,15 +205,7 @@ namespace krys::web
     {
       return 0;
     }
-    if (frame->Document()->Selection().AssociatedLiveRange())
-    {
-      return 1;
-    }
-    if (SelectionShadowAncestor(*frame))
-    {
-      return 1;
-    }
-    return 0;
+    return !frame->Document()->Selection().IsNone() && AreAnchorAndFocusInDocumentTree() ? 1 : 0;
   }
 
   ExceptionOr<void> Selection::Collapse(Node *node, uint32 offset) noexcept
@@ -445,12 +437,13 @@ namespace krys::web
     {
       return Exception(ExceptionCode::IndexSizeError);
     }
-    auto &frame = *Frame();
-    if (RefPtr<dom::Range> liveRange = frame.Document()->Selection().AssociatedLiveRange())
+    // The associated live range is made on first use, and kept until the selection changes.
+    RefPtr<dom::Range> liveRange = Frame()->Document()->Selection().AssociatedLiveRange();
+    if (!liveRange)
     {
-      return ShareRef(*liveRange);
+      return Exception(ExceptionCode::IndexSizeError);
     }
-    return ShareRef(*CreateLiveRangeBeforeShadowHostWithSelection(frame));
+    return ShareRef(*liveRange);
   }
 
   void Selection::RemoveAllRanges() noexcept
@@ -583,6 +576,10 @@ namespace krys::web
 
   bool Selection::ContainsNode(Node &node, bool allowPartial) const noexcept
   {
+    if (!IsInDocumentTree(node))
+    {
+      return false;
+    }
     auto range = GetRange();
     return range && (allowPartial ? Intersects(*range, node) : Contains(*range, node));
   }
@@ -629,49 +626,5 @@ namespace krys::web
 
     auto range = frame->Document()->Selection().Selection().Range();
     return range ? PlainText(*range, options) : DOMString();
-  }
-
-  RefPtr<Node> Selection::ShadowAdjustedNode(const Position &position) const noexcept
-  {
-    if (position.IsNull())
-    {
-      return nullptr;
-    }
-
-    auto *containerNode = position.GetContainerNode();
-    auto *adjustedNode = AncestorNodeInThisScope(*Frame()->Document(), containerNode);
-    if (!adjustedNode)
-    {
-      return nullptr;
-    }
-
-    if (containerNode == adjustedNode)
-    {
-      return ShareRefPtr(containerNode);
-    }
-
-    return ShareRefPtr(adjustedNode->ParentNode());
-  }
-
-  uint32 Selection::ShadowAdjustedOffset(const Position &position) const noexcept
-  {
-    if (position.IsNull())
-    {
-      return 0;
-    }
-
-    auto *containerNode = position.GetContainerNode();
-    auto *adjustedNode = AncestorNodeInThisScope(*Frame()->Document(), containerNode);
-    if (!adjustedNode)
-    {
-      return 0;
-    }
-
-    if (containerNode == adjustedNode)
-    {
-      return static_cast<uint32>(position.ComputeOffsetInContainerNode());
-    }
-
-    return static_cast<uint32>(dom::TreeQueries::Index(*adjustedNode));
   }
 }

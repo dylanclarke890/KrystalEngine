@@ -10,6 +10,7 @@
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
+#include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 
 namespace krys::web::tests
@@ -376,6 +377,67 @@ namespace krys::web::tests
       CHECK_FALSE(range->IsAssociatedWithSelection());
       CHECK(fixture.Document->Selection().IsNone());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Selection: a selection in a shadow tree isn't in the document tree",
+                   "[SelectionApi][Selection][selection-api:dom-selection-anchornode]"
+                   "[selection-api:dom-selection-rangecount][selection-api:dom-selection-type]"
+                   "[selection-api:dom-selection-iscollapsed][selection-api:dom-selection-getrangeat]")
+  {
+    SelectionShadowFixture fixture;
+    auto &selection = fixture.Selection();
+    REQUIRE(!selection.SetBaseAndExtent(*fixture.OuterText, 6, *fixture.OuterText, 10).HasException());
+    REQUIRE(!fixture.Document->Selection().IsNone());
+
+    CHECK(selection.AnchorNode() == nullptr);
+    CHECK(selection.AnchorOffset() == 0);
+    CHECK(selection.FocusNode() == nullptr);
+    CHECK(selection.FocusOffset() == 0);
+    CHECK(selection.RangeCount() == 0);
+    CHECK(selection.Type() == u8"None");
+    CHECK(selection.GetRangeAt(0) == ExceptionCode::IndexSizeError);
+    CHECK(selection.ContainsNode(fixture.ById(u8"host"), true) == false);
+
+    // Its anchor and focus are still where they are, just not in the document tree.
+    CHECK_FALSE(selection.IsCollapsed());
+    CHECK(selection.ToString() == u8"text");
+
+    // getComposedRanges sees into the trees it's given.
+    auto ranges = selection.GetComposedRanges({ShareRef(*fixture.Outer)});
+    REQUIRE(ranges.size() == 1);
+    CHECK(ranges[0]->StartContainer() == fixture.OuterText.get());
+    CHECK(ranges[0]->StartOffset() == 6);
+    CHECK(ranges[0]->EndOffset() == 10);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Selection: a selection in a focused text field isn't in the document tree",
+                   "[SelectionApi][Selection][selection-api:dom-selection-anchornode]"
+                   "[selection-api:dom-selection-rangecount][selection-api:dom-selection-type]"
+                   "[selection-api:dom-selection-stringifier]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a>Name: <input id=field value=hello></p>");
+    auto &selection = fixture.Selection();
+    auto &field = Downcast<HTMLInputElement>(fixture.ById(u8"field"));
+
+    // Unfocused, the field keeps its own selection, and the document's isn't moved into it.
+    REQUIRE(!selection.SetBaseAndExtent(fixture.TextIn(u8"a"), 0, fixture.TextIn(u8"a"), 4).HasException());
+    (void)field.SetSelectionRange(1, 4);
+    CHECK(selection.Type() == u8"Range");
+    CHECK(selection.ToString() == u8"Name");
+
+    field.Focus();
+    (void)field.SetSelectionRange(1, 4);
+    REQUIRE(html::EnclosingTextFormControl(fixture.Document->Selection().Selection().Start()) == &field);
+    CHECK(selection.Type() == u8"None");
+    CHECK(selection.RangeCount() == 0);
+    CHECK(selection.AnchorNode() == nullptr);
+    CHECK(selection.FocusNode() == nullptr);
+    CHECK_FALSE(selection.IsCollapsed());
+    CHECK(selection.ToString() == u8"ell");
+    CHECK(field.SelectionStart() == 1);
+    CHECK(field.SelectionEnd() == 4);
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a document without a frame has none",
