@@ -12,6 +12,8 @@
 #include "Krystal.Web/Editing/Selection/FrameSelection.hpp"
 #include "Krystal.Web/Html/Elements/HTMLInputElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
+#include "Krystal.Web/Input/Internals/EventHandler.hpp"
+#include "Krystal.Web/Page/Frame.hpp"
 
 namespace krys::web::tests
 {
@@ -438,6 +440,211 @@ namespace krys::web::tests
     CHECK(selection.ToString() == u8"ell");
     CHECK(field.SelectionStart() == 1);
     CHECK(field.SelectionEnd() == 4);
+  }
+
+  namespace
+  {
+    /// @brief Checks the selection's range is exactly (@p start, @p startOffset) to (@p end, @p endOffset).
+    void CheckSelectionRangeIs(Selection &selection, const Node &start, uint32 startOffset, const Node &end,
+                               uint32 endOffset) noexcept
+    {
+      auto range = selection.GetRangeAt(0);
+      REQUIRE(!range.HasException());
+      CHECK(range.Value()->StartContainer() == &start);
+      CHECK(range.Value()->StartOffset() == startOffset);
+      CHECK(range.Value()->EndContainer() == &end);
+      CHECK(range.Value()->EndOffset() == endOffset);
+    }
+
+    /// @brief Records the targets of the `selectionchange` events it hears.
+    struct SelectionChangeTargets : public EventListenerCallback
+    {
+      List<RefPtr<EventTarget>> Targets;
+
+      void HandleEvent(Event &event) noexcept override
+      {
+        Targets.push_back(event.Target());
+      }
+    };
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: script gets exactly the range it set",
+                   "[SelectionApi][Selection][selection-api:dom-selection-setbaseandextent]"
+                   "[selection-api:dom-selection-collapse][selection-api:dom-selection-extend]"
+                   "[selection-api:dom-selection-selectallchildren]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a>a   b<span id=hidden style=display:none>hidden</span>"
+                                u8"<span id=unselectable style=user-select:none>unselectable</span></p>");
+    auto &selection = fixture.Selection();
+    auto &paragraph = fixture.ById(u8"a");
+    auto &text = fixture.TextIn(u8"a");
+    auto &hidden = fixture.TextIn(u8"hidden");
+    auto &unselectable = fixture.TextIn(u8"unselectable");
+
+    SECTION("An element's offsets, not its text's")
+    {
+      REQUIRE(!selection.SetBaseAndExtent(paragraph, 0, paragraph, 1).HasException());
+      CHECK(selection.AnchorNode().get() == &paragraph);
+      CHECK(selection.FocusOffset() == 1);
+      CheckSelectionRangeIs(selection, paragraph, 0, paragraph, 1);
+    }
+
+    SECTION("Inside collapsed white space")
+    {
+      REQUIRE(!selection.SetBaseAndExtent(text, 2, text, 3).HasException());
+      CHECK(selection.AnchorOffset() == 2);
+      CHECK(selection.FocusOffset() == 3);
+      CheckSelectionRangeIs(selection, text, 2, text, 3);
+    }
+
+    SECTION("In display: none content")
+    {
+      REQUIRE(!selection.SetBaseAndExtent(hidden, 1, hidden, 4).HasException());
+      CHECK(selection.AnchorNode().get() == &hidden);
+      CHECK(selection.Type() == u8"Range");
+      CheckSelectionRangeIs(selection, hidden, 1, hidden, 4);
+    }
+
+    SECTION("In user-select: none content")
+    {
+      REQUIRE(!selection.SetBaseAndExtent(unselectable, 1, unselectable, 3).HasException());
+      CHECK(selection.AnchorNode().get() == &unselectable);
+      CheckSelectionRangeIs(selection, unselectable, 1, unselectable, 3);
+    }
+
+    SECTION("collapse in display: none content")
+    {
+      REQUIRE(!selection.Collapse(&hidden, 2).HasException());
+      CHECK(selection.Type() == u8"Caret");
+      CHECK(selection.AnchorNode().get() == &hidden);
+      CheckSelectionRangeIs(selection, hidden, 2, hidden, 2);
+    }
+
+    SECTION("extend into display: none content")
+    {
+      REQUIRE(!selection.Collapse(&text, 0).HasException());
+      REQUIRE(!selection.Extend(hidden, 3).HasException());
+      CHECK(selection.FocusNode().get() == &hidden);
+      CheckSelectionRangeIs(selection, text, 0, hidden, 3);
+    }
+
+    SECTION("selectAllChildren of display: none content")
+    {
+      auto &span = fixture.ById(u8"hidden");
+      REQUIRE(!selection.SelectAllChildren(span).HasException());
+      CheckSelectionRangeIs(selection, span, 0, span, 1);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: addRange keeps the range it's given as it is",
+                   "[SelectionApi][Selection][selection-api:dom-selection-addrange]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a>a   b<span id=hidden style=display:none>hidden</span></p>");
+    auto &selection = fixture.Selection();
+    auto &hidden = fixture.TextIn(u8"hidden");
+    auto range = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(hidden), 1},
+                                       dom::BoundaryPoint {ShareRef<Node>(hidden), 4});
+
+    selection.AddRange(*range);
+    REQUIRE(selection.RangeCount() == 1);
+    CHECK(selection.GetRangeAt(0).Value().get() == range.get());
+    CHECK(range->StartContainer() == &hidden);
+    CHECK(range->StartOffset() == 1);
+    CHECK(range->EndOffset() == 4);
+    CHECK(selection.AnchorNode().get() == &hidden);
+    CHECK(selection.FocusOffset() == 4);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: asking for the range keeps the caret where it is",
+                   "[SelectionApi][Selection][selection-api:dom-selection-getrangeat]")
+  {
+    // The caret at the end of a line broken inside a word is upstream: drawn at the end of the first line, not
+    // the start of the next, although both are the same offset.
+    DOMSelectionFixture fixture(u8"<p id=a style=width:30px;word-break:break-all>aaaaaaaaaaaaaaaa</p>");
+    auto &selection = fixture.Selection();
+    auto &frameSelection = fixture.Document->Selection();
+    REQUIRE(!selection.Collapse(&fixture.TextIn(u8"a"), 0).HasException());
+    selection.Modify(u8"move", u8"forward", u8"lineboundary");
+    auto before = frameSelection.Selection();
+    auto caretBefore = frameSelection.AbsoluteCaretBounds();
+    REQUIRE(before.GetAffinity() == Affinity::Upstream);
+
+    REQUIRE(!selection.GetRangeAt(0).HasException());
+    CHECK(frameSelection.Selection() == before);
+    CHECK(frameSelection.Selection().GetAffinity() == Affinity::Upstream);
+    CHECK(frameSelection.AbsoluteCaretBounds() == caretBefore);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: typing replaces the range script set",
+                   "[SelectionApi][Selection]")
+  {
+    DOMSelectionFixture fixture(u8"<div id=e contenteditable>The quick brown fox</div>");
+    auto &selection = fixture.Selection();
+    auto &text = fixture.TextIn(u8"e");
+    REQUIRE(!selection.SetBaseAndExtent(text, 4, text, 9).HasException());
+
+    CHECK(fixture.Document->GetEditor().GetCommand(u8"InsertText").Execute(u8"slow"));
+    CHECK(fixture.ById(u8"e").TextContent() == DOMString(u8"The slow brown fox"));
+    CHECK(selection.Type() == u8"Caret");
+    REQUIRE(selection.FocusNode());
+    CHECK(Is<Text>(*selection.FocusNode()));
+    CHECK(selection.FocusOffset() == 8);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a user's selection is a new range",
+                   "[SelectionApi][Selection]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a style=margin:0>The quick brown fox</p>");
+    auto &selection = fixture.Selection();
+    auto &text = fixture.TextIn(u8"a");
+    REQUIRE(!selection.SetBaseAndExtent(text, 0, text, 3).HasException());
+    Ref<dom::Range> scriptRange = selection.GetRangeAt(0).ReleaseValue();
+
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto mouse = [](PlatformEvent::Type type, double x, int32 clickCount)
+    {
+      return PlatformMouseEvent(PointD(x, 10), PointD(x, 10), MouseButton::Left, type, clickCount, {},
+                                MonotonicTime::Now());
+    };
+    (void)handler.HandleMousePressEvent(mouse(PlatformEvent::Type::MousePressed, 1, 1));
+    (void)handler.MouseMoved(mouse(PlatformEvent::Type::MouseMoved, 300, 0));
+    (void)handler.HandleMouseReleaseEvent(mouse(PlatformEvent::Type::MouseReleased, 300, 1));
+    REQUIRE(selection.Type() == u8"Range");
+
+    // The script's range is left behind as it was.
+    auto range = selection.GetRangeAt(0);
+    REQUIRE(!range.HasException());
+    CHECK(range.Value().get() != scriptRange.get());
+    CHECK_FALSE(scriptRange->IsAssociatedWithSelection());
+    CHECK(scriptRange->StartOffset() == 0);
+    CHECK(scriptRange->EndOffset() == 3);
+    CHECK(range.Value()->EndOffset() == 19);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Selection: typing in a focused text field changes the field's selection",
+                   "[SelectionApi][Selection][selection-api:selectionchange-event]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a>Name: <input id=field value=hello></p>");
+    auto &selection = fixture.Selection();
+    auto &field = Downcast<HTMLInputElement>(fixture.ById(u8"field"));
+    auto targets = CreateRef<SelectionChangeTargets>();
+    fixture.Document->AddEventListener(u8"selectionchange", targets, false);
+
+    field.Focus();
+    (void)field.SetSelectionRange(5, 5);
+    html::EventLoop::Current().RunUntilIdle();
+    targets->Targets.clear();
+
+    CHECK(fixture.Document->GetEditor().GetCommand(u8"InsertText").Execute(u8"!"));
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK(field.Value() == u8"hello!");
+    CHECK(field.SelectionStart() == 6);
+    CHECK(field.SelectionEnd() == 6);
+    // Fired at the field (bubbling to the document), not at the document.
+    REQUIRE(targets->Targets.size() == 1);
+    CHECK(targets->Targets[0].get() == &field);
+    CHECK(selection.Type() == u8"None");
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a document without a frame has none",

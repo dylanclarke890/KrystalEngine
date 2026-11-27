@@ -821,6 +821,7 @@ set(KRYSTAL_WEB_TESTS_STYLE_HEADERS
 
 set(KRYSTAL_WEB_TESTS_SELECTIONAPI_SOURCES
   tests/SelectionApi/Selection.cpp
+  tests/SelectionApi/SelectionMutations.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_STYLE_SOURCES

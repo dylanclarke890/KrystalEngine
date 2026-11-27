@@ -143,6 +143,7 @@ What's out of scope by choice (scripting, the network, frames, workers and the r
 ### Bugs
 
 - `Pasteboard::CanSmartReplaceContents()` is false for the system clipboard, because the smart-paste type is neither written nor read; smart replace only works within a `SelectionData` carried by a drag.
+- The selection doesn't follow the DOM's live range rules for every mutation. Inserting a child before its ends leaves their offsets unchanged, `splitText()` leaves them in the original node (clamped), and `normalize()` leaves them in the removed text node. This happens whether or not script has asked for the range: `FrameSelection` only adjusts for removals and replaced text, and `LiveRangeUpdater`'s updates to the associated range don't reach it, so the two drift apart. A removal or insertion that moves its ends doesn't schedule `selectionchange`. (Tests: `tests/SelectionApi/SelectionMutations.cpp`.)
 
 ### Missing
 
