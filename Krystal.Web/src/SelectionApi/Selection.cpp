@@ -27,7 +27,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Krystal.Web/Page/DOMSelection.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
 #include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
 #include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
@@ -88,17 +88,17 @@ namespace krys::web
     }
   }
 
-  DOMSelection::DOMSelection(Document &document) noexcept : _document(CreateWeakPtr(&document))
+  Selection::Selection(Document &document) noexcept : _document(CreateWeakPtr(&document))
   {
   }
 
-  web::Frame *DOMSelection::Frame() const noexcept
+  web::Frame *Selection::Frame() const noexcept
   {
     auto *document = _document.get();
     return document ? document->Frame() : nullptr;
   }
 
-  Maybe<dom::SimpleRange> DOMSelection::GetRange() const noexcept
+  Maybe<dom::SimpleRange> Selection::GetRange() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -113,7 +113,7 @@ namespace krys::web
     return range;
   }
 
-  Position DOMSelection::AnchorPosition() const noexcept
+  Position Selection::AnchorPosition() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -123,7 +123,7 @@ namespace krys::web
     return frame->Document()->Selection().Selection().Anchor();
   }
 
-  Position DOMSelection::FocusPosition() const noexcept
+  Position Selection::FocusPosition() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -133,27 +133,27 @@ namespace krys::web
     return frame->Document()->Selection().Selection().Focus();
   }
 
-  RefPtr<Node> DOMSelection::AnchorNode() const noexcept
+  RefPtr<Node> Selection::AnchorNode() const noexcept
   {
     return ShadowAdjustedNode(AnchorPosition());
   }
 
-  uint32 DOMSelection::AnchorOffset() const noexcept
+  uint32 Selection::AnchorOffset() const noexcept
   {
     return ShadowAdjustedOffset(AnchorPosition());
   }
 
-  RefPtr<Node> DOMSelection::FocusNode() const noexcept
+  RefPtr<Node> Selection::FocusNode() const noexcept
   {
     return ShadowAdjustedNode(FocusPosition());
   }
 
-  uint32 DOMSelection::FocusOffset() const noexcept
+  uint32 Selection::FocusOffset() const noexcept
   {
     return ShadowAdjustedOffset(FocusPosition());
   }
 
-  bool DOMSelection::IsCollapsed() const noexcept
+  bool Selection::IsCollapsed() const noexcept
   {
     if (!Frame())
     {
@@ -163,7 +163,7 @@ namespace krys::web
     return !range || range->Collapsed();
   }
 
-  DOMString DOMSelection::Type() const noexcept
+  DOMString Selection::Type() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -182,7 +182,7 @@ namespace krys::web
     return u8"Range";
   }
 
-  DOMString DOMSelection::Direction() const noexcept
+  DOMString Selection::Direction() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -198,7 +198,7 @@ namespace krys::web
     return selection.IsBaseFirst() ? u8"forward" : u8"backward";
   }
 
-  uint32 DOMSelection::RangeCount() const noexcept
+  uint32 Selection::RangeCount() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -216,7 +216,7 @@ namespace krys::web
     return 0;
   }
 
-  ExceptionOr<void> DOMSelection::Collapse(Node *node, uint32 offset) noexcept
+  ExceptionOr<void> Selection::Collapse(Node *node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -243,7 +243,7 @@ namespace krys::web
     return {};
   }
 
-  ExceptionOr<void> DOMSelection::CollapseToEnd() noexcept
+  ExceptionOr<void> Selection::CollapseToEnd() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -260,7 +260,7 @@ namespace krys::web
     return {};
   }
 
-  ExceptionOr<void> DOMSelection::CollapseToStart() noexcept
+  ExceptionOr<void> Selection::CollapseToStart() noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -277,13 +277,13 @@ namespace krys::web
     return {};
   }
 
-  void DOMSelection::Empty() noexcept
+  void Selection::Empty() noexcept
   {
     RemoveAllRanges();
   }
 
-  ExceptionOr<void> DOMSelection::SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
-                                                   uint32 focusOffset) noexcept
+  ExceptionOr<void> Selection::SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
+                                                uint32 focusOffset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -312,13 +312,13 @@ namespace krys::web
     return {};
   }
 
-  ExceptionOr<void> DOMSelection::SetPosition(Node *node, uint32 offset) noexcept
+  ExceptionOr<void> Selection::SetPosition(Node *node, uint32 offset) noexcept
   {
     return Collapse(node, offset);
   }
 
-  void DOMSelection::Modify(DOMStringView alterString, DOMStringView directionString,
-                            DOMStringView granularityString) noexcept
+  void Selection::Modify(DOMStringView alterString, DOMStringView directionString,
+                         DOMStringView granularityString) noexcept
   {
     FrameSelection::Alteration alter;
     if (StringAlgorithms::ASCIICaseInsensitiveMatch(alterString, u8"extend"))
@@ -404,7 +404,7 @@ namespace krys::web
     }
   }
 
-  ExceptionOr<void> DOMSelection::Extend(Node &node, uint32 offset) noexcept
+  ExceptionOr<void> Selection::Extend(Node &node, uint32 offset) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -435,7 +435,7 @@ namespace krys::web
     return {};
   }
 
-  ExceptionOr<Ref<dom::Range>> DOMSelection::GetRangeAt(uint32 index) noexcept
+  ExceptionOr<Ref<dom::Range>> Selection::GetRangeAt(uint32 index) noexcept
   {
     if (index >= RangeCount())
     {
@@ -449,7 +449,7 @@ namespace krys::web
     return ShareRef(*CreateLiveRangeBeforeShadowHostWithSelection(frame));
   }
 
-  void DOMSelection::RemoveAllRanges() noexcept
+  void Selection::RemoveAllRanges() noexcept
   {
     if (auto *frame = Frame())
     {
@@ -457,7 +457,7 @@ namespace krys::web
     }
   }
 
-  void DOMSelection::AddRange(dom::Range &liveRange) noexcept
+  void Selection::AddRange(dom::Range &liveRange) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -471,7 +471,7 @@ namespace krys::web
     }
   }
 
-  ExceptionOr<void> DOMSelection::RemoveRange(dom::Range &liveRange) noexcept
+  ExceptionOr<void> Selection::RemoveRange(dom::Range &liveRange) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -486,8 +486,7 @@ namespace krys::web
     return {};
   }
 
-  List<Ref<dom::StaticRange>>
-    DOMSelection::GetComposedRanges(const List<Ref<ShadowRoot>> &shadowRoots) noexcept
+  List<Ref<dom::StaticRange>> Selection::GetComposedRanges(const List<Ref<ShadowRoot>> &shadowRoots) noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -532,7 +531,7 @@ namespace krys::web
     return {CreateRef<dom::StaticRange>(init.ReleaseValue())};
   }
 
-  void DOMSelection::DeleteFromDocument() noexcept
+  void Selection::DeleteFromDocument() noexcept
   {
     html::CEReactionsScope ceReactions;
     auto *frame = Frame();
@@ -546,13 +545,13 @@ namespace krys::web
     }
   }
 
-  bool DOMSelection::ContainsNode(Node &node, bool allowPartial) const noexcept
+  bool Selection::ContainsNode(Node &node, bool allowPartial) const noexcept
   {
     auto range = GetRange();
     return range && (allowPartial ? Intersects(*range, node) : Contains(*range, node));
   }
 
-  ExceptionOr<void> DOMSelection::SelectAllChildren(Node &node) noexcept
+  ExceptionOr<void> Selection::SelectAllChildren(Node &node) noexcept
   {
     // This doesn't (and shouldn't) select the characters in a node if passed a text node.
     // Selection API specification seems to have this wrong: https://github.com/w3c/selection-api/issues/125
@@ -560,7 +559,7 @@ namespace krys::web
   }
 
   // FIXME: Copying text that isn't selectable (the needsToCopyUserSelectNoneQuirk), with quirks.
-  DOMString DOMSelection::ToString() const noexcept
+  DOMString Selection::ToString() const noexcept
   {
     auto *frame = Frame();
     if (!frame)
@@ -574,7 +573,7 @@ namespace krys::web
     return range ? PlainText(*range, options) : DOMString();
   }
 
-  RefPtr<Node> DOMSelection::ShadowAdjustedNode(const Position &position) const noexcept
+  RefPtr<Node> Selection::ShadowAdjustedNode(const Position &position) const noexcept
   {
     if (position.IsNull())
     {
@@ -596,7 +595,7 @@ namespace krys::web
     return ShareRefPtr(adjustedNode->ParentNode());
   }
 
-  uint32 DOMSelection::ShadowAdjustedOffset(const Position &position) const noexcept
+  uint32 Selection::ShadowAdjustedOffset(const Position &position) const noexcept
   {
     if (position.IsNull())
     {

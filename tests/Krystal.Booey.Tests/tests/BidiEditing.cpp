@@ -12,9 +12,9 @@
 #include "Krystal.Web/Editing/Selection/VisiblePosition.hpp"
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/Elements/HTMLTextFormControlElement.hpp"
-#include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Rendering/RenderBlock.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>

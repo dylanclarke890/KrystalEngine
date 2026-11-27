@@ -704,7 +704,6 @@ set(KRYSTAL_WEB_TESTS_MATHML_SOURCES
 set(KRYSTAL_WEB_TESTS_PAGE_SOURCES
   tests/Page/Scrolling/ScrollAnchoringController.cpp
   tests/Page/Scrolling/ScrollSnapOffsetsInfo.cpp
-  tests/Page/DOMSelection.cpp
   tests/Page/Frame.cpp
   tests/Page/FrameView.cpp
   tests/Page/FrameViewScrolling.cpp
@@ -818,6 +817,10 @@ set(KRYSTAL_WEB_TESTS_STYLE_HEADERS
   include/Krystal.Web.Tests/Style/BuilderTestUtils.hpp
   include/Krystal.Web.Tests/Style/ResolverTestUtils.hpp
   include/Krystal.Web.Tests/Style/StyleTestUtils.hpp
+)
+
+set(KRYSTAL_WEB_TESTS_SELECTIONAPI_SOURCES
+  tests/SelectionApi/Selection.cpp
 )
 
 set(KRYSTAL_WEB_TESTS_STYLE_SOURCES
@@ -984,6 +987,7 @@ target_sources(Krystal.Web.Tests
     ${KRYSTAL_WEB_TESTS_PAGE_SOURCES}
     ${KRYSTAL_WEB_TESTS_PLATFORM_SOURCES}
     ${KRYSTAL_WEB_TESTS_RENDERING_SOURCES}
+    ${KRYSTAL_WEB_TESTS_SELECTIONAPI_SOURCES}
     ${KRYSTAL_WEB_TESTS_STYLE_SOURCES}
     ${KRYSTAL_WEB_TESTS_SVG_SOURCES}
     ${KRYSTAL_WEB_TESTS_TEXT_SOURCES}

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Web/Page/DOMSelection.hpp"
+﻿#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Web.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Web/Dom/Events/Event.hpp"
@@ -41,7 +41,7 @@ namespace krys::web::tests
         html::EventLoop::Current().RunUntilIdle();
       }
 
-      KRYS_NODISCARD DOMSelection &Selection() noexcept
+      KRYS_NODISCARD Selection &Selection() noexcept
       {
         return *Document->GetSelection();
       }
@@ -53,7 +53,7 @@ namespace krys::web::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: attributes", "[Page][DOMSelection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: attributes", "[Page][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p><p id=b>jumps</p>");
     auto &selection = fixture.Selection();
@@ -96,7 +96,7 @@ namespace krys::web::tests
     CHECK(selection.ToString() == u8"fox\n\nju");
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: collapsing and extending", "[Page][DOMSelection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: collapsing and extending", "[Page][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -160,7 +160,7 @@ namespace krys::web::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: the live range", "[Page][DOMSelection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: the live range", "[Page][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -224,7 +224,7 @@ namespace krys::web::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: selectionchange", "[Page][DOMSelection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: selectionchange", "[Page][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -251,8 +251,8 @@ namespace krys::web::tests
     CHECK(counter->Count == 2);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "DOMSelection: a document without a frame has none",
-                   "[Page][DOMSelection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a document without a frame has none",
+                   "[Page][Selection]")
   {
     auto document = CreateRef<Document>();
     CHECK(document->GetSelection() == nullptr);

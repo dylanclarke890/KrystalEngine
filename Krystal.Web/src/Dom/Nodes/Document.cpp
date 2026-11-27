@@ -127,7 +127,6 @@
 #include "Krystal.Web/Loader/FrameLoader.hpp"
 #include "Krystal.Web/Page/Clients/EditorClient.hpp"
 #include "Krystal.Web/Page/Clients/WebClient.hpp"
-#include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/Settings.hpp"
@@ -144,6 +143,7 @@
 #include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Web/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Web/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include "Krystal.Web/Style/Change.hpp"
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Web/Style/Relations.hpp"
@@ -2011,7 +2011,7 @@ namespace krys::web
     return _uniqueIdentifier;
   }
 
-  DOMSelection *Document::GetSelection() noexcept
+  web::Selection *Document::GetSelection() noexcept
   {
     if (!Frame())
     {
@@ -2019,7 +2019,7 @@ namespace krys::web
     }
     if (!_domSelection)
     {
-      _domSelection = CreateRef<DOMSelection>(*this);
+      _domSelection = CreateRef<web::Selection>(*this);
     }
     return _domSelection.get();
   }

@@ -57,15 +57,15 @@ namespace krys::web
   /// @brief A document's `Selection`: the script's view of the frame's selection, which is the range it
   /// associates with it.
   /// @see https://w3c.github.io/selection-api/#selection-interface
-  class DOMSelection final : public RefCounted<DOMSelection>
+  class Selection final : public RefCounted<Selection>
   {
-    KRYS_NON_COPY_MOVABLE(DOMSelection);
+    KRYS_NON_COPY_MOVABLE(Selection);
 
   private:
     WeakPtr<Document> _document;
 
   public:
-    explicit DOMSelection(Document &document) noexcept;
+    explicit Selection(Document &document) noexcept;
 
     KRYS_NODISCARD DOMString Type() const noexcept;
 

@@ -58,12 +58,12 @@ namespace krys::web::html
 namespace krys::web
 {
   class CSSStyleDeclaration;
-  class DOMSelection;
   class Document;
   class Element;
   class Frame;
   class HTMLCollection;
   class MediaQueryList;
+  class Selection;
   class VisualViewport;
 
   /// @brief A document's window: the global object of the document a frame shows, which the window events
@@ -306,7 +306,7 @@ namespace krys::web
 
     /// @brief The document's selection, while the window's document is its frame's.
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection
-    KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
+    KRYS_NODISCARD Selection *GetSelection() const noexcept;
 
   protected:
     void DidAddEventListener(const EventListener &listener) noexcept final;

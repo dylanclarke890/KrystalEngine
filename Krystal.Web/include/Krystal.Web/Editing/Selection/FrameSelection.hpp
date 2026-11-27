@@ -246,6 +246,7 @@ namespace krys::web
   // asking its client), with editing commands.
   class FrameSelection final : private CaretBase, public CaretAnimationClient
   {
+    friend class SelectionAlgorithms;
     friend class TemporarySelectionChange;
     KRYS_NON_COPY_MOVABLE(FrameSelection);
 

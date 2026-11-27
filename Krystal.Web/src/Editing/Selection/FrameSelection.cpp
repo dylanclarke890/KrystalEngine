@@ -57,6 +57,7 @@
 #include "Krystal.Web/Rendering/Layers/RenderLayer.hpp"
 #include "Krystal.Web/Rendering/RenderBlock.hpp"
 #include "Krystal.Web/Rendering/RenderView.hpp"
+#include "Krystal.Web/SelectionApi/SelectionAlgorithms.hpp"
 #include "Krystal.Web/Style/TreeResolver.hpp"
 
 namespace krys::web
@@ -442,7 +443,6 @@ namespace krys::web
 
     // Selection offsets should increase when LF is inserted before the caret in InsertLineBreakCommand. See
     // <https://webkit.org/b/56061>.
-    // https://www.w3.org/TR/selection-api/#selectionchange-event
     RefPtr<HTMLTextFormControlElement> textControl =
       ShareRefPtr(html::EnclosingTextFormControl(newSelection.Start()));
     bool shouldScheduleSelectionChangeEvent = willMutateSelection;
@@ -484,21 +484,11 @@ namespace krys::web
 
     if (shouldScheduleSelectionChangeEvent && textControl)
     {
-      textControl->ScheduleSelectionChangeEvent();
+      SelectionAlgorithms::ScheduleSelectionChangeEvent(*textControl);
     }
-    else if (shouldScheduleSelectionChangeEvent && !_hasScheduledSelectionChangeEventOnDocument)
+    else if (shouldScheduleSelectionChangeEvent)
     {
-      _hasScheduledSelectionChangeEventOnDocument = true;
-      html::EventLoop::Current().QueueTask(
-        html::TaskSource::UserInteraction, *document,
-        [weakDocument = CreateWeakPtr(document)]
-        {
-          if (RefPtr<Document> document = ShareRefPtr(weakDocument.get()))
-          {
-            document->Selection()._hasScheduledSelectionChangeEventOnDocument = false;
-            (void)dom::EventDispatcher::FireEvent(event_names::SelectionChange, *document);
-          }
-        });
+      SelectionAlgorithms::ScheduleSelectionChangeEvent(*document);
     }
 
     return true;

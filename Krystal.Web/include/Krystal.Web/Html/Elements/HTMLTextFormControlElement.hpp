@@ -55,6 +55,8 @@ namespace krys::web
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextFormControlElement);
 
+    friend class SelectionAlgorithms;
+
   private:
     html::TextFieldSelectionDirection _cachedSelectionDirection {
       html::TextFieldSelectionDirection::SelectionHasNoDirection};
@@ -151,9 +153,6 @@ namespace krys::web
                              html::TextFieldSelectionDirection::SelectionHasNoDirection,
                            SelectionRevealMode revealMode = SelectionRevealMode::DoNotReveal,
                            html::ForBindings forBindings = html::ForBindings::No) noexcept;
-
-    /// @brief Queues a `selectionchange` event at the control, unless one is queued already.
-    void ScheduleSelectionChangeEvent() noexcept;
 
     /// @brief The direction of the frame's selection in the control, or the cached one.
     KRYS_NODISCARD html::TextFieldSelectionDirection ComputeSelectionDirection() const noexcept;

@@ -38,11 +38,11 @@
 #include "Krystal.Web/Html/Elements/HTMLElement.hpp"
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Page/Clients/WebClient.hpp"
-#include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/Scrolling/ScrollBehavior.hpp"
 #include "Krystal.Web/Page/VisualViewport.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include <limits>
 
 namespace krys::web
@@ -580,7 +580,7 @@ namespace krys::web
     return _frozenNowTimestamp.value_or(NowTimestamp());
   }
 
-  DOMSelection *web::Window::GetSelection() const noexcept
+  Selection *web::Window::GetSelection() const noexcept
   {
     // Return the associated Document's selection: the same object as document.getSelection(), which is null
     // without a browsing context.

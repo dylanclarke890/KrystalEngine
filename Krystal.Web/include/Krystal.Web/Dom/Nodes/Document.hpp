@@ -210,7 +210,6 @@ namespace krys::web
   class CDATASection;
   class CachedResourceLoader;
   class Comment;
-  class DOMSelection;
   class DocumentTimeline;
   class DocumentType;
   class Editor;
@@ -248,6 +247,7 @@ namespace krys::web
   class ResizeObserver;
   class SVGDocumentExtensions;
   class SVGElement;
+  class Selection;
   class ShadowRoot;
   class StyleOriginatedTimelinesController;
   class StyleSheetList;
@@ -340,7 +340,7 @@ namespace krys::web
     bool _activeDOMObjectsAreStopped {false};
     UniquePtr<FrameSelection> _selection;
     UniquePtr<web::Editor> _editor;
-    RefPtr<DOMSelection> _domSelection;
+    RefPtr<web::Selection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
     html::FocusTrigger _latestFocusTrigger {html::FocusTrigger::Other};
@@ -998,7 +998,7 @@ namespace krys::web
     /// @brief The script's view of the selection; null unless the document is fully active (shown in a
     /// frame).
     /// @see https://w3c.github.io/selection-api/#dom-document-getselection
-    KRYS_NODISCARD DOMSelection *GetSelection() noexcept;
+    KRYS_NODISCARD web::Selection *GetSelection() noexcept;
 
     /// @brief The innermost element under the pointer that has a renderer, if any.
     KRYS_NODISCARD Element *HoveredElement() const noexcept

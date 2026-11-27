@@ -9,10 +9,10 @@
 #include "Krystal.Web/Html/EventLoop/EventLoop.hpp"
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Web/Html/Window.hpp"
-#include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Rendering/RenderBox.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include "Krystal.Web/Style/Scope/Scope.hpp"
 
 namespace krys::web::tests

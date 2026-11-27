@@ -30,6 +30,7 @@
 #include "Krystal.Web/Rendering/Selection/CaretRectComputation.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Web/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Web/SelectionApi/SelectionAlgorithms.hpp"
 #include "Krystal.Web/Style/Invalidation/PseudoClassChangeInvalidation.hpp"
 #include <algorithm>
 #include <limits>
@@ -742,24 +743,6 @@ namespace krys::web
     return previousSelectionStart != _cachedSelectionStart || previousSelectionEnd != _cachedSelectionEnd;
   }
 
-  void HTMLTextFormControlElement::ScheduleSelectionChangeEvent() noexcept
-  {
-    if (_hasScheduledSelectionChangeEvent)
-    {
-      return;
-    }
-
-    _hasScheduledSelectionChangeEvent = true;
-    html::EventLoop::Current().QueueTask(
-      html::TaskSource::UserInteraction, NodeDocument(),
-      [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
-      {
-        textControl->_hasScheduledSelectionChangeEvent = false;
-        auto event = Event::Create(event_names::SelectionChange, true, false);
-        (void)dom::EventDispatcher::DispatchToTarget(*event, textControl.get());
-      });
-  }
-
   void HTMLTextFormControlElement::ScheduleSelectEvent() noexcept
   {
     html::EventLoop::Current().QueueTask(html::TaskSource::UserInteraction, NodeDocument(),
@@ -769,7 +752,7 @@ namespace krys::web
                                            (void)dom::EventDispatcher::DispatchToTarget(*event,
                                                                                         textControl.get());
                                          });
-    ScheduleSelectionChangeEvent();
+    SelectionAlgorithms::ScheduleSelectionChangeEvent(*this);
   }
 
   void HTMLTextFormControlElement::OnAttributeChanged(const DOMStringAtom &localName,

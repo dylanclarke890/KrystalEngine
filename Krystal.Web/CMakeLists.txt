@@ -2564,7 +2564,6 @@ set(KRYSTAL_WEB_MATHML_SOURCES
 set(KRYSTAL_WEB_PAGE_HEADERS
   include/Krystal.Web/Page/Clients/WebClient.hpp
   include/Krystal.Web/Page/Clients/EditorClient.hpp
-  include/Krystal.Web/Page/DOMSelection.hpp
   include/Krystal.Web/Page/Frame.hpp
   include/Krystal.Web/Page/FrameSnapshotting.hpp
   include/Krystal.Web/Page/FrameView.hpp
@@ -2581,7 +2580,6 @@ set(KRYSTAL_WEB_PAGE_HEADERS
 )
 
 set(KRYSTAL_WEB_PAGE_SOURCES
-  src/Page/DOMSelection.cpp
   src/Page/Frame.cpp
   src/Page/FrameSnapshotting.cpp
   src/Page/FrameView.cpp
@@ -3160,6 +3158,16 @@ set(KRYSTAL_WEB_RENDERING_SOURCES
   src/Rendering/Updating/RenderTreePosition.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
   src/Rendering/Updating/RenderTreeUpdaterGeneratedContent.cpp
+)
+
+set(KRYSTAL_WEB_SELECTIONAPI_HEADERS
+  include/Krystal.Web/SelectionApi/Selection.hpp
+  include/Krystal.Web/SelectionApi/SelectionAlgorithms.hpp
+)
+
+set(KRYSTAL_WEB_SELECTIONAPI_SOURCES
+  src/SelectionApi/Selection.cpp
+  src/SelectionApi/SelectionAlgorithms.cpp
 )
 
 set(KRYSTAL_WEB_STYLE_HEADERS
@@ -4250,6 +4258,7 @@ target_sources(Krystal.Web
       ${KRYSTAL_WEB_PAGE_HEADERS}
       ${KRYSTAL_WEB_PLATFORM_HEADERS}
       ${KRYSTAL_WEB_RENDERING_HEADERS}
+      ${KRYSTAL_WEB_SELECTIONAPI_HEADERS}
       ${KRYSTAL_WEB_STYLE_HEADERS}
       ${KRYSTAL_WEB_SVG_HEADERS}
       ${KRYSTAL_WEB_TEXT_HEADERS}
@@ -4276,6 +4285,7 @@ target_sources(Krystal.Web
     ${KRYSTAL_WEB_PAGE_SOURCES}
     ${KRYSTAL_WEB_PLATFORM_SOURCES}
     ${KRYSTAL_WEB_RENDERING_SOURCES}
+    ${KRYSTAL_WEB_SELECTIONAPI_SOURCES}
     ${KRYSTAL_WEB_STYLE_SOURCES}
     ${KRYSTAL_WEB_SVG_SOURCES}
     ${KRYSTAL_WEB_TEXT_SOURCES}

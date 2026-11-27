@@ -16,12 +16,12 @@
 #include "Krystal.Web/Html/Parser/DocumentParser.hpp"
 #include "Krystal.Web/Infra/Namespaces.hpp"
 #include "Krystal.Web/Input/Internals/EventHandler.hpp"
-#include "Krystal.Web/Page/DOMSelection.hpp"
 #include "Krystal.Web/Page/Frame.hpp"
 #include "Krystal.Web/Page/FrameView.hpp"
 #include "Krystal.Web/Page/VisualViewport.hpp"
 #include "Krystal.Web/Platform/Events/PlatformKeyboardEvent.hpp"
 #include "Krystal.Web/Platform/Events/PlatformMouseEvent.hpp"
+#include "Krystal.Web/SelectionApi/Selection.hpp"
 #include "Krystal.Web/Style/Scope/Scope.hpp"
 #include "Krystal.Web/Svg/Elements/SVGElement.hpp"
 
