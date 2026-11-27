@@ -53,7 +53,7 @@ namespace krys::web::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: attributes", "[Page][Selection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: attributes", "[SelectionApi][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p><p id=b>jumps</p>");
     auto &selection = fixture.Selection();
@@ -96,7 +96,7 @@ namespace krys::web::tests
     CHECK(selection.ToString() == u8"fox\n\nju");
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: collapsing and extending", "[Page][Selection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: collapsing and extending", "[SelectionApi][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -160,7 +160,7 @@ namespace krys::web::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: the live range", "[Page][Selection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: the live range", "[SelectionApi][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -224,7 +224,7 @@ namespace krys::web::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: selectionchange", "[Page][Selection]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: selectionchange", "[SelectionApi][Selection]")
   {
     DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
     auto &selection = fixture.Selection();
@@ -252,7 +252,7 @@ namespace krys::web::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a document without a frame has none",
-                   "[Page][Selection]")
+                   "[SelectionApi][Selection]")
   {
     auto document = CreateRef<Document>();
     CHECK(document->GetSelection() == nullptr);
