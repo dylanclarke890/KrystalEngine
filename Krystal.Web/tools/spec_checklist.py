@@ -41,6 +41,9 @@ class Spec:
     link_prefixes: tuple[str, ...]
     # Whether it has a checklist per page of its multipage edition, under page_dir, with an index in output.
     paged: bool = False
+    # Where to fetch it from, when url is ReSpec source that's only given its ids in a browser: W3C's spec
+    # generator renders it.
+    rendered_url: str = ""
 
     @property
     def tag(self) -> str:
@@ -62,32 +65,38 @@ class Spec:
         return [self.page_dir / f"{page}.md" for page in re.findall(rf"\]\({self.name}/([^)]+)\.md\)", index)]
 
 
-WHATWG_SPECS = {
+# The specifications named by a short name of their own, rather than a CSS module's.
+NAMED_SPECS = {
     "dom": Spec("dom", "DOM", "https://dom.spec.whatwg.org/", REPO_ROOT / "Krystal.Web/docs/specs/DOM.md",
                 ("https://dom.spec.whatwg.org/",)),
     "infra": Spec("infra", "Infra", "https://infra.spec.whatwg.org/", REPO_ROOT / "Krystal.Web/docs/specs/INFRA.md",
                   ("https://infra.spec.whatwg.org/",)),
     "html": Spec("html", "HTML", "https://html.spec.whatwg.org/", REPO_ROOT / "Krystal.Web/docs/specs/HTML.md",
                  ("https://html.spec.whatwg.org/",), paged=True),
+    "selection-api": Spec("selection-api", "Selection API", "https://w3c.github.io/selection-api/",
+                          REPO_ROOT / "Krystal.Web/docs/specs/SELECTION-API.md",
+                          ("https://w3c.github.io/selection-api/", "https://www.w3.org/TR/selection-api/"),
+                          rendered_url="https://www.w3.org/publications/spec-generator/?type=respec&url="
+                                       "https://w3c.github.io/selection-api/"),
 }
 
 
 def GetSpec(name: str) -> Spec:
-    """The specification called @p name: a WHATWG one, or a CSS module by its short name (`css-cascade-5`)."""
-    if name in WHATWG_SPECS:
-        return WHATWG_SPECS[name]
+    """The specification called @p name: a named one (`dom`, `selection-api`), or a CSS module by its short name (`css-cascade-5`)."""
+    if name in NAMED_SPECS:
+        return NAMED_SPECS[name]
     if re.fullmatch(r"(css|selectors|mediaqueries|cssom|compositing|filter-effects|motion|fill-stroke|"
                     r"scroll-animations|web-animations|resize-observer|pointerevents|uievents|geometry)[a-z0-9-]*", name):
         unversioned = re.sub(r"-\d+$", "", name)
         return Spec(name, name, f"https://drafts.csswg.org/{name}/", REPO_ROOT / f"Krystal.Web/docs/specs/css/{name}.md",
                     (f"https://drafts.csswg.org/{name}/", f"https://drafts.csswg.org/{unversioned}/",
                      f"https://www.w3.org/TR/{name}/", f"https://www.w3.org/TR/{unversioned}/"))
-    raise SystemExit(f"Unknown specification {name!r}: use dom, infra, html or a CSS module's short name.")
+    raise SystemExit(f"Unknown specification {name!r}: use dom, infra, html, selection-api or a CSS module's short name.")
 
 
 def AllSpecs() -> list[Spec]:
     """Every specification that has a checklist."""
-    specs = [spec for spec in WHATWG_SPECS.values() if spec.output.exists()]
+    specs = [spec for spec in NAMED_SPECS.values() if spec.output.exists()]
     css = REPO_ROOT / "Krystal.Web/docs/specs/css"
     if css.is_dir():
         specs += [GetSpec(path.stem) for path in sorted(css.glob("*.md"))]
@@ -320,14 +329,27 @@ def Extract(root: Node) -> list[Section]:
     inside_steps = 0
     algorithm_div = None
     last_definition = ""
+    member_definitions = set()
 
     def Visit(node: Node):
         nonlocal inside_steps, algorithm_div, last_definition
         if IsSkipped(node):
             return
         if re.fullmatch(r"h[2-6]", node.tag) and node.attrs.get("id"):
-            sections.append(Section(node.attrs["id"], HeadingText(node), int(node.tag[1]), []))
-            last_definition = node.attrs["id"]
+            anchor = SectionAnchor(node)
+            sections.append(Section(anchor, HeadingText(node), int(node.tag[1]), []))
+            last_definition = anchor
+            return
+        if node.tag == "dt" and not inside_steps:
+            algorithm = MemberAt(node)
+            if algorithm:
+                sections[-1].algorithms.append(algorithm)
+                member_definitions.add(id(NextElement(node)))
+        if node.tag == "dd" and id(node) in member_definitions:
+            # Its algorithm is the term's, so only its definitions are left to collect.
+            for dfn in Descendants(node, stop=set()):
+                if dfn.tag == "dfn" and dfn.attrs.get("id"):
+                    sections[-1].definitions.append(dfn.attrs["id"])
             return
         if node.tag in ("p", "dd") and not inside_steps:
             in_algorithm_div = algorithm_div is not None
@@ -354,6 +376,38 @@ def Extract(root: Node) -> list[Section]:
     for child in root.Elements():
         Visit(child)
     return [section for section in sections if section.anchor or section.algorithms]
+
+
+def SectionAnchor(heading: Node) -> str:
+    """@p heading's anchor: its section's id where it has one, as ReSpec's are (`#selection-interface`), whose headings
+    get generated ids (`#x3-selection-interface`)."""
+    parent = heading.parent
+    if parent is not None and "header-wrapper" in parent.Classes():
+        parent = parent.parent
+    if parent is not None and parent.tag == "section" and parent.attrs.get("id"):
+        return parent.attrs["id"]
+    return heading.attrs["id"]
+
+
+def MemberAt(term: Node) -> Algorithm | None:
+    """An interface member defined as a term and its description, as ReSpec's are: `<dt>The <dfn>addRange()</dfn>
+    method</dt><dd><ol>...` or `<dd><p>The method must follow these steps:</p><ol>...`, or a description saying what
+    it must do (`The attribute must return ...`)."""
+    dfn = FirstDefinition(term)
+    description = NextElement(term)
+    if not dfn or description is None or description.tag != "dd":
+        return None
+    first = next(iter(description.Elements()), None)
+    if first is not None and first.tag == "ol":
+        return Algorithm(dfn.attrs["id"], AlgorithmName(dfn), Collapse(Text(term)), Steps(first))
+    if first is not None and first.tag == "p":
+        intro = Collapse(Text(first))
+        following = NextElement(first)
+        if following is not None and following.tag == "ol" and intro.endswith(":"):
+            return Algorithm(dfn.attrs["id"], AlgorithmName(dfn), Shorten(intro, MAX_INTRO), Steps(following))
+        if IsInterfaceMember(dfn, intro):
+            return Algorithm(dfn.attrs["id"], AlgorithmName(dfn), Shorten(intro, MAX_PROSE), [])
+    return None
 
 
 def StartsWithDefinition(intro: str, dfn: Node) -> bool:
@@ -619,7 +673,7 @@ def GeneratePaged(spec: Spec, sections: list[Section], fragment_links_source: st
 
 
 def Generate(spec: Spec, source: str | None, fragment_links: str | None = None) -> None:
-    markup = pathlib.Path(source).read_text(encoding="utf-8") if source else Fetch(spec.url)
+    markup = pathlib.Path(source).read_text(encoding="utf-8") if source else Fetch(spec.rendered_url or spec.url)
     builder = TreeBuilder()
     builder.feed(markup)
     builder.close()
@@ -636,7 +690,7 @@ def Generate(spec: Spec, source: str | None, fragment_links: str | None = None) 
 
 def Main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("specs", nargs="+", help="dom, infra, html, or a CSS module's short name")
+    parser.add_argument("specs", nargs="+", help="dom, infra, html, selection-api, or a CSS module's short name")
     parser.add_argument("--html", help="a saved copy of the specification to read instead of fetching it")
     parser.add_argument("--fragment-links", help="a saved copy of HTML's multipage/fragment-links.json")
     args = parser.parse_args()
