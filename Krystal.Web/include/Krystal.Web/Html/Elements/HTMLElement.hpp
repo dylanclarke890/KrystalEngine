@@ -343,6 +343,7 @@ namespace krys::web
 
     /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
     /// @see https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#rules-for-parsing-a-legacy-colour-value
+    /// FIXME: this should not be in HTMLElement.hpp; it drags in ColorTypes for every derived class and more.
     KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(DOMStringView string) noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
