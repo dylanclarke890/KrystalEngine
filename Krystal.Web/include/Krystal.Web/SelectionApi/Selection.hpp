@@ -54,8 +54,6 @@ namespace krys::web
   class Position;
   class ShadowRoot;
 
-  /// @brief A document's `Selection`: the script's view of the frame's selection, which is the range it
-  /// associates with it.
   /// @see https://w3c.github.io/selection-api/#selection-interface
   class Selection final : public RefCounted<Selection>
   {
@@ -67,59 +65,81 @@ namespace krys::web
   public:
     explicit Selection(Document &document) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-type
     KRYS_NODISCARD DOMString Type() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-direction
     KRYS_NODISCARD DOMString Direction() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-setbaseandextent
     ExceptionOr<void> SetBaseAndExtent(Node &anchorNode, uint32 anchorOffset, Node &focusNode,
                                        uint32 focusOffset) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-setposition
     ExceptionOr<void> SetPosition(Node *node, uint32 offset = 0) noexcept;
 
-    /// @note Non-standard.
+    /// @see https://w3c.github.io/selection-api/#dom-selection-modify
     void Modify(DOMStringView alter, DOMStringView direction, DOMStringView granularity) noexcept;
 
-    // The anchor and focus are the start and end of the selection, and
-    // reflect the direction in which the selection was made by the user.
+    /// @see https://w3c.github.io/selection-api/#dom-selection-anchornode
     KRYS_NODISCARD RefPtr<Node> AnchorNode() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-anchoroffset
     KRYS_NODISCARD uint32 AnchorOffset() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-focusnode
     KRYS_NODISCARD RefPtr<Node> FocusNode() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-focusoffset
     KRYS_NODISCARD uint32 FocusOffset() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-iscollapsed
     KRYS_NODISCARD bool IsCollapsed() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-rangecount
     KRYS_NODISCARD uint32 RangeCount() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-collapse
     ExceptionOr<void> Collapse(Node *node, uint32 offset = 0) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-collapsetoend
     ExceptionOr<void> CollapseToEnd() noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-collapsetostart
     ExceptionOr<void> CollapseToStart() noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-extend
     ExceptionOr<void> Extend(Node &node, uint32 offset = 0) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-getrangeat
     KRYS_NODISCARD ExceptionOr<Ref<dom::Range>> GetRangeAt(uint32 index) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-removeallranges
     void RemoveAllRanges() noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-addrange
     void AddRange(dom::Range &liveRange) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-removerange
     ExceptionOr<void> RemoveRange(dom::Range &liveRange) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-getcomposedranges
     KRYS_NODISCARD List<Ref<dom::StaticRange>>
       GetComposedRanges(const List<Ref<ShadowRoot>> &shadowRoots = {}) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-deletefromdocument
     void DeleteFromDocument() noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-containsnode
     KRYS_NODISCARD bool ContainsNode(Node &node, bool allowPartialContainment = false) const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-selectallchildren
     ExceptionOr<void> SelectAllChildren(Node &node) noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-stringifier
     KRYS_NODISCARD DOMString ToString() const noexcept;
 
+    /// @see https://w3c.github.io/selection-api/#dom-selection-empty
     void Empty() noexcept;
 
   private:

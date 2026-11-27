@@ -412,17 +412,21 @@ namespace krys::web
       return {};
     }
 
+    // 1. If the document associated with this is not a shadow-including inclusive ancestor of node, abort
+    // these steps.
+    if (!dom::TreeQueries::IsShadowIncludingInclusiveAncestor(*frame->Document(), node))
+    {
+      return {};
+    }
+
+    // 2. If this is empty, throw an InvalidStateError exception and abort these steps.
     if (RangeCount() < 1 && !frame->Document()->Selection().IsCaretOrRange())
     {
       return Exception(ExceptionCode::InvalidStateError,
                        u8"extend() requires a Range to be added to the Selection");
     }
 
-    if (!(node.IsConnected() && frame->Document() == &node.NodeDocument())
-        && &dom::TreeQueries::Root(node) != frame->Document())
-    {
-      return {};
-    }
+    // 3-9. (The frame selection's new focus, keeping its anchor, sets the range and direction.)
     if (auto result = CheckNodeOffsetPair(node, offset); result.HasException())
     {
       return result.ReleaseException();
@@ -464,11 +468,22 @@ namespace krys::web
     {
       return;
     }
-    auto &selection = frame->Document()->Selection();
-    if (selection.IsNone())
+    // 1. If the root of the range's boundary points are not the document associated with this, abort these
+    // steps.
+    if (&dom::TreeQueries::Root(*liveRange.StartContainer()) != frame->Document())
     {
-      selection.AssociateLiveRange(liveRange);
+      return;
     }
+
+    // 2. If rangeCount is not 0, abort these steps.
+    auto &selection = frame->Document()->Selection();
+    if (!selection.IsNone())
+    {
+      return;
+    }
+
+    // 3. Set this's range to range by a strong reference (not by making a copy).
+    selection.AssociateLiveRange(liveRange);
   }
 
   ExceptionOr<void> Selection::RemoveRange(dom::Range &liveRange) noexcept
@@ -493,38 +508,58 @@ namespace krys::web
     {
       return {};
     }
+    // 1. If this is empty, return an empty array.
     auto range = frame->Document()->Selection().Selection().Range();
     if (!range)
     {
       return {};
     }
 
-    auto isListed = [&](const ShadowRoot *shadowRoot)
+    // Whether node's root is a shadow root that isn't a shadow-including inclusive ancestor of any of
+    // shadowRoots.
+    auto isRescoped = [&](const Node &node)
     {
-      return std::ranges::any_of(shadowRoots,
-                                 [&](const Ref<ShadowRoot> &root) { return root.get() == shadowRoot; });
+      auto *root = dom::TreeTraversal::ContainingShadowRoot(node);
+      return root
+             && std::ranges::none_of(
+               shadowRoots, [&](const Ref<ShadowRoot> &shadowRoot)
+               { return dom::TreeQueries::IsShadowIncludingInclusiveAncestor(*root, *shadowRoot); });
     };
 
+    // 2. Otherwise, let startNode be start node of the range associated with this, and let startOffset be
+    // start offset of the range.
     Ref<Node> startNode = range->Start.Container;
     uint32 startOffset = static_cast<uint32>(range->Start.Offset);
-    while (startNode->IsInShadowTree() && !isListed(dom::TreeTraversal::ContainingShadowRoot(*startNode)))
+    // 3. While startNode is a node, startNode's root is a shadow root, and startNode's root is not a
+    // shadow-including inclusive ancestor of any of options["shadowRoots"], repeat these steps:
+    while (isRescoped(*startNode))
     {
+      // 3a. Set startOffset to index of startNode's root's host.
+      // 3b. Set startNode to startNode's root's host's parent.
       auto *host = dom::TreeTraversal::ShadowHost(*startNode);
       krys_debug_assert(host && host->ParentNode());
       startNode = ShareRef(*host->ParentNode());
       startOffset = static_cast<uint32>(dom::TreeQueries::Index(*host));
     }
 
+    // 4. Let endNode be end node of the range associated with this, and let endOffset be end offset of the
+    // range.
     Ref<Node> endNode = range->End.Container;
     uint32 endOffset = static_cast<uint32>(range->End.Offset);
-    while (endNode->IsInShadowTree() && !isListed(dom::TreeTraversal::ContainingShadowRoot(*endNode)))
+    // 5. While endNode is a node, endNode's root is a shadow root, and endNode's root is not a
+    // shadow-including inclusive ancestor of any of options["shadowRoots"], repeat these steps:
+    while (isRescoped(*endNode))
     {
+      // 5a. Set endOffset to index of endNode's root's host plus 1.
+      // 5b. Set endNode to endNode's root's host's parent.
       auto *host = dom::TreeTraversal::ShadowHost(*endNode);
       krys_debug_assert(host && host->ParentNode());
       endNode = ShareRef(*host->ParentNode());
       endOffset = static_cast<uint32>(dom::TreeQueries::Index(*host) + 1);
     }
 
+    // 6. Return an array consisting of new StaticRange whose start node is startNode, start offset is
+    // startOffset, end node is endNode, and end offset is endOffset.
     auto init = dom::StaticRangeInit::Create(dom::BoundaryPoint {krys::move(startNode), startOffset},
                                              dom::BoundaryPoint {krys::move(endNode), endOffset});
     krys_debug_assert(!init.HasException());
@@ -539,6 +574,7 @@ namespace krys::web
     {
       return;
     }
+    // The associated live range is only ever one whose boundary points are in the document tree.
     if (RefPtr<dom::Range> range = frame->Document()->Selection().AssociatedLiveRange())
     {
       (void)range->DeleteContents();
@@ -553,9 +589,31 @@ namespace krys::web
 
   ExceptionOr<void> Selection::SelectAllChildren(Node &node) noexcept
   {
-    // This doesn't (and shouldn't) select the characters in a node if passed a text node.
-    // Selection API specification seems to have this wrong: https://github.com/w3c/selection-api/issues/125
-    return SetBaseAndExtent(node, 0, node, static_cast<uint32>(dom::TreeQueries::CountChildNodes(node)));
+    auto *frame = Frame();
+    if (!frame)
+    {
+      return {};
+    }
+
+    // 1. If node is a DocumentType, throw an InvalidNodeTypeError exception and abort these steps.
+    if (Is<DocumentType>(node))
+    {
+      return Exception(ExceptionCode::InvalidNodeTypeError);
+    }
+
+    // 2. If node's root is not the document associated with this, abort these steps.
+    if (&dom::TreeQueries::Root(node) != frame->Document())
+    {
+      return {};
+    }
+
+    // 3. Let newRange be a new range and childCount be the number of children of node.
+    // 4. Set newRange's start to (node, 0).
+    // 5. Set newRange's end to (node, childCount).
+    // 6. Set this's range to newRange.
+    // 7. Set this's direction to forwards.
+    auto childCount = static_cast<uint32>(dom::TreeQueries::CountChildNodes(node));
+    return SetBaseAndExtent(node, 0, node, childCount);
   }
 
   // FIXME: Copying text that isn't selectable (the needsToCopyUserSelectNoneQuirk), with quirks.

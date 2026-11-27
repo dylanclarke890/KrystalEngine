@@ -4,6 +4,8 @@
 #include "Krystal.Web/Dom/Events/Event.hpp"
 #include "Krystal.Web/Dom/Events/EventListener.hpp"
 #include "Krystal.Web/Dom/Nodes/Document.hpp"
+#include "Krystal.Web/Dom/Nodes/DocumentType.hpp"
+#include "Krystal.Web/Dom/Nodes/ShadowRoot.hpp"
 #include "Krystal.Web/Dom/Nodes/Text.hpp"
 #include "Krystal.Web/Dom/Ranges/Range.hpp"
 #include "Krystal.Web/Dom/Ranges/StaticRange.hpp"
@@ -249,6 +251,131 @@ namespace krys::web::tests
     fixture.Document->Selection().SelectAll();
     html::EventLoop::Current().RunUntilIdle();
     CHECK(counter->Count == 2);
+  }
+
+  namespace
+  {
+    /// @brief A paragraph, and a host whose open shadow tree holds a text node, a span, and a host of its own
+    /// whose shadow tree holds another text node.
+    struct SelectionShadowFixture : DOMSelectionFixture
+    {
+      RefPtr<ShadowRoot> Outer;
+      RefPtr<ShadowRoot> Inner;
+      RefPtr<Text> OuterText;
+      RefPtr<Element> OuterSpan;
+      RefPtr<Text> InnerText;
+
+      SelectionShadowFixture() noexcept
+          : DOMSelectionFixture(u8"<p id=a>The quick brown fox</p><div id=host></div>")
+      {
+        auto &document = *Document;
+        Outer = ById(u8"host").AttachShadow({}).ReleaseValue();
+        OuterText = document.CreateTextNode(u8"outer text");
+        OuterSpan = document.CreateElement(u8"span").ReleaseValue();
+        auto innerHost = document.CreateElement(u8"div").ReleaseValue();
+        (void)Outer->AppendChild(*OuterText);
+        (void)Outer->AppendChild(*OuterSpan);
+        (void)OuterSpan->AppendChild(*document.CreateTextNode(u8"span text"));
+        (void)Outer->AppendChild(*innerHost);
+        Inner = innerHost->AttachShadow({}).ReleaseValue();
+        InnerText = document.CreateTextNode(u8"inner text");
+        (void)Inner->AppendChild(*InnerText);
+        (void)document.UpdateLayout();
+      }
+    };
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Selection: getComposedRanges keeps a shadow tree around a listed root",
+                   "[SelectionApi][Selection][selection-api:dom-selection-getcomposedranges]")
+  {
+    SelectionShadowFixture fixture;
+    auto &selection = fixture.Selection();
+    REQUIRE(!selection.SetBaseAndExtent(*fixture.OuterText, 0, *fixture.OuterText, 5).HasException());
+    REQUIRE(fixture.Document->Selection().Selection().Range()->Start.Container.get()
+            == fixture.OuterText.get());
+
+    // Unlisted, the outer tree is left for its host's place in the body.
+    auto ranges = selection.GetComposedRanges();
+    REQUIRE(ranges.size() == 1);
+    CHECK(ranges[0]->StartContainer() == fixture.Document->Body());
+    CHECK(ranges[0]->StartOffset() == 1);
+    CHECK(ranges[0]->EndOffset() == 2);
+
+    // The outer tree is a shadow-including ancestor of the listed inner one, so the range stays in it.
+    ranges = selection.GetComposedRanges({ShareRef(*fixture.Inner)});
+    REQUIRE(ranges.size() == 1);
+    CHECK(ranges[0]->StartContainer() == fixture.OuterText.get());
+    CHECK(ranges[0]->StartOffset() == 0);
+    CHECK(ranges[0]->EndContainer() == fixture.OuterText.get());
+    CHECK(ranges[0]->EndOffset() == 5);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: extend does nothing for a node outside the document",
+                   "[SelectionApi][Selection][selection-api:dom-selection-extend]")
+  {
+    DOMSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
+    auto &selection = fixture.Selection();
+    auto detached = fixture.Document->CreateTextNode(u8"detached");
+
+    // The node is checked before the selection, so an empty selection doesn't throw.
+    CHECK_FALSE(selection.Extend(*detached, 0).HasException());
+    CHECK(selection.Type() == u8"None");
+    CHECK(selection.Extend(fixture.TextIn(u8"a"), 0) == ExceptionCode::InvalidStateError);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: selectAllChildren needs a node in the document tree",
+                   "[SelectionApi][Selection][selection-api:dom-selection-selectallchildren]")
+  {
+    SelectionShadowFixture fixture;
+    auto &selection = fixture.Selection();
+
+    REQUIRE(!selection.SelectAllChildren(*fixture.OuterSpan).HasException());
+    CHECK(fixture.Document->Selection().IsNone());
+
+    auto doctype = fixture.Document->DocType();
+    REQUIRE(doctype);
+    CHECK(selection.SelectAllChildren(*doctype) == ExceptionCode::InvalidNodeTypeError);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "Selection: deleteFromDocument needs the selection in the document tree",
+                   "[SelectionApi][Selection][selection-api:dom-selection-deletefromdocument]")
+  {
+    SelectionShadowFixture fixture;
+    auto &selection = fixture.Selection();
+    REQUIRE(!selection.SetBaseAndExtent(*fixture.OuterText, 0, *fixture.OuterText, 6).HasException());
+    REQUIRE(!fixture.Document->Selection().IsNone());
+
+    selection.DeleteFromDocument();
+    CHECK(fixture.OuterText->Data() == u8"outer text");
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: addRange needs a range in the document",
+                   "[SelectionApi][Selection][selection-api:dom-selection-addrange]")
+  {
+    SelectionShadowFixture fixture;
+    auto &selection = fixture.Selection();
+
+    SECTION("In a shadow tree")
+    {
+      auto range = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(*fixture.OuterText), 0},
+                                         dom::BoundaryPoint {ShareRef<Node>(*fixture.OuterText), 5});
+      selection.AddRange(*range);
+      CHECK_FALSE(range->IsAssociatedWithSelection());
+      CHECK(fixture.Document->Selection().IsNone());
+    }
+
+    SECTION("In another document")
+    {
+      auto other = CreateRef<Document>();
+      auto text = other->CreateTextNode(u8"text");
+      auto range = CreateRef<dom::Range>(dom::BoundaryPoint {ShareRef<Node>(*text), 0},
+                                         dom::BoundaryPoint {ShareRef<Node>(*text), 2});
+      selection.AddRange(*range);
+      CHECK_FALSE(range->IsAssociatedWithSelection());
+      CHECK(fixture.Document->Selection().IsNone());
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "Selection: a document without a frame has none",
