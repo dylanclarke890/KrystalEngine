@@ -82,11 +82,13 @@ namespace krys::web
     {
       return null;
     }
+
     auto range = frame->Document()->Selection().Selection().Range();
     if (!range || !IsInDocumentTree(*range->Start.Container) || !IsInDocumentTree(*range->End.Container))
     {
       return null;
     }
+    
     return range;
   }
 
@@ -170,15 +172,18 @@ namespace krys::web
     {
       return u8"None";
     }
+
     auto range = frame->Document()->Selection().Selection().Range();
     if (!range || !AreAnchorAndFocusInDocumentTree())
     {
       return u8"None";
     }
+    
     if (range->Collapsed())
     {
       return u8"Caret";
     }
+    
     return u8"Range";
   }
 

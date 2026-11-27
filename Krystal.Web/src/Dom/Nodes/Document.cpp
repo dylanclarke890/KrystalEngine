@@ -2017,10 +2017,12 @@ namespace krys::web
     {
       return nullptr;
     }
+
     if (!_domSelection)
     {
       _domSelection = CreateRef<web::Selection>(*this);
     }
+    
     return _domSelection.get();
   }
 
